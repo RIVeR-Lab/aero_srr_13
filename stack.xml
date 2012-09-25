@@ -6,5 +6,6 @@
   <license>?</license>
   <review status="unreviewed" notes=""/>
   <url>http://robot.wpi.edu/wiki/index.php/Oryx</url>
-  <depend stack="ros"/>s
+  <depend stack="ros"/>
+  <depend stack="actionlib"/>
 </stack>
