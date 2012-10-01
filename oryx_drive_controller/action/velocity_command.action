@@ -1,0 +1,11 @@
+#goal definition
+float64 velocity
+float64 radius
+---
+#result definition
+bool success
+bool capable
+---
+#feedback
+float64 velocity
+float64 omega
