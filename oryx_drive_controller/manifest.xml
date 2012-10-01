@@ -1,0 +1,18 @@
+<package>
+  <description brief="oryx_drive_controller">
+
+     oryx_drive_controller
+
+  </description>
+  <author>aruis</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/oryx_drive_controller</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="actionlib"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
