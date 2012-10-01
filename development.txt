@@ -1,0 +1,1 @@
+The development branch is the 'in-flux' version of the Master branch. Code which has been at least tested for basic functionality, but not for full validation, should be merged into this branch.
