@@ -32,3 +32,5 @@ rosbuild_gensrv()
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_boost_directories()
+rosbuild_add_executable(oryx_drive_controller src/Nodes/oryx_drive_controller.cpp)
+rosbuild_link_boost(oryx_drive_controller thread)
