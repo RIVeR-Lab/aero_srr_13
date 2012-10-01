@@ -15,6 +15,13 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 				<buildTargets>
+					<target name=": ROSBUILD_genaction_msgs" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>ROSBUILD_genaction_msgs</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
 					<target name=": ROSBUILD_genmsg_cpp" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 						<buildCommand>/usr/bin/make</buildCommand>
 						<buildArguments>-j2</buildArguments>
@@ -26,6 +33,13 @@
 						<buildCommand>/usr/bin/make</buildCommand>
 						<buildArguments>-j2</buildArguments>
 						<buildTarget>ROSBUILD_genmsg_lisp</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
+					<target name=": ROSBUILD_genmsg_py" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>ROSBUILD_genmsg_py</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>false</useDefaultCommand>
 					</target>
@@ -47,6 +61,34 @@
 						<buildCommand>/usr/bin/make</buildCommand>
 						<buildArguments>-j2</buildArguments>
 						<buildTarget>clean-test-results</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
+					<target name="[exe] oryx_drive_controller" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>oryx_drive_controller</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
+					<target name="[exe] oryx_drive_controller/fast" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>oryx_drive_controller/fast</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
+					<target name="Build" path="[Targets]/[exe] oryx_drive_controller" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-C "/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller" -j2</buildArguments>
+						<buildTarget>oryx_drive_controller</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
+					<target name="Clean" path="[Targets]/[exe] oryx_drive_controller" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/cmake</buildCommand>
+						<buildArguments>-E chdir "/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller" "/usr/bin/cmake" -P "CMakeFiles/oryx_drive_controller.dir/cmake_clean.cmake"</buildArguments>
+						<buildTarget/>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>false</useDefaultCommand>
 					</target>
@@ -78,6 +120,13 @@
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>false</useDefaultCommand>
 					</target>
+					<target name=": rospack_genmsg_all" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>rospack_genmsg_all</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
 					<target name=": rospack_genmsg_libexe" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 						<buildCommand>/usr/bin/make</buildCommand>
 						<buildArguments>-j2</buildArguments>
@@ -89,6 +138,13 @@
 						<buildCommand>/usr/bin/make</buildCommand>
 						<buildArguments>-j2</buildArguments>
 						<buildTarget>rospack_gensrv</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
+					<target name=": rospack_gensrv_all" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>rospack_gensrv_all</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>false</useDefaultCommand>
 					</target>
@@ -141,6 +197,27 @@
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>false</useDefaultCommand>
 					</target>
+					<target name="[obj] src/oryx_drive_controller.o" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>src/oryx_drive_controller.o</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
+					<target name="[pre] src/oryx_drive_controller.i" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>src/oryx_drive_controller.i</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
+					<target name="[to asm] src/oryx_drive_controller.s" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+						<buildCommand>/usr/bin/make</buildCommand>
+						<buildArguments>-j2</buildArguments>
+						<buildTarget>src/oryx_drive_controller.s</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+					</target>
 				</buildTargets>
 			</storageModule>
 			<storageModule moduleId="scannerConfiguration">
@@ -171,8 +248,10 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="oryx_drive_controller.null.1" name="oryx_drive_controller"/>
 	</storageModule>
+	<storageModule moduleId="refreshScope"/>
 	<storageModule moduleId="org.eclipse.cdt.core.pathentry">
 		<pathentry excluding="**/CMakeFiles/" kind="out" path=""/>
+		<pathentry kind="mac" name="BOOST_CB_DISABLE_DEBUG" path="" value=""/>
 		<pathentry kind="mac" name="__STDC__" path="" value="1"/>
 		<pathentry kind="mac" name="__STDC_HOSTED__" path="" value="1"/>
 		<pathentry kind="mac" name="__GNUC__" path="" value="4"/>
@@ -397,6 +476,8 @@
 		<pathentry include="/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller/include" kind="inc" path="" system="true"/>
 		<pathentry include="/opt/ros/fuerte/include" kind="inc" path="" system="true"/>
 		<pathentry include="/opt/ros/fuerte/share/actionlib/include" kind="inc" path="" system="true"/>
+		<pathentry include="/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller/msg_gen/cpp/include" kind="inc" path="" system="true"/>
+		<pathentry include="/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller/srv_gen/cpp/include" kind="inc" path="" system="true"/>
 		<pathentry include="/usr/lib/gcc/x86_64-linux-gnu/4.6/include" kind="inc" path="" system="true"/>
 		<pathentry include="/usr/local/include" kind="inc" path="" system="true"/>
 		<pathentry include="/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed" kind="inc" path="" system="true"/>

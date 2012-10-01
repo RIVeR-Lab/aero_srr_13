@@ -79,7 +79,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.environment</key>
-					<value>VERBOSE=1|ROS_ROOT=/opt/ros/fuerte/share/ros|ROS_PACKAGE_PATH=/home/parallels/fuerte_workspace/oryxssr:/home/parallels/fuerte_workspace/sandbox:/opt/ros/fuerte/stacks:/opt/ros/fuerte/share:/opt/ros/fuerte/share/ros|PYTHONPATH=/opt/ros/fuerte/share/ros/core/roslib/src:/opt/ros/fuerte/lib/python2.7/dist-packages:|PATH=/opt/ros/fuerte/share/ros/bin:/opt/ros/fuerte/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games|</value>
+					<value>VERBOSE=1|ROS_ROOT=/opt/ros/fuerte/share/ros|ROS_PACKAGE_PATH=/home/parallels/fuerte_workspace/oryxssr:/home/parallels/fuerte_workspace/sandbox:/opt/ros/fuerte/stacks:/opt/ros/fuerte/share:/opt/ros/fuerte/share/ros|PYTHONPATH=/opt/ros/fuerte/share/ros/core/roslib/src:/opt/ros/fuerte/lib/python2.7/dist-packages:/opt/ros/fuerte/share/ros/core/roslib/src:/opt/ros/fuerte/lib/python2.7/dist-packages:|PATH=/opt/ros/fuerte/share/ros/bin:/opt/ros/fuerte/bin:/opt/ros/fuerte/share/ros/bin:/opt/ros/fuerte/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games|</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.fullBuildTarget</key>
@@ -117,6 +117,36 @@
 			<name>[Targets]</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] oryx_drive_controller/</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] oryx_drive_controller/CMake Rules</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] oryx_drive_controller/Header Files</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] oryx_drive_controller/Resources</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] oryx_drive_controller/Source Files</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] oryx_drive_controller/Source Files/oryx_drive_controller.cpp</name>
+			<type>1</type>
+			<location>/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller/src/oryx_drive_controller.cpp</location>
 		</link>
 	</linkedResources>
 </projectDescription>

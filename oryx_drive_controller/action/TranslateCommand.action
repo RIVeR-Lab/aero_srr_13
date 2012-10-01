@@ -1,7 +1,7 @@
 #goal definition
 float64 x_velocity
 float64 y_velocity
-float64	omega
+#float64	omega
 ---
 #result definition
 bool success
@@ -10,4 +10,4 @@ bool capable
 #feedback
 float64 x_velocity
 float64 y_velocity
-float64 omega
+#float64 omega

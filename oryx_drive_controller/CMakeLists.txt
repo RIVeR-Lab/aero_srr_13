@@ -11,6 +11,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 rosbuild_find_ros_package(actionlib_msgs)
 include(${actionlib_msgs_PACKAGE_PATH}/cmake/actionbuild.cmake)
+genaction()
 rosbuild_init()
 
 #set the default path for built executables to the "bin" directory
@@ -21,7 +22,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services
-rosbuild_gensrv()
+#rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
@@ -32,5 +33,6 @@ rosbuild_gensrv()
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_boost_directories()
-rosbuild_add_executable(oryx_drive_controller src/Nodes/oryx_drive_controller.cpp)
+rosbuild_add_library(${PROJECT_NAME} src/VelocityControlServer.cpp)
+rosbuild_add_executable(oryx_drive_controller src/oryx_drive_controller.cpp)
 rosbuild_link_boost(oryx_drive_controller thread)
