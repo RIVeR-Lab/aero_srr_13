@@ -74,6 +74,7 @@ rosbuild_add_boost_directories()
 
 #Add non-node library files to be build
 rosbuild_add_library(${PROJECT_NAME} src/velocity_command/VelocityControlServer.cpp)
+rosbuild_add_library(${PROJECT_NAME} src/translate_command/TranslateControlServer.cpp)
 
 #Build Nodes
 rosbuild_add_executable(oryx_drive_controller src/nodes/oryx_drive_controller.cpp)
