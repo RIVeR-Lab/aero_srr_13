@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 	ROS_INFO("Oryx Drive Controller Version: %d.%d.%d", oryx_drive_controller_VERSION_MAJOR, oryx_drive_controller_VERSION_MINOR, oryx_drive_controller_VERSION_BUILD);
 	//Just a check to make sure the usage was correct
 	if(argc < 1){
-		ROS_INFO("Usage: oryx_drive_controller _v_action_topic:=string _t_action_topic");
+		ROS_INFO("Usage: oryx_drive_controller _v_action_topic:=string _t_action_topic:=string");
 		return 1;
 	}else{
 		param_nh.getParam("v_action_topic", v_action_topic);
