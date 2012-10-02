@@ -54,6 +54,8 @@ set (oryx_drive_controller_VERSION_MAJOR 0)
 set (oryx_drive_controller_VERSION_MINOR 0)
 set (oryx_drive_controller_VERSION_BUILD ${RESULT})
 
+message(STATUS "Building Oryx Drive Controller Version ${oryx_drive_controller_VERSION_MAJOR}.${oryx_drive_controller_VERSION_MINOR}.${oryx_drive_controller_VERSION_BUILD}")
+
 # configure a header file to pass some of the CMake settings
 # to the source code to use as build-time configuration parameters
 configure_file (
