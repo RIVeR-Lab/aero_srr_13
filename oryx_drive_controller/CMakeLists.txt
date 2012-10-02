@@ -32,10 +32,27 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+#Get the current date
+MACRO (TODAY RESULT) 
+    IF (WIN32) 
+        EXECUTE_PROCESS(COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE ${RESULT}) 
+        string(REGEX REPLACE "(..)/(..)/..(..).*" "\\1\\2\\3" ${RESULT} ${${RESULT}}) 
+    ELSEIF(UNIX) 
+        EXECUTE_PROCESS(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE ${RESULT}) 
+        string(REGEX REPLACE "(..)/(..)/..(..).*" "\\1\\2\\3" ${RESULT} ${${RESULT}}) 
+    ELSE (WIN32) 
+        MESSAGE(SEND_ERROR "date not implemented") 
+        SET(${RESULT} 000000) 
+    ENDIF (WIN32) 
+ENDMACRO (TODAY) 
+
+TODAY(RESULT) 
+message(STATUS "Compilation date = ${RESULT}") 
+
 # The version number.
 set (oryx_drive_controller_VERSION_MAJOR 0)
 set (oryx_drive_controller_VERSION_MINOR 0)
-set (oryx_drive_controller_VERSION_BUILD 1)
+set (oryx_drive_controller_VERSION_BUILD ${RESULT})
 
 # configure a header file to pass some of the CMake settings
 # to the source code to use as build-time configuration parameters
