@@ -32,7 +32,30 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+# The version number.
+set (oryx_drive_controller_VERSION_MAJOR 0)
+set (oryx_drive_controller_VERSION_MINOR 0)
+set (oryx_drive_controller_VERSION_BUILD 1)
+
+# configure a header file to pass some of the CMake settings
+# to the source code to use as build-time configuration parameters
+configure_file (
+  "${PROJECT_SOURCE_DIR}/src/OryxDriveControllerConfig.h.in"
+  "${PROJECT_BINARY_DIR}/OryxDriveControllerConfig.h"
+  )
+
+#Link all source folders so that Headers will be properly found
+include_directories("${PROJECT_BINARY_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}/src/nodes")
+include_directories("${PROJECT_SOURCE_DIR}/src/velocity_command")
+include_directories("${PROJECT_SOURCE_DIR}/src/translate_command")
+
+#Add the Boost libraries
 rosbuild_add_boost_directories()
-rosbuild_add_library(${PROJECT_NAME} src/VelocityControlServer.cpp)
-rosbuild_add_executable(oryx_drive_controller src/oryx_drive_controller.cpp)
+
+#Add non-node library files to be build
+rosbuild_add_library(${PROJECT_NAME} src/velocity_command/VelocityControlServer.cpp)
+
+#Build Nodes
+rosbuild_add_executable(oryx_drive_controller src/nodes/oryx_drive_controller.cpp)
 rosbuild_link_boost(oryx_drive_controller thread)
