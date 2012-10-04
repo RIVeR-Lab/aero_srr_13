@@ -1,0 +1,45 @@
+<launch>
+
+	<node name="Oryx_Manager" pkg="OryxManager" type="OryxManager" />
+
+	<include file="(find OryxManager/launch/DriveMotors.launch) />
+
+	<include file="(find OryxManager/launch/Cameras.launch) />
+
+	<node name = "InertiaCube" pkg="OryxManager" type="InertiaCube" cwd="node" />
+
+	<node name = "hokuyo_node" 	pkg="hokuyo_node" type="hokuyo_node">
+		<param name ="min_ang" value = "-1.1" />
+		<param name ="max_ang" value = "1.1" />
+	</node>
+
+	<node name = "joy" pkg="joy" type="joy_node" >
+		<param name = "deadzone" 			value=".25"/>	
+		<param name = "coalesce_interval" 	value=".04"/>	
+    </node>
+
+	<node name=Battery_Manager" pkg="OryxManager" type="BatteryManager" />
+
+	<node name="CPU_Temps" pkg="OryxManager" type="CPUTempFinder" />
+
+	<node name="Drive_Manager" pkg="OryxManager" type="DriveManager" />
+	
+
+  	<node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+		<remap from="imu_data" to="imu"/>
+    	<param name="output_frame" value="odom"/>
+    	<param name="freq" value="30.0"/>
+    	<param name="sensor_timeout" value="1.0"/>
+    	<param name="odom_used" value="true"/>
+    	<param name="imu_used" value="true"/>
+    	<param name="vo_used" value="false"/>
+    	<param name="debug" value="false"/>
+    	<param name="self_diagnose" value="false"/>
+  	</node>
+
+
+	<node pkg="tf" type="static_transform_publisher" name="Base_Link_To_Laser" 
+		args=".15 0 .05 0.0 .11344 0 /base_link /laser 50" />
+
+
+</launch>

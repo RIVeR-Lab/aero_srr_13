@@ -1,0 +1,46 @@
+Motor_Name: Test_Motor
+
+# MOTOR PARAMETERS
+Node_ID: 1
+Motor_Type: 10 # DC (1), EC_SINUS (10), EC_BLOCK (11)
+Motor_Nominal_Current: 9650        # MILLIAMPS
+Motor_Max_Current: 23600           # MILLIAMPS
+Motor_Thermal_Time_Constant: 21.1
+Motor_Number_Pole_Pairs: 2         # EC_MAX (1), EC_4POLE (2)
+
+# SENSOR PARAMETERS
+Sensor_Type: 2                     # NONE (0), INC_3CH (1), INC_2CH (2)
+                                   # HALL (3), SSI_BINARY (4), SSI_GRAY (5)
+Sensor_Inversion:   0              # Encoder Opposite Hall (1), Same (0)
+Encoder_Resolution: 500            # INC ENCODER CPR
+Encoder_Data_Rate: 0               # ABS ENCODER SSI DATA RATE
+Encoder_Number_Multiturn_Bits: 0   # ABS ENCODER SSI MULTI TURN BITS
+Encoder_Number_Single_Turn_Bits: 0 # ABS ENCODER SSI SINGLE TURN BITS
+
+# SAFETY PARAMETERS
+Max_Following_Error: 20000   # MAX POS FOLLOWING ERROR, ENC COUNTS
+Max_Profile_Velocity: 12500  # MAX PROFILE VELOCITY
+Max_Acceleration: 15000      # MAX ACCELERATION
+
+# MODE SEPECIFIC PARAMETERS
+Position_Profile_Velocity: 12500     # VELOCITY FOR POS PROFILE MODE
+Position_Profile_Acceleration: 8000  # ACCELERATION FOR POS PROFILE MODE
+Position_Profile_Deceleration: 14000 # DECELERATION FOR POS PROFILE MODE
+Velocity_Profile_Acceleration: 8000  # ACCELERATION FOR VEL PROFILE MODE
+Velocity_Profile_Deceleration: 9000  # DECELERATION FOR VEL PROFILE MODE
+
+#PID PARAMETERS
+#
+#PositionPGain				= 0			# P GAIN FOR POS CONTROL
+#PositionIGain				= 0			# I GAIN FOR POS CONTROL
+#PositionDGain				= 0			# D GAIN FOR POS CONTROL
+#VelocityPGain				= 0			# P GAIN FOR VELOCITY CONTROL
+#VelocityIGain				= 0			# I GAIN FOR VELOCITY CONTROL
+#CurrentPGain				= 0			# P GAIN FOR CURRENT CONTROL
+#CurrentIGain				= 0			# I GAIN FOR CURRENT CONTROL
+
+# QUICKSTOP PARAMETERS
+Use_QuickStop: true
+QuickStop_Pin: 1
+Active_Low: true
+

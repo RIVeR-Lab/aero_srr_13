@@ -1,0 +1,7 @@
+<launch>
+	<node name="RockCalibrator" pkg="RockFinder" type="RockHueFinder" ns="ColorTracking">
+		<param name="color" value="Red" />
+		<param name="showWindows" value="true" />
+	</node>
+
+</launch>

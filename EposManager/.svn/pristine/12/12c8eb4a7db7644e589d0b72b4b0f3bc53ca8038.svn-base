@@ -1,0 +1,17 @@
+<launch>
+	<param name="run_id" value="test1" />
+	<env name="ROS_LOG_DIR" value="$(find EposManager)/logs" />
+	<rosparam command="load" file="$(find EposManager)/params/Left_Front_Motor.yaml" ns="motors/Drive_Motors/Left_Front_Motor" />
+	<rosparam command="load" file="$(find EposManager)/params/Right_Front_Motor.yaml" ns="motors/Drive_Motors/Right_Front_Motor" />
+	<rosparam command="load" file="$(find EposManager)/params/Left_Back_Motor.yaml" ns="motors/Drive_Motors/Left_Back_Motor" />
+	<rosparam command="load" file="$(find EposManager)/params/Right_Back_Motor.yaml" ns="motors/Drive_Motors/Right_Back_Motor" />
+
+	<node name="Drive_Motors" pkg="EposManager" type="EposManager" args="Left_Front_Motor Right_Front_Motor Left_Back_Motor Right_Back_Motor" ns="motors/Drive_Motors" output="screen"  >
+		<param name="Port" value="USB0" />
+		<param name="Protocol" value="USB" />
+		<param name="Publish_Rate" value=".1" />
+		
+	</node>
+		
+<node name="dynamic_reconfigure" pkg="dynamic_reconfigure" type="reconfigure_gui" />
+</launch>

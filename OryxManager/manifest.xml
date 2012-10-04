@@ -1,0 +1,21 @@
+<package>
+  <description brief="OryxManager">
+
+     OryxManager
+
+  </description>
+  <author>oryx</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/OryxManager</url>
+  <depend package="OryxMessages"/>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="EposManager"/>
+  <depend package="tf"/>
+  <depend package="geometry_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="dynamic_reconfigure"/>
+</package>
+
+

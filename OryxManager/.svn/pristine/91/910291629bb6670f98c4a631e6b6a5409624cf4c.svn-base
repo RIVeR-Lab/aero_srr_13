@@ -1,0 +1,15 @@
+<launch>
+
+	<node name="Arm_Manager" pkg="OryxManager" type="ArmManager" output="screen" >
+		<param name="Shoulder_Current" value="300" />
+		<param name="Scoop_Current" value="200" />
+		<param name="Pan_Current" value="300" />
+		<param name="Shoulder_Velocity" value="4000" />
+		<param name="Scoop_Velocity" value="8000" />
+		<param name="Pan_Velocity" value="2500" />
+	</node>
+
+	<include file="$(find OryxManager)/launch/Motors/ArmMotorsValgrind.launch" />
+
+
+</launch>

@@ -1,0 +1,26 @@
+<launch>
+	<rosparam command="load" file="$(find EposManager)/params/Tiny_Motor.yaml" ns="motors/Arm_Motors/Tiny_Motor" />
+
+	<rosparam command="load" file="$(find EposManager)/params/New_Motor.yaml" ns="motors/Drive_Motors/New_Motor" />
+	
+	<node name="Name" pkg="EposManager" type="EposManager" args="Tiny_Motor" ns="motors/Arm_Motors" output="screen" >
+		<param name="Port" value="USB0" />
+		<param name="Protocol" value="USB" />
+		<param name="Publish_Rate" value=".1" />
+		<param name="Heartbeat" value="false" />
+		<param name="Max_Heartbeat_Attempts" value="20" />
+		<param name="Heartbeat_Rate" value=".5" />
+	</node>
+
+	<node name="Name" pkg="EposManager" type="EposManager" args="New_Motor" ns="motors/Drive_Motors" output="screen" >
+		<param name="Port" value="USB1" />
+		<param name="Protocol" value="USB" />
+		<param name="Publish_Rate" value=".1" />
+		<param name="Heartbeat" value="false" />
+		<param name="Max_Heartbeat_Attempts" value="20" />
+		<param name="Heartbeat_Rate" value=".5" />
+	</node>
+
+		
+<node name="dynamic_reconfigure" pkg="dynamic_reconfigure" type="reconfigure_gui" />
+</launch>

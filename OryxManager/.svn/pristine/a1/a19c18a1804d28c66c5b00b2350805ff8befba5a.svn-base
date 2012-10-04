@@ -1,0 +1,13 @@
+<launch>
+	<rosparam command="load" file="$(find OryxManager)/params/Arm_Pan.yaml" ns="motors/Arm_Motors/Arm_Pan" />
+	<rosparam command="load" file="$(find OryxManager)/params/Scoop.yaml" ns="motors/Arm_Motors/Scoop" />
+	<rosparam command="load" file="$(find OryxManager)/params/Shoulder.yaml" ns="motors/Arm_Motors/Shoulder" />
+
+	<node name="Arm" pkg="EposManager" type="EposManager" args="Arm_Pan Scoop Shoulder" ns="motors/Arm_Motors" output="screen" respawn="true" launch-prefix="valgrind --log-file=$(env ROS_LOG_DIR)/PTZValgrind.log --error-limit=no">
+		<param name="Port" value="USB3 " />
+		<param name="Protocol" value="USB" />
+		<param name="Publish_Rate" value="5" />		
+	</node>
+
+
+</launch>

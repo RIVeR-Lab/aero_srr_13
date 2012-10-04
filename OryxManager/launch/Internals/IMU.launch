@@ -1,0 +1,6 @@
+<launch>
+	<node name="IMU" pkg="OryxManager" type="InertiaCube" cwd="node" >
+		<param name="Publish_Rate" value="10" />
+	</node>
+
+</launch>

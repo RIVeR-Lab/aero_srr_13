@@ -1,0 +1,26 @@
+<package>
+  <description brief="OryxGui">
+
+     OryxGui
+
+  </description>
+  <author>oryx</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/OryxGui</url>
+  <depend package="rosjava"/>
+  <depend package="OryxMessages"/>
+  <depend package="sensor_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="OryxCommon"/>
+  <depend package="EposManager"/>
+  <depend package="joy"/>
+	<export><rosjava-src location="src"/>
+<rosjava-pathelement location="target/" groupId="" artifactId="" version="0.0.0" built="true"/>
+ <rosjava-pathelement location="src/instruments/resources/OryxGuiResources.jar" />
+</export>
+
+</package>
+
+

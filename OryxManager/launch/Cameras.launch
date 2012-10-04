@@ -1,0 +1,4 @@
+<launch>
+	<include file="(find OryxManager)/launch/Cameras/DriveCam.launch" />
+	<include file="(find OryxManager)/launch/Cameras/ArmCam.launch" />
+</launch>

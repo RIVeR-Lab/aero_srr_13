@@ -1,0 +1,58 @@
+Motor_Name: Left_Front_Wheel
+
+######## MOTOR PARAMETERS##################
+
+#The Node ID is the ID# of the connected EPOS controller, set by the DIP switchhes on the EPOS
+Node_ID: 1
+
+# DC (1), EC_SINUS (10), EC_BLOCK (11)
+Motor_Type: 10 
+
+Motor_Nominal_Current: 8000
+
+Motor_Max_Current: 12800
+
+Motor_Thermal_Time_Constant: 17.1 
+
+# EC_MAX (1), EC_4POLE (4)
+Motor_Number_Pole_Pairs: 1 
+
+############### SENSOR PARAMETERS####################
+
+# NONE (0), INC_3CH (1), INC_2CH (2), HALL (3), SSI_BINARY (4), SSI_GRAY (5)
+Sensor_Type: 1         
+
+# Encoder Opposite Hall (1), Same (0)           
+Sensor_Inversion:   0   
+
+# INC ENCODER CPR
+Encoder_Resolution: 500 
+
+ # ABS ENCODER SSI DATA RATE
+Encoder_Data_Rate: 0   
+
+# ABS ENCODER SSI MULTI TURN BITS
+Encoder_Number_Multiturn_Bits: 0 
+
+# ABS ENCODER SSI SINGLE TURN BITS
+Encoder_Number_Single_Turn_Bits: 0 
+
+############### SAFETY PARAMETERS#####################
+
+# MAX POS FOLLOWING ERROR, ENC COUNTS
+Max_Following_Error: 20000  
+
+# MAX PROFILE VELOCITY
+Max_Profile_Velocity: 18000 
+
+# MAX ACCELERATION
+Max_Acceleration: 9000     
+
+############## MODE SEPECIFIC PARAMETERS############
+Position_Profile_Velocity: 10000    # VELOCITY FOR POS PROFILE MODE
+Position_Profile_Acceleration: 8000 # ACCELERATION FOR POS PROFILE MODE
+Position_Profile_Deceleration: 8000 # DECELERATION FOR POS PROFILE MODE
+Velocity_Profile_Acceleration: 8000 # ACCELERATION FOR VEL PROFILE MODE
+Velocity_Profile_Deceleration: 9000 # DECELERATION FOR VEL PROFILE MODE
+
+Debug_Mode: true

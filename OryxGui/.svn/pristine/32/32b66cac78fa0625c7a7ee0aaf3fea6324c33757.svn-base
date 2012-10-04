@@ -1,0 +1,22 @@
+<launch>
+	<node name="PTZRepub" pkg="image_repub" type="MyRepub" >
+		<param name="topic" value="/PTZ/image" />
+	</node>
+
+	<node name="DriveRepub" pkg="image_repub" type="MyRepub" >
+		<param name="topic" value="/Drive_Camera/image" />
+	</node>
+
+	<node name="ArmRepub" pkg="image_repub" type="MyRepub" >
+		<param name="topic" value="/Arm_Camera/image" />
+	</node>
+
+	<include file="$(find OryxGui)/launch/MultipleJoy.launch" />
+
+	<node name="OperatorReconfigure" pkg="dynamic_reconfigure" type="reconfigure_gui" />
+
+	<node name="OryxDriverClient" pkg="rosjava_bootstrap" type="run.py" args="OryxGui client.OryxClient" />
+
+	<node name="OryxOperatorClient" pkg="rosjava_bootstrap" type="run.py" args="OryxGui client.VideoClient" />
+
+</launch>

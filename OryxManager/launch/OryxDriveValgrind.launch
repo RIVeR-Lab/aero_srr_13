@@ -1,0 +1,14 @@
+<launch>
+
+	<node name="Drive_Manager" pkg="OryxManager" type="DriveManager" />
+
+	<node name = "joy" pkg="joy" type="joy_node" >
+		<param name = "deadzone" 			value=".2"/>	
+		<param name = "coalesce_interval" 	value=".01"/>	
+    </node>
+
+	<include file="$(find OryxManager)/launch/Motors/DriveMotorsHeartBeatValgrind.launch" />
+
+	<node name="OryxManager" pkg="OryxManager" type="OryxManager" />
+
+</launch>
