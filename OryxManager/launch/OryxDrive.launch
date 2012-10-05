@@ -1,6 +1,10 @@
 <launch>
 
-	<node name="Drive_Manager" pkg="OryxManager" type="DriveManager" />
+	<node name="Drive_Manager" pkg="OryxManager" type="DriveManager">
+		<param name = "Max_Velocity"	value="1.2">
+		<param name = "Base_Width"		value=".39">
+		<param name = "Base_Length"		value=".33">
+	</node>
 
 	<node name = "joy" pkg="joy" type="joy_node" >
 		<param name = "deadzone" 			value=".20"/>	
