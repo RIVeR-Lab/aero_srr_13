@@ -4,6 +4,7 @@
 	<arg name="translate_topic"			default="translate_action_topic" />
 	<arg name="drive_velocity_topic"	default="drive_velocity_topic" />
 	<arg name="drive_swerve_topic"		default="drive_swerve_topic" />
+	<arg name="drive_capability_topic"	default="drive_capability_topic" />
 	
 	
 	<!-- Launch Nodes -->
@@ -12,5 +13,6 @@
 		<param name="translate_command_topic"	type="str"	value="$(arg translate_topic)" />
 		<param name="drive_velocity_topic"		type="str"	value="$(arg drive_velocity_topic)" />
 		<param name="drive_swerve_topic"		type="str"	value="$(arg drive_swerve_topic)" />
+		<param name="drive_capability_topic"	type="str"	value="$(arg drive_capability_topic)" />
 	</node>
 </launch>
