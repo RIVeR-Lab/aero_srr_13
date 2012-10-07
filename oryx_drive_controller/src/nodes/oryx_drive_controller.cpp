@@ -56,7 +56,21 @@ private:
 	ros::Publisher swerve_pub;		///Publisher for sending swerve message to DriveManager
 };
 
-///Used by ROS to create the node.
+/**
+ * Used by ROS to create the node
+ * @param argc number of private arguments passed to the node
+ * @param argv pointers to the arguments
+ * The oryx_drive_controller node looks for the following private parameters from the parameter server on startup:
+ * |	Parameter			|	Type	|			Value																|
+ * |	:---:				|	:---:	|			:---:																|
+ * | velocity_command_topic	|	String	| Action Topic name to receive arc commands on									|
+ * | translate_command_topic|	String	| Action Topic name to receive translate commands on							|
+ * | drive_velocity_topic	|	String	| Topic name to send wheel velocity messages to base platform					|
+ * | drive_swerve_topic		|	String	| Topic name to send swerve position messages to base platform					|
+ * | drive_capability_topic	|	String	| Topic name to request capability messages from base							|
+ * | base_length			|	Double	| The length of the base platform from front wheel center to rear wheel center	|
+ * | base_width				|	Double	| The width of the base platform from left wheel center to right wheel center	|
+ */
 int main(int argc, char** argv)
 {
 	std::string v_action_topic;	///String containing the topic name for velocity commands
