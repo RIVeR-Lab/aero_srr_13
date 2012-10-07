@@ -6,10 +6,26 @@
  */
 
 #include <ros/ros.h>
+#include <std_msgs/String.h>
 #include "VelocityControlServer.h"
 #include "TranslateControlServer.h"
 #include "OryxDriveControllerConfig.h"
 
+class DriveController{
+public:
+	DriveController(std::string drive_velocity_topic, std::string drive_swerve_topic, std::string drive_capabilities_topic){
+		ROS_INFO("Starting Up Low Level Drive Controller");
+		//TODO actually set up correct message publishing data
+		//Set up publisher to the DriveManager wheel velocity topic
+		velocity_pub = nh.advertise<std_msgs::String>(drive_velocity_topic.c_str(),2);
+		//Set up publisher to the DriveManager swerve control topic
+		swerve_pub = nh.advertise<std_msgs::String>(drive_swerve_topic.c_str(),2);
+	}
+private:
+	ros::NodeHandle nh;
+	ros::Publisher velocity_pub;
+	ros::Publisher swerve_pub;
+};
 
 ///Used by ROS to create the node.
 int main(int argc, char** argv)
@@ -48,6 +64,7 @@ int main(int argc, char** argv)
 	ROS_INFO("Starting Up Oryx Drive Controller...");
 	VelocityControlServer v_server(v_action_topic);
 	TranslateControlServer t_server(t_action_topic);
+	DriveController d_controller(v_drive_topic, s_drive_topic, c_drive_topic);
 	ROS_INFO("Oryx Drive Controller Running!");
 	ros::spin();
 	return 0;
