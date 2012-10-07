@@ -1,0 +1,12 @@
+<launch>
+	<!-- declare args to be passed in for actionlib topics -->
+	<arg name="velocity_topic" default="velocity_action_topic" />
+	<arg name="translate_topic" default="velocity__action_topic" />
+	
+	
+	<!-- Launch Nodes -->
+	<node name="oryx_drive_controller" pkg="oryx_drive_controller" type="oryx_drive_controller">
+		<param name="velocity_command_topic" type="str" value=$(arg velocity_topic) />
+		<param name="translate_command_topic" type="str" value=$(arg translate_topic) />
+	</node>
+</launch>
