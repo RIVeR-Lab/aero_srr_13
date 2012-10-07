@@ -26,8 +26,8 @@ int main(int argc, char** argv)
 		ROS_INFO("Usage: oryx_drive_controller _v_action_topic:=string _t_action_topic:=string");
 		return 1;
 	}else{
-		param_nh.getParam("v_action_topic", v_action_topic);
-		param_nh.getParam("t_action_topic", t_action_topic);
+		param_nh.getParam("velocity_command_topic", v_action_topic);
+		param_nh.getParam("translate_command_topic", t_action_topic);
 	}
 
 	ROS_INFO("Got Velocity Action Topic Name: <%s>", v_action_topic.c_str());
