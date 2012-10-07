@@ -5,8 +5,8 @@
 	
 	
 	<!-- Launch Nodes -->
-	<node name="oryx_drive_controller" pkg="oryx_drive_controller" type="oryx_drive_controller">
-		<param name="velocity_command_topic" type="str" value=$(arg velocity_topic) />
-		<param name="translate_command_topic" type="str" value=$(arg translate_topic) />
+	<node name="oryx_drive_controller" pkg="oryx_drive_controller" type="oryx_drive_controller" output="screen">
+		<param name="velocity_command_topic" type="str" value="$(arg velocity_topic)" />
+		<param name="translate_command_topic" type="str" value="$(arg translate_topic)" />
 	</node>
 </launch>
