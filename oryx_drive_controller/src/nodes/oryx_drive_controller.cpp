@@ -13,15 +13,25 @@
 
 class DriveController{
 public:
-	DriveController(std::string drive_velocity_topic, std::string drive_swerve_topic, std::string drive_capabilities_topic){
+	DriveController(std::string drive_velocity_topic,
+					std::string drive_swerve_topic,
+					std::string drive_capabilities_topic,
+					double baseLength,
+					double baseWidth){
 		ROS_INFO("Starting Up Low Level Drive Controller");
 		//TODO actually set up correct message publishing data
 		//Set up publisher to the DriveManager wheel velocity topic
-		velocity_pub = nh.advertise<std_msgs::String>(drive_velocity_topic.c_str(),2);
+		this->velocity_pub = nh.advertise<std_msgs::String>(drive_velocity_topic.c_str(),2);
 		//Set up publisher to the DriveManager swerve control topic
-		swerve_pub = nh.advertise<std_msgs::String>(drive_swerve_topic.c_str(),2);
+		this->swerve_pub = nh.advertise<std_msgs::String>(drive_swerve_topic.c_str(),2);
+		//set up dimensional parameters
+		this->baseLength = baseLength;
+		this->baseWidth  = baseWidth;
+		ROS_DEBUG("Got a platform size of <L=%f,W=%f>",baseLength, baseWidth);
 	}
 private:
+	double baseLength;
+	double baseWidth;
 	ros::NodeHandle nh;
 	ros::Publisher velocity_pub;
 	ros::Publisher swerve_pub;
@@ -35,7 +45,10 @@ int main(int argc, char** argv)
 	std::string v_drive_topic;	///String containing the topic name for sending wheel velocities to the DriveManager node
 	std::string s_drive_topic;	///String containing the topic name for sending swerve positions to the DriveManager node
 	std::string c_drive_topic;	///String containing the topic name for polling the DriveManager node on its capabilities
+	double baseWidth;			///width of the platform
+	double baseLength;			///length of the platform
 
+	//Initialize the node
 	ros::init(argc, argv, "oryx_drive_controller");
 	//Get a private node handle to parse command line arguments
 	ros::NodeHandle param_nh("~");
@@ -51,6 +64,8 @@ int main(int argc, char** argv)
 		param_nh.getParam("drive_velocity_topic",		v_drive_topic);
 		param_nh.getParam("drive_swerve_topic",			s_drive_topic);
 		param_nh.getParam("drive_capability_topic",		c_drive_topic);
+		param_nh.getParam("base_length",				baseLength);
+		param_nh.getParam("base_width",					baseWidth);
 	}
 
 	//Print out recieved topics
@@ -64,7 +79,7 @@ int main(int argc, char** argv)
 	ROS_INFO("Starting Up Oryx Drive Controller...");
 	VelocityControlServer v_server(v_action_topic);
 	TranslateControlServer t_server(t_action_topic);
-	DriveController d_controller(v_drive_topic, s_drive_topic, c_drive_topic);
+	DriveController d_controller(v_drive_topic, s_drive_topic, c_drive_topic, baseLength, baseWidth);
 	ROS_INFO("Oryx Drive Controller Running!");
 	ros::spin();
 	return 0;
