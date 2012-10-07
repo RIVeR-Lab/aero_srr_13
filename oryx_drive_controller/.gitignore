@@ -1,3 +1,8 @@
+#Stuff built by rosmake
 /build
 /bin
+#Stuff added by make eclipse-project
+*.project
+*.pydevproject
 *.cproject
+
