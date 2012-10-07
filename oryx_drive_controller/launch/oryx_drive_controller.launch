@@ -1,7 +1,7 @@
 <launch>
 	<!-- declare args to be passed in for actionlib topics -->
 	<arg name="velocity_topic" default="velocity_action_topic" />
-	<arg name="translate_topic" default="velocity_action_topic" />
+	<arg name="translate_topic" default="translate_action_topic" />
 	
 	
 	<!-- Launch Nodes -->
