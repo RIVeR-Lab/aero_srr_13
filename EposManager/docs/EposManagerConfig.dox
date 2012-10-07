@@ -1,0 +1,12 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~Position_Profile_Velocity" : \b [int] Velocity Used During Position Control min: 0, default: 0, max: 40000
+- \b "~Position_Profile_Acceleration" : \b [int] Acceleration Used During Position Control min: 0, default: 0, max: 20000
+- \b "~Position_Profile_Deceleration" : \b [int] Deceleration Used During Position Control min: 0, default: 0, max: 20000
+- \b "~Velocity_Profile_Acceleration" : \b [int] Acceleration Used During Velocity Control min: 0, default: 0, max: 20000
+- \b "~Velocity_Profile_Deceleration" : \b [int] Deceleration Used During Velocity Control min: 0, default: 0, max: 20000
+- \b "~Disable_Motor" : \b [bool] Check to disable motor, uncheck to endable min: False, default: False, max: True
+- \b "~Reinitialize_Motor" : \b [bool] Reinitialize motor if it fails to initialize min: False, default: False, max: True
+

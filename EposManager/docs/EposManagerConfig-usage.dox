@@ -1,0 +1,13 @@
+\subsubsection usage Usage
+\verbatim
+<node name="EPOS" pkg="EposManager" type="EPOS">
+  <param name="Position_Profile_Velocity" type="int" value="0" />
+  <param name="Position_Profile_Acceleration" type="int" value="0" />
+  <param name="Position_Profile_Deceleration" type="int" value="0" />
+  <param name="Velocity_Profile_Acceleration" type="int" value="0" />
+  <param name="Velocity_Profile_Deceleration" type="int" value="0" />
+  <param name="Disable_Motor" type="bool" value="False" />
+  <param name="Reinitialize_Motor" type="bool" value="False" />
+</node>
+\endverbatim
+
