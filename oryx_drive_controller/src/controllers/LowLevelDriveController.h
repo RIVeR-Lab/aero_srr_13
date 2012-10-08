@@ -47,7 +47,7 @@ private:
 	ros::Publisher swerve_pub;		///Publisher for sending swerve message to DriveManager
 
 	/**
-	 * Calculates the wheel velocities used for standard, non-swerve tank steering
+	 * @brief Calculates the wheel velocities used for standard, non-swerve tank steering
 	 * @param velocity The linear velocity for traversing the arc
 	 * @param radius The radius of the arc to traverse
 	 * @return a std::vector of doubles containing the front-left, front-right, rear-left, rear-right wheel velocities in that order.
@@ -55,12 +55,20 @@ private:
 	std::vector<double> calculateTankSteer(double velocity, double radius);
 
 	/**
-	 * Calculates the wheel velocities used for swerve-based tank steering
+	 * @brief Calculates the wheel velocities used for swerve-based tank steering
 	 * @param velocity
 	 * @param radius
 	 * @return a std::vector of doubles containing the front-left, front-right, rear-left, rear-right wheel velocities, followed by corresponding swerve positions, in that order.
 	 */
 	std::vector<double> calculateSwerveTankSteer(double velocity, double radius);
+
+	/**
+	 * @brief Calculates the wheel velocities and swerve positions to translate
+	 * @param xVelocity X Velocity to maintain during the translate
+	 * @param yVelocity Y Velocity to maintain during the translate
+	 * @return a std::vector of doubles containing the front-left, front-right, rear-left, rear-right wheel velocities, followed by corresponding swerve positions, in that order.
+	 */
+	std::vector<double> calculateSwerveTranslate(double xVelocity, double yVelocity);
 };
 
 #endif /* LOWLEVELDRIVECONTROLLER_H_ */

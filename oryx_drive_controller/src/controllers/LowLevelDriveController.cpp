@@ -56,6 +56,15 @@ std::vector<double> LowLevelDriveController::calculateSwerveTankSteer(double vel
 	return wheelData;
 }
 
+std::vector<double> LowLevelDriveController::calculateSwerveTranslate(double xVelocity, double yVelocity){
+	ROS_DEBUG("Calculating Swerve Translate on Parameters <XV=%f, YV=%f>", xVelocity, xVelocity);
+	//Initialize the return vector (FL, FR, RL, RR, FLS, FRS, RLS, RRS)
+	std::vector<double> wheelData(8,0);
+	//TODO Implement here
+	printWheelVectorCalculation(wheelData);
+	return wheelData;
+}
+
 void printWheelVectorCalculation(std::vector<double> wheelData){
 	//Check to see if there is swerve data
 	bool swerveData = (wheelData.size()>SWERVE_OFF);
