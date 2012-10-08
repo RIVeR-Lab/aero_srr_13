@@ -11,6 +11,6 @@
 // the configured options and settings for Oryx Drive Controller
 #define oryx_drive_controller_VERSION_MAJOR @oryx_drive_controller_VERSION_MAJOR@
 #define oryx_drive_controller_VERSION_MINOR @oryx_drive_controller_VERSION_MINOR@
-#define oryx_drive_controller_VERSION_BUILD @oryx_drive_controller_VERSION_BUILD@
+#define oryx_drive_controller_VERSION_BUILD 0x@oryx_drive_controller_VERSION_BUILD@
 
 #endif /* ORYXDRIVECONTROLLERCONFIG_H_ */
