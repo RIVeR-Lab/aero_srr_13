@@ -10,51 +10,8 @@
 #include "VelocityControlServer.h"
 #include "TranslateControlServer.h"
 #include "OryxDriveControllerConfig.h"
+#include "LowLevelDriveController.h"
 
-/**
- * @brief Low level velocity-arc based drive controller
- *
- * Implements a velocity-control based controller which is capable of performing arc based motions. There are seperate
- * control modes for operation based on the capabilities of the base platform:
- * *Without Swerve Capabilities
- *  -Standard Tank Steer Velocity-Arc
- * *With Swerve Capabilities
- *  -Smooth Velocity-Arc
- *  -Translation
- */
-class LowLevelDriveController{
-public:
-	/**
-	 * Creates a new LowLevelDriveController with standard initialization parameters
-	 * @param drive_velocity_topic		The topic name to publish wheel velocity messages to
-	 * @param drive_swerve_topic		The topic name to publish swerve position messages to
-	 * @param drive_capabilities_topic	The topic name to poll for DriveManager capabilities
-	 * @param baseLength				The length of the base platform from front wheel center to rear wheel center
-	 * @param baseWidth					The width of the base platform from left wheel center to right wheel center
-	 */
-	LowLevelDriveController(std::string drive_velocity_topic,
-					std::string drive_swerve_topic,
-					std::string drive_capabilities_topic,
-					double baseLength,
-					double baseWidth){
-		ROS_INFO("Starting Up Low Level Drive Controller");
-		//TODO actually set up correct message publishing data
-		//Set up publisher to the DriveManager wheel velocity topic
-		this->velocity_pub = nh.advertise<std_msgs::String>(drive_velocity_topic.c_str(),2);
-		//Set up publisher to the DriveManager swerve control topic
-		this->swerve_pub = nh.advertise<std_msgs::String>(drive_swerve_topic.c_str(),2);
-		//set up dimensional parameters
-		this->baseLength = baseLength;
-		this->baseWidth  = baseWidth;
-		ROS_DEBUG("Got a platform size of <L=%f,W=%f>",baseLength, baseWidth);
-	}
-private:
-	double baseLength;				///The length of the platform
-	double baseWidth;				///The width of the platform
-	ros::NodeHandle nh;				///Node handle into the ROS system
-	ros::Publisher velocity_pub;	///Publisher for sending velocity messages to DriveManager
-	ros::Publisher swerve_pub;		///Publisher for sending swerve message to DriveManager
-};
 
 /**
  * Used by ROS to create the node
