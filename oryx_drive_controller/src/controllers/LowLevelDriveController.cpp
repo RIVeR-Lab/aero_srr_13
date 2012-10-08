@@ -1,8 +1,8 @@
-/*
- * LowLevelDriveController.cpp
+/**
+ * @file LowLevelDriveController.cpp
  *
- *  Created on: Oct 7, 2012
- *      Author: parallels
+ * @date Oct 7, 2012
+ * @author Adam Panzica
  */
 
 #include "LowLevelDriveController.h"
