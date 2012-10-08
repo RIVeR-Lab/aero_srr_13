@@ -22,17 +22,17 @@
  *  -Smooth Velocity-Arc
  *  -Translation
  */
-class DriveController{
+class LowLevelDriveController{
 public:
 	/**
-	 * Creates a new DriveController with standard initialization parameters
+	 * Creates a new LowLevelDriveController with standard initialization parameters
 	 * @param drive_velocity_topic		The topic name to publish wheel velocity messages to
 	 * @param drive_swerve_topic		The topic name to publish swerve position messages to
 	 * @param drive_capabilities_topic	The topic name to poll for DriveManager capabilities
 	 * @param baseLength				The length of the base platform from front wheel center to rear wheel center
 	 * @param baseWidth					The width of the base platform from left wheel center to right wheel center
 	 */
-	DriveController(std::string drive_velocity_topic,
+	LowLevelDriveController(std::string drive_velocity_topic,
 					std::string drive_swerve_topic,
 					std::string drive_capabilities_topic,
 					double baseLength,
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 	ROS_INFO("Starting Up Oryx Drive Controller...");
 	VelocityControlServer v_server(v_action_topic);
 	TranslateControlServer t_server(t_action_topic);
-	DriveController d_controller(v_drive_topic, s_drive_topic, c_drive_topic, baseLength, baseWidth);
+	LowLevelDriveController lld_controller(v_drive_topic, s_drive_topic, c_drive_topic, baseLength, baseWidth);
 	ROS_INFO("Oryx Drive Controller Running!");
 	ros::spin();
 	return 0;
