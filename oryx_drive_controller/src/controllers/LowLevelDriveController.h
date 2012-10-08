@@ -36,15 +36,31 @@ public:
 					std::string drive_capabilities_topic,
 					double baseLength,
 					double baseWidth);
-	///Default constructor
+	///Default destructor
 	virtual ~LowLevelDriveController();
 private:
-	double baseLength;				///The length of the platform
-	double baseWidth;				///The width of the platform
+	bool	canSwerve;				///Flag for signaling if swerve control is possible
+	double	baseLength;				///The length of the platform
+	double 	baseWidth;				///The width of the platform
 	ros::NodeHandle nh;				///Node handle into the ROS system
 	ros::Publisher velocity_pub;	///Publisher for sending velocity messages to DriveManager
 	ros::Publisher swerve_pub;		///Publisher for sending swerve message to DriveManager
-};
 
+	/**
+	 * Calculates the wheel velocities used for standard, non-swerve tank steering
+	 * @param velocity The linear velocity for traversing the arc
+	 * @param radius The radius of the arc to traverse
+	 * @return a std::vector of doubles containing the front-left, front-right, rear-left, rear-right wheel velocities in that order.
+	 */
+	std::vector<double> calculateTankSteer(double velocity, double radius);
+
+	/**
+	 * Calculates the wheel velocities used for swerve-based tank steering
+	 * @param velocity
+	 * @param radius
+	 * @return a std::vector of doubles containing the front-left, front-right, rear-left, rear-right wheel velocities, followed by corresponding swerve positions, in that order.
+	 */
+	std::vector<double> calculateSwerveTankSteer(double velocity, double radius);
+};
 
 #endif /* LOWLEVELDRIVECONTROLLER_H_ */
