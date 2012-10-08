@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "oryx_drive_controller");
 	//Get a private node handle to parse command line arguments
 	ros::NodeHandle param_nh("~");
-	ROS_INFO("Oryx Drive Controller Version: %d.%d.%d", oryx_drive_controller_VERSION_MAJOR, oryx_drive_controller_VERSION_MINOR, oryx_drive_controller_VERSION_BUILD);
+	ROS_INFO("Oryx Drive Controller Version: %u.%u.%u", oryx_drive_controller_VERSION_MAJOR, oryx_drive_controller_VERSION_MINOR, oryx_drive_controller_VERSION_BUILD);
 	//Just a check to make sure the usage was correct
 	if(argc < 1){
 		ROS_INFO("Usage: oryx_drive_controller velocity_command_topic translate_command_topic drive_velocity_topic drive_swerve_topic drive_capability_topic");
