@@ -9,6 +9,7 @@
 #define LOWLEVELDRIVECONTROLLER_H_
 
 #include <ros/ros.h>
+#include <std_msgs/String.h>
 /**
  * @brief Low level velocity-arc based drive controller
  *
@@ -35,6 +36,8 @@ public:
 					std::string drive_capabilities_topic,
 					double baseLength,
 					double baseWidth);
+	///Default constructor
+	virtual ~LowLevelDriveController();
 private:
 	double baseLength;				///The length of the platform
 	double baseWidth;				///The width of the platform
