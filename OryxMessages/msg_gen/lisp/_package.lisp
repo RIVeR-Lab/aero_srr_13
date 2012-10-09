@@ -1,13 +1,17 @@
 (cl:defpackage OryxMessages-msg
   (:use )
   (:export
+   "<BLOB>"
+   "BLOB"
+   "<BLOBLIST>"
+   "BLOBLIST"
    "<TEMPERATURE>"
    "TEMPERATURE"
    "<BATTERY>"
    "BATTERY"
-   "<BLOBLIST>"
-   "BLOBLIST"
-   "<BLOB>"
-   "BLOB"
+   "<SWERVEPOSITIONS>"
+   "SWERVEPOSITIONS"
+   "<WHEELVELOCITIES>"
+   "WHEELVELOCITIES"
   ))
 
