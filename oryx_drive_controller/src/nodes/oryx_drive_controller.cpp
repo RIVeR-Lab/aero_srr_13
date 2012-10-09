@@ -69,7 +69,7 @@ int main(int argc, char** argv)
 	ROS_INFO("Starting Up Oryx Drive Controller...");
 	VelocityControlServer v_server(v_action_topic);
 	TranslateControlServer t_server(t_action_topic);
-	LowLevelDriveController lld_controller(v_drive_topic, s_drive_topic, c_drive_topic, baseLength, baseWidth);
+	ArcDriveController lld_controller(v_drive_topic, s_drive_topic, c_drive_topic, baseLength, baseWidth);
 	ROS_INFO("I'm Testing Stuff Now...");
 	ROS_INFO("Testing Steer With Velocity = 1m/s, Radius = 5m");
 	lld_controller.setCanSwerve(false);
