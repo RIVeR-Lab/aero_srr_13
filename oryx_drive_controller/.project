@@ -144,6 +144,11 @@
 			<location>/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller/src/translate_command/TranslateControlServer.cpp</location>
 		</link>
 		<link>
+			<name>[Targets]/[exe] oryx_drive_controller/Source Files/ArcDriveController.cpp</name>
+			<type>1</type>
+			<location>/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller/src/controllers/ArcDriveController.cpp</location>
+		</link>
+		<link>
 			<name>[Targets]/[exe] oryx_drive_controller/Source Files/oryx_drive_controller.cpp</name>
 			<type>1</type>
 			<location>/home/parallels/fuerte_workspace/oryxssr/oryx_drive_controller/src/nodes/oryx_drive_controller.cpp</location>
