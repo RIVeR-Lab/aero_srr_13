@@ -60,6 +60,8 @@ void ArcDriveController::drive(double velocity, double radius){
 	else{
 		ArcDriveController::calculateTankSteer(velocity, radius, wheelData);
 	}
+
+	//TODO: Implement sending of velocity/swerve messages to base platform
 }
 
 /**
@@ -72,6 +74,8 @@ void ArcDriveController::translate(double xVelocity, double yVelocity){
 	if(this->canSwerve){
 		ArcDriveController::calculateSwerveTranslate(xVelocity, yVelocity, wheelData);
 	}
+
+	//TODO: Implement sending of velocity/swerve messages to base platform
 }
 
 /**
