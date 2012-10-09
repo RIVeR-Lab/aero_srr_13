@@ -70,7 +70,7 @@ void LowLevelDriveController::drive(double velocity, double radius){
 void LowLevelDriveController::translate(double xVelocity, double yVelocity){
 	std::vector<double> wheelData;
 	if(this->canSwerve){
-		LowLevelDriveController::calculateSwerveTankSteer(xVelocity, yVelocity, wheelData);
+		LowLevelDriveController::calculateSwerveTranslate(xVelocity, yVelocity, wheelData);
 	}
 }
 
@@ -227,22 +227,19 @@ void LowLevelDriveController::calculateSwerveTranslate(double xVelocity, double 
 	ROS_DEBUG("Calculating Swerve Translate on Parameters <XV=%f, YV=%f>", xVelocity, xVelocity);
 	//Initialize the return vector (FL, FR, RL, RR, FLS, FRS, RLS, RRS)
 	result.resize(8);
-	double leftFrontWheelSpeed;
-	double rightFrontWheelSpeed;
-	double leftRearWheelSpeed;
-	double rightRearWheelSpeed;
-
-	double leftFrontSwerve;
-	double rightFrontSwerve;
-	double leftRearSwerve;
-	double rightRearSwerve;
-	//TODO Implement here
+	//Calculate the magnitude of the V vector, as this is the wheelspeeds
+	double velocity_magnitude	= std::sqrt(std::pow(xVelocity,2)+std::pow(yVelocity,2));
+	double swerve_angle			= std::atan2(yVelocity,xVelocity)/*+PI/2*/;
 
 	//Form wheel velocity vector
-	result.at(FRONT_LEFT)	= leftFrontWheelSpeed;
-	result.at(REAR_LEFT)	= leftRearWheelSpeed;
-	result.at(FRONT_RIGHT)	= rightFrontWheelSpeed;
-	result.at(REAR_RIGHT)	= rightRearWheelSpeed;
+	result.at(FRONT_LEFT)	= velocity_magnitude;
+	result.at(REAR_LEFT)	= velocity_magnitude;
+	result.at(FRONT_RIGHT)	= velocity_magnitude;
+	result.at(REAR_RIGHT)	= velocity_magnitude;
+	result.at(FRONT_LEFT+SWERVE_OFF)	= swerve_angle;
+	result.at(REAR_LEFT+SWERVE_OFF)		= swerve_angle;
+	result.at(FRONT_RIGHT+SWERVE_OFF)	= swerve_angle;
+	result.at(REAR_RIGHT+SWERVE_OFF)	= swerve_angle;
 	printWheelVectorCalculation(result);
 }
 
