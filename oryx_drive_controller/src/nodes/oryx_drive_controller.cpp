@@ -71,7 +71,12 @@ int main(int argc, char** argv)
 	TranslateControlServer t_server(t_action_topic);
 	LowLevelDriveController lld_controller(v_drive_topic, s_drive_topic, c_drive_topic, baseLength, baseWidth);
 	ROS_INFO("I'm Testing Stuff Now...");
-	lld_controller.drive(1,baseWidth/2.0);
+	ROS_INFO("Testing With Velocity = 1m/s, Radius = 5m");
+	lld_controller.setCanSwerve(false);
+	lld_controller.drive(1,5);
+	lld_controller.setCanSwerve(true);
+	lld_controller.drive(1,5);
+
 	ROS_INFO("Oryx Drive Controller Running!");
 	ros::spin();
 	return 0;
