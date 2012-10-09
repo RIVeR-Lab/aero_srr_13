@@ -38,6 +38,21 @@ public:
 					double baseWidth);
 	///Default destructor
 	virtual ~LowLevelDriveController();
+
+	/**
+	 * @brief Tells the controller to perform a velocity controlled arc-driving motion
+	 * @param velocity Linear velocity to maintain
+	 * @param radius Radius of the arc to traverse (float.MAX will result in a straight line)
+	 */
+	void drive(double velocity, double radius);
+
+	/**
+	 * @brief Tells the controller to perform a velocity controlled translate motion
+	 * @param xVelocity The X velocity to maintain (relative to robot)
+	 * @param xVelocity The Y velocity to maintain (relative to robot)
+	 */
+	void translate(double xVelocity, double yVelocity);
+
 private:
 	bool	canSwerve;				///Flag for signaling if swerve control is possible
 	double	baseLength;				///The length of the platform
@@ -50,25 +65,25 @@ private:
 	 * @brief Calculates the wheel velocities used for standard, non-swerve tank steering
 	 * @param velocity The linear velocity for traversing the arc
 	 * @param radius The radius of the arc to traverse
-	 * @return a std::vector of doubles containing the front-left, front-right, rear-left, rear-right wheel velocities in that order.
+	 * @param result Reference to a vector to write the result to, which will be  front-left, front-right, rear-left, rear-right wheel velocities in that order.
 	 */
-	std::vector<double> calculateTankSteer(double velocity, double radius);
+	void calculateTankSteer(double velocity, double radius, std::vector<double>& result);
 
 	/**
 	 * @brief Calculates the wheel velocities used for swerve-based tank steering
 	 * @param velocity
 	 * @param radius
-	 * @return a std::vector of doubles containing the front-left, front-right, rear-left, rear-right wheel velocities, followed by corresponding swerve positions, in that order.
+	 * @param result Reference to a vector to write the result to, which will be  front-left, front-right, rear-left, rear-right wheel velocities in that order.
 	 */
-	std::vector<double> calculateSwerveTankSteer(double velocity, double radius);
+	void calculateSwerveTankSteer(double velocity, double radius, std::vector<double>& result);
 
 	/**
 	 * @brief Calculates the wheel velocities and swerve positions to translate
 	 * @param xVelocity X Velocity to maintain during the translate
 	 * @param yVelocity Y Velocity to maintain during the translate
-	 * @return a std::vector of doubles containing the front-left, front-right, rear-left, rear-right wheel velocities, followed by corresponding swerve positions, in that order.
+	 * @param result Reference to a vector to write the result to, which will be  front-left, front-right, rear-left, rear-right wheel velocities in that order.
 	 */
-	std::vector<double> calculateSwerveTranslate(double xVelocity, double yVelocity);
+	void calculateSwerveTranslate(double xVelocity, double yVelocity, std::vector<double>& result);
 };
 
 #endif /* LOWLEVELDRIVECONTROLLER_H_ */
