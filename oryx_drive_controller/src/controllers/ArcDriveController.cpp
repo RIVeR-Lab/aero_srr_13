@@ -29,14 +29,16 @@ ArcDriveController::ArcDriveController(std::string drive_velocity_topic,
 	ROS_INFO("Starting Up Arc Drive Controller");
 	//TODO actually set up correct message publishing data
 	//Set up publisher to the DriveManager wheel velocity topic
-	this->velocity_pub = nh.advertise<std_msgs::String>(drive_velocity_topic.c_str(),2);
+	this->velocity_pub = nh.advertise<OryxMessages::WheelVelocities>(drive_velocity_topic.c_str(),2);
 	//Set up publisher to the DriveManager swerve control topic
-	this->swerve_pub = nh.advertise<std_msgs::String>(drive_swerve_topic.c_str(),2);
+	this->swerve_pub = nh.advertise<OryxMessages::SwervePositions>(drive_swerve_topic.c_str(),2);
 	//set up dimensional parameters
 	this->baseLength = baseLength;
 	this->baseWidth  = baseWidth;
 	this->canSwerve  = false;
 	ROS_DEBUG("Got a platform size of <L=%f,W=%f>",baseLength, baseWidth);
+
+	ArcDriveController::checkCapabilities();
 }
 
 ArcDriveController::~ArcDriveController() {
@@ -45,6 +47,10 @@ ArcDriveController::~ArcDriveController() {
 
 void ArcDriveController::setCanSwerve(bool canSwerve){
 	this->canSwerve = canSwerve;
+}
+
+void ArcDriveController::checkCapabilities(){
+
 }
 
 /**

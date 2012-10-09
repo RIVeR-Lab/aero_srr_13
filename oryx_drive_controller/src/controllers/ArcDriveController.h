@@ -9,7 +9,8 @@
 #define ARCDRIVECONTROLLER_H_
 
 #include <ros/ros.h>
-#include <std_msgs/String.h>
+#include <OryxMessages/WheelVelocities.h>
+#include <OryxMessages/SwervePositions.h>
 /**
  * @brief Low level velocity-arc based drive controller
  *
@@ -94,6 +95,11 @@ private:
 	 * @param result Reference to a vector to write the result to, which will be  front-left, front-right, rear-left, rear-right wheel velocities in that order.
 	 */
 	void calculateSwerveTranslate(double xVelocity, double yVelocity, std::vector<double>& result);
+
+	/**
+	 * Initializaiton function which checks if the platform can swerve
+	 */
+	void checkCapabilities();
 };
 
 #endif /* ARCDRIVECONTROLLER_H_ */
