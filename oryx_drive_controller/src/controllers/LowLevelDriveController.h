@@ -53,6 +53,12 @@ public:
 	 */
 	void translate(double xVelocity, double yVelocity);
 
+	/**
+	 * Tells the controller whether the platform is swerve capable or not
+	 * @param canSwerve TRUE for swerve, else FALSE
+	 */
+	void setCanSwerve(bool canSwerve);
+
 private:
 	bool	canSwerve;				///Flag for signaling if swerve control is possible
 	double	baseLength;				///The length of the platform
