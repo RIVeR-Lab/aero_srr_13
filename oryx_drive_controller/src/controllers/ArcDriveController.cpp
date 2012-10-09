@@ -60,6 +60,8 @@ void ArcDriveController::checkCapabilities(){
  */
 void ArcDriveController::drive(double velocity, double radius){
 	std::vector<double> wheelData(8);
+	OryxMessages::WheelVelocities velocityMessage;
+	OryxMessages::SwervePositions swerveMessage;
 	if(this->canSwerve){
 		ArcDriveController::calculateSwerveTankSteer(velocity, radius, wheelData);
 	}
@@ -67,7 +69,22 @@ void ArcDriveController::drive(double velocity, double radius){
 		ArcDriveController::calculateTankSteer(velocity, radius, wheelData);
 	}
 
-	//TODO: Implement sending of velocity/swerve messages to base platform
+	//Build wheel velocity message
+	velocityMessage.left_front_wheel	= wheelData.at(FRONT_LEFT);
+	velocityMessage.left_rear_wheel		= wheelData.at(REAR_RIGHT);
+	velocityMessage.right_front_wheel	= wheelData.at(FRONT_LEFT);
+	velocityMessage.right_rear_wheel	= wheelData.at(REAR_RIGHT);
+
+	this->velocity_pub.publish(velocityMessage);
+	//Build swerve position message if needed
+	if(wheelData.size()>SWERVE_OFF){
+		swerveMessage.left_front_wheel	= wheelData.at(FRONT_LEFT+SWERVE_OFF);
+		swerveMessage.left_rear_wheel	= wheelData.at(REAR_RIGHT+SWERVE_OFF);
+		swerveMessage.right_front_wheel	= wheelData.at(FRONT_LEFT+SWERVE_OFF);
+		swerveMessage.right_rear_wheel	= wheelData.at(REAR_RIGHT+SWERVE_OFF);
+
+		this->swerve_pub.publish(swerveMessage);
+	}
 }
 
 /**
