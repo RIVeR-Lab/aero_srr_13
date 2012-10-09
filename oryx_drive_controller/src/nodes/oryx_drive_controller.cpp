@@ -70,6 +70,8 @@ int main(int argc, char** argv)
 	VelocityControlServer v_server(v_action_topic);
 	TranslateControlServer t_server(t_action_topic);
 	LowLevelDriveController lld_controller(v_drive_topic, s_drive_topic, c_drive_topic, baseLength, baseWidth);
+	ROS_INFO("I'm Testing Stuff Now...");
+	lld_controller.drive(1,baseWidth/2.0);
 	ROS_INFO("Oryx Drive Controller Running!");
 	ros::spin();
 	return 0;
