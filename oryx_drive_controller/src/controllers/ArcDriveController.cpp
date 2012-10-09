@@ -79,9 +79,11 @@ void ArcDriveController::translate(double xVelocity, double yVelocity){
 	std::vector<double> wheelData;
 	if(this->canSwerve){
 		ArcDriveController::calculateSwerveTranslate(xVelocity, yVelocity, wheelData);
+		ArcDriveController::sendMessages(wheelData);
 	}
-
-	ArcDriveController::sendMessages(wheelData);
+	else{
+		ROS_WARN("Received Translate Command but Swerve Not Supported!");
+	}
 }
 
 /**
