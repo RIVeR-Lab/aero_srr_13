@@ -30,13 +30,15 @@
  */
 int main(int argc, char** argv)
 {
-	std::string v_action_topic;	///String containing the topic name for velocity commands
-	std::string t_action_topic;	///String containing the topic name for translate commands
-	std::string v_drive_topic;	///String containing the topic name for sending wheel velocities to the DriveManager node
-	std::string s_drive_topic;	///String containing the topic name for sending swerve positions to the DriveManager node
-	std::string c_drive_topic;	///String containing the topic name for polling the DriveManager node on its capabilities
-	double baseWidth = .36;			///width of the platform (the default value is overwritten if the appropriate param is set)
-	double baseLength = .39;		///length of the platform (the default value is overwritten if the appropriate param is set)
+	std::string v_action_topic("velocity_command_topic");	///String containing the topic name for velocity commands
+	std::string t_action_topic("translate_command_topic");	///String containing the topic name for translate commands
+	std::string v_drive_topic("drive_velocity_topic");		///String containing the topic name for sending wheel velocities to the DriveManager node
+	std::string s_drive_topic("drive_swerve_topic");		///String containing the topic name for sending swerve positions to the DriveManager node
+	std::string c_drive_topic("drive_capability_topic");	///String containing the topic name for polling the DriveManager node on its capabilities
+	std::string b_length("base_length");		///String containing the parameter name for baseLength
+	std::string b_width("base_width");			///String containing the parameter name for baseWidth
+	double baseWidth = .36;						///width of the platform (the default value is overwritten if the appropriate param is set)
+	double baseLength = .39;					///length of the platform (the default value is overwritten if the appropriate param is set)
 
 	//Initialize the node
 	ros::init(argc, argv, "oryx_drive_controller");
@@ -48,14 +50,14 @@ int main(int argc, char** argv)
 		ROS_INFO("Usage: oryx_drive_controller velocity_command_topic translate_command_topic drive_velocity_topic drive_swerve_topic drive_capability_topic");
 		return 1;
 	}else{
-		//Grab the topic parameters
-		param_nh.getParam("velocity_command_topic",		v_action_topic);
-		param_nh.getParam("translate_command_topic",	t_action_topic);
-		param_nh.getParam("drive_velocity_topic",		v_drive_topic);
-		param_nh.getParam("drive_swerve_topic",			s_drive_topic);
-		param_nh.getParam("drive_capability_topic",		c_drive_topic);
-		param_nh.getParam("base_length",				baseLength);
-		param_nh.getParam("base_width",					baseWidth);
+		//Grab the topic parameters, print warnings if using default values
+		if(!param_nh.getParam(v_action_topic,	v_action_topic))ROS_WARN("Parameter <%s> Not Set. Using Default Velocity Command Action Topic <%s>!", v_action_topic.c_str(), v_action_topic.c_str());
+		if(!param_nh.getParam(t_action_topic,	t_action_topic))ROS_WARN("Parameter <%s> Not Set. Using Default Translate Command Action Topic <%s>!", t_action_topic.c_str(), t_action_topic.c_str());
+		if(!param_nh.getParam(v_drive_topic,	v_drive_topic))	ROS_WARN("Parameter <%s> Not Set. Using Default Wheel Velocity Topic <%s>!", v_drive_topic.c_str(), v_drive_topic.c_str());
+		if(!param_nh.getParam(s_drive_topic,	s_drive_topic))	ROS_WARN("Parameter <%s> Not Set. Using Default Swerve Position Topic <%s>!", s_drive_topic.c_str(), s_drive_topic.c_str());
+		if(!param_nh.getParam(c_drive_topic,	c_drive_topic))	ROS_WARN("Parameter <%s> Not Set. Using Default Platform Capability Topic <%s>!", c_drive_topic.c_str(), c_drive_topic.c_str());
+		if(!param_nh.getParam(b_length,			baseLength))	ROS_WARN("Parameter <%s> Not Set. Using Default Base Length <%d>!", b_length.c_str(), baseLength);
+		if(!param_nh.getParam(b_width,			baseWidth))		ROS_WARN("Parameter <%s> Not Set. Using Default Base Length <%d>!", b_width.c_str(), baseWidth);
 	}
 
 	//Print out recieved topics
