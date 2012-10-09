@@ -100,6 +100,12 @@ private:
 	 * Initializaiton function which checks if the platform can swerve
 	 */
 	void checkCapabilities();
+
+	/**
+	 * Sends the wheel data to the DriveManager
+	 * @param wheelData vector containg wheel velocities and swerve positions
+	 */
+	void sendMessages(std::vector<double>& wheelData);
 };
 
 #endif /* ARCDRIVECONTROLLER_H_ */

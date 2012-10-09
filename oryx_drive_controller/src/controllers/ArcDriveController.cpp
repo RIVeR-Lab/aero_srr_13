@@ -60,8 +60,6 @@ void ArcDriveController::checkCapabilities(){
  */
 void ArcDriveController::drive(double velocity, double radius){
 	std::vector<double> wheelData(8);
-	OryxMessages::WheelVelocities velocityMessage;
-	OryxMessages::SwervePositions swerveMessage;
 	if(this->canSwerve){
 		ArcDriveController::calculateSwerveTankSteer(velocity, radius, wheelData);
 	}
@@ -69,6 +67,29 @@ void ArcDriveController::drive(double velocity, double radius){
 		ArcDriveController::calculateTankSteer(velocity, radius, wheelData);
 	}
 
+	ArcDriveController::sendMessages(wheelData);
+}
+
+/**
+ * Tells the base platform to perform a linear translation motion along a given x/y velocity vector. Will fail if swerve is
+ * not supported by the base platform.
+ *
+ */
+void ArcDriveController::translate(double xVelocity, double yVelocity){
+	std::vector<double> wheelData;
+	if(this->canSwerve){
+		ArcDriveController::calculateSwerveTranslate(xVelocity, yVelocity, wheelData);
+	}
+
+	ArcDriveController::sendMessages(wheelData);
+}
+
+/**
+ * Performs the actual work of publishing WheelVelocites and SwervePositions messages to DriveManager
+ */
+void ArcDriveController::sendMessages(std::vector<double>& wheelData){
+	OryxMessages::WheelVelocities velocityMessage;
+	OryxMessages::SwervePositions swerveMessage;
 	//Build wheel velocity message
 	velocityMessage.left_front_wheel	= wheelData.at(FRONT_LEFT);
 	velocityMessage.left_rear_wheel		= wheelData.at(REAR_RIGHT);
@@ -85,20 +106,6 @@ void ArcDriveController::drive(double velocity, double radius){
 
 		this->swerve_pub.publish(swerveMessage);
 	}
-}
-
-/**
- * Tells the base platform to perform a linear translation motion along a given x/y velocity vector. Will fail if swerve is
- * not supported by the base platform.
- *
- */
-void ArcDriveController::translate(double xVelocity, double yVelocity){
-	std::vector<double> wheelData;
-	if(this->canSwerve){
-		ArcDriveController::calculateSwerveTranslate(xVelocity, yVelocity, wheelData);
-	}
-
-	//TODO: Implement sending of velocity/swerve messages to base platform
 }
 
 /**
