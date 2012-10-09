@@ -43,6 +43,8 @@ public:
 	 * @brief Tells the controller to perform a velocity controlled arc-driving motion
 	 * @param velocity Linear velocity to maintain
 	 * @param radius Radius of the arc to traverse (float.MAX will result in a straight line)
+	 * Note that the controller assumes that right-handed radii are positive. It also assumes that the robot frame is aligned
+	 * such that the +X axis is in the center-forward position.
 	 */
 	void drive(double velocity, double radius);
 
@@ -50,6 +52,8 @@ public:
 	 * @brief Tells the controller to perform a velocity controlled translate motion
 	 * @param xVelocity The X velocity to maintain (relative to robot)
 	 * @param xVelocity The Y velocity to maintain (relative to robot)
+	 * Note that the controller assumes that right-handed radii are positive. It also assumes that the robot frame is aligned
+	 * such that the +X axis is in the center-forward position.
 	 */
 	void translate(double xVelocity, double yVelocity);
 
