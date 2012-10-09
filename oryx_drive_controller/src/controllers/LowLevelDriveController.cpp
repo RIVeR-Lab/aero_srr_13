@@ -47,6 +47,11 @@ void LowLevelDriveController::setCanSwerve(bool canSwerve){
 	this->canSwerve = canSwerve;
 }
 
+/**
+ * Tells the base platform to drive along a given arc with a given tangential velocity. The platform will turn using swerve
+ * automatically if swerve is supported.
+ *
+ */
 void LowLevelDriveController::drive(double velocity, double radius){
 	std::vector<double> wheelData(8);
 	if(this->canSwerve){
@@ -57,6 +62,11 @@ void LowLevelDriveController::drive(double velocity, double radius){
 	}
 }
 
+/**
+ * Tells the base platform to perform a linear translation motion along a given x/y velocity vector. Will fail if swerve is
+ * not supported by the base platform.
+ *
+ */
 void LowLevelDriveController::translate(double xVelocity, double yVelocity){
 	std::vector<double> wheelData;
 	if(this->canSwerve){
@@ -210,6 +220,9 @@ void LowLevelDriveController::calculateSwerveTankSteer(double velocity, double r
 	printWheelVectorCalculation(result);
 }
 
+/**
+ * Calculates the swerve positions and wheel velocities for the base platform using the following equations:
+ */
 void LowLevelDriveController::calculateSwerveTranslate(double xVelocity, double yVelocity, std::vector<double>& result){
 	ROS_DEBUG("Calculating Swerve Translate on Parameters <XV=%f, YV=%f>", xVelocity, xVelocity);
 	//Initialize the return vector (FL, FR, RL, RR, FLS, FRS, RLS, RRS)
