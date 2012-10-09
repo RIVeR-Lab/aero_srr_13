@@ -35,8 +35,8 @@ int main(int argc, char** argv)
 	std::string v_drive_topic;	///String containing the topic name for sending wheel velocities to the DriveManager node
 	std::string s_drive_topic;	///String containing the topic name for sending swerve positions to the DriveManager node
 	std::string c_drive_topic;	///String containing the topic name for polling the DriveManager node on its capabilities
-	double baseWidth;			///width of the platform
-	double baseLength;			///length of the platform
+	double baseWidth = .36;			///width of the platform (the default value is overwritten if the appropriate param is set)
+	double baseLength = .39;		///length of the platform (the default value is overwritten if the appropriate param is set)
 
 	//Initialize the node
 	ros::init(argc, argv, "oryx_drive_controller");
