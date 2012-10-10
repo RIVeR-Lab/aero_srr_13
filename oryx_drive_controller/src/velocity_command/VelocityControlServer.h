@@ -21,7 +21,7 @@ public:
 	 * @param ctrl_velocity_topic	String representing the intra-processes topic name to communicate velocity-arc with the controller
 	 */
 	VelocityControlServer(std::string action_name, std::string ctrl_velocity_topic);
-
+	virtual ~VelocityControlServer();
 private:
 	/**
 	 * Callback for executing a new velocity command
