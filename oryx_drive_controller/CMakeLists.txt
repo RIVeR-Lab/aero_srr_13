@@ -83,4 +83,6 @@ rosbuild_add_library(${PROJECT_NAME} src/controllers/ArcDriveController.cpp)
 
 #Build Nodes
 rosbuild_add_executable(oryx_drive_controller src/nodes/oryx_drive_controller.cpp)
+rosbuild_add_executable(oryx_drive_controller_test src/nodes/oryx_drive_controller_action_tests.cpp)
 rosbuild_link_boost(oryx_drive_controller thread)
+rosbuild_link_boost(oryx_drive_controller_test thread)

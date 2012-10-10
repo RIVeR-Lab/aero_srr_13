@@ -12,6 +12,8 @@
 	<arg name="base_length"				default=".36"/>
 	<arg name="base_width"				default=".39"/>
 	
+	<!-- Test Enable Argument -->
+	<arg name="controller_test"			default="false"/>
 	
 	<!-- Launch Nodes -->
 	<node name="oryx_drive_controller" pkg="oryx_drive_controller" type="oryx_drive_controller" output="screen">
@@ -22,4 +24,12 @@
 		<param name="base_length"				type="double"	value="$(arg base_length)" />
 		<param name="base_width"				type="double"	value="$(arg base_width)" />
 	</node>
+	
+	<!-- If test is set, launch test node -->
+	<group if="$(arg controller_test)">
+  		<node name="oryx_drive_controller_test" pkg="oryx_drive_controller" type="oryx_drive_controller_test" output="screen">
+  			<param name="velocity_command_topic"	type="str"	value="$(arg velocity_topic)" />
+			<param name="translate_command_topic"	type="str"	value="$(arg translate_topic)" />
+  		</node>
+	</group>
 </launch>
