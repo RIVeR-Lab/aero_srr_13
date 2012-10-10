@@ -16,6 +16,10 @@ action_name(action_name){
 	this->vel_pub = this->n.advertise<oryx_drive_controller::VelocityArc>(ctrl_velocity_topic, 2);
 }
 
+/**
+ * Currently, all this does is pipe the received goal directly to the ArcDriveController. At some point it should do some
+ * more advanced processing and feedback development
+ */
 void VelocityControlServer::executeCB(const oryx_drive_controller::VelocityCommandGoalConstPtr& goal){
 	ROS_INFO("Got Goal <R=%f, V=%f> on <%s>", goal->radius,goal->velocity, this->action_name.c_str());
 
