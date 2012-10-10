@@ -35,6 +35,8 @@ int main(int argc, char** argv)
 	std::string v_drive_topic("drive_velocity_topic");		///String containing the topic name for sending wheel velocities to the DriveManager node
 	std::string s_drive_topic("drive_swerve_topic");		///String containing the topic name for sending swerve positions to the DriveManager node
 	std::string c_drive_topic("drive_capability_topic");	///String containing the topic name for polling the DriveManager node on its capabilities
+	std::string ip_v_arc_topic("ip_v_arc_topic");			///String containing the topic name for intra-processes VelocityArc message publishing
+	std::string ip_t_arc_topic("ip_t_arc_topic");			///String containing the topic name for intra-processes VelocityTranslate message publishing
 	std::string b_length("base_length");		///String containing the parameter name for baseLength
 	std::string b_width("base_width");			///String containing the parameter name for baseWidth
 	double baseWidth = .36;						///width of the platform (the default value is overwritten if the appropriate param is set)
@@ -56,8 +58,8 @@ int main(int argc, char** argv)
 		if(!param_nh.getParam(v_drive_topic,	v_drive_topic))	ROS_WARN("Parameter <%s> Not Set. Using Default Wheel Velocity Topic <%s>!", v_drive_topic.c_str(), v_drive_topic.c_str());
 		if(!param_nh.getParam(s_drive_topic,	s_drive_topic))	ROS_WARN("Parameter <%s> Not Set. Using Default Swerve Position Topic <%s>!", s_drive_topic.c_str(), s_drive_topic.c_str());
 		if(!param_nh.getParam(c_drive_topic,	c_drive_topic))	ROS_WARN("Parameter <%s> Not Set. Using Default Platform Capability Topic <%s>!", c_drive_topic.c_str(), c_drive_topic.c_str());
-		if(!param_nh.getParam(b_length,			baseLength))	ROS_WARN("Parameter <%s> Not Set. Using Default Base Length <%d>!", b_length.c_str(), baseLength);
-		if(!param_nh.getParam(b_width,			baseWidth))		ROS_WARN("Parameter <%s> Not Set. Using Default Base Length <%d>!", b_width.c_str(), baseWidth);
+		if(!param_nh.getParam(b_length,			baseLength))	ROS_WARN("Parameter <%s> Not Set. Using Default Base Length <%f>!", b_length.c_str(), baseLength);
+		if(!param_nh.getParam(b_width,			baseWidth))		ROS_WARN("Parameter <%s> Not Set. Using Default Base Length <%f>!", b_width.c_str(), baseWidth);
 	}
 
 	//Print out recieved topics
@@ -67,11 +69,11 @@ int main(int argc, char** argv)
 	ROS_DEBUG("Got DriveManager Swerve Topic Name: <%s>",	s_drive_topic.c_str());
 	ROS_DEBUG("Got DriveManager Capability Topic Name: <%s>",	c_drive_topic.c_str());
 
-	//Spawn the servers
+	//Spawn the servers. They will act as nodelits to each other, and use intra-process publishing
 	ROS_INFO("Starting Up Oryx Drive Controller...");
-	VelocityControlServer v_server(v_action_topic);
-	TranslateControlServer t_server(t_action_topic);
-	ArcDriveController lld_controller(v_drive_topic, s_drive_topic, c_drive_topic, baseLength, baseWidth);
+	VelocityControlServer v_server(v_action_topic, ip_v_arc_topic);
+	TranslateControlServer t_server(t_action_topic, ip_t_arc_topic);
+	ArcDriveController lld_controller(v_drive_topic, s_drive_topic, c_drive_topic, ip_v_arc_topic, ip_t_arc_topic, baseLength, baseWidth);
 	ROS_INFO("I'm Testing Stuff Now...");
 	ROS_INFO("Testing Steer With Velocity = 1m/s, Radius = 5m");
 	lld_controller.setCanSwerve(false);

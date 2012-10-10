@@ -11,6 +11,8 @@
 #include <ros/ros.h>
 #include <OryxMessages/WheelVelocities.h>
 #include <OryxMessages/SwervePositions.h>
+#include <oryx_drive_controller/VelocityArc.h>
+#include <oryx_drive_controller/VelocityTranslate.h>
 /**
  * @brief Low level velocity-arc based drive controller
  *
@@ -29,12 +31,16 @@ public:
 	 * @param drive_velocity_topic		The topic name to publish wheel velocity messages to
 	 * @param drive_swerve_topic		The topic name to publish swerve position messages to
 	 * @param drive_capabilities_topic	The topic name to poll for DriveManager capabilities
+	 * @param ctrl_velocity_topic		String representing the intra-processes topic name to communicate velocity-arc with the controller
+	 * @param ctrl_translate_topic		String representing the intra-processes topic name to communicate velocity-translate with the controller
 	 * @param baseLength				The length of the base platform from front wheel center to rear wheel center
 	 * @param baseWidth					The width of the base platform from left wheel center to right wheel center
 	 */
 	ArcDriveController(std::string drive_velocity_topic,
 					std::string drive_swerve_topic,
 					std::string drive_capabilities_topic,
+					std::string ctrl_velocity_topic,
+					std::string ctrl_translate_topic,
 					double baseLength,
 					double baseWidth);
 	///Default destructor
@@ -71,6 +77,8 @@ private:
 	ros::NodeHandle nh;				///Node handle into the ROS system
 	ros::Publisher velocity_pub;	///Publisher for sending velocity messages to DriveManager
 	ros::Publisher swerve_pub;		///Publisher for sending swerve message to DriveManager
+	ros::Subscriber vel_sub;		///Subscriber to the intra-process VelocityArc message
+	ros::Subscriber tans_sub;		///Subscriber to the intra-process VelocityTranslate message
 
 	/**
 	 * @brief Calculates the wheel velocities used for standard, non-swerve tank steering
@@ -106,6 +114,18 @@ private:
 	 * @param wheelData vector containg wheel velocities and swerve positions
 	 */
 	void sendMessages(std::vector<double>& wheelData);
+
+	/**
+	 * Callback for processing the intra-process VelocityArc messages
+	 * @param msg VelocityArc message received
+	 */
+	void processIPVelCB(const oryx_drive_controller::VelocityArcConstPtr& msg);
+
+	/**
+	 * Callback for processing the intra-process VelocityTranslate messages
+	 * @param msg VelocityTranslate message received
+	 */
+	void processIPTransCB(const oryx_drive_controller::VelocityTranslateConstPtr& msg);
 };
 
 #endif /* ARCDRIVECONTROLLER_H_ */

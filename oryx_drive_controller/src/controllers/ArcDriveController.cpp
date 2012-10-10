@@ -24,14 +24,23 @@ void printWheelVectorCalculation(std::vector<double>& wheelData);
 ArcDriveController::ArcDriveController(std::string drive_velocity_topic,
 		std::string drive_swerve_topic,
 		std::string drive_capabilities_topic,
+		std::string ctrl_velocity_topic,
+		std::string ctrl_translate_topic,
 		double baseLength,
 		double baseWidth) {
 	ROS_INFO("Starting Up Arc Drive Controller");
-	//TODO actually set up correct message publishing data
+
 	//Set up publisher to the DriveManager wheel velocity topic
-	this->velocity_pub = nh.advertise<OryxMessages::WheelVelocities>(drive_velocity_topic.c_str(),2);
+	this->velocity_pub	= nh.advertise<OryxMessages::WheelVelocities>(drive_velocity_topic.c_str(),2);
 	//Set up publisher to the DriveManager swerve control topic
-	this->swerve_pub = nh.advertise<OryxMessages::SwervePositions>(drive_swerve_topic.c_str(),2);
+	this->swerve_pub	= nh.advertise<OryxMessages::SwervePositions>(drive_swerve_topic.c_str(),2);
+	//Set up subscriber to the intra-process VelocityArc message
+	this->vel_sub		= nh.subscribe(ctrl_velocity_topic, 2, &ArcDriveController::processIPVelCB, this);
+
+	//Set up subscriber to the intra-process VelocityTranslate message
+	this->tans_sub		= nh.subscribe(ctrl_translate_topic, 2, &ArcDriveController::processIPTransCB, this);
+
+
 	//set up dimensional parameters
 	this->baseLength = baseLength;
 	this->baseWidth  = baseWidth;
@@ -277,6 +286,14 @@ void ArcDriveController::calculateSwerveTranslate(double xVelocity, double yVelo
 	result.at(FRONT_RIGHT+SWERVE_OFF)	= swerve_angle;
 	result.at(REAR_RIGHT+SWERVE_OFF)	= swerve_angle;
 	printWheelVectorCalculation(result);
+}
+
+void ArcDriveController::processIPVelCB(const oryx_drive_controller::VelocityArcConstPtr& msg){
+
+}
+
+void ArcDriveController::processIPTransCB(const oryx_drive_controller::VelocityTranslateConstPtr& msg){
+
 }
 
 /**

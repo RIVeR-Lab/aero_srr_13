@@ -7,10 +7,13 @@
 
 #include "VelocityControlServer.h"
 
-VelocityControlServer::VelocityControlServer(std::string action_name):
+VelocityControlServer::VelocityControlServer(std::string action_name,std::string ctrl_velocity_topic):
 as(n, action_name, boost::bind(&VelocityControlServer::executeCB, this, _1), false),
 action_name(action_name){
 	ROS_INFO("Starting Up Velocity Command Server on <%s>", this->action_name.c_str());
+
+	//Advertise publishing to the controller's topics
+	this->vel_pub = this->n.advertise<oryx_drive_controller::VelocityArc>(ctrl_velocity_topic, 2);
 }
 
 void VelocityControlServer::executeCB(const oryx_drive_controller::VelocityCommandGoalConstPtr& goal){
