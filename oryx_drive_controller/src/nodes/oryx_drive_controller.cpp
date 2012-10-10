@@ -39,8 +39,10 @@ int main(int argc, char** argv)
 	std::string ip_t_arc_topic("ip_t_arc_topic");			///String containing the topic name for intra-processes VelocityTranslate message publishing
 	std::string b_length("base_length");		///String containing the parameter name for baseLength
 	std::string b_width("base_width");			///String containing the parameter name for baseWidth
-	double baseWidth = .36;						///width of the platform (the default value is overwritten if the appropriate param is set)
-	double baseLength = .39;					///length of the platform (the default value is overwritten if the appropriate param is set)
+	std::string	can_swerve("swerve_capable");	///path to the swerve capability parameter
+	double	baseWidth 	= .36;					///width of the platform (the default value is overwritten if the appropriate param is set)
+	double	baseLength	= .39;					///length of the platform (the default value is overwritten if the appropriate param is set)
+	bool	canSwerve	= false;				///Swerve capability
 
 	//Initialize the node
 	ros::init(argc, argv, "oryx_drive_controller");
@@ -60,6 +62,7 @@ int main(int argc, char** argv)
 		if(!param_nh.getParam(c_drive_topic,	c_drive_topic))	ROS_WARN("Parameter <%s> Not Set. Using Default Platform Capability Topic <%s>!", c_drive_topic.c_str(), c_drive_topic.c_str());
 		if(!param_nh.getParam(b_length,			baseLength))	ROS_WARN("Parameter <%s> Not Set. Using Default Base Length <%f>!", b_length.c_str(), baseLength);
 		if(!param_nh.getParam(b_width,			baseWidth))		ROS_WARN("Parameter <%s> Not Set. Using Default Base Length <%f>!", b_width.c_str(), baseWidth);
+		if(!param_nh.getParam(can_swerve,		canSwerve))		ROS_WARN("Parameter <%s> Not Set. Using Default Value <%s>!", can_swerve.c_str(), ((canSwerve)?"true":"false"));
 	}
 
 	//Print out recieved topics
@@ -74,6 +77,7 @@ int main(int argc, char** argv)
 	VelocityControlServer v_server(v_action_topic, ip_v_arc_topic);
 	TranslateControlServer t_server(t_action_topic, ip_t_arc_topic);
 	ArcDriveController lld_controller(v_drive_topic, s_drive_topic, c_drive_topic, ip_v_arc_topic, ip_t_arc_topic, baseLength, baseWidth);
+	lld_controller.setCanSwerve(canSwerve);
 
 	/*	ROS_INFO("I'm Testing Stuff Now...");
 	ROS_INFO("Testing Steer With Velocity = 1m/s, Radius = 5m");
