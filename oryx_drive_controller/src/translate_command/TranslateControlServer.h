@@ -15,6 +15,11 @@
 
 class TranslateControlServer {
 public:
+	/**
+	 *
+	 * @param action_name			String representing the name of the action topic to communicate on
+	 * @param ctrl_translate_topic	String representing the intra-processes topic name to communicate velocity-translate with the controller
+	 */
 	TranslateControlServer(std::string action_name,  std::string ctrl_translate_topic);
 	virtual ~TranslateControlServer();
 

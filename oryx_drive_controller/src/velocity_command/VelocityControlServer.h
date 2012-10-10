@@ -19,7 +19,6 @@ public:
 	 * Constructor for creating a new VelocityControlServer
 	 * @param action_name			String representing the name of the action topic to communicate on
 	 * @param ctrl_velocity_topic	String representing the intra-processes topic name to communicate velocity-arc with the controller
-	 * @param ctrl_translate_topic	String representing the intra-processes topic name to communicate velocity-translate with the controller
 	 */
 	VelocityControlServer(std::string action_name, std::string ctrl_velocity_topic);
 
