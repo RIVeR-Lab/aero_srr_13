@@ -288,12 +288,18 @@ void ArcDriveController::calculateSwerveTranslate(double xVelocity, double yVelo
 	printWheelVectorCalculation(result);
 }
 
+/**
+ * Passes the message variables to the drive method for processing
+ */
 void ArcDriveController::processIPVelCB(const oryx_drive_controller::VelocityArcConstPtr& msg){
-
+	this->drive(msg->velocity, msg->radius);
 }
 
+/**
+ * Passes the message variables to the translate method for processing
+ */
 void ArcDriveController::processIPTransCB(const oryx_drive_controller::VelocityTranslateConstPtr& msg){
-
+	this->translate(msg->x_velocity, msg->y_velocity);
 }
 
 /**
