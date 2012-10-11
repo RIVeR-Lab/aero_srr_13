@@ -9,7 +9,7 @@
 
 namespace oryx_path_planner{
 
-TentacleGenerator::TentacleGenerator(int numTentacles, double expFact, std::vector<double>& speedSets):
+TentacleGenerator::TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<double>& speedSets):
 		speedSets(speedSets.size()){
 	this->expFact 		= expFact;
 	this->numTentacles	= numTentacles;

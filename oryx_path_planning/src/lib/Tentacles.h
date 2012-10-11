@@ -111,9 +111,12 @@ public:
 	 * @brief Generates a set of tentacles for each speed set
 	 * @param numTentacles	The number of tentacles in each speed set
 	 * @param expFact		The exponential factor used to determine radius for each tentacle
+	 * @param resolution	The resolution of the occupancy grid that the tentacles will be overlaid on
+	 * @param xDim			The length of the x-axis of the occupancy grid, in the positive x-direction and of the same units as resolution
+	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 * @param speedSets		A reference to a vector containing pairs in the format pair.a = seed_radius pair.b = velocity
 	 */
-	TentacleGenerator(int numTentacles, double expFact, std::vector<double>& speedSets);
+	TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<double>& speedSets);
 	virtual ~TentacleGenerator();
 
 	/**
