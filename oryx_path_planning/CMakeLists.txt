@@ -63,3 +63,9 @@ configure_file (
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/src/nodes")
 include_directories("${PROJECT_SOURCE_DIR}/src/lib")
+
+#include boost directories
+rosbuild_add_boost_directories()
+
+#build libraries
+rosbuild_add_library(${PROJECT_NAME} src/lib/TentacleGenerator.cpp)
