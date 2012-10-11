@@ -7,6 +7,12 @@
 
 #include "Tentacles.h"
 
+#if oryx_path_planner_VERBOSITY
+#define PRINTER ROS_INFO
+#else
+#define PRINTER ROS_DEBUG
+#endif
+
 namespace oryx_path_planner{
 //***************************** TENTACLE *********************************//
 /**
@@ -16,9 +22,8 @@ Tentacle::Tentacle(){
 }
 
 Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity){
-#if oryx_path_planner_VERBOSITY
-	ROS_INFO("Generating Tentacle %d", index);
-#endif
+
+	PRINTER("Generating Tentacle %d", index);
 
 }
 
@@ -30,8 +35,8 @@ SpeedSet::SpeedSet(){
 }
 
 SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolution, double xDim, double yDim, double velocity){
-	ROS_INFO("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
-	for(unsigned int t=0; t<numTent; t++){
+	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
+	for(int t=0; t<numTent; t++){
 		this->tentacles.push_back(oryx_path_planner::Tentacle(expFact, seedRad, t, numTent, resolution, xDim, yDim, velocity));
 	}
 }
