@@ -9,7 +9,7 @@
 #define TENTACLE_H_
 
 #include<ros/ros.h>
-
+#include"OryxPathPlannerConfig.h"
 namespace oryx_path_planner{
 
 /**
@@ -23,6 +23,7 @@ struct pair{
 };
 
 class Tentacle{
+public:
 	/**
 	 * @author	Adam Panzics
 	 * @brief	Default constructor for creating an uninitialized Tentacle

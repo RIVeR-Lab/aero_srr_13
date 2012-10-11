@@ -9,18 +9,28 @@
 
 namespace oryx_path_planner{
 //***************************** TENTACLE *********************************//
+/**
+ * This constructor just makes an empty tentacle
+ */
+Tentacle::Tentacle(){
+}
+
+Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity){
+#if oryx_path_planner_VERBOSITY
+	ROS_INFO("Generating Tentacle %d", index);
+#endif
+
+}
 
 //***************************** SPEED SET *********************************//
 /**
  * This constructor just makes an empty set of tentacles
  */
 SpeedSet::SpeedSet(){
-	this->tentacles();
 }
 
 SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolution, double xDim, double yDim, double velocity){
-	ROS_INFO("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>");
-	this->tentacles();
+	ROS_INFO("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(unsigned int t=0; t<numTent; t++){
 		this->tentacles.push_back(oryx_path_planner::Tentacle(expFact, seedRad, t, numTent, resolution, xDim, yDim, velocity));
 	}
@@ -29,11 +39,12 @@ SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolutio
 oryx_path_planner::Tentacle& SpeedSet::getTentacle(int index){
 	return this->tentacles.at(index);
 }
+
+
 //***************************** TENTACLE GENERATOR *********************************//
 TentacleGenerator::TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<pair<double> >& speedSets){
 	this->expFact 		= expFact;
 	this->numTentacles	= numTentacles;
-	this->speedSets();
 	ROS_INFO("Generating Speed Sets...");
 	//Generate the SpeedSets
 	for(unsigned int v=0; v<speedSets.size(); v++){
