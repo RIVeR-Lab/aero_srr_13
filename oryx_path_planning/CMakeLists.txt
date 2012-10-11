@@ -28,3 +28,38 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+
+#Get the current date
+MACRO (TODAY RESULT) 
+    IF (WIN32) 
+        EXECUTE_PROCESS(COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE ${RESULT}) 
+        string(REGEX REPLACE "(..)/(..)/..(..).*" "\\1\\2\\3" ${RESULT} ${${RESULT}}) 
+    ELSEIF(UNIX) 
+        EXECUTE_PROCESS(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE ${RESULT}) 
+        string(REGEX REPLACE "(..)/(..)/..(..).*" "\\1\\2\\3" ${RESULT} ${${RESULT}}) 
+    ELSE (WIN32) 
+        MESSAGE(SEND_ERROR "date not implemented") 
+        SET(${RESULT} 000000) 
+    ENDIF (WIN32) 
+ENDMACRO (TODAY) 
+
+TODAY(RESULT) 
+message(STATUS "Compilation date = ${RESULT}") 
+
+# The version number.
+set (oryx_path_planner_VERSION_MAJOR 0)
+set (oryx_path_planner_VERSION_MINOR 0)
+set (oryx_path_planner_VERSION_BUILD ${RESULT})
+
+# configure a header file to pass some of the CMake settings
+# to the source code to use as build-time configuration parameters
+configure_file (
+  "${PROJECT_SOURCE_DIR}/src/OryxPathPlannerConfig.h.in"
+  "${PROJECT_BINARY_DIR}/OryxPathPlannerConfig.h"
+  )
+
+#Link all source folders so that Headers will be properly found
+include_directories("${PROJECT_BINARY_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}/src/nodes")
+include_directories("${PROJECT_SOURCE_DIR}/src/lib")

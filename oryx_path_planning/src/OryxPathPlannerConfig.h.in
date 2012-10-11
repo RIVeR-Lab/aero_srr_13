@@ -1,0 +1,16 @@
+/**
+ * @file OryxPathPlannerConfig.h
+ *
+ * @date Oct 2, 2012
+ * @author Adam Panzica
+ */
+
+#ifndef ORYXDRIVECONTROLLERCONFIG_H_
+#define ORYXDRIVECONTROLLERCONFIG_H_
+
+// the configured options and settings for Oryx Drive Controller
+#define oryx_path_planner_VERSION_MAJOR @oryx_path_planner_VERSION_MAJOR@
+#define oryx_path_planner_VERSION_MINOR @oryx_path_planner_VERSION_MINOR@
+#define oryx_path_planner_VERSION_BUILD 0x@oryx_path_planner_VERSION_BUILD@
+
+#endif /* ORYXDRIVECONTROLLERCONFIG_H_ */
