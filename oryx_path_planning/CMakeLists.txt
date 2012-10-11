@@ -68,4 +68,4 @@ include_directories("${PROJECT_SOURCE_DIR}/src/lib")
 rosbuild_add_boost_directories()
 
 #build libraries
-rosbuild_add_library(${PROJECT_NAME} src/lib/TentacleGenerator.cpp)
+rosbuild_add_library(${PROJECT_NAME} src/lib/Tentacles.cpp)
