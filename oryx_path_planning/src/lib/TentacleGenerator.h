@@ -70,6 +70,11 @@ private:
 class SpeedSet{
 public:
 	/**
+	 * @author Adam Panzics
+	 * @brief Default constructor which creates an empty speed set
+	 */
+	SpeedSet();
+	/**
 	 * @author Adam Panzica
 	 * @brief Generates all of the tentacles with the given parameters
 	 * @param expFact 		The exponential factor parameter used to calculate the radius of the tentacle
