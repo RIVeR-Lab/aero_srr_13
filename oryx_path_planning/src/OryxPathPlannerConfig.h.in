@@ -12,5 +12,6 @@
 #define oryx_path_planner_VERSION_MAJOR @oryx_path_planner_VERSION_MAJOR@
 #define oryx_path_planner_VERSION_MINOR @oryx_path_planner_VERSION_MINOR@
 #define oryx_path_planner_VERSION_BUILD 0x@oryx_path_planner_VERSION_BUILD@
+#define oryx_path_planner_VERBOSITY @oryx_path_planner_VERBOSITY@
 
 #endif /* ORYXDRIVECONTROLLERCONFIG_H_ */

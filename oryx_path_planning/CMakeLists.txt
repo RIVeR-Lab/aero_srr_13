@@ -52,6 +52,9 @@ set (oryx_path_planner_VERSION_MAJOR 0)
 set (oryx_path_planner_VERSION_MINOR 0)
 set (oryx_path_planner_VERSION_BUILD ${RESULT})
 
+#the verbosity level
+set (oryx_path_planner_VERBOSITY true)
+
 # configure a header file to pass some of the CMake settings
 # to the source code to use as build-time configuration parameters
 configure_file (
