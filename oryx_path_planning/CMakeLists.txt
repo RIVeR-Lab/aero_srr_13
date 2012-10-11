@@ -53,7 +53,15 @@ set (oryx_path_planner_VERSION_MINOR 0)
 set (oryx_path_planner_VERSION_BUILD ${RESULT})
 
 #the verbosity level
-set (oryx_path_planner_VERBOSITY true)
+#define a verbosity option
+option (VERBOSITY "Build the Package with a high level of ROS_INFO prints" ON)
+
+#set the appropriate flag in the config header
+if(VERBOSITY)
+	set (oryx_path_planner_VERBOSITY true)
+else(VERBOSITY)
+	set (oryx_path_planner_VERBOSITY false)
+endif(VERBOSITY)
 
 # configure a header file to pass some of the CMake settings
 # to the source code to use as build-time configuration parameters
