@@ -27,12 +27,14 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 
 }
 
+
 //***************************** SPEED SET *********************************//
 /**
  * This constructor just makes an empty set of tentacles
  */
 SpeedSet::SpeedSet(){
 }
+
 
 SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolution, double xDim, double yDim, double velocity){
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
@@ -56,10 +58,6 @@ TentacleGenerator::TentacleGenerator(int numTentacles, double expFact, double re
 		this->speedSets.push_back(oryx_path_planner::SpeedSet(expFact, speedSets.at(v).a, numTentacles, resolution, xDim, yDim, speedSets.at(v).b));
 	}
 	ROS_INFO("Speed Sets Complete!");
-}
-
-TentacleGenerator::~TentacleGenerator() {
-	// TODO Auto-generated destructor stub
 }
 
 oryx_path_planner::Tentacle& TentacleGenerator::getTentacle(int speedSet, int index){
