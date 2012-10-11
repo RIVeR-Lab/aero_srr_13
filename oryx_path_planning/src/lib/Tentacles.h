@@ -116,7 +116,7 @@ public:
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 * @param speedSets		A reference to a vector containing pairs in the format pair.a = seed_radius pair.b = velocity
 	 */
-	TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<double>& speedSets);
+	TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<pair<double> >& speedSets);
 	virtual ~TentacleGenerator();
 
 	/**
@@ -131,13 +131,6 @@ private:
 	int 				numTentacles;					///Number of tentacles per speed-set
 	double 				expFact;						///Exponential factor used to calculate radii
 	std::vector<oryx_path_planner::SpeedSet > speedSets;	///A set containing all of the valid tentacles that have been generated
-
-	/**
-	 * @author Adam Panzica
-	 * @brief Helper function which does the work of generating tentacles
-	 * @param speedSets A reference to a vector containing pairs in the format pair.a = seed_radius pair.b = velocity
-	 */
-	void generateTentacles(std::vector<double>& speedSets);
 };
 
 }; /*oryx_path_planner*/
