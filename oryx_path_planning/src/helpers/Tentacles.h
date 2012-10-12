@@ -10,8 +10,14 @@
 
 #include<ros/ros.h>
 #include"OryxPathPlannerConfig.h"
-namespace oryx_path_planner{
 
+#if oryx_path_planner_VERBOSITY
+#define PRINTER ROS_INFO
+#else
+#define PRINTER ROS_DEBUG
+#endif
+
+namespace oryx_path_planning{
 /**
  * @author Adam Panzics
  * @brief Simple typedef for defining a basic pair of values
@@ -51,7 +57,7 @@ public:
 	 * @brief gets the radius/velcoity data of the tentacle
 	 * @return A pair where pair.a = radius and pair.b = velocity used to generate the tentacle
 	 */
-	oryx_path_planner::pair<double>& getRadVel();
+	pair<double>& getRadVel();
 
 	/**
 	 * @author Adam Panzica
@@ -60,8 +66,8 @@ public:
 	 */
 	std::vector<pair<int> >& getPoints();
 private:
-	oryx_path_planner::pair<double> tentacleData;		///A pair containing the radius and velocity of the tentacle
-	std::vector<oryx_path_planner::pair<int> > points; ///A vector containing a set of pairs which represent the x/y coordinates relative to robot-center that this tentacle touches
+	pair<double> tentacleData;		///A pair containing the radius and velocity of the tentacle
+	std::vector<pair<int> > points; ///A vector containing a set of pairs which represent the x/y coordinates relative to robot-center that this tentacle touches
 };
 
 /**
@@ -95,10 +101,10 @@ public:
 	 * @param index The index of the tentacle to get
 	 * @return A reference to a Tentacle from the speed set
 	 */
-	oryx_path_planner::Tentacle& getTentacle(int index);
+	Tentacle& getTentacle(int index);
 
 private:
-	std::vector<oryx_path_planner::Tentacle> tentacles;	///A vector containing all of the tentacles for this speed set
+	std::vector<Tentacle> tentacles;	///A vector containing all of the tentacles for this speed set
 };
 
 /**
@@ -127,12 +133,12 @@ public:
 	 * @param index		The index of the tentacle to get
 	 * @return A Tentacle containing all of the data about the requested tentacle
 	 */
-	oryx_path_planner::Tentacle& getTentacle(int speedSet, int index);
+	Tentacle& getTentacle(int speedSet, int index);
 private:
 	int 				numTentacles;					///Number of tentacles per speed-set
 	double 				expFact;						///Exponential factor used to calculate radii
-	std::vector<oryx_path_planner::SpeedSet > speedSets;	///A set containing all of the valid tentacles that have been generated
+	std::vector<SpeedSet > speedSets;	///A set containing all of the valid tentacles that have been generated
 };
 
-}; /*oryx_path_planner*/
+};
 #endif /* TENTACLE_H_ */

@@ -17,9 +17,9 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
@@ -54,7 +54,7 @@ set (oryx_path_planner_VERSION_BUILD ${RESULT})
 
 #the verbosity level
 #define a verbosity option
-option (VERBOSITY "Build the Package with a high level of ROS_INFO prints" ON)
+set (VERBOSITY ON)
 
 #set the appropriate flag in the config header
 if(VERBOSITY)
@@ -73,10 +73,15 @@ configure_file (
 #Link all source folders so that Headers will be properly found
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/src/nodes")
-include_directories("${PROJECT_SOURCE_DIR}/src/lib")
+include_directories("${PROJECT_SOURCE_DIR}/src/helpers")
 
 #include boost directories
 rosbuild_add_boost_directories()
 
 #build libraries
-rosbuild_add_library(${PROJECT_NAME} src/lib/Tentacles.cpp)
+
+
+#build nodes
+rosbuild_add_executable(oryx_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp)
+
+#rosbuild_link_boost(oryx_path_planning_test thread)

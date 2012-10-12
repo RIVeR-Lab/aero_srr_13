@@ -7,19 +7,23 @@
 
 #include "Tentacles.h"
 
+
 #if oryx_path_planner_VERBOSITY
 #define PRINTER ROS_INFO
 #else
 #define PRINTER ROS_DEBUG
 #endif
 
-namespace oryx_path_planner{
+
+namespace oryx_path_planning{
 //***************************** TENTACLE *********************************//
 /**
  * This constructor just makes an empty tentacle
  */
 Tentacle::Tentacle(){
 }
+
+Tentacle::~Tentacle(){};
 
 Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity){
 
@@ -39,11 +43,13 @@ SpeedSet::SpeedSet(){
 SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolution, double xDim, double yDim, double velocity){
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++){
-		this->tentacles.push_back(oryx_path_planner::Tentacle(expFact, seedRad, t, numTent, resolution, xDim, yDim, velocity));
+		this->tentacles.push_back(Tentacle(expFact, seedRad, t, numTent, resolution, xDim, yDim, velocity));
 	}
 }
 
-oryx_path_planner::Tentacle& SpeedSet::getTentacle(int index){
+SpeedSet::~SpeedSet(){};
+
+Tentacle& SpeedSet::getTentacle(int index){
 	return this->tentacles.at(index);
 }
 
@@ -55,13 +61,14 @@ TentacleGenerator::TentacleGenerator(int numTentacles, double expFact, double re
 	ROS_INFO("Generating Speed Sets...");
 	//Generate the SpeedSets
 	for(unsigned int v=0; v<speedSets.size(); v++){
-		this->speedSets.push_back(oryx_path_planner::SpeedSet(expFact, speedSets.at(v).a, numTentacles, resolution, xDim, yDim, speedSets.at(v).b));
+		this->speedSets.push_back(SpeedSet(expFact, speedSets.at(v).a, numTentacles, resolution, xDim, yDim, speedSets.at(v).b));
 	}
 	ROS_INFO("Speed Sets Complete!");
 }
 
-oryx_path_planner::Tentacle& TentacleGenerator::getTentacle(int speedSet, int index){
+TentacleGenerator::~TentacleGenerator(){};
+
+Tentacle& TentacleGenerator::getTentacle(int speedSet, int index){
 	return this->speedSets.at(speedSet).getTentacle(index);
 }
-
 };
