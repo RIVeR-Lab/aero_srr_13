@@ -11,15 +11,12 @@
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "oryx_path_planning_test");
 	ros::NodeHandle nh;
-	std::vector<oryx_path_planning::pair<double> > speedSets;
+	std::vector<double > speedSets;
 	ROS_INFO("Testing Tentacle Generator...");
 	for(int i=0; i<16; i++){
-		oryx_path_planning::pair<double> speedData;
-		speedData.a = (i+1.0)*5.0;
-		speedData.b = 2.0/(16.0-((double)i));
-		speedSets.push_back(speedData);
+		speedSets.push_back(.01*(i+1));
 	}
-	oryx_path_planning::TentacleGenerator(81, 1.19, .25, 512*.25, 512*.25, speedSets);
+	oryx_path_planning::TentacleGenerator(81, 1.15, .25, 512*.25, 512*.25, speedSets);
 
 	return 0;
 }
