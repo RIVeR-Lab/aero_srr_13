@@ -18,6 +18,7 @@
 #endif
 
 namespace oryx_path_planning{
+const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant, define it here
 /**
  * @author Adam Panzics
  * @brief Simple typedef for defining a basic pair of values
@@ -121,9 +122,9 @@ public:
 	 * @param resolution	The resolution of the occupancy grid that the tentacles will be overlaid on
 	 * @param xDim			The length of the x-axis of the occupancy grid, in the positive x-direction and of the same units as resolution
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
-	 * @param speedSets		A reference to a vector containing pairs in the format pair.a = seed_radius pair.b = velocity
+	 * @param speedSets		A reference to a vector containing the velocities of each speed set
 	 */
-	TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<pair<double> >& speedSets);
+	TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<double >& speedSets);
 	virtual ~TentacleGenerator();
 
 	/**
@@ -135,9 +136,18 @@ public:
 	 */
 	Tentacle& getTentacle(int speedSet, int index);
 private:
-	int 				numTentacles;					///Number of tentacles per speed-set
-	double 				expFact;						///Exponential factor used to calculate radii
+	int 				numTentacles;	///Number of tentacles per speed-set
+	double 				expFact;		///Exponential factor used to calculate radii
 	std::vector<SpeedSet > speedSets;	///A set containing all of the valid tentacles that have been generated
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Helper function which calculates the seed radius for a speed set
+	 * @param speedSet The index number of the speed set
+	 * @param numSpeedSet The total number of speed sets
+	 * @return The calculated seed radius
+	 */
+	double calcSeedRad(int speedSet, int numSpeedSet);
 };
 
 };

@@ -16,6 +16,7 @@
 
 
 namespace oryx_path_planning{
+
 //***************************** TENTACLE *********************************//
 /**
  * This constructor just makes an empty tentacle
@@ -67,13 +68,16 @@ Tentacle& SpeedSet::getTentacle(int index){
 
 
 //***************************** TENTACLE GENERATOR *********************************//
-TentacleGenerator::TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<pair<double> >& speedSets){
+TentacleGenerator::TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<double>& speedSets){
 	this->expFact 		= expFact;
 	this->numTentacles	= numTentacles;
 	ROS_INFO("Generating Speed Sets...");
+
+
+
 	//Generate the SpeedSets
 	for(unsigned int v=0; v<speedSets.size(); v++){
-		this->speedSets.push_back(SpeedSet(expFact, speedSets.at(v).a, numTentacles, resolution, xDim, yDim, speedSets.at(v).b));
+		this->speedSets.push_back(SpeedSet(expFact, calcSeedRad(v, speedSets.size()), numTentacles, resolution, xDim, yDim, speedSets.at(v)));
 	}
 	ROS_INFO("Speed Sets Complete!");
 }
@@ -83,4 +87,17 @@ TentacleGenerator::~TentacleGenerator(){};
 Tentacle& TentacleGenerator::getTentacle(int speedSet, int index){
 	return this->speedSets.at(speedSet).getTentacle(index);
 }
+
+/**
+ * calculate seed radius for the speed set. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
+ */
+double TentacleGenerator::calcSeedRad(int speedSet, int numSpeedSet){
+	double qdom = (double)(numSpeedSet-1);
+	double dphi = 1.2*PI/2.0;
+	double q	= ((double) speedSet)/qdom;
+	double l	= 8+33.5*q*std::pow(q, 1.2);
+
+	return l/(dphi*(1-std::pow(q,0.9)));
+}
+
 };
