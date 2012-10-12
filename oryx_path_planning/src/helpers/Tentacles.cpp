@@ -28,7 +28,19 @@ Tentacle::~Tentacle(){};
 Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity){
 
 	PRINTER("Generating Tentacle %d", index);
-
+	int halfwayIndex = numTent/2;
+	//Calculate tentacle radius. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
+	if(index<halfwayIndex){
+		//Tentacle is to the right of halfway
+		this->tentacleData.a = std::pow(expFact,index)*seedRad;
+	}else if(index>halfwayIndex){
+		//Tentacle is to the left of halfway
+		this->tentacleData.a = -std::pow(expFact,index-(halfwayIndex+1))*seedRad;
+	}else{
+		//Tentacle is exactly at halfway
+		this->tentacleData.a = std::numeric_limits<double>::infinity();
+	}
+	PRINTER("Calculated Tentacle Radius=%f", this->tentacleData.a);
 }
 
 
