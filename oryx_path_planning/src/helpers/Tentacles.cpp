@@ -28,8 +28,9 @@ Tentacle::~Tentacle(){};
 
 Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity){
 
+	this->tentacleData.b= velocity;
 	PRINTER("Generating Tentacle %d", index);
-	int halfwayIndex = numTent/2;
+	int halfwayIndex	= numTent/2;
 	//Calculate tentacle radius. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
 	if(index<halfwayIndex){
 		//Tentacle is to the right of halfway
@@ -42,6 +43,17 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		this->tentacleData.a = std::numeric_limits<double>::infinity();
 	}
 	PRINTER("Calculated Tentacle Radius=%f", this->tentacleData.a);
+
+	//Check for special case of straight line
+	if(this->tentacleData.a == std::numeric_limits<double>::infinity()){
+		int numSteps = std::floor(yDim/resolution);
+		for(int i = 0; i<numSteps; i++){
+			oryx_path_planning::pair<int> coord;
+			coord.a = 0;
+			coord.b = std::floor(resolution*i);
+			this->points.push_back(coord);
+		}
+	}
 }
 
 
