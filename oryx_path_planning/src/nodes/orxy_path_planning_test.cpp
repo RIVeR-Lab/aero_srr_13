@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 		speedData.b = 2.0/(16.0-((double)i));
 		speedSets.push_back(speedData);
 	}
-	oryx_path_planning::TentacleGenerator(82, 1.19, .25, 512*.25, 512*.25, speedSets);
+	oryx_path_planning::TentacleGenerator(81, 1.19, .25, 512*.25, 512*.25, speedSets);
 
 	return 0;
 }
