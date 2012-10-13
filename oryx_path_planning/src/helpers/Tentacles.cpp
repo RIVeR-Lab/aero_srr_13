@@ -44,16 +44,55 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	}
 	PRINTER("Calculated Tentacle Radius=%f", this->tentacleData.a);
 
-	//Check for special case of straight line
-	if(this->tentacleData.a == std::numeric_limits<double>::infinity()){
+	//Check for special case of an effectively straight line
+	if(this->tentacleData.a > straightThreshold || this->tentacleData.a < -straightThreshold){
+		this->tentacleData.a = std::numeric_limits<double>::infinity();
 		int numSteps = std::floor(yDim/resolution);
 		for(int i = 0; i<numSteps; i++){
 			oryx_path_planning::pair<int> coord;
 			coord.a = 0;
-			coord.b = std::floor(resolution*i);
+			coord.b = std::floor(i);
 			this->points.push_back(coord);
 		}
 	}
+	else{
+		//Tracks the last coordinate so that we don't get duplicates
+		pair<int> lastCoord;
+		//The amount to increment theta by
+		double thetaIncrement = oryx_path_planning::PI/360;
+		//Push the first coordinate on
+		this->points.push_back(lastCoord);
+		//Calculate the X and Y coord along the tentacle
+		if(this->tentacleData.a>0){
+			for(double t=PI; t>0; t-=thetaIncrement){
+				pair<int> newCoord;
+				Tentacle::calcCoord(this->tentacleData.a, t, this->tentacleData.a,resolution, newCoord);
+				if(!(newCoord==lastCoord)){
+					this->points.push_back(newCoord);
+				}
+			}
+		}
+		else{
+			for(double t=0; t<PI; t+=thetaIncrement){
+				pair<int> newCoord;
+				Tentacle::calcCoord(-this->tentacleData.a, t, -this->tentacleData.a,resolution, newCoord);
+				if(!(newCoord==lastCoord)){
+					this->points.push_back(newCoord);
+				}
+			}
+		}
+	}
+	PRINTER("Calculated a Tentacle with Number of Points=%d",(int)this->points.size());
+}
+
+/**
+ * Calculated via the following formula:
+ * @f[ x = floor(\frac{radius \times \cosine(theta)}{scale}+rshift) @f]
+ * @f[ y = floor(\frac{radius \times \sine(theta)}{scale}) @f]
+ */
+void Tentacle::calcCoord(double radius, double theta, double rshift, double scale, pair<int>& result){
+	result.a = std::floor(radius*std::cos(theta)/scale+rshift);
+	result.b = std::floor(radius*std::sin(theta)/scale);
 }
 
 

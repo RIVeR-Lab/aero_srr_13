@@ -27,7 +27,27 @@ template <class T>
 struct pair{
 	T a;	///first value of the pair
 	T b;	///second value of the pair
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Overload of the == operator for pair
+	 * @param a reference to pair<T>
+	 * @param b reference to pair<T>
+	 * @return the result of (a.a == b.a)&&(a.b == b.b)
+	 */
+	bool operator== (const pair<T>& that){
+		return (this->a == that.a)&&(this->a == that.b);
+	}
+
+	pair<T>& operator+ (const pair<T>& that){
+		pair<T> result;
+		result.a = this->a+that.a;
+		result.b = this->b+that.b;
+		return result;
+	}
 };
+
+
 
 class Tentacle{
 public:
@@ -69,6 +89,18 @@ public:
 private:
 	pair<double> tentacleData;		///A pair containing the radius and velocity of the tentacle
 	std::vector<pair<int> > points; ///A vector containing a set of pairs which represent the x/y coordinates relative to robot-center that this tentacle touches
+	const static double straightThreshold = 500;	///Cuttoff radius for what is considered to be essentially a straight line
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Helper function which caluclates the x/y coord of a point on an arc with an offset
+	 * @param radius	Radius of the arc
+	 * @param theta		Polar theta
+	 * @param scale		Amount to scale the results by
+	 * @param rshift	amount to shift the result in the x-axis
+	 * @param result	Reference to a pair<int> to write the result to
+	 */
+	void calcCoord(double radius, double theta, double scale, double rshift, pair<int>& result);
 };
 
 /**
