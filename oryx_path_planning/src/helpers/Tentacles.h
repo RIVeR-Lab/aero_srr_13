@@ -9,6 +9,7 @@
 #define TENTACLE_H_
 
 #include<ros/ros.h>
+#include<tf/transform_datatypes.h>
 #include"OryxPathPlannerConfig.h"
 
 #if oryx_path_planner_VERBOSITY
@@ -22,30 +23,43 @@ const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant,
 /**
  * @author Adam Panzics
  * @brief Simple typedef for defining a basic pair of values
- */
+
 template <class T>
 struct pair{
 	T a;	///first value of the pair
 	T b;	///second value of the pair
 
-	/**
+	pair<T>& operator=(pair<T>const& that){
+		if(this!=&that){
+			delete this->a;
+			delete this->b;
+			this->a = 0;
+			this->b = 0;
+			this->a = that.a;
+			this->b = that.b;
+		}
+		return *this;
+	}
+
+
+	*
 	 * @author Adam Panzica
 	 * @brief Overload of the == operator for pair
 	 * @param a reference to pair<T>
 	 * @param b reference to pair<T>
 	 * @return the result of (a.a == b.a)&&(a.b == b.b)
-	 */
-	bool operator== (const pair<T>& that){
+
+	bool operator== (pair<T>const& that)const{
 		return (this->a == that.a)&&(this->a == that.b);
 	}
 
-	pair<T>& operator+ (const pair<T>& that){
+	pair<T>& operator+ (pair<T>const& that){
 		pair<T> result;
 		result.a = this->a+that.a;
 		result.b = this->b+that.b;
 		return result;
 	}
-};
+};*/
 
 
 
@@ -78,17 +92,18 @@ public:
 	 * @brief gets the radius/velcoity data of the tentacle
 	 * @return A pair where pair.a = radius and pair.b = velocity used to generate the tentacle
 	 */
-	pair<double>& getRadVel();
+	tf::Point& getRadVel();
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the x/y coordinates of all the points long this tentacle
 	 * @return A reference to a vector containing a set of pairs which represent the x/y coordinates relative to robot-center
 	 */
-	std::vector<pair<int> >& getPoints();
+	std::vector<tf::Point >& getPoints();
 private:
-	pair<double> tentacleData;		///A pair containing the radius and velocity of the tentacle
-	std::vector<pair<int> > points; ///A vector containing a set of pairs which represent the x/y coordinates relative to robot-center that this tentacle touches
+	double radius;
+	double velocity;
+	std::vector<tf::Point > points; 				///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
 	const static double straightThreshold = 500;	///Cuttoff radius for what is considered to be essentially a straight line
 
 	/**
@@ -98,9 +113,9 @@ private:
 	 * @param theta		Polar theta
 	 * @param scale		Amount to scale the results by
 	 * @param rshift	amount to shift the result in the x-axis
-	 * @param result	Reference to a pair<int> to write the result to
+	 * @param result	Reference to a tf::Point to write the result to
 	 */
-	void calcCoord(double radius, double theta, double scale, double rshift, pair<int>& result);
+	void calcCoord(double radius, double theta, double scale, double rshift, tf::Point& result);
 };
 
 /**
@@ -136,6 +151,13 @@ public:
 	 */
 	Tentacle& getTentacle(int index);
 
+	/**
+	 * @author Adam Panzica
+	 * @brief Gets the number of tentacles in the SpeedSet
+	 * @return The number of tentacles in the SpeedSet
+	 */
+	unsigned int getNumTentacle();
+
 private:
 	std::vector<Tentacle> tentacles;	///A vector containing all of the tentacles for this speed set
 };
@@ -167,6 +189,13 @@ public:
 	 * @return A Tentacle containing all of the data about the requested tentacle
 	 */
 	Tentacle& getTentacle(int speedSet, int index);
+
+	/**
+	 * @author Adam Panzica
+	 * @param speedSet Index of the SpeedSet to get
+	 * @return The SpeedSet at the index
+	 */
+	SpeedSet& getSpeedSet(int speedSet);
 private:
 	int 				numTentacles;	///Number of tentacles per speed-set
 	double 				expFact;		///Exponential factor used to calculate radii

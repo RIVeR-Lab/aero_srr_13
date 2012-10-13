@@ -22,62 +22,70 @@ namespace oryx_path_planning{
  * This constructor just makes an empty tentacle
  */
 Tentacle::Tentacle(){
+	this->radius = 0;
+	this->velocity = 0;
 }
 
 Tentacle::~Tentacle(){};
 
 Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity){
 
-	this->tentacleData.b= velocity;
+	this->velocity= velocity;
 	PRINTER("Generating Tentacle %d", index);
 	int halfwayIndex	= numTent/2;
 	//Calculate tentacle radius. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
 	if(index<halfwayIndex){
 		//Tentacle is to the right of halfway
-		this->tentacleData.a = std::pow(expFact,index)*seedRad;
+		this->radius = std::pow(expFact,index)*seedRad;
 	}else if(index>halfwayIndex){
 		//Tentacle is to the left of halfway
-		this->tentacleData.a = -std::pow(expFact,index-(halfwayIndex+1))*seedRad;
+		this->radius = -std::pow(expFact,index-(halfwayIndex+1))*seedRad;
 	}else{
 		//Tentacle is exactly at halfway
-		this->tentacleData.a = std::numeric_limits<double>::infinity();
+		this->radius = std::numeric_limits<double>::infinity();
 	}
-	PRINTER("Calculated Tentacle Radius=%f", this->tentacleData.a);
+	PRINTER("Calculated Tentacle Radius=%f", this->radius);
 
 	//Check for special case of an effectively straight line
-	if(this->tentacleData.a > straightThreshold || this->tentacleData.a < -straightThreshold){
-		this->tentacleData.a = std::numeric_limits<double>::infinity();
+	if(this->radius > straightThreshold || this->radius < -straightThreshold){
+		this->radius = std::numeric_limits<double>::infinity();
 		int numSteps = std::floor(yDim/resolution);
 		for(int i = 0; i<numSteps; i++){
-			oryx_path_planning::pair<int> coord;
-			coord.a = 0;
-			coord.b = std::floor(i);
+			tf::Point coord;
+			coord.setX(std::floor(i));
+			coord.setY(0);
+			coord.setZ(0);
 			this->points.push_back(coord);
 		}
 	}
 	else{
 		//Tracks the last coordinate so that we don't get duplicates
-		pair<int> lastCoord;
+		tf::Point lastCoord;
+		lastCoord.setZero();
 		//The amount to increment theta by
 		double thetaIncrement = oryx_path_planning::PI/360;
 		//Push the first coordinate on
 		this->points.push_back(lastCoord);
 		//Calculate the X and Y coord along the tentacle
-		if(this->tentacleData.a>0){
+		if(this->radius>0){
 			for(double t=PI; t>0; t-=thetaIncrement){
-				pair<int> newCoord;
-				Tentacle::calcCoord(this->tentacleData.a, t, this->tentacleData.a,resolution, newCoord);
+				tf::Point newCoord;
+				Tentacle::calcCoord(this->radius, t, this->radius,resolution, newCoord);
 				if(!(newCoord==lastCoord)){
+					if(newCoord.getX()<0||newCoord.getY()>yDim) break;
 					this->points.push_back(newCoord);
+					lastCoord = newCoord;
 				}
 			}
 		}
 		else{
 			for(double t=0; t<PI; t+=thetaIncrement){
-				pair<int> newCoord;
-				Tentacle::calcCoord(-this->tentacleData.a, t, -this->tentacleData.a,resolution, newCoord);
+				tf::Point newCoord;
+				Tentacle::calcCoord(-this->radius, t, -this->radius,resolution, newCoord);
 				if(!(newCoord==lastCoord)){
+					if(newCoord.getX()<0||newCoord.getY()>yDim) break;
 					this->points.push_back(newCoord);
+					lastCoord = newCoord;
 				}
 			}
 		}
@@ -85,14 +93,19 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	PRINTER("Calculated a Tentacle with Number of Points=%d",(int)this->points.size());
 }
 
+std::vector<tf::Point >& Tentacle::getPoints(){
+	return this->points;
+}
+
 /**
  * Calculated via the following formula:
- * @f[ x = floor(\frac{radius \times \cosine(theta)}{scale}+rshift) @f]
- * @f[ y = floor(\frac{radius \times \sine(theta)}{scale}) @f]
+ * @f[ y = floor(\frac{radius \times \cosine(theta)}{scale}+rshift) @f]
+ * @f[ x = floor(\frac{radius \times \sine(theta)}{scale}) @f]
  */
-void Tentacle::calcCoord(double radius, double theta, double rshift, double scale, pair<int>& result){
-	result.a = std::floor(radius*std::cos(theta)/scale+rshift);
-	result.b = std::floor(radius*std::sin(theta)/scale);
+void Tentacle::calcCoord(double radius, double theta, double rshift, double scale, tf::Point& result){
+	result.setY(std::floor(radius*std::cos(theta)/scale+rshift));
+	result.setX(std::floor(radius*std::sin(theta)/scale));
+	result.setZ(0);
 }
 
 
@@ -112,6 +125,10 @@ SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolutio
 }
 
 SpeedSet::~SpeedSet(){};
+
+unsigned int SpeedSet::getNumTentacle(){
+	return this->tentacles.size();
+}
 
 Tentacle& SpeedSet::getTentacle(int index){
 	return this->tentacles.at(index);
@@ -137,6 +154,10 @@ TentacleGenerator::~TentacleGenerator(){};
 
 Tentacle& TentacleGenerator::getTentacle(int speedSet, int index){
 	return this->speedSets.at(speedSet).getTentacle(index);
+}
+
+SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
+	return this->speedSets.at(speedSet);
 }
 
 /**
