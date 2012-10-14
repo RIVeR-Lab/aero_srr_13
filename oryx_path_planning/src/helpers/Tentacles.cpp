@@ -187,12 +187,20 @@ SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
 
 /**
  * calculate seed radius for the speed set. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
+ * Equations are as follows:
+ * @f[ q = \frac{j}{n-1} @f]
+ * @f[ delta phi = TSA \times \frac{pi}{2} @f]
+ * @f[ l = l_min + E_b \times q^(E_f) @f]
+ * @f[ R_j = \frac{l}{delta phi \times (1-q^(0.9))} @f]
+ *
+ * Where @f$ R_j = \text{Seed Radius for Speed Set j} @f$, @f$ delta phi =@f$ the arc swept by the smallest tentacle,
+ * @f$ l=@f$ length of the longest tentacle in the set, and @f$ TSA, E_b, E_f@f$ are all tuning constants determined empirically.
  */
 double TentacleGenerator::calcSeedRad(int speedSet, int numSpeedSet){
 	double qdom = (double)(numSpeedSet-1);
 	double dphi = TENTACLE_SWEEP_ANGLE*PI/2.0;
 	double q	= ((double) speedSet)/qdom;
-	double l	= MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*q*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
+	double l	= MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
 
 	return l/(dphi*(1-std::pow(q,0.9)));
 }
