@@ -8,4 +8,5 @@
   <url>http://robot.wpi.edu/wiki/index.php/Oryx</url>
   <depend stack="ros"/>
   <depend stack="actionlib"/>
+  <depend stack="oryx_base"/>
 </stack>
