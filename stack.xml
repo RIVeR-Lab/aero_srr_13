@@ -1,6 +1,6 @@
 <stack>
-  <description brief="code for WPI's Oryx SSR Robot">
-    A set of packages that define the operation of WPI's Oryx Sample Search and Return Robot
+  <description brief="code for WPI's Oryx SRR Robot">
+    A set of packages that define the operation of WPI's Oryx Sample Recovery and Return Robot
   </description>
   <author>Maintained by WPI RIVeR Lab</author>
   <license>?</license>
@@ -8,4 +8,5 @@
   <url>http://robot.wpi.edu/wiki/index.php/Oryx</url>
   <depend stack="ros"/>
   <depend stack="actionlib"/>
+  <depend stack="navigation"/>
 </stack>
