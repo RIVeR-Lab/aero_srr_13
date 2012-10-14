@@ -1,7 +1,0 @@
-<launch>
-
-	<include file="$(find OryxManager)/launch/Internals/Battery.launch" />
-	<include file="$(find OryxManager)/launch/Internals/Rocker.launch" />
-	<include file="$(find OryxManager)/launch/Internals/Temps.launch" />
-
-</launch>

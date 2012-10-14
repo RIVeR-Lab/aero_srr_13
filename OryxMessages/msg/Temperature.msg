@@ -1,4 +1,0 @@
-int32 temperature_node
-float32 temperature
-float32 warning_Temp
-float32 danger_Temp

@@ -1,7 +1,0 @@
-<launch>
-
-<node name="Battery_Manager" pkg="OryxManager" type="BatteryManager"  output="screen" respawn="false">
-		<param name="Port" value="/dev/BMS" />
-   	</node>
-
-</launch>

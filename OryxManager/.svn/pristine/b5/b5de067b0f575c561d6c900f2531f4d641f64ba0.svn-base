@@ -1,5 +1,0 @@
-<launch>
-
-	<node name="Battery_Voltmeter" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyUSB3" respawn="true"/>
-
-</launch>

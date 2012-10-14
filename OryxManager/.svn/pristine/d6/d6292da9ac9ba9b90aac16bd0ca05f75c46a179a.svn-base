@@ -1,9 +1,0 @@
-<launch>
-
-<node name="Rocker_Position" pkg="OryxManager" type="RockerPosition"  output="screen" respawn="true">
-		<param name="Port" value="/dev/rocker" />
-		<param name="Offset" value="325.5" />
-		<param name="Rate" value="10" />
-   	</node>
-
-</launch>
