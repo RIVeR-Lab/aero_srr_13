@@ -1,20 +1,45 @@
-/*
- * Tentacle.cpp
+/**
+ * @file Tentacle.cpp
  *
- *  Created on: Oct 11, 2012
- *      Author: parallels
+ * @date Oct 11, 2012
+ * @author Adam Panzica
  */
 
+//************************************************ INCLUDES ***************************************//
 #include "Tentacles.h"
 
-
+//************************************************ MACROS ***************************************//
 #if oryx_path_planner_VERBOSITY
 #define PRINTER ROS_INFO
 #else
 #define PRINTER ROS_DEBUG
 #endif
 
+#ifndef MIN_TENTACLE_LENGTH
+#define MIN_TENTACLE_LENGTH 8.0
+#else
+#error MIN_TENTACLE_LENGTH is already defined!
+#endif
 
+#ifndef EXP_TENTACLE_LENGTH_BASE
+#define EXP_TENTACLE_LENGTH_BASE 33.5
+#else
+#error EXP_TENTACLE_LENGTH_BASE is already defined!
+#endif
+
+#ifndef EXP_TENTACLE_LENGTH_FACTOR
+#define EXP_TENTACLE_LENGTH_FACTOR 1.2
+#else
+#error EXP_TENTACLE_LENGTH_FACTOR is already defined!
+#endif
+
+#ifndef TENTACLE_SWEEP_ANGLE
+#define TENTACLE_SWEEP_ANGLE 1.2
+#else
+#error TENTACLE_SWEEP_ANGLE is already defined!
+#endif
+
+//************************************************ IMPLEMENTATION ***************************************//
 namespace oryx_path_planning{
 
 //***************************** TENTACLE *********************************//
@@ -165,11 +190,17 @@ SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
  */
 double TentacleGenerator::calcSeedRad(int speedSet, int numSpeedSet){
 	double qdom = (double)(numSpeedSet-1);
-	double dphi = 1.2*PI/2.0;
+	double dphi = TENTACLE_SWEEP_ANGLE*PI/2.0;
 	double q	= ((double) speedSet)/qdom;
-	double l	= 8+33.5*q*std::pow(q, 1.2);
+	double l	= MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*q*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
 
 	return l/(dphi*(1-std::pow(q,0.9)));
 }
 
 };
+
+//************************************************ UNDEFS ***************************************//
+#undef MIN_TENTACLE_LENGTH
+#undef EXP_TENTACLE_LENGTH_BASE
+#undef EXP_TENTACLE_LENGTH_FACTOR
+#undef TENTACLE_SWEEP_ANGLE
