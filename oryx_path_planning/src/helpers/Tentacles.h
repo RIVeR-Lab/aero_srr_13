@@ -20,49 +20,12 @@
 
 namespace oryx_path_planning{
 const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant, define it here
+
+
 /**
- * @author Adam Panzics
- * @brief Simple typedef for defining a basic pair of values
-
-template <class T>
-struct pair{
-	T a;	///first value of the pair
-	T b;	///second value of the pair
-
-	pair<T>& operator=(pair<T>const& that){
-		if(this!=&that){
-			delete this->a;
-			delete this->b;
-			this->a = 0;
-			this->b = 0;
-			this->a = that.a;
-			this->b = that.b;
-		}
-		return *this;
-	}
-
-
-	*
-	 * @author Adam Panzica
-	 * @brief Overload of the == operator for pair
-	 * @param a reference to pair<T>
-	 * @param b reference to pair<T>
-	 * @return the result of (a.a == b.a)&&(a.b == b.b)
-
-	bool operator== (pair<T>const& that)const{
-		return (this->a == that.a)&&(this->a == that.b);
-	}
-
-	pair<T>& operator+ (pair<T>const& that){
-		pair<T> result;
-		result.a = this->a+that.a;
-		result.b = this->b+that.b;
-		return result;
-	}
-};*/
-
-
-
+ * @author Adam Panzica
+ * @brief Container class for holding data about a tentacle
+ */
 class Tentacle{
 public:
 	/**
