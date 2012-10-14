@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
 	for(int i=0; i<3; i++){
 		speedSets.push_back(.01*(i+1));
 	}
-	int xDim=25;
+	int xDim=50;
 	int yDim=xDim;
 	oryx_path_planning::TentacleGenerator generator(15, 1.15, .25, xDim*.25, yDim*.25, speedSets);
 	printSpeedSet(xDim, yDim, generator.getSpeedSet(0));
@@ -50,7 +50,7 @@ void printSpeedSet(int xDim, int yDim, oryx_path_planning::SpeedSet& speedSet){
 		occGrid[i][ySize+1]	= '\0';
 	}
 
-	for(unsigned int t=0; t<3/*speedSet.getNumTentacle()*/; t++){
+	for(unsigned int t=0; t<speedSet.getNumTentacle(); t++){
 		oryx_path_planning::Tentacle tentacle = speedSet.getTentacle(t);
 		for(unsigned int p=0; p<tentacle.getPoints().size(); p++){
 			tf::Point point = tentacle.getPoints().at(p);
