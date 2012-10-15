@@ -74,10 +74,9 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	//Check for special case of an effectively straight line
 	if(this->radius > this->straightThreshold || this->radius < -this->straightThreshold){
 		this->radius = std::numeric_limits<double>::infinity();
-		int numSteps = std::floor(yDim/resolution);
-		for(int i = 0; i<numSteps; i++){
+		for(double i = 0; i<std::floor(xDim); i+=resolution){
 			tf::Point coord;
-			coord.setX(std::floor(i));
+			coord.setX(i);
 			coord.setY(0);
 			coord.setZ(0);
 			this->points.push_back(coord);
