@@ -72,7 +72,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	PRINTER("Calculated Tentacle Radius=%f", this->radius);
 
 	//Check for special case of an effectively straight line
-	if(this->radius > straightThreshold || this->radius < -straightThreshold){
+	if(this->radius > this->straightThreshold || this->radius < -this->straightThreshold){
 		this->radius = std::numeric_limits<double>::infinity();
 		int numSteps = std::floor(yDim/resolution);
 		for(int i = 0; i<numSteps; i++){

@@ -67,7 +67,7 @@ private:
 	double radius;
 	double velocity;
 	std::vector<tf::Point > points; 				///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
-	const static double straightThreshold = 500;	///Cuttoff radius for what is considered to be essentially a straight line
+	const static double straightThreshold = 1000;	///Cuttoff radius for what is considered to be essentially a straight line
 
 	/**
 	 * @author Adam Panzica
