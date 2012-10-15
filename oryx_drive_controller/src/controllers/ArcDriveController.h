@@ -9,8 +9,8 @@
 #define ARCDRIVECONTROLLER_H_
 
 #include <ros/ros.h>
-#include <OryxMessages/WheelVelocities.h>
-#include <OryxMessages/SwervePositions.h>
+#include <oryx_msgs/WheelVelocities.h>
+#include <oryx_msgs/SwervePositions.h>
 #include <oryx_drive_controller/VelocityArc.h>
 #include <oryx_drive_controller/VelocityTranslate.h>
 /**
