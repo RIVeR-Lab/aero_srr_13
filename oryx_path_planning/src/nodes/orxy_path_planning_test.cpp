@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 	}
 	int xDim=50;
 	int yDim=xDim;
-	oryx_path_planning::TentacleGenerator generator(15, 1.15, .25, xDim*.25, yDim*.25, speedSets);
+	oryx_path_planning::TentacleGenerator generator(15, 1.15, .25, xDim, yDim, speedSets);
 	printSpeedSet(xDim, yDim, generator.getSpeedSet(0));
 
 /*	tf::Point test1;
@@ -39,32 +39,25 @@ int main(int argc, char **argv) {
 
 
 void printSpeedSet(int xDim, int yDim, oryx_path_planning::SpeedSet& speedSet){
-	int xSize = xDim*2;
-	int ySize = yDim;
-	char occGrid[xSize][ySize+2];
-	memset(occGrid, ' ', xSize*(ySize+2)*sizeof(char));
-
-	//Fill in null newline and terminator to make creating strings easy
-	for(int i=0; i<xSize; i++){
-		occGrid[i][ySize]	= '\n';
-		occGrid[i][ySize+1]	= '\0';
-	}
+	int xSize = xDim;
+	int ySize = yDim*2;
+	std::vector<std::string> occGrid(xSize, std::string(ySize, ' '));
 
 	for(unsigned int t=0; t<speedSet.getNumTentacle(); t++){
 		oryx_path_planning::Tentacle tentacle = speedSet.getTentacle(t);
 		for(unsigned int p=0; p<tentacle.getPoints().size(); p++){
 			tf::Point point = tentacle.getPoints().at(p);
-			//ROS_INFO("Got Point at <%f, %f>", point.getX(), point.getY());
-			point.setY(point.getY()+ySize);
-			//ROS_INFO("Placing Point at <%f, %f>", point.getX(), point.getY());
-			occGrid[(int)point.getX()][(int)point.getY()] = 'T';
+			ROS_INFO("Got Point at <%f, %f>", point.getX(), point.getY());
+			point.setY(point.getY()+yDim);
+			ROS_INFO("Placing Point at <%f, %f>", point.getX(), point.getY());
+			occGrid.at((int)point.getX()).replace((int)point.getY(),1,"T");
 		}
 	}
 	std::string output;
-	for(int x=0; x<xDim; x++){
-		std::string line(occGrid[x]);
-		//ROS_INFO(line.c_str());
-		output.append(line);
+
+	for(int i=0;i<occGrid.size(); i++){
+		output+=occGrid.at(i);
+		output+="\r\n";
 	}
 
 	ROS_INFO("\n%s", output.c_str());
