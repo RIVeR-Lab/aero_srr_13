@@ -31,9 +31,9 @@ ArcDriveController::ArcDriveController(std::string drive_velocity_topic,
 	ROS_INFO("Starting Up Arc Drive Controller");
 
 	//Set up publisher to the DriveManager wheel velocity topic
-	this->velocity_pub	= nh.advertise<OryxMessages::WheelVelocities>(drive_velocity_topic.c_str(),2);
+	this->velocity_pub	= nh.advertise<oryx_msgs::WheelVelocities>(drive_velocity_topic.c_str(),2);
 	//Set up publisher to the DriveManager swerve control topic
-	this->swerve_pub	= nh.advertise<OryxMessages::SwervePositions>(drive_swerve_topic.c_str(),2);
+	this->swerve_pub	= nh.advertise<oryx_msgs::SwervePositions>(drive_swerve_topic.c_str(),2);
 	//Set up subscriber to the intra-process VelocityArc message
 	this->vel_sub		= nh.subscribe(ctrl_velocity_topic, 2, &ArcDriveController::processIPVelCB, this);
 
@@ -99,8 +99,8 @@ void ArcDriveController::translate(double xVelocity, double yVelocity){
  * Performs the actual work of publishing WheelVelocites and SwervePositions messages to DriveManager
  */
 void ArcDriveController::sendMessages(std::vector<double>& wheelData){
-	OryxMessages::WheelVelocities velocityMessage;
-	OryxMessages::SwervePositions swerveMessage;
+	oryx_msgs::WheelVelocities velocityMessage;
+	oryx_msgs::SwervePositions swerveMessage;
 	//Build wheel velocity message
 	velocityMessage.left_front_wheel	= wheelData.at(FRONT_LEFT);
 	velocityMessage.left_rear_wheel		= wheelData.at(REAR_RIGHT);
