@@ -12,14 +12,12 @@ void printSpeedSet(int xDim, int yDim, oryx_path_planning::SpeedSet& speedSet);
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "oryx_path_planning_test");
 	ros::NodeHandle nh;
-	std::vector<double > speedSets;
+
 	ROS_INFO("Testing Tentacle Generator...");
-	for(int i=0; i<3; i++){
-		speedSets.push_back(.01*(i+1));
-	}
 	int xDim=50;
 	int yDim=xDim;
-	oryx_path_planning::TentacleGenerator generator(15, 1.15, .25, xDim, yDim, speedSets);
+	oryx_path_planning::TentacleGenerator generator(.1, 2.25, 5, 15, 1.15, .25, xDim, yDim);
+	ROS_INFO("Tentacles Generated. Printing Speed Sets...");
 	printSpeedSet(xDim, yDim, generator.getSpeedSet(0));
 
 /*	tf::Point test1;
