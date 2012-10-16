@@ -79,6 +79,14 @@ private:
 	 * @param result	Reference to a tf::Point to write the result to
 	 */
 	void calcCoord(double radius, double theta, double scale, double rshift, tf::Point& result);
+
+	/**
+	 * Rounds a value to the nearest scale point. EX: raw=12.35, frac=.25, return = 12.25
+	 * @param raw Raw value to round
+	 * @param frac Fraction to scale to
+	 * @return The result of std::floor(raw/scale)*scale
+	 */
+	double roundToFrac(double raw, double frac);
 };
 
 /**
@@ -134,14 +142,16 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates a set of tentacles for each speed set
+	 * @param minSpeed		The speed of the slowest speed set
+	 * @param maxSpeed		The speed of the fastest speed set
+	 * @param numSpeedSet	The number of speed sets to generate
 	 * @param numTentacles	The number of tentacles in each speed set
 	 * @param expFact		The exponential factor used to determine radius for each tentacle
 	 * @param resolution	The resolution of the occupancy grid that the tentacles will be overlaid on
 	 * @param xDim			The length of the x-axis of the occupancy grid, in the positive x-direction and of the same units as resolution
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
-	 * @param speedSets		A reference to a vector containing the velocities of each speed set
 	 */
-	TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<double >& speedSets);
+	TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, double xDim, double yDim);
 	virtual ~TentacleGenerator();
 
 	/**
@@ -161,17 +171,36 @@ public:
 	SpeedSet& getSpeedSet(int speedSet);
 private:
 	int 				numTentacles;	///Number of tentacles per speed-set
+	int					numSpeedSet;
 	double 				expFact;		///Exponential factor used to calculate radii
 	std::vector<SpeedSet > speedSets;	///A set containing all of the valid tentacles that have been generated
+
+	/**
+	 * @author Adam Panzics
+	 * @brief Calculates the 'magic constant' q used in tentacle generation
+	 * @param speedSet The index of the current speed set
+	 * @return A constant, @f$ q= \frac{speedSet}{numSpeedSet-1} @f$
+	 */
+	double calcQ(int speedSet);
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Helper function which calculates the seed radius for a speed set
 	 * @param speedSet The index number of the speed set
-	 * @param numSpeedSet The total number of speed sets
+	 * @param q			Calculated constant
 	 * @return The calculated seed radius
 	 */
-	double calcSeedRad(int speedSet, int numSpeedSet);
+	double calcSeedRad(int speedSet, double q);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Helper function which calculates the velocity for a speed set
+	 * @param minSpeed	Minimum speed of all speed sets
+	 * @param maxSpeed	Maximum speed of all speed sets
+	 * @param q			Calculated constant
+	 * @return The velocity for a speed set
+	 */
+	double calcSpeedSetVel(double minSpeed, double maxSpeed, double q);
 };
 
 };

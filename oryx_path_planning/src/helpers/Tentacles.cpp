@@ -74,7 +74,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	//Check for special case of an effectively straight line
 	if(this->radius > this->straightThreshold || this->radius < -this->straightThreshold){
 		this->radius = std::numeric_limits<double>::infinity();
-		for(double i = 0; i<std::floor(xDim); i+=resolution){
+		for(double i = 0; i<roundToFrac(seedRad,resolution); i+=resolution){
 			tf::Point coord;
 			coord.setX(i);
 			coord.setY(0);
@@ -87,12 +87,13 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		tf::Point lastCoord;
 		lastCoord.setZero();
 		//The amount to increment theta by
-		double thetaIncrement = oryx_path_planning::PI/360;
+		double thetaIncrement	= oryx_path_planning::PI/360;
+		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
 		//Push the first coordinate on
 		this->points.push_back(lastCoord);
 		//Calculate the X and Y coord along the tentacle
 		if(this->radius>0){
-			for(double t=PI; t>0; t-=thetaIncrement){
+			for(double t=sweepAngle; t>0; t-=thetaIncrement){
 				tf::Point newCoord;
 				Tentacle::calcCoord(this->radius, t, this->radius,resolution, newCoord);
 				if(!(newCoord==lastCoord)){
@@ -103,7 +104,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 			}
 		}
 		else{
-			for(double t=0; t<PI; t+=thetaIncrement){
+			for(double t=0; t<sweepAngle; t+=thetaIncrement){
 				tf::Point newCoord;
 				Tentacle::calcCoord(-this->radius, t, -this->radius,resolution, newCoord);
 				if(!(newCoord==lastCoord)){
@@ -127,9 +128,13 @@ std::vector<tf::Point >& Tentacle::getPoints(){
  * @f[ x = floor(\frac{radius \times \sine(theta)}{scale}) @f]
  */
 void Tentacle::calcCoord(double radius, double theta, double rshift, double scale, tf::Point& result){
-	result.setY(std::floor(radius*std::cos(theta)/scale+rshift));
-	result.setX(std::floor(radius*std::sin(theta)/scale));
+	result.setY(roundToFrac(radius*std::cos(theta)+rshift, scale));
+	result.setX(roundToFrac(radius*std::sin(theta), scale));
 	result.setZ(0);
+}
+
+double Tentacle::roundToFrac(double raw, double frac){
+	return std::floor(raw/frac)*frac;
 }
 
 
@@ -160,16 +165,17 @@ Tentacle& SpeedSet::getTentacle(int index){
 
 
 //***************************** TENTACLE GENERATOR *********************************//
-TentacleGenerator::TentacleGenerator(int numTentacles, double expFact, double resolution, double xDim, double yDim, std::vector<double>& speedSets){
+TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, double xDim, double yDim){
 	this->expFact 		= expFact;
 	this->numTentacles	= numTentacles;
+	this->numSpeedSet	= numSpeedSet;
 	ROS_INFO("Generating Speed Sets...");
 
-
-
+	double q = 0;
 	//Generate the SpeedSets
-	for(unsigned int v=0; v<speedSets.size(); v++){
-		this->speedSets.push_back(SpeedSet(expFact, calcSeedRad(v, speedSets.size()), numTentacles, resolution, xDim, yDim, speedSets.at(v)));
+	for(unsigned int v=0; v<numSpeedSet; v++){
+		q = calcQ(v);
+		this->speedSets.push_back(SpeedSet(expFact, calcSeedRad(v, q), numTentacles, resolution, xDim, yDim, calcSpeedSetVel(minSpeed, maxSpeed, q)));
 	}
 	ROS_INFO("Speed Sets Complete!");
 }
@@ -187,7 +193,6 @@ SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
 /**
  * calculate seed radius for the speed set. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
  * Equations are as follows:
- * @f[ q = \frac{j}{n-1} @f]
  * @f[ delta phi = TSA \times \frac{pi}{2} @f]
  * @f[ l = l_min + E_b \times q^(E_f) @f]
  * @f[ R_j = \frac{l}{delta phi \times (1-q^(0.9))} @f]
@@ -195,13 +200,29 @@ SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
  * Where @f$ R_j = \text{Seed Radius for Speed Set j} @f$, @f$ delta phi =@f$ the arc swept by the smallest tentacle,
  * @f$ l=@f$ length of the longest tentacle in the set, and @f$ TSA, E_b, E_f@f$ are all tuning constants determined empirically.
  */
-double TentacleGenerator::calcSeedRad(int speedSet, int numSpeedSet){
-	double qdom = (double)(numSpeedSet-1);
+double TentacleGenerator::calcSeedRad(int speedSet, double q){
 	double dphi = TENTACLE_SWEEP_ANGLE*PI/2.0;
-	double q	= ((double) speedSet)/qdom;
 	double l	= MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
-
 	return l/(dphi*(1-std::pow(q,0.9)));
+}
+
+/**
+ * calculate velocity for the speed set. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
+ * Equations are as follows:
+ * @f[ V_j = V_s+q^(1.2) \times (V_e-V_s) @f]
+ *
+ * Where @f$ V_j = \text{Velocity for Speed Set j} @f$, @f$ delta phi =@f$ the arc swept by the smallest tentacle,
+ * @f$ l=@f$ length of the longest tentacle in the set, and @f$ TSA, E_b, E_f@f$ are all tuning constants determined empirically.
+ */
+double TentacleGenerator::calcSpeedSetVel(double minSpeed, double maxSpeed, double q){
+	return minSpeed+std::pow(q, 1.2)*(maxSpeed-minSpeed);
+}
+
+/**
+ * Calculates 'magic constant' q. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
+ */
+double TentacleGenerator::calcQ(int speedSet){
+	return (double)speedSet/((double)this->numSpeedSet-1);
 }
 
 };
