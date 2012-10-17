@@ -28,7 +28,7 @@ inline double roundToFrac(double raw, double frac){
  * @param resolution The resolution of the grid to place the point on
  * @return The location of the point on the grid, equivalent to (int)std::floor(raw*resolution)
  */
-inline int expandToGrid(double raw, double resolution){
+inline int roundToGrid(double raw, double resolution){
 	return (int)std::floor(raw*resolution);
 }
 
