@@ -34,7 +34,7 @@
 #endif
 
 #ifndef TENTACLE_SWEEP_ANGLE
-#define TENTACLE_SWEEP_ANGLE 1.2
+#define TENTACLE_SWEEP_ANGLE PI/2.0
 #else
 #error TENTACLE_SWEEP_ANGLE is already defined!
 #endif
@@ -74,7 +74,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	//Check for special case of an effectively straight line
 	if(this->radius > this->straightThreshold || this->radius < -this->straightThreshold){
 		this->radius = std::numeric_limits<double>::infinity();
-		for(double i = 0; i<roundToFrac(seedRad,resolution); i+=resolution){
+		for(double i = 0; i<xDim; i+=resolution){
 			tf::Point coord;
 			coord.setX(i);
 			coord.setY(0);
@@ -93,22 +93,26 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		this->points.push_back(lastCoord);
 		//Calculate the X and Y coord along the tentacle
 		if(this->radius>0){
-			for(double t=sweepAngle; t>0; t-=thetaIncrement){
+			double startAngle = PI/2.0;
+			for(double t=startAngle; t>(startAngle-sweepAngle); t-=thetaIncrement){
 				tf::Point newCoord;
-				Tentacle::calcCoord(this->radius, t, this->radius,resolution, newCoord);
-				if(!(newCoord==lastCoord)){
-					if(newCoord.getX()<0||newCoord.getY()>yDim) break;
+				newCoord.setY(roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
+				newCoord.setX(roundToFrac(this->radius*std::cos(t), resolution));
+				newCoord.setZ(0);
+				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points.push_back(newCoord);
 					lastCoord = newCoord;
 				}
 			}
 		}
 		else{
-			for(double t=0; t<sweepAngle; t+=thetaIncrement){
+			double startAngle = PI/2.0;
+			for(double t=startAngle; t<(startAngle+sweepAngle); t+=thetaIncrement){
 				tf::Point newCoord;
-				Tentacle::calcCoord(-this->radius, t, -this->radius,resolution, newCoord);
-				if(!(newCoord==lastCoord)){
-					if(newCoord.getX()<0||newCoord.getY()>yDim) break;
+				newCoord.setY(roundToFrac(this->radius*std::sin(t)-radius, resolution));
+				newCoord.setX(roundToFrac(this->radius*std::cos(t), resolution));
+				newCoord.setZ(0);
+				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points.push_back(newCoord);
 					lastCoord = newCoord;
 				}
@@ -128,9 +132,7 @@ std::vector<tf::Point >& Tentacle::getPoints(){
  * @f[ x = floor(\frac{radius \times \sine(theta)}{scale}) @f]
  */
 void Tentacle::calcCoord(double radius, double theta, double rshift, double scale, tf::Point& result){
-	result.setY(roundToFrac(radius*std::cos(theta)+rshift, scale));
-	result.setX(roundToFrac(radius*std::sin(theta), scale));
-	result.setZ(0);
+
 }
 
 double Tentacle::roundToFrac(double raw, double frac){
@@ -175,6 +177,7 @@ TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSp
 	//Generate the SpeedSets
 	for(unsigned int v=0; v<numSpeedSet; v++){
 		q = calcQ(v);
+		ROS_INFO("Calculated q=%f",q);
 		this->speedSets.push_back(SpeedSet(expFact, calcSeedRad(v, q), numTentacles, resolution, xDim, yDim, calcSpeedSetVel(minSpeed, maxSpeed, q)));
 	}
 	ROS_INFO("Speed Sets Complete!");
@@ -201,8 +204,9 @@ SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
  * @f$ l=@f$ length of the longest tentacle in the set, and @f$ TSA, E_b, E_f@f$ are all tuning constants determined empirically.
  */
 double TentacleGenerator::calcSeedRad(int speedSet, double q){
-	double dphi = TENTACLE_SWEEP_ANGLE*PI/2.0;
+	double dphi = TENTACLE_SWEEP_ANGLE;
 	double l	= MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
+	ROS_INFO("Calculated dphi=%f, l=%f",dphi, l);
 	return l/(dphi*(1-std::pow(q,0.9)));
 }
 
