@@ -11,6 +11,7 @@
 #include<ros/ros.h>
 #include<tf/transform_datatypes.h>
 #include"OryxPathPlannerConfig.h"
+#include"OryxPathPlanning.h"
 
 #if oryx_path_planner_VERBOSITY
 #define PRINTER ROS_INFO
@@ -78,15 +79,7 @@ private:
 	 * @param rshift	amount to shift the result in the x-axis
 	 * @param result	Reference to a tf::Point to write the result to
 	 */
-	void calcCoord(double radius, double theta, double scale, double rshift, tf::Point& result);
-
-	/**
-	 * Rounds a value to the nearest scale point. EX: raw=12.35, frac=.25, return = 12.25
-	 * @param raw Raw value to round
-	 * @param frac Fraction to scale to
-	 * @return The result of std::floor(raw/scale)*scale
-	 */
-	double roundToFrac(double raw, double frac);
+	//void calcCoord(double radius, double theta, double scale, double rshift, tf::Point& result);
 };
 
 /**

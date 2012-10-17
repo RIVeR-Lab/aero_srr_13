@@ -96,8 +96,8 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 			double startAngle = PI/2.0;
 			for(double t=startAngle; t>(startAngle-sweepAngle); t-=thetaIncrement){
 				tf::Point newCoord;
-				newCoord.setY(roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
-				newCoord.setX(roundToFrac(this->radius*std::cos(t), resolution));
+				newCoord.setY(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
+				newCoord.setX(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
 				newCoord.setZ(0);
 				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points.push_back(newCoord);
@@ -109,8 +109,8 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 			double startAngle = PI/2.0;
 			for(double t=startAngle; t<(startAngle+sweepAngle); t+=thetaIncrement){
 				tf::Point newCoord;
-				newCoord.setY(roundToFrac(this->radius*std::sin(t)-radius, resolution));
-				newCoord.setX(roundToFrac(this->radius*std::cos(t), resolution));
+				newCoord.setY(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-radius, resolution));
+				newCoord.setX(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
 				newCoord.setZ(0);
 				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points.push_back(newCoord);
@@ -131,13 +131,9 @@ std::vector<tf::Point >& Tentacle::getPoints(){
  * @f[ y = floor(\frac{radius \times \cosine(theta)}{scale}+rshift) @f]
  * @f[ x = floor(\frac{radius \times \sine(theta)}{scale}) @f]
  */
-void Tentacle::calcCoord(double radius, double theta, double rshift, double scale, tf::Point& result){
+/*void Tentacle::calcCoord(double radius, double theta, double rshift, double scale, tf::Point& result){
 
-}
-
-double Tentacle::roundToFrac(double raw, double frac){
-	return std::floor(raw/frac)*frac;
-}
+}*/
 
 
 //***************************** SPEED SET *********************************//
