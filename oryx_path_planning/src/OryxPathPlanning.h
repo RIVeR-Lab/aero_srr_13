@@ -22,6 +22,16 @@ inline double roundToFrac(double raw, double frac){
 	return std::floor(raw/frac)*frac;
 }
 
+/**
+ * Turns a real coordinate into an integer value for a grid with a given resolution.
+ * @param raw The raw coordinate value
+ * @param resolution The resolution of the grid to place the point on
+ * @return The location of the point on the grid, equivalent to (int)std::floor(raw*resolution)
+ */
+inline int expandToGrid(double raw, double resolution){
+	return (int)std::floor(raw*resolution);
+}
+
 } /* oryx_path_planning */;
 
 
