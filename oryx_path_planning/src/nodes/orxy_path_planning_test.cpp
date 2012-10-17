@@ -16,11 +16,17 @@ int main(int argc, char **argv) {
 	ROS_INFO("Testing Tentacle Generator...");
 	int xDim=50;
 	int yDim=xDim;
-	oryx_path_planning::TentacleGenerator generator(.1, 2.25, 5, 15, 1.15, .25, xDim, yDim);
+	double resolution = .25;
+	int numTent= 11;
+	double minSpeed = .1;
+	double maxSpeed = 1.5;
+	int numSpeedSet = 5;
+	double expFact = 1.15;
+	oryx_path_planning::TentacleGenerator generator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, resolution, xDim, yDim);
 	ROS_INFO("Tentacles Generated. Printing Speed Sets...");
 	printSpeedSet(xDim, yDim, generator.getSpeedSet(0));
 
-/*	tf::Point test1;
+	/*	tf::Point test1;
 	tf::Point test2;
 
 	test1.a = 1;
@@ -39,17 +45,20 @@ int main(int argc, char **argv) {
 void printSpeedSet(int xDim, int yDim, oryx_path_planning::SpeedSet& speedSet){
 	int xSize = xDim;
 	int ySize = yDim*2;
+	int numTent = speedSet.getNumTentacle();
 	std::vector<std::string> occGrid(xSize, std::string(ySize, ' '));
 
-	for(unsigned int t=0; t<speedSet.getNumTentacle(); t++){
-		oryx_path_planning::Tentacle tentacle = speedSet.getTentacle(t);
-		for(unsigned int p=0; p<tentacle.getPoints().size(); p++){
-			tf::Point point = tentacle.getPoints().at(p);
-			ROS_INFO("Got Point at <%f, %f>", point.getX(), point.getY());
-			point.setY(point.getY()+yDim);
-			ROS_INFO("Placing Point at <%f, %f>", point.getX(), point.getY());
-			occGrid.at((int)point.getX()).replace((int)point.getY(),1,"T");
-		}
+	for(unsigned int t=0; t<numTent; t++){
+		//if(t!=numTent/2){
+			oryx_path_planning::Tentacle tentacle = speedSet.getTentacle(t);
+			for(unsigned int p=0; p<tentacle.getPoints().size(); p++){
+				tf::Point point = tentacle.getPoints().at(p);
+				ROS_INFO("Got Point at <%f, %f>", point.getX(), point.getY());
+				point.setY(point.getY()+yDim);
+				ROS_INFO("Placing Point at <%f, %f>", point.getX(), point.getY());
+				occGrid.at((int)point.getX()).replace((int)point.getY(),1,"T");
+			}
+		//}
 	}
 	std::string output;
 
