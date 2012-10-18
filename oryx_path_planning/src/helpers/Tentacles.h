@@ -9,19 +9,114 @@
 #define TENTACLE_H_
 
 #include<ros/ros.h>
+#include <boost/lexical_cast.hpp>
 #include<tf/transform_datatypes.h>
 #include"OryxPathPlannerConfig.h"
 #include"OryxPathPlanning.h"
 
-#if oryx_path_planner_VERBOSITY
-#define PRINTER ROS_INFO
-#else
-#define PRINTER ROS_DEBUG
-#endif
 
 namespace oryx_path_planning{
-const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant, define it here
 
+/**
+ * @author	Adam Panzica
+ * @brief	Exception to flag when there has been a problem generating a tentacle
+ */
+class TentacleGenerationException : public oryx_path_planning::ChainableException{
+public:
+	/**
+	 * @author Adam Panzica
+	 * @brief Constructor for creating a new exception
+	 * @param index		The index of the tentacle that had the exception
+	 * @param seedRad	The seed radius for the tentacle
+	 * @param velocity	The velocity of the tentacle
+	 * @param message	The error message describing what went wrong
+	 */
+	TentacleGenerationException(int index, double seedRad, double velocity, std::string& message):
+		oryx_path_planning::ChainableException(generateMessage(index, seedRad, velocity, message)){
+
+	}
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Constructor for creating a new exception with an underlying exception that caused it
+	 * @param index		The index of the tentacle that had the exception
+	 * @param seedRad	The seed radius for the tentacle
+	 * @param velocity	The velocity of the tentacle
+	 * @param message	The error message describing what went wrong
+	 * @param cause		The exception which caused this exception
+	 */
+	TentacleGenerationException(int index, double seedRad, double velocity, std::string& message, std::exception& cause):
+		oryx_path_planning::ChainableException(generateMessage(index, seedRad, velocity, message), cause){
+	}
+
+private:
+	std::string& generateMessage(int index, double seedRad, double velocity, std::string& message){
+		message = 	"Tentacle <" +
+				boost::lexical_cast<std::string>(index)+
+				"> with parameters <" +
+				boost::lexical_cast<std::string>(seedRad)+
+				", "+
+				boost::lexical_cast<std::string>(velocity)+
+				"> Had The following Error: "+
+				message;
+		return message;
+	}
+};
+
+/**
+ * @author	Adam Panzica
+ * @brief	Simple accessor exception that provides some debugging details
+ */
+class TentacleAccessException: public oryx_path_planning::ChainableException{
+public:
+	/**
+	 * Default constructor
+	 */
+	TentacleAccessException(){};
+	/**
+	 * @author Adam Panzica
+	 * @param indexTried	The index of the tentacle that was attempted to be accessed
+	 * @param speedSetIndex	The index of the speed set the tentacle is in
+	 */
+	TentacleAccessException(int indexTried, int speedSetIndex){
+		this->message = "Tried to access Invalid Tentacle <"+ boost::lexical_cast<std::string>(indexTried)+ "> in Speed Set "+ boost::lexical_cast<std::string>(speedSetIndex);
+	}
+
+	/**
+	 * @author Adam Panzica
+	 * @param indexTried	The index of the tentacle that was attempted to be accessed
+	 * @param speedSetIndex	The index of the speed set the tentacle is in
+	 * @param message		Explination for what happened
+	 * @param cause			Exception which caused this exception
+	 */
+	TentacleAccessException(int indexTried, int speedSetIndex,std::string& message, std::exception& cause):
+	oryx_path_planning::ChainableException(setUpMessage(indexTried, speedSetIndex, message), cause){
+	}
+
+	~TentacleAccessException() throw(){};
+private:
+	std::string& setUpMessage(int indexTried, int speedSetIndex, std::string& message){
+		message = "Tried to access Invalid Tentacle <"+ boost::lexical_cast<std::string>(indexTried)+ "> in Speed Set <"+ boost::lexical_cast<std::string>(speedSetIndex)+"> which caused: "+message;
+		return message;
+	}
+};
+
+/**
+ * @author	Adam Panzica
+ * @brief	Simple accessor exception that provides some debugging details
+ */
+class SpeedSetAccessException: public oryx_path_planning::ChainableException{
+public:
+	/**
+	 * @author Adam Panzica
+	 * @param indexTried	The index of the speed set that was attempted to be accessed
+	 */
+	SpeedSetAccessException(int indexTried){
+		this->message = "Tried to access Invalid Speed Set"+ boost::lexical_cast<std::string>(indexTried);
+	}
+
+	~SpeedSetAccessException() throw(){};
+};
 
 /**
  * @author Adam Panzica
@@ -45,10 +140,10 @@ public:
 	 * @param xDim			The length of the x-axis of the occupancy grid, in the positive x-direction and of the same units as resolution
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 * @param velocity		The velocity that the tentacle is to be traveled at
-	 *
+	 * @throw TentacleGenerationException If there is a problem generating the tentacle
 	 *
 	 */
-	Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity);
+	Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity) throw (TentacleGenerationException);
 	virtual ~Tentacle();
 
 	/**
@@ -68,7 +163,7 @@ private:
 	double radius;
 	double velocity;
 	std::vector<tf::Point > points; 				///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
-	const static double straightThreshold = 1000;	///Cuttoff radius for what is considered to be essentially a straight line
+	const static double straightThreshold = 1500;	///Cuttoff radius for what is considered to be essentially a straight line
 
 	/**
 	 * @author Adam Panzica
@@ -112,8 +207,9 @@ public:
 	 * @brief Gets a Tentacle from the speed set
 	 * @param index The index of the tentacle to get
 	 * @return A reference to a Tentacle from the speed set
+	 * @throw TentacleAccessException if the tentacle index was invalid
 	 */
-	Tentacle& getTentacle(int index);
+	Tentacle& getTentacle(int index) throw(oryx_path_planning::TentacleAccessException);
 
 	/**
 	 * @author Adam Panzica
@@ -148,13 +244,23 @@ public:
 	virtual ~TentacleGenerator();
 
 	/**
+	 * @author Adam Panzics
+	 * @brief Gets the number of speed sets that were generated
+	 * @return The number of speed sets that were generated
+	 */
+	int getNumSpeedSets();
+
+
+	/**
 	 * @author Adam Panzica
 	 * @brief Gets the tentacle from the given speed set and tentacle index
 	 * @param speedSet	The speed set to look at
 	 * @param index		The index of the tentacle to get
 	 * @return A Tentacle containing all of the data about the requested tentacle
-	 */
-	Tentacle& getTentacle(int speedSet, int index);
+	 * @throw TentacleAccessException if the tentacle index was invalid
+	 * @throw SpeedSetAccessException if the speed set index was invalid
+	  */
+	Tentacle& getTentacle(int speedSet, int index) throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
 
 	/**
 	 * @author Adam Panzica

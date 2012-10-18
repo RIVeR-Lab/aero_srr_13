@@ -53,7 +53,7 @@ Tentacle::Tentacle(){
 
 Tentacle::~Tentacle(){};
 
-Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity){
+Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity) throw (TentacleGenerationException){
 
 	this->velocity= velocity;
 	PRINTER("Generating Tentacle %d", index);
@@ -157,8 +157,14 @@ unsigned int SpeedSet::getNumTentacle(){
 	return this->tentacles.size();
 }
 
-Tentacle& SpeedSet::getTentacle(int index){
-	return this->tentacles.at(index);
+Tentacle& SpeedSet::getTentacle(int index)throw(oryx_path_planning::TentacleAccessException){
+	if(index<0||index>(int)getNumTentacle()) throw new oryx_path_planning::TentacleAccessException(index, 0);
+	try{
+		return this->tentacles.at(index);
+	}catch (std::exception& e){
+		std::string message("Something went wrong!");
+		throw new oryx_path_planning::TentacleAccessException(index, 0, message, e);
+	}
 }
 
 
@@ -171,7 +177,7 @@ TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSp
 
 	double q = 0;
 	//Generate the SpeedSets
-	for(unsigned int v=0; v<numSpeedSet; v++){
+	for(int v=0; v<numSpeedSet; v++){
 		q = calcQ(v);
 		ROS_INFO("Calculated q=%f",q);
 		this->speedSets.push_back(SpeedSet(expFact, calcSeedRad(v, q), numTentacles, resolution, xDim, yDim, calcSpeedSetVel(minSpeed, maxSpeed, q)));
@@ -181,8 +187,19 @@ TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSp
 
 TentacleGenerator::~TentacleGenerator(){};
 
-Tentacle& TentacleGenerator::getTentacle(int speedSet, int index){
-	return this->speedSets.at(speedSet).getTentacle(index);
+int TentacleGenerator::getNumSpeedSets(){
+	return this->speedSets.size();
+}
+
+Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) throw (oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException){
+	if(speedSet<0||speedSet>(int)this->speedSets.size()) throw new oryx_path_planning::SpeedSetAccessException(speedSet);
+	if(index<0||index>(int)this->speedSets.at(speedSet).getNumTentacle()) throw new oryx_path_planning::TentacleAccessException(index, speedSet);
+	try{
+		return this->speedSets.at(speedSet).getTentacle(index);
+	}catch(std::exception& e){
+		std::string message("Something Went Wrong!");
+		throw new oryx_path_planning::TentacleAccessException(index, speedSet, message, e);
+	}
 }
 
 SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
