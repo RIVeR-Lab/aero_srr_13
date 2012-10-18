@@ -34,13 +34,13 @@
 #endif
 
 #ifndef TENTACLE_SWEEP_ANGLE
-#define TENTACLE_SWEEP_ANGLE PI/2.0
+#define TENTACLE_SWEEP_ANGLE (1.2)*PI/2.0
 #else
 #error TENTACLE_SWEEP_ANGLE is already defined!
 #endif
 
 #ifndef THETA_INCREMENT
-#define THETA_INCREMENT PI/1800.0;
+#define THETA_INCREMENT PI/1800.0
 #else
 #error THETA_INCREMENT is already defined!
 #endif
