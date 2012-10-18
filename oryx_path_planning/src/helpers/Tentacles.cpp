@@ -40,7 +40,7 @@
 #endif
 
 #ifndef THETA_INCREMENT
-#define THETA_INCREMENT PI/1080.0;
+#define THETA_INCREMENT PI/1800.0;
 #else
 #error THETA_INCREMENT is already defined!
 #endif
@@ -106,7 +106,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 				newCoord.setX(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
 				newCoord.setZ(0);
 				//If we've hit the top of the occupancy grid, break
-				if(newCoord.getX()>xDim) break;
+				if(newCoord.getX()>xDim||std::abs(newCoord.getY())>yDim) break;
 				//Otherwise push_back the next point if it's not the same as the previous point
 				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points.push_back(newCoord);
@@ -122,7 +122,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 				newCoord.setX(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
 				newCoord.setZ(0);
 				//If we've hit the top of the occupancy grid, break
-				if(newCoord.getX()>xDim) break;
+				if(newCoord.getX()>xDim||std::abs(newCoord.getY())>yDim) break;
 				//Otherwise push_back the next point if it's not the same as the previous point
 				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points.push_back(newCoord);
