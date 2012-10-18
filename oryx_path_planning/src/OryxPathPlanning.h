@@ -23,12 +23,19 @@ const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant,
 class ChainableException: public std::exception{
 public:
 	/**
+	 * Default empty constructor
+	 */
+	ChainableException():
+	message(),
+	cause(){
+	}
+	/**
 	 * Standard Copy constructor
 	 * @param exception The exception to initialize this exception's fields to
 	 */
-	ChainableException(oryx_path_planning::ChainableException exception){
-		this->message(exception.message);
-		this->cause(exception.cause);
+	ChainableException(oryx_path_planning::ChainableException& exception):
+		message(exception.message),
+		cause(exception.cause){
 	}
 
 	/**
@@ -37,9 +44,9 @@ public:
 	 */
 	ChainableException(std::string& message):
 	message(message),
-	cause("ROOT"){
-		this->message += "\nCaused By-> ";
-		this->message += std::string(cause.what());
+	cause(){
+		//this->message += "\nCaused By-> ";
+		//this->message += std::string(cause.what());
 	}
 	/**
 	 * Constructor for creating a new exception with a cause
@@ -52,13 +59,8 @@ public:
 		this->message += "\nCaused By-> ";
 		this->message += std::string(cause.what());
 	}
-	/**
-	 * Deletes the message and cause fields
-	 */
-	virtual ~ChainableException(){
-		delete this->message;
-		delete this->cause;
-	}
+
+	~ChainableException() throw(){};
 
 	/**
 	 * Returns the chained error message in the form of:
