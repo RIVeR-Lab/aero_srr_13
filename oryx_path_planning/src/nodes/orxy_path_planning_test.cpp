@@ -17,17 +17,18 @@ int main(int argc, char **argv) {
 	int xDim=25;
 	int yDim=xDim;
 	double resolution = .25;
-	int numTent= 23;
+	int numTent= 81;
 	double minSpeed = .1;
 	double maxSpeed = 1.5;
-	int numSpeedSet = 5;
+	int numSpeedSet = 6;
 	double expFact = 1.15;
 	oryx_path_planning::TentacleGenerator generator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, resolution, xDim, yDim);
 	ROS_INFO("Tentacles Generated. Printing Speed Sets...");
-	for(int s=0; s<numSpeedSet; s++){
+	for(int s=0; s<generator.getNumSpeedSets()-1; s++){
 		printSpeedSet(xDim, yDim, resolution, generator.getSpeedSet(s));
 	}
 
+	ROS_INFO("Speed Sets Printed!");
 	/*	tf::Point test1;
 	tf::Point test2;
 
@@ -40,6 +41,19 @@ int main(int argc, char **argv) {
 	test1 = test2;
 	ROS_INFO("Answer to if Test1==Test2 is %s", (test1==test2)?"TRUE":"FALSE");*/
 
+	try{
+		std::string testMessage("Testing the Exceptions");
+		std::string testMessage2("Another Exception");
+		std::string testMessage3("Yet another Exception!!");
+		oryx_path_planning::TentacleGenerationException exception3(10, 13.0, 7.1, testMessage3);
+		 oryx_path_planning::ChainableException exception2(testMessage2, exception3);
+		oryx_path_planning::TentacleGenerationException exception(1, 1.0, 1.1, testMessage,exception2);
+		throw  exception;
+	}catch (oryx_path_planning::ChainableException& e){
+		ROS_INFO("Caught an Exception!:");
+		ROS_INFO(std::string(e.what()).c_str());
+	}
+
 	return 0;
 }
 
@@ -48,23 +62,24 @@ void printSpeedSet(int xDim, int yDim, double resolution, oryx_path_planning::Sp
 	int xSize = xDim/resolution;
 	int ySize = (yDim/resolution)*2;
 	int numTent = speedSet.getNumTentacle();
-	std::vector<std::string> occGrid(xSize, std::string(ySize, ' '));
-
-	for(unsigned int t=0; t<numTent; t++){
-		//if(t!=numTent/2){
+	std::vector<std::string> occGrid(xSize+1, std::string(ySize+1, '_'));
+	ROS_INFO("Occupancy Gird Generated");
+	for(int t=0; t<numTent; t++){
 		oryx_path_planning::Tentacle tentacle = speedSet.getTentacle(t);
+		//ROS_INFO("Got Tentacle %d", t);
 		for(unsigned int p=0; p<tentacle.getPoints().size(); p++){
-			tf::Point point = tentacle.getPoints().at(p);
+			tf::Point point(tentacle.getPoints().at(p));
 			//ROS_INFO("Got Point at <%f, %f>", point.getX(), point.getY());
-			point.setY(point.getY()+ySize/2);
+			point.setX(oryx_path_planning::roundToGrid(point.getX(), resolution));
+			point.setY(oryx_path_planning::roundToGrid(point.getY(), resolution)+ySize/2);
 			//ROS_INFO("Placing Point at <%f, %f>", point.getX(), point.getY());
-			occGrid.at(oryx_path_planning::roundToGrid(point.getX(), resolution)).replace(oryx_path_planning::roundToGrid(point.getY(), resolution),1,"T");
+			occGrid.at(point.getX()).replace(point.getY(),1,"T");
 		}
-		//}
+		//ROS_INFO("Done with Tentacle %d", t);
 	}
 	std::string output;
 
-	for(int i=0;i<occGrid.size(); i++){
+	for(unsigned int i=0;i<occGrid.size(); i++){
 		output+=occGrid.at(i);
 		output+="\r\n";
 	}
