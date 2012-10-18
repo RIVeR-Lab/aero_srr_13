@@ -11,20 +11,26 @@ void printSpeedSet(int xDim, int yDim, double resoltuion, oryx_path_planning::Sp
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "oryx_path_planning_test");
-	ros::NodeHandle nh;
+	ros::NodeHandle nh("~");
+
 
 	ROS_INFO("Testing Tentacle Generator...");
-	int xDim=25;
-	int yDim=xDim;
+	int xDim=50;
+	int yDim=xDim/2;
 	double resolution = .25;
 	int numTent= 81;
 	double minSpeed = .1;
 	double maxSpeed = 1.5;
-	int numSpeedSet = 6;
+	int numSpeedSet = 16;
 	double expFact = 1.15;
+	int firstSpeedSet=0;
+	int lastSpeedSet=numSpeedSet;
 	oryx_path_planning::TentacleGenerator generator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, resolution, xDim, yDim);
 	ROS_INFO("Tentacles Generated. Printing Speed Sets...");
-	for(int s=0; s<generator.getNumSpeedSets()-1; s++){
+	if(!nh.getParam("first_speed_set", firstSpeedSet))ROS_WARN("First Speed Set Not Set! Using Default %d", firstSpeedSet);
+	if(!nh.getParam("last_speed_set", lastSpeedSet))ROS_WARN("Last Speed Set Not Set! Using Default %d", lastSpeedSet);
+
+	for(int s=firstSpeedSet; s<lastSpeedSet; s++){
 		printSpeedSet(xDim, yDim, resolution, generator.getSpeedSet(s));
 	}
 
