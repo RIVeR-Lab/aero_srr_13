@@ -39,6 +39,12 @@
 #error TENTACLE_SWEEP_ANGLE is already defined!
 #endif
 
+#ifndef THETA_INCREMENT
+#define THETA_INCREMENT PI/1080.0;
+#else
+#error THETA_INCREMENT is already defined!
+#endif
+
 //************************************************ IMPLEMENTATION ***************************************//
 namespace oryx_path_planning{
 
@@ -87,7 +93,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		tf::Point lastCoord;
 		lastCoord.setZero();
 		//The amount to increment theta by
-		double thetaIncrement	= oryx_path_planning::PI/360;
+		double thetaIncrement	= THETA_INCREMENT;
 		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
 		//Push the first coordinate on
 		this->points.push_back(lastCoord);
@@ -99,6 +105,9 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 				newCoord.setY(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
 				newCoord.setX(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
 				newCoord.setZ(0);
+				//If we've hit the top of the occupancy grid, break
+				if(newCoord.getX()>xDim) break;
+				//Otherwise push_back the next point if it's not the same as the previous point
 				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points.push_back(newCoord);
 					lastCoord = newCoord;
@@ -112,6 +121,9 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 				newCoord.setY(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-radius, resolution));
 				newCoord.setX(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
 				newCoord.setZ(0);
+				//If we've hit the top of the occupancy grid, break
+				if(newCoord.getX()>xDim) break;
+				//Otherwise push_back the next point if it's not the same as the previous point
 				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points.push_back(newCoord);
 					lastCoord = newCoord;
@@ -249,3 +261,4 @@ double TentacleGenerator::calcQ(int speedSet){
 #undef EXP_TENTACLE_LENGTH_BASE
 #undef EXP_TENTACLE_LENGTH_FACTOR
 #undef TENTACLE_SWEEP_ANGLE
+#undef THETA_INCREMENT
