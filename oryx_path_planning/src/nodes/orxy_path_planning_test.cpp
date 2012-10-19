@@ -47,17 +47,15 @@ int main(int argc, char **argv) {
 	test1 = test2;
 	ROS_INFO("Answer to if Test1==Test2 is %s", (test1==test2)?"TRUE":"FALSE");*/
 
+	ROS_INFO("Testing Tentacle Traversal");
 	try{
-		std::string testMessage("Testing the Exceptions");
-		std::string testMessage2("Another Exception");
-		std::string testMessage3("Yet another Exception!!");
-		oryx_path_planning::TentacleGenerationException exception3(10, 13.0, 7.1, testMessage3);
-		 oryx_path_planning::ChainableException exception2(testMessage2, exception3);
-		oryx_path_planning::TentacleGenerationException exception(1, 1.0, 1.1, testMessage,exception2);
-		throw  exception;
-	}catch (oryx_path_planning::ChainableException& e){
-		ROS_INFO("Caught an Exception!:");
-		ROS_INFO(std::string(e.what()).c_str());
+		oryx_path_planning::Tentacle::TentacleTraverser traverser(generator.getTentacle(firstSpeedSet, 0));
+		while(traverser.hasNext()){
+			tf::Point travPoint = traverser.next();
+			ROS_INFO("Traversed Point <%f, %f>, total length = %f", travPoint.getX(), travPoint.getY(), traverser.lengthTraversed());
+		}
+	}catch (std::exception& e){
+		ROS_ERROR(e.what());
 	}
 
 	return 0;
