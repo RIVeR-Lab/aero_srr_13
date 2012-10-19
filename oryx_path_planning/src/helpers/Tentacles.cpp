@@ -45,8 +45,95 @@
 #error THETA_INCREMENT is already defined!
 #endif
 
+typedef oryx_path_planning::Tentacle::TentacleTraverser TentTrav;	///Namespace declaration to make implementation of TentacleTraverser easier
+
 //************************************************ IMPLEMENTATION ***************************************//
 namespace oryx_path_planning{
+
+//******************** TENTACLE::TENTACLETRAVERSER ***********************//
+/**
+ * Sets both lastPoint and nextPoint to points.at(0), unless the points vector is empty in which case empty is set to true
+ */
+TentTrav::TentacleTraverser(Tentacle& tentacle){
+	//If we have a normal set of points, initialize as normal
+	if(tentacle.getPoints().size() > 1){
+		this->start		= tentacle.getPoints().begin();
+		this->end		= tentacle.getPoints().end();
+		this->lastPoint	= &tentacle.getPoints().at(0);
+		this->nextPoint	= &tentacle.getPoints().at(0);
+		this->length	= 0;
+		this->empty		= false;
+	}
+	//If we only got a single point, still initialize the point values, but set empty true
+	else if(tentacle.getPoints().size() == 1){
+		this->start		= tentacle.getPoints().begin();
+		this->end		= tentacle.getPoints().end();
+		this->lastPoint = &tentacle.getPoints().at(0);
+		this->nextPoint = &tentacle.getPoints().at(0);
+		this->empty 	= true;
+	}
+	//If we got a completely empty vector, set empty true, do not initialize point values
+	else {
+		this->empty = true;
+		this->nextPoint = NULL;
+		this->lastPoint = NULL;
+	}
+}
+
+TentTrav::~TentacleTraverser(){
+};
+
+bool TentTrav::hasNext(){
+	return !this->empty;
+}
+
+/**
+ * Calling this method also updates the traversed length.
+ * The traversed length is calculated using linear approximation:
+ * @f[ l_t = \sum\limits_{n=1}^k d(p_(n-1), p_n) @f]
+ * Where @f$ d(p_(k-1), p_k) @f$ is the linear distance between points @f$ p_(n-1) \text{ and } p_n @f$ .
+ *
+ */
+const tf::Point& TentTrav::next(){
+	//If they're not equal, and we're not empty, we're already in the traversal, process the next point
+	if((*this->nextPoint != *this->lastPoint)&&!this->empty){
+		//Update the calculated length along the Tentacle we've traversed
+		this->length += tf::tfDistance(*this->lastPoint, *this->nextPoint);
+
+		//Set lastPoint to nextPoint so that nextPoint can be updated if possible
+		this->lastPoint = this->nextPoint;
+
+		//Increment the traversal and check for end
+		this->start++;
+		if(this->start>= this->end){
+			this->empty = true;
+		}
+		//Otherwise update nextPoint
+		else{
+			this->nextPoint = &*this->start;
+		}
+
+		//Return lastPoint, which was nextPoint when this method was originally called unless the traversal was empty
+		return *this->lastPoint;
+	}
+	//If we're empty, just return lastPoint which will be the final point in the traversal
+	else if(empty){
+		return *this->lastPoint;
+	}
+	//If they're equal and we're not empty, we haven't started the traversal, so start it
+	else{
+		if(this->start != this->end){
+			this->start++;
+			this->nextPoint = &*this->start;
+		} else this->empty = true;
+		return *this->lastPoint;
+	}
+}
+
+
+double TentTrav::lengthTraversed(){
+	return this->length;
+}
 
 //***************************** TENTACLE *********************************//
 /**
