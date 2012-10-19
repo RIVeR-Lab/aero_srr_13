@@ -124,6 +124,7 @@ public:
  */
 class Tentacle{
 public:
+
 	/**
 	 * @author	Adam Panzics
 	 * @brief	Default constructor for creating an uninitialized Tentacle
@@ -159,9 +160,49 @@ public:
 	 * @return A reference to a vector containing a set of pairs which represent the x/y coordinates relative to robot-center
 	 */
 	std::vector<tf::Point >& getPoints();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Helper class for traversing an oryx_path_planning::Tentacle
+	 */
+	class TentacleTraverser{
+	public:
+		/**
+		 * @author Adam Panzica
+		 * @brief Constructs a new TentacleTraverser over a given set of points
+		 * @param points A vector containing the points of the oryx_path_planning::Tentacle to traverse.
+		 * Note that the traverser assumes that the points are in order, starting at <0,0,0> and going outward along the tentacle
+		 */
+		TentacleTraverser(const std::vector<tf::Point>& points);
+		/**
+		 * Default destructor
+		 */
+		virtual ~TentacleTraverser();
+		/**
+		 * @author Adam Panzica
+		 * @brief Gets the next point in the traversal
+		 * @return The next tf::Point along the tentacle
+		 */
+		const tf::Point& next();
+		/**
+		 * @author Adam Panzica
+		 * @brief Gets the length traversed thus far along the Tentacle
+		 * @return The length traversed so far along the tentacle
+		 * The traversed length is calculated using linear approximation and is updated with each call to the next() method.
+		 * @f[ l_t = \sum\limits_{n=1}^k d(p_(n-1), p_n) @f]
+		 * Where @f$ d(p_(k-1), p_k) @f$ is the linear distance between points @f$ p_(n-1) \text{ and } p_n @f$ .
+		 */
+		double lengthTraversed();
+	private:
+		double lengthTraversed;					///The current length traversed along the Tentacle
+		tf::Point& lastPoint;					///The last point that was passed
+		tf::Point& nextPoint;					///The next point that will be passed
+		const std::vector<tf::Point>& points;	///The vector of all the Points along the Tentacle
+	};
+
 private:
-	double radius;
-	double velocity;
+	double radius;									///Radius of the Tentacle
+	double velocity;								///Velocity of the Tentacle
 	std::vector<tf::Point > points; 				///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
 	const static double straightThreshold = 1500;	///Cuttoff radius for what is considered to be essentially a straight line
 
