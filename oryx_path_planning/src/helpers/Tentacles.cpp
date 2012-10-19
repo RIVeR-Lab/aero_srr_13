@@ -180,7 +180,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		tf::Point lastCoord;
 		lastCoord.setZero();
 		//The amount to increment theta by
-		double thetaIncrement	= THETA_INCREMENT;
+		double thetaIncrement	= PI/((5.0/resolution)*std::floor(std::abs(this->radius)));
 		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
 		//Push the first coordinate on
 		this->points.push_back(lastCoord);

@@ -18,23 +18,26 @@ const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant,
  * @author Adam Panzics
  * @brief basic chainable exception class
  *
- * Provides an implementation of std::exception which allows for chaining of exceptions
+ * Provides an implementation of std::exception which allows for chaining of exceptions.
+ * Returns the chained error message in the form of:
+ *
+ * "this_message \n Caused By-> that_message"
  */
-class ChainableException: public std::exception{
+class ChainableException: public std::runtime_error{
 public:
 	/**
 	 * Default empty constructor
 	 */
 	ChainableException():
-	message(),
-	cause(){
+		std::runtime_error(""),
+		cause(){
 	}
 	/**
 	 * Standard Copy constructor
 	 * @param exception The exception to initialize this exception's fields to
 	 */
 	ChainableException(oryx_path_planning::ChainableException& exception):
-		message(exception.message),
+		std::runtime_error(exception),
 		cause(exception.cause){
 	}
 
@@ -43,10 +46,8 @@ public:
 	 * @param message The error message for this exception
 	 */
 	ChainableException(std::string& message):
-	message(message),
-	cause(){
-		//this->message += "\nCaused By-> ";
-		//this->message += std::string(cause.what());
+		std::runtime_error(message),
+		cause(){
 	}
 	/**
 	 * Constructor for creating a new exception with a cause
@@ -54,24 +55,11 @@ public:
 	 * @param cause		The exception which caused this exception
 	 */
 	ChainableException(std::string& message, std::exception& cause):
-	message(message),
-	cause(cause){
-		this->message += "\nCaused By-> ";
-		this->message += std::string(cause.what());
+		std::runtime_error(genMessage(message, cause)),
+		cause(cause){
 	}
 
 	~ChainableException() throw(){};
-
-	/**
-	 * Returns the chained error message in the form of:
-	 *
-	 * "this_message \n Caused By-> that_message"
-	 * @return A char* to a null-terminated character array containing the chained error message
-	 */
-	virtual const char* what() const throw()
-	 {
-	    return this->message.c_str();
-	 }
 
 	/**
 	 * Gets the raw exception that caused this exception
@@ -81,8 +69,13 @@ public:
 		return this->cause;
 	}
 protected:
-	std::string		message;	///The error message of this ChaingedException
 	std::exception	cause;		///The exception which caused this ChaingedException
+
+	std::string& genMessage(std::string& message, std::exception& cause){
+		message += "\nCaused By-> ";
+		message += std::string(cause.what());
+		return message;
+	}
 };
 
 /**

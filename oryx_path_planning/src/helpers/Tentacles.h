@@ -77,26 +77,27 @@ public:
 	 * @author Adam Panzica
 	 * @param indexTried	The index of the tentacle that was attempted to be accessed
 	 * @param speedSetIndex	The index of the speed set the tentacle is in
+	 * @param message		An optional message discribing what went wrong
 	 */
-	TentacleAccessException(int indexTried, int speedSetIndex){
-		this->message = "Tried to access Invalid Tentacle <"+ boost::lexical_cast<std::string>(indexTried)+ "> in Speed Set "+ boost::lexical_cast<std::string>(speedSetIndex);
+	TentacleAccessException(int indexTried, int speedSetIndex, std::string& message = *(new std::string())):
+	oryx_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message)){
 	}
 
 	/**
 	 * @author Adam Panzica
 	 * @param indexTried	The index of the tentacle that was attempted to be accessed
 	 * @param speedSetIndex	The index of the speed set the tentacle is in
-	 * @param message		Explination for what happened
+	 * @param message		Explanation for what happened
 	 * @param cause			Exception which caused this exception
 	 */
-	TentacleAccessException(int indexTried, int speedSetIndex,std::string& message, std::exception& cause):
-	oryx_path_planning::ChainableException(setUpMessage(indexTried, speedSetIndex, message), cause){
+	TentacleAccessException(int indexTried, int speedSetIndex, std::string& message, std::exception& cause):
+	oryx_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message), cause){
 	}
 
 	~TentacleAccessException() throw(){};
 private:
-	std::string& setUpMessage(int indexTried, int speedSetIndex, std::string& message){
-		message = "Tried to access Invalid Tentacle <"+ boost::lexical_cast<std::string>(indexTried)+ "> in Speed Set <"+ boost::lexical_cast<std::string>(speedSetIndex)+"> which caused: "+message;
+	std::string& generateMessage(int indexTried, int speedSetIndex, std::string& message){
+		message = "Tried to access Invalid Tentacle <"+ boost::lexical_cast<std::string>(indexTried)+ "> in Speed Set <"+ boost::lexical_cast<std::string>(speedSetIndex)+">: "+message;
 		return message;
 	}
 };
@@ -110,12 +111,18 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @param indexTried	The index of the speed set that was attempted to be accessed
+	 * @param message		Optional discriptive error message
 	 */
-	SpeedSetAccessException(int indexTried){
-		this->message = "Tried to access Invalid Speed Set"+ boost::lexical_cast<std::string>(indexTried);
+	SpeedSetAccessException(int indexTried, std::string& message = *(new std::string())):
+	oryx_path_planning::ChainableException(generateMessage(indexTried, message)){
 	}
 
 	~SpeedSetAccessException() throw(){};
+private:
+	std::string& generateMessage(int indexTried, std::string& message){
+		message = "Tried to access Invalid Speed Set "+ boost::lexical_cast<std::string>(indexTried)+": "+ message;
+		return message;
+	}
 };
 
 /**
