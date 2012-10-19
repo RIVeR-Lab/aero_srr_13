@@ -35,18 +35,6 @@ int main(int argc, char **argv) {
 	}
 
 	ROS_INFO("Speed Sets Printed!");
-	/*	tf::Point test1;
-	tf::Point test2;
-
-	test1.a = 1;
-	test1.b = 1;
-	test2.a = 3;
-	test2.b = 1;
-
-	ROS_INFO("Answer to if Test1==Test2 is %s", (test1==test2)?"TRUE":"FALSE");
-	test1 = test2;
-	ROS_INFO("Answer to if Test1==Test2 is %s", (test1==test2)?"TRUE":"FALSE");*/
-
 	ROS_INFO("Testing Tentacle Traversal");
 	try{
 		oryx_path_planning::Tentacle::TentacleTraverser traverser(generator.getTentacle(firstSpeedSet, 0));
@@ -55,7 +43,18 @@ int main(int argc, char **argv) {
 			ROS_INFO("Traversed Point <%f, %f>, total length = %f", travPoint.getX(), travPoint.getY(), traverser.lengthTraversed());
 		}
 	}catch (std::exception& e){
-		ROS_ERROR(e.what());
+		ROS_ERROR("%s",e.what());
+	}
+
+	ROS_INFO("Test Some Exceptions:");
+
+	oryx_path_planning::SpeedSetAccessException testE1(100);
+	oryx_path_planning::TentacleAccessException testE2(1, 100, *(new std::string("Testing of Chained Exceptions")), testE1);
+
+	try{
+		throw testE2;
+	}catch (std::exception& e){
+		ROS_ERROR("%s", e.what());
 	}
 
 	return 0;
@@ -75,7 +74,7 @@ void printSpeedSet(int xDim, int yDim, double resolution, oryx_path_planning::Sp
 			tf::Point point(tentacle.getPoints().at(p));
 			//ROS_INFO("Got Point at <%f, %f>", point.getX(), point.getY());
 			point.setX(oryx_path_planning::roundToGrid(point.getX(), resolution));
-			point.setY(oryx_path_planning::roundToGrid(point.getY(), resolution)+ySize/2);
+			point.setY(oryx_path_planning::roundToGrid(point.getY(), resolution)+(ySize/2));
 			//ROS_INFO("Placing Point at <%f, %f>", point.getX(), point.getY());
 			occGrid.at(point.getX()).replace(point.getY(),1,"T");
 		}
