@@ -11,8 +11,7 @@
 #include<ros/ros.h>
 #include <boost/lexical_cast.hpp>
 #include<tf/transform_datatypes.h>
-#include"OryxPathPlannerConfig.h"
-#include"OryxPathPlanning.h"
+#include"OryxPathPlanningUtilities.h"
 
 
 namespace oryx_path_planning{

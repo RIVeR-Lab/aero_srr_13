@@ -5,7 +5,7 @@
  * @brief	Simple test node
  */
 #include <ros/ros.h>
-#include "Tentacles.h"
+#include "OryxPathPlanning.h"
 
 void printSpeedSet(int xDim, int yDim, double resoltuion, oryx_path_planning::SpeedSet& speedSet);
 

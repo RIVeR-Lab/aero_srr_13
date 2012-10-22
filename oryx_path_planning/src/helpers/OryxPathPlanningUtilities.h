@@ -1,5 +1,5 @@
 /**
- * @file	OryxPathPlanning.h
+ * @file	OryxPathPlanningUtilities.h
  * @date	Oct 17, 2012
  * @author	Adam Panzica
  * @brief	Header containing definitions that are used throughout the oryx_path_planning package
