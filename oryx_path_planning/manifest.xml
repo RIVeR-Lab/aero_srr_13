@@ -18,7 +18,8 @@
   <depend package="actionlib_msgs"/>
   <depend package="costmap_2d"/>
   <depend package="geometry_msgs"/>
-
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
 </package>
 
 
