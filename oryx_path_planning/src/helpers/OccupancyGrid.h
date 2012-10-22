@@ -29,14 +29,14 @@ namespace oryx_path_planning{
  * The integer enumeration value is mapped to an RGBA color space representation for ease of translating to color map
  * as well as to allow for using the pcl::PointRBGA class to represent data
  */
-enum PointTrait{
+typedef enum PointTrait_t{
 	OBSTACLE		= 0xFF0000, //!< OBSTACLE		Point on the grid contains an obstacle (Red)
 	INFLATED		= 0x0000FF,	//!< INFLATED		Point on the grid is occupied by a safety inflation radius (Blue)
 	UNKNOWN			= 0x808080, //!< UNKNOWN		Point on the grid is unknown (Grey)
 	FREE_HIGH_COST	= 0x008080,	//!< FREE_HIGH_COST	Point on the grid is free but is expensive to travel over (Teal)
 	FREE_LOW_COST	= 0x008000, //!< FREE_LOW_COST	Point on the grid is free but is easy to travel over (Green)
 	GOAL            = 0xFFFF00	//!< GOAL			Point on the grid is the goal position (Yellow)
-};
+} PointTrait;
 
 /**
  * @author Adam Panzica
@@ -105,7 +105,7 @@ public:
 	 * @param resolution	The grid resolution of the occupancy grid
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::PointTrait seedTrait);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::PointTrait_t seedTrait);
 	/**
 	 * Default destructor
 	 */
@@ -130,7 +130,7 @@ public:
 	 * @param trait	The PointTrait to set the point to
 	 * @return True if succesful, else false
 	 */
-	bool setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait trait);
+	bool setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait);
 
 	/**
 	 * @author	Adam Panzica

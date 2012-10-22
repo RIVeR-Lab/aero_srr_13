@@ -57,6 +57,9 @@ int main(int argc, char **argv) {
 		ROS_ERROR("%s", e.what());
 	}
 
+	ROS_INFO("Testing Occupancy Grid");
+	oryx_path_planning::OccupancyGrid testGrid(50,50, 1, .25, oryx_path_planning::UNKNOWN);
+	ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 	return 0;
 }
 
