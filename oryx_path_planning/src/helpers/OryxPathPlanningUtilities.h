@@ -98,6 +98,16 @@ inline int roundToGrid(double raw, double resolution){
 	return (int)std::floor(raw/resolution);
 }
 
+/**
+ * Turns a given point in grid coordinates into a real value
+ * @param grid			The point on the grid
+ * @param resolution	The resolution of the grid
+ * @return A double corresponding to a real value represented by a grid coordinate
+ */
+inline double gridToReal(int grid, double resolution){
+	return (double)grid/resolution;
+}
+
 } /* oryx_path_planning */;
 
 
