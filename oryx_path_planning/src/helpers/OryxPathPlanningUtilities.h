@@ -5,8 +5,8 @@
  * @brief	Header containing definitions that are used throughout the oryx_path_planning package
  */
 
-#ifndef ORYXPATHPLANNING_H_
-#define ORYXPATHPLANNING_H_
+#ifndef ORYXPATHPLANNINGUTILITIES_H_
+#define ORYXPATHPLANNINGUTILITIES_H_
 
 #include <ros/ros.h>
 
@@ -101,4 +101,4 @@ inline int roundToGrid(double raw, double resolution){
 } /* oryx_path_planning */;
 
 
-#endif /* ORYXPATHPLANNING_H_ */
+#endif /* ORYXPATHPLANNINGUTILITIES_H_ */
