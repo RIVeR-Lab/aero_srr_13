@@ -14,6 +14,7 @@
 #include <pcl/ros/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/ros/register_point_struct.h>
 
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanningUtilities.h"
@@ -25,14 +26,16 @@ namespace oryx_path_planning{
 /**
  * @author Adam Panzica
  * @brief Enum for describing the state of a point
+ * The integer enumeration value is mapped to an RGBA color space representation for ease of translating to color map
+ * as well as to allow for using the pcl::PointRBGA class to represent data
  */
 enum PointTrait{
-	OBSTACLE,        //!< OBSTACLE			Point on the grid contains an obstacle
-	INFLATED,		 //!< INFLATED			Point on the grid is occupied by a safety inflation radius
-	UNKNOWN,         //!< UNKNOWN			Point on the grid is unknown
-	FREE_HIGH_COST,	 //!< FREE_HIGH_COST	Point on the grid is free but is expensive to travel over
-	FREE_LOW_COST,   //!< FREE_LOW_COST		Point on the grid is free but is easy to travel over
-	GOAL             //!< GOAL				Point on the grid is the goal position
+	OBSTACLE		= 0xFF0000, //!< OBSTACLE		Point on the grid contains an obstacle (Red)
+	INFLATED		= 0x0000FF,	//!< INFLATED		Point on the grid is occupied by a safety inflation radius (Blue)
+	UNKNOWN			= 0x808080, //!< UNKNOWN		Point on the grid is unknown (Grey)
+	FREE_HIGH_COST	= 0x008080,	//!< FREE_HIGH_COST	Point on the grid is free but is expensive to travel over (Teal)
+	FREE_LOW_COST	= 0x008000, //!< FREE_LOW_COST	Point on the grid is free but is easy to travel over (Green)
+	GOAL            = 0xFFFF00	//!< GOAL			Point on the grid is the goal position (Yellow)
 };
 
 /**
@@ -65,7 +68,7 @@ public:
 
 	inline PointXYZWithTrait(oryx_path_planning::PointXYZWithTrait& point):
 		PointXYZ(point){
-		this->point_trait = point.getTrait();
+		this->point_trait = point.point_trait;
 	}
 
 	/**
@@ -73,24 +76,6 @@ public:
 	 */
 	inline virtual ~PointXYZWithTrait(){};
 
-	/**
-	 * @author	Adam Panzica
-	 * @brief	Gets the PointTrait of this point
-	 * @return	The PointTrait associated with this point
-	 */
-	inline oryx_path_planning::PointTrait getTrait(){
-		return this->point_trait;
-	}
-
-	/**
-	 * @author	Adam Panzica
-	 * @brief	Sets the PointTrait associated with this point
-	 * @param trait The PointTrait to set this point to
-	 */
-	inline void setTrait(oryx_path_planning::PointTrait trait){
-		this->point_trait = trait;
-	}
-protected:
 	oryx_path_planning::PointTrait point_trait;	///The PointTrait associated with the point
 };
 
@@ -152,7 +137,7 @@ public:
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
 	 * @return	A boost::shared_pt containing the PointCloud<oryx_path_planning::PointXYZWithTrait> which backs this occupancy grid
 	 */
-	boost::shared_ptr<pcl::PointCloud<oryx_path_planning::PointXYZWithTrait>> getGrid();
+	boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > getGrid();
 
 	/**
 	 * @author	Adam Panzica
@@ -175,7 +160,7 @@ private:
 	double yDim;	///The y size of this grid
 	double zDim;	///The z size of this grid
 	double res;		///The grid resolution of this occupancy grid
-	boost::shared_ptr<pcl::PointCloud<oryx_path_planning::PointXYZWithTrait> > occGrid;		///A smart pointer to the point cloud which contains the data for this occupancy grid
+	boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > occGrid;		///A smart pointer to the point cloud which contains the data for this occupancy grid
 };
 };
 #endif /* OCCUPANCYGRID_H_ */
