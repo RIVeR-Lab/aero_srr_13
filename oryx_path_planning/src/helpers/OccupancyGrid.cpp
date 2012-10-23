@@ -30,9 +30,9 @@ OccupancyGrid::OccupancyGrid(oryx_path_planning::OccupancyGrid& grid){
 	this->yDim	= grid.yDim;
 	this->zDim	= grid.zDim;
 	this->res	= grid.res;
-	this->xSize = roundToGrid(this->xDim, this->res);
-	this->ySize = roundToGrid(this->yDim, this->res);
-	this->zSize = roundToGrid(this->zDim, this->res);
+	this->xSize = grid.xSize;
+	this->ySize = grid.ySize;
+	this->zSize = grid.zSize;
 	this->occGrid = grid.getGrid();
 };
 
