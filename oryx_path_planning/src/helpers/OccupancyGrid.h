@@ -14,7 +14,6 @@
 #include <pcl/ros/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/ros/register_point_struct.h>
 
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanningUtilities.h"
@@ -88,20 +87,33 @@ public:
 	 * @param xDim			The size of the occupancy grid in real units in the x-axis
 	 * @param yDim			The size of the occupancy grid in real units in the y-axis
 	 * @param resolution	The grid resolution of the occupancy grid
-	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to
+	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double resolution, PointTrait_t seedTrait);
+	OccupancyGrid(double xDim, double yDim, double resolution, PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new Occupancy Grid with a given set of dimensions and grid resolution
 	 * @param xDim			The size of the occupancy grid in real units in the x-axis
 	 * @param yDim			The size of the occupancy grid in real units in the y-axis
-	 * @param zDim			The size of the occupancy grid in real units in the y-axis
+	 * @param zDim			The size of the occupancy grid in real units in the z-axis
 	 * @param resolution	The grid resolution of the occupancy grid
-	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to
+	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::PointTrait_t seedTrait);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Creates a new OccupancyGrid which uses a supplied PointCloud as its base
+	 * @param xDim			The size of the occupancy grid in real units in the x-axis
+	 * @param yDim			The size of the occupancy grid in real units in the y-axis
+	 * @param zDim			The size of the occupancy grid in real units in the z-axis. For a 2D PointCloud, specify a zDim of Zero and insure that all z-values in the XYZ data of the points are 0.
+	 * @param resolution	The grid resolution of the occupancy grid
+	 * @param cloud			The PointCloud to use as the base for the occupancy grid
+	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
+	 */
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, pcl::PointCloud<pcl::PointXYZRGBA>& cloud) throw(OccupancyGridAccessException);
+
 	/**
 	 * Default destructor
 	 */

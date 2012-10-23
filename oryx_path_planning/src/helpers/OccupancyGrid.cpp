@@ -7,6 +7,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+
+
 #include "OccupancyGrid.h"
 
 using namespace oryx_path_planning;
@@ -64,6 +66,37 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, PointT
 	//ROS_INFO("Calculated Occupancy Grid Size: %d", this->occGrid.get()->size());
 	//Initialize the grid
 	intializeGrid(seedTrait);
+}
+
+/**
+ * This constructor takes a PointCloud, which may or may not have its points in any particular order, and copies it into
+ * the PointCloud which backs this occupancy grid. In the process it organizes the points in such a fashion as to make them
+ * accessible quickly by <x,y,z> coordinates without the need for iteration and comparison. Since there is no built in provision
+ * to bounds-check the XYZ data in the Points in the given PointCloud, this constructor will throw an exception if a Point in
+ * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
+ */
+OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, pcl::PointCloud<pcl::PointXYZRGBA>& cloud) throw(OccupancyGridAccessException):
+		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*roundToGrid(zDim, resolution),1)){
+	this->xDim	= roundToFrac(xDim, resolution);
+	this->yDim	= roundToFrac(yDim, resolution);
+	this->zDim	= roundToFrac(zDim, resolution);
+	this->res	= resolution;
+	this->xSize = roundToGrid(this->xDim, this->res);
+	this->ySize = roundToGrid(this->yDim, this->res);
+	//Check for a 2D PointCloud
+	if(this->zDim!=0)this->zSize = roundToGrid(this->zDim, this->res);
+	else this->zSize = 1;
+
+	//Iterate across the supplied point cloud and fill in the occupancy grid
+	for(pcl::PointCloud<pcl::PointXYZRGBA>::iterator iterator(cloud.begin()); iterator<cloud.end(); iterator++){
+		pcl::PointXYZRGBA& seedPoint = *iterator;
+		pcl::PointXYZRGBA& gridPoint = getPoint(seedPoint.x, seedPoint.y, seedPoint.z);
+		gridPoint.x = seedPoint.x;
+		gridPoint.y = seedPoint.y;
+		gridPoint.z = seedPoint.z;
+		gridPoint.rgba = seedPoint.rgba;
+	}
+
 }
 
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
