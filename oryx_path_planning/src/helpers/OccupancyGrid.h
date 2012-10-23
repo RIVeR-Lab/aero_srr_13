@@ -61,7 +61,7 @@ public:
 	 * @param message	A descriptive message for the error
 	 * @param cause		The cause of the exception
 	 */
-	inline OccupancyGridAccessException(std::string& message, ChainableException& cause): ChainableException(message, cause){};
+	inline OccupancyGridAccessException(std::string& message, std::exception& cause): ChainableException(message, cause){};
 };
 
 /**

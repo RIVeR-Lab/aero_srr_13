@@ -14,7 +14,7 @@ using namespace oryx_path_planning;
 namespace oryx_path_planning{
 
 OccupancyGrid::OccupancyGrid():
-		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()){
+								occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()){
 	this->xDim	= 0;
 	this->yDim	= 0;
 	this->zDim	= 0;
@@ -33,7 +33,7 @@ OccupancyGrid::OccupancyGrid(oryx_path_planning::OccupancyGrid& grid){
  * @todo Currently only 2D
  */
 OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, PointTrait_t seedTrait):
-		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution),roundToGrid(yDim, resolution))){
+								occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution),roundToGrid(yDim, resolution))){
 	this->xDim	= roundToFrac(xDim, resolution);
 	this->yDim	= roundToFrac(yDim, resolution);
 	this->zDim	= roundToFrac(zDim, resolution);
@@ -56,17 +56,29 @@ OccupancyGrid::~OccupancyGrid(){}
  * @todo Currently only 2D
  */
 PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(OccupancyGridAccessException){
-	boundsCheck(x,y,z);
-	return static_cast<oryx_path_planning::PointTrait>(this->occGrid.get()->at(roundToGrid(x, this->res), roundToGrid(y, this->res)).rgba);
+	if(boundsCheck(x,y,z)){
+		try{
+			return static_cast<oryx_path_planning::PointTrait>(this->occGrid.get()->at(roundToGrid(x, this->res), roundToGrid(y, this->res)).rgba);
+		}catch(std::exception& e){
+			throw new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e);
+		}
+	}
+	return 0;
 }
 
 /**
  * @todo Currently only 2D
  */
 bool OccupancyGrid::setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait)throw(OccupancyGridAccessException){
-	boundsCheck(x,y,z);
-	this->occGrid.get()->at(roundToGrid(x, this->res), roundToGrid(y, this->res)).rgba=trait;
-	return true;
+	if(boundsCheck(x,y,z)){
+		try{
+			this->occGrid.get()->at(roundToGrid(x, this->res), roundToGrid(y, this->res)).rgba=trait;
+			return true;
+		}catch(std::exception& e){
+			throw new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e);
+		}
+	}
+	return false;
 }
 
 boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > OccupancyGrid::getGrid(){
