@@ -57,16 +57,25 @@ int main(int argc, char **argv) {
 		ROS_ERROR("%s", e.what());
 	}
 
-	ROS_INFO("Testing Occupancy Grid");
-	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim*2, 1, resolution, oryx_path_planning::UNKNOWN);
-	ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+	ROS_INFO("Testing Occupancy Grid...");
+	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim*2, resolution, oryx_path_planning::UNKNOWN);
+	ROS_INFO("Occupancy Grid Built");
+	try{
+		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+	}catch(std::exception& e){
+		ROS_ERROR(e.what());
+	}
 	ROS_INFO("Placing some test points on the grid");
 	double y = 0;
 	for(double x=0; x<xDim; x+=resolution){
 		y= 1.0/2.0*x;
 		testGrid.setPointTrait(x, y, 0, oryx_path_planning::FREE_LOW_COST);
 	}
-	ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+	try{
+		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+	}catch(std::exception& e){
+		ROS_ERROR(e.what());
+	}
 	return 0;
 }
 
