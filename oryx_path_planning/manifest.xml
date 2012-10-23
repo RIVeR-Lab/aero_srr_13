@@ -20,6 +20,8 @@
   <depend package="geometry_msgs"/>
   <depend package="pcl"/>
   <depend package="pcl_ros"/>
+  <depend package="oryxsrr_msgs"/>
+  <depend package="sensor_msgs"/>
 </package>
 
 
