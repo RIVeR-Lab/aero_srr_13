@@ -84,5 +84,6 @@ rosbuild_add_boost_directories()
 
 #build nodes
 rosbuild_add_executable(oryx_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
+rosbuild_add_executable(oryx_base_planner src/nodes/oryx_base_planner.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
 
 #rosbuild_link_boost(oryx_path_planning_test thread)
