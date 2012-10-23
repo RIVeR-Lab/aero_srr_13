@@ -36,9 +36,7 @@ OccupancyGrid::OccupancyGrid(oryx_path_planning::OccupancyGrid& grid){
 	this->occGrid = grid.getGrid();
 };
 
-/**
- * @todo Currently only 2D
- */
+
 OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, PointTrait_t seedTrait): occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*roundToGrid(zDim, resolution),1)){
 	this->xDim	= roundToFrac(xDim, resolution);
 	this->yDim	= roundToFrac(yDim, resolution);
@@ -116,10 +114,7 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 }
 
 OccupancyGrid::~OccupancyGrid(){}
-
-/**
- * @todo Currently only 2D
- */
+d
 PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(OccupancyGridAccessException){
 	if(boundsCheck(x,y,z)){
 		try{
@@ -131,9 +126,7 @@ PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(Occup
 	return oryx_path_planning::UNKNOWN;
 }
 
-/**
- * @todo Currently only 2D
- */
+
 bool OccupancyGrid::setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait)throw(OccupancyGridAccessException){
 	if(boundsCheck(x,y,z)){
 		try{
@@ -155,9 +148,7 @@ bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2& message){
 	return true;
 }
 
-/**
- * @todo Currently only 2D
- */
+
 boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double slice){
 	boost::shared_ptr<std::string> output(new std::string(""));
 	std::vector<std::string> occGrid(this->xSize, std::string(this->ySize, ' '));
