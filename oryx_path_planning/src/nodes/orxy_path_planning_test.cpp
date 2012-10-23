@@ -58,7 +58,14 @@ int main(int argc, char **argv) {
 	}
 
 	ROS_INFO("Testing Occupancy Grid");
-	oryx_path_planning::OccupancyGrid testGrid(50,50, 1, .25, oryx_path_planning::UNKNOWN);
+	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim*2, 1, resolution, oryx_path_planning::UNKNOWN);
+	ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+	ROS_INFO("Placing some test points on the grid");
+	double y = 0;
+	for(double x=0; x<xDim; x+=resolution){
+		y= 1.0/2.0*x;
+		testGrid.setPointTrait(x, y, 0, oryx_path_planning::FREE_LOW_COST);
+	}
 	ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 	return 0;
 }
