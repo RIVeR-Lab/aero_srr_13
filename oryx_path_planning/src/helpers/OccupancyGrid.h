@@ -81,6 +81,17 @@ public:
 	 * @param grid The OccupancyGrid to copy
 	 */
 	OccupancyGrid(oryx_path_planning::OccupancyGrid& grid);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Creates a new 2D Occupancy Grid with a given set of dimensions and grid resolution
+	 * @param xDim			The size of the occupancy grid in real units in the x-axis
+	 * @param yDim			The size of the occupancy grid in real units in the y-axis
+	 * @param resolution	The grid resolution of the occupancy grid
+	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to
+	 */
+	OccupancyGrid(double xDim, double yDim, double resolution, PointTrait_t seedTrait);
+
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new Occupancy Grid with a given set of dimensions and grid resolution
@@ -154,9 +165,57 @@ private:
 	 */
 	bool boundsCheck(double x, double y, double z)throw(OccupancyGridAccessException);
 
-	double xDim;	///The x size of this grid
-	double yDim;	///The y size of this grid
-	double zDim;	///The z size of this grid
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Calculates the 1-dimension index value of an <x,y,z> coordinate set based on real values
+	 * @param x	x-coord
+	 * @param y	y-coord
+	 * @param z	z-coord
+	 * @return An index into a 1-d array corresponding to the given coord set
+	 */
+	int calcIndex(double x, double y, double z);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Calculates the 1-dimension index value of an <x,y,z> coordinate set based on grid values
+	 * @param x	x-coord
+	 * @param y	y-coord
+	 * @param z	z-coord
+	 * @return An index into a 1-d array corresponding to the given coord set
+	 */
+	int calcIndex(int x, int y, int z);
+
+	/**
+	 * Gets a point out of the point cloud based on real coordinates
+	 * @param x	x-coord
+	 * @param y	y-coord
+	 * @param z	z-coord
+	 * @return The point at the given coordinate
+	 */
+	pcl::PointXYZRGBA& getPoint(double x, double y, double z);
+
+	/**
+	 * Gets a point out of the point cloud based on integer coordinates
+	 * @param x	x-coord
+	 * @param y	y-coord
+	 * @param z	z-coord
+	 * @return The point at the given coordinate
+	 */
+	pcl::PointXYZRGBA& getPoint(int x, int y, int z);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Helper function that initializes the occupancy grid
+	 * @param seedTrait The PointTrait to set all of the points to
+	 */
+	void intializeGrid(PointTrait_t seedTrait);
+
+	double xDim;	///The x dimension of this grid
+	double yDim;	///The y dimension of this grid
+	double zDim;	///The z dimension of this grid
+	double xSize;	///The x size of this grid
+	double ySize;	///The y size of this grid
+	double zSize;	///The z size of this grid
 	double res;		///The grid resolution of this occupancy grid
 	boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > occGrid;		///A smart pointer to the point cloud which contains the data for this occupancy grid
 };
