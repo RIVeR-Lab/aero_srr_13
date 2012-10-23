@@ -14,6 +14,7 @@
 #include <pcl/ros/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <oryxsrr_msgs/OccupancyGrid.h>
 
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanningUtilities.h"
@@ -156,6 +157,14 @@ public:
 	 * @return	True if successful, else false
 	 */
 	bool generateMessage(sensor_msgs::PointCloud2& message);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Generates an oryxsrr_msgs::OccupancyGrid message from the OccupancyGrid
+	 * @param message	The message container to fill
+	 * @return	True if successful
+	 */
+	bool generateMessage(oryxsrr_msgs::OccupancyGrid& message);
 
 	/**
 	 * @author	Adam Panzic

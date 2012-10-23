@@ -114,7 +114,7 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 }
 
 OccupancyGrid::~OccupancyGrid(){}
-d
+
 PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(OccupancyGridAccessException){
 	if(boundsCheck(x,y,z)){
 		try{
@@ -145,6 +145,15 @@ boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > OccupancyGrid::getGrid(){
 
 bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2& message){
 	pcl::toROSMsg(*this->occGrid, message);
+	return true;
+}
+
+bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGrid& message){
+	message.xDim = this->xDim;
+	message.yDim = this->yDim;
+	message.zDim = this->zDim;
+	message.res	 = this->res;
+	pcl::toROSMsg(*this->occGrid, message.cloud);
 	return true;
 }
 
