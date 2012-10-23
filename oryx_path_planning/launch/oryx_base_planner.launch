@@ -1,0 +1,29 @@
+<launch>
+	<!-- declare args to be passed in for actionlib topics -->
+	<arg name="velocity_command_topic"			default="velocity_command_topic" />
+	
+	<!-- declare args to be passed in for topics for receiving new PC data -->
+	<arg name="occupancy_point_cloud_topic"	default="occupancy_point_cloud_topic" />
+	
+	<!-- declare occupancy grid parameters -->
+	<arg name="update_rate"		default="0.2"/>
+	<arg name="x_dimension"		default="20"/>
+	<arg name="y_dimension"		default="20"/>
+	<arg name="z_dimension"		default="0"/>
+	<arg name="grid_resolution"	default="0.25"/>
+	
+	
+	<!-- Test Enable Argument -->
+	<arg name="controller_test"			default="false"/>
+	
+	<!-- Launch Nodes -->
+	<node name="oryx_base_planner" pkg="oryx_path_planning" type="oryx_base_planner" output="screen">
+		<param name="velocity_command_topic"		type="str"		value="$(arg velocity_command_topic)" />
+		<param name="occupancy_point_cloud_topic"	type="str"		value="$(arg occupancy_point_cloud_topic)" />
+		<param name="update_rate"				type="double"	value="$(arg update_rate)" />
+		<param name="x_dimension"				type="double"	value="$(arg x_dimension)" />
+		<param name="y_dimension"				type="double"	value="$(arg y_dimension)" />
+		<param name="z_dimension"				type="double"	value="$(arg z_dimension)" />
+		<param name="grid_resolution"			type="double"	value="$(arg grid_resolution)" />
+	</node>
+</launch>

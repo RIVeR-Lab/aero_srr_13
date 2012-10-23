@@ -11,6 +11,7 @@
 #include<boost/lexical_cast.hpp>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanning.h"
+#include "OryxPathPlannerConfig.h"
 
 //*********************** MACROS ************************************//
 ///Macro for printing out warning messages if default parameters are used
@@ -52,10 +53,10 @@ int main(int argc, char **argv) {
 	//*****************Configuration Parameters*******************//
 	//Minimum update rate expected of occupancy grid
 	std::string p_up_rate("update_rate");
-	int update_rate = 200;
+	double update_rate = 0.2;
 	std::string up_rate_msg("");
-	up_rate_msg+= boost::lexical_cast<int>(update_rate);
-	up_rate_msg+="ms";
+	up_rate_msg+= boost::lexical_cast<double>(update_rate);
+	up_rate_msg+="s";
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("x_dimension");
@@ -85,6 +86,9 @@ int main(int argc, char **argv) {
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
 
+	//Node Information Printout
+	ROS_INFO("Starting Up Oryx Base Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
+
 	//Get Private Parameters
 	if(!nh.getParam(v_com_top, v_com_top))	PARAM_WARN(v_com_top,	v_com_top);
 	//if(!nh.getParam(t_com_top, t_com_top))	PARAM_WARN(t_com_top,	t_com_top);
@@ -97,6 +101,7 @@ int main(int argc, char **argv) {
 
 
 	//Set up client to Drive Controller
+	ROS_INFO("Setting Up Communications...");
 	VelocityClient client(v_com_top);
 }
 
