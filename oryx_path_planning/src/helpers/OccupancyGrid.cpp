@@ -148,7 +148,33 @@ bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2& message){
 	return true;
 }
 
-
+/**
+ * Prints out the specified slice of the occupancy grid in ASCII art with each character representing a point on the grid.
+ * For example, with xDim=Ydim=2.5 and resolution = .25, and all points set to UNKNOWN, the returned string will look like
+ * this:
+ *
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ * UUUUUUUUUU <br>
+ *
+ * The RGBA to ASCII mapping is as follows:
+ * |   RGBA   |  ASCII  |
+ * |  :----:  | :-----: |
+ * | UNKNOWN  |   'U'   |
+ * | FREE_LOW |   ' '   |
+ * | FREE_HIGH|   '_'   |
+ * | OBSTACLE |   'X'   |
+ * | GOAL     |   'G'   |
+ * | INFLATED |   'x'   |
+ * | Non-Std  |   '*'   |
+ */
 boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double slice){
 	boost::shared_ptr<std::string> output(new std::string(""));
 	std::vector<std::string> occGrid(this->xSize, std::string(this->ySize, ' '));
@@ -209,6 +235,7 @@ pcl::PointXYZRGBA& OccupancyGrid::getPoint(double x, double y, double z){
 pcl::PointXYZRGBA& OccupancyGrid::getPoint(int x, int y, int z){
 	return this->occGrid.get()->at(calcIndex(x, y, z));
 }
+
 
 bool OccupancyGrid::boundsCheck(double x, double y, double z)throw(OccupancyGridAccessException){
 	bool failure = false;
