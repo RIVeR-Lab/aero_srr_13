@@ -97,6 +97,20 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 
 }
 
+OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGrid& message):
+	occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()){
+	this->xDim	= roundToFrac(message.xDim, message.res);
+	this->yDim	= roundToFrac(message.yDim, message.res);
+	this->zDim	= roundToFrac(message.zDim, message.res);
+	this->res	= message.res;
+	this->xSize = roundToGrid(this->xDim, this->res);
+	this->ySize = roundToGrid(this->yDim, this->res);
+	//Check for a 2D PointCloud
+	if(this->zDim!=0)this->zSize = roundToGrid(this->zDim, this->res);
+	else this->zSize = 1;
+	pcl::fromROSMsg(message.cloud, *(this->occGrid));
+}
+
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 	for(int x=0; x<this->xSize; x++){
 		for(int y=0; y<this->ySize; y++){

@@ -116,6 +116,13 @@ public:
 	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, pcl::PointCloud<pcl::PointXYZRGBA>& cloud) throw(OccupancyGridAccessException);
 
 	/**
+	 * @author	Adam Panzica
+	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
+	 * @param message	The message to make the OccupancyGrid from
+	 */
+	OccupancyGrid(oryxsrr_msgs::OccupancyGrid& message);
+
+	/**
 	 * Default destructor
 	 */
 	virtual ~OccupancyGrid();
