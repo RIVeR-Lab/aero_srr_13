@@ -5,6 +5,8 @@
  * @brief	Contains the implementations for OccupancyGrid.h
  */
 
+#include <boost/lexical_cast.hpp>
+
 #include "OccupancyGrid.h"
 
 using namespace oryx_path_planning;
@@ -53,14 +55,16 @@ OccupancyGrid::~OccupancyGrid(){}
 /**
  * @todo Currently only 2D
  */
-PointTrait OccupancyGrid::getPointTrait(double x, double y, double z){
+PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(OccupancyGridAccessException){
+	boundsCheck(x,y,z);
 	return static_cast<oryx_path_planning::PointTrait>(this->occGrid.get()->at(roundToGrid(x, this->res), roundToGrid(y, this->res)).rgba);
 }
 
 /**
  * @todo Currently only 2D
  */
-bool OccupancyGrid::setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait){
+bool OccupancyGrid::setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait)throw(OccupancyGridAccessException){
+	boundsCheck(x,y,z);
 	this->occGrid.get()->at(roundToGrid(x, this->res), roundToGrid(y, this->res)).rgba=trait;
 	return true;
 }
@@ -117,6 +121,40 @@ boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double sli
 	}
 	return output;
 }
+
+bool OccupancyGrid::boundsCheck(double x, double y, double z)throw(OccupancyGridAccessException){
+	bool failure = false;
+	const std::string prefex("Invalid Point Requested: ");
+	const std::string middle(" Is Greater Than Max Value: ");
+	std::string message("");
+	if(x>this->xDim){
+		boost::lexical_cast<double>(x);
+		message+=prefex;
+		message+=boost::lexical_cast<double>(x);
+		message+=middle;
+		message+=boost::lexical_cast<double>(this->xDim);
+		failure = true;
+	}
+	else if(y>this->yDim){
+		message+=prefex;
+		message+=boost::lexical_cast<double>(y);
+		message+=middle;
+		message+=boost::lexical_cast<double>(this->yDim);
+		failure = true;
+	}
+	else if(z>this->zDim){
+		message+=prefex;
+		message+=boost::lexical_cast<double>(z);
+		message+=middle;
+		message+=boost::lexical_cast<double>(this->zDim);
+		failure = true;
+	}
+	if(failure){
+		throw new OccupancyGridAccessException(message);
+	}
+	return failure;
+}
+
 };
 
 

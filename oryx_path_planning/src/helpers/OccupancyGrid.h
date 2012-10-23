@@ -39,44 +39,29 @@ typedef enum PointTrait_t{
 } PointTrait;
 
 /**
- * @author Adam Panzica
- * @brief Struct which describes the data in a point in the occupancy grid
+ * @author	Adam Panzica
+ * @brief	Basic exception for stating that an invalid location on the occupancy grid was accessed
  */
-struct PointXYZWithTrait: pcl::PointXYZ{
+class OccupancyGridAccessException:ChainableException{
 public:
 	/**
-	 * @author Adam Panzica
-	 * @brief Default constructor which creates an empty point with its coords set to <0,0,0> and its PointTrait set to UNKNOWN
+	 * @author	Adam Panzica
+	 * @brief	Default constructor
 	 */
-	inline PointXYZWithTrait():
-		pcl::PointXYZ(){
-		this->point_trait = UNKNOWN;
-	}
-
+	inline OccupancyGridAccessException():ChainableException(){};
 	/**
 	 * @author	Adam Panzica
-	 * @brief	Constructor for creating a point with a set of coord, <x,y,z>, and a given PointTrait
-	 * @param x		The x coordinate of the point
-	 * @param y		The y coordinate of the point
-	 * @param z		The z coordinate of the point
-	 * @param trait	The PointTrait of the point
+	 * @brief	Creates an exception with a message describing it
+	 * @param message A descriptive message for the error
 	 */
-	inline PointXYZWithTrait(double x, double y, double z, oryx_path_planning::PointTrait trait):
-		pcl::PointXYZ(x, y, z){
-		this->point_trait = trait;
-	}
-
-	inline PointXYZWithTrait(oryx_path_planning::PointXYZWithTrait& point):
-		PointXYZ(point){
-		this->point_trait = point.point_trait;
-	}
-
+	inline OccupancyGridAccessException(std::string& message):ChainableException(message){};
 	/**
-	 * Default destructor
+	 * @author	Adam Panzica
+	 * @brief	Creates an exception with a message and a cause
+	 * @param message	A descriptive message for the error
+	 * @param cause		The cause of the exception
 	 */
-	inline virtual ~PointXYZWithTrait(){};
-
-	oryx_path_planning::PointTrait point_trait;	///The PointTrait associated with the point
+	inline OccupancyGridAccessException(std::string& message, ChainableException& cause): ChainableException(message, cause){};
 };
 
 /**
@@ -118,8 +103,9 @@ public:
 	 * @param y	The y-coord of the point
 	 * @param z The z-coord of the point
 	 * @return The PointTrait of the point at the given coordinates
+	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	oryx_path_planning::PointTrait getPointTrait(double x, double y, double z);
+	oryx_path_planning::PointTrait getPointTrait(double x, double y, double z) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -129,8 +115,9 @@ public:
 	 * @param z	The z-coord of the point
 	 * @param trait	The PointTrait to set the point to
 	 * @return True if succesful, else false
+	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait);
+	bool setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -156,6 +143,17 @@ public:
 	 */
 	boost::shared_ptr<std::string> toString(int sliceAxis, double slice);
 private:
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Checks to make sure a set of coordinates are on the occupancy grid
+	 * @param x	x-coord to check
+	 * @param y	y-coord to check
+	 * @param z	z-coord to check
+	 * @throw OccupancyGridAccessException if invalid coordinates were given
+	 */
+	bool boundsCheck(double x, double y, double z)throw(OccupancyGridAccessException);
+
 	double xDim;	///The x size of this grid
 	double yDim;	///The y size of this grid
 	double zDim;	///The z size of this grid
