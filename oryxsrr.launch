@@ -1,0 +1,25 @@
+<launch>
+	<!-- declare args to be passed in for actionlib topics -->
+	<arg name="velocity_command_topic"			default="velocity_command_topic" />
+	
+	
+	<!-- declare occupancy grid parameters -->
+	<arg name="occupancy_point_cloud_topic"	default="occupancy_point_cloud_topic" />
+	<arg name="update_rate"		default="0.2"/>
+	<arg name="x_dimension"		default="20"/>
+	<arg name="y_dimension"		default="20"/>
+	<arg name="z_dimension"		default="0"/>
+	<arg name="grid_resolution"	default="0.25"/>
+
+	<!-- Include Sub-Launch Files -->
+	<include file="$(find oryx_path_planning)/launch/oryx_path_planning.launch">
+		<arg name="velocity_command_topic"	value="$(arg velocity_command_topic)" />
+		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
+		<arg name="update_rate" 			value="$(arg update_rate)"/>
+		<arg name="x_dimension"			value="$(arg x_dimension)"/>
+		<arg name="y_dimension"			value="$(arg y_dimension)"/>
+		<arg name="z_dimension"			value="$(arg z_dimension)"/>
+		<arg name="grid_resolution"		value="$(arg grid_resolution)"/>
+	</include>
+	
+</launch>
