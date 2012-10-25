@@ -1,5 +1,5 @@
 
-<launch>
+<launch ns="oryx_path_planning">
 	<!-- ********************ARGUMENTS******************** -->
 	<!-- declare args to be passed in for actionlib topics -->
 	<arg name="velocity_command_topic"	default="velocity_command_topic" />

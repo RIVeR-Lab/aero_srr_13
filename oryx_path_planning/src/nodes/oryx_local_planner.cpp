@@ -17,6 +17,9 @@
 ///Macro for printing out warning messages if default parameters are used
 #define PARAM_WARN(param,value) ROS_WARN(warn_message.c_str(), param.c_str(), value.c_str())
 
+///Number of seconds to wait for connections to other ROS nodes before determining a system failure
+#define CONNECTION_TIMEOUT	5.0
+
 using namespace oryx_path_planning;
 
 //namespace oryx_path_planning{
@@ -27,13 +30,17 @@ using namespace oryx_path_planning;
  */
 class VelocityClient{
 public:
-	VelocityClient(std::string action_topic):
+	VelocityClient(std::string action_topic) throw(std::runtime_error):
 	action_topic(action_topic),
 	client(action_topic, true){
 		ROS_INFO("Waiting For Connection To Server On <%s>...", this->action_topic.c_str());
-		if(client.waitForServer(ros::Duration(5))){
+		if(client.waitForServer(ros::Duration(CONNECTION_TIMEOUT))){
 			ROS_INFO("Connection Established");
-		}else ROS_ERROR("Could Not Establish Connection To Server!");
+		}else{
+			ROS_ERROR("Could Not Establish Connection To Server!");
+			std::string errMsg("Unable to connect to velocity command server over ");
+			throw std::runtime_error(errMsg+this->action_topic);
+		}
 	}
 	virtual ~VelocityClient(){}
 
@@ -78,12 +85,13 @@ private:
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "oryx_base_planner");
 	ros::NodeHandle nh;
+	ros::NodeHandle p_nh("~");
 	//Default Parameter Values
 	std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>");
 	//*****************Communication Parameters*******************//
-	std::string v_com_top("~/velocity_command_topic");
+	std::string v_com_top("velocity_command_topic");
 	//std::string t_com_top("translate_command_topic");
-	std::string pc_top("~/occupancy_point_cloud_topic");
+	std::string pc_top("occupancy_point_cloud_topic");
 
 	//*****************Configuration Parameters*******************//
 	//Minimum update rate expected of occupancy grid
@@ -160,9 +168,9 @@ int main(int argc, char **argv) {
 	ROS_INFO("Starting Up Oryx Base Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
 	//Get Private Parameters
-	if(!nh.getParam(v_com_top,	v_com_top))		PARAM_WARN(v_com_top,	v_com_top);
+	if(!p_nh.getParam(v_com_top,v_com_top))		PARAM_WARN(v_com_top,	v_com_top);
 	//if(!nh.getParam(t_com_top, t_com_top))	PARAM_WARN(t_com_top,	t_com_top);
-	if(!nh.getParam(pc_top,		pc_top))		PARAM_WARN(pc_top,		pc_top);
+	if(!p_nh.getParam(pc_top,	pc_top))		PARAM_WARN(pc_top,		pc_top);
 	if(!nh.getParam(p_up_rate,	update_rate))	PARAM_WARN(p_up_rate,	up_rate_msg);
 	if(!nh.getParam(p_x_dim,	xDim))			PARAM_WARN(p_x_dim,		xDim_msg);
 	if(!nh.getParam(p_y_dim,	yDim))			PARAM_WARN(p_y_dim,		yDim_msg);
@@ -177,10 +185,16 @@ int main(int argc, char **argv) {
 	//Set up Tentacles
 	ROS_INFO("Generating Tentacles...");
 	oryx_path_planning::TentacleGenerator TentacleGen(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, res, xDim, yDim);
+	ROS_INFO("Tentacles Generated!");
 	//Set up client to Drive Controller
 	ROS_INFO("Setting Up Communications...");
-	VelocityClient client(v_com_top);
-
+	try{
+		VelocityClient client(v_com_top);
+	}catch(std::exception& e){
+		ROS_FATAL("%s, %s",e.what(), "Shutting Down");
+		ros::shutdown();
+	}
+	ROS_INFO("Communications Established!");
 }
 
 
