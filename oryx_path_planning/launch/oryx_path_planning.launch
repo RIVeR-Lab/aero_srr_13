@@ -14,7 +14,7 @@
 	<arg name="grid_resolution"	default="0.25"/>
 	
 	<!-- Include Sub-Launch Files -->
-	<include file="$(find oryx_path_planning)/launch/oryx_base_planner.launch">
+	<include file="$(find oryx_path_planning)/launch/oryx_local_planner.launch">
 		<arg name="velocity_command_topic"	value="$(arg velocity_command_topic)" />
 		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
 		<arg name="update_rate"			value="$(arg update_rate)" />
