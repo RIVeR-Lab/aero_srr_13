@@ -6,9 +6,11 @@
  */
 
 //*********************** SYSTEM DEPENDENCIES ************************************//
+#include<queue>
 #include<actionlib/client/simple_action_client.h>
 #include<oryx_drive_controller/VelocityCommandAction.h>
 #include<boost/lexical_cast.hpp>
+#include<boost/circular_buffer.hpp>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanning.h"
 #include "OryxPathPlannerConfig.h"
@@ -31,8 +33,8 @@ using namespace oryx_path_planning;
 class VelocityClient{
 public:
 	VelocityClient(std::string action_topic) throw(std::runtime_error):
-	action_topic(action_topic),
-	client(action_topic, true){
+		action_topic(action_topic),
+		client(action_topic, true){
 		ROS_INFO("Waiting For Connection To Server On <%s>...", this->action_topic.c_str());
 		if(client.waitForServer(ros::Duration(CONNECTION_TIMEOUT))){
 			ROS_INFO("Connection Established");
@@ -46,10 +48,10 @@ public:
 
 	//Called when the goal is completed
 	void doneCb(const actionlib::SimpleClientGoalState& state,
-				const oryx_drive_controller::VelocityCommandResultConstPtr& result)
+			const oryx_drive_controller::VelocityCommandResultConstPtr& result)
 	{
-			ROS_INFO("Finished in state [%s]", state.toString().c_str());
-			ROS_INFO("Result: %s", (result->success)?"Successful":"Unsuccessful");
+		ROS_INFO("Finished in state [%s]", state.toString().c_str());
+		ROS_INFO("Result: %s", (result->success)?"Successful":"Unsuccessful");
 	};
 
 	// Called once when the goal becomes active
@@ -71,13 +73,78 @@ public:
 		newGoal.radius		= radius;
 		//Once again, have to used boost::bind because you are inside a class
 		client.sendGoal(newGoal, boost::bind(&VelocityClient::doneCb, this, _1, _2),
-							 boost::bind(&VelocityClient::activeCb, this),
-							 boost::bind(&VelocityClient::feedbackCb, this, _1));
+				boost::bind(&VelocityClient::activeCb, this),
+				boost::bind(&VelocityClient::feedbackCb, this, _1));
 	}
 private:
 	ros::NodeHandle	nh;
 	std::string		action_topic;
 	actionlib::SimpleActionClient<oryx_drive_controller::VelocityCommandAction> client;
+};
+
+/**
+ * @author	Adam Panzica
+ * @brief	Class which does the actual work of local path planning and sending commands to base
+ */
+class LocalPlanner{
+public:
+	LocalPlanner(double xDim, double yDim, double zDim, double res, std::string& oc_point_cloud_topic, boost::shared_ptr<TentacleGenerator> tentacles, boost::shared_ptr<VelocityClient> v_client):
+		v_client(v_client),
+		tentacles(tentacles),
+		point_cloud_topic(oc_point_cloud_topic),
+		occupancy_buffer(2){
+		this->xDim = xDim;
+		this->yDim = yDim;
+		this->zDim = zDim;
+		this->res  = res;
+		this->pc_sub = nh.subscribe(this->point_cloud_topic, 1, &LocalPlanner::pcCB, this);
+		this->shouldPlan = true;
+	}
+	virtual ~LocalPlanner(){};
+
+	/**
+	 * Callback for processing new point cloud data
+	 * @param message
+	 */
+	void pcCB(const sensor_msgs::PointCloud2ConstPtr& message){
+		ROS_INFO("I Got new Occupancy Grid Data!");
+		pcl::PointCloud<pcl::PointXYZRGBA>cloud;
+		pcl::fromROSMsg(*message, cloud);
+		this->occupancy_buffer.push_back(boost::shared_ptr<OccupancyGrid>(new OccupancyGrid(xDim, yDim, xDim, res, cloud )));
+	}
+
+	/**
+	 * does the actual work of performing path planning
+	 */
+	void doPlanning(){
+		while(ros::ok()){
+			if(shouldPlan){
+				//Grab the next occupancy grid to process
+				if(!this->occupancy_buffer.empty()){
+					boost::shared_ptr<OccupancyGrid> workingGrid_ptr = this->occupancy_buffer.front();
+					this->occupancy_buffer.pop_front();
+
+					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", workingGrid_ptr.get()->toString(0,0).get()->c_str());
+				}
+			}
+			//spin to let ROS process callbacks
+			ros::spinOnce();
+		}
+	}
+private:
+	bool	shouldPlan;
+	double	xDim;
+	double	yDim;
+	double	zDim;
+	double	res;
+	ros::NodeHandle nh;
+	boost::shared_ptr<VelocityClient> v_client;
+	boost::shared_ptr<TentacleGenerator> tentacles;
+	std::string point_cloud_topic;
+	ros::Subscriber pc_sub;
+
+	boost::circular_buffer<boost::shared_ptr<OccupancyGrid> > occupancy_buffer;
+
 };
 
 //*********************** NODE IMPLEMENTATION ******************************//
@@ -122,7 +189,7 @@ int main(int argc, char **argv) {
 	zDim_msg+= boost::lexical_cast<double>(zDim);
 	zDim_msg+="m";
 
-	//z dimension of occupancy grid
+	//resolution occupancy grid
 	std::string p_res("occupancy/grid_resolution");
 	double res = .25;
 	std::string p_res_msg("");
@@ -184,17 +251,19 @@ int main(int argc, char **argv) {
 
 	//Set up Tentacles
 	ROS_INFO("Generating Tentacles...");
-	oryx_path_planning::TentacleGenerator TentacleGen(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, res, xDim, yDim);
+	boost::shared_ptr<TentacleGenerator> tentacle_ptr(new oryx_path_planning::TentacleGenerator (minSpeed, maxSpeed, numSpeedSet, numTent, expFact, res, xDim, yDim));
 	ROS_INFO("Tentacles Generated!");
 	//Set up client to Drive Controller
-	ROS_INFO("Setting Up Communications...");
+	ROS_INFO("Setting Up Communication With Base...");
 	try{
-		VelocityClient client(v_com_top);
+		boost::shared_ptr<VelocityClient> v_client_ptr(new VelocityClient(v_com_top));
+		ROS_INFO("Communications Established!");
+		boost::shared_ptr<LocalPlanner> l_client_ptr(new LocalPlanner(xDim, yDim, zDim, res, pc_top, tentacle_ptr, v_client_ptr));
+		l_client_ptr->doPlanning();
 	}catch(std::exception& e){
 		ROS_FATAL("%s, %s",e.what(), "Shutting Down");
 		ros::shutdown();
 	}
-	ROS_INFO("Communications Established!");
 }
 
 
