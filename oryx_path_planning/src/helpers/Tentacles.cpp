@@ -281,16 +281,16 @@ TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSp
 	this->expFact 		= expFact;
 	this->numTentacles	= numTentacles;
 	this->numSpeedSet	= numSpeedSet;
-	ROS_INFO("Generating Speed Sets...");
+	PRINTER("Generating Speed Sets...");
 
 	double q = 0;
 	//Generate the SpeedSets
 	for(int v=0; v<numSpeedSet; v++){
 		q = calcQ(v);
-		ROS_INFO("Calculated q=%f",q);
+		PRINTER("Calculated q=%f",q);
 		this->speedSets.push_back(SpeedSet(expFact, calcSeedRad(v, q), numTentacles, resolution, xDim, yDim, calcSpeedSetVel(minSpeed, maxSpeed, q)));
 	}
-	ROS_INFO("Speed Sets Complete!");
+	PRINTER("Speed Sets Complete!");
 }
 
 TentacleGenerator::~TentacleGenerator(){};
@@ -335,7 +335,7 @@ TentacleGenerator::iterator TentacleGenerator::end(){
 double TentacleGenerator::calcSeedRad(int speedSet, double q){
 	double dphi = TENTACLE_SWEEP_ANGLE;
 	double l	= MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
-	ROS_INFO("Calculated dphi=%f, l=%f",dphi, l);
+	PRINTER("Calculated dphi=%f, l=%f",dphi, l);
 	return l/(dphi*(1-std::pow(q,0.9)));
 }
 
