@@ -206,6 +206,7 @@ public:
 		 * @return The length traversed so far along the tentacle
 		 */
 		double lengthTraversed();
+
 	private:
 		bool		empty;						///True if the iterator has reached the end of the traversal
 		double		length;						///The current length traversed along the Tentacle
