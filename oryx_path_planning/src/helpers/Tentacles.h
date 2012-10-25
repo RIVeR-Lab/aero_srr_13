@@ -240,6 +240,11 @@ private:
 class SpeedSet{
 public:
 	/**
+	 * typedef over std::vector<Tentacle>::iterator to allow SpeedSet to return an iterator over the Tentacles it contains
+	 */
+	typedef std::vector<Tentacle>::iterator iterator;
+
+	/**
 	 * @author Adam Panzics
 	 * @brief Default constructor which creates an empty speed set
 	 */
@@ -274,6 +279,19 @@ public:
 	 */
 	unsigned int getNumTentacle();
 
+	/**
+	 * @author	Adam Panzica
+	 * @return	An iterator pointing to the first index Tentacle in the SpeedSet
+	 */
+	iterator begin();
+
+	/**
+	 * @author	Adam Panzica
+	 * @return	An iterator pointing to the last index Tentacle in the SpeedSet
+	 */
+	iterator end();
+
+
 private:
 	std::vector<Tentacle> tentacles;	///A vector containing all of the tentacles for this speed set
 };
@@ -284,6 +302,7 @@ private:
  */
 class TentacleGenerator {
 public:
+	typedef std::vector<SpeedSet>::iterator iterator;
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates a set of tentacles for each speed set
@@ -324,6 +343,18 @@ public:
 	 * @return The SpeedSet at the index
 	 */
 	SpeedSet& getSpeedSet(int speedSet);
+
+	/**
+	 * @author	Adam Panzica
+	 * @return	An iterator pointing to the first index SpeedSet in the TentacleGenerator
+	 */
+	iterator begin();
+
+	/**
+	 * @author	Adam Panzica
+	 * @return	An iterator pointing to the last index SpeedSet in the TentacleGenerator
+	 */
+	iterator end();
 private:
 	int 				numTentacles;	///Number of tentacles per speed-set
 	int					numSpeedSet;

@@ -267,6 +267,14 @@ Tentacle& SpeedSet::getTentacle(int index)throw(oryx_path_planning::TentacleAcce
 	}
 }
 
+SpeedSet::iterator SpeedSet::begin(){
+	return this->tentacles.begin();
+}
+
+SpeedSet::iterator SpeedSet::end(){
+	return this->tentacles.end();
+}
+
 
 //***************************** TENTACLE GENERATOR *********************************//
 TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, double xDim, double yDim){
@@ -304,6 +312,14 @@ Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) throw (oryx_pa
 
 SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
 	return this->speedSets.at(speedSet);
+}
+
+TentacleGenerator::iterator TentacleGenerator::begin(){
+	return this->speedSets.begin();
+}
+
+TentacleGenerator::iterator TentacleGenerator::end(){
+	return this->speedSets.end();
 }
 
 /**
