@@ -303,6 +303,9 @@ private:
  */
 class TentacleGenerator {
 public:
+	/**
+	 * typedef over std::vector<SpeedSet>::iterator for convenience
+	 */
 	typedef std::vector<SpeedSet>::iterator iterator;
 	/**
 	 * @author Adam Panzica
