@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 				ROS_ERROR(e.what());
 			}
 		}
-		sensor_msgs::PointCloud2 message;
+		sensor_msgs::PointCloud2Ptr message;
 		grid_ptr->generateMessage(message);
 		pub.publish(message);
 	}

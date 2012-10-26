@@ -7,15 +7,35 @@
 
 #ifndef TENTACLE_H_
 #define TENTACLE_H_
-
+//*********************** SYSTEM DEPENDENCIES ************************************//
 #include<ros/ros.h>
 #include <boost/lexical_cast.hpp>
 #include<tf/transform_datatypes.h>
+
+//*********************** LOCAL DEPENDENCIES ************************************//
 #include"OryxPathPlanningUtilities.h"
 
 
 namespace oryx_path_planning{
+//*********************** PROTOTYPES ******************************//
+class TentacleGenerationException;
+class TentacleAccessException;
+class SpeedSetAccessException;
+class Tentacle;
+class SpeedSet;
+class TentacleGenerator;
 
+//*********************** TYPEDEFS ******************************//
+///Typedef to allow for convenient sharing of a Tentacle via shared pointer
+typedef boost::shared_ptr<Tentacle> TentaclePtr;
+
+///Typedef to allow for convenient sharing of a SpeedSet via shared pointer
+typedef boost::shared_ptr<SpeedSet> SpeedSetPtr;
+
+///Typedef to allow for convenient sharing of a TentacleGenerator via pointer
+typedef boost::shared_ptr<TentacleGenerator> TentacleGeneratorPtr;
+
+//*********************** CLASS DEFINITIONS ************************************//
 /**
  * @author	Adam Panzica
  * @brief	Exception to flag when there has been a problem generating a tentacle
@@ -131,6 +151,9 @@ private:
 class Tentacle{
 public:
 
+	///Typedef to allow for convenient sharing of a vector of points
+	typedef boost::shared_ptr<std::vector<tf::Point > > PointVectorPtr;
+
 	/**
 	 * @author	Adam Panzics
 	 * @brief	Default constructor for creating an uninitialized Tentacle
@@ -165,7 +188,7 @@ public:
 	 * @brief Gets the x/y coordinates of all the points long this tentacle
 	 * @return A reference to a vector containing a set of pairs which represent the x/y coordinates relative to robot-center
 	 */
-	std::vector<tf::Point >& getPoints();
+	PointVectorPtr getPoints();
 
 
 
@@ -175,6 +198,7 @@ public:
 	 */
 	class TentacleTraverser{
 	public:
+
 		/**
 		 * @author Adam Panzica
 		 * @brief Constructs a new TentacleTraverser over a given Tentacle
@@ -182,7 +206,7 @@ public:
 		 * Note that the traverser assumes that the points contained in the tentacle are in order,
 		 * starting at <0,0,0> and going outward along the tentacle
 		 */
-		TentacleTraverser(Tentacle& tentacle);
+		TentacleTraverser(TentaclePtr tentacle);
 		/**
 		 * Default destructor
 		 */
@@ -208,18 +232,24 @@ public:
 		double lengthTraversed();
 
 	private:
-		bool		empty;						///True if the iterator has reached the end of the traversal
-		double		length;						///The current length traversed along the Tentacle
-		tf::Point*	lastPoint;					///Pointer to the last point that was passed
-		tf::Point*	nextPoint;					///Pointer to the next point that will be passed
-		std::vector<tf::Point>::iterator start;	///The start of an iterator over all the Points along the Tentacle
-		std::vector<tf::Point>::iterator end;	///The end of the iterator of the points along the tentacle
+		///Typedef over std::vector<tf::Point>::iterator for convenience
+		typedef std::vector<tf::Point>::iterator PointVectorIterator;
+
+		bool		empty;			///True if the iterator has reached the end of the traversal
+		double		length;			///The current length traversed along the Tentacle
+		tf::Point*	lastPoint;		///Pointer to the last point that was passed
+		tf::Point*	nextPoint;		///Pointer to the next point that will be passed
+		PointVectorIterator start;	///The start of an iterator over all the Points along the Tentacle
+		PointVectorIterator end;	///The end of the iterator of the points along the tentacle
 	};
+
+	///Typedef to allow for convenient sharing of a TentacleTraverser via pointer
+	typedef boost::shared_ptr<TentacleTraverser> TentacleTraverserPtr;
 
 private:
 	double radius;									///Radius of the Tentacle
 	double velocity;								///Velocity of the Tentacle
-	std::vector<tf::Point > points; 				///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
+	PointVectorPtr points; 							///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
 	const static double straightThreshold = 1500;	///Cutoff radius for what is considered to be essentially a straight line
 
 	/**
@@ -243,7 +273,7 @@ public:
 	/**
 	 * typedef over std::vector<Tentacle>::iterator to allow SpeedSet to return an iterator over the Tentacles it contains
 	 */
-	typedef std::vector<Tentacle>::iterator iterator;
+	typedef std::vector<TentaclePtr>::iterator iterator;
 
 	/**
 	 * @author Adam Panzics
@@ -271,7 +301,7 @@ public:
 	 * @return A reference to a Tentacle from the speed set
 	 * @throw TentacleAccessException if the tentacle index was invalid
 	 */
-	Tentacle& getTentacle(int index) throw(oryx_path_planning::TentacleAccessException);
+	TentaclePtr getTentacle(int index) throw(oryx_path_planning::TentacleAccessException);
 
 	/**
 	 * @author Adam Panzica
@@ -294,7 +324,7 @@ public:
 
 
 private:
-	std::vector<Tentacle> tentacles;	///A vector containing all of the tentacles for this speed set
+	std::vector<TentaclePtr> tentacles;	///A vector containing all of the tentacles for this speed set
 };
 
 /**
@@ -306,7 +336,7 @@ public:
 	/**
 	 * typedef over std::vector<SpeedSet>::iterator for convenience
 	 */
-	typedef std::vector<SpeedSet>::iterator iterator;
+	typedef std::vector<SpeedSetPtr>::iterator iterator;
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates a set of tentacles for each speed set
@@ -339,14 +369,14 @@ public:
 	 * @throw TentacleAccessException if the tentacle index was invalid
 	 * @throw SpeedSetAccessException if the speed set index was invalid
 	  */
-	Tentacle& getTentacle(int speedSet, int index) throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
+	TentaclePtr getTentacle(int speedSet, int index) throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
 
 	/**
 	 * @author Adam Panzica
 	 * @param speedSet Index of the SpeedSet to get
 	 * @return The SpeedSet at the index
 	 */
-	SpeedSet& getSpeedSet(int speedSet);
+	SpeedSetPtr getSpeedSet(int speedSet);
 
 	/**
 	 * @author	Adam Panzica
@@ -363,7 +393,7 @@ private:
 	int 				numTentacles;	///Number of tentacles per speed-set
 	int					numSpeedSet;
 	double 				expFact;		///Exponential factor used to calculate radii
-	std::vector<SpeedSet > speedSets;	///A set containing all of the valid tentacles that have been generated
+	std::vector<SpeedSetPtr > speedSets;	///A set containing all of the valid tentacles that have been generated
 
 	/**
 	 * @author Adam Panzics

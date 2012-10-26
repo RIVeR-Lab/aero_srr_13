@@ -20,9 +20,18 @@
 #include "OryxPathPlanningUtilities.h"
 
 
-//*********************** CLASS DEFINITIONS ************************************//
-namespace oryx_path_planning{
 
+namespace oryx_path_planning{
+//*********************** PROTOTYPES ******************************//
+class OccupancyGridAccessException;
+class OccupancyGrid;
+//*********************** TYPEDEFS ******************************//
+///Typedef to allow for convenient sharing of a OccupancyGrid via pointer
+typedef boost::shared_ptr<OccupancyGrid> OccupancyGridPtr;
+
+///Typedef to allow for convenient sharing of a PointCloud<pcl::PointXYZRGBA> > via pointer
+typedef boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > PointCloudPtr;
+//*********************** CLASS DEFINITIONS ************************************//
 /**
  * @author Adam Panzica
  * @brief Enum for describing the state of a point
@@ -70,6 +79,7 @@ public:
  */
 class OccupancyGrid{
 public:
+
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Default constructor
@@ -80,7 +90,7 @@ public:
 	 * @brief	Default copy constructor
 	 * @param grid The OccupancyGrid to copy
 	 */
-	OccupancyGrid(oryx_path_planning::OccupancyGrid& grid);
+	OccupancyGrid(OccupancyGridPtr grid);
 
 	/**
 	 * @author	Adam Panzica
@@ -113,14 +123,14 @@ public:
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, pcl::PointCloud<pcl::PointXYZRGBA>& cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, PointCloudPtr cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
 	 * @param message	The message to make the OccupancyGrid from
 	 */
-	OccupancyGrid(oryxsrr_msgs::OccupancyGrid& message);
+	OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr message);
 
 	/**
 	 * Default destructor
@@ -155,7 +165,7 @@ public:
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
 	 * @return	A boost::shared_pt containing the PointCloud<oryx_path_planning::PointXYZWithTrait> which backs this occupancy grid
 	 */
-	boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > getGrid();
+	PointCloudPtr getGrid();
 
 	/**
 	 * @author	Adam Panzica
@@ -163,7 +173,7 @@ public:
 	 * @param message	The sensor_msgs::PointCloud2 to write the data to
 	 * @return	True if successful, else false
 	 */
-	bool generateMessage(sensor_msgs::PointCloud2& message);
+	bool generateMessage(sensor_msgs::PointCloud2Ptr message);
 
 	/**
 	 * @author	Adam Panzica
@@ -171,7 +181,7 @@ public:
 	 * @param message	The message container to fill
 	 * @return	True if successful
 	 */
-	bool generateMessage(oryxsrr_msgs::OccupancyGrid& message);
+	bool generateMessage(oryxsrr_msgs::OccupancyGridPtr message);
 
 	/**
 	 * @author	Adam Panzic
@@ -245,7 +255,9 @@ private:
 	double ySize;	///The y size of this grid
 	double zSize;	///The z size of this grid
 	double res;		///The grid resolution of this occupancy grid
-	boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > occGrid;		///A smart pointer to the point cloud which contains the data for this occupancy grid
+	PointCloudPtr occGrid;		///A smart pointer to the point cloud which contains the data for this occupancy grid
 };
+
+
 };
 #endif /* OCCUPANCYGRID_H_ */

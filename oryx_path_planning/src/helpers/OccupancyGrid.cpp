@@ -25,15 +25,15 @@ OccupancyGrid::OccupancyGrid(): occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()
 	this->zSize = roundToGrid(this->zDim, this->res);
 }
 
-OccupancyGrid::OccupancyGrid(oryx_path_planning::OccupancyGrid& grid){
-	this->xDim	= grid.xDim;
-	this->yDim	= grid.yDim;
-	this->zDim	= grid.zDim;
-	this->res	= grid.res;
-	this->xSize = grid.xSize;
-	this->ySize = grid.ySize;
-	this->zSize = grid.zSize;
-	this->occGrid = grid.getGrid();
+OccupancyGrid::OccupancyGrid(OccupancyGridPtr grid){
+	this->xDim	= grid->xDim;
+	this->yDim	= grid->yDim;
+	this->zDim	= grid->zDim;
+	this->res	= grid->res;
+	this->xSize = grid->xSize;
+	this->ySize = grid->ySize;
+	this->zSize = grid->zSize;
+	this->occGrid = grid->getGrid();
 };
 
 
@@ -73,42 +73,58 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, PointT
  * to bounds-check the XYZ data in the Points in the given PointCloud, this constructor will throw an exception if a Point in
  * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
  */
-OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, pcl::PointCloud<pcl::PointXYZRGBA>& cloud) throw(OccupancyGridAccessException):
-		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*roundToGrid(zDim, resolution),1)){
+OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, PointCloudPtr cloud) throw(OccupancyGridAccessException):
+		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*((zDim!=0)?roundToGrid(zDim, resolution):1),1)){
+	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%f, %f, %f>", xDim, yDim, zDim);
+	ROS_INFO("Recieved cloud Should be Size <%d>, is size <%d>",this->occGrid->size(), cloud->size());
 	this->xDim	= roundToFrac(xDim, resolution);
 	this->yDim	= roundToFrac(yDim, resolution);
-	this->zDim	= roundToFrac(zDim, resolution);
 	this->res	= resolution;
 	this->xSize = roundToGrid(this->xDim, this->res);
 	this->ySize = roundToGrid(this->yDim, this->res);
 	//Check for a 2D PointCloud
-	if(this->zDim!=0)this->zSize = roundToGrid(this->zDim, this->res);
-	else this->zSize = 1;
+	if(this->zDim!=0){
+		this->zDim	= roundToFrac(zDim, resolution);
+		this->zSize = roundToGrid(this->zDim, this->res);
+	}
+	else{
+		this->zDim	= 0;
+		this->zSize = 1;
+	}
 
 	//Iterate across the supplied point cloud and fill in the occupancy grid
-	for(pcl::PointCloud<pcl::PointXYZRGBA>::iterator iterator(cloud.begin()); iterator<cloud.end(); iterator++){
-		pcl::PointXYZRGBA& seedPoint = *iterator;
-		pcl::PointXYZRGBA& gridPoint = getPoint(seedPoint.x, seedPoint.y, seedPoint.z);
-		gridPoint.x = seedPoint.x;
-		gridPoint.y = seedPoint.y;
-		gridPoint.z = seedPoint.z;
-		gridPoint.rgba = seedPoint.rgba;
+	for(pcl::PointCloud<pcl::PointXYZRGBA>::iterator iterator(cloud->begin()); iterator<cloud->end(); iterator++){
+		pcl::PointXYZRGBA* seedPoint = iterator.base();
+		pcl::PointXYZRGBA* gridPoint = &getPoint(seedPoint->x, seedPoint->y, seedPoint->z);
+		if(seedPoint->rgba!=oryx_path_planning::UNKNOWN){
+			ROS_INFO("Got A Non-Unknown Point!");
+		}
+		gridPoint->x = seedPoint->x;
+		gridPoint->y = seedPoint->y;
+		gridPoint->z = seedPoint->z;
+		gridPoint->rgba = seedPoint->rgba;
+		if(gridPoint->rgba!=oryx_path_planning::UNKNOWN){
+			ROS_INFO("Set A Non-Unknown Point!");
+		}
 	}
+	ROS_INFO("Finished Building Occupancy Grid");
+
+	ROS_INFO("Built the Occupancy Grid:\n%s",this->toString(0,0)->c_str());
 
 }
 
-OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGrid& message):
+OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr message):
 	occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()){
-	this->xDim	= roundToFrac(message.xDim, message.res);
-	this->yDim	= roundToFrac(message.yDim, message.res);
-	this->zDim	= roundToFrac(message.zDim, message.res);
-	this->res	= message.res;
+	this->xDim	= roundToFrac(message->xDim, message->res);
+	this->yDim	= roundToFrac(message->yDim, message->res);
+	this->zDim	= roundToFrac(message->zDim, message->res);
+	this->res	= message->res;
 	this->xSize = roundToGrid(this->xDim, this->res);
 	this->ySize = roundToGrid(this->yDim, this->res);
 	//Check for a 2D PointCloud
 	if(this->zDim!=0)this->zSize = roundToGrid(this->zDim, this->res);
 	else this->zSize = 1;
-	pcl::fromROSMsg(message.cloud, *(this->occGrid));
+	pcl::fromROSMsg(message->cloud, *(this->occGrid));
 }
 
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
@@ -157,17 +173,17 @@ boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > OccupancyGrid::getGrid(){
 	return this->occGrid;
 }
 
-bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2& message){
-	pcl::toROSMsg(*this->occGrid, message);
+bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message){
+	pcl::toROSMsg(*this->occGrid, *message);
 	return true;
 }
 
-bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGrid& message){
-	message.xDim = this->xDim;
-	message.yDim = this->yDim;
-	message.zDim = this->zDim;
-	message.res	 = this->res;
-	pcl::toROSMsg(*this->occGrid, message.cloud);
+bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGridPtr message){
+	message->xDim = this->xDim;
+	message->yDim = this->yDim;
+	message->zDim = this->zDim;
+	message->res  = this->res;
+	pcl::toROSMsg(*this->occGrid, message->cloud);
 	return true;
 }
 

@@ -58,7 +58,7 @@ set (VERBOSITY ON)
 
 #set the appropriate flag in the config header
 if(VERBOSITY)
-	set (oryx_path_planner_VERBOSITY false)
+	set (oryx_path_planner_VERBOSITY true)
 else(VERBOSITY)
 	set (oryx_path_planner_VERBOSITY false)
 endif(VERBOSITY)

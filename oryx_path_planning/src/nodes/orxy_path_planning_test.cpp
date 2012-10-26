@@ -6,8 +6,8 @@
  */
 #include <ros/ros.h>
 #include "OryxPathPlanning.h"
-
-void printSpeedSet(int xDim, int yDim, double resoltuion, oryx_path_planning::SpeedSet& speedSet);
+using namespace oryx_path_planning;
+void printSpeedSet(int xDim, int yDim, double resoltuion, SpeedSetPtr speedSet);
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "oryx_path_planning_test");
@@ -25,22 +25,22 @@ int main(int argc, char **argv) {
 	double expFact = 1.15;
 	int firstSpeedSet=0;
 	int lastSpeedSet=numSpeedSet;
-	oryx_path_planning::TentacleGenerator generator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, resolution, xDim, yDim);
+	TentacleGeneratorPtr generator( new TentacleGenerator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, resolution, xDim, yDim));
 	ROS_INFO("Tentacles Generated. Printing Speed Sets...");
 	if(!nh.getParam("first_speed_set", firstSpeedSet))ROS_WARN("First Speed Set Not Set! Using Default %d", firstSpeedSet);
 	if(!nh.getParam("last_speed_set", lastSpeedSet))ROS_WARN("Last Speed Set Not Set! Using Default %d", lastSpeedSet);
 
 	for(int s=firstSpeedSet; s<lastSpeedSet; s++){
-		printSpeedSet(xDim, yDim, resolution, generator.getSpeedSet(s));
+		printSpeedSet(xDim, yDim, resolution, generator->getSpeedSet(s));
 	}
 
 	ROS_INFO("Speed Sets Printed!");
 	ROS_INFO("Testing Tentacle Traversal");
 	try{
-		oryx_path_planning::Tentacle::TentacleTraverser traverser(generator.getTentacle(firstSpeedSet, 0));
-		while(traverser.hasNext()){
-			tf::Point travPoint = traverser.next();
-			ROS_INFO("Traversed Point <%f, %f>, total length = %f", travPoint.getX(), travPoint.getY(), traverser.lengthTraversed());
+		Tentacle::TentacleTraverserPtr traverser( new Tentacle::TentacleTraverser(generator->getTentacle(firstSpeedSet, 0)));
+		while(traverser->hasNext()){
+			tf::Point travPoint = traverser->next();
+			ROS_INFO("Traversed Point <%f, %f>, total length = %f", travPoint.getX(), travPoint.getY(), traverser->lengthTraversed());
 		}
 	}catch (std::exception& e){
 		ROS_ERROR("%s",e.what());
@@ -80,17 +80,17 @@ int main(int argc, char **argv) {
 }
 
 
-void printSpeedSet(int xDim, int yDim, double resolution, oryx_path_planning::SpeedSet& speedSet){
+void printSpeedSet(int xDim, int yDim, double resolution, SpeedSetPtr speedSet){
 	int xSize = xDim/resolution;
 	int ySize = (yDim/resolution)*2;
-	int numTent = speedSet.getNumTentacle();
+	int numTent = speedSet->getNumTentacle();
 	std::vector<std::string> occGrid(xSize+1, std::string(ySize+1, '_'));
 	ROS_INFO("Occupancy Gird Generated");
 	for(int t=0; t<numTent; t++){
-		oryx_path_planning::Tentacle tentacle = speedSet.getTentacle(t);
+		TentaclePtr tentacle = speedSet->getTentacle(t);
 		//ROS_INFO("Got Tentacle %d", t);
-		for(unsigned int p=0; p<tentacle.getPoints().size(); p++){
-			tf::Point point(tentacle.getPoints().at(p));
+		for(unsigned int p=0; p<tentacle->getPoints()->size(); p++){
+			tf::Point point(tentacle->getPoints()->at(p));
 			//ROS_INFO("Got Point at <%f, %f>", point.getX(), point.getY());
 			point.setX(oryx_path_planning::roundToGrid(point.getX(), resolution));
 			point.setY(oryx_path_planning::roundToGrid(point.getY(), resolution)+(ySize/2));
