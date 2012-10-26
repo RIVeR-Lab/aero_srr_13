@@ -180,6 +180,8 @@ public:
 	 * @brief	Generates a sensor_msgs::PointCloud2 message from the data in the grid
 	 * @param message	The sensor_msgs::PointCloud2 to write the data to
 	 * @return	True if successful, else false
+	 *
+	 * Note that it is up to the caller to properly set the fields in the header other than the stamp
 	 */
 	bool generateMessage(sensor_msgs::PointCloud2Ptr message);
 
@@ -188,6 +190,8 @@ public:
 	 * @brief	Generates an oryxsrr_msgs::OccupancyGrid message from the OccupancyGrid
 	 * @param message	The message container to fill
 	 * @return	True if successful
+	 *
+	 * Note that it is up to the caller to properly set the fields in the header other than the stamp
 	 */
 	bool generateMessage(oryxsrr_msgs::OccupancyGridPtr message);
 
