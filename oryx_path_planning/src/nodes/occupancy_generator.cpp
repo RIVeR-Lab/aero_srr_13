@@ -71,6 +71,7 @@ int main(int argc, char **argv) {
 			}
 		}
 		sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
+		message->header.frame_id = "base_link";
 		grid_ptr->generateMessage(message);
 		pub.publish(message);
 	}
