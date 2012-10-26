@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
 	ROS_INFO("Testing Tentacle Generator...");
 	int xDim=50;
-	int yDim=xDim/2;
+	int yDim=xDim;
 	double resolution = .25;
 	int numTent= 81;
 	double minSpeed = .1;
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 	double expFact = 1.15;
 	int firstSpeedSet=0;
 	int lastSpeedSet=numSpeedSet;
-	TentacleGeneratorPtr generator( new TentacleGenerator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, resolution, xDim, yDim));
+	TentacleGeneratorPtr generator( new TentacleGenerator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, resolution, xDim, yDim/2));
 	ROS_INFO("Tentacles Generated. Printing Speed Sets...");
 	if(!nh.getParam("first_speed_set", firstSpeedSet))ROS_WARN("First Speed Set Not Set! Using Default %d", firstSpeedSet);
 	if(!nh.getParam("last_speed_set", lastSpeedSet))ROS_WARN("Last Speed Set Not Set! Using Default %d", lastSpeedSet);
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 	}
 
 	ROS_INFO("Testing Occupancy Grid...");
-	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim*2, resolution, oryx_path_planning::UNKNOWN);
+	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim, resolution, oryx_path_planning::UNKNOWN);
 	ROS_INFO("Occupancy Grid Built");
 	try{
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 
 void printSpeedSet(int xDim, int yDim, double resolution, SpeedSetPtr speedSet){
 	int xSize = xDim/resolution;
-	int ySize = (yDim/resolution)*2;
+	int ySize = (yDim/resolution);
 	int numTent = speedSet->getNumTentacle();
 	std::vector<std::string> occGrid(xSize+1, std::string(ySize+1, '_'));
 	ROS_INFO("Occupancy Gird Generated");

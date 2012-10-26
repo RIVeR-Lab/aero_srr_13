@@ -108,8 +108,8 @@ public:
 	 */
 	void pcCB(const sensor_msgs::PointCloud2ConstPtr& message){
 		ROS_INFO("I Got new Occupancy Grid Data!");
-		PointCloudPtr cloud;
-		pcl::fromROSMsg(*message, *cloud);
+		PointCloudPtr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
+		pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, *cloud);
 		this->occupancy_buffer.push_back(OccupancyGridPtr(new OccupancyGrid(xDim, yDim, zDim, res, cloud )));
 	}
 
@@ -127,7 +127,7 @@ public:
 					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", workingGrid_ptr.get()->toString(0,0).get()->c_str());
 					for(pcl::PointCloud<pcl::PointXYZRGBA>::iterator itr = workingGrid_ptr->getGrid()->begin(); itr<workingGrid_ptr->getGrid()->end(); itr++){
 						if(itr->rgba!=oryx_path_planning::UNKNOWN||itr->rgba!=0){
-							ROS_INFO("Found a Point <%f,%f,%f> with RGBA = %d", itr->x, itr->y, itr->z, itr->rgba);
+							//ROS_INFO("Found a Point <%f,%f,%f> with RGBA = %d", itr->x, itr->y, itr->z, itr->rgba);
 						}
 					}
 				}

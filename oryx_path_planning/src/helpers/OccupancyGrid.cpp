@@ -94,19 +94,16 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 
 	//Iterate across the supplied point cloud and fill in the occupancy grid
 	for(pcl::PointCloud<pcl::PointXYZRGBA>::iterator iterator(cloud->begin()); iterator<cloud->end(); iterator++){
-		pcl::PointXYZRGBA* seedPoint = iterator.base();
-		pcl::PointXYZRGBA* gridPoint = &getPoint(seedPoint->x, seedPoint->y, seedPoint->z);
-		if(seedPoint->rgba!=oryx_path_planning::UNKNOWN){
-			ROS_INFO("Got A Non-Unknown Point!");
+		pcl::PointXYZRGBA seedPoint = *iterator;
+		if(seedPoint.rgba!=oryx_path_planning::UNKNOWN){
+			ROS_INFO("Got A Non-Unknown Point! <%f,%f,%f,%x>", seedPoint.x,seedPoint.y, seedPoint.z, seedPoint.rgba);
 		}
-		gridPoint->x = seedPoint->x;
-		gridPoint->y = seedPoint->y;
-		gridPoint->z = seedPoint->z;
-		gridPoint->rgba = seedPoint->rgba;
-		if(gridPoint->rgba!=oryx_path_planning::UNKNOWN){
-			ROS_INFO("Set A Non-Unknown Point!");
-		}
+		this->occGrid->at(calcIndex(seedPoint.x, seedPoint.y, seedPoint.z)) = seedPoint;
+
+		pcl::PointXYZRGBA placedpoint = this->occGrid->at(calcIndex(seedPoint.x, seedPoint.y, seedPoint.z));
+		ROS_INFO("Placed Point <%f, %f, %f, %x>", placedpoint.x, placedpoint.y, placedpoint.z, placedpoint.rgba);
 	}
+
 	ROS_INFO("Finished Building Occupancy Grid");
 
 	ROS_INFO("Built the Occupancy Grid:\n%s",this->toString(0,0)->c_str());
@@ -124,7 +121,7 @@ OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr message):
 	//Check for a 2D PointCloud
 	if(this->zDim!=0)this->zSize = roundToGrid(this->zDim, this->res);
 	else this->zSize = 1;
-	pcl::fromROSMsg(message->cloud, *(this->occGrid));
+	pcl::fromROSMsg<pcl::PointXYZRGBA>(message->cloud, *(this->occGrid));
 }
 
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
@@ -169,21 +166,23 @@ bool OccupancyGrid::setPointTrait(double x, double y, double z, oryx_path_planni
 	return false;
 }
 
-boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > OccupancyGrid::getGrid(){
+PointCloudPtr OccupancyGrid::getGrid(){
 	return this->occGrid;
 }
 
 bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message){
-	pcl::toROSMsg(*this->occGrid, *message);
+	message->header.stamp = ros::Time::now();
+	pcl::toROSMsg<pcl::PointXYZRGBA>(*this->occGrid, *message);
 	return true;
 }
 
 bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGridPtr message){
+	message->header.stamp = ros::Time::now();
 	message->xDim = this->xDim;
 	message->yDim = this->yDim;
 	message->zDim = this->zDim;
 	message->res  = this->res;
-	pcl::toROSMsg(*this->occGrid, message->cloud);
+	pcl::toROSMsg<pcl::PointXYZRGBA>(*this->occGrid, message->cloud);
 	return true;
 }
 

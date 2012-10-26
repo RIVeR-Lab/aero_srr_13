@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 		ROS_INFO("Enter A Number: ");
 		std::cin >> input;
 		ROS_INFO("I Got Input!: %f", input);
-		boost::shared_ptr<oryx_path_planning::OccupancyGrid> grid_ptr(new oryx_path_planning::OccupancyGrid(xDim, yDim, res, oryx_path_planning::UNKNOWN));
+		oryx_path_planning::OccupancyGridPtr grid_ptr(new oryx_path_planning::OccupancyGrid(xDim, yDim, res, oryx_path_planning::UNKNOWN));
 		double y;
 		for(double x=0; x<xDim; x+=res){
 			y= input*x;
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 				ROS_ERROR(e.what());
 			}
 		}
-		sensor_msgs::PointCloud2Ptr message;
+		sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
 		grid_ptr->generateMessage(message);
 		pub.publish(message);
 	}

@@ -105,7 +105,7 @@ inline int roundToGrid(double raw, double resolution){
  * @return A double corresponding to a real value represented by a grid coordinate
  */
 inline double gridToReal(int grid, double resolution){
-	return (double)grid/resolution;
+	return (double)grid*resolution;
 }
 
 } /* oryx_path_planning */;
