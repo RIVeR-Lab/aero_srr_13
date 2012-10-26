@@ -11,6 +11,7 @@
 #include<oryx_drive_controller/VelocityCommandAction.h>
 #include<boost/lexical_cast.hpp>
 #include<boost/circular_buffer.hpp>
+#include<oryxsrr_msgs/SoftwareStop.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanning.h"
 #include "OryxPathPlannerConfig.h"
@@ -62,6 +63,13 @@ public:
 		this->res  = res;
 		this->pc_sub = nh.subscribe(this->pc_topic, 1, &LocalPlanner::pcCB, this);
 		this->shouldPlan = true;
+		this->currentRad = 0;
+		this->currentVel = 0;
+
+		std::string software_stop_topic("oryx/software_stop");
+
+		if(!this->nh.getParam(software_stop_topic, software_stop_topic))ROS_WARN("%s not set, using default value %s", software_stop_topic.c_str(), software_stop_topic.c_str());
+		this->stop_sub = nh.subscribe(software_stop_topic, 1, &LocalPlanner::stopCB, this);
 
 		ROS_INFO("Waiting For Connection To Velocity Control Server On <%s>...", this->v_action_topic.c_str());
 		if(v_client.waitForServer(ros::Duration(CONNECTION_TIMEOUT))){
@@ -89,14 +97,11 @@ public:
 				//Grab the next occupancy grid to process
 				if(!this->occupancy_buffer.empty()){
 					OccupancyGridPtr workingGrid_ptr = this->occupancy_buffer.front();
+					SpeedSetPtr		 speedSet_ptr	 = this->tentacles->getSpeedSet(this->currentVel);
 					this->occupancy_buffer.pop_front();
 
 					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", workingGrid_ptr.get()->toString(0,0).get()->c_str());
-					for(OccupancyGrid::iterator itr = workingGrid_ptr->begin(); itr<workingGrid_ptr->end(); itr++){
-						if(itr->rgba!=oryx_path_planning::UNKNOWN||itr->rgba!=0){
-							//ROS_INFO("Found a Point <%f,%f,%f> with RGBA = %d", itr->x, itr->y, itr->z, itr->rgba);
-						}
-					}
+					ROS_INFO("I'm Going To Use A Speed Set With The Parameters <NumTent:%d, Vel:%f, SR:%f>", speedSet_ptr->getNumTentacle(), speedSet_ptr->getVelocity(), speedSet_ptr->getSeedRad());
 				}
 			}
 			//spin to let ROS process callbacks
@@ -111,16 +116,29 @@ private:
 	double	yDim;		///y dimension of the occupancy grid to use, in real units
 	double	zDim;		///z dimension of the occupancy grid to use, in real units
 	double	res;		///resolution the occupancy grid to use, in real units per grid unit
+	double	currentVel;	///Current Velocity of the Platform
+	double	currentRad;	///Current Radius followed by the Platform
 	ros::NodeHandle nh;	///Node handle for publishing/subscribing to topics
 	std::string	v_action_topic;
 	std::string pc_topic;			///topic name of the ROS topic to receive new occupancy grid data over
 	TentacleGeneratorPtr tentacles;	///Pointer to the tentacle generator which contains the tentacles to use for planning
 
-	ros::Subscriber 	 pc_sub;	///Subscriber to the ROS topic to receive new occupancy grid data over
+	ros::Subscriber 	pc_sub;		///Subscriber to the ROS topic to receive new occupancy grid data over
+	ros::Subscriber		stop_sub;	///Subscriber to the ROS topic to receive the software stop message
 
-	boost::circular_buffer<OccupancyGridPtr > occupancy_buffer;
+	boost::circular_buffer<OccupancyGridPtr > occupancy_buffer;	///Buffer to store received OccupancyGrid data
 
-	actionlib::SimpleActionClient<oryx_drive_controller::VelocityCommandAction> v_client;
+	actionlib::SimpleActionClient<oryx_drive_controller::VelocityCommandAction> v_client;	///The actionlib client to set velocity command messages to the base platform with
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Callback for handling the SoftwareStop message
+	 * @param message The message to process
+	 */
+	void stopCB(const oryxsrr_msgs::SoftwareStopConstPtr& message){
+		this->shouldPlan = message->stop;
+		ROS_WARN("Oryx Local Path Planner Received A Software Stop Message: %s", message->message.c_str());
+	}
 
 	/**
 	 * @author	Adam Panzica
@@ -162,8 +180,8 @@ private:
 	void doneCb(const actionlib::SimpleClientGoalState& state,
 			const oryx_drive_controller::VelocityCommandResultConstPtr& result)
 	{
-		ROS_INFO("Finished in state [%s]", state.toString().c_str());
-		ROS_INFO("Result: %s", (result->success)?"Successful":"Unsuccessful");
+		ROS_DEBUG("Finished in state [%s]", state.toString().c_str());
+		ROS_DEBUG("Result: %s", (result->success)?"Successful":"Unsuccessful");
 	};
 
 	/**
@@ -172,7 +190,7 @@ private:
 	 */
 	void activeCb()
 	{
-		ROS_INFO("Goal just went active...");
+		ROS_DEBUG("Platform Received Velocity Goal");
 	};
 
 	/**
@@ -182,7 +200,8 @@ private:
 	 */
 	void feedbackCb(const oryx_drive_controller::VelocityCommandFeedbackConstPtr& feedback)
 	{
-		ROS_INFO("Feedback: <%f,%f>", feedback->velocity, feedback->omega);
+		this->currentVel = feedback->velocity;
+		this->currentRad = feedback->omega;
 	};
 
 };
