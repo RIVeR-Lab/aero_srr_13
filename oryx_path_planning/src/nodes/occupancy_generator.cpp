@@ -56,18 +56,16 @@ int main(int argc, char **argv) {
 		ROS_INFO("Enter A Number: ");
 		std::cin >> input;
 		ROS_INFO("I Got Input!: %f", input);
-		oryx_path_planning::OccupancyGridPtr grid_ptr(new oryx_path_planning::OccupancyGrid(xDim, yDim, res, oryx_path_planning::UNKNOWN));
+		oryx_path_planning::OccupancyGridPtr grid_ptr(new oryx_path_planning::OccupancyGrid(xDim, yDim, res, oryx_path_planning::FREE_LOW_COST));
 		double y;
 		for(double x=0; x<xDim; x+=res){
 			y= input*x;
-			if(y>yDim){
-				y=yDim;
-			}else if(y< 0){
-				y=0;
+			if(y>yDim||y<0){
+				break;
 			}
 			try{
 				ROS_INFO("Setting Point at <%f,%f>", x,y);
-				grid_ptr->setPointTrait(x,y,0,oryx_path_planning::FREE_HIGH_COST);
+				grid_ptr->setPointTrait(x,y,0,oryx_path_planning::OBSTACLE);
 			}catch(std::exception& e){
 				ROS_ERROR(e.what());
 			}

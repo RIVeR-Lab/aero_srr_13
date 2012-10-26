@@ -54,7 +54,7 @@ set (oryx_path_planner_VERSION_BUILD ${RESULT})
 
 #the verbosity level
 #define a verbosity option
-set (VERBOSITY ON)
+set (VERBOSITY OFF)
 
 #set the appropriate flag in the config header
 if(VERBOSITY)

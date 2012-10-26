@@ -31,6 +31,12 @@ typedef boost::shared_ptr<OccupancyGrid> OccupancyGridPtr;
 
 ///Typedef to allow for convenient sharing of a PointCloud<pcl::PointXYZRGBA> > via pointer
 typedef boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > PointCloudPtr;
+
+///Typedef to allow for convenient sharing of a pcl::PointXYZRGBA via pointer
+typedef boost::shared_ptr<pcl::PointXYZRGBA> PointPtr;
+
+///Typedef to allow for easier to read code
+typedef pcl::PointXYZRGBA Point;
 //*********************** CLASS DEFINITIONS ************************************//
 /**
  * @author Adam Panzica
@@ -79,6 +85,8 @@ public:
  */
 class OccupancyGrid{
 public:
+	///Typedef to make iterators easier
+	typedef pcl::PointCloud<pcl::PointXYZRGBA>::iterator iterator;
 
 	/**
 	 * @author	Adam Panzica
@@ -184,6 +192,18 @@ public:
 	bool generateMessage(oryxsrr_msgs::OccupancyGridPtr message);
 
 	/**
+	 * @author	Adam Panzica
+	 * @return	A reference to an iterator at the beginning of the occupancy grid
+	 */
+	iterator begin();
+
+	/**
+	 * @author	Adam Panzica
+	 * @return	A reference to an iterator at the end of the occupancy grid
+	 */
+	iterator end();
+
+	/**
 	 * @author	Adam Panzic
 	 * @brief	Generates a string representation of a slice of the Occupancy Grid
 	 * @param sliceAxis	The axis to create the slice along. O=x-axis, 1 = y-axis, 2=z-axis
@@ -230,7 +250,7 @@ private:
 	 * @param z	z-coord
 	 * @return The point at the given coordinate
 	 */
-	pcl::PointXYZRGBA& getPoint(double x, double y, double z);
+	Point& getPoint(double x, double y, double z);
 
 	/**
 	 * Gets a point out of the point cloud based on integer coordinates
@@ -239,7 +259,7 @@ private:
 	 * @param z	z-coord
 	 * @return The point at the given coordinate
 	 */
-	pcl::PointXYZRGBA& getPoint(int x, int y, int z);
+	Point& getPoint(int x, int y, int z);
 
 	/**
 	 * @author Adam Panzica
@@ -251,9 +271,9 @@ private:
 	double xDim;	///The x dimension of this grid
 	double yDim;	///The y dimension of this grid
 	double zDim;	///The z dimension of this grid
-	double xSize;	///The x size of this grid
-	double ySize;	///The y size of this grid
-	double zSize;	///The z size of this grid
+	int xSize;		///The x size of this grid
+	int ySize;		///The y size of this grid
+	int zSize;		///The z size of this grid
 	double res;		///The grid resolution of this occupancy grid
 	PointCloudPtr occGrid;		///A smart pointer to the point cloud which contains the data for this occupancy grid
 };

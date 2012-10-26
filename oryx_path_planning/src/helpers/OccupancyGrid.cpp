@@ -6,6 +6,7 @@
  */
 
 #include <boost/lexical_cast.hpp>
+#include<tf/transform_datatypes.h>
 
 
 
@@ -74,44 +75,57 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, PointT
  * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
  */
 OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, PointCloudPtr cloud) throw(OccupancyGridAccessException):
-		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*((zDim!=0)?roundToGrid(zDim, resolution):1),1)){
+				occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*((zDim!=0)?roundToGrid(zDim, resolution):1),1)){
 	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%f, %f, %f>", xDim, yDim, zDim);
-	ROS_INFO("Recieved cloud Should be Size <%d>, is size <%d>",this->occGrid->size(), cloud->size());
+	ROS_INFO("Recieved cloud Should be Size <%d>, is size <%d>",(int)this->occGrid->size(), (int)cloud->size());
 	this->xDim	= roundToFrac(xDim, resolution);
 	this->yDim	= roundToFrac(yDim, resolution);
 	this->res	= resolution;
 	this->xSize = roundToGrid(this->xDim, this->res);
 	this->ySize = roundToGrid(this->yDim, this->res);
 	//Check for a 2D PointCloud
-	if(this->zDim!=0){
+	if(this->zDim==0){
+		this->zDim	= 0;
+		this->zSize = 1;
+	}else{
 		this->zDim	= roundToFrac(zDim, resolution);
 		this->zSize = roundToGrid(this->zDim, this->res);
 	}
-	else{
-		this->zDim	= 0;
-		this->zSize = 1;
+
+	OccupancyGrid::iterator cloudItr;
+	OccupancyGrid::iterator occItr = this->occGrid->begin();
+	/*for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
+		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
+		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
+		occItr++;
+	}*/
+
+	for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
+		double	pointX = cloudItr->x;
+		double	pointY = cloudItr->y;
+		double	pointZ = cloudItr->z;
+		int		pointRGBA = cloudItr->rgba;
+		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", pointX, pointY, pointZ, pointRGBA);
+
+		Point& point = getPoint(pointX, pointY, pointZ);
+		point.x = pointX;
+		point.y = pointY;
+		point.z = pointZ;
+		point.rgba = pointRGBA;
 	}
 
-	//Iterate across the supplied point cloud and fill in the occupancy grid
-	for(pcl::PointCloud<pcl::PointXYZRGBA>::iterator iterator(cloud->begin()); iterator<cloud->end(); iterator++){
-		pcl::PointXYZRGBA seedPoint = *iterator;
-		if(seedPoint.rgba!=oryx_path_planning::UNKNOWN){
-			ROS_INFO("Got A Non-Unknown Point! <%f,%f,%f,%x>", seedPoint.x,seedPoint.y, seedPoint.z, seedPoint.rgba);
-		}
-		this->occGrid->at(calcIndex(seedPoint.x, seedPoint.y, seedPoint.z)) = seedPoint;
-
-		pcl::PointXYZRGBA placedpoint = this->occGrid->at(calcIndex(seedPoint.x, seedPoint.y, seedPoint.z));
-		ROS_INFO("Placed Point <%f, %f, %f, %x>", placedpoint.x, placedpoint.y, placedpoint.z, placedpoint.rgba);
-	}
-
-	ROS_INFO("Finished Building Occupancy Grid");
-
-	ROS_INFO("Built the Occupancy Grid:\n%s",this->toString(0,0)->c_str());
+	/*occItr = this->occGrid->begin();
+	for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
+		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
+		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
+		occItr++;
+	}*/
+	//ROS_INFO("Built the Occupancy Grid <%f/%d, %f/%d, %f/%d>:\n%s",this->xDim, this->xSize,this->yDim, this->ySize,this->zDim, this->zSize, this->toString(0,0)->c_str());
 
 }
 
 OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr message):
-	occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()){
+			occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()){
 	this->xDim	= roundToFrac(message->xDim, message->res);
 	this->yDim	= roundToFrac(message->yDim, message->res);
 	this->zDim	= roundToFrac(message->zDim, message->res);
@@ -130,7 +144,7 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 			for(int z=0; z<this->zSize; z++){
 				//ROS_INFO("Initializing Point <%d, %d, %d>", x,y,z);
 				//Initialize the point
-				pcl::PointXYZRGBA& point = getPoint(x,y,z);
+				Point& point = getPoint(x,y,z);
 				point.x = gridToReal(x, this->res);
 				point.y = gridToReal(y, this->res);
 				point.z = gridToReal(z, this->res);
@@ -184,6 +198,14 @@ bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGridPtr message){
 	message->res  = this->res;
 	pcl::toROSMsg<pcl::PointXYZRGBA>(*this->occGrid, message->cloud);
 	return true;
+}
+
+OccupancyGrid::iterator OccupancyGrid::begin(){
+	return this->occGrid->begin();
+}
+
+OccupancyGrid::iterator OccupancyGrid::end(){
+	return this->occGrid->end();
 }
 
 /**
@@ -266,11 +288,11 @@ int OccupancyGrid::calcIndex(int x, int y, int z){
 	return x*this->zSize*this->ySize + y*this->zSize + z;
 }
 
-pcl::PointXYZRGBA& OccupancyGrid::getPoint(double x, double y, double z){
+Point& OccupancyGrid::getPoint(double x, double y, double z){
 	return this->occGrid.get()->at(calcIndex(x, y, z));
 }
 
-pcl::PointXYZRGBA& OccupancyGrid::getPoint(int x, int y, int z){
+Point& OccupancyGrid::getPoint(int x, int y, int z){
 	return this->occGrid.get()->at(calcIndex(x, y, z));
 }
 
