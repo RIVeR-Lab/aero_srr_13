@@ -322,8 +322,24 @@ public:
 	 */
 	iterator end();
 
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Gets the velocity of this SpeedSet
+	 * @return	The velocity value of this SpeedSet
+	 */
+	double getVelocity();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Gets the seed radius of this SpeedSet
+	 * @return	The calculated sseed radius of this SpeedSet
+	 */
+	double getSeedRad();
+
 
 private:
+	double velocity;
+	double seedRad;
 	std::vector<TentaclePtr> tentacles;	///A vector containing all of the tentacles for this speed set
 };
 

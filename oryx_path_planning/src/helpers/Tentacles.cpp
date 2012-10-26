@@ -242,10 +242,14 @@ Tentacle::PointVectorPtr Tentacle::getPoints(){
  * This constructor just makes an empty set of tentacles
  */
 SpeedSet::SpeedSet(){
+	this->seedRad = 0;
+	this->velocity = 0;
 }
 
 
 SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolution, double xDim, double yDim, double velocity){
+	this->seedRad  = seedRad;
+	this->velocity = velocity;
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++){
 		this->tentacles.push_back(TentaclePtr(new Tentacle(expFact, seedRad, t, numTent, resolution, xDim, yDim, velocity)));
@@ -256,6 +260,14 @@ SpeedSet::~SpeedSet(){};
 
 unsigned int SpeedSet::getNumTentacle(){
 	return this->tentacles.size();
+}
+
+double SpeedSet::getVelocity(){
+	return this->velocity;
+}
+
+double SpeedSet::getSeedRad(){
+	return this->seedRad;
 }
 
 TentaclePtr SpeedSet::getTentacle(int index)throw(oryx_path_planning::TentacleAccessException){
