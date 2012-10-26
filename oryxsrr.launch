@@ -25,6 +25,9 @@
 
 	<!-- ********************INCLUDES******************** -->
 	<!-- Include Sub-Launch Files -->
+	<include file="$(find oryx_drive_controller)/launch/oryx_drive_controller.launch">
+		<arg name="velocity_topic"		value="$(arg velocity_command_topic)"/>
+	</include>
 	<include file="$(find oryx_path_planning)/launch/oryx_path_planning.launch">
 		<arg name="velocity_command_topic"	value="$(arg velocity_command_topic)" />
 		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
@@ -39,5 +42,4 @@
 		<arg name="tentacles/number"		value="$(arg tentacles/number)"/>
 		<arg name="tentacles/exp_factor"		value="$(arg tentacles/exp_factor)"/>
 	</include>
-	
 </launch>

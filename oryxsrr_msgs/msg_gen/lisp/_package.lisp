@@ -3,5 +3,7 @@
   (:export
    "<OCCUPANCYGRID>"
    "OCCUPANCYGRID"
+   "<SOFTWARESTOP>"
+   "SOFTWARESTOP"
   ))
 
