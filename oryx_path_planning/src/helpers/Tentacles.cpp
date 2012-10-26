@@ -285,11 +285,14 @@ TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSp
 	PRINTER("Generating Speed Sets...");
 
 	double q = 0;
+	double vel = 0;
 	//Generate the SpeedSets
 	for(int v=0; v<numSpeedSet; v++){
 		q = calcQ(v);
+		vel = calcSpeedSetVel(minSpeed, maxSpeed, q);
 		PRINTER("Calculated q=%f",q);
-		this->speedSets.push_back(SpeedSetPtr(new SpeedSet(expFact, calcSeedRad(v, q), numTentacles, resolution, xDim, yDim, calcSpeedSetVel(minSpeed, maxSpeed, q))));
+		this->speedSets.push_back(SpeedSetPtr(new SpeedSet(expFact, calcSeedRad(v, q), numTentacles, resolution, xDim, yDim, vel)));
+		this->velocityKeys.push_back(vel);
 	}
 	PRINTER("Speed Sets Complete!");
 }
@@ -313,6 +316,34 @@ TentaclePtr TentacleGenerator::getTentacle(int speedSet, int index) throw (oryx_
 
 SpeedSetPtr TentacleGenerator::getSpeedSet(int speedSet){
 	return this->speedSets.at(speedSet);
+}
+
+/**
+ * Finds the speed set based on a nearest neighbor search
+ */
+SpeedSetPtr TentacleGenerator::getSpeedSet(double velocity){
+	double lowSpeed		= 0;
+	double highSpeed	= 0;
+	int index			= 0;
+	//Iterate across keys looking for closest neighbors
+	for(std::vector<double>::iterator itr = this->velocityKeys.begin(); itr<this->velocityKeys.end(); itr++){
+		if(velocity>=*itr){
+			lowSpeed = *itr;
+			index++;
+		}else{
+			highSpeed = *itr;
+			break;
+		}
+	}
+	//If the key was between two values, calculate the closest neighbor
+	if(highSpeed!=0){
+		//If closer to low speed, select that index
+		if((velocity-lowSpeed)>(highSpeed-velocity)){
+			return this->speedSets.at(index);
+		}else{
+			return this->speedSets.at(index+1);
+		}
+	}else return this->speedSets.at(index);
 }
 
 TentacleGenerator::iterator TentacleGenerator::begin(){

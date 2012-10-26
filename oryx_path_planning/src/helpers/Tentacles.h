@@ -372,11 +372,20 @@ public:
 	TentaclePtr getTentacle(int speedSet, int index) throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
 
 	/**
-	 * @author Adam Panzica
+	 * @author	Adam Panzica
+	 * @brief	Looks up a speed set based on index
 	 * @param speedSet Index of the SpeedSet to get
 	 * @return The SpeedSet at the index
 	 */
 	SpeedSetPtr getSpeedSet(int speedSet);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Looks up a SpeedSet based on velocity
+	 * @param velocity Velocity to find a closest match for
+	 * @return A SpeedSetPtr to the SpeedSet who most closely matches the given velocity
+	 */
+	SpeedSetPtr getSpeedSet(double velocity);
 
 	/**
 	 * @author	Adam Panzica
@@ -394,6 +403,7 @@ private:
 	int					numSpeedSet;
 	double 				expFact;		///Exponential factor used to calculate radii
 	std::vector<SpeedSetPtr > speedSets;	///A set containing all of the valid tentacles that have been generated
+	std::vector<double>		  velocityKeys;	///A set containing the velocity keys for each speed set
 
 	/**
 	 * @author Adam Panzics
