@@ -6,6 +6,7 @@
  */
 #include<ros/ros.h>
 #include<sensor_msgs/PointCloud2.h>
+#include<oryxsrr_msgs/SoftwareStop.h>
 #include"OccupancyGrid.h"
 
 ///Macro for printing out warning messages if default parameters are used
@@ -16,6 +17,7 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "Occupancy_Generator");
 	ros::NodeHandle nh;
 	ros::Publisher pub = nh.advertise<sensor_msgs::PointCloud2>("occupancy_point_cloud_topic", 2);
+	ros::Publisher s_pub = nh.advertise<oryxsrr_msgs::SoftwareStop>("oryx/software_stop", 2);
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");
@@ -50,30 +52,39 @@ int main(int argc, char **argv) {
 	if(!nh.getParam(p_z_dim,	zDim))			PARAM_WARN(p_z_dim,		zDim_msg);
 	if(!nh.getParam(p_res,		res))			PARAM_WARN(p_res,		p_res_msg);
 
-
+	bool stop = true;
 	while(ros::ok()){
 		double input;
 		ROS_INFO("Enter A Number: ");
 		std::cin >> input;
 		ROS_INFO("I Got Input!: %f", input);
 		oryx_path_planning::OccupancyGridPtr grid_ptr(new oryx_path_planning::OccupancyGrid(xDim, yDim, res, oryx_path_planning::FREE_LOW_COST));
-		double y;
-		for(double x=0; x<xDim; x+=res){
-			y= input*x;
-			if(y>yDim||y<0){
-				break;
+		if(input>0){
+			double y;
+			for(double x=0; x<xDim; x+=res){
+				y= input*x;
+				if(y>yDim||y<0){
+					break;
+				}
+				try{
+					ROS_INFO("Setting Point at <%f,%f>", x,y);
+					grid_ptr->setPointTrait(x,y,0,oryx_path_planning::OBSTACLE);
+				}catch(std::exception& e){
+					ROS_ERROR(e.what());
+				}
 			}
-			try{
-				ROS_INFO("Setting Point at <%f,%f>", x,y);
-				grid_ptr->setPointTrait(x,y,0,oryx_path_planning::OBSTACLE);
-			}catch(std::exception& e){
-				ROS_ERROR(e.what());
-			}
+			sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
+			message->header.frame_id = "base_link";
+			grid_ptr->generateMessage(message);
+			pub.publish(message);
+		}else{
+			oryxsrr_msgs::SoftwareStop stopMessage;
+			stopMessage.stop = stop;
+			stopMessage.message = "I'm testing Software Stop";
+			s_pub.publish(stopMessage);
+			if(stop) stop = false;
+			else stop = true;
 		}
-		sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
-		message->header.frame_id = "base_link";
-		grid_ptr->generateMessage(message);
-		pub.publish(message);
 	}
 }
 
