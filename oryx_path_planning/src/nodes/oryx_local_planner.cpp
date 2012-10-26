@@ -136,8 +136,11 @@ private:
 	 * @param message The message to process
 	 */
 	void stopCB(const oryxsrr_msgs::SoftwareStopConstPtr& message){
-		this->shouldPlan = message->stop;
-		ROS_WARN("Oryx Local Path Planner Received A Software Stop Message: %s", message->message.c_str());
+		//Need to flip as message is true when should stop
+		this->shouldPlan = !message->stop;
+		ROS_WARN("Oryx Local Path Planner Received A Software Stop Message [%s]: %s",(message->stop)?"Stop":"Go", message->message.c_str());
+		//If we were told to stop, clear the buffer so we don't process stale data at wakeup
+		if(!this->shouldPlan)this->occupancy_buffer.clear();
 	}
 
 	/**
@@ -149,10 +152,13 @@ private:
 	 * and places it on the occupancy grid buffer for processing by the planner
 	 */
 	void pcCB(const sensor_msgs::PointCloud2ConstPtr& message){
-		ROS_INFO("I Got new Occupancy Grid Data!");
-		PointCloudPtr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
-		pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, *cloud);
-		this->occupancy_buffer.push_back(OccupancyGridPtr(new OccupancyGrid(xDim, yDim, zDim, res, cloud )));
+		//To prevent processing of stale data, ignore anything received while we shouldn't be planning
+		if(this->shouldPlan){
+			ROS_INFO("I Got new Occupancy Grid Data!");
+			PointCloudPtr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
+			pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, *cloud);
+			this->occupancy_buffer.push_back(OccupancyGridPtr(new OccupancyGrid(xDim, yDim, zDim, res, cloud )));
+		}
 	}
 
 	/**
