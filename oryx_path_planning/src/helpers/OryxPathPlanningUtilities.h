@@ -8,9 +8,33 @@
 #ifndef ORYXPATHPLANNINGUTILITIES_H_
 #define ORYXPATHPLANNINGUTILITIES_H_
 
+#ifndef POINT_PRECISION
+#define POINT_PRECISION float	///Macro for defining the precision of the point values being used
+#else
+#error POINT_PRECISION is already defined
+#endif
+
 #include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/ros/conversions.h>
+#include <pcl/registration/distances.h>
+#include <sensor_msgs/PointCloud2.h>
+
 
 namespace oryx_path_planning{
+
+//*********************** TYPEDEFS ******************************//
+///Typedef to allow for easier to read code
+typedef pcl::PointXYZRGBA Point;
+
+///Typedef to allow for convenient sharing of a pcl::PointXYZRGBA via pointer
+typedef boost::shared_ptr<Point> PointPtr;
+
+///Typedef to allow for convenient sharing of a PointCloud<pcl::PointXYZRGBA> > via pointer
+typedef boost::shared_ptr<pcl::PointCloud<Point> > PointCloudPtr;
+
+//*********************** CONSTANTS ******************************//
 
 const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant, define it here
 

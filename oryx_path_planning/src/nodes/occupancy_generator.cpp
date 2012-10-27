@@ -52,7 +52,10 @@ int main(int argc, char **argv) {
 	if(!nh.getParam(p_z_dim,	zDim))			PARAM_WARN(p_z_dim,		zDim_msg);
 	if(!nh.getParam(p_res,		res))			PARAM_WARN(p_res,		p_res_msg);
 
-	tf::Point origin(0, yDim/2, 0);
+	oryx_path_planning::Point origin;
+	origin.x = 0;
+	origin.y = yDim/2;
+	origin.z = 0;
 
 	bool stop = true;
 	while(ros::ok()){
@@ -65,7 +68,7 @@ int main(int argc, char **argv) {
 			double y;
 			for(double x=0; x<xDim; x+=res){
 				y= input*x;
-				if(y>(yDim+origin.getY())||y<0){
+				if(y>(yDim+origin.y)||y<0){
 					break;
 				}
 				try{

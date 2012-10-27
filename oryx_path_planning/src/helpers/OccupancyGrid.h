@@ -10,12 +10,7 @@
 
 //*********************** SYSTEM DEPENDENCIES ************************************//
 #include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <pcl/ros/conversions.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <oryxsrr_msgs/OccupancyGrid.h>
-#include<tf/transform_datatypes.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanningUtilities.h"
 
@@ -29,14 +24,6 @@ class OccupancyGrid;
 ///Typedef to allow for convenient sharing of a OccupancyGrid via pointer
 typedef boost::shared_ptr<OccupancyGrid> OccupancyGridPtr;
 
-///Typedef to allow for convenient sharing of a PointCloud<pcl::PointXYZRGBA> > via pointer
-typedef boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > PointCloudPtr;
-
-///Typedef to allow for convenient sharing of a pcl::PointXYZRGBA via pointer
-typedef boost::shared_ptr<pcl::PointXYZRGBA> PointPtr;
-
-///Typedef to allow for easier to read code
-typedef pcl::PointXYZRGBA Point;
 //*********************** CLASS DEFINITIONS ************************************//
 /**
  * @author Adam Panzica
@@ -110,7 +97,7 @@ public:
 	 * @param origin		The origin of the occupancy grid
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double resolution, tf::Point& origin, PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(double xDim, double yDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
@@ -122,7 +109,7 @@ public:
 	 * @param origin		The origin of the occupancy grid
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, tf::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, const oryx_path_planning::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
@@ -135,7 +122,7 @@ public:
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, tf::Point& origin, PointCloudPtr cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, const oryx_path_planning::Point& origin, PointCloudPtr cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -162,15 +149,34 @@ public:
 
 	/**
 	 * @author	Adam Panzica
+	 * @brief	Gets the PointTrait of a given point on the grid
+	 * @param point	The coordinates of the point on the grid
+	 * @return The PointTrait of the point at the given coordinates
+	 * @throw OccupancyGridAccessException if invalid coordinates were given
+	 */
+	oryx_path_planning::PointTrait getPointTrait(oryx_path_planning::Point point)throw(OccupancyGridAccessException);
+
+	/**
+	 * @author	Adam Panzica
 	 * @brief	Sets the PointTrait of a point on the grid
 	 * @param x	The x-coord of the point
 	 * @param y	The y-coord of the point
 	 * @param z	The z-coord of the point
 	 * @param trait	The PointTrait to set the point to
-	 * @return True if succesful, else false
+	 * @return True if successful, else false
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait) throw(OccupancyGridAccessException);
+	bool setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Sets the PointTrait of a point on the grid
+	 * @param point	The coordinates of the point on the grid
+	 * @param trait	The PointTrait to set the point to
+	 * @return True if successful, else false
+	 * @throw OccupancyGridAccessException if invalid coordinates were given
+	 */
+	bool setPointTrait(oryx_path_planning::Point point, oryx_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -224,12 +230,10 @@ private:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Checks to make sure a set of coordinates are on the occupancy grid
-	 * @param x	x-coord to check
-	 * @param y	y-coord to check
-	 * @param z	z-coord to check
+	 * @param point Coordinates of the point to check
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool boundsCheck(double x, double y, double z)throw(OccupancyGridAccessException);
+	bool boundsCheck(oryx_path_planning::Point& point)throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -258,7 +262,7 @@ private:
 	 * @param z	z-coord
 	 * @return The point at the given coordinate
 	 */
-	Point& getPoint(double x, double y, double z);
+	Point& getPoint(oryx_path_planning::Point& point);
 
 	/**
 	 * Gets a point out of the point cloud based on integer coordinates
@@ -286,7 +290,7 @@ private:
 	int x_ori;		///The x origin of the grid in grid units
 	int y_ori;		///The y origin of the grid in grid units
 	int z_ori;		///The z origin of the grid in grid units
-	tf::Point origin;		///The origin of the occupancy grid
+	oryx_path_planning::Point origin;		///The origin of the occupancy grid
 	PointCloudPtr occGrid;	///A smart pointer to the point cloud which contains the data for this occupancy grid
 };
 

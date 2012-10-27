@@ -37,10 +37,10 @@ int main(int argc, char **argv) {
 	ROS_INFO("Speed Sets Printed!");
 	ROS_INFO("Testing Tentacle Traversal");
 	try{
-		Tentacle::TentacleTraverserPtr traverser( new Tentacle::TentacleTraverser(generator->getTentacle(firstSpeedSet, 0)));
+		Tentacle::TentacleTraverserPtr traverser( new Tentacle::TentacleTraverser(*generator->getTentacle(firstSpeedSet, 0)));
 		while(traverser->hasNext()){
-			tf::Point travPoint = traverser->next();
-			ROS_INFO("Traversed Point <%f, %f>, total length = %f", travPoint.getX(), travPoint.getY(), traverser->lengthTraversed());
+			oryx_path_planning::Point travPoint = traverser->next();
+			ROS_INFO("Traversed Point <%f, %f>, total length = %f", travPoint.x, travPoint.y, traverser->lengthTraversed());
 		}
 	}catch (std::exception& e){
 		ROS_ERROR("%s",e.what());
@@ -58,7 +58,10 @@ int main(int argc, char **argv) {
 	}
 
 	ROS_INFO("Testing Occupancy Grid...");
-	tf::Point origin(0, yDim/2, 0);
+	oryx_path_planning::Point origin;
+	origin.x=0;
+	origin.y=yDim/2;
+	origin.z=0;
 	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim, resolution, origin, oryx_path_planning::UNKNOWN);
 	ROS_INFO("Occupancy Grid Built");
 	try{
@@ -91,12 +94,12 @@ void printSpeedSet(int xDim, int yDim, double resolution, SpeedSetPtr speedSet){
 		TentaclePtr tentacle = speedSet->getTentacle(t);
 		//ROS_INFO("Got Tentacle %d", t);
 		for(unsigned int p=0; p<tentacle->getPoints()->size(); p++){
-			tf::Point point(tentacle->getPoints()->at(p));
-			//ROS_INFO("Got Point at <%f, %f>", point.getX(), point.getY());
-			point.setX(oryx_path_planning::roundToGrid(point.getX(), resolution));
-			point.setY(oryx_path_planning::roundToGrid(point.getY(), resolution)+(ySize/2));
-			//ROS_INFO("Placing Point at <%f, %f>", point.getX(), point.getY());
-			occGrid.at(point.getX()).replace(point.getY(),1,"T");
+			oryx_path_planning::Point point(tentacle->getPoints()->at(p));
+			ROS_INFO("Got Point at <%f, %f>", point.x, point.y);
+			point.x = (oryx_path_planning::roundToGrid(point.x, resolution));
+			point.y = (oryx_path_planning::roundToGrid(point.y, resolution)+(ySize/2));
+			ROS_INFO("Placing Point at <%f, %f>", point.x, point.y);
+			occGrid.at(point.x).replace(point.y,1,"T");
 		}
 		//ROS_INFO("Done with Tentacle %d", t);
 	}

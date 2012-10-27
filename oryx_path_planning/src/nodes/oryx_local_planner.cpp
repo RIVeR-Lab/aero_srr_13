@@ -52,13 +52,13 @@ public:
 	 * @param v_client				Pointer to the velocity client to send commands to the base platform
 	 * @throw std::runtime_error	If the planner is unable to connect to the base platform
 	 */
-	LocalPlanner(double xDim, double yDim, double zDim, double res, tf::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
+	LocalPlanner(double xDim, double yDim, double zDim, double res, oryx_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
 		v_action_topic(v_action_topic),
 		pc_topic(oc_point_cloud_topic),
+		origin(origin),
 		tentacles(tentacles),
 		occupancy_buffer(2),
-		v_client(v_action_topic, true),
-		origin(origin){
+		v_client(v_action_topic, true){
 		this->xDim = xDim;
 		this->yDim = yDim;
 		this->zDim = zDim;
@@ -105,11 +105,11 @@ public:
 					ROS_INFO("I'm Going To Use A Speed Set With The Parameters <NumTent:%d, Vel:%f, SR:%f>", speedSet_ptr->getNumTentacle(), speedSet_ptr->getVelocity(), speedSet_ptr->getSeedRad());
 					OccupancyGridPtr rendering_ptr(new OccupancyGrid(*workingGrid_ptr));
 					for(int i=0; i<speedSet_ptr->getNumTentacle(); i++){
-						Tentacle::TentacleTraverser traverser(speedSet_ptr->getTentacle(i));
+						Tentacle::TentacleTraverser traverser(*speedSet_ptr->getTentacle(i));
 						while(traverser.hasNext()){
-							tf::Point point = traverser.next();
+							oryx_path_planning::Point point = traverser.next();
 							try{
-								rendering_ptr->setPointTrait(point.getX(), point.getY(), point.getZ(), oryx_path_planning::TENTACLE);
+								rendering_ptr->setPointTrait(point, oryx_path_planning::TENTACLE);
 							}catch(OccupancyGridAccessException& e){
 								ROS_ERROR(e.what());
 							}
@@ -134,10 +134,10 @@ private:
 	double	currentVel;	///Current Velocity of the Platform
 	double	currentRad;	///Current Radius followed by the Platform
 	ros::NodeHandle nh;	///Node handle for publishing/subscribing to topics
-	std::string	v_action_topic;
+	std::string	v_action_topic;		///Actionlib topic name to send velocity commands over
 	std::string pc_topic;			///topic name of the ROS topic to receive new occupancy grid data over
+	oryx_path_planning::Point	origin;	///The origin to use for the occupancy grids
 	TentacleGeneratorPtr tentacles;	///Pointer to the tentacle generator which contains the tentacles to use for planning
-	tf::Point	origin;				///The origin to use for the occupancy grids
 	ros::Subscriber 	pc_sub;		///Subscriber to the ROS topic to receive new occupancy grid data over
 	ros::Subscriber		stop_sub;	///Subscriber to the ROS topic to receive the software stop message
 
@@ -357,7 +357,10 @@ int main(int argc, char **argv) {
 	ROS_INFO("Tentacles Generated!");
 	//Set up client to Drive Controller
 	try{
-		tf::Point origin(x_ori, y_ori, z_ori);
+		oryx_path_planning::Point origin;
+		origin.x=x_ori;
+		origin.y=y_ori;
+		origin.z=z_ori;
 		boost::shared_ptr<LocalPlanner> l_client_ptr(new LocalPlanner(xDim, yDim, zDim, res, origin, v_com_top,  pc_top, tentacle_ptr));
 		l_client_ptr->doPlanning();
 	}catch(std::exception& e){

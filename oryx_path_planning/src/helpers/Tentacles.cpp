@@ -46,6 +46,8 @@
 #error THETA_INCREMENT is already defined!
 #endif
 
+
+
 typedef oryx_path_planning::Tentacle::TentacleTraverser TentTrav;	///Namespace declaration to make implementation of TentacleTraverser easier
 
 //************************************************ IMPLEMENTATION ***************************************//
@@ -55,22 +57,22 @@ namespace oryx_path_planning{
 /**
  * Sets both lastPoint and nextPoint to points.at(0), unless the points vector is empty in which case empty is set to true
  */
-TentTrav::TentacleTraverser(TentaclePtr tentacle){
+TentTrav::TentacleTraverser(Tentacle& tentacle){
 	//If we have a normal set of points, initialize as normal
-	if(tentacle->getPoints()->size() > 1){
-		this->start		= tentacle->getPoints()->begin();
-		this->end		= tentacle->getPoints()->end();
-		this->lastPoint	= &tentacle->getPoints()->at(0);
-		this->nextPoint	= &tentacle->getPoints()->at(0);
+	if(tentacle.getPoints()->size() > 1){
+		this->start		= tentacle.getPoints()->begin();
+		this->end		= tentacle.getPoints()->end();
+		this->lastPoint	= &tentacle.getPoints()->at(0);
+		this->nextPoint	= &tentacle.getPoints()->at(0);
 		this->length	= 0;
 		this->empty		= false;
 	}
 	//If we only got a single point, still initialize the point values, but set empty true
-	else if(tentacle->getPoints()->size() == 1){
-		this->start		= tentacle->getPoints()->begin();
-		this->end		= tentacle->getPoints()->end();
-		this->lastPoint = &tentacle->getPoints()->at(0);
-		this->nextPoint = &tentacle->getPoints()->at(0);
+	else if(tentacle.getPoints()->size() == 1){
+		this->start		= tentacle.getPoints()->begin();
+		this->end		= tentacle.getPoints()->end();
+		this->lastPoint = &tentacle.getPoints()->at(0);
+		this->nextPoint = &tentacle.getPoints()->at(0);
 		this->empty 	= true;
 	}
 	//If we got a completely empty vector, set empty true, do not initialize point values
@@ -95,11 +97,13 @@ bool TentTrav::hasNext(){
  * Where @f$ d(p_(k-1), p_k) @f$ is the linear distance between points @f$ p_(n-1) \text{ and } p_n @f$ .
  *
  */
-const tf::Point& TentTrav::next(){
+const oryx_path_planning::Point& TentTrav::next(){
 	//If they're not equal, and we're not empty, we're already in the traversal, process the next point
-	if((*this->nextPoint != *this->lastPoint)&&!this->empty){
+	if((this->nextPoint != this->lastPoint)&&!this->empty){
 		//Update the calculated length along the Tentacle we've traversed
-		this->length += tf::tfDistance(*this->lastPoint, *this->nextPoint);
+		Eigen::Vector4f lastPM(this->lastPoint->getVector4fMap());
+		Eigen::Vector4f nextPM(this->nextPoint->getVector4fMap());
+		this->length += pcl::distances::l2(lastPM, nextPM);
 
 		//Set lastPoint to nextPoint so that nextPoint can be updated if possible
 		this->lastPoint = this->nextPoint;
@@ -148,7 +152,7 @@ Tentacle::Tentacle(){
 Tentacle::~Tentacle(){};
 
 Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity) throw (TentacleGenerationException):
-	points(new std::vector<tf::Point>()){
+	points(new pcl::PointCloud<oryx_path_planning::Point>()){
 
 	this->velocity= velocity;
 	PRINTER("Generating Tentacle %d", index);
@@ -170,17 +174,19 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	if(this->radius > this->straightThreshold || this->radius < -this->straightThreshold){
 		this->radius = std::numeric_limits<double>::infinity();
 		for(double i = 0; i<xDim; i+=resolution){
-			tf::Point coord;
-			coord.setX(i);
-			coord.setY(0);
-			coord.setZ(0);
+			oryx_path_planning::Point coord;
+			coord.x=i;
+			coord.x=0;
+			coord.x=0;
 			this->points->push_back(coord);
 		}
 	}
 	else{
 		//Tracks the last coordinate so that we don't get duplicates
-		tf::Point lastCoord;
-		lastCoord.setZero();
+		oryx_path_planning::Point lastCoord;
+		lastCoord.x = 0;
+		lastCoord.y = 0;
+		lastCoord.z = 0;
 		//The amount to increment theta by
 		double thetaIncrement	= PI/((5.0/resolution)*std::floor(std::abs(this->radius)));
 		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
@@ -190,14 +196,14 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		if(this->radius>0){
 			double startAngle = PI/2.0;
 			for(double t=startAngle; t>(startAngle-sweepAngle); t-=thetaIncrement){
-				tf::Point newCoord;
-				newCoord.setY(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
-				newCoord.setX(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
-				newCoord.setZ(0);
+				oryx_path_planning::Point newCoord;
+				newCoord.y = (oryx_path_planning::roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
+				newCoord.y = (oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
+				newCoord.z = 0;
 				//If we've hit the top of the occupancy grid, break
-				if(newCoord.getX()>xDim||std::abs(newCoord.getY())>yDim) break;
+				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
 				//Otherwise push_back the next point if it's not the same as the previous point
-				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
+				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points->push_back(newCoord);
 					lastCoord = newCoord;
 				}
@@ -206,14 +212,14 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		else{
 			double startAngle = PI/2.0;
 			for(double t=startAngle; t<(startAngle+sweepAngle); t+=thetaIncrement){
-				tf::Point newCoord;
-				newCoord.setY(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-radius, resolution));
-				newCoord.setX(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
-				newCoord.setZ(0);
+				oryx_path_planning::Point newCoord;
+				newCoord.y = (float)(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-radius, resolution));
+				newCoord.x = (float)(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
+				newCoord.z = 0;
 				//If we've hit the top of the occupancy grid, break
-				if(newCoord.getX()>xDim||std::abs(newCoord.getY())>yDim) break;
+				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
 				//Otherwise push_back the next point if it's not the same as the previous point
-				if(!((newCoord==lastCoord)||(newCoord.getX()<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
+				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
 					this->points->push_back(newCoord);
 					lastCoord = newCoord;
 				}
@@ -223,7 +229,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	PRINTER("Calculated a Tentacle with Number of Points=%d",(int)this->points->size());
 }
 
-Tentacle::PointVectorPtr Tentacle::getPoints(){
+Tentacle::TentacleCloudPtr Tentacle::getPoints(){
 	return this->points;
 }
 

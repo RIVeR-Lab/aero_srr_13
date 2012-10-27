@@ -152,7 +152,9 @@ class Tentacle{
 public:
 
 	///Typedef to allow for convenient sharing of a vector of points
-	typedef boost::shared_ptr<std::vector<tf::Point > > PointVectorPtr;
+	typedef boost::shared_ptr<pcl::PointCloud<oryx_path_planning::Point> > TentacleCloudPtr;
+	///Typedef pcl::PointCloud<oryx_path_planning::Point>::iterator for convenience
+	typedef pcl::PointCloud<oryx_path_planning::Point>::iterator iterator;
 
 	/**
 	 * @author	Adam Panzics
@@ -177,20 +179,38 @@ public:
 	virtual ~Tentacle();
 
 	/**
-	 * @author Adam Panzica
-	 * @brief gets the radius/velcoity data of the tentacle
-	 * @return A pair where pair.a = radius and pair.b = velocity used to generate the tentacle
+	 * @author	Adam Panzica
+	 * @brief	gets The radius data of the tentacle
+	 * @return	The radius data of the tentacle
 	 */
-	tf::Point& getRadVel();
+	double getRad();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Gets the velocity data of the tentacle
+	 * @return	The velocity data of the tentacle
+	 */
+	double getVel();
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the x/y coordinates of all the points long this tentacle
 	 * @return A reference to a vector containing a set of pairs which represent the x/y coordinates relative to robot-center
 	 */
-	PointVectorPtr getPoints();
+	TentacleCloudPtr getPoints();
 
-
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Gets an iterator reference to the beginning of the tentacle
+	 * @return	An iterator reference to the beginning of the tentacle
+	 */
+	iterator begin();
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Gets an iterator reference to the end of the tentacle
+	 * @return	An iterator reference to the end of the tentacle
+	 */
+	iterator end();
 
 	/**
 	 * @author Adam Panzica
@@ -206,7 +226,7 @@ public:
 		 * Note that the traverser assumes that the points contained in the tentacle are in order,
 		 * starting at <0,0,0> and going outward along the tentacle
 		 */
-		TentacleTraverser(TentaclePtr tentacle);
+		TentacleTraverser(Tentacle& tentacle);
 		/**
 		 * Default destructor
 		 */
@@ -220,10 +240,10 @@ public:
 		/**
 		 * @author Adam Panzica
 		 * @brief	Gets the next point in the traversal
-		 * @return	The next tf::Point along the tentacle.
+		 * @return	The next Point along the tentacle.
 		 * Will return the last point in the traversal for subsequent calls after the end of the traversal is reached
 		 */
-		const tf::Point& next();
+		const oryx_path_planning::Point& next();
 		/**
 		 * @author Adam Panzica
 		 * @brief Gets the length traversed thus far along the Tentacle
@@ -232,15 +252,13 @@ public:
 		double lengthTraversed();
 
 	private:
-		///Typedef over std::vector<tf::Point>::iterator for convenience
-		typedef std::vector<tf::Point>::iterator PointVectorIterator;
 
 		bool		empty;			///True if the iterator has reached the end of the traversal
 		double		length;			///The current length traversed along the Tentacle
-		tf::Point*	lastPoint;		///Pointer to the last point that was passed
-		tf::Point*	nextPoint;		///Pointer to the next point that will be passed
-		PointVectorIterator start;	///The start of an iterator over all the Points along the Tentacle
-		PointVectorIterator end;	///The end of the iterator of the points along the tentacle
+		oryx_path_planning::Point*	lastPoint;	///Pointer to the last point that was passed
+		oryx_path_planning::Point*	nextPoint;	///Pointer to the next point that will be passed
+		Tentacle::iterator start;	///The start of an iterator over all the Points along the Tentacle
+		Tentacle::iterator end;		///The end of the iterator of the points along the tentacle
 	};
 
 	///Typedef to allow for convenient sharing of a TentacleTraverser via pointer
@@ -249,8 +267,8 @@ public:
 private:
 	double radius;									///Radius of the Tentacle
 	double velocity;								///Velocity of the Tentacle
-	PointVectorPtr points; 							///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
-	const static double straightThreshold = 1500;	///Cutoff radius for what is considered to be essentially a straight line
+	TentacleCloudPtr points; 						///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
+	const static double straightThreshold = 2000;	///Cutoff radius for what is considered to be essentially a straight line
 
 	/**
 	 * @author Adam Panzica
