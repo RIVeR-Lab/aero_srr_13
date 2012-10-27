@@ -29,7 +29,7 @@ OccupancyGrid::OccupancyGrid(): occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()
 	this->z_ori = 0;
 }
 
-OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
+OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
 						origin(grid.origin),
 						occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(*grid.occGrid)){
 	this->xDim	= grid.xDim;
@@ -96,7 +96,7 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 						origin(origin),
 						occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*((zDim!=0)?roundToGrid(zDim, resolution):1),1)){
 	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%f, %f, %f>", xDim, yDim, zDim);
-	ROS_INFO("Recieved cloud Should be Size <%d>, is size <%d>",(int)this->occGrid->size(), (int)cloud->size());
+	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occGrid->size(), (int)cloud->size());
 	this->xDim	= roundToFrac(xDim, resolution);
 	this->yDim	= roundToFrac(yDim, resolution);
 	this->res	= resolution;

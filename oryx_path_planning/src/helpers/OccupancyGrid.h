@@ -86,7 +86,7 @@ public:
 	 * @brief	Default copy constructor
 	 * @param grid The OccupancyGrid to copy
 	 */
-	OccupancyGrid(OccupancyGrid& grid);
+	OccupancyGrid(const OccupancyGrid& grid);
 
 	/**
 	 * @author	Adam Panzica

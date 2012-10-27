@@ -59,20 +59,20 @@ namespace oryx_path_planning{
  */
 TentTrav::TentacleTraverser(Tentacle& tentacle){
 	//If we have a normal set of points, initialize as normal
-	if(tentacle.getPoints()->size() > 1){
-		this->start		= tentacle.getPoints()->begin();
-		this->end		= tentacle.getPoints()->end();
-		this->lastPoint	= &tentacle.getPoints()->at(0);
-		this->nextPoint	= &tentacle.getPoints()->at(0);
+	if(tentacle.points.size() > 1){
+		this->start		= tentacle.points.begin();
+		this->end		= tentacle.points.end();
+		this->lastPoint	= &tentacle.points.at(0);
+		this->nextPoint	= &tentacle.points.at(0);
 		this->length	= 0;
 		this->empty		= false;
 	}
 	//If we only got a single point, still initialize the point values, but set empty true
-	else if(tentacle.getPoints()->size() == 1){
-		this->start		= tentacle.getPoints()->begin();
-		this->end		= tentacle.getPoints()->end();
-		this->lastPoint = &tentacle.getPoints()->at(0);
-		this->nextPoint = &tentacle.getPoints()->at(0);
+	else if(tentacle.points.size() == 1){
+		this->start		= tentacle.points.begin();
+		this->end		= tentacle.points.end();
+		this->lastPoint = &tentacle.points.at(0);
+		this->nextPoint = &tentacle.points.at(0);
 		this->empty 	= true;
 	}
 	//If we got a completely empty vector, set empty true, do not initialize point values
@@ -149,10 +149,16 @@ Tentacle::Tentacle(){
 	this->velocity = 0;
 }
 
+Tentacle::Tentacle(const Tentacle& Tentacle):
+				points(Tentacle.points){
+	this->radius = Tentacle.radius;
+	this->velocity = Tentacle.velocity;
+}
+
 Tentacle::~Tentacle(){};
 
 Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity) throw (TentacleGenerationException):
-	points(new pcl::PointCloud<oryx_path_planning::Point>()){
+					points(){
 
 	this->velocity= velocity;
 	PRINTER("Generating Tentacle %d", index);
@@ -178,7 +184,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 			coord.x=i;
 			coord.x=0;
 			coord.x=0;
-			this->points->push_back(coord);
+			this->points.push_back(coord);
 		}
 	}
 	else{
@@ -191,7 +197,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		double thetaIncrement	= PI/((5.0/resolution)*std::floor(std::abs(this->radius)));
 		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
 		//Push the first coordinate on
-		this->points->push_back(lastCoord);
+		this->points.push_back(lastCoord);
 		//Calculate the X and Y coord along the tentacle
 		if(this->radius>0){
 			double startAngle = PI/2.0;
@@ -204,7 +210,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
 				//Otherwise push_back the next point if it's not the same as the previous point
 				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
-					this->points->push_back(newCoord);
+					this->points.push_back(newCoord);
 					lastCoord = newCoord;
 				}
 			}
@@ -220,16 +226,16 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
 				//Otherwise push_back the next point if it's not the same as the previous point
 				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
-					this->points->push_back(newCoord);
+					this->points.push_back(newCoord);
 					lastCoord = newCoord;
 				}
 			}
 		}
 	}
-	PRINTER("Calculated a Tentacle with Number of Points=%d",(int)this->points->size());
+	PRINTER("Calculated a Tentacle with Number of Points=%d",(int)this->points.size());
 }
 
-Tentacle::TentacleCloudPtr Tentacle::getPoints(){
+const Tentacle::TentaclePointCloud& Tentacle::getPoints(){
 	return this->points;
 }
 
@@ -250,6 +256,12 @@ Tentacle::TentacleCloudPtr Tentacle::getPoints(){
 SpeedSet::SpeedSet(){
 	this->seedRad = 0;
 	this->velocity = 0;
+}
+
+SpeedSet::SpeedSet(const SpeedSet& SpeedSet):
+					tentacles(SpeedSet.tentacles){
+	this->seedRad  = SpeedSet.seedRad;
+	this->velocity = SpeedSet.velocity;
 }
 
 
@@ -276,10 +288,10 @@ double SpeedSet::getSeedRad(){
 	return this->seedRad;
 }
 
-TentaclePtr SpeedSet::getTentacle(int index)throw(oryx_path_planning::TentacleAccessException){
+const Tentacle& SpeedSet::getTentacle(int index)throw(oryx_path_planning::TentacleAccessException){
 	if(index<0||index>(int)getNumTentacle()) throw new oryx_path_planning::TentacleAccessException(index, 0);
 	try{
-		return this->tentacles.at(index);
+		return *this->tentacles.at(index);
 	}catch (std::exception& e){
 		std::string message("Something went wrong!");
 		throw new oryx_path_planning::TentacleAccessException(index, 0, message, e);
@@ -296,6 +308,20 @@ SpeedSet::iterator SpeedSet::end(){
 
 
 //***************************** TENTACLE GENERATOR *********************************//
+TentacleGenerator::TentacleGenerator(){
+	this->numTentacles	= 0;
+	this->numSpeedSet	= 0;
+	this->expFact	= 0;
+}
+
+TentacleGenerator::TentacleGenerator(const TentacleGenerator& TentacleGenerator):
+		speedSets(TentacleGenerator.speedSets),
+		velocityKeys(TentacleGenerator.velocityKeys){
+	this->numSpeedSet = TentacleGenerator.numSpeedSet;
+	this->numTentacles= TentacleGenerator.numTentacles;
+	this->expFact     = TentacleGenerator.expFact;
+}
+
 TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, double xDim, double yDim){
 	this->expFact 		= expFact;
 	this->numTentacles	= numTentacles;
@@ -321,7 +347,7 @@ int TentacleGenerator::getNumSpeedSets(){
 	return this->speedSets.size();
 }
 
-TentaclePtr TentacleGenerator::getTentacle(int speedSet, int index) throw (oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException){
+const Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) throw (oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException){
 	if(speedSet<0||speedSet>(int)this->speedSets.size()) throw new oryx_path_planning::SpeedSetAccessException(speedSet);
 	if(index<0||index>(int)this->speedSets.at(speedSet)->getNumTentacle()) throw new oryx_path_planning::TentacleAccessException(index, speedSet);
 	try{
@@ -332,14 +358,14 @@ TentaclePtr TentacleGenerator::getTentacle(int speedSet, int index) throw (oryx_
 	}
 }
 
-SpeedSetPtr TentacleGenerator::getSpeedSet(int speedSet){
-	return this->speedSets.at(speedSet);
+const SpeedSet& TentacleGenerator::getSpeedSet(int speedSet){
+	return *this->speedSets.at(speedSet);
 }
 
 /**
  * Finds the speed set based on a nearest neighbor search
  */
-SpeedSetPtr TentacleGenerator::getSpeedSet(double velocity){
+const SpeedSet& TentacleGenerator::getSpeedSet(double velocity){
 	double lowSpeed		= 0;
 	double highSpeed	= 0;
 	int index			= 0;
@@ -357,11 +383,11 @@ SpeedSetPtr TentacleGenerator::getSpeedSet(double velocity){
 	if(highSpeed!=0){
 		//If closer to low speed, select that index
 		if((velocity-lowSpeed)>(highSpeed-velocity)){
-			return this->speedSets.at(index);
+			return *this->speedSets.at(index);
 		}else{
-			return this->speedSets.at(index+1);
+			return *this->speedSets.at(index+1);
 		}
-	}else return this->speedSets.at(index);
+	}else return *this->speedSets.at(index);
 }
 
 TentacleGenerator::iterator TentacleGenerator::begin(){

@@ -98,24 +98,25 @@ public:
 			if(shouldPlan){
 				//Grab the next occupancy grid to process
 				if(!this->occupancy_buffer.empty()){
-					OccupancyGridPtr workingGrid_ptr(this->occupancy_buffer.front());
-					SpeedSetPtr	  	 speedSet_ptr(this->tentacles->getSpeedSet(this->currentVel));
+					OccupancyGrid	workingGrid= *this->occupancy_buffer.front();
+					SpeedSet	  	speedSet   = this->tentacles->getSpeedSet(this->currentVel);
 
-					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", workingGrid_ptr.get()->toString(0,0).get()->c_str());
-					ROS_INFO("I'm Going To Use A Speed Set With The Parameters <NumTent:%d, Vel:%f, SR:%f>", speedSet_ptr->getNumTentacle(), speedSet_ptr->getVelocity(), speedSet_ptr->getSeedRad());
-					OccupancyGridPtr rendering_ptr(new OccupancyGrid(*workingGrid_ptr));
-					for(int i=0; i<speedSet_ptr->getNumTentacle(); i++){
-						Tentacle::TentacleTraverser traverser(*speedSet_ptr->getTentacle(i));
+					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", workingGrid.toString(0,0).get()->c_str());
+					ROS_INFO("I'm Going To Use A Speed Set With The Parameters <NumTent:%d, Vel:%f, SR:%f>", speedSet.getNumTentacle(), speedSet.getVelocity(), speedSet.getSeedRad());
+					OccupancyGrid rendering(workingGrid);
+					for(int i=0; i<speedSet.getNumTentacle(); i++){
+						Tentacle workingTentacle = speedSet.getTentacle(i);
+						Tentacle::TentacleTraverser traverser(workingTentacle);
 						while(traverser.hasNext()){
 							oryx_path_planning::Point point = traverser.next();
 							try{
-								rendering_ptr->setPointTrait(point, oryx_path_planning::TENTACLE);
+								rendering.setPointTrait(point, oryx_path_planning::TENTACLE);
 							}catch(OccupancyGridAccessException& e){
 								ROS_ERROR(e.what());
 							}
 						}
 					}
-					ROS_INFO("This Is The Occupancy Grid With Tentacles Overlaid:\n%s", rendering_ptr->toString(0,0)->c_str());
+					ROS_INFO("This Is The Occupancy Grid With Tentacles Overlaid:\n%s", rendering.toString(0,0)->c_str());
 					this->occupancy_buffer.pop_front();
 				}
 			}

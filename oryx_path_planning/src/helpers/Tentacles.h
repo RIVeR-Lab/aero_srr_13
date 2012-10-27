@@ -150,8 +150,9 @@ private:
  */
 class Tentacle{
 public:
-
-	///Typedef to allow for convenient sharing of a vector of points
+	///Typedef to allow for convenient naming of tentacle point cloud
+	typedef pcl::PointCloud<oryx_path_planning::Point> TentaclePointCloud;
+	///Typedef to allow for convenient sharing of a vector of points by pointer
 	typedef boost::shared_ptr<pcl::PointCloud<oryx_path_planning::Point> > TentacleCloudPtr;
 	///Typedef pcl::PointCloud<oryx_path_planning::Point>::iterator for convenience
 	typedef pcl::PointCloud<oryx_path_planning::Point>::iterator iterator;
@@ -161,6 +162,14 @@ public:
 	 * @brief	Default constructor for creating an uninitialized Tentacle
 	 */
 	Tentacle();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Copy constructor
+	 * @param Tentacle The Tentacle to copy
+	 */
+	Tentacle(const Tentacle& Tentacle);
+
 	/**
 	 * @author Adam Panzica
 	 * @brief Creates a new Tentacle using the given parameters for its construction
@@ -197,7 +206,7 @@ public:
 	 * @brief Gets the x/y coordinates of all the points long this tentacle
 	 * @return A reference to a vector containing a set of pairs which represent the x/y coordinates relative to robot-center
 	 */
-	TentacleCloudPtr getPoints();
+	const TentaclePointCloud& getPoints();
 
 	/**
 	 * @author	Adam Panzica
@@ -267,7 +276,7 @@ public:
 private:
 	double radius;									///Radius of the Tentacle
 	double velocity;								///Velocity of the Tentacle
-	TentacleCloudPtr points; 						///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
+	TentaclePointCloud points; 						///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
 	const static double straightThreshold = 2000;	///Cutoff radius for what is considered to be essentially a straight line
 
 	/**
@@ -298,6 +307,14 @@ public:
 	 * @brief Default constructor which creates an empty speed set
 	 */
 	SpeedSet();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Copy constructor
+	 * @param SpeedSet SpeedSet to copy
+	 */
+	SpeedSet(const SpeedSet& SpeedSet);
+
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates all of the tentacles with the given parameters
@@ -319,7 +336,7 @@ public:
 	 * @return A reference to a Tentacle from the speed set
 	 * @throw TentacleAccessException if the tentacle index was invalid
 	 */
-	TentaclePtr getTentacle(int index) throw(oryx_path_planning::TentacleAccessException);
+	const Tentacle& getTentacle(int index) throw(oryx_path_planning::TentacleAccessException);
 
 	/**
 	 * @author Adam Panzica
@@ -371,6 +388,20 @@ public:
 	 * typedef over std::vector<SpeedSet>::iterator for convenience
 	 */
 	typedef std::vector<SpeedSetPtr>::iterator iterator;
+
+	/**
+	 * default empty constructor
+	 */
+	TentacleGenerator();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Copy Constructor
+	 * @param TentacleGenerator TentacleGenerator to copy
+	 */
+	TentacleGenerator(const TentacleGenerator& TentacleGenerator);
+
+
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates a set of tentacles for each speed set
@@ -403,7 +434,7 @@ public:
 	 * @throw TentacleAccessException if the tentacle index was invalid
 	 * @throw SpeedSetAccessException if the speed set index was invalid
 	  */
-	TentaclePtr getTentacle(int speedSet, int index) throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
+	const Tentacle& getTentacle(int speedSet, int index) throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -411,7 +442,7 @@ public:
 	 * @param speedSet Index of the SpeedSet to get
 	 * @return The SpeedSet at the index
 	 */
-	SpeedSetPtr getSpeedSet(int speedSet);
+	const SpeedSet& getSpeedSet(int speedSet);
 
 	/**
 	 * @author	Adam Panzica
@@ -419,7 +450,7 @@ public:
 	 * @param velocity Velocity to find a closest match for
 	 * @return A SpeedSetPtr to the SpeedSet who most closely matches the given velocity
 	 */
-	SpeedSetPtr getSpeedSet(double velocity);
+	const SpeedSet& getSpeedSet(double velocity);
 
 	/**
 	 * @author	Adam Panzica
@@ -436,7 +467,7 @@ private:
 	int 				numTentacles;	///Number of tentacles per speed-set
 	int					numSpeedSet;
 	double 				expFact;		///Exponential factor used to calculate radii
-	std::vector<SpeedSetPtr > speedSets;	///A set containing all of the valid tentacles that have been generated
+	std::vector<SpeedSetPtr > speedSets;	///A set containing all of the valid speed sets that have been generated
 	std::vector<double>		  velocityKeys;	///A set containing the velocity keys for each speed set
 
 	/**
