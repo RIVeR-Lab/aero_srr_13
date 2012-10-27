@@ -63,24 +63,25 @@ int main(int argc, char **argv) {
 		ROS_INFO("Enter A Number: ");
 		std::cin >> input;
 		ROS_INFO("I Got Input!: %f", input);
-		oryx_path_planning::OccupancyGridPtr grid_ptr(new oryx_path_planning::OccupancyGrid(xDim, yDim, res, origin, oryx_path_planning::FREE_LOW_COST));
+		oryx_path_planning::OccupancyGrid grid(xDim, yDim, res, origin, oryx_path_planning::FREE_LOW_COST);
 		if(input>0){
 			double y;
-			for(double x=0; x<xDim; x+=res){
+			for(double x=0; x<xDim; x+=res/20){
 				y= input*x;
-				if(y>(yDim+origin.y)||y<0){
+				if(y>(yDim/2)||y<-yDim/2){
 					break;
 				}
 				try{
 					ROS_INFO("Setting Point at <%f,%f>", x,y);
-					grid_ptr->setPointTrait(x,y,0,oryx_path_planning::OBSTACLE);
+					grid.setPointTrait(x,y-origin.y,0,oryx_path_planning::OBSTACLE);
 				}catch(std::exception& e){
-					ROS_ERROR(e.what());
+					ROS_ERROR("%s", e.what());
 				}
 			}
+			ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());
 			sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
 			message->header.frame_id = "base_link";
-			grid_ptr->generateMessage(message);
+			grid.generateMessage(message);
 			pub.publish(message);
 		}else{
 			oryxsrr_msgs::SoftwareStop stopMessage;
