@@ -45,18 +45,20 @@ public:
 	 * @param yDim	y dimension of the occupancy grids to use, in real units
 	 * @param zDim	z dimension of the occupancy grids to use, in real units
 	 * @param res	resolution  of the occupancy grids to use, in real units per grid unit
+	 * @param origin				Origin to use for the occupancy grid
 	 * @param v_action_topic		Actionlib topic to communicate with the base platform
 	 * @param oc_point_cloud_topic	Topic name of the ROS topic to receive new occupancy grid data over
 	 * @param tentacles				Pointer to the tentacle generator which contains the tentacles to use for planning
 	 * @param v_client				Pointer to the velocity client to send commands to the base platform
 	 * @throw std::runtime_error	If the planner is unable to connect to the base platform
 	 */
-	LocalPlanner(double xDim, double yDim, double zDim, double res, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
+	LocalPlanner(double xDim, double yDim, double zDim, double res, tf::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
 		v_action_topic(v_action_topic),
 		pc_topic(oc_point_cloud_topic),
 		tentacles(tentacles),
 		occupancy_buffer(2),
-		v_client(v_action_topic, true){
+		v_client(v_action_topic, true),
+		origin(origin){
 		this->xDim = xDim;
 		this->yDim = yDim;
 		this->zDim = zDim;
@@ -96,21 +98,25 @@ public:
 			if(shouldPlan){
 				//Grab the next occupancy grid to process
 				if(!this->occupancy_buffer.empty()){
-					OccupancyGridPtr workingGrid_ptr = this->occupancy_buffer.front();
-					SpeedSetPtr		 speedSet_ptr	 = this->tentacles->getSpeedSet(this->currentVel);
-					this->occupancy_buffer.pop_front();
+					OccupancyGridPtr workingGrid_ptr(this->occupancy_buffer.front());
+					SpeedSetPtr	  	 speedSet_ptr(this->tentacles->getSpeedSet(this->currentVel));
 
 					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", workingGrid_ptr.get()->toString(0,0).get()->c_str());
 					ROS_INFO("I'm Going To Use A Speed Set With The Parameters <NumTent:%d, Vel:%f, SR:%f>", speedSet_ptr->getNumTentacle(), speedSet_ptr->getVelocity(), speedSet_ptr->getSeedRad());
 					OccupancyGridPtr rendering_ptr(new OccupancyGrid(*workingGrid_ptr));
-					for(int i=0; i<1; i++){
+					for(int i=0; i<speedSet_ptr->getNumTentacle(); i++){
 						Tentacle::TentacleTraverser traverser(speedSet_ptr->getTentacle(i));
 						while(traverser.hasNext()){
 							tf::Point point = traverser.next();
-							rendering_ptr->setPointTrait(point.getX(), point.getY(), point.getZ(), oryx_path_planning::TENTACLE);
+							try{
+								rendering_ptr->setPointTrait(point.getX(), point.getY(), point.getZ(), oryx_path_planning::TENTACLE);
+							}catch(OccupancyGridAccessException& e){
+								ROS_ERROR(e.what());
+							}
 						}
 					}
 					ROS_INFO("This Is The Occupancy Grid With Tentacles Overlaid:\n%s", rendering_ptr->toString(0,0)->c_str());
+					this->occupancy_buffer.pop_front();
 				}
 			}
 			//spin to let ROS process callbacks
@@ -131,7 +137,7 @@ private:
 	std::string	v_action_topic;
 	std::string pc_topic;			///topic name of the ROS topic to receive new occupancy grid data over
 	TentacleGeneratorPtr tentacles;	///Pointer to the tentacle generator which contains the tentacles to use for planning
-
+	tf::Point	origin;				///The origin to use for the occupancy grids
 	ros::Subscriber 	pc_sub;		///Subscriber to the ROS topic to receive new occupancy grid data over
 	ros::Subscriber		stop_sub;	///Subscriber to the ROS topic to receive the software stop message
 
@@ -163,10 +169,10 @@ private:
 	void pcCB(const sensor_msgs::PointCloud2ConstPtr& message){
 		//To prevent processing of stale data, ignore anything received while we shouldn't be planning
 		if(this->shouldPlan){
-			ROS_INFO("I Got new Occupancy Grid Data!");
+			ROS_DEBUG("I Got new Occupancy Grid Data!");
 			PointCloudPtr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
 			pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, *cloud);
-			this->occupancy_buffer.push_back(OccupancyGridPtr(new OccupancyGrid(xDim, yDim, zDim, res, cloud )));
+			this->occupancy_buffer.push_back(OccupancyGridPtr(new OccupancyGrid(xDim, yDim, zDim, res, this->origin, cloud )));
 		}
 	}
 
@@ -270,6 +276,28 @@ int main(int argc, char **argv) {
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
 
+	//x coord of the origin of the occupancy grids
+	std::string p_x_ori("occupancy/x_origin");
+	double x_ori = 0;
+	std::string p_x_ori_msg("");
+	p_x_ori_msg+= boost::lexical_cast<double>(x_ori);
+	p_x_ori_msg+="m";
+
+	//z coord of the origin of the occupancy grids
+	std::string p_z_ori("occupancy/z_origin");
+	double z_ori = 0;
+	std::string p_z_ori_msg("");
+	p_z_ori_msg+= boost::lexical_cast<double>(z_ori);
+	p_z_ori_msg+="m";
+
+	//y coord of the origin of the occupancy grids
+	std::string p_y_ori("occupancy/y_origin");
+	double y_ori = yDim/2;
+	std::string p_y_ori_msg("");
+	p_y_ori_msg+= boost::lexical_cast<double>(y_ori);
+	p_y_ori_msg+="m";
+
+
 	//number of tentacles per speed set
 	std::string p_numTent("tentacles/number");
 	int numTent = 81;
@@ -329,7 +357,8 @@ int main(int argc, char **argv) {
 	ROS_INFO("Tentacles Generated!");
 	//Set up client to Drive Controller
 	try{
-		boost::shared_ptr<LocalPlanner> l_client_ptr(new LocalPlanner(xDim, yDim, zDim, res, v_com_top,  pc_top, tentacle_ptr));
+		tf::Point origin(x_ori, y_ori, z_ori);
+		boost::shared_ptr<LocalPlanner> l_client_ptr(new LocalPlanner(xDim, yDim, zDim, res, origin, v_com_top,  pc_top, tentacle_ptr));
 		l_client_ptr->doPlanning();
 	}catch(std::exception& e){
 		ROS_FATAL("%s, %s",e.what(), "Shutting Down");

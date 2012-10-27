@@ -5,10 +5,11 @@ import genpy
 import struct
 
 import sensor_msgs.msg
+import geometry_msgs.msg
 import std_msgs.msg
 
 class OccupancyGrid(genpy.Message):
-  _md5sum = "d6135f2b4674d634babc7ed1e9f5a246"
+  _md5sum = "3f5d31d7c64f748d5ceddcd94f26d6b8"
   _type = "oryxsrr_msgs/OccupancyGrid"
   _has_header = True #flag to mark the presence of a Header object
   _full_text = """#Header
@@ -20,8 +21,12 @@ float64 yDim
 float64 zDim
 float64 res
 
+#the origin of the grid
+geometry_msgs/Point origin
+
 #The PointCloud which backs the occupancy grid
 sensor_msgs/PointCloud2 cloud
+
 
 ================================================================================
 MSG: std_msgs/Header
@@ -40,6 +45,13 @@ time stamp
 # 0: no frame
 # 1: global frame
 string frame_id
+
+================================================================================
+MSG: geometry_msgs/Point
+# This contains the position of a point in free space
+float64 x
+float64 y
+float64 z
 
 ================================================================================
 MSG: sensor_msgs/PointCloud2
@@ -90,8 +102,8 @@ uint8  datatype  # Datatype enumeration, see above
 uint32 count     # How many elements in the field
 
 """
-  __slots__ = ['header','xDim','yDim','zDim','res','cloud']
-  _slot_types = ['std_msgs/Header','float64','float64','float64','float64','sensor_msgs/PointCloud2']
+  __slots__ = ['header','xDim','yDim','zDim','res','origin','cloud']
+  _slot_types = ['std_msgs/Header','float64','float64','float64','float64','geometry_msgs/Point','sensor_msgs/PointCloud2']
 
   def __init__(self, *args, **kwds):
     """
@@ -101,7 +113,7 @@ uint32 count     # How many elements in the field
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       header,xDim,yDim,zDim,res,cloud
+       header,xDim,yDim,zDim,res,origin,cloud
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -120,6 +132,8 @@ uint32 count     # How many elements in the field
         self.zDim = 0.
       if self.res is None:
         self.res = 0.
+      if self.origin is None:
+        self.origin = geometry_msgs.msg.Point()
       if self.cloud is None:
         self.cloud = sensor_msgs.msg.PointCloud2()
     else:
@@ -128,6 +142,7 @@ uint32 count     # How many elements in the field
       self.yDim = 0.
       self.zDim = 0.
       self.res = 0.
+      self.origin = geometry_msgs.msg.Point()
       self.cloud = sensor_msgs.msg.PointCloud2()
 
   def _get_types(self):
@@ -151,7 +166,7 @@ uint32 count     # How many elements in the field
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_4d3I.pack(_x.xDim, _x.yDim, _x.zDim, _x.res, _x.cloud.header.seq, _x.cloud.header.stamp.secs, _x.cloud.header.stamp.nsecs))
+      buff.write(_struct_7d3I.pack(_x.xDim, _x.yDim, _x.zDim, _x.res, _x.origin.x, _x.origin.y, _x.origin.z, _x.cloud.header.seq, _x.cloud.header.stamp.secs, _x.cloud.header.stamp.nsecs))
       _x = self.cloud.header.frame_id
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -192,6 +207,8 @@ uint32 count     # How many elements in the field
     try:
       if self.header is None:
         self.header = std_msgs.msg.Header()
+      if self.origin is None:
+        self.origin = geometry_msgs.msg.Point()
       if self.cloud is None:
         self.cloud = sensor_msgs.msg.PointCloud2()
       end = 0
@@ -210,8 +227,8 @@ uint32 count     # How many elements in the field
         self.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 44
-      (_x.xDim, _x.yDim, _x.zDim, _x.res, _x.cloud.header.seq, _x.cloud.header.stamp.secs, _x.cloud.header.stamp.nsecs,) = _struct_4d3I.unpack(str[start:end])
+      end += 68
+      (_x.xDim, _x.yDim, _x.zDim, _x.res, _x.origin.x, _x.origin.y, _x.origin.z, _x.cloud.header.seq, _x.cloud.header.stamp.secs, _x.cloud.header.stamp.nsecs,) = _struct_7d3I.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -284,7 +301,7 @@ uint32 count     # How many elements in the field
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_4d3I.pack(_x.xDim, _x.yDim, _x.zDim, _x.res, _x.cloud.header.seq, _x.cloud.header.stamp.secs, _x.cloud.header.stamp.nsecs))
+      buff.write(_struct_7d3I.pack(_x.xDim, _x.yDim, _x.zDim, _x.res, _x.origin.x, _x.origin.y, _x.origin.z, _x.cloud.header.seq, _x.cloud.header.stamp.secs, _x.cloud.header.stamp.nsecs))
       _x = self.cloud.header.frame_id
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -326,6 +343,8 @@ uint32 count     # How many elements in the field
     try:
       if self.header is None:
         self.header = std_msgs.msg.Header()
+      if self.origin is None:
+        self.origin = geometry_msgs.msg.Point()
       if self.cloud is None:
         self.cloud = sensor_msgs.msg.PointCloud2()
       end = 0
@@ -344,8 +363,8 @@ uint32 count     # How many elements in the field
         self.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 44
-      (_x.xDim, _x.yDim, _x.zDim, _x.res, _x.cloud.header.seq, _x.cloud.header.stamp.secs, _x.cloud.header.stamp.nsecs,) = _struct_4d3I.unpack(str[start:end])
+      end += 68
+      (_x.xDim, _x.yDim, _x.zDim, _x.res, _x.origin.x, _x.origin.y, _x.origin.z, _x.cloud.header.seq, _x.cloud.header.stamp.secs, _x.cloud.header.stamp.nsecs,) = _struct_7d3I.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -404,7 +423,7 @@ uint32 count     # How many elements in the field
 _struct_I = genpy.struct_I
 _struct_IBI = struct.Struct("<IBI")
 _struct_B = struct.Struct("<B")
+_struct_2I = struct.Struct("<2I")
 _struct_3I = struct.Struct("<3I")
 _struct_B2I = struct.Struct("<B2I")
-_struct_4d3I = struct.Struct("<4d3I")
-_struct_2I = struct.Struct("<2I")
+_struct_7d3I = struct.Struct("<7d3I")

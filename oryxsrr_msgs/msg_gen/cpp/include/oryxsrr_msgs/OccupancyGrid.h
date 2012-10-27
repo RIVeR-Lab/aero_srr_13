@@ -15,6 +15,7 @@
 #include "ros/assert.h"
 
 #include "std_msgs/Header.h"
+#include "geometry_msgs/Point.h"
 #include "sensor_msgs/PointCloud2.h"
 
 namespace oryxsrr_msgs
@@ -29,6 +30,7 @@ struct OccupancyGrid_ {
   , yDim(0.0)
   , zDim(0.0)
   , res(0.0)
+  , origin()
   , cloud()
   {
   }
@@ -39,6 +41,7 @@ struct OccupancyGrid_ {
   , yDim(0.0)
   , zDim(0.0)
   , res(0.0)
+  , origin(_alloc)
   , cloud(_alloc)
   {
   }
@@ -57,6 +60,9 @@ struct OccupancyGrid_ {
 
   typedef double _res_type;
   double res;
+
+  typedef  ::geometry_msgs::Point_<ContainerAllocator>  _origin_type;
+   ::geometry_msgs::Point_<ContainerAllocator>  origin;
 
   typedef  ::sensor_msgs::PointCloud2_<ContainerAllocator>  _cloud_type;
    ::sensor_msgs::PointCloud2_<ContainerAllocator>  cloud;
@@ -90,12 +96,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::oryxsrr_msgs::OccupancyGrid_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "d6135f2b4674d634babc7ed1e9f5a246";
+    return "3f5d31d7c64f748d5ceddcd94f26d6b8";
   }
 
   static const char* value(const  ::oryxsrr_msgs::OccupancyGrid_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0xd6135f2b4674d634ULL;
-  static const uint64_t static_value2 = 0xbabc7ed1e9f5a246ULL;
+  static const uint64_t static_value1 = 0x3f5d31d7c64f748dULL;
+  static const uint64_t static_value2 = 0x5ceddcd94f26d6b8ULL;
 };
 
 template<class ContainerAllocator>
@@ -121,8 +127,12 @@ float64 yDim\n\
 float64 zDim\n\
 float64 res\n\
 \n\
+#the origin of the grid\n\
+geometry_msgs/Point origin\n\
+\n\
 #The PointCloud which backs the occupancy grid\n\
 sensor_msgs/PointCloud2 cloud\n\
+\n\
 \n\
 ================================================================================\n\
 MSG: std_msgs/Header\n\
@@ -141,6 +151,13 @@ time stamp\n\
 # 0: no frame\n\
 # 1: global frame\n\
 string frame_id\n\
+\n\
+================================================================================\n\
+MSG: geometry_msgs/Point\n\
+# This contains the position of a point in free space\n\
+float64 x\n\
+float64 y\n\
+float64 z\n\
 \n\
 ================================================================================\n\
 MSG: sensor_msgs/PointCloud2\n\
@@ -215,6 +232,7 @@ template<class ContainerAllocator> struct Serializer< ::oryxsrr_msgs::OccupancyG
     stream.next(m.yDim);
     stream.next(m.zDim);
     stream.next(m.res);
+    stream.next(m.origin);
     stream.next(m.cloud);
   }
 
@@ -244,6 +262,9 @@ s << std::endl;
     Printer<double>::stream(s, indent + "  ", v.zDim);
     s << indent << "res: ";
     Printer<double>::stream(s, indent + "  ", v.res);
+    s << indent << "origin: ";
+s << std::endl;
+    Printer< ::geometry_msgs::Point_<ContainerAllocator> >::stream(s, indent + "  ", v.origin);
     s << indent << "cloud: ";
 s << std::endl;
     Printer< ::sensor_msgs::PointCloud2_<ContainerAllocator> >::stream(s, indent + "  ", v.cloud);

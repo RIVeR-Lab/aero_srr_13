@@ -58,7 +58,8 @@ int main(int argc, char **argv) {
 	}
 
 	ROS_INFO("Testing Occupancy Grid...");
-	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim, resolution, oryx_path_planning::UNKNOWN);
+	tf::Point origin(0, yDim/2, 0);
+	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim, resolution, origin, oryx_path_planning::UNKNOWN);
 	ROS_INFO("Occupancy Grid Built");
 	try{
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());

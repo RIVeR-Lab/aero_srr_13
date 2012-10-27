@@ -24,10 +24,14 @@ OccupancyGrid::OccupancyGrid(): occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()
 	this->xSize = roundToGrid(this->xDim, this->res);
 	this->ySize = roundToGrid(this->yDim, this->res);
 	this->zSize = roundToGrid(this->zDim, this->res);
+	this->x_ori = 0;
+	this->y_ori = 0;
+	this->z_ori = 0;
 }
 
 OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
-	occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(*grid.occGrid)){
+		origin(grid.origin),
+		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(*grid.occGrid)){
 	this->xDim	= grid.xDim;
 	this->yDim	= grid.yDim;
 	this->zDim	= grid.zDim;
@@ -35,10 +39,15 @@ OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
 	this->xSize = grid.xSize;
 	this->ySize = grid.ySize;
 	this->zSize = grid.zSize;
+	this->x_ori = grid.x_ori;
+	this->y_ori = grid.y_ori;
+	this->z_ori = grid.z_ori;
 };
 
 
-OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, PointTrait_t seedTrait): occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*roundToGrid(zDim, resolution),1)){
+OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, tf::Point& origin, PointTrait_t seedTrait):
+		origin(origin),
+		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*roundToGrid(zDim, resolution),1)){
 	this->xDim	= roundToFrac(xDim, resolution);
 	this->yDim	= roundToFrac(yDim, resolution);
 	this->zDim	= roundToFrac(zDim, resolution);
@@ -46,6 +55,9 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 	this->xSize = roundToGrid(this->xDim, this->res);
 	this->ySize = roundToGrid(this->yDim, this->res);
 	this->zSize = roundToGrid(this->zDim, this->res);
+	this->x_ori = roundToGrid(this->origin.getX(), this->res);
+	this->y_ori = roundToGrid(this->origin.getY(), this->res);
+	this->z_ori = roundToGrid(this->origin.getZ(), this->res);
 
 	//ROS_INFO("Calculated Occupancy Grid Size: %d", this->occGrid.get()->size());
 	//Initialize the grid
@@ -53,7 +65,10 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 
 }
 
-OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, PointTrait_t seedTrait): occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution),1)){
+OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, tf::Point& origin, PointTrait_t seedTrait):
+		origin(origin),
+		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution),1))
+	{
 	this->xDim	= roundToFrac(xDim, resolution);
 	this->yDim	= roundToFrac(yDim, resolution);
 	this->zDim	= 0;
@@ -61,6 +76,9 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, PointT
 	this->xSize = roundToGrid(this->xDim, this->res);
 	this->ySize = roundToGrid(this->yDim, this->res);
 	this->zSize = 1;
+	this->x_ori = roundToGrid(this->origin.getX(), this->res);
+	this->y_ori = roundToGrid(this->origin.getY(), this->res);
+	this->z_ori = 0;
 
 	//ROS_INFO("Calculated Occupancy Grid Size: %d", this->occGrid.get()->size());
 	//Initialize the grid
@@ -74,8 +92,9 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, PointT
  * to bounds-check the XYZ data in the Points in the given PointCloud, this constructor will throw an exception if a Point in
  * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
  */
-OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, PointCloudPtr cloud) throw(OccupancyGridAccessException):
-				occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*((zDim!=0)?roundToGrid(zDim, resolution):1),1)){
+OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, tf::Point& origin, PointCloudPtr cloud) throw(OccupancyGridAccessException):
+		origin(origin),
+		occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*((zDim!=0)?roundToGrid(zDim, resolution):1),1)){
 	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%f, %f, %f>", xDim, yDim, zDim);
 	ROS_INFO("Recieved cloud Should be Size <%d>, is size <%d>",(int)this->occGrid->size(), (int)cloud->size());
 	this->xDim	= roundToFrac(xDim, resolution);
@@ -87,10 +106,14 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 	if(this->zDim==0){
 		this->zDim	= 0;
 		this->zSize = 1;
+		this->z_ori = 0;
 	}else{
 		this->zDim	= roundToFrac(zDim, resolution);
 		this->zSize = roundToGrid(this->zDim, this->res);
+		this->z_ori = roundToGrid(this->origin.getZ(), this->res);
 	}
+	this->x_ori = roundToGrid(this->origin.getX(), this->res);
+	this->y_ori = roundToGrid(this->origin.getY(), this->res);
 
 	OccupancyGrid::iterator cloudItr;
 	//OccupancyGrid::iterator occItr = this->occGrid->begin();
@@ -125,17 +148,26 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 }
 
 OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr message):
-			occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()){
+	occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()){
 	this->xDim	= roundToFrac(message->xDim, message->res);
 	this->yDim	= roundToFrac(message->yDim, message->res);
 	this->zDim	= roundToFrac(message->zDim, message->res);
 	this->res	= message->res;
 	this->xSize = roundToGrid(this->xDim, this->res);
 	this->ySize = roundToGrid(this->yDim, this->res);
+	this->x_ori = roundToGrid(this->origin.getX(), this->res);
+	this->y_ori = roundToGrid(this->origin.getY(), this->res);
 	//Check for a 2D PointCloud
-	if(this->zDim!=0)this->zSize = roundToGrid(this->zDim, this->res);
-	else this->zSize = 1;
+	if(this->zDim!=0){
+		this->zSize = roundToGrid(this->zDim, this->res);
+		this->z_ori = roundToGrid(this->origin.getZ(), this->res);
+	}
+	else{
+		this->zSize = 1;
+		this->z_ori = 0;
+	}
 	pcl::fromROSMsg<pcl::PointXYZRGBA>(message->cloud, *(this->occGrid));
+	//tf::pointMsgToTF(message->origin, this->origin);
 }
 
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
@@ -157,11 +189,14 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 OccupancyGrid::~OccupancyGrid(){}
 
 PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(OccupancyGridAccessException){
+	x+= this->origin.getX();
+	y+= this->origin.getY();
+	z+= this->origin.getZ();
 	if(boundsCheck(x,y,z)){
 		try{
 			return static_cast<oryx_path_planning::PointTrait>(getPoint(x,y,z).rgba);
 		}catch(std::exception& e){
-			throw new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e);
+			throw *(new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e));
 		}
 	}
 	return oryx_path_planning::UNKNOWN;
@@ -169,12 +204,15 @@ PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(Occup
 
 
 bool OccupancyGrid::setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait_t trait)throw(OccupancyGridAccessException){
+	x+= this->origin.getX();
+	y+= this->origin.getY();
+	z+= this->origin.getZ();
 	if(boundsCheck(x,y,z)){
 		try{
 			getPoint(x,y,z).rgba=trait;
 			return true;
 		}catch(std::exception& e){
-			throw new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e);
+			throw *(new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e));
 		}
 	}
 	return false;
@@ -288,7 +326,7 @@ int OccupancyGrid::calcIndex(double x, double y, double z){
 }
 
 int OccupancyGrid::calcIndex(int x, int y, int z){
-	return x*this->zSize*this->ySize + y*this->zSize + z;
+	return (x)*this->zSize*this->ySize + (y)*this->zSize + (z);
 }
 
 Point& OccupancyGrid::getPoint(double x, double y, double z){
@@ -328,7 +366,7 @@ bool OccupancyGrid::boundsCheck(double x, double y, double z)throw(OccupancyGrid
 		failure = true;
 	}
 	if(failure){
-		throw new OccupancyGridAccessException(message);
+		throw *(new OccupancyGridAccessException(message));
 	}
 	return true;
 }

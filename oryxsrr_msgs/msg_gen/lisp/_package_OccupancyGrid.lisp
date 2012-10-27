@@ -9,6 +9,8 @@
           ZDIM
           RES-VAL
           RES
+          ORIGIN-VAL
+          ORIGIN
           CLOUD-VAL
           CLOUD
 ))

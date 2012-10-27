@@ -15,7 +15,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <oryxsrr_msgs/OccupancyGrid.h>
-
+#include<tf/transform_datatypes.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanningUtilities.h"
 
@@ -58,7 +58,7 @@ typedef enum PointTrait_t{
  * @author	Adam Panzica
  * @brief	Basic exception for stating that an invalid location on the occupancy grid was accessed
  */
-class OccupancyGridAccessException:ChainableException{
+class OccupancyGridAccessException: public ChainableException{
 public:
 	/**
 	 * @author	Adam Panzica
@@ -107,9 +107,10 @@ public:
 	 * @param xDim			The size of the occupancy grid in real units in the x-axis
 	 * @param yDim			The size of the occupancy grid in real units in the y-axis
 	 * @param resolution	The grid resolution of the occupancy grid
+	 * @param origin		The origin of the occupancy grid
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double resolution, PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(double xDim, double yDim, double resolution, tf::Point& origin, PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
@@ -118,9 +119,10 @@ public:
 	 * @param yDim			The size of the occupancy grid in real units in the y-axis
 	 * @param zDim			The size of the occupancy grid in real units in the z-axis
 	 * @param resolution	The grid resolution of the occupancy grid
+	 * @param origin		The origin of the occupancy grid
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, tf::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
@@ -129,10 +131,11 @@ public:
 	 * @param yDim			The size of the occupancy grid in real units in the y-axis
 	 * @param zDim			The size of the occupancy grid in real units in the z-axis. For a 2D PointCloud, specify a zDim of Zero and insure that all z-values in the XYZ data of the points are 0.
 	 * @param resolution	The grid resolution of the occupancy grid
+	 * @param origin		The origin of the occupancy grid
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, PointCloudPtr cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, tf::Point& origin, PointCloudPtr cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -280,7 +283,11 @@ private:
 	int ySize;		///The y size of this grid
 	int zSize;		///The z size of this grid
 	double res;		///The grid resolution of this occupancy grid
-	PointCloudPtr occGrid;		///A smart pointer to the point cloud which contains the data for this occupancy grid
+	int x_ori;		///The x origin of the grid in grid units
+	int y_ori;		///The y origin of the grid in grid units
+	int z_ori;		///The z origin of the grid in grid units
+	tf::Point origin;		///The origin of the occupancy grid
+	PointCloudPtr occGrid;	///A smart pointer to the point cloud which contains the data for this occupancy grid
 };
 
 
