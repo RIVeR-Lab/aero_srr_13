@@ -79,6 +79,14 @@ int main(int argc, char **argv) {
 	}
 	try{
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+		ROS_INFO("Testing Occupancy Grid Copy...");
+		OccupancyGrid copyGrid(testGrid);
+		ROS_INFO("Copied Grid:\n%s", copyGrid.toString(0,0)->c_str());
+		ROS_INFO("Testing Build From Point Cloud...");
+		OccpancyGridCloud copyCloud(copyGrid.getGrid());
+		OccupancyGrid cloudGrid(xDim,yDim,0.0,resolution,origin, copyCloud);
+		ROS_INFO("PC Built Grid:\n%s", cloudGrid.toString(0,0)->c_str());
+		ROS_INFO("Data at 10,10,0 <%x>", cloudGrid.getPointTrait(10,10,0));
 	}catch(std::exception& e){
 		ROS_ERROR(e.what());
 	}

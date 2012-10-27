@@ -24,6 +24,8 @@ class OccupancyGrid;
 ///Typedef to allow for convenient sharing of a OccupancyGrid via pointer
 typedef boost::shared_ptr<OccupancyGrid> OccupancyGridPtr;
 
+typedef pcl::PointCloud<Point> OccpancyGridCloud;
+
 //*********************** CLASS DEFINITIONS ************************************//
 /**
  * @author Adam Panzica
@@ -122,7 +124,7 @@ public:
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, const oryx_path_planning::Point& origin, PointCloudPtr cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, const oryx_path_planning::Point& origin, const OccpancyGridCloud& cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -181,9 +183,9 @@ public:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
-	 * @return	A boost::shared_pt containing the PointCloud<oryx_path_planning::PointXYZWithTrait> which backs this occupancy grid
+	 * @return	A reference to the PointCloud<oryx_path_planning::PointXYZWithTrait> which backs this occupancy grid
 	 */
-	PointCloudPtr getGrid();
+	const OccpancyGridCloud& getGrid();
 
 	/**
 	 * @author	Adam Panzica
@@ -262,7 +264,7 @@ private:
 	 * @param z	z-coord
 	 * @return The point at the given coordinate
 	 */
-	Point& getPoint(oryx_path_planning::Point& point);
+	Point& getPoint(oryx_path_planning::Point& point , bool origin_corrected = true);
 
 	/**
 	 * Gets a point out of the point cloud based on integer coordinates
@@ -290,8 +292,8 @@ private:
 	int x_ori;		///The x origin of the grid in grid units
 	int y_ori;		///The y origin of the grid in grid units
 	int z_ori;		///The z origin of the grid in grid units
-	oryx_path_planning::Point origin;		///The origin of the occupancy grid
-	PointCloudPtr occGrid;	///A smart pointer to the point cloud which contains the data for this occupancy grid
+	oryx_path_planning::Point origin;	///The origin of the occupancy grid
+	OccpancyGridCloud occGrid;			///The point cloud which contains the data for this occupancy grid
 };
 
 

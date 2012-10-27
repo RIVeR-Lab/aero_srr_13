@@ -66,7 +66,9 @@ int main(int argc, char **argv) {
 		oryx_path_planning::OccupancyGrid grid(xDim, yDim, res, origin, oryx_path_planning::FREE_LOW_COST);
 		if(input>0){
 			double y;
-			for(double x=0; x<xDim; x+=res/20){
+			double x;
+			int numPoints = 0;
+			for(x=0; x<xDim; x+=res/20){
 				y= input*x;
 				if(y>(yDim/2)||y<-yDim/2){
 					break;
@@ -74,11 +76,13 @@ int main(int argc, char **argv) {
 				try{
 					ROS_INFO("Setting Point at <%f,%f>", x,y);
 					grid.setPointTrait(x,y-origin.y,0,oryx_path_planning::OBSTACLE);
+					numPoints++;
 				}catch(std::exception& e){
 					ROS_ERROR("%s", e.what());
 				}
 			}
 			ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());
+			ROS_INFO("I placed ~%d points", numPoints);
 			sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
 			message->header.frame_id = "base_link";
 			grid.generateMessage(message);

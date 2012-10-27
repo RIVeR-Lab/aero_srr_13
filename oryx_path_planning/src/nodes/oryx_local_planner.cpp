@@ -98,10 +98,19 @@ public:
 			if(shouldPlan){
 				//Grab the next occupancy grid to process
 				if(!this->occupancy_buffer.empty()){
-					OccupancyGrid	workingGrid= *this->occupancy_buffer.front();
+					OccupancyGrid	workingGrid= this->occupancy_buffer.front();
 					SpeedSet	  	speedSet   = this->tentacles->getSpeedSet(this->currentVel);
 
 					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", workingGrid.toString(0,0).get()->c_str());
+					int numPoints = 0;
+					for(OccupancyGrid::iterator test_itr = workingGrid.begin(); test_itr<workingGrid.end(); test_itr++){
+						//ROS_INFO_COND(test_itr->rgba != oryx_path_planning::FREE_LOW_COST, "Found an obsticale point! <%f, %f>", test_itr->x, test_itr->y);
+						numPoints++;
+					}
+					ROS_INFO("I Found %d number of interesting points", numPoints);
+
+
+
 					ROS_INFO("I'm Going To Use A Speed Set With The Parameters <NumTent:%d, Vel:%f, SR:%f>", speedSet.getNumTentacle(), speedSet.getVelocity(), speedSet.getSeedRad());
 					OccupancyGrid rendering(workingGrid);
 					for(int i=0; i<speedSet.getNumTentacle(); i++){
@@ -112,11 +121,11 @@ public:
 							try{
 								rendering.setPointTrait(point, oryx_path_planning::TENTACLE);
 							}catch(OccupancyGridAccessException& e){
-								ROS_ERROR(e.what());
+								//ROS_ERROR("%s", e.what());
 							}
 						}
 					}
-					ROS_INFO("This Is The Occupancy Grid With Tentacles Overlaid:\n%s", rendering.toString(0,0)->c_str());
+					//ROS_INFO("This Is The Occupancy Grid With Tentacles Overlaid:\n%s", rendering.toString(0,0)->c_str());
 					this->occupancy_buffer.pop_front();
 				}
 			}
@@ -142,7 +151,7 @@ private:
 	ros::Subscriber 	pc_sub;		///Subscriber to the ROS topic to receive new occupancy grid data over
 	ros::Subscriber		stop_sub;	///Subscriber to the ROS topic to receive the software stop message
 
-	boost::circular_buffer<OccupancyGridPtr > occupancy_buffer;	///Buffer to store received OccupancyGrid data
+	boost::circular_buffer<OccupancyGrid > occupancy_buffer;	///Buffer to store received OccupancyGrid data
 
 	actionlib::SimpleActionClient<oryx_drive_controller::VelocityCommandAction> v_client;	///The actionlib client to set velocity command messages to the base platform with
 
@@ -171,9 +180,11 @@ private:
 		//To prevent processing of stale data, ignore anything received while we shouldn't be planning
 		if(this->shouldPlan){
 			ROS_DEBUG("I Got new Occupancy Grid Data!");
-			PointCloudPtr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
-			pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, *cloud);
-			this->occupancy_buffer.push_back(OccupancyGridPtr(new OccupancyGrid(xDim, yDim, zDim, res, this->origin, cloud )));
+			OccpancyGridCloud cloud;
+			pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, cloud);
+			OccupancyGrid recievedGrid(xDim, yDim, zDim, res, this->origin, cloud);
+			ROS_INFO("Callback got the grid:\n%s", recievedGrid.toString(0,0)->c_str());
+			this->occupancy_buffer.push_back(recievedGrid);
 		}
 	}
 
