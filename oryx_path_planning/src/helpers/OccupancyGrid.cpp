@@ -26,15 +26,15 @@ OccupancyGrid::OccupancyGrid(): occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>()
 	this->zSize = roundToGrid(this->zDim, this->res);
 }
 
-OccupancyGrid::OccupancyGrid(OccupancyGridPtr grid){
-	this->xDim	= grid->xDim;
-	this->yDim	= grid->yDim;
-	this->zDim	= grid->zDim;
-	this->res	= grid->res;
-	this->xSize = grid->xSize;
-	this->ySize = grid->ySize;
-	this->zSize = grid->zSize;
-	this->occGrid = grid->getGrid();
+OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
+	occGrid(new pcl::PointCloud<pcl::PointXYZRGBA>(*grid.occGrid)){
+	this->xDim	= grid.xDim;
+	this->yDim	= grid.yDim;
+	this->zDim	= grid.zDim;
+	this->res	= grid.res;
+	this->xSize = grid.xSize;
+	this->ySize = grid.ySize;
+	this->zSize = grid.zSize;
 };
 
 
@@ -93,7 +93,7 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 	}
 
 	OccupancyGrid::iterator cloudItr;
-	OccupancyGrid::iterator occItr = this->occGrid->begin();
+	//OccupancyGrid::iterator occItr = this->occGrid->begin();
 	/*for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
 		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
 		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
@@ -260,6 +260,9 @@ boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double sli
 				break;
 			case INFLATED:
 				value[0] = 'x';
+				break;
+			case TENTACLE:
+				value[0] = 'T';
 				break;
 			default:
 				value[0] = '*';

@@ -11,7 +11,7 @@
 	<arg name="occupancy/x_dimension"	default="20"/>
 	<arg name="occupancy/y_dimension"	default="20"/>
 	<arg name="occupancy/z_dimension"	default="0"/>
-	<arg name="occupancy/grid_resolution"	default="0.25"/>
+	<arg name="occupancy/grid_resolution"	default="0.1"/>
 	
 	<!-- declare speed set arguments -->
 	<arg name="speed_set/number"	default="15"/>

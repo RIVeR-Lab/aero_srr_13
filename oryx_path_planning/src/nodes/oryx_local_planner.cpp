@@ -102,6 +102,15 @@ public:
 
 					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", workingGrid_ptr.get()->toString(0,0).get()->c_str());
 					ROS_INFO("I'm Going To Use A Speed Set With The Parameters <NumTent:%d, Vel:%f, SR:%f>", speedSet_ptr->getNumTentacle(), speedSet_ptr->getVelocity(), speedSet_ptr->getSeedRad());
+					OccupancyGridPtr rendering_ptr(new OccupancyGrid(*workingGrid_ptr));
+					for(int i=0; i<1; i++){
+						Tentacle::TentacleTraverser traverser(speedSet_ptr->getTentacle(i));
+						while(traverser.hasNext()){
+							tf::Point point = traverser.next();
+							rendering_ptr->setPointTrait(point.getX(), point.getY(), point.getZ(), oryx_path_planning::TENTACLE);
+						}
+					}
+					ROS_INFO("This Is The Occupancy Grid With Tentacles Overlaid:\n%s", rendering_ptr->toString(0,0)->c_str());
 				}
 			}
 			//spin to let ROS process callbacks
@@ -316,7 +325,7 @@ int main(int argc, char **argv) {
 
 	//Set up Tentacles
 	ROS_INFO("Generating Tentacles...");
-	boost::shared_ptr<TentacleGenerator> tentacle_ptr(new oryx_path_planning::TentacleGenerator (minSpeed, maxSpeed, numSpeedSet, numTent, expFact, res, xDim, yDim));
+	boost::shared_ptr<TentacleGenerator> tentacle_ptr(new oryx_path_planning::TentacleGenerator (minSpeed, maxSpeed, numSpeedSet, numTent, expFact, res, xDim, yDim/2));
 	ROS_INFO("Tentacles Generated!");
 	//Set up client to Drive Controller
 	try{

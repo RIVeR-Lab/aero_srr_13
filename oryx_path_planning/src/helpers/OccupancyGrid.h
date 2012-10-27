@@ -50,7 +50,8 @@ typedef enum PointTrait_t{
 	UNKNOWN			= 0x808080, //!< UNKNOWN		Point on the grid is unknown (Grey)
 	FREE_HIGH_COST	= 0x008080,	//!< FREE_HIGH_COST	Point on the grid is free but is expensive to travel over (Teal)
 	FREE_LOW_COST	= 0x008000, //!< FREE_LOW_COST	Point on the grid is free but is easy to travel over (Green)
-	GOAL            = 0xFFFF00	//!< GOAL			Point on the grid is the goal position (Yellow)
+	GOAL            = 0xFFFF00,	//!< GOAL			Point on the grid is the goal position (Yellow)
+	TENTACLE		= 0xCD00CD	//!< TENTACLE		Point on the grid is a Tentacle marker (Pink)
 } PointTrait;
 
 /**
@@ -98,7 +99,7 @@ public:
 	 * @brief	Default copy constructor
 	 * @param grid The OccupancyGrid to copy
 	 */
-	OccupancyGrid(OccupancyGridPtr grid);
+	OccupancyGrid(OccupancyGrid& grid);
 
 	/**
 	 * @author	Adam Panzica
