@@ -197,9 +197,9 @@ PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(Occup
 }
 
 PointTrait OccupancyGrid::getPointTrait(Point point)throw(OccupancyGridAccessException){
-	point.x+=this->origin.x;
-	point.y+=this->origin.y;
-	point.z+=this->origin.z;
+	point.x=roundToFrac(point.x+this->origin.x, this->res);
+	point.y=roundToFrac(point.y+this->origin.y, this->res);
+	point.z=roundToFrac(point.z+this->origin.z, this->res);
 	if(boundsCheck(point)){
 		try{
 			return static_cast<oryx_path_planning::PointTrait>(getPoint(point).rgba);
@@ -220,9 +220,9 @@ bool OccupancyGrid::setPointTrait(double x, double y, double z, PointTrait trait
 }
 
 bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyGridAccessException){
-	point.x+=this->origin.x;
-	point.y+=this->origin.y;
-	point.z+=this->origin.z;
+	point.x=roundToFrac(point.x+this->origin.x, this->res);
+	point.y=roundToFrac(point.y+this->origin.y, this->res);
+	point.z=roundToFrac(point.z+this->origin.z, this->res);
 	if(boundsCheck(point)){
 		try{
 			getPoint(point).rgba=trait;
@@ -357,32 +357,24 @@ Point& OccupancyGrid::getPoint(int x, int y, int z){
 bool OccupancyGrid::boundsCheck(Point& point)throw(OccupancyGridAccessException){
 	bool failure = false;
 	const std::string prefex("Invalid Point Requested: ");
-	const std::string middle(" Is Greater Than Max Value: ");
-	std::string message("");
-	if(point.x>this->xDim){
-		boost::lexical_cast<double>(point.x);
-		message+=prefex;
-		message+=boost::lexical_cast<double>(point.x);
-		message+=middle;
-		message+=boost::lexical_cast<double>(this->xDim);
+	const std::string middle(" Is Greater Than Max Value Or Less Than Zero: ");
+	std::stringstream message("");
+	if(point.x>this->xDim || point.x<0){
+		message<<prefex<<"X value"<<point.x<<middle<<this->xDim;
 		failure = true;
 	}
-	else if(point.y>this->yDim){
-		message+=prefex;
-		message+=boost::lexical_cast<double>(point.y);
-		message+=middle;
-		message+=boost::lexical_cast<double>(this->yDim);
+	else if(point.y>this->yDim|| point.x<0){
+		message<<prefex<<"Y value"<<point.y<<middle<<this->yDim;
 		failure = true;
 	}
-	else if(point.z>this->zDim){
-		message+=prefex;
-		message+=boost::lexical_cast<double>(point.z);
-		message+=middle;
-		message+=boost::lexical_cast<double>(this->zDim);
+	else if(point.z>this->zDim|| point.x<0){
+		message<<prefex<<"Z value"<<point.z<<middle<<this->zDim;
 		failure = true;
 	}
 	if(failure){
-		throw *(new OccupancyGridAccessException(message));
+		std::string messageOut(message.str());
+		OccupancyGridAccessException exception(messageOut);
+		throw exception;
 	}
 	return true;
 }
