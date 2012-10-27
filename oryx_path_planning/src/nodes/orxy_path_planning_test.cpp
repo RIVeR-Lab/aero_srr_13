@@ -95,10 +95,10 @@ void printSpeedSet(int xDim, int yDim, double resolution, SpeedSetPtr speedSet){
 		//ROS_INFO("Got Tentacle %d", t);
 		for(unsigned int p=0; p<tentacle->getPoints()->size(); p++){
 			oryx_path_planning::Point point(tentacle->getPoints()->at(p));
-			ROS_INFO("Got Point at <%f, %f>", point.x, point.y);
+			//ROS_INFO("Got Point at <%f, %f>", point.x, point.y);
 			point.x = (oryx_path_planning::roundToGrid(point.x, resolution));
 			point.y = (oryx_path_planning::roundToGrid(point.y, resolution)+(ySize/2));
-			ROS_INFO("Placing Point at <%f, %f>", point.x, point.y);
+			//ROS_INFO("Placing Point at <%f, %f>", point.x, point.y);
 			occGrid.at(point.x).replace(point.y,1,"T");
 		}
 		//ROS_INFO("Done with Tentacle %d", t);
