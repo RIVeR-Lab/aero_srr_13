@@ -198,7 +198,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 			for(double t=startAngle; t>(startAngle-sweepAngle); t-=thetaIncrement){
 				oryx_path_planning::Point newCoord;
 				newCoord.y = (oryx_path_planning::roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
-				newCoord.y = (oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
+				newCoord.x = (oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
 				newCoord.z = 0;
 				//If we've hit the top of the occupancy grid, break
 				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
