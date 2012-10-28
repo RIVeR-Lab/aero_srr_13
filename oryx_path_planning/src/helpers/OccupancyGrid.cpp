@@ -30,6 +30,21 @@ OccupancyGrid::OccupancyGrid(): occGrid(){
 	this->z_ori = 0;
 }
 
+OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
+						origin(grid.origin),
+						occGrid(grid.occGrid){
+	this->xDim	= grid.xDim;
+	this->yDim	= grid.yDim;
+	this->zDim	= grid.zDim;
+	this->res	= grid.res;
+	this->xSize = grid.xSize;
+	this->ySize = grid.ySize;
+	this->zSize = grid.zSize;
+	this->x_ori = grid.x_ori;
+	this->y_ori = grid.y_ori;
+	this->z_ori = grid.z_ori;
+};
+
 OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
 						origin(grid.origin),
 						occGrid(grid.occGrid){
@@ -143,7 +158,86 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 
 }
 
-OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr message):
+/**
+ * This constructor takes a PointCloud, which may or may not have its points in any particular order, and copies it into
+ * the PointCloud which backs this occupancy grid. In the process it organizes the points in such a fashion as to make them
+ * accessible quickly by <x,y,z> coordinates without the need for iteration and comparison. Since there is no built in provision
+ * to bounds-check the XYZ data in the Points in the given PointCloud, this constructor will throw an exception if a Point in
+ * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
+ */
+OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::Point& origin, OccpancyGridCloud& cloud) throw(OccupancyGridAccessException):
+						origin(origin),
+						occGrid(cloud /*roundToGrid(xDim, resolution)*roundToGrid(yDim, resolution)*((zDim!=0)?roundToGrid(zDim, resolution):1),1*/){
+	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%f, %f, %f>", xDim, yDim, zDim);
+	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occGrid.size(), (int)cloud.size());
+	this->xDim	= roundToFrac(xDim, resolution);
+	this->yDim	= roundToFrac(yDim, resolution);
+	this->res	= resolution;
+	this->xSize = roundToGrid(this->xDim, this->res);
+	this->ySize = roundToGrid(this->yDim, this->res);
+	//Check for a 2D PointCloud
+	if(this->zDim==0){
+		this->zDim	= 0;
+		this->zSize = 1;
+		this->z_ori = 0;
+	}else{
+		this->zDim	= roundToFrac(zDim, resolution);
+		this->zSize = roundToGrid(this->zDim, this->res);
+		this->z_ori = roundToGrid(this->origin.z, this->res);
+	}
+	this->x_ori = roundToGrid(this->origin.x, this->res);
+	this->y_ori = roundToGrid(this->origin.y, this->res);
+
+	//pcl::copyPointCloud(, this->occGrid);
+	//OccupancyGrid::iterator cloudItr;
+	//OccupancyGrid::iterator occItr = this->occGrid->begin();
+	/*for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
+		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
+		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
+		occItr++;
+	}*/
+
+	/*for(cloudItr = cloud.begin(); cloudItr<cloud.end(); cloudItr++){
+		Point seedPoint = *cloudItr;
+		getPoint(seedPoint, false) = seedPoint;
+		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", seedPoint.x, seedPoint.y, seedPoint.z, seedPoint.rgba);
+		 ;
+		//ROS_INFO("Set Data <%f, %f, %f, %x>", gridPoint.x, gridPoint.y, gridPoint.z, gridPoint.rgba);
+	}*/
+
+	/*occItr = this->occGrid->begin();
+	for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
+		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
+		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
+		occItr++;
+	}*/
+	//ROS_INFO("Built the Occupancy Grid <%f/%d, %f/%d, %f/%d>:\n%s",this->xDim, this->xSize,this->yDim, this->ySize,this->zDim, this->zSize, this->toString(0,0)->c_str());
+
+}
+
+OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr& message):
+					occGrid(){
+	this->xDim	= roundToFrac(message->xDim, message->res);
+	this->yDim	= roundToFrac(message->yDim, message->res);
+	this->zDim	= roundToFrac(message->zDim, message->res);
+	this->res	= message->res;
+	this->xSize = roundToGrid(this->xDim, this->res);
+	this->ySize = roundToGrid(this->yDim, this->res);
+	this->x_ori = roundToGrid(this->origin.x, this->res);
+	this->y_ori = roundToGrid(this->origin.y, this->res);
+	//Check for a 2D PointCloud
+	if(this->zDim!=0){
+		this->zSize = roundToGrid(this->zDim, this->res);
+		this->z_ori = roundToGrid(this->origin.z, this->res);
+	}
+	else{
+		this->zSize = 1;
+		this->z_ori = 0;
+	}
+	pcl::fromROSMsg<pcl::PointXYZRGBA>(message->cloud, this->occGrid);
+}
+
+OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridConstPtr& message):
 					occGrid(){
 	this->xDim	= roundToFrac(message->xDim, message->res);
 	this->yDim	= roundToFrac(message->yDim, message->res);
@@ -183,7 +277,7 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 
 OccupancyGrid::~OccupancyGrid(){}
 
-PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(OccupancyGridAccessException){
+PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)const throw(OccupancyGridAccessException){
 	Point workingPoint;
 	workingPoint.x = x;
 	workingPoint.y = y;
@@ -191,7 +285,7 @@ PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)throw(Occup
 	return getPointTrait(workingPoint);
 }
 
-PointTrait OccupancyGrid::getPointTrait(Point point)throw(OccupancyGridAccessException){
+PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAccessException){
 	point.x=roundToFrac(point.x+this->origin.x, this->res);
 	point.y=roundToFrac(point.y+this->origin.y, this->res);
 	point.z=roundToFrac(point.z+this->origin.z, this->res);
@@ -229,17 +323,17 @@ bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyG
 	return false;
 }
 
-const OccpancyGridCloud& OccupancyGrid::getGrid(){
+const OccpancyGridCloud& OccupancyGrid::getGrid() const{
 	return this->occGrid;
 }
 
-bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message){
+bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message) const{
 	message->header.stamp = ros::Time::now();
 	pcl::toROSMsg<pcl::PointXYZRGBA>(this->occGrid, *message);
 	return true;
 }
 
-bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGridPtr message){
+bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGridPtr message) const{
 	message->header.stamp = ros::Time::now();
 	message->xDim = this->xDim;
 	message->yDim = this->yDim;
@@ -284,7 +378,7 @@ OccupancyGrid::iterator OccupancyGrid::end(){
  * | INFLATED |   'x'   |
  * | Non-Std  |   '*'   |
  */
-boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double slice){
+boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double slice) const{
 	boost::shared_ptr<std::string> output(new std::string(""));
 	std::vector<std::string> occGrid(this->xSize, std::string(this->ySize, ' '));
 
@@ -328,7 +422,7 @@ boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double sli
 	return output;
 }
 
-int OccupancyGrid::calcIndex(double x, double y, double z){
+int OccupancyGrid::calcIndex(double x, double y, double z) const{
 	int xVal = roundToGrid(x, this->res);
 	int yVal = roundToGrid(y, this->res);
 	int zVal = roundToGrid(z, this->res);
@@ -336,8 +430,20 @@ int OccupancyGrid::calcIndex(double x, double y, double z){
 	return calcIndex(xVal, yVal, zVal);
 }
 
-int OccupancyGrid::calcIndex(int x, int y, int z){
+int OccupancyGrid::calcIndex(int x, int y, int z) const{
 	return (x)*this->zSize*this->ySize + (y)*this->zSize + (z);
+}
+
+const Point& OccupancyGrid::getPoint(oryx_path_planning::Point& point, bool origin_corrected) const{
+	if(origin_corrected){
+		return this->occGrid.at(calcIndex(point.x, point.y, point.z));
+	}else{
+		return this->occGrid.at(calcIndex(point.x+this->origin.x, point.y+this->origin.y, point.z+this->origin.z));
+	}
+}
+
+const Point& OccupancyGrid::getPoint(int x, int y, int z) const{
+	return this->occGrid.at(calcIndex(x, y, z));
 }
 
 Point& OccupancyGrid::getPoint(oryx_path_planning::Point& point, bool origin_corrected){
@@ -353,7 +459,7 @@ Point& OccupancyGrid::getPoint(int x, int y, int z){
 }
 
 
-bool OccupancyGrid::boundsCheck(Point& point)throw(OccupancyGridAccessException){
+bool OccupancyGrid::boundsCheck(Point& point)const throw(OccupancyGridAccessException){
 	bool failure = false;
 	const std::string prefex("Invalid Point Requested: ");
 	const std::string middle(" Is Greater Than Max Value Or Less Than Zero: ");

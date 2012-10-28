@@ -86,9 +86,16 @@ public:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Default copy constructor
-	 * @param grid The OccupancyGrid to copy
+	 * @param grid The const OccupancyGrid to copy
 	 */
 	OccupancyGrid(const OccupancyGrid& grid);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Default copy constructor
+	 * @param grid The OccupancyGrid to copy
+	 */
+	OccupancyGrid(OccupancyGrid& grid);
 
 	/**
 	 * @author	Adam Panzica
@@ -115,6 +122,18 @@ public:
 
 	/**
 	 * @author	Adam Panzica
+	 * @brief	Creates a new Occupancy Grid with a given set of dimensions and grid resolution
+	 * @param xDim			The size of the occupancy grid in real units in the x-axis
+	 * @param yDim			The size of the occupancy grid in real units in the y-axis
+	 * @param zDim			The size of the occupancy grid in real units in the z-axis
+	 * @param resolution	The grid resolution of the occupancy grid
+	 * @param origin		The origin of the occupancy grid
+	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
+	 */
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+
+	/**
+	 * @author	Adam Panzica
 	 * @brief	Creates a new OccupancyGrid which uses a supplied PointCloud as its base
 	 * @param xDim			The size of the occupancy grid in real units in the x-axis
 	 * @param yDim			The size of the occupancy grid in real units in the y-axis
@@ -128,10 +147,30 @@ public:
 
 	/**
 	 * @author	Adam Panzica
-	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
-	 * @param message	The message to make the OccupancyGrid from
+	 * @brief	Creates a new OccupancyGrid which uses a supplied PointCloud as its base
+	 * @param xDim			The size of the occupancy grid in real units in the x-axis
+	 * @param yDim			The size of the occupancy grid in real units in the y-axis
+	 * @param zDim			The size of the occupancy grid in real units in the z-axis. For a 2D PointCloud, specify a zDim of Zero and insure that all z-values in the XYZ data of the points are 0.
+	 * @param resolution	The grid resolution of the occupancy grid
+	 * @param origin		The origin of the occupancy grid
+	 * @param cloud			The PointCloud to use as the base for the occupancy grid
+	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr message);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::Point& origin, OccpancyGridCloud& cloud) throw(OccupancyGridAccessException);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
+	 * @param message	reference to the message to make the OccupancyGrid from
+	 */
+	OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr& message);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
+	 * @param message	const reference to the message to make the OccupancyGrid from
+	 */
+	OccupancyGrid(oryxsrr_msgs::OccupancyGridConstPtr& message);
 
 	/**
 	 * Default destructor
@@ -147,7 +186,7 @@ public:
 	 * @return The PointTrait of the point at the given coordinates
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	oryx_path_planning::PointTrait getPointTrait(double x, double y, double z) throw(OccupancyGridAccessException);
+	oryx_path_planning::PointTrait getPointTrait(double x, double y, double z) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -156,7 +195,7 @@ public:
 	 * @return The PointTrait of the point at the given coordinates
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	oryx_path_planning::PointTrait getPointTrait(oryx_path_planning::Point point)throw(OccupancyGridAccessException);
+	oryx_path_planning::PointTrait getPointTrait(oryx_path_planning::Point point) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -185,7 +224,7 @@ public:
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
 	 * @return	A reference to the PointCloud<oryx_path_planning::PointXYZWithTrait> which backs this occupancy grid
 	 */
-	const OccpancyGridCloud& getGrid();
+	const OccpancyGridCloud& getGrid() const;
 
 	/**
 	 * @author	Adam Panzica
@@ -195,7 +234,7 @@ public:
 	 *
 	 * Note that it is up to the caller to properly set the fields in the header other than the stamp
 	 */
-	bool generateMessage(sensor_msgs::PointCloud2Ptr message);
+	bool generateMessage(sensor_msgs::PointCloud2Ptr message) const;
 
 	/**
 	 * @author	Adam Panzica
@@ -205,7 +244,7 @@ public:
 	 *
 	 * Note that it is up to the caller to properly set the fields in the header other than the stamp
 	 */
-	bool generateMessage(oryxsrr_msgs::OccupancyGridPtr message);
+	bool generateMessage(oryxsrr_msgs::OccupancyGridPtr message) const;
 
 	/**
 	 * @author	Adam Panzica
@@ -226,7 +265,7 @@ public:
 	 * @param slice		The distance along the slice axis to make the slice
 	 * @return	A shared pointer to a std::string containing an ASCII-art representation of the occupancy grid slice specified
 	 */
-	boost::shared_ptr<std::string> toString(int sliceAxis, double slice);
+	boost::shared_ptr<std::string> toString(int sliceAxis, double slice) const;
 private:
 
 	/**
@@ -235,7 +274,7 @@ private:
 	 * @param point Coordinates of the point to check
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool boundsCheck(oryx_path_planning::Point& point)throw(OccupancyGridAccessException);
+	bool boundsCheck(oryx_path_planning::Point& point) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -245,7 +284,7 @@ private:
 	 * @param z	z-coord
 	 * @return An index into a 1-d array corresponding to the given coord set
 	 */
-	int calcIndex(double x, double y, double z);
+	int calcIndex(double x, double y, double z) const ;
 
 	/**
 	 * @author	Adam Panzica
@@ -255,7 +294,7 @@ private:
 	 * @param z	z-coord
 	 * @return An index into a 1-d array corresponding to the given coord set
 	 */
-	int calcIndex(int x, int y, int z);
+	int calcIndex(int x, int y, int z) const;
 
 	/**
 	 * Gets a point out of the point cloud based on real coordinates
@@ -265,6 +304,7 @@ private:
 	 * @return The point at the given coordinate
 	 */
 	Point& getPoint(oryx_path_planning::Point& point , bool origin_corrected = true);
+	const Point& getPoint(oryx_path_planning::Point& point , bool origin_corrected = true) const;
 
 	/**
 	 * Gets a point out of the point cloud based on integer coordinates
@@ -274,6 +314,8 @@ private:
 	 * @return The point at the given coordinate
 	 */
 	Point& getPoint(int x, int y, int z);
+	const Point& getPoint(int x, int y, int z) const;
+
 
 	/**
 	 * @author Adam Panzica
