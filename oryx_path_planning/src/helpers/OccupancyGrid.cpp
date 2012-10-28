@@ -351,6 +351,14 @@ OccupancyGrid::iterator OccupancyGrid::end(){
 	return this->occGrid.end();
 }
 
+OccupancyGrid::const_iterator OccupancyGrid::begin() const{
+	return this->occGrid.begin();
+}
+
+OccupancyGrid::const_iterator OccupancyGrid::end() const{
+	return this->occGrid.end();
+}
+
 /**
  * Prints out the specified slice of the occupancy grid in ASCII art with each character representing a point on the grid.
  * For example, with xDim=Ydim=2.5 and resolution = .25, and all points set to UNKNOWN, the returned string will look like

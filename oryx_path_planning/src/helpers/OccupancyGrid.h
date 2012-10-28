@@ -77,6 +77,8 @@ class OccupancyGrid{
 public:
 	///Typedef to make iterators easier
 	typedef pcl::PointCloud<pcl::PointXYZRGBA>::iterator iterator;
+	///Typedef to make const_iterators easier
+	typedef pcl::PointCloud<pcl::PointXYZRGBA>::const_iterator const_iterator;
 
 	/**
 	 * @author	Adam Panzica
@@ -257,6 +259,18 @@ public:
 	 * @return	A reference to an iterator at the end of the occupancy grid
 	 */
 	iterator end();
+
+	/**
+	 * @author	Adam Panzica
+	 * @return	A reference to an iterator at the beginning of the occupancy grid
+	 */
+	const_iterator begin() const;
+
+	/**
+	 * @author	Adam Panzica
+	 * @return	A reference to an iterator at the end of the occupancy grid
+	 */
+	const_iterator end() const;
 
 	/**
 	 * @author	Adam Panzic
