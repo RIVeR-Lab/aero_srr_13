@@ -99,7 +99,7 @@ public:
 	 * @param message		An optional message discribing what went wrong
 	 */
 	TentacleAccessException(int indexTried, int speedSetIndex, std::string& message = *(new std::string())):
-	oryx_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message)){
+		oryx_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message)){
 	}
 
 	/**
@@ -110,7 +110,7 @@ public:
 	 * @param cause			Exception which caused this exception
 	 */
 	TentacleAccessException(int indexTried, int speedSetIndex, std::string& message, std::exception& cause):
-	oryx_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message), cause){
+		oryx_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message), cause){
 	}
 
 	~TentacleAccessException() throw(){};
@@ -133,7 +133,7 @@ public:
 	 * @param message		Optional discriptive error message
 	 */
 	SpeedSetAccessException(int indexTried, std::string& message = *(new std::string())):
-	oryx_path_planning::ChainableException(generateMessage(indexTried, message)){
+		oryx_path_planning::ChainableException(generateMessage(indexTried, message)){
 	}
 
 	~SpeedSetAccessException() throw(){};
@@ -156,12 +156,21 @@ public:
 	typedef boost::shared_ptr<pcl::PointCloud<oryx_path_planning::Point> > TentacleCloudPtr;
 	///Typedef pcl::PointCloud<oryx_path_planning::Point>::iterator for convenience
 	typedef pcl::PointCloud<oryx_path_planning::Point>::iterator iterator;
+	///Typedef pcl::PointCloud<oryx_path_planning::Point>::const_iterator for convenience
+	typedef pcl::PointCloud<oryx_path_planning::Point>::const_iterator const_iterator;
 
 	/**
 	 * @author	Adam Panzics
 	 * @brief	Default constructor for creating an uninitialized Tentacle
 	 */
 	Tentacle();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Copy constructor
+	 * @param Tentacle The Tentacle to copy
+	 */
+	Tentacle(Tentacle& Tentacle);
 
 	/**
 	 * @author	Adam Panzica
@@ -192,21 +201,21 @@ public:
 	 * @brief	gets The radius data of the tentacle
 	 * @return	The radius data of the tentacle
 	 */
-	double getRad();
+	double getRad() const;
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Gets the velocity data of the tentacle
 	 * @return	The velocity data of the tentacle
 	 */
-	double getVel();
+	double getVel() const;
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the x/y coordinates of all the points long this tentacle
 	 * @return A reference to a vector containing a set of pairs which represent the x/y coordinates relative to robot-center
 	 */
-	const TentaclePointCloud& getPoints();
+	const TentaclePointCloud& getPoints() const;
 
 	/**
 	 * @author	Adam Panzica
@@ -220,6 +229,19 @@ public:
 	 * @return	An iterator reference to the end of the tentacle
 	 */
 	iterator end();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Gets an iterator reference to the beginning of the tentacle
+	 * @return	An iterator reference to the beginning of the tentacle
+	 */
+	const_iterator begin() const;
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Gets an iterator reference to the end of the tentacle
+	 * @return	An iterator reference to the end of the tentacle
+	 */
+	const_iterator end() const;
 
 	/**
 	 * @author Adam Panzica
@@ -236,6 +258,15 @@ public:
 		 * starting at <0,0,0> and going outward along the tentacle
 		 */
 		TentacleTraverser(Tentacle& tentacle);
+
+		/**
+		 * @author Adam Panzica
+		 * @brief Constructs a new TentacleTraverser over a given Tentacle
+		 * @param tentacle The tentacle to traverse over
+		 * Note that the traverser assumes that the points contained in the tentacle are in order,
+		 * starting at <0,0,0> and going outward along the tentacle
+		 */
+		TentacleTraverser(const Tentacle& tentacle);
 		/**
 		 * Default destructor
 		 */
@@ -245,7 +276,7 @@ public:
 		 * @brief	Returns true if there are points left in the traversal
 		 * @return	true if there are points left in the traversal, else false
 		 */
-		bool hasNext();
+		bool hasNext() const;
 		/**
 		 * @author Adam Panzica
 		 * @brief	Gets the next point in the traversal
@@ -258,16 +289,16 @@ public:
 		 * @brief Gets the length traversed thus far along the Tentacle
 		 * @return The length traversed so far along the tentacle
 		 */
-		double lengthTraversed();
+		double lengthTraversed() const;
 
 	private:
 
 		bool		empty;			///True if the iterator has reached the end of the traversal
 		double		length;			///The current length traversed along the Tentacle
-		oryx_path_planning::Point*	lastPoint;	///Pointer to the last point that was passed
-		oryx_path_planning::Point*	nextPoint;	///Pointer to the next point that will be passed
-		Tentacle::iterator start;	///The start of an iterator over all the Points along the Tentacle
-		Tentacle::iterator end;		///The end of the iterator of the points along the tentacle
+		const oryx_path_planning::Point*	lastPoint;	///Pointer to the last point that was passed
+		const oryx_path_planning::Point*	nextPoint;	///Pointer to the next point that will be passed
+		Tentacle::const_iterator start;	///The start of an iterator over all the Points along the Tentacle
+		Tentacle::const_iterator end;		///The end of the iterator of the points along the tentacle
 	};
 
 	///Typedef to allow for convenient sharing of a TentacleTraverser via pointer
@@ -303,10 +334,22 @@ public:
 	typedef std::vector<TentaclePtr>::iterator iterator;
 
 	/**
+	 * typedef over std::vector<Tentacle>::const_iterator to allow SpeedSet to return an iterator over the Tentacles it contains
+	 */
+	typedef std::vector<TentaclePtr>::const_iterator const_iterator;
+
+	/**
 	 * @author Adam Panzics
 	 * @brief Default constructor which creates an empty speed set
 	 */
 	SpeedSet();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Copy constructor
+	 * @param SpeedSet SpeedSet to copy
+	 */
+	SpeedSet(SpeedSet& SpeedSet);
 
 	/**
 	 * @author	Adam Panzica
@@ -336,14 +379,14 @@ public:
 	 * @return A reference to a Tentacle from the speed set
 	 * @throw TentacleAccessException if the tentacle index was invalid
 	 */
-	const Tentacle& getTentacle(int index) throw(oryx_path_planning::TentacleAccessException);
+	const Tentacle& getTentacle(int index) const throw(oryx_path_planning::TentacleAccessException);
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the number of tentacles in the SpeedSet
 	 * @return The number of tentacles in the SpeedSet
 	 */
-	unsigned int getNumTentacle();
+	unsigned int getNumTentacle() const;
 
 	/**
 	 * @author	Adam Panzica
@@ -359,17 +402,29 @@ public:
 
 	/**
 	 * @author	Adam Panzica
+	 * @return	An iterator pointing to the first index Tentacle in the SpeedSet
+	 */
+	const_iterator begin() const;
+
+	/**
+	 * @author	Adam Panzica
+	 * @return	An iterator pointing to the last index Tentacle in the SpeedSet
+	 */
+	const_iterator end() const;
+
+	/**
+	 * @author	Adam Panzica
 	 * @brief	Gets the velocity of this SpeedSet
 	 * @return	The velocity value of this SpeedSet
 	 */
-	double getVelocity();
+	double getVelocity() const;
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Gets the seed radius of this SpeedSet
 	 * @return	The calculated sseed radius of this SpeedSet
 	 */
-	double getSeedRad();
+	double getSeedRad() const;
 
 
 private:
@@ -388,11 +443,22 @@ public:
 	 * typedef over std::vector<SpeedSet>::iterator for convenience
 	 */
 	typedef std::vector<SpeedSetPtr>::iterator iterator;
+	/**
+	 * typedef over std::vector<SpeedSet>::const_iterator for convenience
+	 */
+	typedef std::vector<SpeedSetPtr>::const_iterator const_iterator;
 
 	/**
 	 * default empty constructor
 	 */
 	TentacleGenerator();
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Copy Constructor
+	 * @param TentacleGenerator TentacleGenerator to copy
+	 */
+	TentacleGenerator(TentacleGenerator& TentacleGenerator);
 
 	/**
 	 * @author	Adam Panzica
@@ -422,7 +488,7 @@ public:
 	 * @brief Gets the number of speed sets that were generated
 	 * @return The number of speed sets that were generated
 	 */
-	int getNumSpeedSets();
+	int getNumSpeedSets() const;
 
 
 	/**
@@ -433,8 +499,8 @@ public:
 	 * @return A Tentacle containing all of the data about the requested tentacle
 	 * @throw TentacleAccessException if the tentacle index was invalid
 	 * @throw SpeedSetAccessException if the speed set index was invalid
-	  */
-	const Tentacle& getTentacle(int speedSet, int index) throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
+	 */
+	const Tentacle& getTentacle(int speedSet, int index) const throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -442,7 +508,7 @@ public:
 	 * @param speedSet Index of the SpeedSet to get
 	 * @return The SpeedSet at the index
 	 */
-	const SpeedSet& getSpeedSet(int speedSet);
+	const SpeedSet& getSpeedSet(int speedSet) const;
 
 	/**
 	 * @author	Adam Panzica
@@ -450,7 +516,7 @@ public:
 	 * @param velocity Velocity to find a closest match for
 	 * @return A SpeedSetPtr to the SpeedSet who most closely matches the given velocity
 	 */
-	const SpeedSet& getSpeedSet(double velocity);
+	const SpeedSet& getSpeedSet(double velocity) const;
 
 	/**
 	 * @author	Adam Panzica
@@ -463,6 +529,17 @@ public:
 	 * @return	An iterator pointing to the last index SpeedSet in the TentacleGenerator
 	 */
 	iterator end();
+	/**
+	 * @author	Adam Panzica
+	 * @return	An iterator pointing to the first index SpeedSet in the TentacleGenerator
+	 */
+	const_iterator begin() const;
+
+	/**
+	 * @author	Adam Panzica
+	 * @return	An iterator pointing to the last index SpeedSet in the TentacleGenerator
+	 */
+	const_iterator end() const;
 private:
 	int 				numTentacles;	///Number of tentacles per speed-set
 	int					numSpeedSet;
@@ -476,7 +553,7 @@ private:
 	 * @param speedSet The index of the current speed set
 	 * @return A constant, @f$ q= \frac{speedSet}{numSpeedSet-1} @f$
 	 */
-	double calcQ(int speedSet);
+	double calcQ(int speedSet) const;
 
 	/**
 	 * @author Adam Panzica
@@ -485,7 +562,7 @@ private:
 	 * @param q			Calculated constant
 	 * @return The calculated seed radius
 	 */
-	double calcSeedRad(int speedSet, double q);
+	double calcSeedRad(int speedSet, double q) const;
 
 	/**
 	 * @author Adam Panzica
@@ -495,7 +572,7 @@ private:
 	 * @param q			Calculated constant
 	 * @return The velocity for a speed set
 	 */
-	double calcSpeedSetVel(double minSpeed, double maxSpeed, double q);
+	double calcSpeedSetVel(double minSpeed, double maxSpeed, double q) const;
 };
 
 };
