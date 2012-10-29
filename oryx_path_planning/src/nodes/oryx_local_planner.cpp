@@ -17,9 +17,6 @@
 #include "OryxPathPlannerConfig.h"
 
 //*********************** MACROS ************************************//
-///Macro for printing out warning messages if default parameters are used
-#define PARAM_WARN(param,value) ROS_WARN(warn_message.c_str(), param.c_str(), value.c_str())
-
 ///Number of seconds to wait for connections to other ROS nodes before determining a system failure
 #define CONNECTION_TIMEOUT	5.0
 
@@ -246,7 +243,6 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle p_nh("~");
 	//Default Parameter Values
-	std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>");
 	//*****************Communication Parameters*******************//
 	std::string v_com_top("velocity_command_topic");
 	//std::string t_com_top("translate_command_topic");

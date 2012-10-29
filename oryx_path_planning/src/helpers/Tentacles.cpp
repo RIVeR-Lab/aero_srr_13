@@ -223,7 +223,7 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		lastCoord.y = 0;
 		lastCoord.z = 0;
 		//The amount to increment theta by
-		double thetaIncrement	= PI/((5.0/resolution)*std::floor(std::abs(this->radius)));
+		double thetaIncrement	= PI/((100.0/resolution)*std::abs(this->radius));
 		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
 		//Push the first coordinate on
 		this->points.push_back(lastCoord);
@@ -315,7 +315,7 @@ SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolutio
 	this->velocity = velocity;
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++){
-		this->tentacles.push_back(TentaclePtr(new Tentacle(expFact, seedRad, t, numTent, resolution, xDim, yDim, velocity)));
+		this->tentacles.push_back(Tentacle(expFact, seedRad, t, numTent, resolution, xDim, yDim, velocity));
 	}
 }
 
@@ -336,7 +336,7 @@ double SpeedSet::getSeedRad() const{
 const Tentacle& SpeedSet::getTentacle(int index)const throw(oryx_path_planning::TentacleAccessException){
 	if(index<0||index>(int)getNumTentacle()) throw new oryx_path_planning::TentacleAccessException(index, 0);
 	try{
-		return *this->tentacles.at(index);
+		return this->tentacles.at(index);
 	}catch (std::exception& e){
 		std::string message("Something went wrong!");
 		throw new oryx_path_planning::TentacleAccessException(index, 0, message, e);

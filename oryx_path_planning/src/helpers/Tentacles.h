@@ -331,12 +331,12 @@ public:
 	/**
 	 * typedef over std::vector<Tentacle>::iterator to allow SpeedSet to return an iterator over the Tentacles it contains
 	 */
-	typedef std::vector<TentaclePtr>::iterator iterator;
+	typedef std::vector<Tentacle>::iterator iterator;
 
 	/**
 	 * typedef over std::vector<Tentacle>::const_iterator to allow SpeedSet to return an iterator over the Tentacles it contains
 	 */
-	typedef std::vector<TentaclePtr>::const_iterator const_iterator;
+	typedef std::vector<Tentacle>::const_iterator const_iterator;
 
 	/**
 	 * @author Adam Panzics
@@ -430,7 +430,7 @@ public:
 private:
 	double velocity;
 	double seedRad;
-	std::vector<TentaclePtr> tentacles;	///A vector containing all of the tentacles for this speed set
+	std::vector<Tentacle> tentacles;	///A vector containing all of the tentacles for this speed set
 };
 
 /**

@@ -21,6 +21,10 @@
 #include <pcl/registration/distances.h>
 #include <sensor_msgs/PointCloud2.h>
 
+//*********************** MACROS ************************************//
+///Macro for printing out warning messages if default parameters are used
+#define PARAM_WARN(param,value) ROS_WARN(warn_message.c_str(), param.c_str(), value.c_str())
+
 
 namespace oryx_path_planning{
 
@@ -37,6 +41,8 @@ typedef boost::shared_ptr<pcl::PointCloud<Point> > PointCloudPtr;
 //*********************** CONSTANTS ******************************//
 
 const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant, define it here
+
+const std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>");	///Standard parameter warning message
 
 /**
  * @author Adam Panzics
