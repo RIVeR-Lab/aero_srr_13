@@ -280,6 +280,15 @@ public:
 	 * @return	A shared pointer to a std::string containing an ASCII-art representation of the occupancy grid slice specified
 	 */
 	boost::shared_ptr<std::string> toString(int sliceAxis, double slice) const;
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Copys the data from a point into the occupancy grid
+	 * @param copy_point The point to copy into the grid
+	 * @param origin_corrected True if the x/y/z coordinates in copy_ponit have been offset by the grid origin
+	 */
+	void setPoint(oryx_path_planning::Point& copy_point, bool origin_corrected = true);
+	void setPoint(const oryx_path_planning::Point& copy_point, bool origin_corrected = true);
 private:
 
 	/**
@@ -318,7 +327,9 @@ private:
 	 * @return The point at the given coordinate
 	 */
 	Point& getPoint(oryx_path_planning::Point& point , bool origin_corrected = true);
+	Point& getPoint(const oryx_path_planning::Point& point , bool origin_corrected = true);
 	const Point& getPoint(oryx_path_planning::Point& point , bool origin_corrected = true) const;
+	const Point& getPoint(const oryx_path_planning::Point& point , bool origin_corrected = true) const;
 
 	/**
 	 * Gets a point out of the point cloud based on integer coordinates
@@ -329,7 +340,6 @@ private:
 	 */
 	Point& getPoint(int x, int y, int z);
 	const Point& getPoint(int x, int y, int z) const;
-
 
 	/**
 	 * @author Adam Panzica
