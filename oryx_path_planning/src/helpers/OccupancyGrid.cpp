@@ -139,10 +139,9 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 	}*/
 
 	for(unsigned int index = 0; index<cloud.size(); index++){
+		ROS_INFO("Extracted Data <%f, %f, %f, %x>", cloud.at(index).x, cloud.at(index).y, cloud.at(index).z, cloud.at(index).rgba);
 		setPoint(cloud.at(index), false);
-		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", seedPoint.x, seedPoint.y, seedPoint.z, seedPoint.rgba);
-		;
-		//ROS_INFO("Set Data <%f, %f, %f, %x>", gridPoint.x, gridPoint.y, gridPoint.z, gridPoint.rgba);
+		ROS_INFO("Set Data <%f, %f, %f, %x>", getPoint(cloud.at(index), false).x, getPoint(cloud.at(index), false).y, getPoint(cloud.at(index), false).z, getPoint(cloud.at(index), false).rgba);
 	}
 
 	/*occItr = this->occGrid->begin();
@@ -194,9 +193,9 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 
 
 	for(unsigned int index = 0; index<cloud.size(); index++){
-		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", seedPoint.x, seedPoint.y, seedPoint.z, seedPoint.rgba);
+		ROS_INFO("Extracted Data <%f, %f, %f, %x>", cloud.at(index).x, cloud.at(index).y, cloud.at(index).z, cloud.at(index).rgba);
 		setPoint(cloud.at(index), false);
-		//ROS_INFO("Set Data <%f, %f, %f, %x>", gridPoint.x, gridPoint.y, gridPoint.z, gridPoint.rgba);
+		ROS_INFO("Set Data <%f, %f, %f, %x>", getPoint(cloud.at(index), false).x, getPoint(cloud.at(index), false).y, getPoint(cloud.at(index), false).z, getPoint(cloud.at(index), false).rgba);
 	}
 
 	/*occItr = this->occGrid->begin();
