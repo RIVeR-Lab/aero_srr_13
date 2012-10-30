@@ -192,7 +192,7 @@ inline void castLine(Point& startPoint, Point& endPoint, double res, int rgba, P
 	}
 	//Figure out if the line is 'steep' along the xz plane
 	s_xz = std::abs(z_f-z_0)>std::abs(x_f-x_0);
-	if(s_xy){
+	if(s_xz){
 		std::swap<int>(x_0, z_0);
 		std::swap<int>(x_f, z_f);
 	}
@@ -216,7 +216,7 @@ inline void castLine(Point& startPoint, Point& endPoint, double res, int rgba, P
 	z = z_0;
 
 	//ROS_INFO("Calculated Line Parameters: s_xy=%s, s_xz=%s, delta_x=%d, delta_y=%d, delta_z=%d, step_x=%d, step_y=%d, step_z=%d",
-	(s_xy)?"true":"false",(s_xz)?"true":"false", delta_x, delta_y, delta_z, step_x, step_y, step_z);
+	//(s_xy)?"true":"false",(s_xz)?"true":"false", delta_x, delta_y, delta_z, step_x, step_y, step_z);
 
 	//Iterate across the line
 	for(x = x_0; x<x_f; x+=step_x){
