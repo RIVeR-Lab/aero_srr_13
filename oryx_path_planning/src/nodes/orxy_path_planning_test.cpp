@@ -119,6 +119,8 @@ int main(int argc, char **argv) {
 	if(!nh.getParam(p_numSpeedSet, numSpeedSet))PARAM_WARN(p_numSpeedSet,	p_numSpeedSet_msg);
 	if(!nh.getParam(p_maxSpeed,	maxSpeed))		PARAM_WARN(p_maxSpeed,	p_maxSpeed_msg);
 	if(!nh.getParam(p_minSpeed,	minSpeed))		PARAM_WARN(p_minSpeed,	p_minSpeed_msg);
+
+	//Build The Tentacles
 	int firstSpeedSet=0;
 	int lastSpeedSet=numSpeedSet;
 	TentacleGenerator generator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, res, xDim, yDim/2);
@@ -126,12 +128,15 @@ int main(int argc, char **argv) {
 	if(!nh.getParam("first_speed_set", firstSpeedSet))ROS_WARN("First Speed Set Not Set! Using Default %d", firstSpeedSet);
 	if(!nh.getParam("last_speed_set", lastSpeedSet))ROS_WARN("Last Speed Set Not Set! Using Default %d", lastSpeedSet);
 
+	//Print out the Speed Sets
 	for(int s=firstSpeedSet; s<lastSpeedSet; s++){
 		SpeedSet speedSet = generator.getSpeedSet(s);
 		printSpeedSet(xDim, yDim, res, speedSet);
 	}
 
 	ROS_INFO("Speed Sets Printed!");
+
+	//Test a Tentacle Traverser
 	ROS_INFO("Testing Tentacle Traversal");
 	try{
 		Tentacle workingTentacle = generator.getTentacle(firstSpeedSet, 0);
@@ -144,6 +149,7 @@ int main(int argc, char **argv) {
 		ROS_ERROR("%s",e.what());
 	}
 
+	//Test some exceptions
 	ROS_INFO("Test Some Exceptions:");
 
 	oryx_path_planning::SpeedSetAccessException testE1(100);
@@ -155,6 +161,8 @@ int main(int argc, char **argv) {
 		ROS_ERROR("%s", e.what());
 	}
 
+
+	//Build the base occupancy grid
 	ROS_INFO("Testing Occupancy Grid...");
 	oryx_path_planning::Point origin;
 	origin.x=0;
@@ -162,7 +170,9 @@ int main(int argc, char **argv) {
 	origin.z=0;
 	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim, res, origin, oryx_path_planning::FREE_LOW_COST);
 	ROS_INFO("Occupancy Grid Built");
+
 	try{
+		//Place a single point on the grid
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 		ROS_INFO("Testing setPoint...");
 		oryx_path_planning::Point testPoint;
@@ -170,30 +180,46 @@ int main(int argc, char **argv) {
 		testPoint.y = 0;
 		testPoint.z = 0;
 		testPoint.rgba = oryx_path_planning::FREE_LOW_COST;
-		ROS_INFO("Placing Point <%f,%f,%f,%x>", testPoint.x, testPoint.y, testPoint.z, testPoint.rgba);
+		PRINT_POINT("Placing Point", testPoint);
 		testGrid.setPoint(testPoint, false);
 		ROS_INFO("Resulting Grid:\n%s", testGrid.toString(0,0)->c_str());
-	}catch(std::exception& e){
-		ROS_ERROR(e.what());
-	}
 
-	try{
+		//Place a line of points on the grid
 		ROS_INFO("Placing some test points on the grid");
-		double y = 0;
-		for(double x=0; x<xDim; x+=res/25){
-			y= 1.0/2.0*x-origin.y;
-			testGrid.setPointTrait(x, y, 0, oryx_path_planning::OBSTACLE);
+		PointCloud lineCloud;
+		Point lineStart;
+		lineStart.x = 0;
+		lineStart.y = yDim-origin.y;
+		lineStart.z = 0;
+		lineStart.rgba = oryx_path_planning::OBSTACLE;
+		PRINT_POINT("Start Point", lineStart);
+		Point lineEnd;
+		lineEnd.x = xDim;
+		lineEnd.y = 0;
+		lineEnd.z = 0;
+		lineEnd.rgba = oryx_path_planning::GOAL;
+		PRINT_POINT("End Point", lineEnd);
+		castLine(lineStart, lineEnd, res, oryx_path_planning::OBSTACLE, lineCloud);
+		ROS_INFO("Line Generated, placing on grid...");
+		for(PointCloud::iterator line_itr = lineCloud.begin(); line_itr<lineCloud.end(); line_itr++){
+			PRINT_POINT("Line Point", (*line_itr));
+			testGrid.setPointTrait(*line_itr, (oryx_path_planning::PointTrait_t)line_itr->rgba);
 		}
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+
+		//Test copying occupancy grids
 		ROS_INFO("Testing Occupancy Grid Copy...");
 		OccupancyGrid copyGrid(testGrid);
 		ROS_INFO("Copied Grid:\n%s", copyGrid.toString(0,0)->c_str());
+
+		//Test building a grid from an existing point cloud
 		ROS_INFO("Testing Build From Point Cloud...");
 		OccupancyGrid cloudGrid(xDim,yDim,0.0,res,origin, copyGrid.getGrid());
 		ROS_INFO("PC Built Grid:\n%s", cloudGrid.toString(0,0)->c_str());
 		ROS_INFO("Data at 10,10,0 <%x>", cloudGrid.getPointTrait(10,10,0));
 
 
+		//Overlay tentacles on grid
 		ROS_INFO("Testing Tentacle Overlay...");
 		for(SpeedSet::const_iterator tentacle_itr = generator.getSpeedSet(0).begin(); tentacle_itr < generator.getSpeedSet(0).end(); tentacle_itr++){
 			Tentacle::TentacleTraverser traverser(*tentacle_itr);
