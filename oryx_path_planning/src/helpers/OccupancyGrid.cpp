@@ -181,7 +181,7 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 			for(int z=0; z<this->zDim+1; z++){
 				//ROS_INFO("Initializing Point <%d, %d, %d>", x,y,z);
 				//Initialize the point
-				ROS_INFO("I'm Trying To Initialize Point %d,%d,%d, Index=%d", x,y,z, calcIndex(x,y,z));
+				//ROS_INFO("I'm Trying To Initialize Point %d,%d,%d, Index=%d", x,y,z, calcIndex(x,y,z));
 				Point& point = getPoint(x,y,z);
 				point.x = x-this->origin.x;
 				point.y = y-this->origin.y;
