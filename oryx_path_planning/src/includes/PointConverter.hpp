@@ -21,6 +21,25 @@ namespace oryx_path_planning{
  */
 class PointConverter{
 public:
+	/**
+	 * Empty constructor needed by C++
+	 */
+	inline PointConverter(){}
+
+	/**
+	 * copy constructor
+	 * @param converter Converter to copy from
+	 */
+	inline PointConverter(PointConverter& converter):
+		cm(converter.cm){}
+	inline PointConverter(const PointConverter& converter):
+		cm(converter.cm){}
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Constructs a point converter with a given scaling factor
+	 * @param scale_value The conversion factor to convert between coordinate systems
+	 */
 	inline PointConverter(float scale_value){
 		cm = cm.Identity(4,4)*scale_value;
 	}
@@ -53,6 +72,17 @@ public:
 	inline void convertToGrid(const Point& from, Point& to) const{
 		to.getVector4fMap() = cm.inverse()*from.getVector4fMap();
 		to.rgba = from.rgba;
+	}
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Assignment operator, equivalent to PointConverter copy constructor
+	 * @param operand The PointConverter to assign this to
+	 * @return *this
+	 */
+	PointConverter& operator=(PointConverter const& operand){
+		this->cm = operand.cm;
+		return *this;
 	}
 private:
 	/**
