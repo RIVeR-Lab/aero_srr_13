@@ -26,14 +26,14 @@ int main(int argc, char **argv) {
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");
-	double xDim = 1;
+	double xDim = 20;
 	std::string xDim_msg("");
 	xDim_msg+= boost::lexical_cast<double>(xDim);
 	xDim_msg+="m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim("occupancy/y_dimension");
-	double yDim = 1;
+	double yDim = 20;
 	std::string yDim_msg("");
 	yDim_msg+= boost::lexical_cast<double>(yDim);
 	yDim_msg+="m";
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
 	//resolution occupancy grid
 	std::string p_res("occupancy/grid_resolution");
-	double res = .025;
+	double res = .1;
 	std::string p_res_msg("");
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
 	unConvertedPoint.rgba = 0;
 	oryx_path_planning::PointConverter converter(.001);
 	oryx_path_planning::Point convertedPoint;
-	converter.convert(unConvertedPoint, convertedPoint);
+	converter.convertToEng(unConvertedPoint, convertedPoint);
 	PRINT_POINT("Unconverted:", unConvertedPoint);
 	PRINT_POINT("Converted:", convertedPoint);
 
@@ -188,10 +188,10 @@ int main(int argc, char **argv) {
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 		ROS_INFO("Testing setPoint...");
 		oryx_path_planning::Point testPoint;
-		testPoint.x = xDim/2;
-		testPoint.y = 0;
+		testPoint.x = 0;
+		testPoint.y = origin.y;
 		testPoint.z = 0;
-		testPoint.rgba = oryx_path_planning::FREE_LOW_COST;
+		testPoint.rgba = oryx_path_planning::ROBOT;
 		PRINT_POINT("Placing Point", testPoint);
 		testGrid.setPoint(testPoint, false);
 		ROS_INFO("Resulting Grid:\n%s", testGrid.toString(0,0)->c_str());

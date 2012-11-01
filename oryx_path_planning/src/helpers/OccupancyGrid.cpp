@@ -22,58 +22,37 @@ OccupancyGrid::OccupancyGrid(): occGrid(){
 	this->yDim	= 0;
 	this->zDim	= 0;
 	this->res	= 0;
-	this->xSize = 0;
-	this->ySize = 0;
-	this->zSize = 0;
-	this->x_ori = 0;
-	this->y_ori = 0;
-	this->z_ori = 0;
 }
 
 OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
 								origin(grid.origin),
-								occGrid(grid.occGrid){
+								occGrid(grid.occGrid),
+								converter(grid.converter){
 	this->xDim	= grid.xDim;
 	this->yDim	= grid.yDim;
 	this->zDim	= grid.zDim;
 	this->res	= grid.res;
-	this->xSize = grid.xSize;
-	this->ySize = grid.ySize;
-	this->zSize = grid.zSize;
-	this->x_ori = grid.x_ori;
-	this->y_ori = grid.y_ori;
-	this->z_ori = grid.z_ori;
 };
 
 OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
 								origin(grid.origin),
-								occGrid(grid.occGrid){
+								occGrid(grid.occGrid),
+								converter(grid.converter){
 	this->xDim	= grid.xDim;
 	this->yDim	= grid.yDim;
 	this->zDim	= grid.zDim;
 	this->res	= grid.res;
-	this->xSize = grid.xSize;
-	this->ySize = grid.ySize;
-	this->zSize = grid.zSize;
-	this->x_ori = grid.x_ori;
-	this->y_ori = grid.y_ori;
-	this->z_ori = grid.z_ori;
 };
 
 
-OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait):
+OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait):
 								origin(origin),
-								occGrid((roundToGrid(xDim, resolution)+1)*(roundToGrid(yDim, resolution)+1)*(roundToGrid(zDim, resolution)+1),1){
-	this->xDim	= roundToFrac(xDim, resolution);
-	this->yDim	= roundToFrac(yDim, resolution);
-	this->zDim	= roundToFrac(zDim, resolution);
+								occGrid((xDim+1)*(yDim+1)*(zDim+1),1),
+								converter(resolution){
+	this->xDim	= xDim;
+	this->yDim	= yDim;
+	this->zDim	= zDim;
 	this->res	= resolution;
-	this->xSize = roundToGrid(this->xDim, this->res)+1;
-	this->ySize = roundToGrid(this->yDim, this->res)+1;
-	this->zSize = roundToGrid(this->zDim, this->res)+1;
-	this->x_ori = roundToGrid(this->origin.x, this->res);
-	this->y_ori = roundToGrid(this->origin.y, this->res);
-	this->z_ori = roundToGrid(this->origin.z, this->res);
 
 	//ROS_INFO("Calculated Occupancy Grid Size: %d", this->occGrid.get()->size());
 	//Initialize the grid
@@ -81,20 +60,14 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 
 }
 
-OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait):
+OccupancyGrid::OccupancyGrid(int xDim, int yDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait):
 								origin(origin),
-								occGrid((roundToGrid(xDim, resolution)+1)*(roundToGrid(yDim, resolution)+1),1)
-{
-	this->xDim	= roundToFrac(xDim, resolution);
-	this->yDim	= roundToFrac(yDim, resolution);
+								occGrid((xDim+1)*(yDim+1),1),
+								converter(resolution){
+	this->xDim	= xDim;
+	this->yDim	= xDim;
 	this->zDim	= 0;
 	this->res	= resolution;
-	this->xSize = roundToGrid(this->xDim, this->res)+1;
-	this->ySize = roundToGrid(this->yDim, this->res)+1;
-	this->zSize = 1;
-	this->x_ori = roundToGrid(this->origin.x, this->res);
-	this->y_ori = roundToGrid(this->origin.y, this->res);
-	this->z_ori = 0;
 
 	//ROS_INFO("Calculated Occupancy Grid Size: %d", this->occGrid.get()->size());
 	//Initialize the grid
@@ -108,29 +81,16 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double resolution, const 
  * to bounds-check the XYZ data in the Points in the given PointCloud, this constructor will throw an exception if a Point in
  * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
  */
-OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, const oryx_path_planning::Point& origin, const OccpancyGridCloud& cloud) throw(OccupancyGridAccessException):
+OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, const OccpancyGridCloud& cloud) throw(OccupancyGridAccessException):
 								origin(origin),
-								occGrid((roundToGrid(xDim, resolution)+1)*(roundToGrid(yDim, resolution)+1)*(roundToGrid(zDim, resolution)+1),1){
+								occGrid((xDim+1)*(yDim+1)*(zDim+1),1),
+								converter(resolution){
 	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%f, %f, %f>", xDim, yDim, zDim);
 	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occGrid.size(), (int)cloud.size());
-	this->xDim	= roundToFrac(xDim, resolution);
-	this->yDim	= roundToFrac(yDim, resolution);
+	this->xDim	= xDim;
+	this->yDim	= yDim;
+	this->zDim	= zDim;
 	this->res	= resolution;
-	this->xSize = roundToGrid(this->xDim, this->res)+1;
-	this->ySize = roundToGrid(this->yDim, this->res)+1;
-	//Check for a 2D PointCloud
-	if(this->zDim==0){
-		this->zDim	= 0;
-		this->zSize = 1;
-		this->z_ori = 0;
-	}else{
-		this->zDim	= roundToFrac(zDim, resolution);
-		this->zSize = roundToGrid(this->zDim, this->res)+1;
-		this->z_ori = roundToGrid(this->origin.z, this->res);
-	}
-	this->x_ori = roundToGrid(this->origin.x, this->res);
-	this->y_ori = roundToGrid(this->origin.y, this->res);
-
 	//OccupancyGrid::iterator occItr = this->occGrid->begin();
 	/*for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
 		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
@@ -161,28 +121,16 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
  * to bounds-check the XYZ data in the Points in the given PointCloud, this constructor will throw an exception if a Point in
  * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
  */
-OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::Point& origin, OccpancyGridCloud& cloud) throw(OccupancyGridAccessException):
+OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, oryx_path_planning::Point& origin, OccpancyGridCloud& cloud) throw(OccupancyGridAccessException):
 								origin(origin),
-								occGrid((roundToGrid(xDim, resolution)+1)*(roundToGrid(yDim, resolution)+1)*(roundToGrid(zDim, resolution)+1),1){
-	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%f, %f, %f>", xDim, yDim, zDim);
+								occGrid((xDim+1)*(yDim+1)*(zDim+1),1),
+								converter(resolution){
+	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
 	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occGrid.size(), (int)cloud.size());
-	this->xDim	= roundToFrac(xDim, resolution);
-	this->yDim	= roundToFrac(yDim, resolution);
+	this->xDim	= xDim;
+	this->yDim	= yDim;
+	this->zDim	= zDim;
 	this->res	= resolution;
-	this->xSize = roundToGrid(this->xDim, this->res)+1;
-	this->ySize = roundToGrid(this->yDim, this->res)+1;
-	//Check for a 2D PointCloud
-	if(this->zDim==0){
-		this->zDim	= 0;
-		this->zSize = 1;
-		this->z_ori = 0;
-	}else{
-		this->zDim	= roundToFrac(zDim, resolution);
-		this->zSize = roundToGrid(this->zDim, this->res)+1;
-		this->z_ori = roundToGrid(this->origin.z, this->res);
-	}
-	this->x_ori = roundToGrid(this->origin.x, this->res);
-	this->y_ori = roundToGrid(this->origin.y, this->res);
 
 	//OccupancyGrid::iterator occItr = this->occGrid->begin();
 	/*for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
@@ -210,58 +158,34 @@ OccupancyGrid::OccupancyGrid(double xDim, double yDim, double zDim, double resol
 
 OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr& message):
 							occGrid(){
-	this->xDim	= roundToFrac(message->xDim, message->res);
-	this->yDim	= roundToFrac(message->yDim, message->res);
-	this->zDim	= roundToFrac(message->zDim, message->res);
+	this->xDim	= message->xDim;
+	this->yDim	= message->yDim;
+	this->zDim	= message->zDim;
 	this->res	= message->res;
-	this->xSize = roundToGrid(this->xDim, this->res)+1;
-	this->ySize = roundToGrid(this->yDim, this->res)+1;
-	this->x_ori = roundToGrid(this->origin.x, this->res);
-	this->y_ori = roundToGrid(this->origin.y, this->res);
-	//Check for a 2D PointCloud
-	if(this->zDim!=0){
-		this->zSize = roundToGrid(this->zDim, this->res)+1;
-		this->z_ori = roundToGrid(this->origin.z, this->res);
-	}
-	else{
-		this->zSize = 1;
-		this->z_ori = 0;
-	}
 	pcl::fromROSMsg<pcl::PointXYZRGBA>(message->cloud, this->occGrid);
 }
 
 OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridConstPtr& message):
 							occGrid(){
-	this->xDim	= roundToFrac(message->xDim, message->res);
-	this->yDim	= roundToFrac(message->yDim, message->res);
-	this->zDim	= roundToFrac(message->zDim, message->res);
+	this->xDim	= message->xDim;
+	this->yDim	= message->yDim;
+	this->zDim	= message->zDim;
 	this->res	= message->res;
-	this->xSize = roundToGrid(this->xDim, this->res)+1;
-	this->ySize = roundToGrid(this->yDim, this->res)+1;
-	this->x_ori = roundToGrid(this->origin.x, this->res);
-	this->y_ori = roundToGrid(this->origin.y, this->res);
-	//Check for a 2D PointCloud
-	if(this->zDim!=0){
-		this->zSize = roundToGrid(this->zDim, this->res)+1;
-		this->z_ori = roundToGrid(this->origin.z, this->res);
-	}
-	else{
-		this->zSize = 1;
-		this->z_ori = 0;
-	}
 	pcl::fromROSMsg<pcl::PointXYZRGBA>(message->cloud, this->occGrid);
 }
 
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
-	for(int x=0; x<this->xSize; x++){
-		for(int y=0; y<this->ySize; y++){
-			for(int z=0; z<this->zSize; z++){
+	ROS_INFO("Grid Size:%d", this->occGrid.size());
+	for(int x=0; x<this->xDim+1; x++){
+		for(int y=0; y<this->yDim+1; y++){
+			for(int z=0; z<this->zDim+1; z++){
 				//ROS_INFO("Initializing Point <%d, %d, %d>", x,y,z);
 				//Initialize the point
+				ROS_INFO("I'm Trying To Initialize Point %d,%d,%d, Index=%d", x,y,z, calcIndex(x,y,z));
 				Point& point = getPoint(x,y,z);
-				point.x = gridToReal(x-this->origin.x, this->res);
-				point.y = gridToReal(y-this->origin.y, this->res);
-				point.z = gridToReal(z-this->origin.z, this->res);
+				point.x = x-this->origin.x;
+				point.y = y-this->origin.y;
+				point.z = z-this->origin.z;
 				point.rgba = seedTrait;
 			}
 		}
@@ -270,7 +194,7 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 
 OccupancyGrid::~OccupancyGrid(){}
 
-PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)const throw(OccupancyGridAccessException){
+PointTrait OccupancyGrid::getPointTrait(int x, int y, int z)const throw(OccupancyGridAccessException){
 	Point workingPoint;
 	workingPoint.x = x;
 	workingPoint.y = y;
@@ -279,9 +203,9 @@ PointTrait OccupancyGrid::getPointTrait(double x, double y, double z)const throw
 }
 
 PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAccessException){
-	point.x=roundToFrac(point.x+this->origin.x, this->res);
-	point.y=roundToFrac(point.y+this->origin.y, this->res);
-	point.z=roundToFrac(point.z+this->origin.z, this->res);
+	point.x=point.x+this->origin.x;
+	point.y=point.y+this->origin.y;
+	point.z=point.z+this->origin.z;
 	if(boundsCheck(point)){
 		try{
 			return static_cast<oryx_path_planning::PointTrait>(getPoint(point).rgba);
@@ -293,7 +217,7 @@ PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAcc
 }
 
 
-bool OccupancyGrid::setPointTrait(double x, double y, double z, PointTrait trait)throw(OccupancyGridAccessException){
+bool OccupancyGrid::setPointTrait(int x, int y, int z, PointTrait trait)throw(OccupancyGridAccessException){
 	Point workingPoint;
 	workingPoint.x = x;
 	workingPoint.y = y;
@@ -302,9 +226,9 @@ bool OccupancyGrid::setPointTrait(double x, double y, double z, PointTrait trait
 }
 
 bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyGridAccessException){
-	point.x=roundToFrac(point.x+this->origin.x, this->res);
-	point.y=roundToFrac(point.y+this->origin.y, this->res);
-	point.z=roundToFrac(point.z+this->origin.z, this->res);
+	point.x=point.x+this->origin.x;
+	point.y=point.y+this->origin.y;
+	point.z=point.z+this->origin.z;
 	if(boundsCheck(point)){
 		try{
 			getPoint(point).rgba=trait;
@@ -352,6 +276,10 @@ OccupancyGrid::const_iterator OccupancyGrid::end() const{
 	return this->occGrid.end();
 }
 
+const oryx_path_planning::PointConverter& OccupancyGrid::getConverter() const{
+	return this->converter;
+}
+
 /**
  * Prints out the specified slice of the occupancy grid in ASCII art with each character representing a point on the grid.
  * For example, with xDim=Ydim=2.5 and resolution = .25, and all points set to UNKNOWN, the returned string will look like
@@ -379,13 +307,13 @@ OccupancyGrid::const_iterator OccupancyGrid::end() const{
  * | INFLATED |   'x'   |
  * | Non-Std  |   '*'   |
  */
-boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double slice) const{
+boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, int slice) const{
 	boost::shared_ptr<std::string> output(new std::string(""));
-	std::vector<std::string> occGrid(this->xSize, std::string(this->ySize, ' '));
+	std::vector<std::string> occGrid(this->xDim, std::string(this->yDim, ' '));
 
 	char value[2] ={0,'\0'};
-	for(int x=0; x<this->xSize; x++){
-		for(int y=0; y<this->ySize; y++){
+	for(int x=0; x<this->xDim; x++){
+		for(int y=0; y<this->yDim; y++){
 			switch(getPoint(x, y, 0).rgba){
 			case UNKNOWN:
 				value[0] = 'U';
@@ -408,6 +336,9 @@ boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double sli
 			case TENTACLE:
 				value[0] = 'T';
 				break;
+			case ROBOT:
+				value[0] = 'R';
+				break;
 			default:
 				value[0] = '*';
 				break;
@@ -423,16 +354,8 @@ boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, double sli
 	return output;
 }
 
-int OccupancyGrid::calcIndex(double x, double y, double z) const{
-	int xVal = roundToGrid(x, this->res);
-	int yVal = roundToGrid(y, this->res);
-	int zVal = roundToGrid(z, this->res);
-
-	return calcIndex(xVal, yVal, zVal);
-}
-
 int OccupancyGrid::calcIndex(int x, int y, int z) const{
-	return (x)*this->zSize*this->ySize + (y)*this->zSize + (z);
+	return x + (this->yDim+1) * (y + (this->zDim+1) * z);
 }
 
 const Point& OccupancyGrid::getPoint(const oryx_path_planning::Point& point, bool origin_corrected) const{

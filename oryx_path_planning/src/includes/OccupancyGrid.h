@@ -40,7 +40,8 @@ typedef enum PointTrait_t{
 	FREE_HIGH_COST	= 0x008080,	//!< FREE_HIGH_COST	Point on the grid is free but is expensive to travel over (Teal)
 	FREE_LOW_COST	= 0x008000, //!< FREE_LOW_COST	Point on the grid is free but is easy to travel over (Green)
 	GOAL            = 0xFFFF00,	//!< GOAL			Point on the grid is the goal position (Yellow)
-	TENTACLE		= 0xCD00CD	//!< TENTACLE		Point on the grid is a Tentacle marker (Pink)
+	TENTACLE		= 0xCD00CD,	//!< TENTACLE		Point on the grid is a Tentacle marker (Pink)
+	ROBOT			= 0x000001,	//!< ROBOT			Point on the grid is the robot's center point
 } PointTrait;
 
 /**
@@ -102,34 +103,35 @@ public:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new 2D Occupancy Grid with a given set of dimensions and grid resolution
-	 * @param xDim			The size of the occupancy grid in real units in the x-axis
-	 * @param yDim			The size of the occupancy grid in real units in the y-axis
-	 * @param resolution	The grid resolution of the occupancy grid
-	 * @param origin		The origin of the occupancy grid
+	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
+	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param resolution	A conversion factor to go from the integer unit representation to an engineering unit representation
+	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(int xDim, int yDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new Occupancy Grid with a given set of dimensions and grid resolution
-	 * @param xDim			The size of the occupancy grid in real units in the x-axis
-	 * @param yDim			The size of the occupancy grid in real units in the y-axis
-	 * @param zDim			The size of the occupancy grid in real units in the z-axis
-	 * @param resolution	The grid resolution of the occupancy grid
+	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
+	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param zDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param resolution	A conversion factor to go from the integer unit representation to an engineering unit representation
+	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param origin		The origin of the occupancy grid
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, const oryx_path_planning::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new Occupancy Grid with a given set of dimensions and grid resolution
-	 * @param xDim			The size of the occupancy grid in real units in the x-axis
-	 * @param yDim			The size of the occupancy grid in real units in the y-axis
-	 * @param zDim			The size of the occupancy grid in real units in the z-axis
-	 * @param resolution	The grid resolution of the occupancy grid
-	 * @param origin		The origin of the occupancy grid
+	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
+	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param zDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param resolution	A conversion factor to go from the integer unit representation to an engineering unit representation
+	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
 	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
@@ -137,28 +139,28 @@ public:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new OccupancyGrid which uses a supplied PointCloud as its base
-	 * @param xDim			The size of the occupancy grid in real units in the x-axis
-	 * @param yDim			The size of the occupancy grid in real units in the y-axis
-	 * @param zDim			The size of the occupancy grid in real units in the z-axis. For a 2D PointCloud, specify a zDim of Zero and insure that all z-values in the XYZ data of the points are 0.
-	 * @param resolution	The grid resolution of the occupancy grid
-	 * @param origin		The origin of the occupancy grid
+	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
+	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param zDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param resolution	A conversion factor to go from the integer unit representation to an engineering unit representation
+	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, const oryx_path_planning::Point& origin, const OccpancyGridCloud& cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, const OccpancyGridCloud& cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new OccupancyGrid which uses a supplied PointCloud as its base
-	 * @param xDim			The size of the occupancy grid in real units in the x-axis
-	 * @param yDim			The size of the occupancy grid in real units in the y-axis
-	 * @param zDim			The size of the occupancy grid in real units in the z-axis. For a 2D PointCloud, specify a zDim of Zero and insure that all z-values in the XYZ data of the points are 0.
-	 * @param resolution	The grid resolution of the occupancy grid
-	 * @param origin		The origin of the occupancy grid
+	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
+	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param zDim			The size of the occupancy grid in some integer unit the y-axis
+	 * @param resolution	A conversion factor to go from the integer unit representation to an engineering unit representation
+	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::Point& origin, OccpancyGridCloud& cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, oryx_path_planning::Point& origin, OccpancyGridCloud& cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -188,7 +190,7 @@ public:
 	 * @return The PointTrait of the point at the given coordinates
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	oryx_path_planning::PointTrait getPointTrait(double x, double y, double z) const throw(OccupancyGridAccessException);
+	oryx_path_planning::PointTrait getPointTrait(int x, int y, int z) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -209,7 +211,7 @@ public:
 	 * @return True if successful, else false
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(double x, double y, double z, oryx_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
+	bool setPointTrait(int x, int y, int z, oryx_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -279,7 +281,7 @@ public:
 	 * @param slice		The distance along the slice axis to make the slice
 	 * @return	A shared pointer to a std::string containing an ASCII-art representation of the occupancy grid slice specified
 	 */
-	boost::shared_ptr<std::string> toString(int sliceAxis, double slice) const;
+	boost::shared_ptr<std::string> toString(int sliceAxis, int slice) const;
 
 	/**
 	 * @author	Adam Panzica
@@ -289,6 +291,13 @@ public:
 	 */
 	void setPoint(oryx_path_planning::Point& copy_point, bool origin_corrected = true);
 	void setPoint(const oryx_path_planning::Point& copy_point, bool origin_corrected = true);
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Gets the default PointConverter that will transform between grid units and engineering units for this grid
+	 * @return	A PointConverter that uses the resolution given to this OccupancyGrid as its scale factor
+	 */
+	const PointConverter& getConverter() const;
 private:
 
 	/**
@@ -298,16 +307,6 @@ private:
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
 	bool boundsCheck(oryx_path_planning::Point& point) const throw(OccupancyGridAccessException);
-
-	/**
-	 * @author	Adam Panzica
-	 * @brief	Calculates the 1-dimension index value of an <x,y,z> coordinate set based on real values
-	 * @param x	x-coord
-	 * @param y	y-coord
-	 * @param z	z-coord
-	 * @return An index into a 1-d array corresponding to the given coord set
-	 */
-	int calcIndex(double x, double y, double z) const ;
 
 	/**
 	 * @author	Adam Panzica
@@ -348,18 +347,13 @@ private:
 	 */
 	void intializeGrid(PointTrait_t seedTrait);
 
-	double xDim;	///The x dimension of this grid
-	double yDim;	///The y dimension of this grid
-	double zDim;	///The z dimension of this grid
-	int xSize;		///The x size of this grid
-	int ySize;		///The y size of this grid
-	int zSize;		///The z size of this grid
-	double res;		///The grid resolution of this occupancy grid
-	int x_ori;		///The x origin of the grid in grid units
-	int y_ori;		///The y origin of the grid in grid units
-	int z_ori;		///The z origin of the grid in grid units
+	int xDim;	///The x dimension of this grid
+	int yDim;	///The y dimension of this grid
+	int zDim;	///The z dimension of this grid
+	double res;	///The grid resolution of this occupancy grid
 	oryx_path_planning::Point origin;	///The origin of the occupancy grid
 	OccpancyGridCloud occGrid;			///The point cloud which contains the data for this occupancy grid
+	oryx_path_planning::PointConverter converter;	///Used to convert the internal integer units to output engineering units
 };
 
 
