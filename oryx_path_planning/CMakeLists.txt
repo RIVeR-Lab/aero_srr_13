@@ -73,6 +73,7 @@ configure_file (
 #Link all source folders so that Headers will be properly found
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/src/includes")
 include_directories("${PROJECT_SOURCE_DIR}/src/nodes")
 include_directories("${PROJECT_SOURCE_DIR}/src/helpers")
 
