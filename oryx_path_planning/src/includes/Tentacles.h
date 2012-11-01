@@ -193,7 +193,7 @@ public:
 	 * @throw TentacleGenerationException If there is a problem generating the tentacle
 	 *
 	 */
-	Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity) throw (TentacleGenerationException);
+	Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException);
 	virtual ~Tentacle();
 
 	/**
@@ -369,7 +369,7 @@ public:
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 * @param velocity		The velocity that the tentacle is to be traveled at
 	 */
-	SpeedSet(double expFact, double seedRad, int numTent, double resolution, double xDim, double yDim, double velocity);
+	SpeedSet(double expFact, double seedRad, int numTent, double resolution, int xDim, int yDim, double velocity);
 	virtual ~SpeedSet();
 
 	/**
@@ -480,7 +480,7 @@ public:
 	 * @param xDim			The length of the x-axis of the occupancy grid, in the positive x-direction and of the same units as resolution
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 */
-	TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, double xDim, double yDim);
+	TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim);
 	virtual ~TentacleGenerator();
 
 	/**

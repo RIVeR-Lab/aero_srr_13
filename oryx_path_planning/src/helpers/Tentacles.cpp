@@ -186,7 +186,7 @@ Tentacle::Tentacle(const Tentacle& Tentacle):
 
 Tentacle::~Tentacle(){};
 
-Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, double xDim, double yDim, double velocity) throw (TentacleGenerationException):
+Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException):
 					points(){
 
 	this->velocity= velocity;
@@ -310,7 +310,7 @@ SpeedSet::SpeedSet(const SpeedSet& SpeedSet):
 }
 
 
-SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolution, double xDim, double yDim, double velocity){
+SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolution, int xDim, int yDim, double velocity){
 	this->seedRad  = seedRad;
 	this->velocity = velocity;
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
@@ -383,7 +383,7 @@ TentacleGenerator::TentacleGenerator(const TentacleGenerator& TentacleGenerator)
 	this->expFact     = TentacleGenerator.expFact;
 }
 
-TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, double xDim, double yDim){
+TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim){
 	this->expFact 		= expFact;
 	this->numTentacles	= numTentacles;
 	this->numSpeedSet	= numSpeedSet;
