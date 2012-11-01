@@ -10,7 +10,7 @@
 
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "TypeDefinitions.h"
-
+namespace oryx_path_planning{
 /**
  * @author	Adam Panzica
  * @brief	Class for converting a point with 'integer' x/y/z into some 'engineering unit' x/y/z coordinates
@@ -31,8 +31,13 @@ public:
 	 * @param point	 Reference to the point to convert to engineering units
 	 * @param output Reference to a point to place the converted data into
 	 */
-	inline void convert(const pcl::PointWithRange& point, pcl::PointWithRange& output) const{
+	inline void convert(Point& point, Point& output) const{
+			output.getVector4fMap() = cm*point.getVector4fMap();
+			output.rgba = point.rgba;
+	}
+	inline void convert(const Point& point, Point& output) const{
 		output.getVector4fMap() = cm*point.getVector4fMap();
+		output.rgba = point.rgba;
 	}
 private:
 	/**
@@ -50,5 +55,5 @@ private:
 	Eigen::Matrix4f cm;
 };
 
-
+};	/* oryx_path_planning */
 #endif /* POINTCONVERTER_HPP_ */

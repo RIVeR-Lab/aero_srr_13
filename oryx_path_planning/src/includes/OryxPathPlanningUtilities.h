@@ -21,6 +21,7 @@
 #include <sensor_msgs/PointCloud2.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "TypeDefinitions.h"
+#include "PointConverter.hpp"
 
 //*********************** MACROS ************************************//
 

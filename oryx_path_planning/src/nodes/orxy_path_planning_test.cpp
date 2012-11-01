@@ -26,14 +26,14 @@ int main(int argc, char **argv) {
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");
-	double xDim = 20;
+	double xDim = 1;
 	std::string xDim_msg("");
 	xDim_msg+= boost::lexical_cast<double>(xDim);
 	xDim_msg+="m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim("occupancy/y_dimension");
-	double yDim = 20;
+	double yDim = 1;
 	std::string yDim_msg("");
 	yDim_msg+= boost::lexical_cast<double>(yDim);
 	yDim_msg+="m";
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
 	//resolution occupancy grid
 	std::string p_res("occupancy/grid_resolution");
-	double res = .1;
+	double res = .025;
 	std::string p_res_msg("");
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
@@ -161,6 +161,18 @@ int main(int argc, char **argv) {
 		ROS_ERROR("%s", e.what());
 	}
 
+	//Test Point Converter
+	ROS_INFO("Testing Point Converter...");
+	oryx_path_planning::Point unConvertedPoint;
+	unConvertedPoint.x = 100;
+	unConvertedPoint.y = 50;
+	unConvertedPoint.z = 500;
+	unConvertedPoint.rgba = 0;
+	oryx_path_planning::PointConverter converter(.001);
+	oryx_path_planning::Point convertedPoint;
+	converter.convert(unConvertedPoint, convertedPoint);
+	PRINT_POINT("Unconverted:", unConvertedPoint);
+	PRINT_POINT("Converted:", convertedPoint);
 
 	//Build the base occupancy grid
 	ROS_INFO("Testing Occupancy Grid...");
@@ -202,10 +214,15 @@ int main(int argc, char **argv) {
 		castLine(lineStart, lineEnd, res, oryx_path_planning::OBSTACLE, lineCloud);
 		ROS_INFO("Line Generated, placing on grid...");
 		for(PointCloud::iterator line_itr = lineCloud.begin(); line_itr<lineCloud.end(); line_itr++){
-			PRINT_POINT("Line Point", (*line_itr));
+			//PRINT_POINT("Line Point", (*line_itr));
 			testGrid.setPointTrait(*line_itr, (oryx_path_planning::PointTrait_t)line_itr->rgba);
 		}
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+
+		//Place a known straight line on the grid
+		for(double x=0; x<xDim; x+=res){
+			testGrid.setPointTrait(x, -origin.y, 0.0, oryx_path_planning::OBSTACLE);
+		}
 
 		//Test copying occupancy grids
 		ROS_INFO("Testing Occupancy Grid Copy...");
