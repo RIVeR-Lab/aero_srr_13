@@ -27,17 +27,32 @@ public:
 
 	/**
 	 * @author	Adam Panzica
-	 * @brief	Performs the actual work
-	 * @param point	 Reference to the point to convert to engineering units
-	 * @param output Reference to a point to place the converted data into
+	 * @brief	Converts from an integer representation coordinate system to a floating point one
+	 * @param from	 Reference to the point to convert to engineering units
+	 * @param to Reference to a point to place the converted data into
 	 */
-	inline void convert(Point& point, Point& output) const{
-			output.getVector4fMap() = cm*point.getVector4fMap();
-			output.rgba = point.rgba;
+	inline void convertToEng(Point& from, Point& to) const{
+			to.getVector4fMap() = cm*from.getVector4fMap();
+			to.rgba = from.rgba;
 	}
-	inline void convert(const Point& point, Point& output) const{
-		output.getVector4fMap() = cm*point.getVector4fMap();
-		output.rgba = point.rgba;
+	inline void convertToEng(const Point& from, Point& to) const{
+		to.getVector4fMap() = cm*from.getVector4fMap();
+		to.rgba = from.rgba;
+	}
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Converts from an integer representation coordinate system to a floating point one
+	 * @param from	 Reference to the point to convert to grid units
+	 * @param to Reference to a point to place the converted data into
+	 */
+	inline void convertToGrid(Point& from, Point& to) const{
+			to.getVector4fMap() = cm.inverse()*from.getVector4fMap();
+			to.rgba = from.rgba;
+	}
+	inline void convertToGrid(const Point& from, Point& to) const{
+		to.getVector4fMap() = cm.inverse()*from.getVector4fMap();
+		to.rgba = from.rgba;
 	}
 private:
 	/**
