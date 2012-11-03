@@ -205,62 +205,67 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	}
 	PRINTER("Calculated Tentacle Radius=%f", this->radius);
 
+
 	//Check for special case of an effectively straight line
 	if(this->radius > this->straightThreshold || this->radius < -this->straightThreshold){
 		this->radius = std::numeric_limits<double>::infinity();
-		for(double i = 0; i<xDim; i+=resolution){
+		for(double i = 0; i<xDim; i++){
 			oryx_path_planning::Point coord;
 			coord.x=i;
-			coord.x=0;
-			coord.x=0;
+			coord.y=0;
+			coord.z=0;
 			this->points.push_back(coord);
 		}
 	}
 	else{
-		//Tracks the last coordinate so that we don't get duplicates
-		oryx_path_planning::Point lastCoord;
-		lastCoord.x = 0;
-		lastCoord.y = 0;
-		lastCoord.z = 0;
-		//The amount to increment theta by
-		double thetaIncrement	= PI/((100.0/resolution)*std::abs(this->radius));
-		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
-		//Push the first coordinate on
-		this->points.push_back(lastCoord);
-		//Calculate the X and Y coord along the tentacle
-		if(this->radius>0){
-			double startAngle = PI/2.0;
-			for(double t=startAngle; t>(startAngle-sweepAngle); t-=thetaIncrement){
-				oryx_path_planning::Point newCoord;
-				newCoord.y = (oryx_path_planning::roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
-				newCoord.x = (oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
-				newCoord.z = 0;
-				//If we've hit the top of the occupancy grid, break
-				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
-				//Otherwise push_back the next point if it's not the same as the previous point
-				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
-					this->points.push_back(newCoord);
-					lastCoord = newCoord;
-				}
-			}
-		}
-		else{
-			double startAngle = PI/2.0;
-			for(double t=startAngle; t<(startAngle+sweepAngle); t+=thetaIncrement){
-				oryx_path_planning::Point newCoord;
-				newCoord.y = (float)(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-radius, resolution));
-				newCoord.x = (float)(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
-				newCoord.z = 0;
-				//If we've hit the top of the occupancy grid, break
-				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
-				//Otherwise push_back the next point if it's not the same as the previous point
-				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
-					this->points.push_back(newCoord);
-					lastCoord = newCoord;
-				}
-			}
-		}
+		//Convert the radius, which will be in engineering units, into grid coordinates
+		int workingRadius = roundToGrid(radius, resolution);
 	}
+//	else{
+//		//Tracks the last coordinate so that we don't get duplicates
+//		oryx_path_planning::Point lastCoord;
+//		lastCoord.x = 0;
+//		lastCoord.y = 0;
+//		lastCoord.z = 0;
+//		//The amount to increment theta by
+//		double thetaIncrement	= PI/((100.0/resolution)*std::abs(this->radius));
+//		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
+//		//Push the first coordinate on
+//		this->points.push_back(lastCoord);
+//		//Calculate the X and Y coord along the tentacle
+//		if(this->radius>0){
+//			double startAngle = PI/2.0;
+//			for(double t=startAngle; t>(startAngle-sweepAngle); t-=thetaIncrement){
+//				oryx_path_planning::Point newCoord;
+//				newCoord.y = (oryx_path_planning::roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
+//				newCoord.x = (oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
+//				newCoord.z = 0;
+//				//If we've hit the top of the occupancy grid, break
+//				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
+//				//Otherwise push_back the next point if it's not the same as the previous point
+//				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
+//					this->points.push_back(newCoord);
+//					lastCoord = newCoord;
+//				}
+//			}
+//		}
+//		else{
+//			double startAngle = PI/2.0;
+//			for(double t=startAngle; t<(startAngle+sweepAngle); t+=thetaIncrement){
+//				oryx_path_planning::Point newCoord;
+//				newCoord.y = (float)(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-radius, resolution));
+//				newCoord.x = (float)(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
+//				newCoord.z = 0;
+//				//If we've hit the top of the occupancy grid, break
+//				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
+//				//Otherwise push_back the next point if it's not the same as the previous point
+//				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
+//					this->points.push_back(newCoord);
+//					lastCoord = newCoord;
+//				}
+//			}
+//		}
+//	}
 	PRINTER("Calculated a Tentacle with Number of Points=%d",(int)this->points.size());
 }
 
