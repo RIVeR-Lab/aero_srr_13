@@ -164,14 +164,15 @@ inline double gridToReal(int grid, double resolution){
  * given grid resolution. The RGBA values of the start point and end point are copied into the respective points in the cloud,
  * with the points between them filled with the value given by the RGBA parameter
  */
-inline void castLine(Point& startPoint, Point& endPoint, double res, int rgba, PointCloud& cloud){
-	int x_0 = roundToGrid(startPoint.x, res), x_f= roundToGrid(endPoint.x, res), x, delta_x, step_x;
-	int y_0 = roundToGrid(startPoint.y, res), y_f= roundToGrid(endPoint.y, res), y, delta_y, step_y;
-	int z_0 = roundToGrid(startPoint.z, res), z_f= roundToGrid(endPoint.z, res), z, delta_z, step_z;
+inline void castLine(Point& startPoint, Point& endPoint, int rgba, PointCloud& cloud){
+	int x_0 = startPoint.x, x_f= endPoint.x, x, delta_x, step_x;
+	int y_0 = startPoint.y, y_f= endPoint.y, y, delta_y, step_y;
+	int z_0 = startPoint.z, z_f= endPoint.z, z, delta_z, step_z;
 	bool s_xy, s_xz;
 	int error_xy, error_xz;
 	int cx, cy, cz;
 	int initial_size = cloud.size();
+
 
 	//Figure out if the line is 'steep' along the xy plane
 	s_xy = std::abs(y_f-y_0)>std::abs(x_f-x_0);
@@ -218,9 +219,9 @@ inline void castLine(Point& startPoint, Point& endPoint, double res, int rgba, P
 
 		//Write out the point
 		Point point;
-		point.x = gridToReal(cx, res);
-		point.y = gridToReal(cy, res);
-		point.z = gridToReal(cz, res);
+		point.x = cx;
+		point.y = cy;
+		point.z = cz;
 		point.rgba = rgba;
 		//PRINT_POINT("Line Calculated", point);
 		cloud.push_back(point);
@@ -246,6 +247,70 @@ inline void castLine(Point& startPoint, Point& endPoint, double res, int rgba, P
 	//Set the RGBA values of the first and last point to their correct values
 	cloud.at(cloud.size()-(cloud.size()-initial_size)).rgba = startPoint.rgba;
 	cloud.at(cloud.size()-1).rgba = endPoint.rgba;
+}
+
+/**
+ * @author	Adam Panzica
+ * @brief	Generates the series of points along a 90* arc between two points and places them into a PointCloud
+ * @param radius	The radius of the arch to cast
+ * @param rgba
+ * @param origin
+ * @param cloud
+ * @param quardrent
+ * @param plane
+ */
+inline void castArc(int radius, int rgba, Point& origin, PointCloud& cloud, int quardrent=1, int plane=0){
+	  int x = 0, y = radius;
+	  int g = 3 - 2*radius;
+	  int diagonalInc = 10 - 4*radius;
+	  int rightInc = 6;
+	  while (x <= y) {
+	    Point pointTop;
+	    pointTop.x = x+origin.x;
+	    pointTop.y = y+origin.y;
+	    pointTop.z = origin.z;
+	    pointTop.rgba = rgba;
+	    switch(quardrent){
+	    case 2:
+	    	pointTop.x = -pointTop.x;
+	    	break;
+	    case 3:
+	    	pointTop.x = -pointTop.x;
+	    	pointTop.y = -pointTop.y;
+	    	break;
+	    case 4:
+	    	pointTop.y = -pointTop.y;
+	    	break;
+	    }
+	    Point pointBottom;
+	    pointBottom.x = pointTop.y;
+	    pointBottom.y = pointTop.x;
+	    pointBottom.z = pointTop.z;
+	    pointBottom.rgba = rgba;
+	    switch(plane){
+	    case 1:
+	    	std::swap<float>(pointTop.x, pointTop.z);
+	    	std::swap<float>(pointBottom.x, pointBottom.z);
+	    	break;
+	    case 2:
+	    	std::swap<float>(pointTop.y, pointTop.z);
+	    	std::swap<float>(pointBottom.y, pointBottom.z);
+	    	break;
+	    }
+	    if (g >=  0) {
+	      g += diagonalInc;
+	      diagonalInc += 8;
+	      y -= 1;
+	    }
+	    else {
+	      g += rightInc;
+	      diagonalInc += 4;
+	    }
+	    rightInc += 4;
+	    x += 1;
+	    cloud.push_back(pointTop);
+	    cloud.push_back(pointBottom);
+	  }
 }
 
 /**
