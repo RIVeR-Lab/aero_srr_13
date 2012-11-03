@@ -176,10 +176,11 @@ private:
 	void pcCB(const sensor_msgs::PointCloud2ConstPtr& message){
 		//To prevent processing of stale data, ignore anything received while we shouldn't be planning
 		if(this->shouldPlan){
-			ROS_DEBUG("I Got new Occupancy Grid Data!");
+			ROS_INFO("I Got new Occupancy Grid Data!");
 			OccpancyGridCloud cloud;
 			pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, cloud);
 			OccupancyGrid recievedGrid(xDim, yDim, zDim, res, this->origin, cloud);
+			ROS_INFO("Grid Processed...");
 			ROS_INFO("Callback got the grid:\n%s", recievedGrid.toString(0,0)->c_str());
 			this->occupancy_buffer.push_back(recievedGrid);
 		}
@@ -258,14 +259,14 @@ int main(int argc, char **argv) {
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");
-	double xDim = 20;
+	double xDim = 200;
 	std::string xDim_msg("");
 	xDim_msg+= boost::lexical_cast<double>(xDim);
 	xDim_msg+="m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim("occupancy/y_dimension");
-	double yDim = 20;
+	double yDim = 200;
 	std::string yDim_msg("");
 	yDim_msg+= boost::lexical_cast<double>(yDim);
 	yDim_msg+="m";
@@ -279,7 +280,7 @@ int main(int argc, char **argv) {
 
 	//resolution occupancy grid
 	std::string p_res("occupancy/grid_resolution");
-	double res = .25;
+	double res = .01;
 	std::string p_res_msg("");
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
@@ -344,7 +345,7 @@ int main(int argc, char **argv) {
 	//Node Information Printout
 	ROS_INFO("Starting Up Oryx Base Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
-	//Get Private Parameters
+	//Get Parameters
 	if(!p_nh.getParam(v_com_top,v_com_top))		PARAM_WARN(v_com_top,	v_com_top);
 	//if(!nh.getParam(t_com_top, t_com_top))	PARAM_WARN(t_com_top,	t_com_top);
 	if(!p_nh.getParam(pc_top,	pc_top))		PARAM_WARN(pc_top,		pc_top);
@@ -352,6 +353,9 @@ int main(int argc, char **argv) {
 	if(!nh.getParam(p_x_dim,	xDim))			PARAM_WARN(p_x_dim,		xDim_msg);
 	if(!nh.getParam(p_y_dim,	yDim))			PARAM_WARN(p_y_dim,		yDim_msg);
 	if(!nh.getParam(p_z_dim,	zDim))			PARAM_WARN(p_z_dim,		zDim_msg);
+	if(!nh.getParam(p_x_ori,	x_ori))			PARAM_WARN(p_x_ori,		p_x_ori_msg);
+	if(!nh.getParam(p_y_ori,	y_ori))			PARAM_WARN(p_y_ori,		p_y_ori_msg);
+	if(!nh.getParam(p_z_ori,	z_ori))			PARAM_WARN(p_z_ori,		p_z_ori_msg);
 	if(!nh.getParam(p_res,		res))			PARAM_WARN(p_res,		p_res_msg);
 	if(!nh.getParam(p_numTent,	numTent))		PARAM_WARN(p_numTent,	p_numTent_msg);
 	if(!nh.getParam(p_expFact,	expFact))		PARAM_WARN(p_expFact,	p_expFact_msg);
@@ -369,6 +373,7 @@ int main(int argc, char **argv) {
 		origin.x=x_ori;
 		origin.y=y_ori;
 		origin.z=z_ori;
+		PRINT_POINT("Origin Point", origin);
 		boost::shared_ptr<LocalPlanner> l_client_ptr(new LocalPlanner(xDim, yDim, zDim, res, origin, v_com_top,  pc_top, tentacle_ptr));
 		l_client_ptr->doPlanning();
 	}catch(std::exception& e){
