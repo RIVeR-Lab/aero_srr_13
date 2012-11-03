@@ -8,10 +8,13 @@
 	
 	<!-- declare occupancy grid arguments -->
 	<arg name="occupancy/update_rate"	default="0.2"/>
-	<arg name="occupancy/x_dimension"	default="20"/>
-	<arg name="occupancy/y_dimension"	default="20"/>
+	<arg name="occupancy/x_dimension"	default="200"/>
+	<arg name="occupancy/y_dimension"	default="200"/>
 	<arg name="occupancy/z_dimension"	default="0"/>
-	<arg name="occupancy/grid_resolution"	default="0.1"/>
+	<arg name="occupancy/x_origin"		default="0"/>
+	<arg name="occupancy/y_origin"		default="100"/>
+	<arg name="occupancy/z_origin"		default="0"/>
+	<arg name="occupancy/grid_resolution"	default="0.01"/>
 	
 	<!-- declare speed set arguments -->
 	<arg name="speed_set/number"	default="15"/>
@@ -35,6 +38,9 @@
 		<arg name="occupancy/x_dimension"	value="$(arg occupancy/x_dimension)"/>
 		<arg name="occupancy/y_dimension"	value="$(arg occupancy/y_dimension)"/>
 		<arg name="occupancy/z_dimension"	value="$(arg occupancy/z_dimension)"/>
+		<arg name="occupancy/x_origin"		value="$(arg occupancy/x_origin)"/>
+		<arg name="occupancy/y_origin"		value="$(arg occupancy/y_origin)"/>
+		<arg name="occupancy/z_origin"		value="$(arg occupancy/z_origin)"/>
 		<arg name="occupancy/grid_resolution"	value="$(arg occupancy/grid_resolution)"/>
 		<arg name="speed_set/number"		value="$(arg speed_set/number)"/>
 		<arg name="speed_set/max_speed"		value="$(arg speed_set/max_speed)"/>
