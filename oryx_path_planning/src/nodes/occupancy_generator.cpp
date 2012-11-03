@@ -59,42 +59,48 @@ int main(int argc, char **argv) {
 
 	bool stop = true;
 	while(ros::ok()){
-		double input;
-		ROS_INFO("Enter A Number: ");
-		std::cin >> input;
-		ROS_INFO("I Got Input!: %f", input);
 		oryx_path_planning::OccupancyGrid grid(xDim, yDim, res, origin, oryx_path_planning::FREE_LOW_COST);
-		if(input>0){
-			double y;
-			double x;
-			int numPoints = 0;
-			for(x=0; x<xDim; x+=res/20){
-				y= input*x;
-				if(y>(yDim/2)||y<-yDim/2){
-					break;
-				}
-				try{
-					ROS_INFO("Setting Point at <%f,%f>", x,y);
-					grid.setPointTrait(x,y-origin.y,0,oryx_path_planning::OBSTACLE);
-					numPoints++;
-				}catch(std::exception& e){
-					ROS_ERROR("%s", e.what());
-				}
-			}
-			ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());
-			ROS_INFO("I placed ~%d points", numPoints);
-			sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
-			message->header.frame_id = "base_link";
-			grid.generateMessage(message);
-			pub.publish(message);
-		}else{
-			oryxsrr_msgs::SoftwareStop stopMessage;
-			stopMessage.stop = stop;
-			stopMessage.message = "I'm testing Software Stop";
-			s_pub.publish(stopMessage);
-			if(stop) stop = false;
-			else stop = true;
+		oryx_path_planning::PointCloud lineCloud;
+		oryx_path_planning::Point startPoint;
+		startPoint.z=0;
+		startPoint.rgba = oryx_path_planning::OBSTACLE;
+		oryx_path_planning::Point endPoint;
+		endPoint.z=0;
+		endPoint.rgba = oryx_path_planning::OBSTACLE;
+
+		ROS_INFO("Enter X0: ");
+		std::cin >> startPoint.x;
+		startPoint.x=std::floor(startPoint.x);
+		ROS_INFO("I Got Input!: %f", startPoint.x);
+		ROS_INFO("Enter Y0: ");
+		std::cin >> startPoint.y;
+		startPoint.y=std::floor(startPoint.y);
+		ROS_INFO("I Got Input!: %f", startPoint.y);
+
+		ROS_INFO("Enter Xf: ");
+		std::cin >> endPoint.x;
+		endPoint.x=std::floor(endPoint.x);
+		ROS_INFO("I Got Input!: %f", endPoint.x);
+		ROS_INFO("Enter Yf: ");
+		std::cin >> endPoint.y;
+		endPoint.y=std::floor(endPoint.y);
+		ROS_INFO("I Got Input!: %f", endPoint.y);
+
+		startPoint.getVector4fMap();
+		endPoint.getVector4fMap();
+
+		oryx_path_planning::castLine(startPoint, endPoint, oryx_path_planning::OBSTACLE, lineCloud);
+
+		for(oryx_path_planning::PointCloud::iterator line_itr = lineCloud.begin(); line_itr<lineCloud.end(); line_itr++){
+			PRINT_POINT("Line Point", (*line_itr));
+			grid.setPointTrait(*line_itr, (oryx_path_planning::PointTrait)line_itr->rgba);
 		}
+
+		ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());
+		sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
+		message->header.frame_id = "base_link";
+		grid.generateMessage(message);
+		pub.publish(message);
 	}
 }
 

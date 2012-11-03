@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
 		lineEnd.z = 0;
 		lineEnd.rgba = oryx_path_planning::GOAL;
 		PRINT_POINT("End Point", lineEnd);
-		castLine(lineStart, lineEnd, res, oryx_path_planning::OBSTACLE, lineCloud);
+		castLine(lineStart, lineEnd, oryx_path_planning::OBSTACLE, lineCloud);
 		ROS_INFO("Line Generated, placing on grid...");
 		for(PointCloud::iterator line_itr = lineCloud.begin(); line_itr<lineCloud.end(); line_itr++){
 			//PRINT_POINT("Line Point", (*line_itr));
@@ -219,6 +219,20 @@ int main(int argc, char **argv) {
 		}
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 
+		//Test arc generator
+		ROS_INFO("Testing arc generation...");
+		PointCloud arcCloud;
+		Point arcCenter;
+		arcCenter.x = 0;
+		arcCenter.y = 0;
+		arcCenter.z = 0;
+		castArc(10,oryx_path_planning::OBSTACLE, arcCenter, arcCloud);
+		ROS_INFO("Arc generated, placing on grid...");
+		for(PointCloud::iterator arc_itr = arcCloud.begin(); arc_itr<arcCloud.end(); arc_itr++){
+			PRINT_POINT("Arc Point", (*arc_itr));
+			testGrid.setPointTrait(*arc_itr, (oryx_path_planning::PointTrait_t)arc_itr->rgba);
+		}
+		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 		//Place a known straight line on the grid
 		for(double x=0; x<xDim; x+=res){
 			testGrid.setPointTrait(x, -origin.y, 0.0, oryx_path_planning::OBSTACLE);
