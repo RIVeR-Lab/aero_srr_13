@@ -271,19 +271,18 @@ int main(int argc, char **argv) {
 
 
 void printSpeedSet(int xDim, int yDim, double resolution, SpeedSet& speedSet){
-	int xSize = xDim/resolution;
-	int ySize = (yDim/resolution);
+	int xSize = xDim;
+	int ySize = yDim;
 	unsigned int numTent = speedSet.getNumTentacle();
 	std::vector<std::string> occGrid(xSize+1, std::string(ySize+1, '_'));
-	ROS_INFO("Occupancy Gird Generated");
+	ROS_INFO("Speed Set Gird Generated");
 	for(int t=0; t<numTent; t++){
 		Tentacle tentacle = speedSet.getTentacle(t);
 		//ROS_INFO("Got Tentacle %d", t);
 		for(unsigned int p=0; p<tentacle.getPoints().size(); p++){
 			oryx_path_planning::Point point(tentacle.getPoints().at(p));
 			//ROS_INFO("Got Point at <%f, %f>", point.x, point.y);
-			point.x = (oryx_path_planning::roundToGrid(point.x, resolution));
-			point.y = (oryx_path_planning::roundToGrid(point.y, resolution)+(ySize/2));
+			point.y+=ySize/2;
 			//ROS_INFO("Placing Point at <%f, %f>", point.x, point.y);
 			occGrid.at(point.x).replace(point.y,1,"T");
 		}
