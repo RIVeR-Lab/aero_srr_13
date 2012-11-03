@@ -287,7 +287,7 @@ public:
 	 * @author	Adam Panzica
 	 * @brief	Copys the data from a point into the occupancy grid
 	 * @param copy_point The point to copy into the grid
-	 * @param origin_corrected True if the x/y/z coordinates in copy_ponit have been offset by the grid origin
+	 * @param origin_corrected True if the x/y/z coordinates in copy_ponit have been offset by the grid origin (aka all positive values)
 	 */
 	void setPoint(oryx_path_planning::Point& copy_point, bool origin_corrected = true);
 	void setPoint(const oryx_path_planning::Point& copy_point, bool origin_corrected = true);

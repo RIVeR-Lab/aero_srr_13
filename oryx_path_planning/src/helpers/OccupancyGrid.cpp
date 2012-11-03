@@ -85,18 +85,13 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 								origin(origin),
 								occGrid((xDim+1)*(yDim+1)*(zDim+1),1),
 								converter(resolution){
-	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%f, %f, %f>", xDim, yDim, zDim);
+	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
 	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occGrid.size(), (int)cloud.size());
 	this->xDim	= xDim;
 	this->yDim	= yDim;
 	this->zDim	= zDim;
 	this->res	= resolution;
-	//OccupancyGrid::iterator occItr = this->occGrid->begin();
-	/*for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
-		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
-		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
-		occItr++;
-	}*/
+
 
 	for(unsigned int index = 0; index<cloud.size(); index++){
 		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", cloud.at(index).x, cloud.at(index).y, cloud.at(index).z, cloud.at(index).rgba);
@@ -104,13 +99,6 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 		//ROS_INFO("Set Data <%f, %f, %f, %x>", getPoint(cloud.at(index), false).x, getPoint(cloud.at(index), false).y, getPoint(cloud.at(index), false).z, getPoint(cloud.at(index), false).rgba);
 	}
 
-	/*occItr = this->occGrid->begin();
-	for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
-		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
-		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
-		occItr++;
-	}*/
-	//ROS_INFO("Built the Occupancy Grid <%f/%d, %f/%d, %f/%d>:\n%s",this->xDim, this->xSize,this->yDim, this->ySize,this->zDim, this->zSize, this->toString(0,0)->c_str());
 
 }
 
@@ -132,27 +120,11 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, or
 	this->zDim	= zDim;
 	this->res	= resolution;
 
-	//OccupancyGrid::iterator occItr = this->occGrid->begin();
-	/*for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
-		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
-		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
-		occItr++;
-	}*/
-
-
 	for(unsigned int index = 0; index<cloud.size(); index++){
 		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", cloud.at(index).x, cloud.at(index).y, cloud.at(index).z, cloud.at(index).rgba);
 		setPoint(cloud.at(index), false);
 		//ROS_INFO("Set Data <%f, %f, %f, %x>", getPoint(cloud.at(index), false).x, getPoint(cloud.at(index), false).y, getPoint(cloud.at(index), false).z, getPoint(cloud.at(index), false).rgba);
 	}
-
-	/*occItr = this->occGrid->begin();
-	for(cloudItr = cloud->begin(); cloudItr<cloud->end(); cloudItr++){
-		ROS_INFO("Point Cloud Point <%f, %f, %f, %x>", cloudItr->x, cloudItr->y, cloudItr->z, cloudItr->rgba);
-		ROS_INFO("Occupancy Grid Point <%f, %f, %f, %x>", occItr->x, occItr->y, occItr->z, occItr->rgba);
-		occItr++;
-	}*/
-	//ROS_INFO("Built the Occupancy Grid <%f/%d, %f/%d, %f/%d>:\n%s",this->xDim, this->xSize,this->yDim, this->ySize,this->zDim, this->zSize, this->toString(0,0)->c_str());
 
 }
 
