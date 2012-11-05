@@ -27,22 +27,6 @@ typedef boost::shared_ptr<OccupancyGrid> OccupancyGridPtr;
 typedef pcl::PointCloud<Point> OccpancyGridCloud;
 
 //*********************** CLASS DEFINITIONS ************************************//
-/**
- * @author Adam Panzica
- * @brief Enum for describing the state of a point
- * The integer enumeration value is mapped to an RGBA color space representation for ease of translating to color map
- * as well as to allow for using the pcl::PointRBGA class to represent data
- */
-typedef enum PointTrait_t{
-	OBSTACLE		= 0xFF0000, //!< OBSTACLE		Point on the grid contains an obstacle (Red)
-	INFLATED		= 0x0000FF,	//!< INFLATED		Point on the grid is occupied by a safety inflation radius (Blue)
-	UNKNOWN			= 0x808080, //!< UNKNOWN		Point on the grid is unknown (Grey)
-	FREE_HIGH_COST	= 0x008080,	//!< FREE_HIGH_COST	Point on the grid is free but is expensive to travel over (Teal)
-	FREE_LOW_COST	= 0x008000, //!< FREE_LOW_COST	Point on the grid is free but is easy to travel over (Green)
-	GOAL            = 0xFFFF00,	//!< GOAL			Point on the grid is the goal position (Yellow)
-	TENTACLE		= 0xCD00CD,	//!< TENTACLE		Point on the grid is a Tentacle marker (Pink)
-	ROBOT			= 0x000001,	//!< ROBOT			Point on the grid is the robot's center point
-} PointTrait;
 
 /**
  * @author	Adam Panzica
