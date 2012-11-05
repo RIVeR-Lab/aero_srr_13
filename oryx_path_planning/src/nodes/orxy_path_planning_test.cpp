@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
 		arcCenter.x = 0;
 		arcCenter.y = 0;
 		arcCenter.z = 0;
-		castArc(10,oryx_path_planning::OBSTACLE, arcCenter, arcCloud);
+		castArc(100, oryx_path_planning::constants::PI()/2, oryx_path_planning::OBSTACLE, arcCenter, arcCloud);
 		ROS_INFO("Arc generated, placing on grid...");
 		for(PointCloud::iterator arc_itr = arcCloud.begin(); arc_itr<arcCloud.end(); arc_itr++){
 			PRINT_POINT("Arc Point", (*arc_itr));
@@ -241,12 +241,12 @@ int main(int argc, char **argv) {
 		//Test copying occupancy grids
 		ROS_INFO("Testing Occupancy Grid Copy...");
 		OccupancyGrid copyGrid(testGrid);
-		ROS_INFO("Copied Grid:\n%s", copyGrid.toString(0,0)->c_str());
+		//ROS_INFO("Copied Grid:\n%s", copyGrid.toString(0,0)->c_str());
 
 		//Test building a grid from an existing point cloud
 		ROS_INFO("Testing Build From Point Cloud...");
 		OccupancyGrid cloudGrid(xDim,yDim,0.0,res,origin, copyGrid.getGrid());
-		ROS_INFO("PC Built Grid:\n%s", cloudGrid.toString(0,0)->c_str());
+		//ROS_INFO("PC Built Grid:\n%s", cloudGrid.toString(0,0)->c_str());
 		ROS_INFO("Data at 10,10,0 <%x>", cloudGrid.getPointTrait(10,10,0));
 
 
@@ -262,7 +262,7 @@ int main(int argc, char **argv) {
 				}
 			}
 		}
-		ROS_INFO("Tentacle Overlay:\n%s", copyGrid.toString(0,0)->c_str());
+		//ROS_INFO("Tentacle Overlay:\n%s", copyGrid.toString(0,0)->c_str());
 	}catch(std::exception& e){
 		ROS_ERROR(e.what());
 	}

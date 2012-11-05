@@ -34,12 +34,6 @@
 #error EXP_TENTACLE_LENGTH_FACTOR is already defined!
 #endif
 
-#ifndef TENTACLE_SWEEP_ANGLE
-#define TENTACLE_SWEEP_ANGLE (1.2)*PI/2.0
-#else
-#error TENTACLE_SWEEP_ANGLE is already defined!
-#endif
-
 #ifndef THETA_INCREMENT
 #define THETA_INCREMENT PI/1800.0
 #else
@@ -220,6 +214,12 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	else{
 		//Convert the radius, which will be in engineering units, into grid coordinates
 		int workingRadius = roundToGrid(radius, resolution);
+		Point tentacleOrigin;
+		tentacleOrigin.x = 0;
+		tentacleOrigin.y = radius;
+		tentacleOrigin.z = 0;
+		tentacleOrigin.rgba = oryx_path_planning::TENTACLE;
+		//castArc(workingRadius, oryx_path_planning::PI/2.0, oryx_path_planning::TENTACLE, tentacleOrigin, this->points);
 	}
 //	else{
 //		//Tracks the last coordinate so that we don't get duplicates
@@ -483,7 +483,7 @@ TentacleGenerator::const_iterator TentacleGenerator::end() const{
  * @f$ l=@f$ length of the longest tentacle in the set, and @f$ TSA, E_b, E_f@f$ are all tuning constants determined empirically.
  */
 double TentacleGenerator::calcSeedRad(int speedSet, double q) const{
-	double dphi = TENTACLE_SWEEP_ANGLE;
+	double dphi = oryx_path_planning::constants::PI();
 	double l	= MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
 	PRINTER("Calculated dphi=%f, l=%f",dphi, l);
 	return l/(dphi*(1-std::pow(q,0.9)));

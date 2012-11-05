@@ -52,8 +52,16 @@
 namespace oryx_path_planning{
 
 //*********************** CONSTANTS ******************************//
-
-const double PI = std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant, define it here
+/**
+ * @author	Adam Panzica
+ * @brief	singleton class which returns dynamically generated constants
+ */
+class constants{
+public:
+	static double PI(){
+		return std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant, define it here
+	}
+};
 
 const std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>");	///Standard parameter warning message
 
@@ -272,65 +280,113 @@ inline void castLine(Point& startPoint, Point& endPoint, int rgba, PointCloud& c
 /**
  * @author	Adam Panzica
  * @brief	Generates the series of points along a 90* arc between two points and places them into a PointCloud
- * @param radius	The radius of the arch to cast
- * @param rgba
- * @param origin
- * @param cloud
- * @param quardrent
- * @param plane
+ * @param radius		The radius of the arch to cast
+ * @param sweep_angle	The angle, in radians, to sweep the arc in the given quadrant and plane
+ * @param rgba			The value to fill the rgba field of the points with
+ * @param origin		The origin of the arc
+ * @param cloud			PointCloud to write the arc into
+ * @param quadrant		The quadrant that the arc lies in (1, 2, 3 or 4, anything outside that range will be 1)
+ * @param plane			The plane to cast the arc in (0 for xy, 1 for xz, 2 for yz)
  */
-inline void castArc(int radius, int rgba, Point& origin, PointCloud& cloud, int quardrent=1, int plane=0){
-	  int x = 0, y = radius;
-	  int g = 3 - 2*radius;
-	  int diagonalInc = 10 - 4*radius;
-	  int rightInc = 6;
-	  while (x <= y) {
-	    Point pointTop;
-	    pointTop.x = x+origin.x;
-	    pointTop.y = y+origin.y;
-	    pointTop.z = origin.z;
-	    pointTop.rgba = rgba;
-	    switch(quardrent){
-	    case 2:
-	    	pointTop.x = -pointTop.x;
-	    	break;
-	    case 3:
-	    	pointTop.x = -pointTop.x;
-	    	pointTop.y = -pointTop.y;
-	    	break;
-	    case 4:
-	    	pointTop.y = -pointTop.y;
-	    	break;
-	    }
-	    Point pointBottom;
-	    pointBottom.x = pointTop.y;
-	    pointBottom.y = pointTop.x;
-	    pointBottom.z = pointTop.z;
-	    pointBottom.rgba = rgba;
-	    switch(plane){
-	    case 1:
-	    	std::swap<float>(pointTop.x, pointTop.z);
-	    	std::swap<float>(pointBottom.x, pointBottom.z);
-	    	break;
-	    case 2:
-	    	std::swap<float>(pointTop.y, pointTop.z);
-	    	std::swap<float>(pointBottom.y, pointBottom.z);
-	    	break;
-	    }
-	    if (g >=  0) {
-	      g += diagonalInc;
-	      diagonalInc += 8;
-	      y -= 1;
-	    }
-	    else {
-	      g += rightInc;
-	      diagonalInc += 4;
-	    }
-	    rightInc += 4;
-	    x += 1;
-	    cloud.push_back(pointTop);
-	    cloud.push_back(pointBottom);
-	  }
+inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, PointCloud& cloud, int quadrant=1, int plane=0){
+	int x = 0, y = radius;
+	int g = 3 - 2*radius;
+	int diagonalInc = 10 - 4*radius;
+	int rightInc = 6;
+	//Calculate the halfway cuttoff (we can use symmetry after this point to speed up calculations)
+	double halfCutoff = std::atan2(1,1);
+	//Calculate the cutoff point. If it's greater than pi/4, this won't actually matter
+	double fullCutoff = oryx_path_planning::constants::PI()/2.0 - sweep_angle;
+	//Calculate initial swept angle
+	double sweptAngle = std::atan2(y, x);
+	//Draw the first half of the arc, or the whole arc if the sweep angle is less than pi/4
+	while (sweptAngle>fullCutoff&&sweptAngle>halfCutoff) {
+		//Build the point.
+		Point point;
+		point.x = x+origin.x;
+		point.y = y+origin.y;
+		point.z = origin.z;
+		point.rgba = rgba;
+		//Adjust the sign of the x/y values to account for quadrant changes
+		switch(quadrant){
+		case 2:
+			point.x = -point.x;
+			break;
+		case 3:
+			point.x = -point.x;
+			point.y = -point.y;
+			break;
+		case 4:
+			point.y = -point.y;
+			break;
+		}
+		/*Point pointBottom;
+	    pointBottom.x = point.y;
+	    pointBottom.y = point.x;
+	    pointBottom.z = point.z;
+	    pointBottom.rgba = rgba;*/
+		switch(plane){
+		case 1:
+			std::swap<float>(point.x, point.z);
+			//std::swap<float>(pointBottom.x, pointBottom.z);
+			break;
+		case 2:
+			std::swap<float>(point.y, point.z);
+			//std::swap<float>(pointBottom.y, pointBottom.z);
+			break;
+		}
+		if (g >=  0) {
+			g += diagonalInc;
+			diagonalInc += 8;
+			y -= 1;
+		}
+		else {
+			g += rightInc;
+			diagonalInc += 4;
+		}
+		rightInc += 4;
+		x += 1;
+		//cloud.push_back(pointTop);
+		PRINT_POINT("Arc Generated Bottom Point", point);
+		cloud.push_back(point);
+		sweptAngle = std::atan2(y, x);
+	}
+	ROS_INFO("Reached Swept Angle %f, Goal Angle%f", sweptAngle, sweep_angle);
+	//If the full arc was greater than pi/4, build the rest of the arc from symmetry
+	if(sweep_angle>halfCutoff){
+		for(int index=cloud.size()-1; index>=0; index--){
+			Point& point = cloud.at(index);
+			//otherwise push back the symmetric point
+			Point pointSym;
+			switch(plane){
+			case 1:
+				pointSym.x = point.x;
+				pointSym.y = point.z;
+				pointSym.z = point.y;
+				break;
+			case 2:
+				pointSym.x = point.z;
+				pointSym.y = point.y;
+				pointSym.z = point.x;
+				break;
+			case 0:
+			default:
+				pointSym.x = point.y;
+				pointSym.y = point.x;
+				pointSym.z = point.z;
+				break;
+			}
+			pointSym.rgba = point.rgba;
+			PRINT_POINT("Arc Generated Top Point", pointSym);
+			cloud.push_back(pointSym);
+			ROS_INFO("Reached Swept Angle %f, Goal Angle%f", std::atan2(point.y, point.x), sweep_angle);
+			//If the next point is past the sweep angle, than we're done. break
+			if(std::atan2(point.y, point.x)>sweep_angle){
+				ROS_INFO("I'm breaking cuz I got to the angle I wanted");
+				break;
+			}
+		}
+	}
 }
 
 /**

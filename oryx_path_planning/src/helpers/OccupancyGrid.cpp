@@ -175,9 +175,7 @@ PointTrait OccupancyGrid::getPointTrait(int x, int y, int z)const throw(Occupanc
 }
 
 PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAccessException){
-	point.x=point.x+this->origin.x;
-	point.y=point.y+this->origin.y;
-	point.z=point.z+this->origin.z;
+	point.getVector4fMap()+=this->origin.getVector4fMap();
 	if(boundsCheck(point)){
 		try{
 			return static_cast<oryx_path_planning::PointTrait>(getPoint(point).rgba);
@@ -198,9 +196,7 @@ bool OccupancyGrid::setPointTrait(int x, int y, int z, PointTrait trait)throw(Oc
 }
 
 bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyGridAccessException){
-	point.x=point.x+this->origin.x;
-	point.y=point.y+this->origin.y;
-	point.z=point.z+this->origin.z;
+	point.getVector4fMap()+=this->origin.getVector4fMap();
 	if(boundsCheck(point)){
 		try{
 			getPoint(point).rgba=trait;
