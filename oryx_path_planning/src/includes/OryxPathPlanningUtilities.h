@@ -289,7 +289,7 @@ inline void castLine(Point& startPoint, Point& endPoint, int rgba, PointCloud& c
  * @param plane			The plane to cast the arc in (0 for xy, 1 for xz, 2 for yz)
  */
 inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, PointCloud& cloud, int quadrant=1, int plane=0){
-	int x = 0, y = radius;
+	int x = origin.x, y = radius+origin.y;
 	int g = 3 - 2*radius;
 	int diagonalInc = 10 - 4*radius;
 	int rightInc = 6;
@@ -298,15 +298,19 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 	//Calculate the cutoff point. If it's greater than pi/4, this won't actually matter
 	double fullCutoff = oryx_path_planning::constants::PI()/2.0 - sweep_angle;
 	//Calculate initial swept angle
-	double sweptAngle = std::atan2(y, x);
+	double sweptAngle = std::atan2(y-origin.y, x-origin.x);
 	//Draw the first half of the arc, or the whole arc if the sweep angle is less than pi/4
 	while (sweptAngle>fullCutoff&&sweptAngle>halfCutoff) {
 		//Build the point.
 		Point point;
-		point.x = x+origin.x;
-		point.y = y+origin.y;
+		point.x = x;
+		point.y = y;
 		point.z = origin.z;
 		point.rgba = rgba;
+		//Calculate the currently swept angle
+		Point checkPoint;
+		checkPoint.getVector4fMap()=point.getVector4fMap()-origin.getVector4fMap();
+		sweptAngle = std::atan2(checkPoint.y, checkPoint.x);
 		//Adjust the sign of the x/y values to account for quadrant changes
 		switch(quadrant){
 		case 2:
@@ -347,11 +351,10 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 		rightInc += 4;
 		x += 1;
 		//cloud.push_back(pointTop);
-		PRINT_POINT("Arc Generated Bottom Point", point);
+		//PRINT_POINT("Arc Generated Bottom Point", point);
 		cloud.push_back(point);
-		sweptAngle = std::atan2(y, x);
 	}
-	ROS_INFO("Reached Swept Angle %f, Goal Angle%f", sweptAngle, sweep_angle);
+	//ROS_INFO("Reached Swept Angle %f, Goal Angle%f", sweptAngle, sweep_angle);
 	//If the full arc was greater than pi/4, build the rest of the arc from symmetry
 	if(sweep_angle>halfCutoff){
 		for(int index=cloud.size()-1; index>=0; index--){
@@ -377,14 +380,45 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 				break;
 			}
 			pointSym.rgba = point.rgba;
-			PRINT_POINT("Arc Generated Top Point", pointSym);
+			//PRINT_POINT("Arc Generated Top Point", pointSym);
 			cloud.push_back(pointSym);
-			ROS_INFO("Reached Swept Angle %f, Goal Angle%f", std::atan2(point.y, point.x), sweep_angle);
+			//ROS_INFO("Reached Swept Angle %f, Goal Angle%f", std::atan2(point.y, point.x), sweep_angle);
 			//If the next point is past the sweep angle, than we're done. break
-			if(std::atan2(point.y, point.x)>sweep_angle){
-				ROS_INFO("I'm breaking cuz I got to the angle I wanted");
+			Point checkPoint;
+			checkPoint.getVector4fMap()=pointSym.getVector4fMap()-origin.getVector4fMap();
+			sweptAngle = std::atan2(checkPoint.y, checkPoint.x);
+			if(sweptAngle>sweep_angle){
+				//ROS_INFO("I'm breaking cuz I got to the angle I wanted");
 				break;
 			}
+		}
+	}
+	//If we're sweeping more than PI/2, need to use additional symmetry to finish the arc
+	if(sweep_angle>oryx_path_planning::constants::PI()/2){
+		ROS_INFO("I'm doing the arc past pi/2");
+		double remainingSweep = sweep_angle-oryx_path_planning::constants::PI()/2;
+		for(int index = cloud.size()-1; index>=0; index--){
+			Point pointFinal;
+			Point& point = cloud.at(index);
+			switch(quadrant){
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			case 0:
+			default:
+				pointFinal.x = point.x;
+				pointFinal.y = -point.y;
+				pointFinal.z = point.z;
+				pointFinal.rgba = point.rgba;
+				break;
+			}
+			cloud.push_back(pointFinal);
+			Point checkPoint;
+			checkPoint.getVector4fMap()=pointFinal.getVector4fMap()-origin.getVector4fMap();
+			if(std::abs(std::atan(checkPoint.y/checkPoint.x))>remainingSweep) break;
 		}
 	}
 }
