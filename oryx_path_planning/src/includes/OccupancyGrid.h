@@ -24,7 +24,7 @@ class OccupancyGrid;
 ///Typedef to allow for convenient sharing of a OccupancyGrid via pointer
 typedef boost::shared_ptr<OccupancyGrid> OccupancyGridPtr;
 
-typedef pcl::PointCloud<Point> OccpancyGridCloud;
+typedef pcl::PointCloud<Point> OccupancyGridCloud;
 
 //*********************** CLASS DEFINITIONS ************************************//
 
@@ -131,7 +131,7 @@ public:
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, const OccpancyGridCloud& cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, const OccupancyGridCloud& cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -144,7 +144,7 @@ public:
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, oryx_path_planning::Point& origin, OccpancyGridCloud& cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, oryx_path_planning::Point& origin, OccupancyGridCloud& cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -208,11 +208,18 @@ public:
 	bool setPointTrait(oryx_path_planning::Point point, oryx_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
 
 	/**
+	 * Gets the location of the goal point on the occupancy grid, if it exists
+	 * @return	A Point containing the coordinates of the goal point, if it exists
+	 * @throw	false if there is no goal point on the grid
+	 */
+	const Point& getGoalPoint() const throw (bool);
+
+	/**
 	 * @author	Adam Panzica
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
 	 * @return	A reference to the PointCloud<oryx_path_planning::PointXYZWithTrait> which backs this occupancy grid
 	 */
-	const OccpancyGridCloud& getGrid() const;
+	const OccupancyGridCloud& getGrid() const;
 
 	/**
 	 * @author	Adam Panzica
@@ -331,12 +338,20 @@ private:
 	 */
 	void intializeGrid(PointTrait_t seedTrait);
 
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Helper function which searches for a goal point in the grid
+	 */
+	void searchForGoal();
+
 	int xDim;	///The x dimension of this grid
 	int yDim;	///The y dimension of this grid
 	int zDim;	///The z dimension of this grid
 	double res;	///The grid resolution of this occupancy grid
 	oryx_path_planning::Point origin;	///The origin of the occupancy grid
-	OccpancyGridCloud occGrid;			///The point cloud which contains the data for this occupancy grid
+	bool hasGoal;						///Flag to signal there is a goal point on the grid
+	oryx_path_planning::Point goal;		///The location of the goal point on the grid
+	OccupancyGridCloud occGrid;			///The point cloud which contains the data for this occupancy grid
 	oryx_path_planning::PointConverter converter;	///Used to convert the internal integer units to output engineering units
 };
 
