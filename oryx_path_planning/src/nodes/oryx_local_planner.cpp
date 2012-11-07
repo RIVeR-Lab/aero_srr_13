@@ -22,11 +22,6 @@
 
 using namespace oryx_path_planning;
 
-//namespace oryx_path_planning{
-//*********************** PROTOTYPES ******************************//
-class VelocityClient;
-//*********************** TYPEDEFS ******************************//
-typedef boost::shared_ptr<VelocityClient> VelocityClientPtr;
 //*********************** HELPER CLASS DEFINITIONS ******************************//
 
 /**
@@ -38,10 +33,13 @@ public:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new local planner
-	 * @param xDim	x dimension of the occupancy grids to use, in real units
-	 * @param yDim	y dimension of the occupancy grids to use, in real units
-	 * @param zDim	z dimension of the occupancy grids to use, in real units
-	 * @param res	resolution  of the occupancy grids to use, in real units per grid unit
+	 * @param goalWeight			weighting factor to bias tentacle selection towards the goal point
+	 * @param travWeight			weighting factor to bias tentacle selection away from previously traversed points
+	 * @param diffWeight			weighting factor to bias tentacle selection away from difficult terrain
+	 * @param xDim					x dimension of the occupancy grids to use, in real units
+	 * @param yDim					y dimension of the occupancy grids to use, in real units
+	 * @param zDim					z dimension of the occupancy grids to use, in real units
+	 * @param res					resolution  of the occupancy grids to use, in real units per grid unit
 	 * @param origin				Origin to use for the occupancy grid
 	 * @param v_action_topic		Actionlib topic to communicate with the base platform
 	 * @param oc_point_cloud_topic	Topic name of the ROS topic to receive new occupancy grid data over
@@ -49,13 +47,16 @@ public:
 	 * @param v_client				Pointer to the velocity client to send commands to the base platform
 	 * @throw std::runtime_error	If the planner is unable to connect to the base platform
 	 */
-	LocalPlanner(double xDim, double yDim, double zDim, double res, oryx_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
+	LocalPlanner(double goalWeight, double travWeight, double diffWeight, double xDim, double yDim, double zDim, double res, oryx_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
 		v_action_topic(v_action_topic),
 		pc_topic(oc_point_cloud_topic),
 		origin(origin),
 		tentacles(tentacles),
 		occupancy_buffer(2),
 		v_client(v_action_topic, true){
+		this->goalWeight = goalWeight;
+		this->travWeight = travWeight;
+		this->diffWeight = diffWeight;
 		this->xDim = xDim;
 		this->yDim = yDim;
 		this->zDim = zDim;
@@ -156,6 +157,10 @@ public:
 private:
 
 	bool	shouldPlan;	///Flag for signaling if the local planner should be running
+
+	double	goalWeight;	///weighting factor to bias tentacle selection towards the goal point
+	double	travWeight;	///weighting factor to bias tentacle selection away from previously traversed points
+	double	diffWeight;	///weighting factor to bias tentacle selection away from difficult terrain
 	double	xDim;		///x dimension of the occupancy grid to use, in real units
 	double	yDim;		///y dimension of the occupancy grid to use, in real units
 	double	zDim;		///z dimension of the occupancy grid to use, in real units
@@ -364,13 +369,34 @@ int main(int argc, char **argv) {
 	p_minSpeed_msg+= boost::lexical_cast<double>(minSpeed);
 	p_minSpeed_msg+="m/s";
 
+	//Goal Weight
+	std::string p_goalWeight("goal_weight");
+	double goalWeight = 2;
+	std::string p_goalWeight_msg("");
+	p_goalWeight_msg+= boost::lexical_cast<double>(goalWeight);
+
+	//Traversed Weight
+	std::string p_travWeight("traversed_weight");
+	double travWeight = 0.1;
+	std::string p_travWeight_msg("");
+	p_travWeight_msg+= boost::lexical_cast<double>(travWeight);
+
+	//Difficulty Weight
+	std::string p_diffWeight("difficult_weight");
+	double diffWeight = 0.1;
+	std::string p_diffWeight_msg("");
+	p_diffWeight_msg+= boost::lexical_cast<double>(diffWeight);
+
 	//Node Information Printout
 	ROS_INFO("Starting Up Oryx Base Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
-	//Get Parameters
+	//Get Private Parameters
 	if(!p_nh.getParam(v_com_top,v_com_top))		PARAM_WARN(v_com_top,	v_com_top);
-	//if(!nh.getParam(t_com_top, t_com_top))	PARAM_WARN(t_com_top,	t_com_top);
 	if(!p_nh.getParam(pc_top,	pc_top))		PARAM_WARN(pc_top,		pc_top);
+	if(!p_nh.getParam(p_goalWeight,	goalWeight))PARAM_WARN(p_goalWeight,p_goalWeight_msg);
+	if(!p_nh.getParam(p_travWeight,	travWeight))PARAM_WARN(p_travWeight,p_travWeight_msg);
+	if(!p_nh.getParam(p_diffWeight,	diffWeight))PARAM_WARN(p_diffWeight,p_diffWeight_msg);
+	//Get Public Parameters
 	if(!nh.getParam(p_up_rate,	update_rate))	PARAM_WARN(p_up_rate,	up_rate_msg);
 	if(!nh.getParam(p_x_dim,	xDim))			PARAM_WARN(p_x_dim,		xDim_msg);
 	if(!nh.getParam(p_y_dim,	yDim))			PARAM_WARN(p_y_dim,		yDim_msg);
@@ -396,8 +422,8 @@ int main(int argc, char **argv) {
 		origin.y=y_ori;
 		origin.z=z_ori;
 		PRINT_POINT("Origin Point", origin);
-		boost::shared_ptr<LocalPlanner> l_client_ptr(new LocalPlanner(xDim, yDim, zDim, res, origin, v_com_top,  pc_top, tentacle_ptr));
-		l_client_ptr->doPlanning();
+		LocalPlanner planner(goalWeight, travWeight, diffWeight, xDim, yDim, zDim, res, origin, v_com_top,  pc_top, tentacle_ptr);
+		planner.doPlanning();
 	}catch(std::exception& e){
 		ROS_FATAL("%s, %s",e.what(), "Shutting Down");
 		ros::shutdown();
