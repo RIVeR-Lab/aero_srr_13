@@ -102,7 +102,7 @@ public:
 					int numPoints = 0;
 					for(OccupancyGrid::iterator test_itr = workingGrid.begin(); test_itr<workingGrid.end(); test_itr++){
 						//ROS_INFO_COND(test_itr->rgba != oryx_path_planning::FREE_LOW_COST, "Found an obsticale point! <%f, %f>", test_itr->x, test_itr->y);
-						numPoints++;
+						if(test_itr->rgba != oryx_path_planning::FREE_LOW_COST)numPoints++;
 					}
 					ROS_INFO("I Found %d number of interesting points", numPoints);
 
@@ -110,19 +110,41 @@ public:
 
 					ROS_INFO("I'm Going To Use A Speed Set With The Parameters <NumTent:%d, Vel:%f, SR:%f>", speedSet.getNumTentacle(), speedSet.getVelocity(), speedSet.getSeedRad());
 					OccupancyGrid rendering(workingGrid);
-					for(int i=0; i<speedSet.getNumTentacle(); i++){
+					unsigned int longestIndex = 0;
+					double longestLength = 0;
+					ROS_INFO("I'm looking for the longest tentacle...");
+					for(unsigned int i=0; i<speedSet.getNumTentacle(); i++){
 						Tentacle workingTentacle = speedSet.getTentacle(i);
 						Tentacle::TentacleTraverser traverser(workingTentacle);
 						while(traverser.hasNext()){
-							oryx_path_planning::Point point = traverser.next();
+							const oryx_path_planning::Point& point = traverser.next();
 							try{
-								rendering.setPointTrait(point, oryx_path_planning::TENTACLE);
+								if(workingGrid.getPointTrait(point) == oryx_path_planning::OBSTACLE){
+									ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
+									PRINT_POINT("Hit Point", point);
+									break;
+								}
 							}catch(OccupancyGridAccessException& e){
-								//ROS_ERROR("%s", e.what());
+								ROS_ERROR("%s", e.what());
 							}
 						}
+						if(traverser.lengthTraversed() >= longestLength){
+							longestIndex = i;
+							longestLength = traverser.lengthTraversed();
+						}
 					}
-					//ROS_INFO("This Is The Occupancy Grid With Tentacles Overlaid:\n%s", rendering.toString(0,0)->c_str());
+					//Print out the selected tentacle on the grid
+					ROS_INFO("I Selected Tentacle %d, length %f", longestIndex, longestLength);
+					Tentacle::TentacleTraverser overlayTraverser(speedSet.getTentacle(longestIndex));
+					while(overlayTraverser.hasNext()){
+						oryx_path_planning::Point point = overlayTraverser.next();
+						try{
+							rendering.setPointTrait(point, oryx_path_planning::TENTACLE);
+						}catch(std::exception& e){
+							ROS_ERROR("%s", e.what());
+						}
+					}
+					ROS_INFO("This Is The Occupancy Grid With Selected Tentacle Overlaid:\n%s", rendering.toString(0,0)->c_str());
 					this->occupancy_buffer.pop_front();
 				}
 			}

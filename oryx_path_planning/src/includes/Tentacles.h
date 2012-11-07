@@ -184,6 +184,7 @@ public:
 	 * @brief Creates a new Tentacle using the given parameters for its construction
 	 * @param expFact 		The exponential factor parameter used to calculate the radius of the tentacle
 	 * @param seedRad 		The seed radius for the speed set the tentacle is in
+	 * @param seedLength	The seed length that was used to calculate the seed radius
 	 * @param index			The tentacle index of this tentacle
 	 * @param numTent		The total number of tentacles in the speed set
 	 * @param resolution	The resolution of the occupancy grid that the tentacle will be overlaid on
@@ -193,7 +194,7 @@ public:
 	 * @throw TentacleGenerationException If there is a problem generating the tentacle
 	 *
 	 */
-	Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException);
+	Tentacle(double expFact, double seedRad, double seedLength, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException);
 	virtual ~Tentacle();
 
 	/**
@@ -363,13 +364,14 @@ public:
 	 * @brief Generates all of the tentacles with the given parameters
 	 * @param expFact 		The exponential factor parameter used to calculate the radius of the tentacle
 	 * @param seedRad 		The seed radius for the speed set
+	 * @param seedLength	The seed length that was used to calculate the seed radius
 	 * @param numTent		The total number of tentacles in the speed set
 	 * @param resolution	The resolution of the occupancy grid that the tentacles will be overlaid on
 	 * @param xDim			The length of the x-axis of the occupancy grid, in the positive x-direction and of the same units as resolution
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 * @param velocity		The velocity that the tentacle is to be traveled at
 	 */
-	SpeedSet(double expFact, double seedRad, int numTent, double resolution, int xDim, int yDim, double velocity);
+	SpeedSet(double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity);
 	virtual ~SpeedSet();
 
 	/**
@@ -548,6 +550,13 @@ private:
 	std::vector<double>		  velocityKeys;	///A set containing the velocity keys for each speed set
 
 	/**
+	 * @author Adam Panzica
+	 * @param q	Calculated constant
+	 * @return The calculated length constant for the speed set
+	 */
+	double calcL(double q);
+
+	/**
 	 * @author Adam Panzics
 	 * @brief Calculates the 'magic constant' q used in tentacle generation
 	 * @param speedSet The index of the current speed set
@@ -559,10 +568,11 @@ private:
 	 * @author Adam Panzica
 	 * @brief Helper function which calculates the seed radius for a speed set
 	 * @param speedSet The index number of the speed set
-	 * @param q			Calculated constant
+	 * @param q		Calculated constant
+	 * @param l		Calculated seed length for the speed set
 	 * @return The calculated seed radius
 	 */
-	double calcSeedRad(int speedSet, double q) const;
+	double calcSeedRad(int speedSet, double l, double q) const;
 
 	/**
 	 * @author Adam Panzica
