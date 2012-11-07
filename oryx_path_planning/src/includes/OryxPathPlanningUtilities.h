@@ -289,7 +289,7 @@ inline void castLine(Point& startPoint, Point& endPoint, int rgba, PointCloud& c
  * @param plane			The plane to cast the arc in (0 for xy, 1 for xz, 2 for yz)
  */
 inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, PointCloud& cloud, int quadrant=1, int plane=0){
-	int x = origin.x, y = radius+origin.y;
+	int x = 0, y = radius;
 	int g = 3 - 2*radius;
 	int diagonalInc = 10 - 4*radius;
 	int rightInc = 6;
@@ -305,12 +305,10 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 		Point point;
 		point.x = x;
 		point.y = y;
-		point.z = origin.z;
+		point.z = 0;
 		point.rgba = rgba;
 		//Calculate the currently swept angle
-		Point checkPoint;
-		checkPoint.getVector4fMap()=point.getVector4fMap()-origin.getVector4fMap();
-		sweptAngle = std::atan2(checkPoint.y, checkPoint.x);
+		sweptAngle = std::atan2(point.y, point.x);
 		//Adjust the sign of the x/y values to account for quadrant changes
 		switch(quadrant){
 		case 2:
@@ -384,9 +382,7 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 			cloud.push_back(pointSym);
 			//ROS_INFO("Reached Swept Angle %f, Goal Angle%f", std::atan2(point.y, point.x), sweep_angle);
 			//If the next point is past the sweep angle, than we're done. break
-			Point checkPoint;
-			checkPoint.getVector4fMap()=pointSym.getVector4fMap()-origin.getVector4fMap();
-			sweptAngle = std::atan2(checkPoint.y, checkPoint.x);
+			sweptAngle = std::atan2(pointSym.y, pointSym.x);
 			if(sweptAngle>sweep_angle){
 				//ROS_INFO("I'm breaking cuz I got to the angle I wanted");
 				break;
@@ -423,34 +419,30 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 	}
 }
 
-/**
- * @author	Adam Panzica
- * @brief	Simple class which generates
- */
+///**
+// * @author	Adam Panzica
+// * @brief	Simple class which generates
+// */
 //class InflationBubble{
 //public:
-//	///Typedef for an iterator for the class
-//	typedef PointCloud::iterator iterator;
-//	///Typedef for a const_iterator for the class
-//	typedef PointCloud::const_iterator const_iterator;
 //
-//	inline InflationBubble(Point& point, double radius, double resolution){
+//	inline InflationBubble(Point& point, int radius){
 //
 //	}
 //
-//	inline InflationBubble(const Point& point, double radius, double resolution){
+//	inline InflationBubble(const Point& point, int radius){
 //
 //	}
 //
 //	inline virtual ~InflationBubble(){}
 //
-//	inline iterator begin(){return this->points.begin();}
+//	inline PointCloud::iterator begin(){return this->points.begin();}
 //
-//	inline iterator end(){return this->points.end();}
+//	inline PointCloud::iterator end(){return this->points.end();}
 //
-//	inline const_iterator begin() const{return this->points.begin();}
+//	inline PointCloud::const_iterator begin() const{return this->points.begin();}
 //
-//	inline const_iterator end() const{return this->points.end();}
+//	inline PointCloud::const_iterator end() const{return this->points.end();}
 //
 //private:
 //	double radius;
@@ -464,48 +456,64 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 //	 * @param y0 y-origin of the circle
 //	 * @param radius radius of the circle
 //	 */
-//	void rasterCircle(int x0, int y0, int radius)
+//	void rasterCircle(const Point& origin, int radius)
 //	{
-//	  int f = 1 - radius;
-//	  int ddF_x = 1;
-//	  int ddF_y = -2 * radius;
-//	  int x = 0;
-//	  int y = radius;
+//		int f = 1 - radius;
+//		int ddF_x = 1;
+//		int ddF_y = -2 * radius;
+//		int x = 0;
+//		int y = radius;
 //
-//	  Point yHigh(x0, y0 + radius);
-//	  Point yLow(x0, y0 - radius);
-//	  Point xHigh(x0 + radius, y0);
-//	  Point xLow(x0 - radius, y0);
+//		Point yHigh;
+//		yHigh.x	= origin.x;
+//		yHigh.y	= origin.y + radius;
+//		yHigh.z	= origin.z;
+//		yHigh.rgba= origin.rgba;
+//		Point yLow;
+//		yLow.x	= origin.x;
+//		yLow.y	= origin.y - radius;
+//		yLow.z	= origin.z;
+//		yLow.rgba= origin.rgba;
+//		Point xHigh;
+//		xHigh.x	= origin.x+radius;
+//		xHigh.y	= origin.y;
+//		xHigh.z	= origin.z;
+//		xHigh.rgba= origin.rgba;
+//		Point xLow;
+//		xLow.x	= origin.x-radius;
+//		xLow.y	= origin.y;
+//		xLow.z	= origin.z;
+//		xLow.rgba= origin.rgba;
 //
 //
-//	  this->points.push_back(yHigh);
-//	  this->points.push_back(yLow);
-//	  this->points.push_back(xHigh);
-//	  this->points.push_back(yLow);
+//		this->points.push_back(yHigh);
+//		this->points.push_back(yLow);
+//		//this->points.push_back(xHigh);
+//		//this->points.push_back(xLow);
 //
-//	  while(x < y)
-//	  {
-//	    // ddF_x == 2 * x + 1;
-//	    // ddF_y == -2 * y;
-//	    // f == x*x + y*y - radius*radius + 2*x - y + 1;
-//	    if(f >= 0)
-//	    {
-//	      y--;
-//	      ddF_y += 2;
-//	      f += ddF_y;
-//	    }
-//	    x++;
-//	    ddF_x += 2;
-//	    f += ddF_x;
-//	    setPixel(x0 + x, y0 + y);
-//	    setPixel(x0 - x, y0 + y);
-//	    setPixel(x0 + x, y0 - y);
-//	    setPixel(x0 - x, y0 - y);
-//	    setPixel(x0 + y, y0 + x);
-//	    setPixel(x0 - y, y0 + x);
-//	    setPixel(x0 + y, y0 - x);
-//	    setPixel(x0 - y, y0 - x);
-//	  }
+//		while(x < y)
+//		{
+//			// ddF_x == 2 * x + 1;
+//			// ddF_y == -2 * y;
+//			// f == x*x + y*y - radius*radius + 2*x - y + 1;
+//			if(f >= 0)
+//			{
+//				y--;
+//				ddF_y += 2;
+//				f += ddF_y;
+//			}
+//			x++;
+//			ddF_x += 2;
+//			f += ddF_x;
+//			setPixel(x0 + x, y0 + y);
+//			setPixel(x0 - x, y0 + y);
+//			setPixel(x0 + x, y0 - y);
+//			setPixel(x0 - x, y0 - y);
+//			setPixel(x0 + y, y0 + x);
+//			setPixel(x0 - y, y0 + x);
+//			setPixel(x0 + y, y0 - x);
+//			setPixel(x0 - y, y0 - x);
+//		}
 //	}
 //};
 
