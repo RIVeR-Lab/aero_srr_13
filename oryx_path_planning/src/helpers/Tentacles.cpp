@@ -17,13 +17,13 @@
 #endif
 
 #ifndef MIN_TENTACLE_LENGTH
-#define MIN_TENTACLE_LENGTH 8.0
+#define MIN_TENTACLE_LENGTH 0.8
 #else
 #error MIN_TENTACLE_LENGTH is already defined!
 #endif
 
 #ifndef EXP_TENTACLE_LENGTH_BASE
-#define EXP_TENTACLE_LENGTH_BASE 33.5
+#define EXP_TENTACLE_LENGTH_BASE 3.5
 #else
 #error EXP_TENTACLE_LENGTH_BASE is already defined!
 #endif
@@ -180,7 +180,7 @@ Tentacle::Tentacle(const Tentacle& Tentacle):
 
 Tentacle::~Tentacle(){};
 
-Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException):
+Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException):
 					points(){
 
 	this->velocity= velocity;
@@ -198,12 +198,22 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 		this->radius = std::numeric_limits<double>::infinity();
 	}
 	PRINTER("Calculated Tentacle Radius=%f", this->radius);
+	//Calculate the working length of the tentacle
+	int workingLength;
 
+	if(index<halfwayIndex){
+		//ROS_INFO("Small Index %d, raw working length is %f",index, seedLength+2*std::sqrt((double)index/(double)halfwayIndex));
+		workingLength = roundToGrid(seedLength+2*std::sqrt((double)index/(double)halfwayIndex), resolution);
+	}
+	else{
+		//ROS_INFO("Large Index %d, raw working length is %f",index, seedLength+2*std::sqrt(((double)index-(double)halfwayIndex)/(double)halfwayIndex));
+		workingLength = roundToGrid(seedLength+2*std::sqrt(((double)index-(double)halfwayIndex)/(double)halfwayIndex), resolution);
+	}
 
 	//Check for special case of an effectively straight line
 	if(this->radius > this->straightThreshold || this->radius < -this->straightThreshold){
 		this->radius = std::numeric_limits<double>::infinity();
-		for(double i = 0; i<xDim; i++){
+		for(double i = 0; i<workingLength; i++){
 			oryx_path_planning::Point coord;
 			coord.x=i;
 			coord.y=0;
@@ -214,58 +224,68 @@ Tentacle::Tentacle(double expFact, double seedRad, int index, int numTent, doubl
 	else{
 		//Convert the radius, which will be in engineering units, into grid coordinates
 		int workingRadius = roundToGrid(radius, resolution);
-		Point tentacleOrigin;
-		tentacleOrigin.x = 0;
-		tentacleOrigin.y = radius;
-		tentacleOrigin.z = 0;
-		tentacleOrigin.rgba = oryx_path_planning::TENTACLE;
-		//castArc(workingRadius, oryx_path_planning::PI/2.0, oryx_path_planning::TENTACLE, tentacleOrigin, this->points);
-	}
-//	else{
-//		//Tracks the last coordinate so that we don't get duplicates
-//		oryx_path_planning::Point lastCoord;
-//		lastCoord.x = 0;
-//		lastCoord.y = 0;
-//		lastCoord.z = 0;
-//		//The amount to increment theta by
-//		double thetaIncrement	= PI/((100.0/resolution)*std::abs(this->radius));
-//		double sweepAngle		= TENTACLE_SWEEP_ANGLE;
-//		//Push the first coordinate on
-//		this->points.push_back(lastCoord);
-//		//Calculate the X and Y coord along the tentacle
+		//Calculate the sweep angle for this tentacle
+		double sweepAngle = std::abs((double)workingLength/(double)workingRadius);
+		ROS_INFO("Tentacle %d, Working Length %d, Working Radius %d, Sweep Angle %f", index, workingLength, workingRadius, sweepAngle);
+//		//Place the origin of the tentacle, which will be at x=0 and y=-workingRadius
+//		Point tentacleOrigin;
+//		tentacleOrigin.x = 0;
+//		tentacleOrigin.y = -workingRadius;
+//		tentacleOrigin.z = 0;
+//		tentacleOrigin.rgba = oryx_path_planning::TENTACLE;
+//
+//		workingRadius = std::abs(workingRadius);
 //		if(this->radius>0){
-//			double startAngle = PI/2.0;
-//			for(double t=startAngle; t>(startAngle-sweepAngle); t-=thetaIncrement){
-//				oryx_path_planning::Point newCoord;
-//				newCoord.y = (oryx_path_planning::roundToFrac(this->radius*std::sin(t)-this->radius, resolution));
-//				newCoord.x = (oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
-//				newCoord.z = 0;
-//				//If we've hit the top of the occupancy grid, break
-//				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
-//				//Otherwise push_back the next point if it's not the same as the previous point
-//				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
-//					this->points.push_back(newCoord);
-//					lastCoord = newCoord;
-//				}
-//			}
+//			castArc(workingRadius, sweepAngle, oryx_path_planning::TENTACLE, tentacleOrigin, this->points);
 //		}
 //		else{
-//			double startAngle = PI/2.0;
-//			for(double t=startAngle; t<(startAngle+sweepAngle); t+=thetaIncrement){
-//				oryx_path_planning::Point newCoord;
-//				newCoord.y = (float)(oryx_path_planning::roundToFrac(this->radius*std::sin(t)-radius, resolution));
-//				newCoord.x = (float)(oryx_path_planning::roundToFrac(this->radius*std::cos(t), resolution));
-//				newCoord.z = 0;
-//				//If we've hit the top of the occupancy grid, break
-//				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
-//				//Otherwise push_back the next point if it's not the same as the previous point
-//				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
-//					this->points.push_back(newCoord);
-//					lastCoord = newCoord;
-//				}
-//			}
+//			castArc(workingRadius, sweepAngle, oryx_path_planning::TENTACLE, tentacleOrigin, this->points, 3);
 //		}
 //	}
+//	else{
+		//Tracks the last coordinate so that we don't get duplicates
+		oryx_path_planning::Point lastCoord;
+		lastCoord.x = 0;
+		lastCoord.y = 0;
+		lastCoord.z = 0;
+		//The amount to increment theta by
+		double thetaIncrement	= oryx_path_planning::constants::PI()/((100.0/resolution)*std::abs(this->radius));
+		//Push the first coordinate on
+		this->points.push_back(lastCoord);
+		//Calculate the X and Y coord along the tentacle
+		if(this->radius>0){
+			double startAngle = oryx_path_planning::constants::PI()/2.0;
+			for(double t=startAngle; t>(startAngle-sweepAngle); t-=thetaIncrement){
+				oryx_path_planning::Point newCoord;
+				newCoord.y = (oryx_path_planning::roundToGrid(this->radius*std::sin(t)-this->radius, resolution));
+				newCoord.x = (oryx_path_planning::roundToGrid(this->radius*std::cos(t), resolution));
+				newCoord.z = 0;
+				//If we've hit the top of the occupancy grid, break
+				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
+				//Otherwise push_back the next point if it's not the same as the previous point
+				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
+					this->points.push_back(newCoord);
+					lastCoord = newCoord;
+				}
+			}
+		}
+		else{
+			double startAngle = oryx_path_planning::constants::PI()/2.0;
+			for(double t=startAngle; t<(startAngle+sweepAngle); t+=thetaIncrement){
+				oryx_path_planning::Point newCoord;
+				newCoord.y = (float)(oryx_path_planning::roundToGrid(this->radius*std::sin(t)-radius, resolution));
+				newCoord.x = (float)(oryx_path_planning::roundToGrid(this->radius*std::cos(t), resolution));
+				newCoord.z = 0;
+				//If we've hit the top of the occupancy grid, break
+				if(newCoord.x>xDim||std::abs(newCoord.y)>yDim) break;
+				//Otherwise push_back the next point if it's not the same as the previous point
+				if(!((((Eigen::Vector4f)newCoord.getVector4fMap())==(((Eigen::Vector4f)lastCoord.getVector4fMap())))||(newCoord.x<0)/*||(std::abs(newCoord.getY()>yDim))*/)){
+					this->points.push_back(newCoord);
+					lastCoord = newCoord;
+				}
+			}
+		}
+	}
 	PRINTER("Calculated a Tentacle with Number of Points=%d",(int)this->points.size());
 }
 
@@ -315,12 +335,12 @@ SpeedSet::SpeedSet(const SpeedSet& SpeedSet):
 }
 
 
-SpeedSet::SpeedSet(double expFact, double seedRad, int numTent, double resolution, int xDim, int yDim, double velocity){
+SpeedSet::SpeedSet(double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity){
 	this->seedRad  = seedRad;
 	this->velocity = velocity;
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++){
-		this->tentacles.push_back(Tentacle(expFact, seedRad, t, numTent, resolution, xDim, yDim, velocity));
+		this->tentacles.push_back(Tentacle(expFact, seedRad, seedLength, t, numTent, resolution, xDim, yDim, velocity));
 	}
 }
 
@@ -396,12 +416,14 @@ TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSp
 
 	double q = 0;
 	double vel = 0;
+	double l = 0;
 	//Generate the SpeedSets
 	for(int v=0; v<numSpeedSet; v++){
 		q = calcQ(v);
+		l = calcL(q);
 		vel = calcSpeedSetVel(minSpeed, maxSpeed, q);
 		PRINTER("Calculated q=%f",q);
-		this->speedSets.push_back(SpeedSetPtr(new SpeedSet(expFact, calcSeedRad(v, q), numTentacles, resolution, xDim, yDim, vel)));
+		this->speedSets.push_back(SpeedSetPtr(new SpeedSet(expFact, calcSeedRad(v, l, q), l, numTentacles, resolution, xDim, yDim, vel)));
 		this->velocityKeys.push_back(vel);
 	}
 	PRINTER("Speed Sets Complete!");
@@ -472,6 +494,10 @@ TentacleGenerator::const_iterator TentacleGenerator::end() const{
 	return this->speedSets.end();
 }
 
+double TentacleGenerator::calcL(double q){
+	return  MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
+}
+
 /**
  * calculate seed radius for the speed set. Formula taken from 'von Hundelshausen et al.: Integral Structures for Sensing and Motion'
  * Equations are as follows:
@@ -482,9 +508,8 @@ TentacleGenerator::const_iterator TentacleGenerator::end() const{
  * Where @f$ R_j = \text{Seed Radius for Speed Set j} @f$, @f$ delta phi =@f$ the arc swept by the smallest tentacle,
  * @f$ l=@f$ length of the longest tentacle in the set, and @f$ TSA, E_b, E_f@f$ are all tuning constants determined empirically.
  */
-double TentacleGenerator::calcSeedRad(int speedSet, double q) const{
-	double dphi = oryx_path_planning::constants::PI();
-	double l	= MIN_TENTACLE_LENGTH+EXP_TENTACLE_LENGTH_BASE*std::pow(q, EXP_TENTACLE_LENGTH_FACTOR);
+double TentacleGenerator::calcSeedRad(int speedSet, double l, double q) const{
+	double dphi = 1.2*oryx_path_planning::constants::PI()/2.0;
 	PRINTER("Calculated dphi=%f, l=%f",dphi, l);
 	return l/(dphi*(1-std::pow(q,0.9)));
 }
