@@ -123,20 +123,20 @@ int main(int argc, char **argv) {
 	//Build The Tentacles
 	int firstSpeedSet=0;
 	int lastSpeedSet=numSpeedSet;
-	TentacleGenerator generator(minSpeed, maxSpeed, numSpeedSet, numTent, expFact, res, xDim, yDim/2);
+	TentacleGenerator generator(minSpeed, maxSpeed, 2, numTent, expFact, res, xDim, yDim/2);
 	ROS_INFO("Tentacles Generated. Printing Speed Sets...");
 	if(!nh.getParam("first_speed_set", firstSpeedSet))ROS_WARN("First Speed Set Not Set! Using Default %d", firstSpeedSet);
 	if(!nh.getParam("last_speed_set", lastSpeedSet))ROS_WARN("Last Speed Set Not Set! Using Default %d", lastSpeedSet);
 
 	//Print out the Speed Sets
-	for(int s=firstSpeedSet; s<lastSpeedSet; s++){
+	for(int s=0/*firstSpeedSet*/; s<1/*lastSpeedSet*/; s++){
 		SpeedSet speedSet = generator.getSpeedSet(s);
-		printSpeedSet(xDim, yDim, res, speedSet);
+		//printSpeedSet(xDim, yDim, res, speedSet);
 	}
 
 	ROS_INFO("Speed Sets Printed!");
 
-	//Test a Tentacle Traverser
+	/*//Test a Tentacle Traverser
 	ROS_INFO("Testing Tentacle Traversal");
 	try{
 		Tentacle workingTentacle = generator.getTentacle(firstSpeedSet, 0);
@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
 	oryx_path_planning::Point convertedPoint;
 	converter.convertToEng(unConvertedPoint, convertedPoint);
 	PRINT_POINT("Unconverted:", unConvertedPoint);
-	PRINT_POINT("Converted:", convertedPoint);
+	PRINT_POINT("Converted:", convertedPoint);*/
 
 	//Build the base occupancy grid
 	ROS_INFO("Testing Occupancy Grid...");
@@ -184,85 +184,92 @@ int main(int argc, char **argv) {
 	ROS_INFO("Occupancy Grid Built");
 
 	try{
-		//Place a single point on the grid
-		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
-		ROS_INFO("Testing setPoint...");
-		oryx_path_planning::Point testPoint;
-		testPoint.x = 0;
-		testPoint.y = origin.y;
-		testPoint.z = 0;
-		testPoint.rgba = oryx_path_planning::ROBOT;
-		PRINT_POINT("Placing Point", testPoint);
-		testGrid.setPoint(testPoint, false);
-		ROS_INFO("Resulting Grid:\n%s", testGrid.toString(0,0)->c_str());
-
-		//Place a line of points on the grid
-		ROS_INFO("Placing some test points on the grid");
-		PointCloud lineCloud;
-		Point lineStart;
-		lineStart.x = 0;
-		lineStart.y = yDim-origin.y;
-		lineStart.z = 0;
-		lineStart.rgba = oryx_path_planning::OBSTACLE;
-		PRINT_POINT("Start Point", lineStart);
-		Point lineEnd;
-		lineEnd.x = xDim;
-		lineEnd.y = 0;
-		lineEnd.z = 0;
-		lineEnd.rgba = oryx_path_planning::GOAL;
-		PRINT_POINT("End Point", lineEnd);
-		castLine(lineStart, lineEnd, oryx_path_planning::OBSTACLE, lineCloud);
-		ROS_INFO("Line Generated, placing on grid...");
-		for(PointCloud::iterator line_itr = lineCloud.begin(); line_itr<lineCloud.end(); line_itr++){
-			//PRINT_POINT("Line Point", (*line_itr));
-			testGrid.setPointTrait(*line_itr, (oryx_path_planning::PointTrait_t)line_itr->rgba);
-		}
-		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+//		//Place a single point on the grid
+//		//ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+//		ROS_INFO("Testing setPoint...");
+//		oryx_path_planning::Point testPoint;
+//		testPoint.x = 0;
+//		testPoint.y = origin.y;
+//		testPoint.z = 0;
+//		testPoint.rgba = oryx_path_planning::ROBOT;
+//		PRINT_POINT("Placing Point", testPoint);
+//		testGrid.setPoint(testPoint, false);
+//		//ROS_INFO("Resulting Grid:\n%s", testGrid.toString(0,0)->c_str());
+//
+//		//Place a line of points on the grid
+//		ROS_INFO("Placing some test points on the grid");
+//		PointCloud lineCloud;
+//		Point lineStart;
+//		lineStart.x = 0;
+//		lineStart.y = yDim-origin.y;
+//		lineStart.z = 0;
+//		lineStart.rgba = oryx_path_planning::OBSTACLE;
+//		PRINT_POINT("Start Point", lineStart);
+//		Point lineEnd;
+//		lineEnd.x = xDim;
+//		lineEnd.y = 0;
+//		lineEnd.z = 0;
+//		lineEnd.rgba = oryx_path_planning::GOAL;
+//		PRINT_POINT("End Point", lineEnd);
+//		castLine(lineStart, lineEnd, oryx_path_planning::OBSTACLE, lineCloud);
+//		ROS_INFO("Line Generated, placing on grid...");
+//		for(PointCloud::iterator line_itr = lineCloud.begin(); line_itr<lineCloud.end(); line_itr++){
+//			//PRINT_POINT("Line Point", (*line_itr));
+//			testGrid.setPointTrait(*line_itr, (oryx_path_planning::PointTrait_t)line_itr->rgba);
+//		}
+//		//ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 
 		//Test arc generator
 		ROS_INFO("Testing arc generation...");
 		PointCloud arcCloud;
 		Point arcCenter;
 		arcCenter.x = 0;
-		arcCenter.y = 0;
+		arcCenter.y = -55;
 		arcCenter.z = 0;
-		castArc(100, oryx_path_planning::constants::PI()/2, oryx_path_planning::OBSTACLE, arcCenter, arcCloud);
+		arcCenter.rgba = oryx_path_planning::TENTACLE;
+		castArc(48, 2.312500, oryx_path_planning::OBSTACLE, arcCenter, arcCloud);
 		ROS_INFO("Arc generated, placing on grid...");
 		for(PointCloud::iterator arc_itr = arcCloud.begin(); arc_itr<arcCloud.end(); arc_itr++){
 			PRINT_POINT("Arc Point", (*arc_itr));
 			testGrid.setPointTrait(*arc_itr, (oryx_path_planning::PointTrait_t)arc_itr->rgba);
 		}
+		//PRINT_POINT("Setting a Point on the Grid at Arc Origin", arcCenter);
+		testGrid.setPointTrait(arcCenter, (oryx_path_planning::PointTrait_t)arcCenter.rgba);
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
-		//Place a known straight line on the grid
-		for(double x=0; x<xDim; x+=res){
-			testGrid.setPointTrait(x, -origin.y, 0.0, oryx_path_planning::OBSTACLE);
-		}
-
-		//Test copying occupancy grids
-		ROS_INFO("Testing Occupancy Grid Copy...");
-		OccupancyGrid copyGrid(testGrid);
-		//ROS_INFO("Copied Grid:\n%s", copyGrid.toString(0,0)->c_str());
-
-		//Test building a grid from an existing point cloud
-		ROS_INFO("Testing Build From Point Cloud...");
-		OccupancyGrid cloudGrid(xDim,yDim,0.0,res,origin, copyGrid.getGrid());
-		//ROS_INFO("PC Built Grid:\n%s", cloudGrid.toString(0,0)->c_str());
-		ROS_INFO("Data at 10,10,0 <%x>", cloudGrid.getPointTrait(10,10,0));
-
-
+//		//Place a known straight line on the grid
+//		for(double x=0; x<xDim; x+=res){
+//			testGrid.setPointTrait(x, -origin.y, 0.0, oryx_path_planning::OBSTACLE);
+//		}
+//
+//		//Test copying occupancy grids
+//		ROS_INFO("Testing Occupancy Grid Copy...");
+//		OccupancyGrid copyGrid(testGrid);
+//		//ROS_INFO("Copied Grid:\n%s", copyGrid.toString(0,0)->c_str());
+//
+//		//Test building a grid from an existing point cloud
+//		ROS_INFO("Testing Build From Point Cloud...");
+//		OccupancyGrid cloudGrid(xDim,yDim,0.0,res,origin, copyGrid.getGrid());
+//		//ROS_INFO("PC Built Grid:\n%s", cloudGrid.toString(0,0)->c_str());
+//		ROS_INFO("Data at 10,10,0 <%x>", cloudGrid.getPointTrait(10,10,0));
+//
+//
 		//Overlay tentacles on grid
 		ROS_INFO("Testing Tentacle Overlay...");
-		for(SpeedSet::const_iterator tentacle_itr = generator.getSpeedSet(0).begin(); tentacle_itr < generator.getSpeedSet(0).end(); tentacle_itr++){
-			Tentacle::TentacleTraverser traverser(*tentacle_itr);
-			while(traverser.hasNext()){
-				const Point& point = traverser.next();
+		for(unsigned int index =0; index<generator.getSpeedSet(0).getNumTentacle(); index++){
+			const Tentacle& tentacle = generator.getSpeedSet(0).getTentacle(index);
+			for(unsigned int pi = 0; pi<tentacle.getPoints().size(); pi++){
+				const Point& point = tentacle.getPoints().at(pi);
 				if(std::abs(point.x)<xDim && std::abs(point.y)<yDim){
 					//ROS_INFO("Placing Point <%f,%f,%f,%x>", point.x, point.y, point.z, oryx_path_planning::TENTACLE);
-					copyGrid.setPointTrait(point, oryx_path_planning::TENTACLE);
+					try{
+						testGrid.setPointTrait(point, oryx_path_planning::TENTACLE);
+					}catch(std::exception& e){
+
+					}
 				}
 			}
 		}
-		//ROS_INFO("Tentacle Overlay:\n%s", copyGrid.toString(0,0)->c_str());
+		ROS_INFO("Tentacle Overlay:\n%s", testGrid.toString(0,0)->c_str());
 	}catch(std::exception& e){
 		ROS_ERROR(e.what());
 	}
@@ -284,7 +291,7 @@ void printSpeedSet(int xDim, int yDim, double resolution, SpeedSet& speedSet){
 			//ROS_INFO("Got Point at <%f, %f>", point.x, point.y);
 			point.y+=ySize/2;
 			//ROS_INFO("Placing Point at <%f, %f>", point.x, point.y);
-			occGrid.at(point.x).replace(point.y,1,"T");
+			if(point.x<xDim&&point.y<yDim&&point.x>=0&&point.y>=0)occGrid.at(point.x).replace(point.y,1,"T");
 		}
 		//ROS_INFO("Done with Tentacle %d", t);
 	}
