@@ -204,7 +204,7 @@ private:
 		//To prevent processing of stale data, ignore anything received while we shouldn't be planning
 		if(this->shouldPlan){
 			ROS_INFO("I Got new Occupancy Grid Data!");
-			OccpancyGridCloud cloud;
+			OccupancyGridCloud cloud;
 			pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, cloud);
 			OccupancyGrid recievedGrid(xDim, yDim, zDim, res, this->origin, cloud);
 			ROS_INFO("Grid Processed...");
