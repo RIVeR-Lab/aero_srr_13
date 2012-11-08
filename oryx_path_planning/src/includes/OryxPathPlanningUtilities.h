@@ -78,6 +78,7 @@ typedef enum PointTrait_t{
 	UNKNOWN			= 0x808080, //!< UNKNOWN		Point on the grid is unknown (Grey)
 	FREE_HIGH_COST	= 0x008080,	//!< FREE_HIGH_COST	Point on the grid is free but is expensive to travel over (Teal)
 	FREE_LOW_COST	= 0x008000, //!< FREE_LOW_COST	Point on the grid is free but is easy to travel over (Green)
+	TRAVERSED		= 0x6B8E23,	//!< TRAVERSED		Point on the grid is free but has been previously traversed (Olive Drab)
 	GOAL            = 0xFFFF00,	//!< GOAL			Point on the grid is the goal position (Yellow)
 	TENTACLE		= 0xCD00CD,	//!< TENTACLE		Point on the grid is a Tentacle marker (Pink)
 	ROBOT			= 0x000001,	//!< ROBOT			Point on the grid is the robot's center point

@@ -113,25 +113,48 @@ public:
 					OccupancyGrid rendering(workingGrid);
 					unsigned int longestIndex = 0;
 					double longestLength = 0;
+					double lengthModifier = 0;
 					ROS_INFO("I'm looking for the longest tentacle...");
 					for(unsigned int i=0; i<speedSet.getNumTentacle(); i++){
+						bool traversing = true;
 						Tentacle workingTentacle = speedSet.getTentacle(i);
 						Tentacle::TentacleTraverser traverser(workingTentacle);
-						while(traverser.hasNext()){
+						lengthModifier = 0;
+
+						while(traverser.hasNext()&&traversing){
 							const oryx_path_planning::Point& point = traverser.next();
 							try{
-								if(workingGrid.getPointTrait(point) == oryx_path_planning::OBSTACLE){
+								switch(workingGrid.getPointTrait(point)){
+								case oryx_path_planning::OBSTACLE:
 									ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
 									PRINT_POINT("Hit Point", point);
+									traversing = false;
+									break;
+								case oryx_path_planning::GOAL:
+									ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
+									traversing = false;
+									break;
+								case oryx_path_planning::FREE_HIGH_COST:
+									lengthModifier -= traverser.deltaLength()*this->diffWeight;
+									break;
+								case oryx_path_planning::TRAVERSED:
+									lengthModifier -= traverser.deltaLength()*this->travWeight;
+									break;
+								default:
 									break;
 								}
 							}catch(OccupancyGridAccessException& e){
 								ROS_ERROR("%s", e.what());
 							}
+
 						}
-						if(traverser.lengthTraversed() >= longestLength){
+
+						//Check to see if the current tentacle is the best one
+						if(traverser.lengthTraversed() >= (longestLength+lengthModifier)){
 							longestIndex = i;
 							longestLength = traverser.lengthTraversed();
+							//if traversing was set to false, we hit the goal, break out of the tentacle search
+							if(!traversing) break;
 						}
 					}
 					//Print out the selected tentacle on the grid

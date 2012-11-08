@@ -59,6 +59,7 @@ TentTrav::TentacleTraverser(Tentacle& tentacle){
 		this->lastPoint	= &tentacle.points.at(0);
 		this->nextPoint	= &tentacle.points.at(0);
 		this->length	= 0;
+		this->delta_length = 0;
 		this->empty		= false;
 	}
 	//If we only got a single point, still initialize the point values, but set empty true
@@ -88,6 +89,7 @@ TentTrav::TentacleTraverser(const Tentacle& tentacle){
 		this->lastPoint	= &tentacle.points.at(0);
 		this->nextPoint	= &tentacle.points.at(0);
 		this->length	= 0;
+		this->delta_length = 0;
 		this->empty		= false;
 	}
 	//If we only got a single point, still initialize the point values, but set empty true
