@@ -292,10 +292,18 @@ public:
 		 */
 		double lengthTraversed() const;
 
+		/**
+		 * @author	Adam Panzica
+		 * @brief	Gets the distance traversed between the last two points
+		 * @return	The distance between the last two points (change in lengthTraversed() after last next() call)
+		 */
+		double deltaLength() const;
+
 	private:
 
 		bool		empty;			///True if the iterator has reached the end of the traversal
 		double		length;			///The current length traversed along the Tentacle
+		double		delta_length;	///The difference between the current length and last length traversed
 		const oryx_path_planning::Point*	lastPoint;	///Pointer to the last point that was passed
 		const oryx_path_planning::Point*	nextPoint;	///Pointer to the next point that will be passed
 		Tentacle::const_iterator start;	///The start of an iterator over all the Points along the Tentacle

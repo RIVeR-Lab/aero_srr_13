@@ -126,7 +126,8 @@ const oryx_path_planning::Point& TentTrav::next(){
 		//Update the calculated length along the Tentacle we've traversed
 		Eigen::Vector4f lastPM(this->lastPoint->getVector4fMap());
 		Eigen::Vector4f nextPM(this->nextPoint->getVector4fMap());
-		this->length += pcl::distances::l2(lastPM, nextPM);
+		this->delta_length = pcl::distances::l2(lastPM, nextPM);
+		this->length += this->delta_length;
 
 		//Set lastPoint to nextPoint so that nextPoint can be updated if possible
 		this->lastPoint = this->nextPoint;
@@ -161,6 +162,10 @@ const oryx_path_planning::Point& TentTrav::next(){
 
 double TentTrav::lengthTraversed() const{
 	return this->length;
+}
+
+double TentTrav::deltaLength() const{
+	return this->delta_length;
 }
 
 //***************************** TENTACLE *********************************//
