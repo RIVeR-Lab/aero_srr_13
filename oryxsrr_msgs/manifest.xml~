@@ -1,0 +1,22 @@
+<package>
+  <description brief="oryxsrr_msgs">
+
+     Message definitions used by the oryxsrr stack
+
+  </description>
+  <author>RIVeR Lab</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/oryxsrr_msgs</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+  <depend package="tf"/>
+  <depend package="oryx_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
+
+</package>
+
+
