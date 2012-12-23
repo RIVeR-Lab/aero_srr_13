@@ -344,15 +344,15 @@ private:
 	 */
 	void searchForGoal();
 
-	int xDim;	///The x dimension of this grid
-	int yDim;	///The y dimension of this grid
-	int zDim;	///The z dimension of this grid
-	double res;	///The grid resolution of this occupancy grid
-	oryx_path_planning::Point origin;	///The origin of the occupancy grid
-	bool hasGoal;						///Flag to signal there is a goal point on the grid
-	oryx_path_planning::Point goal;		///The location of the goal point on the grid
-	OccupancyGridCloud occGrid;			///The point cloud which contains the data for this occupancy grid
-	oryx_path_planning::PointConverter converter;	///Used to convert the internal integer units to output engineering units
+	int x_dim_;	///The x dimension of this grid
+	int y_dim_;	///The y dimension of this grid
+	int z_dim_;	///The z dimension of this grid
+	double res_;	///The grid resolution of this occupancy grid
+	bool has_goal_;						///Flag to signal there is a goal point on the grid
+	oryx_path_planning::Point origin_;	///The origin of the occupancy grid
+	oryx_path_planning::Point goal_;		///The location of the goal point on the grid
+	OccupancyGridCloud occ_grid_;			///The point cloud which contains the data for this occupancy grid
+	oryx_path_planning::PointConverter converter_;	///Used to convert the internal integer units to output engineering units
 };
 
 
