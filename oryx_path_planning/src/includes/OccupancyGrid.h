@@ -257,13 +257,13 @@ public:
 	 * @author	Adam Panzica
 	 * @return	A reference to an iterator at the beginning of the occupancy grid
 	 */
-	const_iterator begin() const;
+	const_iterator cbegin() const;
 
 	/**
 	 * @author	Adam Panzica
 	 * @return	A reference to an iterator at the end of the occupancy grid
 	 */
-	const_iterator end() const;
+	const_iterator cend() const;
 
 	/**
 	 * @author	Adam Panzic

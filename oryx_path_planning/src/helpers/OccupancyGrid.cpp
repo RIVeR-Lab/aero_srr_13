@@ -264,11 +264,11 @@ OccupancyGrid::iterator OccupancyGrid::end(){
 	return this->occGrid.end();
 }
 
-OccupancyGrid::const_iterator OccupancyGrid::begin() const{
+OccupancyGrid::const_iterator OccupancyGrid::cbegin() const{
 	return this->occGrid.begin();
 }
 
-OccupancyGrid::const_iterator OccupancyGrid::end() const{
+OccupancyGrid::const_iterator OccupancyGrid::cend() const{
 	return this->occGrid.end();
 }
 
