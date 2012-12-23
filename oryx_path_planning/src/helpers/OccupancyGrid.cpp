@@ -256,6 +256,16 @@ bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGridPtr message) cons
 	return true;
 }
 
+bool OccupancyGrid::generateMessage(sensor_msgs::Image& message) const{
+	try{
+		pcl::toROSMsg(this->occ_grid_, message);
+	}catch(std::runtime_error& e){
+		ROS_ERROR("Problem building an Image from the OccupancyGrid: %s", e.what());
+		return false;
+	}
+	return true;
+}
+
 OccupancyGrid::iterator OccupancyGrid::begin(){
 	return this->occ_grid_.begin();
 }

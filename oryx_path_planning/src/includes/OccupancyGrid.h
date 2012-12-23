@@ -242,6 +242,16 @@ public:
 	bool generateMessage(oryxsrr_msgs::OccupancyGridPtr message) const;
 
 	/**
+	 * @author Adam Panzica
+	 * @brief Produces a sensor_msgs::Image out of the occupancy grid data, for use with visualization tools like rviz
+	 * @param message Reference to a sensor_msgs::Image to build
+	 * @return TRUE if successful, else false
+	 *
+	 * @todo Currently, it assumes a 2D, XY grid. Will still work with 3D, but will only take the XY plane at Z=0
+	 */
+	bool generateMessage(sensor_msgs::Image& message) const;
+
+	/**
 	 * @author	Adam Panzica
 	 * @return	A reference to an iterator at the beginning of the occupancy grid
 	 */
