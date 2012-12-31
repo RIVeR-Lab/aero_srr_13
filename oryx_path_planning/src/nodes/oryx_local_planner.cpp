@@ -86,7 +86,7 @@ public:
 			throw std::runtime_error(errMsg+this->v_action_topic_);
 		}
 		ROS_INFO("Oryx Local Planner Running");
-	}
+}
 	/**
 	 * default destructor
 	 */
