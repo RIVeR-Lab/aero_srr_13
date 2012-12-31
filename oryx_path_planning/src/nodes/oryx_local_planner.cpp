@@ -118,10 +118,12 @@ public:
 					ROS_INFO("I'm looking for the longest tentacle...");
 					for(unsigned int i=0; i<speedSet.getNumTentacle(); i++){
 						bool traversing = true;
+						bool hit_goal   = false;
 						Tentacle workingTentacle = speedSet.getTentacle(i);
 						Tentacle::TentacleTraverser traverser(workingTentacle);
 						lengthModifier = 0;
 
+						//As long as the tentacle has points still, and we're still traversing, continue traversing
 						while(traverser.hasNext()&&traversing){
 							const oryx_path_planning::Point& point = traverser.next();
 							try{
@@ -134,6 +136,7 @@ public:
 								case oryx_path_planning::GOAL:
 									ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
 									traversing = false;
+									hit_goal   = true;
 									break;
 								case oryx_path_planning::FREE_HIGH_COST:
 									lengthModifier -= traverser.deltaLength()*this->diffWeight;
@@ -147,15 +150,14 @@ public:
 							}catch(OccupancyGridAccessException& e){
 								ROS_ERROR("%s", e.what());
 							}
-
 						}
 
 						//Check to see if the current tentacle is the best one
-						if(traverser.lengthTraversed() >= (longestLength+lengthModifier)){
+						if(traverser.lengthTraversed()+lengthModifier >= (longestLength)){
 							longestIndex = i;
 							longestLength = traverser.lengthTraversed();
-							//if traversing was set to false, we hit the goal, break out of the tentacle search
-							if(!traversing) break;
+							//if we hit the goal, break out of the tentacle search
+							if(hit_goal) break;
 						}
 					}
 					//Print out the selected tentacle on the grid
