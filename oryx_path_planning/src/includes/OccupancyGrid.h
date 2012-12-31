@@ -151,7 +151,7 @@ public:
 	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
 	 * @param message	Reference to the message to make the OccupancyGrid from
 	 */
-	OccupancyGrid(oryx_path_planning::OccupancyGridMsg& message);
+	OccupancyGrid(const oryx_path_planning::OccupancyGridMsg& message);
 
 	/**
 	 * Default destructor

@@ -134,7 +134,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, or
 
 }
 
-OccupancyGrid::OccupancyGrid(oryx_path_planning::OccupancyGridMsg& message):
+OccupancyGrid::OccupancyGrid(const oryx_path_planning::OccupancyGridMsg& message):
 							occ_grid_(){
 	//extract grid information
 	this->x_dim_	= message.x_dim;
