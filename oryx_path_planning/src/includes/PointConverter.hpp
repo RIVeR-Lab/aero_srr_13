@@ -10,7 +10,8 @@
 
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "TypeDefinitions.h"
-namespace oryx_path_planning{
+namespace oryx_path_planning
+{
 /**
  * @author	Adam Panzica
  * @brief	Class for converting a point with 'integer' x/y/z into some 'engineering unit' x/y/z coordinates
@@ -19,7 +20,8 @@ namespace oryx_path_planning{
  * to be approximated in the internal point clouds, which greatly improves the numerical stability of lookups to a grid representation,
  * and still have very fast output to 'real' engineering units for display or comparison to results which are in engineering units
  */
-class PointConverter{
+class PointConverter
+{
 public:
 	/**
 	 * Empty constructor needed by C++
@@ -31,9 +33,9 @@ public:
 	 * @param converter Converter to copy from
 	 */
 	inline PointConverter(PointConverter& converter):
-		cm(converter.cm){}
+		cm_(converter.cm_){}
 	inline PointConverter(const PointConverter& converter):
-		cm(converter.cm){}
+		cm_(converter.cm_){}
 
 	/**
 	 * @author	Adam Panzica
@@ -41,7 +43,7 @@ public:
 	 * @param scale_value The conversion factor to convert between coordinate systems
 	 */
 	inline PointConverter(float scale_value){
-		cm = cm.Identity(4,4)*scale_value;
+		cm_ = cm_.Identity(4,4)*scale_value;
 	}
 
 	/**
@@ -50,12 +52,14 @@ public:
 	 * @param from	 Reference to the point to convert to engineering units
 	 * @param to Reference to a point to place the converted data into
 	 */
-	inline void convertToEng(Point& from, Point& to) const{
-			to.getVector4fMap() = cm*from.getVector4fMap();
+	inline void convertToEng(Point& from, Point& to) const
+	{
+			to.getVector4fMap() = cm_*from.getVector4fMap();
 			to.rgba = from.rgba;
 	}
-	inline void convertToEng(const Point& from, Point& to) const{
-		to.getVector4fMap() = cm*from.getVector4fMap();
+	inline void convertToEng(const Point& from, Point& to) const
+	{
+		to.getVector4fMap() = cm_*from.getVector4fMap();
 		to.rgba = from.rgba;
 	}
 
@@ -65,12 +69,14 @@ public:
 	 * @param from	 Reference to the point to convert to grid units
 	 * @param to Reference to a point to place the converted data into
 	 */
-	inline void convertToGrid(Point& from, Point& to) const{
-			to.getVector4fMap() = cm.inverse()*from.getVector4fMap();
+	inline void convertToGrid(Point& from, Point& to) const
+	{
+			to.getVector4fMap() = cm_.inverse()*from.getVector4fMap();
 			to.rgba = from.rgba;
 	}
-	inline void convertToGrid(const Point& from, Point& to) const{
-		to.getVector4fMap() = cm.inverse()*from.getVector4fMap();
+	inline void convertToGrid(const Point& from, Point& to) const
+	{
+		to.getVector4fMap() = cm_.inverse()*from.getVector4fMap();
 		to.rgba = from.rgba;
 	}
 
@@ -80,8 +86,9 @@ public:
 	 * @param operand The PointConverter to assign this to
 	 * @return *this
 	 */
-	PointConverter& operator=(PointConverter const& operand){
-		this->cm = operand.cm;
+	PointConverter& operator=(PointConverter const& operand)
+	{
+		this->cm_ = operand.cm_;
 		return *this;
 	}
 private:
@@ -97,7 +104,7 @@ private:
 	 * [0	0	... ]
 	 *
 	 */
-	Eigen::Matrix4f cm;
+	Eigen::Matrix4f cm_;
 };
 
 };	/* oryx_path_planning */
