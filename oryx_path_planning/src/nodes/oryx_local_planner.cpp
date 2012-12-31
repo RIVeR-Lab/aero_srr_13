@@ -115,7 +115,9 @@ public:
 					unsigned int longestIndex = 0;
 					double longestLength = 0;
 					double lengthModifier = 0;
+					bool   has_goal      = true;
 					ROS_INFO("I'm looking for the longest tentacle...");
+
 					for(unsigned int i=0; i<speedSet.getNumTentacle(); i++){
 						bool traversing = true;
 						bool hit_goal   = false;
@@ -149,6 +151,26 @@ public:
 								}
 							}catch(OccupancyGridAccessException& e){
 								ROS_ERROR("%s", e.what());
+							}
+						}
+						ROS_INFO_STREAM("I'm Checking The Distance To Goal");
+						//Modify length based on closeness to goal, if there is one
+						if(has_goal)
+						{
+							ROS_INFO_STREAM("There is a goal...");
+							try
+							{
+								//Will throw false if there was no goal point
+								const oryx_path_planning::Point goal_point = workingGrid.getGoalPoint();
+								const oryx_path_planning::Point end_point = traverser.next();
+								double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
+								ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
+								lengthModifier-= dist_to_goal*this->goalWeight;
+							}catch(bool& e)
+							{
+								ROS_INFO("There is not a goal");
+								//There was no goal, set the flag
+								has_goal = e;
 							}
 						}
 
