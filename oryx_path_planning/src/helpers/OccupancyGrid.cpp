@@ -15,9 +15,11 @@
 
 using namespace oryx_path_planning;
 
-namespace oryx_path_planning{
+namespace oryx_path_planning
+{
 
-OccupancyGrid::OccupancyGrid(): occ_grid_(){
+OccupancyGrid::OccupancyGrid(): occ_grid_()
+{
 	this->x_dim_	= 0;
 	this->y_dim_	= 0;
 	this->z_dim_	= 0;
@@ -26,9 +28,10 @@ OccupancyGrid::OccupancyGrid(): occ_grid_(){
 }
 
 OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
-								origin_(grid.origin_),
-								occ_grid_(grid.occ_grid_),
-								converter_(grid.converter_){
+										origin_(grid.origin_),
+										occ_grid_(grid.occ_grid_),
+										converter_(grid.converter_)
+{
 	this->x_dim_	= grid.x_dim_;
 	this->y_dim_	= grid.y_dim_;
 	this->z_dim_	= grid.z_dim_;
@@ -38,9 +41,10 @@ OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
 };
 
 OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
-								origin_(grid.origin_),
-								occ_grid_(grid.occ_grid_),
-								converter_(grid.converter_){
+										origin_(grid.origin_),
+										occ_grid_(grid.occ_grid_),
+										converter_(grid.converter_)
+{
 	this->x_dim_	= grid.x_dim_;
 	this->y_dim_	= grid.y_dim_;
 	this->z_dim_	= grid.z_dim_;
@@ -51,9 +55,10 @@ OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
 
 
 OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait):
-								origin_(origin),
-								occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
-								converter_(resolution){
+										origin_(origin),
+										occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
+										converter_(resolution)
+{
 	this->x_dim_	= xDim;
 	this->y_dim_	= yDim;
 	this->z_dim_	= zDim;
@@ -67,9 +72,10 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 }
 
 OccupancyGrid::OccupancyGrid(int xDim, int yDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait):
-								origin_(origin),
-								occ_grid_((xDim+1)*(yDim+1),1),
-								converter_(resolution){
+										origin_(origin),
+										occ_grid_((xDim+1)*(yDim+1),1),
+										converter_(resolution)
+{
 	this->x_dim_	= xDim;
 	this->y_dim_	= xDim;
 	this->z_dim_	= 0;
@@ -89,9 +95,10 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, double resolution, const oryx_p
  * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
  */
 OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, const OccupancyGridCloud& cloud) throw(OccupancyGridAccessException):
-								origin_(origin),
-								occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
-								converter_(resolution){
+										origin_(origin),
+										occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
+										converter_(resolution)
+{
 	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
 	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occ_grid_.size(), (int)cloud.size());
 	this->x_dim_	= xDim;
@@ -100,7 +107,8 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 	this->res_	= resolution;
 	this->has_goal_ = false;
 
-	for(unsigned int index = 0; index<cloud.size(); index++){
+	for(unsigned int index = 0; index<cloud.size(); index++)
+	{
 		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", cloud.at(index).x, cloud.at(index).y, cloud.at(index).z, cloud.at(index).rgba);
 		setPoint(cloud.at(index), false);
 		//ROS_INFO("Set Data <%f, %f, %f, %x>", getPoint(cloud.at(index), false).x, getPoint(cloud.at(index), false).y, getPoint(cloud.at(index), false).z, getPoint(cloud.at(index), false).rgba);
@@ -117,9 +125,10 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
  * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
  */
 OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, oryx_path_planning::Point& origin, OccupancyGridCloud& cloud) throw(OccupancyGridAccessException):
-								origin_(origin),
-								occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
-								converter_(resolution){
+										origin_(origin),
+										occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
+										converter_(resolution)
+{
 	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
 	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occ_grid_.size(), (int)cloud.size());
 	this->x_dim_	= xDim;
@@ -128,7 +137,8 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, or
 	this->res_	= resolution;
 	this->has_goal_ = false;
 
-	for(unsigned int index = 0; index<cloud.size(); index++){
+	for(unsigned int index = 0; index<cloud.size(); index++)
+	{
 		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", cloud.at(index).x, cloud.at(index).y, cloud.at(index).z, cloud.at(index).rgba);
 		setPoint(cloud.at(index), false);
 		//ROS_INFO("Set Data <%f, %f, %f, %x>", getPoint(cloud.at(index), false).x, getPoint(cloud.at(index), false).y, getPoint(cloud.at(index), false).z, getPoint(cloud.at(index), false).rgba);
@@ -137,7 +147,8 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, or
 }
 
 OccupancyGrid::OccupancyGrid(const oryx_path_planning::OccupancyGridMsg& message):
-							occ_grid_(){
+									occ_grid_()
+{
 	//extract grid information
 	this->x_dim_	= message.x_dim;
 	this->y_dim_	= message.y_dim;
@@ -163,11 +174,15 @@ OccupancyGrid::OccupancyGrid(const oryx_path_planning::OccupancyGridMsg& message
 	pcl::fromROSMsg<pcl::PointXYZRGBA>(message.grid_data, this->occ_grid_);
 }
 
-void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
+void OccupancyGrid::intializeGrid(PointTrait_t seedTrait)
+{
 	ROS_INFO("Grid Size:%d", (int)this->occ_grid_.size());
-	for(int x=0; x<this->x_dim_+1; x++){
-		for(int y=0; y<this->y_dim_+1; y++){
-			for(int z=0; z<this->z_dim_+1; z++){
+	for(int x=0; x<this->x_dim_+1; x++)
+	{
+		for(int y=0; y<this->y_dim_+1; y++)
+		{
+			for(int z=0; z<this->z_dim_+1; z++)
+			{
 				//ROS_INFO("Initializing Point <%d, %d, %d>", x,y,z);
 				//Initialize the point
 				//ROS_INFO("I'm Trying To Initialize Point %d,%d,%d, Index=%d", x,y,z, calcIndex(x,y,z));
@@ -181,9 +196,12 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
 	}
 }
 
-void OccupancyGrid::searchForGoal(){
-	for(OccupancyGridCloud::iterator search_itr= this->occ_grid_.begin(); search_itr< this->occ_grid_.end(); search_itr++){
-		if(search_itr->rgba==oryx_path_planning::GOAL){
+void OccupancyGrid::searchForGoal()
+{
+	for(OccupancyGridCloud::iterator search_itr= this->occ_grid_.begin(); search_itr< this->occ_grid_.end(); search_itr++)
+	{
+		if(search_itr->rgba==oryx_path_planning::GOAL)
+		{
 			this->goal_ = *search_itr;
 			this->has_goal_ = true;
 		}
@@ -192,13 +210,14 @@ void OccupancyGrid::searchForGoal(){
 
 OccupancyGrid::~OccupancyGrid(){}
 
-PointTrait OccupancyGrid::getPointTrait(int x, int y, int z)const throw(OccupancyGridAccessException){
+PointTrait OccupancyGrid::getPointTrait(int x, int y, int z)const throw(OccupancyGridAccessException)
+				{
 	Point workingPoint;
 	workingPoint.x = x;
 	workingPoint.y = y;
 	workingPoint.z = z;
 	return getPointTrait(workingPoint);
-}
+				}
 
 PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAccessException){
 	point.getVector4fMap()+=this->origin_.getVector4fMap();
@@ -214,61 +233,77 @@ PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAcc
 
 
 bool OccupancyGrid::setPointTrait(int x, int y, int z, PointTrait trait)throw(OccupancyGridAccessException){
-	Point workingPoint;
-	workingPoint.x = x;
-	workingPoint.y = y;
-	workingPoint.z = z;
-	return setPointTrait(workingPoint, trait);
+	Point working_point;
+	working_point.x = x;
+	working_point.y = y;
+	working_point.z = z;
+	return setPointTrait(working_point, trait);
 }
 
-bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyGridAccessException){
+bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyGridAccessException)
+				{
 	point.getVector4fMap()+=this->origin_.getVector4fMap();
-	if(boundsCheck(point)){
-		try{
+	if(boundsCheck(point))
+	{
+		try
+		{
 			oryx_path_planning::Point& setPoint = getPoint(point);
 			setPoint.rgba = trait;
-			if(trait==oryx_path_planning::GOAL){
+			if(trait==oryx_path_planning::GOAL)
+			{
 				this->goal_ = setPoint;
 				this->has_goal_ = true;
 			}
 			return true;
-		}catch(std::exception& e){
+		}
+		catch(std::exception& e)
+		{
 			throw *(new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e));
 		}
 	}
 	return false;
-}
+				}
 
-const Point& OccupancyGrid::getGoalPoint() const throw (bool){
-	if(this->has_goal_){
+const Point& OccupancyGrid::getGoalPoint() const throw (bool)
+				{
+	if(this->has_goal_)
+	{
 		return this->goal_;
-	}else throw false;
-}
+	}
+	else throw false;
+				}
 
-void OccupancyGrid::setGoalPoint(oryx_path_planning::Point point) throw(OccupancyGridAccessException){
+void OccupancyGrid::setGoalPoint(oryx_path_planning::Point point) throw(OccupancyGridAccessException)
+				{
 	point.rgba = oryx_path_planning::GOAL;
-	try{
+	try
+	{
 		setPoint(point, false);
 		this->goal_ = point;
 		this->has_goal_ = true;
-	}catch(std::exception& e){
+	}
+	catch(std::exception& e)
+	{
 		std::string message("Unable to Place Goal Point On Grid");
 		OccupancyGridAccessException error(message, e);
 		throw error;
 	}
-}
+				}
 
-const OccupancyGridCloud& OccupancyGrid::getGrid() const{
+const OccupancyGridCloud& OccupancyGrid::getGrid() const
+{
 	return this->occ_grid_;
 }
 
-bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message) const{
+bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message) const
+{
 	message->header.stamp = ros::Time::now();
 	pcl::toROSMsg<pcl::PointXYZRGBA>(this->occ_grid_, *message);
 	return true;
 }
 
-bool OccupancyGrid::generateMessage(oryx_path_planning::OccupancyGridMsg& message) const{
+bool OccupancyGrid::generateMessage(oryx_path_planning::OccupancyGridMsg& message) const
+{
 	message.header.stamp = ros::Time::now();
 	//Pack grid data
 	message.x_dim = this->x_dim_;
@@ -293,33 +328,42 @@ bool OccupancyGrid::generateMessage(oryx_path_planning::OccupancyGridMsg& messag
 	return true;
 }
 
-bool OccupancyGrid::generateMessage(sensor_msgs::Image& message) const{
-	try{
+bool OccupancyGrid::generateMessage(sensor_msgs::Image& message) const
+{
+	try
+	{
 		pcl::toROSMsg(this->occ_grid_, message);
-	}catch(std::runtime_error& e){
+	}
+	catch(std::runtime_error& e)
+	{
 		ROS_ERROR("Problem building an Image from the OccupancyGrid: %s", e.what());
 		return false;
 	}
 	return true;
 }
 
-OccupancyGrid::iterator OccupancyGrid::begin(){
+OccupancyGrid::iterator OccupancyGrid::begin()
+{
 	return this->occ_grid_.begin();
 }
 
-OccupancyGrid::iterator OccupancyGrid::end(){
+OccupancyGrid::iterator OccupancyGrid::end()
+{
 	return this->occ_grid_.end();
 }
 
-OccupancyGrid::const_iterator OccupancyGrid::cbegin() const{
+OccupancyGrid::const_iterator OccupancyGrid::cbegin() const
+{
 	return this->occ_grid_.begin();
 }
 
-OccupancyGrid::const_iterator OccupancyGrid::cend() const{
+OccupancyGrid::const_iterator OccupancyGrid::cend() const
+{
 	return this->occ_grid_.end();
 }
 
-const oryx_path_planning::PointConverter& OccupancyGrid::getConverter() const{
+const oryx_path_planning::PointConverter& OccupancyGrid::getConverter() const
+{
 	return this->converter_;
 }
 
@@ -350,14 +394,18 @@ const oryx_path_planning::PointConverter& OccupancyGrid::getConverter() const{
  * | INFLATED |   'x'   |
  * | Non-Std  |   '*'   |
  */
-boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, int slice) const{
+boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, int slice) const
+{
 	boost::shared_ptr<std::string> output(new std::string(""));
-	std::vector<std::string> occGrid(this->x_dim_, std::string(this->y_dim_, ' '));
+	std::vector<std::string> occ_grid(this->x_dim_, std::string(this->y_dim_, ' '));
 
 	char value[2] ={0,'\0'};
-	for(int x=0; x<this->x_dim_; x++){
-		for(int y=0; y<this->y_dim_; y++){
-			switch(getPoint(x, y, 0).rgba){
+	for(int x=0; x<this->x_dim_; x++)
+	{
+		for(int y=0; y<this->y_dim_; y++)
+		{
+			switch(getPoint(x, y, 0).rgba)
+			{
 			case UNKNOWN:
 				value[0] = 'U';
 				break;
@@ -386,107 +434,136 @@ boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, int slice)
 				value[0] = '*';
 				break;
 			}
-			occGrid.at(x).replace(y,1,value);
+			occ_grid.at(x).replace(y,1,value);
 		}
 	}
 
-	for(unsigned int i=0;i<occGrid.size(); i++){
-		*output+=occGrid.at(i);
+	for(unsigned int i=0;i<occ_grid.size(); i++)
+	{
+		*output+=occ_grid.at(i);
 		*output+="\r\n";
 	}
 	return output;
 }
 
-int OccupancyGrid::calcIndex(int x, int y, int z) const{
+int OccupancyGrid::calcIndex(int x, int y, int z) const
+{
 	return x + (this->y_dim_+1) * (y + (this->z_dim_+1) * z);
 }
 
-const Point& OccupancyGrid::getPoint(const oryx_path_planning::Point& point, bool origin_corrected) const{
-	if(origin_corrected){
+const Point& OccupancyGrid::getPoint(const oryx_path_planning::Point& point, bool origin_corrected) const
+{
+	if(origin_corrected)
+	{
 		return this->occ_grid_.at(calcIndex(point.x, point.y, point.z));
-	}else{
+	}
+	else
+	{
 		return this->occ_grid_.at(calcIndex(point.x+this->origin_.x, point.y+this->origin_.y, point.z+this->origin_.z));
 	}
 }
 
-const Point& OccupancyGrid::getPoint(oryx_path_planning::Point& point, bool origin_corrected) const{
-	if(origin_corrected){
+const Point& OccupancyGrid::getPoint(oryx_path_planning::Point& point, bool origin_corrected) const
+{
+	if(origin_corrected)
+	{
 		return this->occ_grid_.at(calcIndex(point.x, point.y, point.z));
-	}else{
+	}
+	else
+	{
 		return this->occ_grid_.at(calcIndex(point.x+this->origin_.x, point.y+this->origin_.y, point.z+this->origin_.z));
 	}
 }
 
-const Point& OccupancyGrid::getPoint(int x, int y, int z) const{
+const Point& OccupancyGrid::getPoint(int x, int y, int z) const
+{
 	return this->occ_grid_.at(calcIndex(x, y, z));
 }
 
-Point& OccupancyGrid::getPoint(oryx_path_planning::Point& point, bool origin_corrected){
-	if(origin_corrected){
+Point& OccupancyGrid::getPoint(oryx_path_planning::Point& point, bool origin_corrected)
+{
+	if(origin_corrected)
+	{
 		return this->occ_grid_.at(calcIndex(point.x, point.y, point.z));
-	}else{
+	}
+	else
+	{
 		return this->occ_grid_.at(calcIndex(point.x+this->origin_.x, point.y+this->origin_.y, point.z+this->origin_.z));
 	}
 }
 
-Point& OccupancyGrid::getPoint(const oryx_path_planning::Point& point, bool origin_corrected){
-	if(origin_corrected){
+Point& OccupancyGrid::getPoint(const oryx_path_planning::Point& point, bool origin_corrected)
+{
+	if(origin_corrected)
+	{
 		return this->occ_grid_.at(calcIndex(point.x, point.y, point.z));
-	}else{
+	}
+	else
+	{
 		return this->occ_grid_.at(calcIndex(point.x+this->origin_.x, point.y+this->origin_.y, point.z+this->origin_.z));
 	}
 }
 
-Point& OccupancyGrid::getPoint(int x, int y, int z){
+Point& OccupancyGrid::getPoint(int x, int y, int z)
+{
 	return this->occ_grid_.at(calcIndex(x, y, z));
 }
 
 
-bool OccupancyGrid::boundsCheck(Point& point)const throw(OccupancyGridAccessException){
+bool OccupancyGrid::boundsCheck(Point& point)const throw(OccupancyGridAccessException)
+				{
 	bool failure = false;
 	const std::string prefex("Invalid Point Requested: ");
 	const std::string middle(" Is Greater Than Max Value Or Less Than Zero: ");
 	std::stringstream message("");
-	if(point.x>this->x_dim_ || point.x<0){
+	if(point.x>this->x_dim_ || point.x<0)
+	{
 		message<<prefex<<"X value"<<point.x<<middle<<this->x_dim_;
 		failure = true;
 	}
-	else if(point.y>this->y_dim_|| point.x<0){
+	else if(point.y>this->y_dim_|| point.x<0)
+	{
 		message<<prefex<<"Y value"<<point.y<<middle<<this->y_dim_;
 		failure = true;
 	}
-	else if(point.z>this->z_dim_|| point.x<0){
+	else if(point.z>this->z_dim_|| point.x<0)
+	{
 		message<<prefex<<"Z value"<<point.z<<middle<<this->z_dim_;
 		failure = true;
 	}
-	if(failure){
-		std::string messageOut(message.str());
-		OccupancyGridAccessException exception(messageOut);
+	if(failure)
+	{
+		std::string message_out(message.str());
+		OccupancyGridAccessException exception(message_out);
 		throw exception;
 	}
 	return true;
-}
+				}
 
-void OccupancyGrid::setPoint(Point& copy_point, bool origin_corrected){
-	Point& gridPoint = getPoint(copy_point, origin_corrected);
-	gridPoint.x = copy_point.x;
-	gridPoint.y = copy_point.y;
-	gridPoint.z = copy_point.z;
-	gridPoint.rgba = copy_point.rgba;
-	if(gridPoint.rgba == oryx_path_planning::GOAL){
-		this->goal_		= gridPoint;
+void OccupancyGrid::setPoint(Point& copy_point, bool origin_corrected)
+{
+	Point& grid_point = getPoint(copy_point, origin_corrected);
+	grid_point.x = copy_point.x;
+	grid_point.y = copy_point.y;
+	grid_point.z = copy_point.z;
+	grid_point.rgba = copy_point.rgba;
+	if(grid_point.rgba == oryx_path_planning::GOAL)
+	{
+		this->goal_		= grid_point;
 		this->has_goal_	= true;
 	}
 }
 
-void OccupancyGrid::setPoint(const Point& copy_point, bool origin_corrected){
-	Point& gridPoint = getPoint(copy_point, origin_corrected);
-	gridPoint.x = copy_point.x;
-	gridPoint.y = copy_point.y;
-	gridPoint.z = copy_point.z;
-	gridPoint.rgba = copy_point.rgba;
-	if(gridPoint.rgba == oryx_path_planning::GOAL){
-		this->goal_		= gridPoint;
+void OccupancyGrid::setPoint(const Point& copy_point, bool origin_corrected)
+{
+	Point& grid_point = getPoint(copy_point, origin_corrected);
+	grid_point.x = copy_point.x;
+	grid_point.y = copy_point.y;
+	grid_point.z = copy_point.z;
+	grid_point.rgba = copy_point.rgba;
+	if(grid_point.rgba == oryx_path_planning::GOAL)
+	{
+		this->goal_		= grid_point;
 		this->has_goal_	= true;
 	}
 }
