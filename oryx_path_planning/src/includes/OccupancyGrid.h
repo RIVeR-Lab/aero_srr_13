@@ -215,6 +215,14 @@ public:
 	const Point& getGoalPoint() const throw (bool);
 
 	/**
+	 * @author Adam Panzica
+	 * @brief Sets the goal point on a grid
+	 * @param point The point to set as the goal
+	 * @throw OccupancyGridAccessException if the point specified is not on the gird
+	 */
+	void setGoalPoint(oryx_path_planning::Point point) throw(OccupancyGridAccessException);
+
+	/**
 	 * @author	Adam Panzica
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
 	 * @return	A reference to the PointCloud<oryx_path_planning::PointXYZWithTrait> which backs this occupancy grid
@@ -239,7 +247,7 @@ public:
 	 *
 	 * Note that it is up to the caller to properly set the fields in the header other than the stamp
 	 */
-	bool generateMessage(oryxsrr_msgs::OccupancyGridPtr message) const;
+	bool generateMessage(oryx_path_planning::OccupancyGridPtr message) const;
 
 	/**
 	 * @author Adam Panzica

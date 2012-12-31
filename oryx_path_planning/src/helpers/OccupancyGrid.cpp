@@ -236,6 +236,18 @@ const Point& OccupancyGrid::getGoalPoint() const throw (bool){
 	}else throw false;
 }
 
+void OccupancyGrid::setGoalPoint(oryx_path_planning::Point point) throw(OccupancyGridAccessException){
+	try{
+		setPoint(point, oryx_path_planning::GOAL);
+		this->goal_ = point;
+		this->has_goal_ = true;
+	}catch(std::exception& e){
+		std::string message("Unable to Place Goal Point On Grid");
+		OccupancyGridAccessException error(message, e);
+		throw error;
+	}
+}
+
 const OccupancyGridCloud& OccupancyGrid::getGrid() const{
 	return this->occ_grid_;
 }
