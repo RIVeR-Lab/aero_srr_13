@@ -16,7 +16,8 @@
 
 
 
-namespace oryx_path_planning{
+namespace oryx_path_planning
+{
 //*********************** PROTOTYPES ******************************//
 class OccupancyGridAccessException;
 class OccupancyGrid;
@@ -32,7 +33,8 @@ typedef pcl::PointCloud<Point> OccupancyGridCloud;
  * @author	Adam Panzica
  * @brief	Basic exception for stating that an invalid location on the occupancy grid was accessed
  */
-class OccupancyGridAccessException: public ChainableException{
+class OccupancyGridAccessException: public ChainableException
+{
 public:
 	/**
 	 * @author	Adam Panzica
@@ -58,7 +60,8 @@ public:
  * @author	Adam Panzica
  * @brief	Class which represents an Occupancy Grid that contains data on the robot's local frame
  */
-class OccupancyGrid{
+class OccupancyGrid
+{
 public:
 	///Typedef to make iterators easier
 	typedef pcl::PointCloud<pcl::PointXYZRGBA>::iterator iterator;
