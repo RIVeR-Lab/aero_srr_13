@@ -10,9 +10,9 @@
 
 //*********************** SYSTEM DEPENDENCIES ************************************//
 #include <ros/ros.h>
-#include <oryxsrr_msgs/OccupancyGrid.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanningUtilities.h"
+#include "oryx_path_planning/OccupancyGridMsg.h"
 
 
 
@@ -149,16 +149,9 @@ public:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
-	 * @param message	reference to the message to make the OccupancyGrid from
+	 * @param message	Reference to the message to make the OccupancyGrid from
 	 */
-	OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr& message);
-
-	/**
-	 * @author	Adam Panzica
-	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
-	 * @param message	const reference to the message to make the OccupancyGrid from
-	 */
-	OccupancyGrid(oryxsrr_msgs::OccupancyGridConstPtr& message);
+	OccupancyGrid(oryx_path_planning::OccupancyGridMsg& message);
 
 	/**
 	 * Default destructor
@@ -247,7 +240,7 @@ public:
 	 *
 	 * Note that it is up to the caller to properly set the fields in the header other than the stamp
 	 */
-	bool generateMessage(oryx_path_planning::OccupancyGridPtr message) const;
+	bool generateMessage(oryx_path_planning::OccupancyGridMsg& message) const;
 
 	/**
 	 * @author Adam Panzica

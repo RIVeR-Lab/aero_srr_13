@@ -134,24 +134,31 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, or
 
 }
 
-OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridPtr& message):
+OccupancyGrid::OccupancyGrid(oryx_path_planning::OccupancyGridMsg& message):
 							occ_grid_(){
-	this->x_dim_	= message->xDim;
-	this->y_dim_	= message->yDim;
-	this->z_dim_	= message->zDim;
-	this->res_	= message->res;
-	this->has_goal_ = false;
-	pcl::fromROSMsg<pcl::PointXYZRGBA>(message->cloud, this->occ_grid_);
-}
+	//extract grid information
+	this->x_dim_	= message.x_dim;
+	this->y_dim_	= message.y_dim;
+	this->z_dim_	= message.z_dim;
+	this->res_		= message.resolution;
 
-OccupancyGrid::OccupancyGrid(oryxsrr_msgs::OccupancyGridConstPtr& message):
-							occ_grid_(){
-	this->x_dim_	= message->xDim;
-	this->y_dim_	= message->yDim;
-	this->z_dim_	= message->zDim;
-	this->res_	= message->res;
-	this->has_goal_ = false;
-	pcl::fromROSMsg<pcl::PointXYZRGBA>(message->cloud, this->occ_grid_);
+	//extract origin data
+	this->origin_.x = message.x_origin;
+	this->origin_.y = message.y_origin;
+	this->origin_.z = message.z_origin;
+
+	//extract goal data
+	if(message.has_goal)
+	{
+		this->has_goal_ = true;
+		this->goal_.x   = message.x_goal;
+		this->goal_.y   = message.y_goal;
+		this->goal_.z   = message.z_goal;
+	}
+	else this->has_goal_ = false;
+
+	//extract grid data
+	pcl::fromROSMsg<pcl::PointXYZRGBA>(message.grid_data, this->occ_grid_);
 }
 
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait){
@@ -258,13 +265,28 @@ bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message) const{
 	return true;
 }
 
-bool OccupancyGrid::generateMessage(oryxsrr_msgs::OccupancyGridPtr message) const{
-	message->header.stamp = ros::Time::now();
-	message->xDim = this->x_dim_;
-	message->yDim = this->y_dim_;
-	message->zDim = this->z_dim_;
-	message->res  = this->res_;
-	pcl::toROSMsg<pcl::PointXYZRGBA>(this->occ_grid_, message->cloud);
+bool OccupancyGrid::generateMessage(oryx_path_planning::OccupancyGridMsg& message) const{
+	message.header.stamp = ros::Time::now();
+	//Pack grid data
+	message.x_dim = this->x_dim_;
+	message.y_dim = this->y_dim_;
+	message.z_dim = this->z_dim_;
+	message.resolution  = this->res_;
+	//Pack origin data
+	message.x_origin = this->origin_.x;
+	message.y_origin = this->origin_.y;
+	message.z_origin = this->origin_.z;
+	//pack goal data
+	if(this->has_goal_)
+	{
+		message.has_goal = true;
+		message.x_goal   = this->goal_.x;
+		message.y_goal   = this->goal_.y;
+		message.z_goal   = this->goal_.z;
+	}
+	else message.has_goal = false;
+	//pack grid data
+	pcl::toROSMsg<pcl::PointXYZRGBA>(this->occ_grid_, message.grid_data);
 	return true;
 }
 
