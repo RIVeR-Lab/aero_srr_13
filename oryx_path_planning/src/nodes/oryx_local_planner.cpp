@@ -490,7 +490,8 @@ int main(int argc, char **argv) {
 		PRINT_POINT("Origin Point", origin);
 		LocalPlanner planner(goal_weight, trav_weight, diff_weight, x_dim, y_dim, z_dim, res, origin, v_com_top,  pc_top, tentacle_ptr);
 		planner.doPlanning();
-	}catch(std::exception& e)
+	}
+	catch(std::exception& e)
 	{
 		ROS_FATAL("%s, %s",e.what(), "Shutting Down");
 		ros::shutdown();
