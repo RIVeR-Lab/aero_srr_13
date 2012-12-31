@@ -49,16 +49,19 @@
 #error PRINT_POINT is already defined!
 #endif
 
-namespace oryx_path_planning{
+namespace oryx_path_planning
+{
 
 //*********************** CONSTANTS ******************************//
 /**
  * @author	Adam Panzica
  * @brief	singleton class which returns dynamically generated constants
  */
-class constants{
+class constants
+{
 public:
-	static double PI(){
+	static double PI()
+	{
 		return std::atan(1.0)*4;	///Since C++ lacks a predefined PI constant, define it here
 	}
 };
@@ -72,7 +75,8 @@ const std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>
  * The integer enumeration value is mapped to an RGBA color space representation for ease of translating to color map
  * as well as to allow for using the pcl::PointRBGA class to represent data
  */
-typedef enum PointTrait_t{
+typedef enum PointTrait_t
+{
 	OBSTACLE		= 0xFF0000, //!< OBSTACLE		Point on the grid contains an obstacle (Red)
 	INFLATED		= 0x0000FF,	//!< INFLATED		Point on the grid is occupied by a safety inflation radius (Blue)
 	UNKNOWN			= 0x808080, //!< UNKNOWN		Point on the grid is unknown (Grey)
@@ -93,14 +97,16 @@ typedef enum PointTrait_t{
  *
  * "this_message \n Caused By-> that_message"
  */
-class ChainableException: public std::runtime_error{
+class ChainableException: public std::runtime_error
+{
 public:
 	/**
 	 * Default empty constructor
 	 */
 	ChainableException():
 		std::runtime_error(""),
-		cause(){
+		cause_()
+	{
 	}
 	/**
 	 * Standard Copy constructor
@@ -108,7 +114,8 @@ public:
 	 */
 	ChainableException(oryx_path_planning::ChainableException& exception):
 		std::runtime_error(exception),
-		cause(exception.cause){
+		cause_(exception.cause_)
+	{
 	}
 
 	/**
@@ -117,7 +124,8 @@ public:
 	 */
 	ChainableException(std::string& message):
 		std::runtime_error(message),
-		cause(){
+		cause_()
+	{
 	}
 	/**
 	 * Constructor for creating a new exception with a cause
@@ -126,7 +134,8 @@ public:
 	 */
 	ChainableException(std::string& message, std::exception& cause):
 		std::runtime_error(genMessage(message, cause)),
-		cause(cause){
+		cause_(cause)
+	{
 	}
 
 	~ChainableException() throw(){};
@@ -136,10 +145,10 @@ public:
 	 * @return A std::exception which caused this exception
 	 */
 	std::exception& getCause(){
-		return this->cause;
+		return this->cause_;
 	}
 protected:
-	std::exception	cause;		///The exception which caused this ChaingedException
+	std::exception	cause_;		///The exception which caused this ChaingedException
 
 	std::string& genMessage(std::string& message, std::exception& cause){
 		message += "\nCaused By-> ";
@@ -156,7 +165,8 @@ protected:
  * @param frac Fraction to scale to
  * @return The result of std::floor(raw/scale)*scale
  */
-inline double roundToFrac(double raw, double frac){
+inline double roundToFrac(double raw, double frac)
+{
 	return std::floor(raw/frac)*frac;
 }
 
@@ -166,7 +176,8 @@ inline double roundToFrac(double raw, double frac){
  * @param resolution The resolution of the grid to place the point on
  * @return The location of the point on the grid, equivalent to (int)std::floor(raw/resolution)
  */
-inline int roundToGrid(double raw, double resolution){
+inline int roundToGrid(double raw, double resolution)
+{
 	return (int)std::floor(raw/resolution);
 }
 
@@ -176,7 +187,8 @@ inline int roundToGrid(double raw, double resolution){
  * @param resolution	The resolution of the grid
  * @return A double corresponding to a real value represented by a grid coordinate
  */
-inline double gridToReal(int grid, double resolution){
+inline double gridToReal(int grid, double resolution)
+{
 	return (double)grid*resolution;
 }
 
@@ -193,7 +205,8 @@ inline double gridToReal(int grid, double resolution){
  * given grid resolution. The RGBA values of the start point and end point are copied into the respective points in the cloud,
  * with the points between them filled with the value given by the RGBA parameter
  */
-inline void castLine(Point& startPoint, Point& endPoint, int rgba, PointCloud& cloud){
+inline void castLine(Point& startPoint, Point& endPoint, int rgba, PointCloud& cloud)
+{
 	int x_0 = startPoint.x, x_f= endPoint.x, x, delta_x, step_x;
 	int y_0 = startPoint.y, y_f= endPoint.y, y, delta_y, step_y;
 	int z_0 = startPoint.z, z_f= endPoint.z, z, delta_z, step_z;
@@ -289,7 +302,8 @@ inline void castLine(Point& startPoint, Point& endPoint, int rgba, PointCloud& c
  * @param quadrant		The quadrant that the arc lies in (1, 2, 3 or 4, anything outside that range will be 1)
  * @param plane			The plane to cast the arc in (0 for xy, 1 for xz, 2 for yz)
  */
-inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, PointCloud& cloud, int quadrant=1, int plane=0){
+inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, PointCloud& cloud, int quadrant=1, int plane=0)
+{
 	int x = 0, y = radius;
 	int g = 3 - 2*radius;
 	int diagonalInc = 10 - 4*radius;
