@@ -13,7 +13,8 @@
 ///Macro for printing out warning messages if default parameters are used
 #define PARAM_WARN(param,value) ROS_WARN(warn_message.c_str(), param.c_str(), value.c_str())
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 	std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>");
 	ros::init(argc, argv, "Occupancy_Generator");
 	ros::NodeHandle nh;
@@ -22,24 +23,24 @@ int main(int argc, char **argv) {
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");
-	double xDim = 20;
-	std::string xDim_msg("");
-	xDim_msg+= boost::lexical_cast<double>(xDim);
-	xDim_msg+="m";
+	double x_dim = 20;
+	std::string x_dim_msg("");
+	x_dim_msg+= boost::lexical_cast<double>(x_dim);
+	x_dim_msg+="m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim("occupancy/y_dimension");
-	double yDim = 20;
-	std::string yDim_msg("");
-	yDim_msg+= boost::lexical_cast<double>(yDim);
-	yDim_msg+="m";
+	double y_dim = 20;
+	std::string y_dim_msg("");
+	y_dim_msg+= boost::lexical_cast<double>(y_dim);
+	y_dim_msg+="m";
 
 	//z dimension of occupancy grid
 	std::string p_z_dim("occupancy/z_dimension");
-	double zDim = 0;
-	std::string zDim_msg("");
-	zDim_msg+= boost::lexical_cast<double>(zDim);
-	zDim_msg+="m";
+	double z_dim = 0;
+	std::string z_dim_msg("");
+	z_dim_msg+= boost::lexical_cast<double>(z_dim);
+	z_dim_msg+="m";
 
 	//resolution occupancy grid
 	std::string p_res("occupancy/grid_resolution");
@@ -48,64 +49,66 @@ int main(int argc, char **argv) {
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
 
-	if(!nh.getParam(p_x_dim,	xDim))			PARAM_WARN(p_x_dim,		xDim_msg);
-	if(!nh.getParam(p_y_dim,	yDim))			PARAM_WARN(p_y_dim,		yDim_msg);
-	if(!nh.getParam(p_z_dim,	zDim))			PARAM_WARN(p_z_dim,		zDim_msg);
+	if(!nh.getParam(p_x_dim,	x_dim))			PARAM_WARN(p_x_dim,		x_dim_msg);
+	if(!nh.getParam(p_y_dim,	y_dim))			PARAM_WARN(p_y_dim,		y_dim_msg);
+	if(!nh.getParam(p_z_dim,	z_dim))			PARAM_WARN(p_z_dim,		z_dim_msg);
 	if(!nh.getParam(p_res,		res))			PARAM_WARN(p_res,		p_res_msg);
 
 	oryx_path_planning::Point origin;
 	origin.x = 0;
-	origin.y = yDim/2;
+	origin.y = y_dim/2;
 	origin.z = 0;
 
 	bool stop = true;
-	while(ros::ok()){
-		oryx_path_planning::OccupancyGrid grid(xDim, yDim, res, origin, oryx_path_planning::FREE_LOW_COST);
-		oryx_path_planning::PointCloud lineCloud;
-		oryx_path_planning::Point startPoint;
-		startPoint.z=0;
-		startPoint.rgba = oryx_path_planning::OBSTACLE;
-		oryx_path_planning::Point endPoint;
-		endPoint.z=0;
-		endPoint.rgba = oryx_path_planning::OBSTACLE;
+	while(ros::ok())
+	{
+		oryx_path_planning::OccupancyGrid grid(x_dim, y_dim, res, origin, oryx_path_planning::FREE_LOW_COST);
+		oryx_path_planning::PointCloud line_cloud;
+		oryx_path_planning::Point start_point;
+		start_point.z=0;
+		start_point.rgba = oryx_path_planning::OBSTACLE;
+		oryx_path_planning::Point end_point;
+		end_point.z=0;
+		end_point.rgba = oryx_path_planning::OBSTACLE;
 
 		oryx_path_planning::Point goal_point;
 
 		ROS_INFO("Enter X0: ");
-		std::cin >> startPoint.x;
-		startPoint.x=std::floor(startPoint.x);
-		ROS_INFO("I Got Input!: %f", startPoint.x);
+		std::cin >> start_point.x;
+		start_point.x=std::floor(start_point.x);
+		ROS_INFO("I Got Input!: %f", start_point.x);
 		ROS_INFO("Enter Y0: ");
-		std::cin >> startPoint.y;
-		startPoint.y=std::floor(startPoint.y);
-		ROS_INFO("I Got Input!: %f", startPoint.y);
+		std::cin >> start_point.y;
+		start_point.y=std::floor(start_point.y);
+		ROS_INFO("I Got Input!: %f", start_point.y);
 
 		ROS_INFO("Enter Xf: ");
-		std::cin >> endPoint.x;
-		endPoint.x=std::floor(endPoint.x);
-		ROS_INFO("I Got Input!: %f", endPoint.x);
+		std::cin >> end_point.x;
+		end_point.x=std::floor(end_point.x);
+		ROS_INFO("I Got Input!: %f", end_point.x);
 		ROS_INFO("Enter Yf: ");
-		std::cin >> endPoint.y;
-		endPoint.y=std::floor(endPoint.y);
-		ROS_INFO("I Got Input!: %f", endPoint.y);
+		std::cin >> end_point.y;
+		end_point.y=std::floor(end_point.y);
+		ROS_INFO("I Got Input!: %f", end_point.y);
 
 		ROS_INFO("Enter Goal X: ");
 		std::cin >> goal_point.x;
 		goal_point.x=std::floor(goal_point.x);
-		ROS_INFO("I Got Input!: %f", endPoint.x);
+		ROS_INFO("I Got Input!: %f", end_point.x);
 		ROS_INFO("Enter Goal Y: ");
 		std::cin >> goal_point.y;
 		goal_point.y=std::floor(goal_point.y);
-		ROS_INFO("I Got Input!: %f", endPoint.y);
+		ROS_INFO("I Got Input!: %f", end_point.y);
 
 		goal_point.z = 0;
 
-		startPoint.getVector4fMap();
-		endPoint.getVector4fMap();
+		start_point.getVector4fMap();
+		end_point.getVector4fMap();
 
-		oryx_path_planning::castLine(startPoint, endPoint, oryx_path_planning::OBSTACLE, lineCloud);
+		oryx_path_planning::castLine(start_point, end_point, oryx_path_planning::OBSTACLE, line_cloud);
 
-		for(oryx_path_planning::PointCloud::iterator line_itr = lineCloud.begin(); line_itr<lineCloud.end(); line_itr++){
+		for(oryx_path_planning::PointCloud::iterator line_itr = line_cloud.begin(); line_itr<line_cloud.end(); line_itr++)
+		{
 			PRINT_POINT("Line Point", (*line_itr));
 			grid.setPointTrait(*line_itr, (oryx_path_planning::PointTrait)line_itr->rgba);
 		}
@@ -114,7 +117,9 @@ int main(int argc, char **argv) {
 		try
 		{
 			grid.setGoalPoint(goal_point);
-		}catch(std::runtime_error& e){
+		}
+		catch(std::runtime_error& e)
+		{
 			ROS_WARN_STREAM(e.what());
 		}
 		oryx_path_planning::OccupancyGridMsg message;
