@@ -69,6 +69,8 @@ int main(int argc, char **argv) {
 		endPoint.z=0;
 		endPoint.rgba = oryx_path_planning::OBSTACLE;
 
+		oryx_path_planning::Point goal_point;
+
 		ROS_INFO("Enter X0: ");
 		std::cin >> startPoint.x;
 		startPoint.x=std::floor(startPoint.x);
@@ -87,6 +89,17 @@ int main(int argc, char **argv) {
 		endPoint.y=std::floor(endPoint.y);
 		ROS_INFO("I Got Input!: %f", endPoint.y);
 
+		ROS_INFO("Enter Goal X: ");
+		std::cin >> goal_point.x;
+		goal_point.x=std::floor(goal_point.x);
+		ROS_INFO("I Got Input!: %f", endPoint.x);
+		ROS_INFO("Enter Goal Y: ");
+		std::cin >> goal_point.y;
+		goal_point.y=std::floor(goal_point.y);
+		ROS_INFO("I Got Input!: %f", endPoint.y);
+
+		goal_point.z = 0;
+
 		startPoint.getVector4fMap();
 		endPoint.getVector4fMap();
 
@@ -98,6 +111,12 @@ int main(int argc, char **argv) {
 		}
 
 		ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());
+		try
+		{
+			grid.setGoalPoint(goal_point);
+		}catch(std::runtime_error& e){
+			ROS_WARN_STREAM(e.what());
+		}
 		oryx_path_planning::OccupancyGridMsg message;
 		message.header.frame_id = "base_link";
 		grid.generateMessage(message);
