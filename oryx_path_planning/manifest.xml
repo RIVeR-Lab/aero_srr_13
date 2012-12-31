@@ -13,7 +13,6 @@
   <depend package="std_msgs"/>
   <depend package="tf"/>
   <depend package="oryx_drive_controller"/>
-  <depend package="OryxMessages"/>
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
   <depend package="costmap_2d"/>
