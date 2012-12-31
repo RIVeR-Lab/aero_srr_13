@@ -6,7 +6,8 @@
  */
 #include<ros/ros.h>
 #include<sensor_msgs/PointCloud2.h>
-#include<oryxsrr_msgs/SoftwareStop.h>
+#include<oryx_msgs/SoftwareStop.h>
+#include"oryx_path_planning/OccupancyGridMsg.h"
 #include"OccupancyGrid.h"
 
 ///Macro for printing out warning messages if default parameters are used
@@ -16,8 +17,8 @@ int main(int argc, char **argv) {
 	std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>");
 	ros::init(argc, argv, "Occupancy_Generator");
 	ros::NodeHandle nh;
-	ros::Publisher pub = nh.advertise<sensor_msgs::PointCloud2>("occupancy_point_cloud_topic", 2);
-	ros::Publisher s_pub = nh.advertise<oryxsrr_msgs::SoftwareStop>("oryx/software_stop", 2);
+	ros::Publisher pub = nh.advertise<oryx_path_planning::OccupancyGridMsg>("occupancy_point_cloud_topic", 2);
+	ros::Publisher s_pub = nh.advertise<oryx_msgs::SoftwareStop>("oryx/software_stop", 2);
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");
@@ -97,8 +98,8 @@ int main(int argc, char **argv) {
 		}
 
 		ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());
-		sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
-		message->header.frame_id = "base_link";
+		oryx_path_planning::OccupancyGridMsg message;
+		message.header.frame_id = "base_link";
 		grid.generateMessage(message);
 		pub.publish(message);
 	}

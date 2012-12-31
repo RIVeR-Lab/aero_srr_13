@@ -11,10 +11,11 @@
 #include<oryx_drive_controller/VelocityCommandAction.h>
 #include<boost/lexical_cast.hpp>
 #include<boost/circular_buffer.hpp>
-#include<oryxsrr_msgs/SoftwareStop.h>
+#include<oryx_msgs/SoftwareStop.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanning.h"
 #include "OryxPathPlannerConfig.h"
+#include "oryx_path_planning/OccupancyGridMsg.h"
 
 //*********************** MACROS ************************************//
 ///Number of seconds to wait for connections to other ROS nodes before determining a system failure
@@ -207,7 +208,7 @@ private:
 	 * @brief	Callback for handling the SoftwareStop message
 	 * @param message The message to process
 	 */
-	void stopCB(const oryxsrr_msgs::SoftwareStopConstPtr& message){
+	void stopCB(const oryx_msgs::SoftwareStopConstPtr& message){
 		//Need to flip as message is true when should stop
 		this->shouldPlan = !message->stop;
 		ROS_WARN("Oryx Local Path Planner Received A Software Stop Message [%s]: %s",(message->stop)?"Stop":"Go", message->message.c_str());
@@ -218,18 +219,16 @@ private:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Callback for processing new point cloud data
-	 * @param message The sensor_msgs::PointCloud2 message to process
+	 * @param message The oryx_path_planning::OccupancyGridMsg message to process
 	 *
 	 * Takes the data from the PointCloud2 message, processes it into a new occupancy grid,
 	 * and places it on the occupancy grid buffer for processing by the planner
 	 */
-	void pcCB(const sensor_msgs::PointCloud2ConstPtr& message){
+	void pcCB(const oryx_path_planning::OccupancyGridMsgConstPtr& message){
 		//To prevent processing of stale data, ignore anything received while we shouldn't be planning
 		if(this->shouldPlan){
 			ROS_INFO("I Got new Occupancy Grid Data!");
-			OccupancyGridCloud cloud;
-			pcl::fromROSMsg<pcl::PointXYZRGBA>(*message, cloud);
-			OccupancyGrid recievedGrid(xDim, yDim, zDim, res, this->origin, cloud);
+			OccupancyGrid recievedGrid(*message);
 			ROS_INFO("Grid Processed...");
 			ROS_INFO("Callback got the grid:\n%s", recievedGrid.toString(0,0)->c_str());
 			this->occupancy_buffer.push_back(recievedGrid);
