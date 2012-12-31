@@ -33,7 +33,8 @@ OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
 	this->y_dim_	= grid.y_dim_;
 	this->z_dim_	= grid.z_dim_;
 	this->res_	= grid.res_;
-	this->has_goal_ = false;
+	this->has_goal_ = grid.has_goal_;
+	this->goal_     = grid.goal_;
 };
 
 OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
@@ -44,7 +45,8 @@ OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
 	this->y_dim_	= grid.y_dim_;
 	this->z_dim_	= grid.z_dim_;
 	this->res_	= grid.res_;
-	this->has_goal_ = false;
+	this->has_goal_ = grid.has_goal_;
+	this->goal_     = grid.goal_;
 };
 
 
@@ -244,8 +246,9 @@ const Point& OccupancyGrid::getGoalPoint() const throw (bool){
 }
 
 void OccupancyGrid::setGoalPoint(oryx_path_planning::Point point) throw(OccupancyGridAccessException){
+	point.rgba = oryx_path_planning::GOAL;
 	try{
-		setPoint(point, oryx_path_planning::GOAL);
+		setPoint(point, false);
 		this->goal_ = point;
 		this->has_goal_ = true;
 	}catch(std::exception& e){
