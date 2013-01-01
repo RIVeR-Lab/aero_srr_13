@@ -453,7 +453,7 @@ int main(int argc, char **argv) {
 	p_diff_weight_msg+= boost::lexical_cast<double>(diff_weight);
 
 	//Node Information Printout
-	ROS_INFO("Starting Up Oryx Base Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
+	ROS_INFO("Starting Up Oryx Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
 	//Get Private Parameters
 	if(!p_nh.getParam(v_com_top,v_com_top))		PARAM_WARN(v_com_top,	v_com_top);

@@ -11,7 +11,7 @@
 #include"OryxPathPlanningUtilities.h"	///General Utility definitions
 #include"Tentacles.h"					///Tentacle class definitions
 #include"OccupancyGrid.h"				///Occupancy Grid definitions
-
+#include"TypeDefinitions.h"				///General Type Definitions
 
 
 #endif /* ORYXPATHPLANNING_H_ */
