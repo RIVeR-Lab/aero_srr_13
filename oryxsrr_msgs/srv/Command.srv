@@ -1,0 +1,20 @@
+#Service for sending string-based commands between a server and a client
+
+#Request##############################
+
+#The unique command type
+string command
+
+#The data of the command. This is parsed differently depending on the command type
+string data
+
+---
+
+#Response#############################
+
+#TRUE if the command was successfully completed, else FALSE
+bool success
+
+#The data of the response to the command, if applicable. The format of the data will depend on the command sent. If success
+#Was false, this will contain a descriptive error message of what went wrong
+string data
