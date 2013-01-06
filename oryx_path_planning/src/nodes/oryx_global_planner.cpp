@@ -113,13 +113,13 @@ private:
 				switch(this->com_map_[request.command].second)
 				{
 				case FATAL:
-					ROS_FATAL_STREAM(command_message<<request.command);
+					ROS_FATAL_STREAM(command_message<<request.command<<": "<<response.data);
 					break;
 				case CRITICAL:
-					ROS_ERROR_STREAM(command_message<<request.command);
+					ROS_ERROR_STREAM(command_message<<request.command<<": "<<response.data);
 					break;
 				case WARNING:
-					ROS_WARN_STREAM(command_message<<request.command);
+					ROS_WARN_STREAM(command_message<<request.command<<": "<<response.data);
 					break;
 				default:
 					break;
