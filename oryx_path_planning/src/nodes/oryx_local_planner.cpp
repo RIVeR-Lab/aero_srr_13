@@ -38,6 +38,7 @@ public:
 	 * @param goalWeight			weighting factor to bias tentacle selection towards the goal point
 	 * @param travWeight			weighting factor to bias tentacle selection away from previously traversed points
 	 * @param diffWeight			weighting factor to bias tentacle selection away from difficult terrain
+	 * @param unknWeight			weighting factor to bias tentacle selection towards from unkown terrain
 	 * @param xDim					x dimension of the occupancy grids to use, in real units
 	 * @param yDim					y dimension of the occupancy grids to use, in real units
 	 * @param zDim					z dimension of the occupancy grids to use, in real units
@@ -49,7 +50,7 @@ public:
 	 * @param v_client				Pointer to the velocity client to send commands to the base platform
 	 * @throw std::runtime_error	If the planner is unable to connect to the base platform
 	 */
-	LocalPlanner(double goalWeight, double travWeight, double diffWeight, double xDim, double yDim, double zDim, double res, oryx_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
+	LocalPlanner(double goalWeight, double travWeight, double diffWeight, double unknWeight, double xDim, double yDim, double zDim, double res, oryx_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
 		v_action_topic_(v_action_topic),
 		pc_topic_(oc_point_cloud_topic),
 		origin_(origin),
@@ -60,6 +61,7 @@ public:
 		this->goal_weight_ = goalWeight;
 		this->trav_weight_ = travWeight;
 		this->diff_weight_ = diffWeight;
+		this->unkn_weight_ = unknWeight;
 		this->x_dim_ = xDim;
 		this->y_dim_ = yDim;
 		this->z_dim_ = zDim;
@@ -160,6 +162,9 @@ public:
 								case oryx_path_planning::TRAVERSED:
 									length_modifier -= traverser.deltaLength()*this->trav_weight_;
 									break;
+								case oryx_path_planning::UNKNOWN:
+									length_modifier += traverser.deltaLength()*this->unkn_weight_;
+									break;
 								default:
 									break;
 								}
@@ -228,6 +233,7 @@ private:
 	double	goal_weight_;	///weighting factor to bias tentacle selection towards the goal point
 	double	trav_weight_;	///weighting factor to bias tentacle selection away from previously traversed points
 	double	diff_weight_;	///weighting factor to bias tentacle selection away from difficult terrain
+	double  unkn_weight_;	///weighting factor to bias tentacle selection towards unknown terrain
 	double	x_dim_;		///x dimension of the occupancy grid to use, in real units
 	double	y_dim_;		///y dimension of the occupancy grid to use, in real units
 	double	z_dim_;		///z dimension of the occupancy grid to use, in real units
@@ -452,6 +458,12 @@ int main(int argc, char **argv) {
 	std::string p_diff_weight_msg("");
 	p_diff_weight_msg+= boost::lexical_cast<double>(diff_weight);
 
+	//Unkown Terrain Weight
+	std::string p_unkn_weight("unknown_weight");
+	double unkn_weight = 0.1;
+	std::string p_unkn_weight_msg("");
+	p_unkn_weight_msg+= boost::lexical_cast<double>(unkn_weight);
+
 	//Node Information Printout
 	ROS_INFO("Starting Up Oryx Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -461,6 +473,7 @@ int main(int argc, char **argv) {
 	if(!p_nh.getParam(p_goal_weight,	goal_weight))PARAM_WARN(p_goal_weight,p_goal_weight_msg);
 	if(!p_nh.getParam(p_trav_weight,	trav_weight))PARAM_WARN(p_trav_weight,p_trav_weight_msg);
 	if(!p_nh.getParam(p_diff_weight,	diff_weight))PARAM_WARN(p_diff_weight,p_diff_weight_msg);
+	if(!p_nh.getParam(p_unkn_weight,	unkn_weight))PARAM_WARN(p_unkn_weight,p_unkn_weight_msg);
 	//Get Public Parameters
 	if(!nh.getParam(p_up_rate,	update_rate))	PARAM_WARN(p_up_rate,	up_rate_msg);
 	if(!nh.getParam(p_x_dim,	x_dim))			PARAM_WARN(p_x_dim,		x_dim_msg);
@@ -488,7 +501,7 @@ int main(int argc, char **argv) {
 		origin.y=y_ori;
 		origin.z=z_ori;
 		PRINT_POINT("Origin Point", origin);
-		LocalPlanner planner(goal_weight, trav_weight, diff_weight, x_dim, y_dim, z_dim, res, origin, v_com_top,  pc_top, tentacle_ptr);
+		LocalPlanner planner(goal_weight, trav_weight, diff_weight, unkn_weight, x_dim, y_dim, z_dim, res, origin, v_com_top,  pc_top, tentacle_ptr);
 		planner.doPlanning();
 	}
 	catch(std::exception& e)
