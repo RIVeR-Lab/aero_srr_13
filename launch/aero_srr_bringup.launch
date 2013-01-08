@@ -22,7 +22,7 @@
 	<arg name="tentacles/number"	default="81"/>
 	<arg name="tentacles/exp_factor"	default="1.15"/>
 	
-  <include file="$(find oryx_srr)/launch/oryxsrr.launch">
+  <include file="oryxsrr.launch">
     <arg name="platform"      		value="1" />
     <arg name="velocity_command_topic"	value="cmd_vel" />
     <arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
