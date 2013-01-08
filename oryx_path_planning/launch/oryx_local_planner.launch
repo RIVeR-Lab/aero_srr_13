@@ -1,6 +1,8 @@
 <launch>
 
 	<!-- ********************ARGUMENTS******************** -->
+	<!-- declare args for platform -->
+	<arg name="platform"			default="0" />
 	<!-- declare args to be passed in for actionlib topics -->
 	<arg name="velocity_command_topic"			default="velocity_command_topic" />
 	
@@ -24,6 +26,7 @@
 		<param name="goal_weight"					type="double"	value="$(arg goal_weight)" />
 		<param name="traversed_weight"				type="double"	value="$(arg traversed_weight)" />
 		<param name="difficult_weight"				type="double"	value="$(arg difficult_weight)" />
+		<param name="platform"						type="unit32"	value="$(arg platform)" />
 	</node>
 	
 </launch>

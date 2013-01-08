@@ -1,6 +1,8 @@
 
 <launch ns="oryx_path_planning">
 	<!-- ********************ARGUMENTS******************** -->
+	<!-- declare args for platform -->
+	<arg name="platform"			default="0" />
 	<!-- declare args to be passed in for actionlib topics -->
 	<arg name="velocity_command_topic"	default="velocity_command_topic" />
 	
@@ -57,7 +59,8 @@
 	<!-- ********************INCLUDES******************** -->
 	<!-- Include Sub-Launch Files -->
 	<include file="$(find oryx_path_planning)/launch/oryx_local_planner.launch">
-		<arg name="velocity_command_topic"	value="$(arg velocity_command_topic)" />
+		<arg name="velocity_command_topic"		value="$(arg velocity_command_topic)" />
 		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
+		<arg name="platform"					value="$(arg platform)"  />
 	</include>
 </launch>
