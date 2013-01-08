@@ -408,7 +408,7 @@ int main(int argc, char **argv) {
 	//*****************Configuration Parameters*******************//
 	//The platform that the local planner is running on
 	std::string p_platform("platform");
-	double platform = 0;
+	int platform = 0;
 	std::string platform_message("Oryx");
 
 	//Minimum update rate expected of occupancy grid
