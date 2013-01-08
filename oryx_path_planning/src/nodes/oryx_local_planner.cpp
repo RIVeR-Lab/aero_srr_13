@@ -12,6 +12,7 @@
 #include<boost/lexical_cast.hpp>
 #include<boost/circular_buffer.hpp>
 #include<oryx_msgs/SoftwareStop.h>
+#include<geometry_msgs/Twist.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanning.h"
 #include "OryxPathPlannerConfig.h"
@@ -35,6 +36,7 @@ public:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates a new local planner
+	 * @param platform				integer denoting what platform the local planner is running on
 	 * @param goalWeight			weighting factor to bias tentacle selection towards the goal point
 	 * @param travWeight			weighting factor to bias tentacle selection away from previously traversed points
 	 * @param diffWeight			weighting factor to bias tentacle selection away from difficult terrain
@@ -50,7 +52,7 @@ public:
 	 * @param v_client				Pointer to the velocity client to send commands to the base platform
 	 * @throw std::runtime_error	If the planner is unable to connect to the base platform
 	 */
-	LocalPlanner(double goalWeight, double travWeight, double diffWeight, double unknWeight, double xDim, double yDim, double zDim, double res, oryx_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
+	LocalPlanner(int platform, double goalWeight, double travWeight, double diffWeight, double unknWeight, double xDim, double yDim, double zDim, double res, oryx_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
 		v_action_topic_(v_action_topic),
 		pc_topic_(oc_point_cloud_topic),
 		origin_(origin),
@@ -58,6 +60,7 @@ public:
 		occupancy_buffer_(2),
 		v_client_(v_action_topic, true)
 {
+		this->platform_    = platform;
 		this->goal_weight_ = goalWeight;
 		this->trav_weight_ = travWeight;
 		this->diff_weight_ = diffWeight;
@@ -76,16 +79,29 @@ public:
 		if(!this->nh_.getParam(software_stop_topic, software_stop_topic))ROS_WARN("%s not set, using default value %s", software_stop_topic.c_str(), software_stop_topic.c_str());
 		this->stop_sub_ = nh_.subscribe(software_stop_topic, 1, &LocalPlanner::stopCB, this);
 
-		ROS_INFO("Waiting For Connection To Velocity Control Server On <%s>...", this->v_action_topic_.c_str());
-		if(v_client_.waitForServer(ros::Duration(CONNECTION_TIMEOUT)))
+		switch(this->platform_)
 		{
-			ROS_INFO("Connection Established");
-		}
-		else
-		{
-			ROS_ERROR("Could Not Establish Connection To Velocity Control Server!");
-			std::string errMsg("Unable to connect to velocity command server over ");
-			throw std::runtime_error(errMsg+this->v_action_topic_);
+		case 0:
+			ROS_INFO("Waiting For Connection To Velocity Control Server On <%s>...", this->v_action_topic_.c_str());
+			if(v_client_.waitForServer(ros::Duration(CONNECTION_TIMEOUT)))
+			{
+				ROS_INFO("Connection Established");
+			}
+			else
+			{
+				ROS_ERROR("Could Not Establish Connection To Velocity Control Server!");
+				std::string errMsg("Unable to connect to velocity command server over ");
+				throw std::runtime_error(errMsg+this->v_action_topic_);
+			}
+			break;
+		case 1:
+			ROS_INFO_STREAM("Publishing Twists to <"<<this->v_action_topic_<<">");
+			this->vel_pub_ = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
+			break;
+		default:
+			ROS_FATAL("Unkown Platform, Could Not Setup Local Planner");
+			break;
+
 		}
 		ROS_INFO("Oryx Local Planner Running");
 }
@@ -105,6 +121,7 @@ public:
 		{
 			if(should_plan_)
 			{
+				const Tentacle& current_tentacle;
 				//Grab the next occupancy grid to process
 				if(!this->occupancy_buffer_.empty())
 				{
@@ -204,9 +221,11 @@ public:
 							if(hit_goal) break;
 						}
 					}
+					//Update the current tentacle
+					current_tentacle = speed_set.getTentacle(longest_index);
 					//Print out the selected tentacle on the grid
 					ROS_INFO("I Selected Tentacle %d, length %f", longest_index, longest_length);
-					Tentacle::TentacleTraverser overlayTraverser(speed_set.getTentacle(longest_index));
+					Tentacle::TentacleTraverser overlayTraverser(current_tentacle);
 					while(overlayTraverser.hasNext())
 					{
 						oryx_path_planning::Point point = overlayTraverser.next();
@@ -220,6 +239,8 @@ public:
 					ROS_INFO("This Is The Occupancy Grid With Selected Tentacle Overlaid:\n%s", rendering.toString(0,0)->c_str());
 					this->occupancy_buffer_.pop_front();
 				}
+				//Send the velocity command to the platform
+				sendVelCom(current_tentacle.getRad(), current_tentacle.getVel());
 			}
 			//spin to let ROS process callbacks
 			ros::spinOnce();
@@ -228,6 +249,7 @@ public:
 	}
 private:
 
+	int		platform_;		///flat marking what platform we're running on
 	bool	should_plan_;	///Flag for signaling if the local planner should be running
 
 	double	goal_weight_;	///weighting factor to bias tentacle selection towards the goal point
@@ -247,6 +269,7 @@ private:
 	TentacleGeneratorPtr tentacles_;	///Pointer to the tentacle generator which contains the tentacles to use for planning
 	ros::Subscriber 	pc_sub_;		///Subscriber to the ROS topic to receive new occupancy grid data over
 	ros::Subscriber		stop_sub_;	///Subscriber to the ROS topic to receive the software stop message
+	ros::Publisher		vel_pub_;	///Publisher for Twist messages to a platform that takes them
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
 
@@ -286,12 +309,46 @@ private:
 	}
 
 	/**
+	 * Performs platform specific sending of velocity commands
+	 * @param velocity The linear velocity in +x to follow
+	 * @param radius The radius of curvature to follow
+	 */
+	void sendVelCom(double velocity, double radius)
+	{
+		switch (this->platform_)
+		{
+		case 0:
+			send(velocity, radius);
+			break;
+		case 1:
+			twist(velocity, velocity/radius);
+			break;
+		default:
+			break;
+		}
+	}
+
+	/**
+	 * Sends out geometery_msgs::Twist messages to the platform
+	 * @param x_dot The linear velocity in +x
+	 * @param omega The angular velocity around +z
+	 */
+	void twist(double x_dot, double omega)
+	{
+		geometry_msgs::Twist message;
+		message.linear.x  = 0;
+		message.angular.z = omega;
+		this->vel_pub_.publish(message);
+	}
+
+	/**
 	 * @author	Adam Panzica
 	 * @brief	Sends a command to the base's velocity controller
 	 * @param velocity	The linear velocity to follow
 	 * @param radius	The arc-radius to follow
 	 */
-	void send(double velocity, double radius){
+	void send(double velocity, double radius)
+	{
 		oryx_drive_controller::VelocityCommandGoal newGoal;
 		newGoal.velocity	= velocity;
 		newGoal.radius		= radius;
@@ -349,6 +406,11 @@ int main(int argc, char **argv) {
 	std::string pc_top("occupancy_point_cloud_topic");
 
 	//*****************Configuration Parameters*******************//
+	//The platform that the local planner is running on
+	std::string p_platform("platform");
+	double platform = 0;
+	std::string platform_message("Oryx");
+
 	//Minimum update rate expected of occupancy grid
 	std::string p_up_rate("occupancy/update_rate");
 	double update_rate = 0.2;
@@ -468,6 +530,26 @@ int main(int argc, char **argv) {
 	ROS_INFO("Starting Up Oryx Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
 	//Get Private Parameters
+	if(!p_nh.getParam(p_platform, platform))
+	{
+		PARAM_WARN(p_platform, platform_message);
+	}
+	else
+	{
+		switch(platform)
+		{
+		case 0:
+			platform_message = "Oryx";
+			break;
+		case 1:
+			platform_message = "Husky A200";
+			break;
+		default:
+			platform_message = "Unkown, defaulting to Oryx";
+			break;
+		}
+		ROS_INFO_STREAM("Running on Platform: "<<platform_message);
+	}
 	if(!p_nh.getParam(v_com_top,v_com_top))		PARAM_WARN(v_com_top,	v_com_top);
 	if(!p_nh.getParam(pc_top,	pc_top))		PARAM_WARN(pc_top,		pc_top);
 	if(!p_nh.getParam(p_goal_weight,	goal_weight))PARAM_WARN(p_goal_weight,p_goal_weight_msg);
