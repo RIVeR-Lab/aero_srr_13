@@ -38,7 +38,7 @@ private:
 		WARNING  //!< WARNING Failure to process the command is only a warning
 	} command_criticality;
 
-	typedef boost::function<bool (std::string data, oryxsrr_msgs::Command::Response& response)> command_func;	///Typedef for the signature of command functions
+	typedef boost::function<bool (std::string& data, oryxsrr_msgs::Command::Response& response)> command_func;	///Typedef for the signature of command functions
 	typedef boost::unordered_map<std::string, std::pair<command_func, command_criticality> > command_map;///Typedef for a map of command functions to their command keyword
 public:
 	CommandEngine()
@@ -148,7 +148,7 @@ private:
 	 *
 	 * This command starts the global planner into whatever mode it was in last (or default if there was no mode specified)
 	 */
-	bool startCB(std::string data)
+	bool startCB(std::string& data, oryxsrr_msgs::Command::Response& response)
 	{
 		return false;
 	}
@@ -161,7 +161,7 @@ private:
 	 *
 	 * This command stops the global planner from running, except to process new commands from the CommandEngine
 	 */
-	bool stopCB(std::string data)
+	bool stopCB(std::string& data, oryxsrr_msgs::Command::Response& response)
 	{
 		return false;
 	}
@@ -175,7 +175,7 @@ private:
 	 *
 	 * This command puts the global planner into Manual Control mode. It lets it know to expect Joy Messages to control it
 	 */
-	bool manCB(std::string data)
+	bool manCB(std::string& data, oryxsrr_msgs::Command::Response& response)
 	{
 		return false;
 	}
@@ -188,7 +188,7 @@ private:
 	 *
 	 * This command puts the global planner into Autonomous Control mode.
 	 */
-	bool autoCB(std::string data)
+	bool autoCB(std::string& data, oryxsrr_msgs::Command::Response& response)
 	{
 		return false;
 	}
