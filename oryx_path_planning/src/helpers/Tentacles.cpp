@@ -328,6 +328,16 @@ Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index,
 	PRINTER("Calculated a Tentacle with Number of Points=%d",(int)this->points_.size());
 }
 
+double Tentacle::getRad() const
+{
+	return this->radius_;
+}
+
+double Tentacle::getVel() const
+{
+	return this->velocity_;
+}
+
 const Tentacle::TentaclePointCloud& Tentacle::getPoints() const
 {
 	return this->points_;
