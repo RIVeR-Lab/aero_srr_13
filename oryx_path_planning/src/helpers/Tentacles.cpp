@@ -261,7 +261,7 @@ Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index,
 		int working_radius = roundToGrid(radius_, resolution);
 		//Calculate the sweep angle for this tentacle
 		double sweep_angle = std::abs((double)working_length/(double)working_radius);
-		ROS_INFO("Tentacle %d, Working Length %d, Working Radius %d, Sweep Angle %f", index, working_length, working_radius, sweep_angle);
+		//ROS_INFO("Tentacle %d, Working Length %d, Working Radius %d, Sweep Angle %f", index, working_length, working_radius, sweep_angle);
 		//		//Place the origin of the tentacle, which will be at x=0 and y=-workingRadius
 		//		Point tentacleOrigin;
 		//		tentacleOrigin.x = 0;

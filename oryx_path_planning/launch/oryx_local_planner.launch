@@ -26,7 +26,7 @@
 		<param name="goal_weight"					type="double"	value="$(arg goal_weight)" />
 		<param name="traversed_weight"				type="double"	value="$(arg traversed_weight)" />
 		<param name="difficult_weight"				type="double"	value="$(arg difficult_weight)" />
-		<param name="platform"						type="unit32"	value="$(arg platform)" />
+		<param name="platform"						type="int"		value="$(arg platform)" />
 	</node>
 	
 </launch>

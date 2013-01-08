@@ -119,9 +119,10 @@ public:
 	{
 		while(ros::ok())
 		{
+			Tentacle zero_tentacle(0,0,0,0,0,0,0,0);
 			if(should_plan_)
 			{
-				const Tentacle& current_tentacle;
+				const Tentacle& current_tentacle = zero_tentacle;
 				//Grab the next occupancy grid to process
 				if(!this->occupancy_buffer_.empty())
 				{
@@ -583,7 +584,7 @@ int main(int argc, char **argv) {
 		origin.y=y_ori;
 		origin.z=z_ori;
 		PRINT_POINT("Origin Point", origin);
-		LocalPlanner planner(goal_weight, trav_weight, diff_weight, unkn_weight, x_dim, y_dim, z_dim, res, origin, v_com_top,  pc_top, tentacle_ptr);
+		LocalPlanner planner(platform, goal_weight, trav_weight, diff_weight, unkn_weight, x_dim, y_dim, z_dim, res, origin, v_com_top,  pc_top, tentacle_ptr);
 		planner.doPlanning();
 	}
 	catch(std::exception& e)
