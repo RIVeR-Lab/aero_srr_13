@@ -117,12 +117,13 @@ public:
 	 */
 	void doPlanning()
 	{
+		Tentacle zero_tentacle(0,0,0,0,0,0,0,0,0);
+		double current_radius = std::numeric_limits<double>::infinity();
+		double current_velocity = 0;
 		while(ros::ok())
 		{
-			Tentacle zero_tentacle(0,0,0,0,0,0,0,0);
 			if(should_plan_)
 			{
-				const Tentacle& current_tentacle = zero_tentacle;
 				//Grab the next occupancy grid to process
 				if(!this->occupancy_buffer_.empty())
 				{
@@ -222,11 +223,12 @@ public:
 							if(hit_goal) break;
 						}
 					}
-					//Update the current tentacle
-					current_tentacle = speed_set.getTentacle(longest_index);
+					//Update the current radius and velocity
+					current_radius   = speed_set.getTentacle(longest_index).getRad();
+					current_velocity = speed_set.getTentacle(longest_index).getVel();
 					//Print out the selected tentacle on the grid
 					ROS_INFO("I Selected Tentacle %d, length %f", longest_index, longest_length);
-					Tentacle::TentacleTraverser overlayTraverser(current_tentacle);
+					Tentacle::TentacleTraverser overlayTraverser(speed_set.getTentacle(longest_index));
 					while(overlayTraverser.hasNext())
 					{
 						oryx_path_planning::Point point = overlayTraverser.next();
@@ -241,7 +243,7 @@ public:
 					this->occupancy_buffer_.pop_front();
 				}
 				//Send the velocity command to the platform
-				sendVelCom(current_tentacle.getRad(), current_tentacle.getVel());
+				sendVelCom(current_radius, current_velocity);
 			}
 			//spin to let ROS process callbacks
 			ros::spinOnce();
