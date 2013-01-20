@@ -1,0 +1,93 @@
+\section{interrogate\-\_\-setup\-\_\-dot\-\_\-py \-Namespace \-Reference}
+\label{namespaceinterrogate__setup__dot__py}\index{interrogate\-\_\-setup\-\_\-dot\-\_\-py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}}
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bf \-\_\-create\-\_\-mock\-\_\-setup\-\_\-function}
+\item 
+def {\bf \-\_\-get\-\_\-locations}
+\item 
+def {\bf generate\-\_\-cmake\-\_\-file}
+\item 
+def {\bf main}
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Function \-Documentation}
+\index{interrogate\-\_\-setup\-\_\-dot\-\_\-py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}!\-\_\-create\-\_\-mock\-\_\-setup\-\_\-function@{\-\_\-create\-\_\-mock\-\_\-setup\-\_\-function}}
+\index{\-\_\-create\-\_\-mock\-\_\-setup\-\_\-function@{\-\_\-create\-\_\-mock\-\_\-setup\-\_\-function}!interrogate_setup_dot_py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}}
+\subsubsection[{\-\_\-create\-\_\-mock\-\_\-setup\-\_\-function}]{\setlength{\rightskip}{0pt plus 5cm}def {\bf interrogate\-\_\-setup\-\_\-dot\-\_\-py.\-\_\-create\-\_\-mock\-\_\-setup\-\_\-function} (
+\begin{DoxyParamCaption}
+\item[{}]{package\-\_\-name, }
+\item[{}]{outfile}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [private]}}\label{namespaceinterrogate__setup__dot__py_aab9753d5a1f453802a69ed2edb8866ab}
+\begin{DoxyVerb}
+Creates a function to call instead of distutils.core.setup or
+setuptools.setup, which just captures some args and writes them
+into a file that can be used from cmake
+
+:param package_name: name of the package
+:param outfile: filename that cmake will use afterwards
+:returns: a function to replace disutils.core.setup and setuptools.setup
+\end{DoxyVerb}
+ 
+
+\-Definition at line 135 of file interrogate\-\_\-setup\-\_\-dot\-\_\-py.\-py.
+
+\index{interrogate\-\_\-setup\-\_\-dot\-\_\-py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}!\-\_\-get\-\_\-locations@{\-\_\-get\-\_\-locations}}
+\index{\-\_\-get\-\_\-locations@{\-\_\-get\-\_\-locations}!interrogate_setup_dot_py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}}
+\subsubsection[{\-\_\-get\-\_\-locations}]{\setlength{\rightskip}{0pt plus 5cm}def {\bf interrogate\-\_\-setup\-\_\-dot\-\_\-py.\-\_\-get\-\_\-locations} (
+\begin{DoxyParamCaption}
+\item[{}]{pkgs, }
+\item[{}]{package\-\_\-dir}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [private]}}\label{namespaceinterrogate__setup__dot__py_a5ceafe1f0892bcc8696e6d743d24c8e5}
+\begin{DoxyVerb}
+based on setuptools logic and the package_dir dict, builds a dict
+of location roots for each pkg in pkgs.
+See http://docs.python.org/distutils/setupscript.html
+
+:returns: a dict {pkgname: root} for each pkgname in pkgs (and each of their parents)
+\end{DoxyVerb}
+ 
+
+\-Definition at line 48 of file interrogate\-\_\-setup\-\_\-dot\-\_\-py.\-py.
+
+\index{interrogate\-\_\-setup\-\_\-dot\-\_\-py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}!generate\-\_\-cmake\-\_\-file@{generate\-\_\-cmake\-\_\-file}}
+\index{generate\-\_\-cmake\-\_\-file@{generate\-\_\-cmake\-\_\-file}!interrogate_setup_dot_py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}}
+\subsubsection[{generate\-\_\-cmake\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}def {\bf interrogate\-\_\-setup\-\_\-dot\-\_\-py.\-generate\-\_\-cmake\-\_\-file} (
+\begin{DoxyParamCaption}
+\item[{}]{package\-\_\-name, }
+\item[{}]{version, }
+\item[{}]{scripts, }
+\item[{}]{package\-\_\-dir, }
+\item[{}]{pkgs}
+\end{DoxyParamCaption}
+)}\label{namespaceinterrogate__setup__dot__py_ae08ca8f2b0f2d777cd152dc94352a73f}
+\begin{DoxyVerb}
+Generates lines to add to a cmake file which will set variables
+
+:param version: str, format 'int.int.int'
+:param scripts: [list of str]: relative paths to scripts
+:param package_dir: {modulename: path}
+:pkgs: [list of str] python_packages declared in catkin package
+\end{DoxyVerb}
+ 
+
+\-Definition at line 86 of file interrogate\-\_\-setup\-\_\-dot\-\_\-py.\-py.
+
+\index{interrogate\-\_\-setup\-\_\-dot\-\_\-py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}!main@{main}}
+\index{main@{main}!interrogate_setup_dot_py@{interrogate\-\_\-setup\-\_\-dot\-\_\-py}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}def {\bf interrogate\-\_\-setup\-\_\-dot\-\_\-py.\-main} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{namespaceinterrogate__setup__dot__py_a13c37ad37b9153e698b6bed029bf5d86}
+\begin{DoxyVerb}
+Script main, parses arguments and invokes Dummy.setup indirectly.
+\end{DoxyVerb}
+ 
+
+\-Definition at line 186 of file interrogate\-\_\-setup\-\_\-dot\-\_\-py.\-py.
+

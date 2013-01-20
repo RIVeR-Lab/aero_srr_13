@@ -1,0 +1,182 @@
+\section{oryx\-\_\-path\-\_\-planning\-:\-:\-Chainable\-Exception \-Class \-Reference}
+\label{classoryx__path__planning_1_1ChainableException}\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+
+
+basic chainable exception class  
+
+
+
+
+{\ttfamily \#include $<$\-Oryx\-Path\-Planning\-Utilities.\-h$>$}
+
+
+
+\-Inheritance diagram for oryx\-\_\-path\-\_\-planning\-:\-:\-Chainable\-Exception\-:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classoryx__path__planning_1_1ChainableException__inherit__graph}
+\end{center}
+\end{figure}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bf \-Chainable\-Exception} ()
+\item 
+{\bf \-Chainable\-Exception} ({\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception} \&exception)
+\item 
+{\bf \-Chainable\-Exception} (std\-::string \&message)
+\item 
+{\bf \-Chainable\-Exception} (std\-::string \&message, std\-::exception \&cause)
+\item 
+std\-::exception \& {\bf get\-Cause} ()
+\item 
+{\bf $\sim$\-Chainable\-Exception} ()  throw ()
+\end{DoxyCompactItemize}
+\subsection*{\-Protected \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\-::string \& {\bf gen\-Message} (std\-::string \&message, std\-::exception \&cause)
+\begin{DoxyCompactList}\small\item\em \-The exception which caused this \-Chainged\-Exception. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{\-Protected \-Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\-::exception {\bf cause\-\_\-}
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+basic chainable exception class 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzics \-Provides an implementation of std\-::exception which allows for chaining of exceptions. \-Returns the chained error message in the form of\-:
+\end{DoxyAuthor}
+\char`\"{}this\-\_\-message $\backslash$n Caused By-\/$>$ that\-\_\-message\char`\"{} 
+
+\-Definition at line 100 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+
+
+\subsection{\-Constructor \& \-Destructor \-Documentation}
+\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}!\-Chainable\-Exception@{\-Chainable\-Exception}}
+\index{\-Chainable\-Exception@{\-Chainable\-Exception}!oryx_path_planning::ChainableException@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+\subsubsection[{\-Chainable\-Exception}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception\-::\-Chainable\-Exception} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline]}}\label{classoryx__path__planning_1_1ChainableException_ab20ed6e91591011c1182758900f146f7}
+\-Default empty constructor 
+
+\-Definition at line 106 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}!\-Chainable\-Exception@{\-Chainable\-Exception}}
+\index{\-Chainable\-Exception@{\-Chainable\-Exception}!oryx_path_planning::ChainableException@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+\subsubsection[{\-Chainable\-Exception}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception\-::\-Chainable\-Exception} (
+\begin{DoxyParamCaption}
+\item[{{\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception} \&}]{exception}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline]}}\label{classoryx__path__planning_1_1ChainableException_a53967498ff29a4debdfb2066db245ef7}
+\-Standard \-Copy constructor 
+\begin{DoxyParams}{\-Parameters}
+{\em exception} & \-The exception to initialize this exception's fields to \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 115 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}!\-Chainable\-Exception@{\-Chainable\-Exception}}
+\index{\-Chainable\-Exception@{\-Chainable\-Exception}!oryx_path_planning::ChainableException@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+\subsubsection[{\-Chainable\-Exception}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception\-::\-Chainable\-Exception} (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline]}}\label{classoryx__path__planning_1_1ChainableException_ac16ccc14c8e8d3b9bcb05d2597155ecb}
+\-Constructor for creating a new exception without a cause 
+\begin{DoxyParams}{\-Parameters}
+{\em message} & \-The error message for this exception \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 125 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}!\-Chainable\-Exception@{\-Chainable\-Exception}}
+\index{\-Chainable\-Exception@{\-Chainable\-Exception}!oryx_path_planning::ChainableException@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+\subsubsection[{\-Chainable\-Exception}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception\-::\-Chainable\-Exception} (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{message, }
+\item[{std\-::exception \&}]{cause}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline]}}\label{classoryx__path__planning_1_1ChainableException_af4166889087f2f0c2ba7ea9d808b603d}
+\-Constructor for creating a new exception with a cause 
+\begin{DoxyParams}{\-Parameters}
+{\em message} & \-The error message for the exception \\
+\hline
+{\em cause} & \-The exception which caused this exception \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 135 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}!$\sim$\-Chainable\-Exception@{$\sim$\-Chainable\-Exception}}
+\index{$\sim$\-Chainable\-Exception@{$\sim$\-Chainable\-Exception}!oryx_path_planning::ChainableException@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+\subsubsection[{$\sim$\-Chainable\-Exception}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception\-::$\sim$\-Chainable\-Exception} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)  throw ()\hspace{0.3cm}{\ttfamily  [inline]}}\label{classoryx__path__planning_1_1ChainableException_a8c231302f56749ee456bdea4b10ced95}
+
+
+\-Definition at line 141 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+
+
+\subsection{\-Member \-Function \-Documentation}
+\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}!gen\-Message@{gen\-Message}}
+\index{gen\-Message@{gen\-Message}!oryx_path_planning::ChainableException@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+\subsubsection[{gen\-Message}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string\& {\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception\-::gen\-Message} (
+\begin{DoxyParamCaption}
+\item[{std\-::string \&}]{message, }
+\item[{std\-::exception \&}]{cause}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, protected]}}\label{classoryx__path__planning_1_1ChainableException_a0633345de372b9a6b09eea3a3db4bd37}
+
+
+\-The exception which caused this \-Chainged\-Exception. 
+
+
+
+\-Definition at line 153 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}!get\-Cause@{get\-Cause}}
+\index{get\-Cause@{get\-Cause}!oryx_path_planning::ChainableException@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+\subsubsection[{get\-Cause}]{\setlength{\rightskip}{0pt plus 5cm}std\-::exception\& {\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception\-::get\-Cause} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline]}}\label{classoryx__path__planning_1_1ChainableException_a5d5f968075a47a9dd4c477c5a788f5a7}
+\-Gets the raw exception that caused this exception \begin{DoxyReturn}{\-Returns}
+\-A std\-::exception which caused this exception 
+\end{DoxyReturn}
+
+
+\-Definition at line 147 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+
+
+\subsection{\-Member \-Data \-Documentation}
+\index{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}!cause\-\_\-@{cause\-\_\-}}
+\index{cause\-\_\-@{cause\-\_\-}!oryx_path_planning::ChainableException@{oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}}
+\subsubsection[{cause\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::exception {\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception\-::cause\-\_\-}\hspace{0.3cm}{\ttfamily  [protected]}}\label{classoryx__path__planning_1_1ChainableException_a5c1bd8bc4bd38a5bc66b2c29fd48fda9}
+
+
+\-Definition at line 151 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
+
+
+
+\-The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+{\bf \-Oryx\-Path\-Planning\-Utilities.\-h}\end{DoxyCompactItemize}
