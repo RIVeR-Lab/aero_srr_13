@@ -1,0 +1,92 @@
+\section{\-Oryx\-Path\-Planning\-Utilities.\-h \-File \-Reference}
+\label{OryxPathPlanningUtilities_8h}\index{\-Oryx\-Path\-Planning\-Utilities.\-h@{\-Oryx\-Path\-Planning\-Utilities.\-h}}
+
+
+\-Header containing definitions that are used throughout the \doxyref{oryx\-\_\-path\-\_\-planning}{p.}{namespaceoryx__path__planning} package.  
+
+
+{\ttfamily \#include $<$ros/ros.\-h$>$}\*
+{\ttfamily \#include $<$pcl/ros/conversions.\-h$>$}\*
+{\ttfamily \#include $<$pcl/registration/distances.\-h$>$}\*
+{\ttfamily \#include $<$sensor\-\_\-msgs/\-Point\-Cloud2.\-h$>$}\*
+{\ttfamily \#include \char`\"{}\-Type\-Definitions.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Point\-Converter.\-hpp\char`\"{}}\*
+\-Include dependency graph for \-Oryx\-Path\-Planning\-Utilities.\-h\-:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{OryxPathPlanningUtilities_8h__incl}
+\end{center}
+\end{figure}
+\-This graph shows which files directly or indirectly include this file\-:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{OryxPathPlanningUtilities_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{\-Classes}
+\begin{DoxyCompactItemize}
+\item 
+class {\bf oryx\-\_\-path\-\_\-planning\-::\-Chainable\-Exception}
+\begin{DoxyCompactList}\small\item\em basic chainable exception class \end{DoxyCompactList}\item 
+class {\bf oryx\-\_\-path\-\_\-planning\-::constants}
+\begin{DoxyCompactList}\small\item\em singleton class which returns dynamically generated constants \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{\-Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace {\bf oryx\-\_\-path\-\_\-planning}
+\begin{DoxyCompactList}\small\item\em \-Namespace declaration to make implementation of \-Tentacle\-Traverser easier. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{\-Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef enum \*
+{\bf oryx\-\_\-path\-\_\-planning\-::\-Point\-Trait\-\_\-t} {\bf oryx\-\_\-path\-\_\-planning\-::\-Point\-Trait}
+\begin{DoxyCompactList}\small\item\em \-Standard parameter warning message. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{\-Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum {\bf oryx\-\_\-path\-\_\-planning\-::\-Point\-Trait\-\_\-t} \{ \*
+{\bf oryx\-\_\-path\-\_\-planning\-::\-O\-B\-S\-T\-A\-C\-L\-E} =  0x\-F\-F0000, 
+{\bf oryx\-\_\-path\-\_\-planning\-::\-I\-N\-F\-L\-A\-T\-E\-D} =  0x0000\-F\-F, 
+{\bf oryx\-\_\-path\-\_\-planning\-::\-U\-N\-K\-N\-O\-W\-N} =  0x808080, 
+{\bf oryx\-\_\-path\-\_\-planning\-::\-F\-R\-E\-E\-\_\-\-H\-I\-G\-H\-\_\-\-C\-O\-S\-T} =  0x008080, 
+\*
+{\bf oryx\-\_\-path\-\_\-planning\-::\-F\-R\-E\-E\-\_\-\-L\-O\-W\-\_\-\-C\-O\-S\-T} =  0x008000, 
+{\bf oryx\-\_\-path\-\_\-planning\-::\-T\-R\-A\-V\-E\-R\-S\-E\-D} =  0x6\-B8\-E23, 
+{\bf oryx\-\_\-path\-\_\-planning\-::\-G\-O\-A\-L} =  0x\-F\-F\-F\-F00, 
+{\bf oryx\-\_\-path\-\_\-planning\-::\-T\-E\-N\-T\-A\-C\-L\-E} =  0x\-C\-D00\-C\-D, 
+\*
+{\bf oryx\-\_\-path\-\_\-planning\-::\-R\-O\-B\-O\-T} =  0x000001
+ \}
+\begin{DoxyCompactList}\small\item\em \-Standard parameter warning message. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bf oryx\-\_\-path\-\_\-planning\-::cast\-Arc} (int radius, double sweep\-\_\-angle, int rgba, \-Point \&origin, \-Point\-Cloud \&cloud, int quadrant=1, int plane=0)
+\begin{DoxyCompactList}\small\item\em \-Generates the series of points along a 90$\ast$ arc between two points and places them into a \-Point\-Cloud. \end{DoxyCompactList}\item 
+void {\bf oryx\-\_\-path\-\_\-planning\-::cast\-Line} (\-Point \&start\-Point, \-Point \&end\-Point, int rgba, \-Point\-Cloud \&cloud)
+\begin{DoxyCompactList}\small\item\em \-Generates the series of points along a line between two points and places them into a \-Point\-Cloud. \end{DoxyCompactList}\item 
+double {\bf oryx\-\_\-path\-\_\-planning\-::grid\-To\-Real} (int grid, double resolution)
+\item 
+double {\bf oryx\-\_\-path\-\_\-planning\-::round\-To\-Frac} (double raw, double frac)
+\item 
+int {\bf oryx\-\_\-path\-\_\-planning\-::round\-To\-Grid} (double raw, double resolution)
+\item 
+const std\-::string {\bf oryx\-\_\-path\-\_\-planning\-::warn\-\_\-message} (\char`\"{}\-Parameter $<$\%s$>$ \-Not \-Set. \-Using \-Default \-Value $<$\%s$>$\char`\"{})
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Header containing definitions that are used throughout the \doxyref{oryx\-\_\-path\-\_\-planning}{p.}{namespaceoryx__path__planning} package. \begin{DoxyDate}{\-Date}
+\-Oct 17, 2012 
+\end{DoxyDate}
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+
+\-Definition in file {\bf \-Oryx\-Path\-Planning\-Utilities.\-h}.
+

@@ -11,8 +11,6 @@
   <depend package="roscpp"/>
   <depend package="rospy"/>
   <depend package="oryx_msgs"/>
-  <depend package="oryx_path_planning"/>
-  <depend package="oryx_drive_controller"/>
   <depend package="qt_build"/>
   <depend package="roscpp"/>
 

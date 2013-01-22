@@ -1,8 +1,0 @@
-#goal definition
-int32 request
----
-#result definition
-int32 result
----
-#feedback
-int32 progress

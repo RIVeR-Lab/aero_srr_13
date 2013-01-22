@@ -1,0 +1,31 @@
+authors: aruis
+brief: oryx_drive_controller
+depends:
+- rospy
+- roscpp
+- actionlib
+- geometry_msgs
+- oryx_msgs
+- actionlib_msgs
+description: "\n\n     oryx_drive_controller\n\n  "
+license: BSD
+msgs:
+- VelocityCommandGoal
+- TranslateCommandActionResult
+- VelocityArc
+- TranslateCommandResult
+- VelocityCommandActionResult
+- VelocityCommandResult
+- VelocityTranslate
+- TranslateCommandActionFeedback
+- TranslateCommandActionGoal
+- VelocityCommandActionFeedback
+- TranslateCommandFeedback
+- VelocityCommandAction
+- VelocityCommandActionGoal
+- TranslateCommandAction
+- TranslateCommandGoal
+- VelocityCommandFeedback
+package_type: package
+srvs: []
+url: http://ros.org/wiki/oryx_drive_controller
