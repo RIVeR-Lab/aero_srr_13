@@ -330,7 +330,9 @@ bool OccupancyGrid::generateMessage(oryx_path_planning::OccupancyGridMsg& messag
 
 bool OccupancyGrid::generateMessage(sensor_msgs::Image& message) const
 {
-	try
+	ROS_WARN("Images Not Currently Supported!");
+	return false;
+	/*try
 	{
 		pcl::toROSMsg(this->occ_grid_, message);
 	}
@@ -339,7 +341,7 @@ bool OccupancyGrid::generateMessage(sensor_msgs::Image& message) const
 		ROS_ERROR("Problem building an Image from the OccupancyGrid: %s", e.what());
 		return false;
 	}
-	return true;
+	return true;*/
 }
 
 OccupancyGrid::iterator OccupancyGrid::begin()
