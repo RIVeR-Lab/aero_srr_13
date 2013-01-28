@@ -58,14 +58,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00011"></a>00011 
 <a name="l00012"></a>00012 
 <a name="l00013"></a>00013 
-<a name="l00014"></a>00014 <span class="preprocessor">#include &quot;OccupancyGrid.h&quot;</span>
+<a name="l00014"></a>00014 <span class="preprocessor">#include &quot;<a class="code" href="OccupancyGrid_8h.html" title="//TODO fill in detailed discription here">OccupancyGrid.h</a>&quot;</span>
 <a name="l00015"></a>00015 
 <a name="l00016"></a>00016 <span class="keyword">using namespace </span>oryx_path_planning;
 <a name="l00017"></a>00017 
 <a name="l00018"></a>00018 <span class="keyword">namespace </span>oryx_path_planning
 <a name="l00019"></a>00019 {
 <a name="l00020"></a>00020 
-<a name="l00021"></a><a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a000a4a895febfdb8d95f7c5c80299ae3">00021</a> <a class="code" href="namespaceoryx__path__planning.html#a944fe0c4dcd7cbd444291c1abf3d7b56">OccupancyGrid::OccupancyGrid</a>(): occ_grid_()
+<a name="l00021"></a><a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a000a4a895febfdb8d95f7c5c80299ae3">00021</a> <a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a000a4a895febfdb8d95f7c5c80299ae3" title="Default constructor.">OccupancyGrid::OccupancyGrid</a>(): occ_grid_()
 <a name="l00022"></a>00022 {
 <a name="l00023"></a>00023         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a670a24857754c67333d7f19555bbdb4e">x_dim_</a>    = 0;
 <a name="l00024"></a>00024         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a14dff2ac63668698fdebe973017e516d" title="The x dimension of this grid.">y_dim_</a>    = 0;
@@ -179,32 +179,32 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00146"></a>00146 
 <a name="l00147"></a>00147 }
 <a name="l00148"></a>00148 
-<a name="l00149"></a><a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a76fd7f8e41b76c2e454b71ace1705394">00149</a> <a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a000a4a895febfdb8d95f7c5c80299ae3" title="Default constructor.">OccupancyGrid::OccupancyGrid</a>(<span class="keyword">const</span> <a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html">oryx_path_planning::OccupancyGridMsg</a>&amp; message):
+<a name="l00149"></a><a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a76fd7f8e41b76c2e454b71ace1705394">00149</a> <a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a000a4a895febfdb8d95f7c5c80299ae3" title="Default constructor.">OccupancyGrid::OccupancyGrid</a>(<span class="keyword">const</span> oryx_path_planning::OccupancyGridMsg&amp; message):
 <a name="l00150"></a>00150                                                                         occ_grid_()
 <a name="l00151"></a>00151 {
 <a name="l00152"></a>00152         <span class="comment">//extract grid information</span>
-<a name="l00153"></a>00153         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a670a24857754c67333d7f19555bbdb4e">x_dim_</a>    = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a20ddf478e9d9e2a20b6df3e77d83df4f">x_dim</a>;
-<a name="l00154"></a>00154         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a14dff2ac63668698fdebe973017e516d" title="The x dimension of this grid.">y_dim_</a>    = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a879b788ce9d0312d7da0628d503cbe7b">y_dim</a>;
-<a name="l00155"></a>00155         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a9510a9469933e26c48d56dd6147853b8" title="The y dimension of this grid.">z_dim_</a>    = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a666d97f6cbe1d6341089369596a8eb1a">z_dim</a>;
-<a name="l00156"></a>00156         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a6395fd1e226da33a6b3c0445b852271a" title="The z dimension of this grid.">res_</a>              = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a81d78b0735542f3d13940ab1028d9cf8">resolution</a>;
+<a name="l00153"></a>00153         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a670a24857754c67333d7f19555bbdb4e">x_dim_</a>    = message.x_dim;
+<a name="l00154"></a>00154         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a14dff2ac63668698fdebe973017e516d" title="The x dimension of this grid.">y_dim_</a>    = message.y_dim;
+<a name="l00155"></a>00155         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a9510a9469933e26c48d56dd6147853b8" title="The y dimension of this grid.">z_dim_</a>    = message.z_dim;
+<a name="l00156"></a>00156         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a6395fd1e226da33a6b3c0445b852271a" title="The z dimension of this grid.">res_</a>              = message.resolution;
 <a name="l00157"></a>00157 
 <a name="l00158"></a>00158         <span class="comment">//extract origin data</span>
-<a name="l00159"></a>00159         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.x = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a7380dfa3e2f923e793b43f7b36a6b104">x_origin</a>;
-<a name="l00160"></a>00160         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.y = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a00650a31d3f8484d4701f272aef0bed7">y_origin</a>;
-<a name="l00161"></a>00161         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.z = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a46fbb96a5b16863178f371f0d1eae062">z_origin</a>;
+<a name="l00159"></a>00159         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.x = message.x_origin;
+<a name="l00160"></a>00160         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.y = message.y_origin;
+<a name="l00161"></a>00161         this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.z = message.z_origin;
 <a name="l00162"></a>00162 
 <a name="l00163"></a>00163         <span class="comment">//extract goal data</span>
-<a name="l00164"></a>00164         <span class="keywordflow">if</span>(message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a6b9bfc8df2c1d4a92bd8beb94645ccea">has_goal</a>)
+<a name="l00164"></a>00164         <span class="keywordflow">if</span>(message.has_goal)
 <a name="l00165"></a>00165         {
 <a name="l00166"></a>00166                 this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#ae099263171b4590e6e5340f88100c34c" title="The grid resolution of this occupancy grid.">has_goal_</a> = <span class="keyword">true</span>;
-<a name="l00167"></a>00167                 this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.x   = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a73dbb38e12b13da2de68a89c50317426">x_goal</a>;
-<a name="l00168"></a>00168                 this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.y   = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#ae6846604da7700cd7053e6788a9a8510">y_goal</a>;
-<a name="l00169"></a>00169                 this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.z   = message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#abc1dfd42c11c840c8e22c212ad606933">z_goal</a>;
+<a name="l00167"></a>00167                 this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.x   = message.x_goal;
+<a name="l00168"></a>00168                 this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.y   = message.y_goal;
+<a name="l00169"></a>00169                 this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.z   = message.z_goal;
 <a name="l00170"></a>00170         }
 <a name="l00171"></a>00171         <span class="keywordflow">else</span> this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#ae099263171b4590e6e5340f88100c34c" title="The grid resolution of this occupancy grid.">has_goal_</a> = <span class="keyword">false</span>;
 <a name="l00172"></a>00172 
 <a name="l00173"></a>00173         <span class="comment">//extract grid data</span>
-<a name="l00174"></a>00174         pcl::fromROSMsg&lt;pcl::PointXYZRGBA&gt;(message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#afa73abe77df0b705ecdf94d1ac9c4cf5">grid_data</a>, this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a19388f6222f3d237862696e44e6e2b1a" title="The location of the goal point on the grid.">occ_grid_</a>);
+<a name="l00174"></a>00174         pcl::fromROSMsg&lt;pcl::PointXYZRGBA&gt;(message.grid_data, this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a19388f6222f3d237862696e44e6e2b1a" title="The location of the goal point on the grid.">occ_grid_</a>);
 <a name="l00175"></a>00175 }
 <a name="l00176"></a>00176 
 <a name="l00177"></a><a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a649f914fa09538bf2246655f283415d8">00177</a> <span class="keywordtype">void</span> <a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a649f914fa09538bf2246655f283415d8" title="Helper function that initializes the occupancy grid.">OccupancyGrid::intializeGrid</a>(<a class="code" href="namespaceoryx__path__planning.html#a4d4dae29f743adb3cb1f7c657a6d15ea" title="Standard parameter warning message.">PointTrait_t</a> seedTrait)
@@ -335,29 +335,29 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00302"></a>00302         <span class="keywordflow">return</span> <span class="keyword">true</span>;
 <a name="l00303"></a>00303 }
 <a name="l00304"></a>00304 
-<a name="l00305"></a><a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#afe445f7453a834cae2d7ab783019d9b7">00305</a> <span class="keywordtype">bool</span> <a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a247665987ca0500791e5f0906670395b" title="Generates a sensor_msgs::PointCloud2 message from the data in the grid.">OccupancyGrid::generateMessage</a>(<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html">oryx_path_planning::OccupancyGridMsg</a>&amp; message)<span class="keyword"> const</span>
+<a name="l00305"></a><a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#afe445f7453a834cae2d7ab783019d9b7">00305</a> <span class="keywordtype">bool</span> <a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a247665987ca0500791e5f0906670395b" title="Generates a sensor_msgs::PointCloud2 message from the data in the grid.">OccupancyGrid::generateMessage</a>(oryx_path_planning::OccupancyGridMsg&amp; message)<span class="keyword"> const</span>
 <a name="l00306"></a>00306 <span class="keyword"></span>{
-<a name="l00307"></a>00307         message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a915367aae5d3ae5f7e973d7b92bcef69">header</a>.stamp = ros::Time::now();
+<a name="l00307"></a>00307         message.header.stamp = ros::Time::now();
 <a name="l00308"></a>00308         <span class="comment">//Pack grid data</span>
-<a name="l00309"></a>00309         message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a20ddf478e9d9e2a20b6df3e77d83df4f">x_dim</a> = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a670a24857754c67333d7f19555bbdb4e">x_dim_</a>;
-<a name="l00310"></a>00310         message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a879b788ce9d0312d7da0628d503cbe7b">y_dim</a> = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a14dff2ac63668698fdebe973017e516d" title="The x dimension of this grid.">y_dim_</a>;
-<a name="l00311"></a>00311         message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a666d97f6cbe1d6341089369596a8eb1a">z_dim</a> = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a9510a9469933e26c48d56dd6147853b8" title="The y dimension of this grid.">z_dim_</a>;
-<a name="l00312"></a>00312         message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a81d78b0735542f3d13940ab1028d9cf8">resolution</a>  = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a6395fd1e226da33a6b3c0445b852271a" title="The z dimension of this grid.">res_</a>;
+<a name="l00309"></a>00309         message.x_dim = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a670a24857754c67333d7f19555bbdb4e">x_dim_</a>;
+<a name="l00310"></a>00310         message.y_dim = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a14dff2ac63668698fdebe973017e516d" title="The x dimension of this grid.">y_dim_</a>;
+<a name="l00311"></a>00311         message.z_dim = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a9510a9469933e26c48d56dd6147853b8" title="The y dimension of this grid.">z_dim_</a>;
+<a name="l00312"></a>00312         message.resolution  = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a6395fd1e226da33a6b3c0445b852271a" title="The z dimension of this grid.">res_</a>;
 <a name="l00313"></a>00313         <span class="comment">//Pack origin data</span>
-<a name="l00314"></a>00314         message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a7380dfa3e2f923e793b43f7b36a6b104">x_origin</a> = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.x;
-<a name="l00315"></a>00315         message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a00650a31d3f8484d4701f272aef0bed7">y_origin</a> = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.y;
-<a name="l00316"></a>00316         message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a46fbb96a5b16863178f371f0d1eae062">z_origin</a> = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.z;
+<a name="l00314"></a>00314         message.x_origin = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.x;
+<a name="l00315"></a>00315         message.y_origin = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.y;
+<a name="l00316"></a>00316         message.z_origin = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a8ad2bd09d301456ad05cfb54a7bf2893" title="Flag to signal there is a goal point on the grid.">origin_</a>.z;
 <a name="l00317"></a>00317         <span class="comment">//pack goal data</span>
 <a name="l00318"></a>00318         <span class="keywordflow">if</span>(this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#ae099263171b4590e6e5340f88100c34c" title="The grid resolution of this occupancy grid.">has_goal_</a>)
 <a name="l00319"></a>00319         {
-<a name="l00320"></a>00320                 message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a6b9bfc8df2c1d4a92bd8beb94645ccea">has_goal</a> = <span class="keyword">true</span>;
-<a name="l00321"></a>00321                 message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a73dbb38e12b13da2de68a89c50317426">x_goal</a>   = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.x;
-<a name="l00322"></a>00322                 message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#ae6846604da7700cd7053e6788a9a8510">y_goal</a>   = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.y;
-<a name="l00323"></a>00323                 message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#abc1dfd42c11c840c8e22c212ad606933">z_goal</a>   = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.z;
+<a name="l00320"></a>00320                 message.has_goal = <span class="keyword">true</span>;
+<a name="l00321"></a>00321                 message.x_goal   = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.x;
+<a name="l00322"></a>00322                 message.y_goal   = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.y;
+<a name="l00323"></a>00323                 message.z_goal   = this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#add6a0e22642637f29b8a797416ab1c72" title="The origin of the occupancy grid.">goal_</a>.z;
 <a name="l00324"></a>00324         }
-<a name="l00325"></a>00325         <span class="keywordflow">else</span> message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#a6b9bfc8df2c1d4a92bd8beb94645ccea">has_goal</a> = <span class="keyword">false</span>;
+<a name="l00325"></a>00325         <span class="keywordflow">else</span> message.has_goal = <span class="keyword">false</span>;
 <a name="l00326"></a>00326         <span class="comment">//pack grid data</span>
-<a name="l00327"></a>00327         pcl::toROSMsg&lt;pcl::PointXYZRGBA&gt;(this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a19388f6222f3d237862696e44e6e2b1a" title="The location of the goal point on the grid.">occ_grid_</a>, message.<a class="code" href="structoryx__path__planning_1_1OccupancyGridMsg__.html#afa73abe77df0b705ecdf94d1ac9c4cf5">grid_data</a>);
+<a name="l00327"></a>00327         pcl::toROSMsg&lt;pcl::PointXYZRGBA&gt;(this-&gt;<a class="code" href="classoryx__path__planning_1_1OccupancyGrid.html#a19388f6222f3d237862696e44e6e2b1a" title="The location of the goal point on the grid.">occ_grid_</a>, message.grid_data);
 <a name="l00328"></a>00328         <span class="keywordflow">return</span> <span class="keyword">true</span>;
 <a name="l00329"></a>00329 }
 <a name="l00330"></a>00330 
@@ -596,8 +596,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <br clear="all" />
 <hr size="1"><div style="align: right;">
 <a href="http://ros.org/wiki/oryx_path_planning">oryx_path_planning</a><br />
-Author(s): aruis</br />
-<small>autogenerated on Sun Jan 20 2013 12:22:58</small>
+Author(s): </br />
+<small>autogenerated on Sun Jan 27 2013 20:34:31</small>
 </div>
 </body>
 </html>

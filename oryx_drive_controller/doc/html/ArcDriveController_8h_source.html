@@ -57,8 +57,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00011"></a>00011 <span class="preprocessor">#include &lt;ros/ros.h&gt;</span>
 <a name="l00012"></a>00012 <span class="preprocessor">#include &lt;oryx_msgs/WheelVelocities.h&gt;</span>
 <a name="l00013"></a>00013 <span class="preprocessor">#include &lt;oryx_msgs/SwervePositions.h&gt;</span>
-<a name="l00014"></a>00014 <span class="preprocessor">#include &lt;<a class="code" href="VelocityArc_8h.html">oryx_drive_controller/VelocityArc.h</a>&gt;</span>
-<a name="l00015"></a>00015 <span class="preprocessor">#include &lt;<a class="code" href="VelocityTranslate_8h.html">oryx_drive_controller/VelocityTranslate.h</a>&gt;</span>
+<a name="l00014"></a>00014 <span class="preprocessor">#include &lt;oryx_drive_controller/VelocityArc.h&gt;</span>
+<a name="l00015"></a>00015 <span class="preprocessor">#include &lt;oryx_drive_controller/VelocityTranslate.h&gt;</span>
 <a name="l00027"></a><a class="code" href="classArcDriveController.html">00027</a> <span class="keyword">class </span><a class="code" href="classArcDriveController.html" title="Low level velocity-arc based drive controller.">ArcDriveController</a>{
 <a name="l00028"></a>00028 <span class="keyword">public</span>:
 <a name="l00039"></a>00039         <a class="code" href="classArcDriveController.html#a5ed280bc0ffafb777477dae528b5ed58">ArcDriveController</a>(std::string drive_velocity_topic,
@@ -96,9 +96,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00111"></a>00111 
 <a name="l00116"></a>00116         <span class="keywordtype">void</span> <a class="code" href="classArcDriveController.html#aed58b914802f794c57dda926567cfd64">sendMessages</a>(std::vector&lt;double&gt;&amp; wheelData);
 <a name="l00117"></a>00117 
-<a name="l00122"></a>00122         <span class="keywordtype">void</span> <a class="code" href="classArcDriveController.html#ad2e3b10af8f3c79d02215af2114eb846">processIPVelCB</a>(<span class="keyword">const</span> <a class="code" href="namespaceoryx__drive__controller.html#ae8bcf0d2781bab938fc0b428f43aefc3">oryx_drive_controller::VelocityArcConstPtr</a>&amp; msg);
+<a name="l00122"></a>00122         <span class="keywordtype">void</span> <a class="code" href="classArcDriveController.html#ad2e3b10af8f3c79d02215af2114eb846">processIPVelCB</a>(<span class="keyword">const</span> oryx_drive_controller::VelocityArcConstPtr&amp; msg);
 <a name="l00123"></a>00123 
-<a name="l00128"></a>00128         <span class="keywordtype">void</span> <a class="code" href="classArcDriveController.html#adcc52f5f1d08e8f78f488385f6d699be">processIPTransCB</a>(<span class="keyword">const</span> <a class="code" href="namespaceoryx__drive__controller.html#a08f44e7cdd4ff4146f607fb97b53cd53">oryx_drive_controller::VelocityTranslateConstPtr</a>&amp; msg);
+<a name="l00128"></a>00128         <span class="keywordtype">void</span> <a class="code" href="classArcDriveController.html#adcc52f5f1d08e8f78f488385f6d699be">processIPTransCB</a>(<span class="keyword">const</span> oryx_drive_controller::VelocityTranslateConstPtr&amp; msg);
 <a name="l00129"></a>00129 };
 <a name="l00130"></a>00130 
 <a name="l00131"></a>00131 <span class="preprocessor">#endif </span><span class="comment">/* ARCDRIVECONTROLLER_H_ */</span>
@@ -108,7 +108,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Defines</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Defines</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -121,8 +121,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <br clear="all" />
 <hr size="1"><div style="align: right;">
 <a href="http://ros.org/wiki/oryx_drive_controller">oryx_drive_controller</a><br />
-Author(s): aruis</br />
-<small>autogenerated on Sun Jan 20 2013 12:23:25</small>
+Author(s): </br />
+<small>autogenerated on Sun Jan 27 2013 20:34:16</small>
 </div>
 </body>
 </html>

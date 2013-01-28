@@ -55,8 +55,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00008"></a>00008 <span class="preprocessor"></span><span class="preprocessor">#define VELOCITYCONTROLSERVER_H_</span>
 <a name="l00009"></a>00009 <span class="preprocessor"></span>
 <a name="l00010"></a>00010 <span class="preprocessor">#include &lt;ros/ros.h&gt;</span>
-<a name="l00011"></a>00011 <span class="preprocessor">#include &lt;<a class="code" href="VelocityCommandAction_8h.html">oryx_drive_controller/VelocityCommandAction.h</a>&gt;</span>
-<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;<a class="code" href="VelocityArc_8h.html">oryx_drive_controller/VelocityArc.h</a>&gt;</span>
+<a name="l00011"></a>00011 <span class="preprocessor">#include &lt;oryx_drive_controller/VelocityCommandAction.h&gt;</span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;oryx_drive_controller/VelocityArc.h&gt;</span>
 <a name="l00013"></a>00013 <span class="preprocessor">#include &lt;actionlib/server/simple_action_server.h&gt;</span>
 <a name="l00014"></a>00014 
 <a name="l00015"></a>00015 
@@ -65,13 +65,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00023"></a>00023         <a class="code" href="classVelocityControlServer.html#a0984aa479f1fefab9c90ee66546f39a7">VelocityControlServer</a>(std::string <a class="code" href="classVelocityControlServer.html#aeb4831cabac2073a83ea3f66ecf9b1ae" title="Result message for actionlib server.">action_name</a>, std::string ctrl_velocity_topic);
 <a name="l00024"></a>00024         <span class="keyword">virtual</span> <a class="code" href="classVelocityControlServer.html#afd8d6bd3d3428015f284254ddf783d89">~VelocityControlServer</a>();
 <a name="l00025"></a>00025 <span class="keyword">private</span>:
-<a name="l00030"></a>00030         <span class="keywordtype">void</span> <a class="code" href="classVelocityControlServer.html#a6e353d83ff20a78431d1b46fc1cfcc30">executeCB</a>(<span class="keyword">const</span> <a class="code" href="namespaceoryx__drive__controller.html#a3ff2664f9e9448433850c456405979e7">oryx_drive_controller::VelocityCommandGoalConstPtr</a>&amp; goal);
+<a name="l00030"></a>00030         <span class="keywordtype">void</span> <a class="code" href="classVelocityControlServer.html#a6e353d83ff20a78431d1b46fc1cfcc30">executeCB</a>(<span class="keyword">const</span> oryx_drive_controller::VelocityCommandGoalConstPtr&amp; goal);
 <a name="l00031"></a>00031 
 <a name="l00032"></a><a class="code" href="classVelocityControlServer.html#ac77672805b1eec96d03f690864175370">00032</a>         ros::NodeHandle <a class="code" href="classVelocityControlServer.html#ac77672805b1eec96d03f690864175370">n</a>;                      
 <a name="l00033"></a><a class="code" href="classVelocityControlServer.html#afadde070b15369a2500f91f2166d11e0">00033</a>         ros::Publisher <a class="code" href="classVelocityControlServer.html#afadde070b15369a2500f91f2166d11e0" title="Node handle for getting parameters.">vel_pub</a>;         
 <a name="l00034"></a><a class="code" href="classVelocityControlServer.html#a30f7b7c35980b805f3a936b36fd9d2d6">00034</a>         actionlib::SimpleActionServer&lt;oryx_drive_controller::VelocityCommandAction&gt;     <a class="code" href="classVelocityControlServer.html#a30f7b7c35980b805f3a936b36fd9d2d6" title="Publisher for sending velocity-arc messages to controller.">as</a>;     
-<a name="l00035"></a><a class="code" href="classVelocityControlServer.html#ade4b0da029ade0b30661caffb113db80">00035</a>         <a class="code" href="structoryx__drive__controller_1_1VelocityCommandFeedback__.html">oryx_drive_controller::VelocityCommandFeedback</a>  <a class="code" href="classVelocityControlServer.html#ade4b0da029ade0b30661caffb113db80" title="Actionlib server for processing velocity commands.">feedback</a>;                                               
-<a name="l00036"></a><a class="code" href="classVelocityControlServer.html#a13bb38879569f505da33268d7b5aaf86">00036</a>         <a class="code" href="structoryx__drive__controller_1_1VelocityCommandResult__.html">oryx_drive_controller::VelocityCommandResult</a>    <a class="code" href="classVelocityControlServer.html#a13bb38879569f505da33268d7b5aaf86" title="Feedback message for actionlib server.">result</a>;                                                 
+<a name="l00035"></a><a class="code" href="classVelocityControlServer.html#ade4b0da029ade0b30661caffb113db80">00035</a>         oryx_drive_controller::VelocityCommandFeedback  <a class="code" href="classVelocityControlServer.html#ade4b0da029ade0b30661caffb113db80" title="Actionlib server for processing velocity commands.">feedback</a>;                                               
+<a name="l00036"></a><a class="code" href="classVelocityControlServer.html#a13bb38879569f505da33268d7b5aaf86">00036</a>         oryx_drive_controller::VelocityCommandResult    <a class="code" href="classVelocityControlServer.html#a13bb38879569f505da33268d7b5aaf86" title="Feedback message for actionlib server.">result</a>;                                                 
 <a name="l00037"></a><a class="code" href="classVelocityControlServer.html#aeb4831cabac2073a83ea3f66ecf9b1ae">00037</a>         std::string                                                                     <a class="code" href="classVelocityControlServer.html#aeb4831cabac2073a83ea3f66ecf9b1ae" title="Result message for actionlib server.">action_name</a>;                                    
 <a name="l00038"></a>00038 };
 <a name="l00039"></a>00039 
@@ -82,7 +82,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Defines</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Defines</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -95,8 +95,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <br clear="all" />
 <hr size="1"><div style="align: right;">
 <a href="http://ros.org/wiki/oryx_drive_controller">oryx_drive_controller</a><br />
-Author(s): aruis</br />
-<small>autogenerated on Sun Jan 20 2013 12:23:25</small>
+Author(s): </br />
+<small>autogenerated on Sun Jan 27 2013 20:34:16</small>
 </div>
 </body>
 </html>

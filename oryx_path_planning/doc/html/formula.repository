@@ -1,15 +1,15 @@
-\form#0:\[ l_t = \sum\limits_{n=1}^k d(p_(n-1), p_n) \]
-\form#1:$ d(p_(k-1), p_k) $
-\form#2:$ p_(n-1) \text{ and } p_n $
-\form#3:\[ y = floor(\frac{radius \times \cosine(theta)}{scale}+rshift) \]
-\form#4:\[ x = floor(\frac{radius \times \sine(theta)}{scale}) \]
-\form#5:\[ delta phi = TSA \times \frac{pi}{2} \]
-\form#6:\[ l = l_min + E_b \times q^(E_f) \]
-\form#7:\[ R_j = \frac{l}{delta phi \times (1-q^(0.9))} \]
-\form#8:$ R_j = \text{Seed Radius for Speed Set j} $
-\form#9:$ delta phi =$
-\form#10:$ l=$
-\form#11:$ TSA, E_b, E_f$
-\form#12:\[ V_j = V_s+q^(1.2) \times (V_e-V_s) \]
-\form#13:$ V_j = \text{Velocity for Speed Set j} $
-\form#14:$ q= \frac{speedSet}{numSpeedSet-1} $
+\form#0:$ q= \frac{speedSet}{numSpeedSet-1} $
+\form#1:\[ l_t = \sum\limits_{n=1}^k d(p_(n-1), p_n) \]
+\form#2:$ d(p_(k-1), p_k) $
+\form#3:$ p_(n-1) \text{ and } p_n $
+\form#4:\[ y = floor(\frac{radius \times \cosine(theta)}{scale}+rshift) \]
+\form#5:\[ x = floor(\frac{radius \times \sine(theta)}{scale}) \]
+\form#6:\[ delta phi = TSA \times \frac{pi}{2} \]
+\form#7:\[ l = l_min + E_b \times q^(E_f) \]
+\form#8:\[ R_j = \frac{l}{delta phi \times (1-q^(0.9))} \]
+\form#9:$ R_j = \text{Seed Radius for Speed Set j} $
+\form#10:$ delta phi =$
+\form#11:$ l=$
+\form#12:$ TSA, E_b, E_f$
+\form#13:\[ V_j = V_s+q^(1.2) \times (V_e-V_s) \]
+\form#14:$ V_j = \text{Velocity for Speed Set j} $

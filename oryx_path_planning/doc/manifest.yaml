@@ -1,20 +1,22 @@
-authors: aruis
-brief: oryx_path_planning
+authors: ''
+brief: ''
 depends:
+- catkin
 - roscpp
-- costmap_2d
 - sensor_msgs
 - actionlib
+- message_runtime
 - std_msgs
 - oryx_drive_controller
-- rospy
+- oryx_msgs
 - pcl
 - tf
+- message_generation
 - geometry_msgs
 - oryxsrr_msgs
 - actionlib_msgs
 - pcl_ros
-description: "\n\n     oryx_path_planning\n\n  "
+description: oryx_path_planning
 license: BSD
 msgs:
 - OccupancyGridMsg

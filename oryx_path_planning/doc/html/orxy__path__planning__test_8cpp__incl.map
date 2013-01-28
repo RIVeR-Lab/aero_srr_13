@@ -1,9 +1,8 @@
 <map id="G" name="G">
-<area shape="rect" id="node5" href="$OryxPathPlanning_8h.html" title="Contains all of the Includes required to complete the oryx_path_planning namespace." alt="" coords="434,83,573,112"/>
-<area shape="rect" id="node7" href="$OryxPathPlanningUtilities_8h.html" title="Header containing definitions that are used throughout the oryx_path_planning package." alt="" coords="486,237,667,267"/>
-<area shape="rect" id="node16" href="$TypeDefinitions_8h.html" title="Common typedefs for the oryx_path_planning namespace." alt="" coords="619,392,742,421"/>
-<area shape="rect" id="node25" href="$Tentacles_8h.html" title="Tentacles.h" alt="" coords="327,160,418,189"/>
-<area shape="rect" id="node33" href="$src_2includes_2OccupancyGrid_8h.html" title="OccupancyGrid.h" alt="" coords="442,160,565,189"/>
-<area shape="rect" id="node22" href="$PointConverter_8hpp.html" title="Header containg class definitions for converting between points." alt="" coords="614,315,747,344"/>
-<area shape="rect" id="node37" href="$OccupancyGridMsg_8h.html" title="oryx_path_planning/OccupancyGridMsg.h" alt="" coords="1555,237,1819,267"/>
+<area shape="rect" id="node5" href="$OryxPathPlanning_8h.html" title="Contains all of the Includes required to complete the oryx_path_planning namespace." alt="" coords="433,83,572,112"/>
+<area shape="rect" id="node7" href="$OryxPathPlanningUtilities_8h.html" title="Header containing definitions that are used throughout the oryx_path_planning package." alt="" coords="485,237,667,267"/>
+<area shape="rect" id="node16" href="$TypeDefinitions_8h.html" title="Common typedefs for the oryx_path_planning namespace." alt="" coords="873,392,996,421"/>
+<area shape="rect" id="node25" href="$Tentacles_8h.html" title="Tentacles.h" alt="" coords="327,160,417,189"/>
+<area shape="rect" id="node33" href="$OccupancyGrid_8h.html" title="//TODO fill in detailed discription here" alt="" coords="441,160,564,189"/>
+<area shape="rect" id="node22" href="$PointConverter_8hpp.html" title="Header containg class definitions for converting between points." alt="" coords="868,315,1001,344"/>
 </map>

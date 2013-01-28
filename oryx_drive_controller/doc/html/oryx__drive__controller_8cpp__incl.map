@@ -1,22 +1,5 @@
 <map id="G" name="G">
-<area shape="rect" id="node7" href="$VelocityControlServer_8h.html" title="VelocityControlServer.h" alt="" coords="5716,83,5876,112"/>
-<area shape="rect" id="node127" href="$TranslateControlServer_8h.html" title="TranslateControlServer.h" alt="" coords="5527,83,5692,112"/>
-<area shape="rect" id="node233" href="$OryxDriveControllerConfig_8h.html" title="OryxDriveControllerConfig.h" alt="" coords="6265,83,6452,112"/>
-<area shape="rect" id="node235" href="$ArcDriveController_8h.html" title="ArcDriveController.h" alt="" coords="5951,83,6089,112"/>
-<area shape="rect" id="node10" href="$VelocityCommandAction_8h.html" title="oryx_drive_controller/VelocityCommandAction.h" alt="" coords="4449,160,4751,189"/>
-<area shape="rect" id="node113" href="$VelocityArc_8h.html" title="oryx_drive_controller/VelocityArc.h" alt="" coords="5096,315,5320,344"/>
-<area shape="rect" id="node32" href="$VelocityCommandActionGoal_8h.html" title="oryx_drive_controller/VelocityCommandActionGoal.h" alt="" coords="3439,237,3767,267"/>
-<area shape="rect" id="node60" href="$VelocityCommandActionResult_8h.html" title="oryx_drive_controller/VelocityCommandActionResult.h" alt="" coords="3832,237,4171,267"/>
-<area shape="rect" id="node87" href="$VelocityCommandActionFeedback_8h.html" title="oryx_drive_controller/VelocityCommandActionFeedback.h" alt="" coords="4221,237,4579,267"/>
-<area shape="rect" id="node48" href="$VelocityCommandGoal_8h.html" title="oryx_drive_controller/VelocityCommandGoal.h" alt="" coords="3475,315,3765,344"/>
-<area shape="rect" id="node75" href="$VelocityCommandResult_8h.html" title="oryx_drive_controller/VelocityCommandResult.h" alt="" coords="3891,315,4192,344"/>
-<area shape="rect" id="node101" href="$VelocityCommandFeedback_8h.html" title="oryx_drive_controller/VelocityCommandFeedback.h" alt="" coords="4267,315,4587,344"/>
-<area shape="rect" id="node130" href="$TranslateCommandAction_8h.html" title="oryx_drive_controller/TranslateCommandAction.h" alt="" coords="2879,160,3185,189"/>
-<area shape="rect" id="node220" href="$VelocityTranslate_8h.html" title="oryx_drive_controller/VelocityTranslate.h" alt="" coords="4813,315,5072,344"/>
-<area shape="rect" id="node142" href="$TranslateCommandActionGoal_8h.html" title="oryx_drive_controller/TranslateCommandActionGoal.h" alt="" coords="2296,237,2629,267"/>
-<area shape="rect" id="node168" href="$TranslateCommandActionResult_8h.html" title="oryx_drive_controller/TranslateCommandActionResult.h" alt="" coords="3048,237,3395,267"/>
-<area shape="rect" id="node194" href="$TranslateCommandActionFeedback_8h.html" title="oryx_drive_controller/TranslateCommandActionFeedback.h" alt="" coords="2659,237,3024,267"/>
-<area shape="rect" id="node156" href="$TranslateCommandGoal_8h.html" title="oryx_drive_controller/TranslateCommandGoal.h" alt="" coords="1701,315,2000,344"/>
-<area shape="rect" id="node182" href="$TranslateCommandResult_8h.html" title="oryx_drive_controller/TranslateCommandResult.h" alt="" coords="2565,315,2875,344"/>
-<area shape="rect" id="node208" href="$TranslateCommandFeedback_8h.html" title="oryx_drive_controller/TranslateCommandFeedback.h" alt="" coords="2024,315,2352,344"/>
+<area shape="rect" id="node7" href="$VelocityControlServer_8h.html" title="VelocityControlServer.h" alt="" coords="500,83,660,112"/>
+<area shape="rect" id="node16" href="$TranslateControlServer_8h.html" title="TranslateControlServer.h" alt="" coords="735,83,900,112"/>
+<area shape="rect" id="node26" href="$ArcDriveController_8h.html" title="ArcDriveController.h" alt="" coords="924,83,1063,112"/>
 </map>
