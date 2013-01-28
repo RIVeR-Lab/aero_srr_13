@@ -33,9 +33,9 @@ void {\bf calculate\-Tank\-Steer} (double velocity, double radius, std\-::vector
 \begin{DoxyCompactList}\small\item\em \-Subscriber to the intra-\/process \-Velocity\-Translate message. \end{DoxyCompactList}\item 
 void {\bf check\-Capabilities} ()
 \item 
-void {\bf process\-I\-P\-Trans\-C\-B} (const {\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Translate\-Const\-Ptr} \&msg)
+void {\bf process\-I\-P\-Trans\-C\-B} (const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Translate\-Const\-Ptr \&msg)
 \item 
-void {\bf process\-I\-P\-Vel\-C\-B} (const {\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Arc\-Const\-Ptr} \&msg)
+void {\bf process\-I\-P\-Vel\-C\-B} (const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Arc\-Const\-Ptr \&msg)
 \item 
 void {\bf send\-Messages} (std\-::vector$<$ double $>$ \&wheel\-Data)
 \end{DoxyCompactItemize}
@@ -242,7 +242,7 @@ ros\-::\-Publisher {\bf velocity\-\_\-pub}
 \index{process\-I\-P\-Trans\-C\-B@{process\-I\-P\-Trans\-C\-B}!ArcDriveController@{\-Arc\-Drive\-Controller}}
 \subsubsection[{process\-I\-P\-Trans\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Arc\-Drive\-Controller\-::process\-I\-P\-Trans\-C\-B} (
 \begin{DoxyParamCaption}
-\item[{const {\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Translate\-Const\-Ptr} \&}]{msg}
+\item[{const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Translate\-Const\-Ptr \&}]{msg}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily  [private]}}\label{classArcDriveController_adcc52f5f1d08e8f78f488385f6d699be}
 \-Callback for processing the intra-\/process \-Velocity\-Translate messages 
@@ -258,7 +258,7 @@ ros\-::\-Publisher {\bf velocity\-\_\-pub}
 \index{process\-I\-P\-Vel\-C\-B@{process\-I\-P\-Vel\-C\-B}!ArcDriveController@{\-Arc\-Drive\-Controller}}
 \subsubsection[{process\-I\-P\-Vel\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Arc\-Drive\-Controller\-::process\-I\-P\-Vel\-C\-B} (
 \begin{DoxyParamCaption}
-\item[{const {\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Arc\-Const\-Ptr} \&}]{msg}
+\item[{const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Arc\-Const\-Ptr \&}]{msg}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily  [private]}}\label{classArcDriveController_ad2e3b10af8f3c79d02215af2114eb846}
 \-Callback for processing the intra-\/process \-Velocity\-Arc messages 

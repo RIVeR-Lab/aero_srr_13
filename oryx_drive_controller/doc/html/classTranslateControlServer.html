@@ -65,16 +65,16 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#af9358928b7212aad88a46cee16f52871">~TranslateControlServer</a> ()</td></tr>
 <tr><td colspan="2"><h2><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a0e5f5af1909910dbc210c7b09d2c0866">executeCB</a> (const <a class="el" href="namespaceoryx__drive__controller.html#aa7a5aba5e401fc9d72c07dd489080fb9">oryx_drive_controller::TranslateCommandGoalConstPtr</a> &amp;goal)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a0e5f5af1909910dbc210c7b09d2c0866">executeCB</a> (const oryx_drive_controller::TranslateCommandGoalConstPtr &amp;goal)</td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#ac840f78258c200e2f4a2f7feb7e9f198">action_name</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">actionlib::SimpleActionServer<br class="typebreak"/>
-&lt; <a class="el" href="namespaceoryx__drive__controller.html#a7d298c9bf3b5985e1faa7bdfe244d682">oryx_drive_controller::TranslateCommandAction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a374da04a17cc0fe3a957fda2dd2bb139">as</a></td></tr>
+&lt; oryx_drive_controller::TranslateCommandAction &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a374da04a17cc0fe3a957fda2dd2bb139">as</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Publisher for sending velocity-translate messages to controller.  <a href="#a374da04a17cc0fe3a957fda2dd2bb139"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceoryx__drive__controller.html#a24d6edc66f86f659d7cab9dab42fbe11">oryx_drive_controller::TranslateCommandFeedback</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a4409bee4c271657fe56f729901ba1e4a">feedback</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">oryx_drive_controller::TranslateCommandFeedback&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a4409bee4c271657fe56f729901ba1e4a">feedback</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">ros::NodeHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#ac2af712474c85b6c91f5a4c10ba45dee">n</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceoryx__drive__controller.html#a462e7faed5e47b9cf03730ab81c43789">oryx_drive_controller::TranslateCommandResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a59eb67af2de81ebb5b251b4f41e36759">result</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">oryx_drive_controller::TranslateCommandResult&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a59eb67af2de81ebb5b251b4f41e36759">result</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">ros::Publisher&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTranslateControlServer.html#a573578727b5611f4275f7b5debaab90d">trans_pub</a></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
@@ -143,7 +143,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname">void <a class="el" href="classTranslateControlServer.html#a0e5f5af1909910dbc210c7b09d2c0866">TranslateControlServer::executeCB</a> </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="namespaceoryx__drive__controller.html#aa7a5aba5e401fc9d72c07dd489080fb9">oryx_drive_controller::TranslateCommandGoalConstPtr</a> &amp;&#160;</td>
+          <td class="paramtype">const oryx_drive_controller::TranslateCommandGoalConstPtr &amp;&#160;</td>
           <td class="paramname"><em>goal</em></td><td>)</td>
           <td><code> [private]</code></td>
         </tr>
@@ -176,7 +176,7 @@ Private Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">actionlib::SimpleActionServer&lt;<a class="el" href="namespaceoryx__drive__controller.html#a7d298c9bf3b5985e1faa7bdfe244d682">oryx_drive_controller::TranslateCommandAction</a>&gt; <a class="el" href="classTranslateControlServer.html#a374da04a17cc0fe3a957fda2dd2bb139">TranslateControlServer::as</a><code> [private]</code></td>
+          <td class="memname">actionlib::SimpleActionServer&lt;oryx_drive_controller::TranslateCommandAction&gt; <a class="el" href="classTranslateControlServer.html#a374da04a17cc0fe3a957fda2dd2bb139">TranslateControlServer::as</a><code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -193,7 +193,7 @@ Private Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespaceoryx__drive__controller.html#a24d6edc66f86f659d7cab9dab42fbe11">oryx_drive_controller::TranslateCommandFeedback</a> <a class="el" href="classTranslateControlServer.html#a4409bee4c271657fe56f729901ba1e4a">TranslateControlServer::feedback</a><code> [private]</code></td>
+          <td class="memname">oryx_drive_controller::TranslateCommandFeedback <a class="el" href="classTranslateControlServer.html#a4409bee4c271657fe56f729901ba1e4a">TranslateControlServer::feedback</a><code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -223,7 +223,7 @@ Private Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespaceoryx__drive__controller.html#a462e7faed5e47b9cf03730ab81c43789">oryx_drive_controller::TranslateCommandResult</a> <a class="el" href="classTranslateControlServer.html#a59eb67af2de81ebb5b251b4f41e36759">TranslateControlServer::result</a><code> [private]</code></td>
+          <td class="memname">oryx_drive_controller::TranslateCommandResult <a class="el" href="classTranslateControlServer.html#a59eb67af2de81ebb5b251b4f41e36759">TranslateControlServer::result</a><code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -258,7 +258,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Defines</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Defines</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -271,8 +271,8 @@ Private Attributes</h2></td></tr>
 <br clear="all" />
 <hr size="1"><div style="align: right;">
 <a href="http://ros.org/wiki/oryx_drive_controller">oryx_drive_controller</a><br />
-Author(s): aruis</br />
-<small>autogenerated on Sun Jan 20 2013 12:23:25</small>
+Author(s): </br />
+<small>autogenerated on Sun Jan 27 2013 20:34:16</small>
 </div>
 </body>
 </html>

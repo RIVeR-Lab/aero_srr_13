@@ -14,7 +14,7 @@ virtual {\bf $\sim$\-Velocity\-Control\-Server} ()
 \subsection*{\-Private \-Member \-Functions}
 \begin{DoxyCompactItemize}
 \item 
-void {\bf execute\-C\-B} (const {\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Goal\-Const\-Ptr} \&goal)
+void {\bf execute\-C\-B} (const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Goal\-Const\-Ptr \&goal)
 \end{DoxyCompactItemize}
 \subsection*{\-Private \-Attributes}
 \begin{DoxyCompactItemize}
@@ -22,13 +22,13 @@ void {\bf execute\-C\-B} (const {\bf oryx\-\_\-drive\-\_\-controller\-::\-Veloci
 std\-::string {\bf action\-\_\-name}
 \begin{DoxyCompactList}\small\item\em \-Result message for actionlib server. \end{DoxyCompactList}\item 
 actionlib\-::\-Simple\-Action\-Server\*
-$<$ {\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Action} $>$ {\bf as}
+$<$ oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Action $>$ {\bf as}
 \begin{DoxyCompactList}\small\item\em \-Publisher for sending velocity-\/arc messages to controller. \end{DoxyCompactList}\item 
-{\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback} {\bf feedback}
+oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback {\bf feedback}
 \begin{DoxyCompactList}\small\item\em \-Actionlib server for processing velocity commands. \end{DoxyCompactList}\item 
 ros\-::\-Node\-Handle {\bf n}
 \item 
-{\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Result} {\bf result}
+oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Result {\bf result}
 \begin{DoxyCompactList}\small\item\em \-Feedback message for actionlib server. \end{DoxyCompactList}\item 
 ros\-::\-Publisher {\bf vel\-\_\-pub}
 \begin{DoxyCompactList}\small\item\em \-Node handle for getting parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
@@ -79,7 +79,7 @@ ros\-::\-Publisher {\bf vel\-\_\-pub}
 \index{execute\-C\-B@{execute\-C\-B}!VelocityControlServer@{\-Velocity\-Control\-Server}}
 \subsubsection[{execute\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Velocity\-Control\-Server\-::execute\-C\-B} (
 \begin{DoxyParamCaption}
-\item[{const {\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Goal\-Const\-Ptr} \&}]{goal}
+\item[{const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Goal\-Const\-Ptr \&}]{goal}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_a6e353d83ff20a78431d1b46fc1cfcc30}
 \-Callback for executing a new velocity command 
@@ -107,7 +107,7 @@ ros\-::\-Publisher {\bf vel\-\_\-pub}
 
 \index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!as@{as}}
 \index{as@{as}!VelocityControlServer@{\-Velocity\-Control\-Server}}
-\subsubsection[{as}]{\setlength{\rightskip}{0pt plus 5cm}actionlib\-::\-Simple\-Action\-Server$<${\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Action}$>$ {\bf \-Velocity\-Control\-Server\-::as}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_a30f7b7c35980b805f3a936b36fd9d2d6}
+\subsubsection[{as}]{\setlength{\rightskip}{0pt plus 5cm}actionlib\-::\-Simple\-Action\-Server$<$oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Action$>$ {\bf \-Velocity\-Control\-Server\-::as}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_a30f7b7c35980b805f3a936b36fd9d2d6}
 
 
 \-Publisher for sending velocity-\/arc messages to controller. 
@@ -118,7 +118,7 @@ ros\-::\-Publisher {\bf vel\-\_\-pub}
 
 \index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!feedback@{feedback}}
 \index{feedback@{feedback}!VelocityControlServer@{\-Velocity\-Control\-Server}}
-\subsubsection[{feedback}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback} {\bf \-Velocity\-Control\-Server\-::feedback}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_ade4b0da029ade0b30661caffb113db80}
+\subsubsection[{feedback}]{\setlength{\rightskip}{0pt plus 5cm}oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback {\bf \-Velocity\-Control\-Server\-::feedback}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_ade4b0da029ade0b30661caffb113db80}
 
 
 \-Actionlib server for processing velocity commands. 
@@ -136,7 +136,7 @@ ros\-::\-Publisher {\bf vel\-\_\-pub}
 
 \index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!result@{result}}
 \index{result@{result}!VelocityControlServer@{\-Velocity\-Control\-Server}}
-\subsubsection[{result}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Result} {\bf \-Velocity\-Control\-Server\-::result}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_a13bb38879569f505da33268d7b5aaf86}
+\subsubsection[{result}]{\setlength{\rightskip}{0pt plus 5cm}oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Result {\bf \-Velocity\-Control\-Server\-::result}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_a13bb38879569f505da33268d7b5aaf86}
 
 
 \-Feedback message for actionlib server. 

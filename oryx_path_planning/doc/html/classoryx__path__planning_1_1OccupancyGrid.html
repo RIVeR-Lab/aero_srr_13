@@ -81,7 +81,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>Class which represents an Occupancy Grid that contains data on the robot's local frame.  
  <a href="classoryx__path__planning_1_1OccupancyGrid.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">OccupancyGrid.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>&gt;</code></p>
 
 <p><a href="classoryx__path__planning_1_1OccupancyGrid-members.html">List of all members.</a></p>
 <table class="memberdecls">
@@ -103,7 +103,7 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a19ff15df98710c66a94f4611b8a3b5f5">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a9804fe713c0cb384fd694221172fe411">end</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a247665987ca0500791e5f0906670395b">generateMessage</a> (sensor_msgs::PointCloud2Ptr message) const </td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a sensor_msgs::PointCloud2 message from the data in the grid.  <a href="#a247665987ca0500791e5f0906670395b"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#afe445f7453a834cae2d7ab783019d9b7">generateMessage</a> (<a class="el" href="namespaceoryx__path__planning.html#abde0e023279ca63ce67bd315a09e1b59">oryx_path_planning::OccupancyGridMsg</a> &amp;message) const </td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#afe445f7453a834cae2d7ab783019d9b7">generateMessage</a> (oryx_path_planning::OccupancyGridMsg &amp;message) const </td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates an oryxsrr_msgs::OccupancyGrid message from the <a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html" title="Class which represents an Occupancy Grid that contains data on the robot&#39;s local frame.">OccupancyGrid</a>.  <a href="#afe445f7453a834cae2d7ab783019d9b7"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a28709bca2d63cf5951fc1d9de0c1f11f">generateMessage</a> (sensor_msgs::Image &amp;message) const </td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Produces a sensor_msgs::Image out of the occupancy grid data, for use with visualization tools like rviz.  <a href="#a28709bca2d63cf5951fc1d9de0c1f11f"></a><br/></td></tr>
@@ -132,7 +132,7 @@ Public Member Functions</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html" title="Class which represents an Occupancy Grid that contains data on the robot&#39;s local frame.">OccupancyGrid</a> which uses a supplied PointCloud as its base.  <a href="#a67877c6aea87c3f119bfbb9d4517152c"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a21483289cff5b7d695ecbc83fe768040">OccupancyGrid</a> (int xDim, int yDim, int zDim, double resolution, <a class="el" href="namespaceoryx__path__planning.html#ab6b2cd9ece5379387e19040263872757">oryx_path_planning::Point</a> &amp;origin, <a class="el" href="namespaceoryx__path__planning.html#a8cb1695455776ea54023599c941914f5">OccupancyGridCloud</a> &amp;cloud)  throw (OccupancyGridAccessException)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new <a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html" title="Class which represents an Occupancy Grid that contains data on the robot&#39;s local frame.">OccupancyGrid</a> which uses a supplied PointCloud as its base.  <a href="#a21483289cff5b7d695ecbc83fe768040"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a76fd7f8e41b76c2e454b71ace1705394">OccupancyGrid</a> (const <a class="el" href="namespaceoryx__path__planning.html#abde0e023279ca63ce67bd315a09e1b59">oryx_path_planning::OccupancyGridMsg</a> &amp;message)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a76fd7f8e41b76c2e454b71ace1705394">OccupancyGrid</a> (const oryx_path_planning::OccupancyGridMsg &amp;message)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an <a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html" title="Class which represents an Occupancy Grid that contains data on the robot&#39;s local frame.">OccupancyGrid</a> from an oryxsrr_msgs::OccupancyGrid.  <a href="#a76fd7f8e41b76c2e454b71ace1705394"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#aaa5554a93c4b15c6c38418fbf42b9346">setGoalPoint</a> (<a class="el" href="namespaceoryx__path__planning.html#ab6b2cd9ece5379387e19040263872757">oryx_path_planning::Point</a> point)  throw (OccupancyGridAccessException)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the goal point on a grid.  <a href="#aaa5554a93c4b15c6c38418fbf42b9346"></a><br/></td></tr>
@@ -186,7 +186,7 @@ Private Attributes</h2></td></tr>
 <div class="textblock"><p>Class which represents an Occupancy Grid that contains data on the robot's local frame. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Adam Panzica </dd></dl>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00063">63</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00063">63</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 </div><hr/><h2>Member Typedef Documentation</h2>
 <a class="anchor" id="ab84a86f3598732c27a6b4a857d3cffe3"></a><!-- doxytag: member="oryx_path_planning::OccupancyGrid::const_iterator" ref="ab84a86f3598732c27a6b4a857d3cffe3" args="" -->
 <div class="memitem">
@@ -201,7 +201,7 @@ Private Attributes</h2></td></tr>
 
 <p>Typedef to make const_iterators easier. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00069">69</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00069">69</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -218,7 +218,7 @@ Private Attributes</h2></td></tr>
 
 <p>Typedef to make iterators easier. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00067">67</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00067">67</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -648,7 +648,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a000a4a895febfdb8d95f7c5c80299ae3">oryx_path_planning::OccupancyGrid::OccupancyGrid</a> </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="namespaceoryx__path__planning.html#abde0e023279ca63ce67bd315a09e1b59">oryx_path_planning::OccupancyGridMsg</a> &amp;&#160;</td>
+          <td class="paramtype">const oryx_path_planning::OccupancyGridMsg &amp;&#160;</td>
           <td class="paramname"><em>message</em></td><td>)</td>
           <td></td>
         </tr>
@@ -887,7 +887,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname">bool <a class="el" href="classoryx__path__planning_1_1OccupancyGrid.html#a247665987ca0500791e5f0906670395b">oryx_path_planning::OccupancyGrid::generateMessage</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="namespaceoryx__path__planning.html#abde0e023279ca63ce67bd315a09e1b59">oryx_path_planning::OccupancyGridMsg</a> &amp;&#160;</td>
+          <td class="paramtype">oryx_path_planning::OccupancyGridMsg &amp;&#160;</td>
           <td class="paramname"><em>message</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -1628,7 +1628,7 @@ Private Attributes</h2></td></tr>
 
 <p>The point cloud which contains the data for this occupancy grid. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00369">369</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00369">369</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -1645,7 +1645,7 @@ Private Attributes</h2></td></tr>
 
 <p>The origin of the occupancy grid. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00367">367</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00367">367</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -1662,7 +1662,7 @@ Private Attributes</h2></td></tr>
 
 <p>The grid resolution of this occupancy grid. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00365">365</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00365">365</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -1679,7 +1679,7 @@ Private Attributes</h2></td></tr>
 
 <p>The location of the goal point on the grid. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00368">368</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00368">368</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -1696,7 +1696,7 @@ Private Attributes</h2></td></tr>
 
 <p>Flag to signal there is a goal point on the grid. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00366">366</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00366">366</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -1713,7 +1713,7 @@ Private Attributes</h2></td></tr>
 
 <p>The z dimension of this grid. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00364">364</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00364">364</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -1728,7 +1728,7 @@ Private Attributes</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00361">361</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00361">361</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -1745,7 +1745,7 @@ Private Attributes</h2></td></tr>
 
 <p>The x dimension of this grid. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00362">362</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00362">362</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
@@ -1762,12 +1762,12 @@ Private Attributes</h2></td></tr>
 
 <p>The y dimension of this grid. </p>
 
-<p>Definition at line <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html#l00363">363</a> of file <a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a>.</p>
+<p>Definition at line <a class="el" href="OccupancyGrid_8h_source.html#l00363">363</a> of file <a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li><a class="el" href="src_2includes_2OccupancyGrid_8h_source.html">src/includes/OccupancyGrid.h</a></li>
+<li><a class="el" href="OccupancyGrid_8h_source.html">OccupancyGrid.h</a></li>
 <li><a class="el" href="OccupancyGrid_8cpp_source.html">OccupancyGrid.cpp</a></li>
 </ul>
 </div><!-- contents -->
@@ -1789,8 +1789,8 @@ Private Attributes</h2></td></tr>
 <br clear="all" />
 <hr size="1"><div style="align: right;">
 <a href="http://ros.org/wiki/oryx_path_planning">oryx_path_planning</a><br />
-Author(s): aruis</br />
-<small>autogenerated on Sun Jan 20 2013 12:22:59</small>
+Author(s): </br />
+<small>autogenerated on Sun Jan 27 2013 20:34:31</small>
 </div>
 </body>
 </html>

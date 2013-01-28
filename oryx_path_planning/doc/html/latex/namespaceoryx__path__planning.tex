@@ -5,11 +5,6 @@
 \-Namespace declaration to make implementation of \-Tentacle\-Traverser easier.  
 
 
-\subsection*{\-Namespaces}
-\begin{DoxyCompactItemize}
-\item 
-namespace {\bf msg}
-\end{DoxyCompactItemize}
 \subsection*{\-Classes}
 \begin{DoxyCompactItemize}
 \item 
@@ -19,12 +14,8 @@ class {\bf constants}
 \begin{DoxyCompactList}\small\item\em singleton class which returns dynamically generated constants \end{DoxyCompactList}\item 
 class {\bf \-Occupancy\-Grid}
 \begin{DoxyCompactList}\small\item\em \-Class which represents an \-Occupancy \-Grid that contains data on the robot's local frame. \end{DoxyCompactList}\item 
-struct {\bf \-Occupancy\-Grid\-\_\-}
-\item 
 class {\bf \-Occupancy\-Grid\-Access\-Exception}
 \begin{DoxyCompactList}\small\item\em \-Basic exception for stating that an invalid location on the occupancy grid was accessed. \end{DoxyCompactList}\item 
-struct {\bf \-Occupancy\-Grid\-Msg\-\_\-}
-\item 
 class {\bf \-Point\-Converter}
 \begin{DoxyCompactList}\small\item\em \-Class for converting a point with 'integer' x/y/z into some 'engineering unit' x/y/z coordinates. \end{DoxyCompactList}\item 
 class {\bf \-Speed\-Set}
@@ -42,29 +33,10 @@ class {\bf \-Tentacle\-Generator}
 \subsection*{\-Typedefs}
 \begin{DoxyCompactItemize}
 \item 
-typedef \*
-\-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-\_\-}\*
-$<$ std\-::allocator$<$ void $>$ $>$ {\bf \-Occupancy\-Grid}
-\item 
 typedef pcl\-::\-Point\-Cloud$<$ {\bf \-Point} $>$ {\bf \-Occupancy\-Grid\-Cloud}
 \item 
 typedef boost\-::shared\-\_\-ptr\*
-$<$ \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid} \*
-const  $>$ {\bf \-Occupancy\-Grid\-Const\-Ptr}
-\item 
-typedef \*
-\-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-\_\-}\*
-$<$ std\-::allocator$<$ void $>$ $>$ {\bf \-Occupancy\-Grid\-Msg}
-\item 
-typedef boost\-::shared\-\_\-ptr\*
-$<$ \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg} \*
-const  $>$ {\bf \-Occupancy\-Grid\-Msg\-Const\-Ptr}
-\item 
-typedef boost\-::shared\-\_\-ptr\*
-$<$ \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg} $>$ {\bf \-Occupancy\-Grid\-Msg\-Ptr}
-\item 
-typedef boost\-::shared\-\_\-ptr\*
-$<$ \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid} $>$ {\bf \-Occupancy\-Grid\-Ptr}
+$<$ {\bf \-Occupancy\-Grid} $>$ {\bf \-Occupancy\-Grid\-Ptr}
 \begin{DoxyCompactList}\small\item\em \-Typedef to allow for convenient sharing of a \doxyref{\-Occupancy\-Grid}{p.}{classoryx__path__planning_1_1OccupancyGrid} via pointer. \end{DoxyCompactList}\item 
 typedef pcl\-::\-Point\-X\-Y\-Z\-R\-G\-B\-A {\bf \-Point}
 \begin{DoxyCompactList}\small\item\em \-Typedef to allow for easier to read code. \end{DoxyCompactList}\item 
@@ -113,10 +85,6 @@ void {\bf cast\-Line} ({\bf \-Point} \&start\-Point, {\bf \-Point} \&end\-Point,
 \begin{DoxyCompactList}\small\item\em \-Generates the series of points along a line between two points and places them into a \-Point\-Cloud. \end{DoxyCompactList}\item 
 double {\bf grid\-To\-Real} (int grid, double resolution)
 \item 
-{\footnotesize template$<$typename Container\-Allocator $>$ }\\std\-::ostream \& {\bf operator$<$$<$} (std\-::ostream \&s, const \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-\_\-}$<$ \-Container\-Allocator $>$ \&v)
-\item 
-{\footnotesize template$<$typename Container\-Allocator $>$ }\\std\-::ostream \& {\bf operator$<$$<$} (std\-::ostream \&s, const \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-\_\-}$<$ \-Container\-Allocator $>$ \&v)
-\item 
 double {\bf round\-To\-Frac} (double raw, double frac)
 \item 
 int {\bf round\-To\-Grid} (double raw, double resolution)
@@ -129,58 +97,23 @@ const std\-::string {\bf warn\-\_\-message} (\char`\"{}\-Parameter $<$\%s$>$ \-N
 \-Namespace declaration to make implementation of \-Tentacle\-Traverser easier. 
 
 \subsection{\-Typedef \-Documentation}
-\index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!\-Occupancy\-Grid@{\-Occupancy\-Grid}}
-\index{\-Occupancy\-Grid@{\-Occupancy\-Grid}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
-\subsubsection[{\-Occupancy\-Grid}]{\setlength{\rightskip}{0pt plus 5cm}typedef \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-\_\-}$<$std\-::allocator$<$void$>$ $>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}\label{namespaceoryx__path__planning_a944fe0c4dcd7cbd444291c1abf3d7b56}
-
-
-\-Definition at line 104 of file msg\-\_\-gen/cpp/include/oryx\-\_\-path\-\_\-planning/\-Occupancy\-Grid.\-h.
-
 \index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!\-Occupancy\-Grid\-Cloud@{\-Occupancy\-Grid\-Cloud}}
 \index{\-Occupancy\-Grid\-Cloud@{\-Occupancy\-Grid\-Cloud}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
 \subsubsection[{\-Occupancy\-Grid\-Cloud}]{\setlength{\rightskip}{0pt plus 5cm}typedef pcl\-::\-Point\-Cloud$<${\bf \-Point}$>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Cloud}}\label{namespaceoryx__path__planning_a8cb1695455776ea54023599c941914f5}
 
 
-\-Definition at line 28 of file src/includes/\-Occupancy\-Grid.\-h.
-
-\index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!\-Occupancy\-Grid\-Const\-Ptr@{\-Occupancy\-Grid\-Const\-Ptr}}
-\index{\-Occupancy\-Grid\-Const\-Ptr@{\-Occupancy\-Grid\-Const\-Ptr}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
-\subsubsection[{\-Occupancy\-Grid\-Const\-Ptr}]{\setlength{\rightskip}{0pt plus 5cm}typedef boost\-::shared\-\_\-ptr$<$ \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid} const$>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Const\-Ptr}}\label{namespaceoryx__path__planning_a5f7446e58e9d592ce2693641c9473008}
-
-
-\-Definition at line 107 of file msg\-\_\-gen/cpp/include/oryx\-\_\-path\-\_\-planning/\-Occupancy\-Grid.\-h.
-
-\index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!\-Occupancy\-Grid\-Msg@{\-Occupancy\-Grid\-Msg}}
-\index{\-Occupancy\-Grid\-Msg@{\-Occupancy\-Grid\-Msg}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
-\subsubsection[{\-Occupancy\-Grid\-Msg}]{\setlength{\rightskip}{0pt plus 5cm}typedef \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-\_\-}$<$std\-::allocator$<$void$>$ $>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg}}\label{namespaceoryx__path__planning_abde0e023279ca63ce67bd315a09e1b59}
-
-
-\-Definition at line 104 of file \-Occupancy\-Grid\-Msg.\-h.
-
-\index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!\-Occupancy\-Grid\-Msg\-Const\-Ptr@{\-Occupancy\-Grid\-Msg\-Const\-Ptr}}
-\index{\-Occupancy\-Grid\-Msg\-Const\-Ptr@{\-Occupancy\-Grid\-Msg\-Const\-Ptr}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
-\subsubsection[{\-Occupancy\-Grid\-Msg\-Const\-Ptr}]{\setlength{\rightskip}{0pt plus 5cm}typedef boost\-::shared\-\_\-ptr$<$ \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg} const$>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-Const\-Ptr}}\label{namespaceoryx__path__planning_a82694c8320a2ecd2a2c9678f1c4f6a70}
-
-
-\-Definition at line 107 of file \-Occupancy\-Grid\-Msg.\-h.
-
-\index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!\-Occupancy\-Grid\-Msg\-Ptr@{\-Occupancy\-Grid\-Msg\-Ptr}}
-\index{\-Occupancy\-Grid\-Msg\-Ptr@{\-Occupancy\-Grid\-Msg\-Ptr}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
-\subsubsection[{\-Occupancy\-Grid\-Msg\-Ptr}]{\setlength{\rightskip}{0pt plus 5cm}typedef boost\-::shared\-\_\-ptr$<$ \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg}$>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-Ptr}}\label{namespaceoryx__path__planning_a4fc5911a6cbfc560ce87f5b39e0bd079}
-
-
-\-Definition at line 106 of file \-Occupancy\-Grid\-Msg.\-h.
+\-Definition at line 28 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!\-Occupancy\-Grid\-Ptr@{\-Occupancy\-Grid\-Ptr}}
 \index{\-Occupancy\-Grid\-Ptr@{\-Occupancy\-Grid\-Ptr}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
-\subsubsection[{\-Occupancy\-Grid\-Ptr}]{\setlength{\rightskip}{0pt plus 5cm}typedef boost\-::shared\-\_\-ptr$<$ {\bf \-Occupancy\-Grid} $>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Ptr}}\label{namespaceoryx__path__planning_a59c531fbf2b71e60458d8a121439f47b}
+\subsubsection[{\-Occupancy\-Grid\-Ptr}]{\setlength{\rightskip}{0pt plus 5cm}typedef boost\-::shared\-\_\-ptr$<${\bf \-Occupancy\-Grid}$>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Ptr}}\label{namespaceoryx__path__planning_a3f541d6b4e0975e7b65d8990d2ec6f69}
 
 
 \-Typedef to allow for convenient sharing of a \doxyref{\-Occupancy\-Grid}{p.}{classoryx__path__planning_1_1OccupancyGrid} via pointer. 
 
 
 
-\-Definition at line 106 of file msg\-\_\-gen/cpp/include/oryx\-\_\-path\-\_\-planning/\-Occupancy\-Grid.\-h.
+\-Definition at line 23 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!\-Point@{\-Point}}
 \index{\-Point@{\-Point}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
@@ -409,30 +342,6 @@ const std\-::string {\bf warn\-\_\-message} (\char`\"{}\-Parameter $<$\%s$>$ \-N
 
 
 \-Definition at line 190 of file \-Oryx\-Path\-Planning\-Utilities.\-h.
-
-\index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!operator$<$$<$@{operator$<$$<$}}
-\index{operator$<$$<$@{operator$<$$<$}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
-\subsubsection[{operator$<$$<$}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Container\-Allocator $>$ std\-::ostream\& oryx\-\_\-path\-\_\-planning\-::operator$<$$<$ (
-\begin{DoxyParamCaption}
-\item[{std\-::ostream \&}]{s, }
-\item[{const \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-\_\-}$<$ \-Container\-Allocator $>$ \&}]{v}
-\end{DoxyParamCaption}
-)}\label{namespaceoryx__path__planning_a17695a3cad775e299f923d74a461cf5d}
-
-
-\-Definition at line 111 of file \-Occupancy\-Grid\-Msg.\-h.
-
-\index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!operator$<$$<$@{operator$<$$<$}}
-\index{operator$<$$<$@{operator$<$$<$}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}
-\subsubsection[{operator$<$$<$}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Container\-Allocator $>$ std\-::ostream\& oryx\-\_\-path\-\_\-planning\-::operator$<$$<$ (
-\begin{DoxyParamCaption}
-\item[{std\-::ostream \&}]{s, }
-\item[{const \-::{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-\_\-}$<$ \-Container\-Allocator $>$ \&}]{v}
-\end{DoxyParamCaption}
-)}\label{namespaceoryx__path__planning_a2af223defdd9738b713d1d9db8e20ec8}
-
-
-\-Definition at line 111 of file msg\-\_\-gen/cpp/include/oryx\-\_\-path\-\_\-planning/\-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning@{oryx\-\_\-path\-\_\-planning}!round\-To\-Frac@{round\-To\-Frac}}
 \index{round\-To\-Frac@{round\-To\-Frac}!oryx_path_planning@{oryx\-\_\-path\-\_\-planning}}

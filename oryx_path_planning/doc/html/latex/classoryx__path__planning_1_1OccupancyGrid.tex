@@ -33,7 +33,7 @@ $<$ pcl\-::\-Point\-X\-Y\-Z\-R\-G\-B\-A $>$\*
 \item 
 bool {\bf generate\-Message} (sensor\-\_\-msgs\-::\-Point\-Cloud2\-Ptr message) const 
 \begin{DoxyCompactList}\small\item\em \-Generates a sensor\-\_\-msgs\-::\-Point\-Cloud2 message from the data in the grid. \end{DoxyCompactList}\item 
-bool {\bf generate\-Message} ({\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg} \&message) const 
+bool {\bf generate\-Message} (oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg \&message) const 
 \begin{DoxyCompactList}\small\item\em \-Generates an oryxsrr\-\_\-msgs\-::\-Occupancy\-Grid message from the \doxyref{\-Occupancy\-Grid}{p.}{classoryx__path__planning_1_1OccupancyGrid}. \end{DoxyCompactList}\item 
 bool {\bf generate\-Message} (sensor\-\_\-msgs\-::\-Image \&message) const 
 \begin{DoxyCompactList}\small\item\em \-Produces a sensor\-\_\-msgs\-::\-Image out of the occupancy grid data, for use with visualization tools like rviz. \end{DoxyCompactList}\item 
@@ -63,7 +63,7 @@ const {\bf \-Occupancy\-Grid\-Cloud} \& {\bf get\-Grid} () const
 \begin{DoxyCompactList}\small\item\em \-Creates a new \doxyref{\-Occupancy\-Grid}{p.}{classoryx__path__planning_1_1OccupancyGrid} which uses a supplied \-Point\-Cloud as its base. \end{DoxyCompactList}\item 
 {\bf \-Occupancy\-Grid} (int x\-Dim, int y\-Dim, int z\-Dim, double resolution, {\bf oryx\-\_\-path\-\_\-planning\-::\-Point} \&origin, {\bf \-Occupancy\-Grid\-Cloud} \&cloud)  throw (\-Occupancy\-Grid\-Access\-Exception)
 \begin{DoxyCompactList}\small\item\em \-Creates a new \doxyref{\-Occupancy\-Grid}{p.}{classoryx__path__planning_1_1OccupancyGrid} which uses a supplied \-Point\-Cloud as its base. \end{DoxyCompactList}\item 
-{\bf \-Occupancy\-Grid} (const {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg} \&message)
+{\bf \-Occupancy\-Grid} (const oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg \&message)
 \begin{DoxyCompactList}\small\item\em \-Creates an \doxyref{\-Occupancy\-Grid}{p.}{classoryx__path__planning_1_1OccupancyGrid} from an oryxsrr\-\_\-msgs\-::\-Occupancy\-Grid. \end{DoxyCompactList}\item 
 void {\bf set\-Goal\-Point} ({\bf oryx\-\_\-path\-\_\-planning\-::\-Point} point)  throw (\-Occupancy\-Grid\-Access\-Exception)
 \begin{DoxyCompactList}\small\item\em \-Sets the goal point on a grid. \end{DoxyCompactList}\item 
@@ -133,7 +133,7 @@ int {\bf z\-\_\-dim\-\_\-}
 \end{DoxyAuthor}
 
 
-\-Definition at line 63 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 63 of file \-Occupancy\-Grid.\-h.
 
 
 
@@ -147,7 +147,7 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 69 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 69 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!iterator@{iterator}}
 \index{iterator@{iterator}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
@@ -158,7 +158,7 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 67 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 67 of file \-Occupancy\-Grid.\-h.
 
 
 
@@ -426,7 +426,7 @@ int {\bf z\-\_\-dim\-\_\-}
 \index{\-Occupancy\-Grid@{\-Occupancy\-Grid}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
 \subsubsection[{\-Occupancy\-Grid}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-::\-Occupancy\-Grid} (
 \begin{DoxyParamCaption}
-\item[{const {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg} \&}]{message}
+\item[{const oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg \&}]{message}
 \end{DoxyParamCaption}
 )}\label{classoryx__path__planning_1_1OccupancyGrid_a76fd7f8e41b76c2e454b71ace1705394}
 
@@ -617,7 +617,7 @@ int {\bf z\-\_\-dim\-\_\-}
 \index{generate\-Message@{generate\-Message}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
 \subsubsection[{generate\-Message}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-::generate\-Message} (
 \begin{DoxyParamCaption}
-\item[{{\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg} \&}]{message}
+\item[{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg \&}]{message}
 \end{DoxyParamCaption}
 ) const}\label{classoryx__path__planning_1_1OccupancyGrid_afe445f7453a834cae2d7ab783019d9b7}
 
@@ -1130,7 +1130,7 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 369 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 369 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!goal\-\_\-@{goal\-\_\-}}
 \index{goal\-\_\-@{goal\-\_\-}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
@@ -1141,7 +1141,7 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 367 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 367 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!has\-\_\-goal\-\_\-@{has\-\_\-goal\-\_\-}}
 \index{has\-\_\-goal\-\_\-@{has\-\_\-goal\-\_\-}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
@@ -1152,7 +1152,7 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 365 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 365 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!occ\-\_\-grid\-\_\-@{occ\-\_\-grid\-\_\-}}
 \index{occ\-\_\-grid\-\_\-@{occ\-\_\-grid\-\_\-}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
@@ -1163,7 +1163,7 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 368 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 368 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!origin\-\_\-@{origin\-\_\-}}
 \index{origin\-\_\-@{origin\-\_\-}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
@@ -1174,7 +1174,7 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 366 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 366 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!res\-\_\-@{res\-\_\-}}
 \index{res\-\_\-@{res\-\_\-}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
@@ -1185,14 +1185,14 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 364 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 364 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!x\-\_\-dim\-\_\-@{x\-\_\-dim\-\_\-}}
 \index{x\-\_\-dim\-\_\-@{x\-\_\-dim\-\_\-}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
 \subsubsection[{x\-\_\-dim\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-::x\-\_\-dim\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1OccupancyGrid_a670a24857754c67333d7f19555bbdb4e}
 
 
-\-Definition at line 361 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 361 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!y\-\_\-dim\-\_\-@{y\-\_\-dim\-\_\-}}
 \index{y\-\_\-dim\-\_\-@{y\-\_\-dim\-\_\-}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
@@ -1203,7 +1203,7 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 362 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 362 of file \-Occupancy\-Grid.\-h.
 
 \index{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}!z\-\_\-dim\-\_\-@{z\-\_\-dim\-\_\-}}
 \index{z\-\_\-dim\-\_\-@{z\-\_\-dim\-\_\-}!oryx_path_planning::OccupancyGrid@{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid}}
@@ -1214,11 +1214,11 @@ int {\bf z\-\_\-dim\-\_\-}
 
 
 
-\-Definition at line 363 of file src/includes/\-Occupancy\-Grid.\-h.
+\-Definition at line 363 of file \-Occupancy\-Grid.\-h.
 
 
 
 \-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
 \item 
-{\bf src/includes/\-Occupancy\-Grid.\-h}\item 
+{\bf \-Occupancy\-Grid.\-h}\item 
 {\bf \-Occupancy\-Grid.\-cpp}\end{DoxyCompactItemize}

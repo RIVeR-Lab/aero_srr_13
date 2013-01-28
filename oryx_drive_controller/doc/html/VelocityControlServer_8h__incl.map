@@ -1,10 +1,2 @@
 <map id="G" name="G">
-<area shape="rect" id="node5" href="$VelocityCommandAction_8h.html" title="oryx_drive_controller/VelocityCommandAction.h" alt="" coords="1921,83,2223,112"/>
-<area shape="rect" id="node108" href="$VelocityArc_8h.html" title="oryx_drive_controller/VelocityArc.h" alt="" coords="2435,237,2659,267"/>
-<area shape="rect" id="node27" href="$VelocityCommandActionGoal_8h.html" title="oryx_drive_controller/VelocityCommandActionGoal.h" alt="" coords="973,160,1301,189"/>
-<area shape="rect" id="node55" href="$VelocityCommandActionResult_8h.html" title="oryx_drive_controller/VelocityCommandActionResult.h" alt="" coords="1903,160,2241,189"/>
-<area shape="rect" id="node82" href="$VelocityCommandActionFeedback_8h.html" title="oryx_drive_controller/VelocityCommandActionFeedback.h" alt="" coords="1496,160,1853,189"/>
-<area shape="rect" id="node43" href="$VelocityCommandGoal_8h.html" title="oryx_drive_controller/VelocityCommandGoal.h" alt="" coords="875,237,1165,267"/>
-<area shape="rect" id="node70" href="$VelocityCommandResult_8h.html" title="oryx_drive_controller/VelocityCommandResult.h" alt="" coords="2109,237,2411,267"/>
-<area shape="rect" id="node96" href="$VelocityCommandFeedback_8h.html" title="oryx_drive_controller/VelocityCommandFeedback.h" alt="" coords="1291,237,1611,267"/>
 </map>

@@ -1,0 +1,15 @@
+authors: ''
+brief: ''
+depends:
+- catkin
+- roscpp
+- libqt4-dev
+- oryx_msgs
+- rospy
+- qt_build
+description: GUI elements used by the oryx_srr stack for visualization of system processes
+license: BSD
+msgs: []
+package_type: package
+srvs: []
+url: http://ros.org/wiki/oryx_srr_gui
