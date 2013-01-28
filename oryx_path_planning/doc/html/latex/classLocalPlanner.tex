@@ -1,0 +1,620 @@
+\section{\-Local\-Planner \-Class \-Reference}
+\label{classLocalPlanner}\index{\-Local\-Planner@{\-Local\-Planner}}
+
+
+\-Class which does the actual work of local path planning and sending commands to base.  
+
+
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bf do\-Planning} ()
+\begin{DoxyCompactList}\small\item\em \-Does the actual work of implementing the \-Driving with \-Tentacles algorithm. \end{DoxyCompactList}\item 
+{\bf \-Local\-Planner} (int platform, double goal\-Weight, double trav\-Weight, double diff\-Weight, double unkn\-Weight, double x\-Dim, double y\-Dim, double z\-Dim, double res, {\bf oryx\-\_\-path\-\_\-planning\-::\-Point} \&origin, std\-::string \&v\-\_\-action\-\_\-topic, std\-::string \&oc\-\_\-point\-\_\-cloud\-\_\-topic, {\bf \-Tentacle\-Generator\-Ptr} tentacles)  throw (std\-::runtime\-\_\-error)
+\begin{DoxyCompactList}\small\item\em \-Creates a new local planner. \end{DoxyCompactList}\item 
+virtual {\bf $\sim$\-Local\-Planner} ()
+\end{DoxyCompactItemize}
+\subsection*{\-Private \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bf active\-Cb} ()
+\begin{DoxyCompactList}\small\item\em \-Callback for processing the response that a velocity goal went active. \end{DoxyCompactList}\item 
+void {\bf done\-Cb} (const actionlib\-::\-Simple\-Client\-Goal\-State \&state, const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Result\-Const\-Ptr \&result)
+\begin{DoxyCompactList}\small\item\em \-Callback for handling the result from the velocity controller. \end{DoxyCompactList}\item 
+void {\bf feedback\-Cb} (const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback\-Const\-Ptr \&feedback)
+\begin{DoxyCompactList}\small\item\em \-Callback for handling velocity controller feedback. \end{DoxyCompactList}\item 
+void {\bf pc\-C\-B} (const oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-Const\-Ptr \&message)
+\begin{DoxyCompactList}\small\item\em \-Callback for processing new point cloud data. \end{DoxyCompactList}\item 
+void {\bf send} (double velocity, double radius)
+\begin{DoxyCompactList}\small\item\em \-Sends a command to the base's velocity controller. \end{DoxyCompactList}\item 
+void {\bf send\-Vel\-Com} (double velocity, double radius)
+\item 
+void {\bf stop\-C\-B} (const oryx\-\_\-msgs\-::\-Software\-Stop\-Const\-Ptr \&message)
+\begin{DoxyCompactList}\small\item\em \-The actionlib client to set velocity command messages to the base platform with. \end{DoxyCompactList}\item 
+void {\bf twist} (double x\-\_\-dot, double omega)
+\end{DoxyCompactItemize}
+\subsection*{\-Private \-Attributes}
+\begin{DoxyCompactItemize}
+\item 
+double {\bf current\-\_\-rad\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Current \-Velocity of the \-Platform. \end{DoxyCompactList}\item 
+double {\bf current\-\_\-vel\-\_\-}
+\begin{DoxyCompactList}\small\item\em resolution the occupancy grid to use, in real units per grid unit \end{DoxyCompactList}\item 
+double {\bf diff\-\_\-weight\-\_\-}
+\begin{DoxyCompactList}\small\item\em weighting factor to bias tentacle selection away from previously traversed points \end{DoxyCompactList}\item 
+double {\bf goal\-\_\-weight\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Flag for signaling if the local planner should be running. \end{DoxyCompactList}\item 
+ros\-::\-Node\-Handle {\bf nh\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Current \-Radius followed by the \-Platform. \end{DoxyCompactList}\item 
+boost\-::circular\-\_\-buffer\*
+$<$ {\bf \-Occupancy\-Grid} $>$ {\bf occupancy\-\_\-buffer\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Publisher for \-Twist messages to a platform that takes them. \end{DoxyCompactList}\item 
+{\bf oryx\-\_\-path\-\_\-planning\-::\-Point} {\bf origin\-\_\-}
+\begin{DoxyCompactList}\small\item\em topic name of the \-R\-O\-S topic to receive new occupancy grid data over \end{DoxyCompactList}\item 
+ros\-::\-Subscriber {\bf pc\-\_\-sub\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Pointer to the tentacle generator which contains the tentacles to use for planning. \end{DoxyCompactList}\item 
+std\-::string {\bf pc\-\_\-topic\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Actionlib topic name to send velocity commands over. \end{DoxyCompactList}\item 
+int {\bf platform\-\_\-}
+\item 
+double {\bf res\-\_\-}
+\begin{DoxyCompactList}\small\item\em z dimension of the occupancy grid to use, in real units \end{DoxyCompactList}\item 
+bool {\bf should\-\_\-plan\-\_\-}
+\begin{DoxyCompactList}\small\item\em flat marking what platform we're running on \end{DoxyCompactList}\item 
+ros\-::\-Subscriber {\bf stop\-\_\-sub\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Subscriber to the \-R\-O\-S topic to receive new occupancy grid data over. \end{DoxyCompactList}\item 
+{\bf \-Tentacle\-Generator\-Ptr} {\bf tentacles\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-The origin to use for the occupancy grids. \end{DoxyCompactList}\item 
+double {\bf trav\-\_\-weight\-\_\-}
+\begin{DoxyCompactList}\small\item\em weighting factor to bias tentacle selection towards the goal point \end{DoxyCompactList}\item 
+double {\bf unkn\-\_\-weight\-\_\-}
+\begin{DoxyCompactList}\small\item\em weighting factor to bias tentacle selection away from difficult terrain \end{DoxyCompactList}\item 
+std\-::string {\bf v\-\_\-action\-\_\-topic\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Node handle for publishing/subscribing to topics. \end{DoxyCompactList}\item 
+actionlib\-::\-Simple\-Action\-Client\*
+$<$ oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Action $>$ {\bf v\-\_\-client\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Buffer to store received \-Occupancy\-Grid data. \end{DoxyCompactList}\item 
+ros\-::\-Publisher {\bf vel\-\_\-pub\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Subscriber to the \-R\-O\-S topic to receive the software stop message. \end{DoxyCompactList}\item 
+double {\bf x\-\_\-dim\-\_\-}
+\begin{DoxyCompactList}\small\item\em weighting factor to bias tentacle selection towards unknown terrain \end{DoxyCompactList}\item 
+double {\bf y\-\_\-dim\-\_\-}
+\begin{DoxyCompactList}\small\item\em x dimension of the occupancy grid to use, in real units \end{DoxyCompactList}\item 
+double {\bf z\-\_\-dim\-\_\-}
+\begin{DoxyCompactList}\small\item\em y dimension of the occupancy grid to use, in real units \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Class which does the actual work of local path planning and sending commands to base. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+
+\-Definition at line 33 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+
+
+\subsection{\-Constructor \& \-Destructor \-Documentation}
+\index{\-Local\-Planner@{\-Local\-Planner}!\-Local\-Planner@{\-Local\-Planner}}
+\index{\-Local\-Planner@{\-Local\-Planner}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{\-Local\-Planner}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Local\-Planner\-::\-Local\-Planner} (
+\begin{DoxyParamCaption}
+\item[{int}]{platform, }
+\item[{double}]{goal\-Weight, }
+\item[{double}]{trav\-Weight, }
+\item[{double}]{diff\-Weight, }
+\item[{double}]{unkn\-Weight, }
+\item[{double}]{x\-Dim, }
+\item[{double}]{y\-Dim, }
+\item[{double}]{z\-Dim, }
+\item[{double}]{res, }
+\item[{{\bf oryx\-\_\-path\-\_\-planning\-::\-Point} \&}]{origin, }
+\item[{std\-::string \&}]{v\-\_\-action\-\_\-topic, }
+\item[{std\-::string \&}]{oc\-\_\-point\-\_\-cloud\-\_\-topic, }
+\item[{{\bf \-Tentacle\-Generator\-Ptr}}]{tentacles}
+\end{DoxyParamCaption}
+)  throw (std\-::runtime\-\_\-error)\hspace{0.3cm}{\ttfamily  [inline]}}\label{classLocalPlanner_a93af54d6907d8691ba72f009b1f6195e}
+
+
+\-Creates a new local planner. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em platform} & integer denoting what platform the local planner is running on \\
+\hline
+{\em goal\-Weight} & weighting factor to bias tentacle selection towards the goal point \\
+\hline
+{\em trav\-Weight} & weighting factor to bias tentacle selection away from previously traversed points \\
+\hline
+{\em diff\-Weight} & weighting factor to bias tentacle selection away from difficult terrain \\
+\hline
+{\em unkn\-Weight} & weighting factor to bias tentacle selection towards from unkown terrain \\
+\hline
+{\em x\-Dim} & x dimension of the occupancy grids to use, in real units \\
+\hline
+{\em y\-Dim} & y dimension of the occupancy grids to use, in real units \\
+\hline
+{\em z\-Dim} & z dimension of the occupancy grids to use, in real units \\
+\hline
+{\em res} & resolution of the occupancy grids to use, in real units per grid unit \\
+\hline
+{\em origin} & \-Origin to use for the occupancy grid \\
+\hline
+{\em v\-\_\-action\-\_\-topic} & \-Actionlib topic to communicate with the base platform \\
+\hline
+{\em oc\-\_\-point\-\_\-cloud\-\_\-topic} & \-Topic name of the \-R\-O\-S topic to receive new occupancy grid data over \\
+\hline
+{\em tentacles} & \-Pointer to the tentacle generator which contains the tentacles to use for planning \\
+\hline
+{\em v\-\_\-client} & \-Pointer to the velocity client to send commands to the base platform \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{\-Exceptions}
+{\em std\-::runtime\-\_\-error} & \-If the planner is unable to connect to the base platform \\
+\hline
+\end{DoxyExceptions}
+
+
+\-Definition at line 55 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!$\sim$\-Local\-Planner@{$\sim$\-Local\-Planner}}
+\index{$\sim$\-Local\-Planner@{$\sim$\-Local\-Planner}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{$\sim$\-Local\-Planner}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf \-Local\-Planner\-::$\sim$\-Local\-Planner} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, virtual]}}\label{classLocalPlanner_a3cd8fe2ad521379c1adb801202fef62d}
+default destructor 
+
+\-Definition at line 111 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+
+
+\subsection{\-Member \-Function \-Documentation}
+\index{\-Local\-Planner@{\-Local\-Planner}!active\-Cb@{active\-Cb}}
+\index{active\-Cb@{active\-Cb}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{active\-Cb}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::active\-Cb} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_a7124072c7a21bbad98349274cf25c0d5}
+
+
+\-Callback for processing the response that a velocity goal went active. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+
+\-Definition at line 381 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!done\-Cb@{done\-Cb}}
+\index{done\-Cb@{done\-Cb}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{done\-Cb}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::done\-Cb} (
+\begin{DoxyParamCaption}
+\item[{const actionlib\-::\-Simple\-Client\-Goal\-State \&}]{state, }
+\item[{const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Result\-Const\-Ptr \&}]{result}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_a716bff1f3f435ee76a11e64c58167606}
+
+
+\-Callback for handling the result from the velocity controller. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em state} & \-State that the goal finished in \\
+\hline
+{\em result} & \-The result message returned from the velocity controller \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 370 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!do\-Planning@{do\-Planning}}
+\index{do\-Planning@{do\-Planning}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{do\-Planning}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::do\-Planning} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline]}}\label{classLocalPlanner_a5e5de9ddb98611ea99329b8ef295c7c4}
+
+
+\-Does the actual work of implementing the \-Driving with \-Tentacles algorithm. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+
+\-Definition at line 118 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!feedback\-Cb@{feedback\-Cb}}
+\index{feedback\-Cb@{feedback\-Cb}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{feedback\-Cb}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::feedback\-Cb} (
+\begin{DoxyParamCaption}
+\item[{const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback\-Const\-Ptr \&}]{feedback}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_ad578d2ad2eebf7753f421f65360a9990}
+
+
+\-Callback for handling velocity controller feedback. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em feedback} & \-The feedback message that needs to be processed \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 391 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!pc\-C\-B@{pc\-C\-B}}
+\index{pc\-C\-B@{pc\-C\-B}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{pc\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::pc\-C\-B} (
+\begin{DoxyParamCaption}
+\item[{const oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-Const\-Ptr \&}]{message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_af5e5b35b455967277af17dcb6b09fb3b}
+
+
+\-Callback for processing new point cloud data. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em message} & \-The oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg message to process\\
+\hline
+\end{DoxyParams}
+\-Takes the data from the \-Point\-Cloud2 message, processes it into a new occupancy grid, and places it on the occupancy grid buffer for processing by the planner 
+
+\-Definition at line 302 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!send@{send}}
+\index{send@{send}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{send}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::send} (
+\begin{DoxyParamCaption}
+\item[{double}]{velocity, }
+\item[{double}]{radius}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_a7ff5ca95ed25c73a15323db998ef3278}
+
+
+\-Sends a command to the base's velocity controller. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em velocity} & \-The linear velocity to follow \\
+\hline
+{\em radius} & \-The arc-\/radius to follow \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 353 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!send\-Vel\-Com@{send\-Vel\-Com}}
+\index{send\-Vel\-Com@{send\-Vel\-Com}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{send\-Vel\-Com}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::send\-Vel\-Com} (
+\begin{DoxyParamCaption}
+\item[{double}]{velocity, }
+\item[{double}]{radius}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_a6063c84b14ab9fbe5aa8ec6ff4d2feeb}
+\-Performs platform specific sending of velocity commands 
+\begin{DoxyParams}{\-Parameters}
+{\em velocity} & \-The linear velocity in +x to follow \\
+\hline
+{\em radius} & \-The radius of curvature to follow \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 319 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!stop\-C\-B@{stop\-C\-B}}
+\index{stop\-C\-B@{stop\-C\-B}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{stop\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::stop\-C\-B} (
+\begin{DoxyParamCaption}
+\item[{const oryx\-\_\-msgs\-::\-Software\-Stop\-Const\-Ptr \&}]{message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_a80d9e4db91908f43ed4c062b64bc026a}
+
+
+\-The actionlib client to set velocity command messages to the base platform with. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica \-Callback for handling the \-Software\-Stop message 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em message} & \-The message to process \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 286 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!twist@{twist}}
+\index{twist@{twist}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{twist}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::twist} (
+\begin{DoxyParamCaption}
+\item[{double}]{x\-\_\-dot, }
+\item[{double}]{omega}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_aea03c48eeabeb399d57fedf6d035f722}
+\-Sends out geometery\-\_\-msgs\-::\-Twist messages to the platform 
+\begin{DoxyParams}{\-Parameters}
+{\em x\-\_\-dot} & \-The linear velocity in +x \\
+\hline
+{\em omega} & \-The angular velocity around +z \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 339 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+
+
+\subsection{\-Member \-Data \-Documentation}
+\index{\-Local\-Planner@{\-Local\-Planner}!current\-\_\-rad\-\_\-@{current\-\_\-rad\-\_\-}}
+\index{current\-\_\-rad\-\_\-@{current\-\_\-rad\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{current\-\_\-rad\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::current\-\_\-rad\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a2c383a3a38dc3666db5d06b61b14fd1d}
+
+
+\-Current \-Velocity of the \-Platform. 
+
+
+
+\-Definition at line 267 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!current\-\_\-vel\-\_\-@{current\-\_\-vel\-\_\-}}
+\index{current\-\_\-vel\-\_\-@{current\-\_\-vel\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{current\-\_\-vel\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::current\-\_\-vel\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a054b4da9ce90665b04a7e7b609672b5a}
+
+
+resolution the occupancy grid to use, in real units per grid unit 
+
+
+
+\-Definition at line 266 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!diff\-\_\-weight\-\_\-@{diff\-\_\-weight\-\_\-}}
+\index{diff\-\_\-weight\-\_\-@{diff\-\_\-weight\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{diff\-\_\-weight\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::diff\-\_\-weight\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_ab54f1e68f375ec0dbf96eca2c6f0a14d}
+
+
+weighting factor to bias tentacle selection away from previously traversed points 
+
+
+
+\-Definition at line 260 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!goal\-\_\-weight\-\_\-@{goal\-\_\-weight\-\_\-}}
+\index{goal\-\_\-weight\-\_\-@{goal\-\_\-weight\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{goal\-\_\-weight\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::goal\-\_\-weight\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a5c93ab12f5722cfe56f363a00fa1d781}
+
+
+\-Flag for signaling if the local planner should be running. 
+
+
+
+\-Definition at line 258 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!nh\-\_\-@{nh\-\_\-}}
+\index{nh\-\_\-@{nh\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{nh\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}ros\-::\-Node\-Handle {\bf \-Local\-Planner\-::nh\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_aa5ea5044555101033c5b1795c5f9cf3f}
+
+
+\-Current \-Radius followed by the \-Platform. 
+
+
+
+\-Definition at line 268 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!occupancy\-\_\-buffer\-\_\-@{occupancy\-\_\-buffer\-\_\-}}
+\index{occupancy\-\_\-buffer\-\_\-@{occupancy\-\_\-buffer\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{occupancy\-\_\-buffer\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}boost\-::circular\-\_\-buffer$<${\bf \-Occupancy\-Grid} $>$ {\bf \-Local\-Planner\-::occupancy\-\_\-buffer\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a07707d65004db2f3812fbe6e14bbdaa1}
+
+
+\-Publisher for \-Twist messages to a platform that takes them. 
+
+
+
+\-Definition at line 277 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!origin\-\_\-@{origin\-\_\-}}
+\index{origin\-\_\-@{origin\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{origin\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Point} {\bf \-Local\-Planner\-::origin\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_ad8e9ea5ce805a9c92b054353b6fe00d7}
+
+
+topic name of the \-R\-O\-S topic to receive new occupancy grid data over 
+
+
+
+\-Definition at line 271 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!pc\-\_\-sub\-\_\-@{pc\-\_\-sub\-\_\-}}
+\index{pc\-\_\-sub\-\_\-@{pc\-\_\-sub\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{pc\-\_\-sub\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}ros\-::\-Subscriber {\bf \-Local\-Planner\-::pc\-\_\-sub\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a5a190e043aa46ffe4d459cf1efbd4d78}
+
+
+\-Pointer to the tentacle generator which contains the tentacles to use for planning. 
+
+
+
+\-Definition at line 273 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!pc\-\_\-topic\-\_\-@{pc\-\_\-topic\-\_\-}}
+\index{pc\-\_\-topic\-\_\-@{pc\-\_\-topic\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{pc\-\_\-topic\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string {\bf \-Local\-Planner\-::pc\-\_\-topic\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_ab7b4031d03a074a4fb683606ee87cadc}
+
+
+\-Actionlib topic name to send velocity commands over. 
+
+
+
+\-Definition at line 270 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!platform\-\_\-@{platform\-\_\-}}
+\index{platform\-\_\-@{platform\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{platform\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf \-Local\-Planner\-::platform\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a96e21935e453518a9760e78cc722b271}
+
+
+\-Definition at line 255 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!res\-\_\-@{res\-\_\-}}
+\index{res\-\_\-@{res\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{res\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::res\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a8077cef3936c2691936388ee28f0ff9d}
+
+
+z dimension of the occupancy grid to use, in real units 
+
+
+
+\-Definition at line 265 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!should\-\_\-plan\-\_\-@{should\-\_\-plan\-\_\-}}
+\index{should\-\_\-plan\-\_\-@{should\-\_\-plan\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{should\-\_\-plan\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf \-Local\-Planner\-::should\-\_\-plan\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_aedc2482876eaeb5f9c33f24f90fa827d}
+
+
+flat marking what platform we're running on 
+
+
+
+\-Definition at line 256 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!stop\-\_\-sub\-\_\-@{stop\-\_\-sub\-\_\-}}
+\index{stop\-\_\-sub\-\_\-@{stop\-\_\-sub\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{stop\-\_\-sub\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}ros\-::\-Subscriber {\bf \-Local\-Planner\-::stop\-\_\-sub\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_ac5be4b2d7e3ba97acd1baad8378e5b84}
+
+
+\-Subscriber to the \-R\-O\-S topic to receive new occupancy grid data over. 
+
+
+
+\-Definition at line 274 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!tentacles\-\_\-@{tentacles\-\_\-}}
+\index{tentacles\-\_\-@{tentacles\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{tentacles\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Tentacle\-Generator\-Ptr} {\bf \-Local\-Planner\-::tentacles\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_ae8cae1e72eacad73b0ec423f0352c887}
+
+
+\-The origin to use for the occupancy grids. 
+
+
+
+\-Definition at line 272 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!trav\-\_\-weight\-\_\-@{trav\-\_\-weight\-\_\-}}
+\index{trav\-\_\-weight\-\_\-@{trav\-\_\-weight\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{trav\-\_\-weight\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::trav\-\_\-weight\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a6f668b354b481784a886b7f935f9bef4}
+
+
+weighting factor to bias tentacle selection towards the goal point 
+
+
+
+\-Definition at line 259 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!unkn\-\_\-weight\-\_\-@{unkn\-\_\-weight\-\_\-}}
+\index{unkn\-\_\-weight\-\_\-@{unkn\-\_\-weight\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{unkn\-\_\-weight\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::unkn\-\_\-weight\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a633f5fdf6a570395d59e02f1f714fba2}
+
+
+weighting factor to bias tentacle selection away from difficult terrain 
+
+
+
+\-Definition at line 261 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!v\-\_\-action\-\_\-topic\-\_\-@{v\-\_\-action\-\_\-topic\-\_\-}}
+\index{v\-\_\-action\-\_\-topic\-\_\-@{v\-\_\-action\-\_\-topic\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{v\-\_\-action\-\_\-topic\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string {\bf \-Local\-Planner\-::v\-\_\-action\-\_\-topic\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_aa2d89e1db5100cee7f0b8b6db59411ac}
+
+
+\-Node handle for publishing/subscribing to topics. 
+
+
+
+\-Definition at line 269 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!v\-\_\-client\-\_\-@{v\-\_\-client\-\_\-}}
+\index{v\-\_\-client\-\_\-@{v\-\_\-client\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{v\-\_\-client\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}actionlib\-::\-Simple\-Action\-Client$<$oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Action$>$ {\bf \-Local\-Planner\-::v\-\_\-client\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a4f4e9a8c0a8121240f3604b90835f2df}
+
+
+\-Buffer to store received \-Occupancy\-Grid data. 
+
+
+
+\-Definition at line 279 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!vel\-\_\-pub\-\_\-@{vel\-\_\-pub\-\_\-}}
+\index{vel\-\_\-pub\-\_\-@{vel\-\_\-pub\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{vel\-\_\-pub\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}ros\-::\-Publisher {\bf \-Local\-Planner\-::vel\-\_\-pub\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a05929c79a45501fa680b29ac47b7f456}
+
+
+\-Subscriber to the \-R\-O\-S topic to receive the software stop message. 
+
+
+
+\-Definition at line 275 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!x\-\_\-dim\-\_\-@{x\-\_\-dim\-\_\-}}
+\index{x\-\_\-dim\-\_\-@{x\-\_\-dim\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{x\-\_\-dim\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::x\-\_\-dim\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a8341d0c7a16284070852ae4b31d83929}
+
+
+weighting factor to bias tentacle selection towards unknown terrain 
+
+
+
+\-Definition at line 262 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!y\-\_\-dim\-\_\-@{y\-\_\-dim\-\_\-}}
+\index{y\-\_\-dim\-\_\-@{y\-\_\-dim\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{y\-\_\-dim\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::y\-\_\-dim\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_abc0f1d506fc102fdc2802f55b654b613}
+
+
+x dimension of the occupancy grid to use, in real units 
+
+
+
+\-Definition at line 263 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+\index{\-Local\-Planner@{\-Local\-Planner}!z\-\_\-dim\-\_\-@{z\-\_\-dim\-\_\-}}
+\index{z\-\_\-dim\-\_\-@{z\-\_\-dim\-\_\-}!LocalPlanner@{\-Local\-Planner}}
+\subsubsection[{z\-\_\-dim\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \-Local\-Planner\-::z\-\_\-dim\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classLocalPlanner_a5a5e8a299d488da417fa3baea4b9b785}
+
+
+y dimension of the occupancy grid to use, in real units 
+
+
+
+\-Definition at line 264 of file oryx\-\_\-local\-\_\-planner.\-cpp.
+
+
+
+\-The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+{\bf oryx\-\_\-local\-\_\-planner.\-cpp}\end{DoxyCompactItemize}

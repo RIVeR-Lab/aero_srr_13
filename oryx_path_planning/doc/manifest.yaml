@@ -1,0 +1,25 @@
+authors: ''
+brief: ''
+depends:
+- catkin
+- roscpp
+- sensor_msgs
+- actionlib
+- message_runtime
+- std_msgs
+- oryx_drive_controller
+- oryx_msgs
+- pcl
+- tf
+- message_generation
+- geometry_msgs
+- oryxsrr_msgs
+- actionlib_msgs
+- pcl_ros
+description: oryx_path_planning
+license: BSD
+msgs:
+- OccupancyGridMsg
+package_type: package
+srvs: []
+url: http://ros.org/wiki/oryx_path_planning

@@ -1,0 +1,223 @@
+\section{oryx\-\_\-srr\-\_\-gui\-:\-:\-Q\-Node \-Class \-Reference}
+\label{classoryx__srr__gui_1_1QNode}\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+
+
+{\ttfamily \#include $<$qnode.\-hpp$>$}
+
+\subsection*{\-Public \-Types}
+\begin{DoxyCompactItemize}
+\item 
+enum {\bf \-Log\-Level} \{ \*
+{\bf \-Debug}, 
+{\bf \-Info}, 
+{\bf \-Warn}, 
+{\bf \-Error}, 
+\*
+{\bf \-Fatal}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{\-Signals}
+\begin{DoxyCompactItemize}
+\item 
+void {\bf logging\-Updated} ()
+\item 
+void {\bf ros\-Shutdown} ()
+\end{DoxyCompactItemize}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bf init} ()
+\item 
+bool {\bf init} (const std\-::string \&master\-\_\-url, const std\-::string \&host\-\_\-url)
+\item 
+void {\bf log} (const {\bf \-Log\-Level} \&level, const std\-::string \&msg)
+\item 
+\-Q\-String\-List\-Model $\ast$ {\bf logging\-Model} ()
+\item 
+{\bf \-Q\-Node} (int argc, char $\ast$$\ast$argv)
+\item 
+void {\bf run} ()
+\item 
+virtual {\bf $\sim$\-Q\-Node} ()
+\end{DoxyCompactItemize}
+\subsection*{\-Private \-Attributes}
+\begin{DoxyCompactItemize}
+\item 
+ros\-::\-Publisher {\bf chatter\-\_\-publisher}
+\item 
+int {\bf init\-\_\-argc}
+\item 
+char $\ast$$\ast$ {\bf init\-\_\-argv}
+\item 
+\-Q\-String\-List\-Model {\bf logging\-\_\-model}
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+
+
+\-Definition at line 35 of file qnode.\-hpp.
+
+
+
+\subsection{\-Member \-Enumeration \-Documentation}
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!\-Log\-Level@{\-Log\-Level}}
+\index{\-Log\-Level@{\-Log\-Level}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{\-Log\-Level}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::\-Log\-Level}}\label{classoryx__srr__gui_1_1QNode_a4f1994a5e1c52fe01c9f8912d3805f33}
+\begin{Desc}
+\item[\-Enumerator\-: ]\par
+\begin{description}
+\index{\-Debug@{\-Debug}!oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!\-Debug@{\-Debug}}\item[{\em 
+\-Debug\label{classoryx__srr__gui_1_1QNode_a4f1994a5e1c52fe01c9f8912d3805f33ab00057884f8def3ca86dc4a6c09e2101}
+}]\index{\-Info@{\-Info}!oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!\-Info@{\-Info}}\item[{\em 
+\-Info\label{classoryx__srr__gui_1_1QNode_a4f1994a5e1c52fe01c9f8912d3805f33ace977181d936a8d69189d98d45eb7181}
+}]\index{\-Warn@{\-Warn}!oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!\-Warn@{\-Warn}}\item[{\em 
+\-Warn\label{classoryx__srr__gui_1_1QNode_a4f1994a5e1c52fe01c9f8912d3805f33aeba5da997de9b3f6e56dc1a212671822}
+}]\index{\-Error@{\-Error}!oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!\-Error@{\-Error}}\item[{\em 
+\-Error\label{classoryx__srr__gui_1_1QNode_a4f1994a5e1c52fe01c9f8912d3805f33a76b22ddb9c5bdce76b8001c1cd66fec4}
+}]\index{\-Fatal@{\-Fatal}!oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!\-Fatal@{\-Fatal}}\item[{\em 
+\-Fatal\label{classoryx__srr__gui_1_1QNode_a4f1994a5e1c52fe01c9f8912d3805f33a39a63979c03bcea0c959a8fae7217d25}
+}]\end{description}
+\end{Desc}
+
+
+
+\-Definition at line 47 of file qnode.\-hpp.
+
+
+
+\subsection{\-Constructor \& \-Destructor \-Documentation}
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!\-Q\-Node@{\-Q\-Node}}
+\index{\-Q\-Node@{\-Q\-Node}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{\-Q\-Node}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::\-Q\-Node} (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$$\ast$}]{argv}
+\end{DoxyParamCaption}
+)}\label{classoryx__srr__gui_1_1QNode_a5f77b2795c1879fd2be5e0d20db3b08d}
+
+
+\-Definition at line 30 of file qnode.\-cpp.
+
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!$\sim$\-Q\-Node@{$\sim$\-Q\-Node}}
+\index{$\sim$\-Q\-Node@{$\sim$\-Q\-Node}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{$\sim$\-Q\-Node}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::$\sim$\-Q\-Node} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [virtual]}}\label{classoryx__srr__gui_1_1QNode_a31e9177c2d169976311d8f38904add72}
+
+
+\-Definition at line 35 of file qnode.\-cpp.
+
+
+
+\subsection{\-Member \-Function \-Documentation}
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!init@{init}}
+\index{init@{init}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::init} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{classoryx__srr__gui_1_1QNode_a5562e4b68b6c215c7c9bb5529ffcae44}
+
+
+\-Definition at line 43 of file qnode.\-cpp.
+
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!init@{init}}
+\index{init@{init}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::init} (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{master\-\_\-url, }
+\item[{const std\-::string \&}]{host\-\_\-url}
+\end{DoxyParamCaption}
+)}\label{classoryx__srr__gui_1_1QNode_a8b414f80675cc88439eab5cbce7fc74b}
+
+
+\-Definition at line 56 of file qnode.\-cpp.
+
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!log@{log}}
+\index{log@{log}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{log}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::log} (
+\begin{DoxyParamCaption}
+\item[{const {\bf \-Log\-Level} \&}]{level, }
+\item[{const std\-::string \&}]{msg}
+\end{DoxyParamCaption}
+)}\label{classoryx__srr__gui_1_1QNode_ab10096c521d1ca947de6ca8d0fa6f881}
+
+
+\-Definition at line 92 of file qnode.\-cpp.
+
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!logging\-Model@{logging\-Model}}
+\index{logging\-Model@{logging\-Model}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{logging\-Model}]{\setlength{\rightskip}{0pt plus 5cm}\-Q\-String\-List\-Model$\ast$ {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::logging\-Model} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [inline]}}\label{classoryx__srr__gui_1_1QNode_a14b65d01c7897fd977001285b9c89efa}
+
+
+\-Definition at line 55 of file qnode.\-hpp.
+
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!logging\-Updated@{logging\-Updated}}
+\index{logging\-Updated@{logging\-Updated}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{logging\-Updated}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::logging\-Updated} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [signal]}}\label{classoryx__srr__gui_1_1QNode_a89e07d13ceb0adf7a21e9522cfcf4867}
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!ros\-Shutdown@{ros\-Shutdown}}
+\index{ros\-Shutdown@{ros\-Shutdown}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{ros\-Shutdown}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::ros\-Shutdown} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [signal]}}\label{classoryx__srr__gui_1_1QNode_af650172d0b6fca89c7a6c930b882b384}
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!run@{run}}
+\index{run@{run}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{run}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::run} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{classoryx__srr__gui_1_1QNode_a7812639b1655f0045a51ab7bd635d9f4}
+
+
+\-Definition at line 72 of file qnode.\-cpp.
+
+
+
+\subsection{\-Member \-Data \-Documentation}
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!chatter\-\_\-publisher@{chatter\-\_\-publisher}}
+\index{chatter\-\_\-publisher@{chatter\-\_\-publisher}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{chatter\-\_\-publisher}]{\setlength{\rightskip}{0pt plus 5cm}ros\-::\-Publisher {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::chatter\-\_\-publisher}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__srr__gui_1_1QNode_abf30f6403919472a2fb5cc01462492aa}
+
+
+\-Definition at line 65 of file qnode.\-hpp.
+
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!init\-\_\-argc@{init\-\_\-argc}}
+\index{init\-\_\-argc@{init\-\_\-argc}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{init\-\_\-argc}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::init\-\_\-argc}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__srr__gui_1_1QNode_a3868d1b0d7b37a21a76d41e702b15590}
+
+
+\-Definition at line 63 of file qnode.\-hpp.
+
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!init\-\_\-argv@{init\-\_\-argv}}
+\index{init\-\_\-argv@{init\-\_\-argv}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{init\-\_\-argv}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$$\ast$ {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::init\-\_\-argv}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__srr__gui_1_1QNode_abfb1c5a7e651fed6b88bf865cbc9a974}
+
+
+\-Definition at line 64 of file qnode.\-hpp.
+
+\index{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}!logging\-\_\-model@{logging\-\_\-model}}
+\index{logging\-\_\-model@{logging\-\_\-model}!oryx_srr_gui::QNode@{oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node}}
+\subsubsection[{logging\-\_\-model}]{\setlength{\rightskip}{0pt plus 5cm}\-Q\-String\-List\-Model {\bf oryx\-\_\-srr\-\_\-gui\-::\-Q\-Node\-::logging\-\_\-model}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__srr__gui_1_1QNode_aefcfc7970dca9c2634b964db207255cd}
+
+
+\-Definition at line 66 of file qnode.\-hpp.
+
+
+
+\-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+{\bf qnode.\-hpp}\item 
+{\bf qnode.\-cpp}\end{DoxyCompactItemize}

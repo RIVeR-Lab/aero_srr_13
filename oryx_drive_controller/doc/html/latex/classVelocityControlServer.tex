@@ -1,0 +1,164 @@
+\section{\-Velocity\-Control\-Server \-Class \-Reference}
+\label{classVelocityControlServer}\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}}
+
+
+{\ttfamily \#include $<$\-Velocity\-Control\-Server.\-h$>$}
+
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bf \-Velocity\-Control\-Server} (std\-::string {\bf action\-\_\-name}, std\-::string ctrl\-\_\-velocity\-\_\-topic)
+\item 
+virtual {\bf $\sim$\-Velocity\-Control\-Server} ()
+\end{DoxyCompactItemize}
+\subsection*{\-Private \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bf execute\-C\-B} (const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Goal\-Const\-Ptr \&goal)
+\end{DoxyCompactItemize}
+\subsection*{\-Private \-Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\-::string {\bf action\-\_\-name}
+\begin{DoxyCompactList}\small\item\em \-Result message for actionlib server. \end{DoxyCompactList}\item 
+actionlib\-::\-Simple\-Action\-Server\*
+$<$ oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Action $>$ {\bf as}
+\begin{DoxyCompactList}\small\item\em \-Publisher for sending velocity-\/arc messages to controller. \end{DoxyCompactList}\item 
+oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback {\bf feedback}
+\begin{DoxyCompactList}\small\item\em \-Actionlib server for processing velocity commands. \end{DoxyCompactList}\item 
+ros\-::\-Node\-Handle {\bf n}
+\item 
+oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Result {\bf result}
+\begin{DoxyCompactList}\small\item\em \-Feedback message for actionlib server. \end{DoxyCompactList}\item 
+ros\-::\-Publisher {\bf vel\-\_\-pub}
+\begin{DoxyCompactList}\small\item\em \-Node handle for getting parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+
+
+\-Definition at line 16 of file \-Velocity\-Control\-Server.\-h.
+
+
+
+\subsection{\-Constructor \& \-Destructor \-Documentation}
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}}
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{\-Velocity\-Control\-Server}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Velocity\-Control\-Server\-::\-Velocity\-Control\-Server} (
+\begin{DoxyParamCaption}
+\item[{std\-::string}]{action\-\_\-name, }
+\item[{std\-::string}]{ctrl\-\_\-velocity\-\_\-topic}
+\end{DoxyParamCaption}
+)}\label{classVelocityControlServer_a0984aa479f1fefab9c90ee66546f39a7}
+\-Constructor for creating a new \doxyref{\-Velocity\-Control\-Server}{p.}{classVelocityControlServer} 
+\begin{DoxyParams}{\-Parameters}
+{\em action\-\_\-name} & \-String representing the name of the action topic to communicate on \\
+\hline
+{\em ctrl\-\_\-velocity\-\_\-topic} & \-String representing the intra-\/processes topic name to communicate velocity-\/arc with the controller \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 12 of file \-Velocity\-Control\-Server.\-cpp.
+
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!$\sim$\-Velocity\-Control\-Server@{$\sim$\-Velocity\-Control\-Server}}
+\index{$\sim$\-Velocity\-Control\-Server@{$\sim$\-Velocity\-Control\-Server}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{$\sim$\-Velocity\-Control\-Server}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Velocity\-Control\-Server\-::$\sim$\-Velocity\-Control\-Server} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [virtual]}}\label{classVelocityControlServer_afd8d6bd3d3428015f284254ddf783d89}
+
+
+\-Definition at line 21 of file \-Velocity\-Control\-Server.\-cpp.
+
+
+
+\subsection{\-Member \-Function \-Documentation}
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!execute\-C\-B@{execute\-C\-B}}
+\index{execute\-C\-B@{execute\-C\-B}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{execute\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Velocity\-Control\-Server\-::execute\-C\-B} (
+\begin{DoxyParamCaption}
+\item[{const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Goal\-Const\-Ptr \&}]{goal}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_a6e353d83ff20a78431d1b46fc1cfcc30}
+\-Callback for executing a new velocity command 
+\begin{DoxyParams}{\-Parameters}
+{\em goal} & the goal message to process\\
+\hline
+\end{DoxyParams}
+\-Currently, all this does is pipe the received goal directly to the \doxyref{\-Arc\-Drive\-Controller}{p.}{classArcDriveController}. \-At some point it should do some more advanced processing and feedback development 
+
+\-Definition at line 29 of file \-Velocity\-Control\-Server.\-cpp.
+
+
+
+\subsection{\-Member \-Data \-Documentation}
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!action\-\_\-name@{action\-\_\-name}}
+\index{action\-\_\-name@{action\-\_\-name}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{action\-\_\-name}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string {\bf \-Velocity\-Control\-Server\-::action\-\_\-name}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_aeb4831cabac2073a83ea3f66ecf9b1ae}
+
+
+\-Result message for actionlib server. 
+
+
+
+\-Definition at line 37 of file \-Velocity\-Control\-Server.\-h.
+
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!as@{as}}
+\index{as@{as}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{as}]{\setlength{\rightskip}{0pt plus 5cm}actionlib\-::\-Simple\-Action\-Server$<$oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Action$>$ {\bf \-Velocity\-Control\-Server\-::as}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_a30f7b7c35980b805f3a936b36fd9d2d6}
+
+
+\-Publisher for sending velocity-\/arc messages to controller. 
+
+
+
+\-Definition at line 34 of file \-Velocity\-Control\-Server.\-h.
+
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!feedback@{feedback}}
+\index{feedback@{feedback}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{feedback}]{\setlength{\rightskip}{0pt plus 5cm}oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback {\bf \-Velocity\-Control\-Server\-::feedback}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_ade4b0da029ade0b30661caffb113db80}
+
+
+\-Actionlib server for processing velocity commands. 
+
+
+
+\-Definition at line 35 of file \-Velocity\-Control\-Server.\-h.
+
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!n@{n}}
+\index{n@{n}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{n}]{\setlength{\rightskip}{0pt plus 5cm}ros\-::\-Node\-Handle {\bf \-Velocity\-Control\-Server\-::n}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_ac77672805b1eec96d03f690864175370}
+
+
+\-Definition at line 32 of file \-Velocity\-Control\-Server.\-h.
+
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!result@{result}}
+\index{result@{result}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{result}]{\setlength{\rightskip}{0pt plus 5cm}oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Result {\bf \-Velocity\-Control\-Server\-::result}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_a13bb38879569f505da33268d7b5aaf86}
+
+
+\-Feedback message for actionlib server. 
+
+
+
+\-Definition at line 36 of file \-Velocity\-Control\-Server.\-h.
+
+\index{\-Velocity\-Control\-Server@{\-Velocity\-Control\-Server}!vel\-\_\-pub@{vel\-\_\-pub}}
+\index{vel\-\_\-pub@{vel\-\_\-pub}!VelocityControlServer@{\-Velocity\-Control\-Server}}
+\subsubsection[{vel\-\_\-pub}]{\setlength{\rightskip}{0pt plus 5cm}ros\-::\-Publisher {\bf \-Velocity\-Control\-Server\-::vel\-\_\-pub}\hspace{0.3cm}{\ttfamily  [private]}}\label{classVelocityControlServer_afadde070b15369a2500f91f2166d11e0}
+
+
+\-Node handle for getting parameters. 
+
+
+
+\-Definition at line 33 of file \-Velocity\-Control\-Server.\-h.
+
+
+
+\-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+{\bf \-Velocity\-Control\-Server.\-h}\item 
+{\bf \-Velocity\-Control\-Server.\-cpp}\end{DoxyCompactItemize}

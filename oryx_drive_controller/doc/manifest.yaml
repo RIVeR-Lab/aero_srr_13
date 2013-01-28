@@ -1,0 +1,20 @@
+authors: ''
+brief: ''
+depends:
+- catkin
+- roscpp
+- actionlib
+- message_runtime
+- std_msgs
+- oryx_msgs
+- message_generation
+- geometry_msgs
+- actionlib_msgs
+description: oryx_drive_controller
+license: BSD
+msgs:
+- VelocityTranslate
+- VelocityArc
+package_type: package
+srvs: []
+url: http://ros.org/wiki/oryx_drive_controller

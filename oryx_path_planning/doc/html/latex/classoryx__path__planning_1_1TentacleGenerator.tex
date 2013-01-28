@@ -1,0 +1,574 @@
+\section{oryx\-\_\-path\-\_\-planning\-:\-:\-Tentacle\-Generator \-Class \-Reference}
+\label{classoryx__path__planning_1_1TentacleGenerator}\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+
+
+\-Generates and manages tentacle data.  
+
+
+
+
+{\ttfamily \#include $<$\-Tentacles.\-h$>$}
+
+\subsection*{\-Public \-Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef std\-::vector\*
+$<$ {\bf \-Speed\-Set\-Ptr} $>$\*
+\-::{\bf const\-\_\-iterator} {\bf const\-\_\-iterator}
+\item 
+typedef std\-::vector\*
+$<$ {\bf \-Speed\-Set\-Ptr} $>$\-::{\bf iterator} {\bf iterator}
+\end{DoxyCompactItemize}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bf iterator} {\bf begin} ()
+\item 
+{\bf const\-\_\-iterator} {\bf cbegin} () const 
+\item 
+{\bf const\-\_\-iterator} {\bf cend} () const 
+\item 
+{\bf iterator} {\bf end} ()
+\item 
+int {\bf get\-Num\-Speed\-Sets} () const 
+\begin{DoxyCompactList}\small\item\em \-Gets the number of speed sets that were generated. \end{DoxyCompactList}\item 
+const {\bf \-Speed\-Set} \& {\bf get\-Speed\-Set} (int speed\-Set) const 
+\begin{DoxyCompactList}\small\item\em \-Looks up a speed set based on index. \end{DoxyCompactList}\item 
+const {\bf \-Speed\-Set} \& {\bf get\-Speed\-Set} (double velocity) const 
+\begin{DoxyCompactList}\small\item\em \-Looks up a \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} based on velocity. \end{DoxyCompactList}\item 
+const {\bf \-Tentacle} \& {\bf get\-Tentacle} (int speed\-Set, int index) const   throw (oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Access\-Exception, oryx\-\_\-path\-\_\-planning\-::\-Speed\-Set\-Access\-Exception)
+\begin{DoxyCompactList}\small\item\em \-Gets the tentacle from the given speed set and tentacle index. \end{DoxyCompactList}\item 
+{\bf \-Tentacle\-Generator} ()
+\item 
+{\bf \-Tentacle\-Generator} ({\bf \-Tentacle\-Generator} \&{\bf \-Tentacle\-Generator})
+\begin{DoxyCompactList}\small\item\em \-Copy \-Constructor. \end{DoxyCompactList}\item 
+{\bf \-Tentacle\-Generator} (const {\bf \-Tentacle\-Generator} \&{\bf \-Tentacle\-Generator})
+\begin{DoxyCompactList}\small\item\em \-Copy \-Constructor. \end{DoxyCompactList}\item 
+{\bf \-Tentacle\-Generator} (double min\-Speed, double max\-Speed, int num\-Speed\-Set, int num\-Tentacles, double exp\-Fact, double resolution, int x\-Dim, int y\-Dim)
+\begin{DoxyCompactList}\small\item\em \-Generates a set of tentacles for each speed set. \end{DoxyCompactList}\item 
+virtual {\bf $\sim$\-Tentacle\-Generator} ()
+\end{DoxyCompactItemize}
+\subsection*{\-Private \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+double {\bf calc\-L} (double q)
+\begin{DoxyCompactList}\small\item\em \-A set containing the velocity keys for each speed set. \end{DoxyCompactList}\item 
+double {\bf calc\-Q} (int speed\-Set) const 
+\begin{DoxyCompactList}\small\item\em \-Calculates the 'magic constant' q used in tentacle generation. \end{DoxyCompactList}\item 
+double {\bf calc\-Seed\-Rad} (int speed\-Set, double l, double q) const 
+\begin{DoxyCompactList}\small\item\em \-Helper function which calculates the seed radius for a speed set. \end{DoxyCompactList}\item 
+double {\bf calc\-Speed\-Set\-Vel} (double min\-Speed, double max\-Speed, double q) const 
+\begin{DoxyCompactList}\small\item\em \-Helper function which calculates the velocity for a speed set. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{\-Private \-Attributes}
+\begin{DoxyCompactItemize}
+\item 
+double {\bf exp\-\_\-fact\-\_\-}
+\item 
+int {\bf num\-\_\-speed\-\_\-set\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Number of tentacles per speed-\/set. \end{DoxyCompactList}\item 
+int {\bf num\-\_\-tentacles\-\_\-}
+\item 
+std\-::vector$<$ {\bf \-Speed\-Set\-Ptr} $>$ {\bf speed\-\_\-sets\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-Exponential factor used to calculate radii. \end{DoxyCompactList}\item 
+std\-::vector$<$ double $>$ {\bf velocity\-\_\-keys\-\_\-}
+\begin{DoxyCompactList}\small\item\em \-A set containing all of the valid speed sets that have been generated. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Generates and manages tentacle data. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzics 
+\end{DoxyAuthor}
+
+
+\-Definition at line 464 of file \-Tentacles.\-h.
+
+
+
+\subsection{\-Member \-Typedef \-Documentation}
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!const\-\_\-iterator@{const\-\_\-iterator}}
+\index{const\-\_\-iterator@{const\-\_\-iterator}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{const\-\_\-iterator}]{\setlength{\rightskip}{0pt plus 5cm}typedef std\-::vector$<${\bf \-Speed\-Set\-Ptr}$>$\-::{\bf const\-\_\-iterator} {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::const\-\_\-iterator}}\label{classoryx__path__planning_1_1TentacleGenerator_adb029a14a7e39d15665c2ca91f403e8a}
+typedef over std\-::vector$<$\-Speed\-Set$>$\-::const\-\_\-iterator for convenience 
+
+\-Definition at line 474 of file \-Tentacles.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!iterator@{iterator}}
+\index{iterator@{iterator}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{iterator}]{\setlength{\rightskip}{0pt plus 5cm}typedef std\-::vector$<${\bf \-Speed\-Set\-Ptr}$>$\-::{\bf iterator} {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::iterator}}\label{classoryx__path__planning_1_1TentacleGenerator_a83e7a964c7940df6bd0fbd190515472d}
+typedef over std\-::vector$<$\-Speed\-Set$>$\-::iterator for convenience 
+
+\-Definition at line 470 of file \-Tentacles.\-h.
+
+
+
+\subsection{\-Constructor \& \-Destructor \-Documentation}
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!\-Tentacle\-Generator@{\-Tentacle\-Generator}}
+\index{\-Tentacle\-Generator@{\-Tentacle\-Generator}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{\-Tentacle\-Generator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::\-Tentacle\-Generator} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{classoryx__path__planning_1_1TentacleGenerator_aa9058f577b83b704c8fdfefb503ace09}
+default empty constructor 
+
+\-Definition at line 458 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!\-Tentacle\-Generator@{\-Tentacle\-Generator}}
+\index{\-Tentacle\-Generator@{\-Tentacle\-Generator}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{\-Tentacle\-Generator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::\-Tentacle\-Generator} (
+\begin{DoxyParamCaption}
+\item[{{\bf \-Tentacle\-Generator} \&}]{\-Tentacle\-Generator}
+\end{DoxyParamCaption}
+)}\label{classoryx__path__planning_1_1TentacleGenerator_a9d39d6c78927c4d8494189f87e0c3eab}
+
+
+\-Copy \-Constructor. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em \doxyref{\-Tentacle\-Generator}{p.}{classoryx__path__planning_1_1TentacleGenerator}} & \doxyref{\-Tentacle\-Generator}{p.}{classoryx__path__planning_1_1TentacleGenerator} to copy \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 465 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!\-Tentacle\-Generator@{\-Tentacle\-Generator}}
+\index{\-Tentacle\-Generator@{\-Tentacle\-Generator}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{\-Tentacle\-Generator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::\-Tentacle\-Generator} (
+\begin{DoxyParamCaption}
+\item[{const {\bf \-Tentacle\-Generator} \&}]{\-Tentacle\-Generator}
+\end{DoxyParamCaption}
+)}\label{classoryx__path__planning_1_1TentacleGenerator_a45d736acd7ed16d4c48f1916cf9b6722}
+
+
+\-Copy \-Constructor. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em \doxyref{\-Tentacle\-Generator}{p.}{classoryx__path__planning_1_1TentacleGenerator}} & \doxyref{\-Tentacle\-Generator}{p.}{classoryx__path__planning_1_1TentacleGenerator} to copy \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 474 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!\-Tentacle\-Generator@{\-Tentacle\-Generator}}
+\index{\-Tentacle\-Generator@{\-Tentacle\-Generator}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{\-Tentacle\-Generator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::\-Tentacle\-Generator} (
+\begin{DoxyParamCaption}
+\item[{double}]{min\-Speed, }
+\item[{double}]{max\-Speed, }
+\item[{int}]{num\-Speed\-Set, }
+\item[{int}]{num\-Tentacles, }
+\item[{double}]{exp\-Fact, }
+\item[{double}]{resolution, }
+\item[{int}]{x\-Dim, }
+\item[{int}]{y\-Dim}
+\end{DoxyParamCaption}
+)}\label{classoryx__path__planning_1_1TentacleGenerator_a39f9b860c30f48ea1f3349f176443761}
+
+
+\-Generates a set of tentacles for each speed set. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em min\-Speed} & \-The speed of the slowest speed set \\
+\hline
+{\em max\-Speed} & \-The speed of the fastest speed set \\
+\hline
+{\em num\-Speed\-Set} & \-The number of speed sets to generate \\
+\hline
+{\em num\-Tentacles} & \-The number of tentacles in each speed set \\
+\hline
+{\em exp\-Fact} & \-The exponential factor used to determine radius for each tentacle \\
+\hline
+{\em resolution} & \-The resolution of the occupancy grid that the tentacles will be overlaid on \\
+\hline
+{\em x\-Dim} & \-The length of the x-\/axis of the occupancy grid, in the positive x-\/direction and of the same units as resolution \\
+\hline
+{\em y\-Dim} & \-The length of the y-\/axis of the occupancy grid, in the positive y-\/direction and of the same units as resolution \\
+\hline
+\end{DoxyParams}
+
+
+\-Definition at line 483 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!$\sim$\-Tentacle\-Generator@{$\sim$\-Tentacle\-Generator}}
+\index{$\sim$\-Tentacle\-Generator@{$\sim$\-Tentacle\-Generator}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{$\sim$\-Tentacle\-Generator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::$\sim$\-Tentacle\-Generator} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [virtual]}}\label{classoryx__path__planning_1_1TentacleGenerator_a7226434fb8edc74864e7de47dcafd9a0}
+
+
+\-Definition at line 506 of file \-Tentacles.\-cpp.
+
+
+
+\subsection{\-Member \-Function \-Documentation}
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!begin@{begin}}
+\index{begin@{begin}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{begin}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Tentacle\-Generator\-::iterator} {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::begin} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{classoryx__path__planning_1_1TentacleGenerator_a7c23f010f493c572b490cd56d7fe2a19}
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+\begin{DoxyReturn}{\-Returns}
+\-An iterator pointing to the first index \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} in the \doxyref{\-Tentacle\-Generator}{p.}{classoryx__path__planning_1_1TentacleGenerator} 
+\end{DoxyReturn}
+
+
+\-Definition at line 570 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!calc\-L@{calc\-L}}
+\index{calc\-L@{calc\-L}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{calc\-L}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::calc\-L} (
+\begin{DoxyParamCaption}
+\item[{double}]{q}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_a3d3182f139f58a8f24096765e7552e58}
+
+
+\-A set containing the velocity keys for each speed set. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em q} & \-Calculated constant \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-The calculated length constant for the speed set 
+\end{DoxyReturn}
+
+
+\-Definition at line 590 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!calc\-Q@{calc\-Q}}
+\index{calc\-Q@{calc\-Q}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{calc\-Q}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::calc\-Q} (
+\begin{DoxyParamCaption}
+\item[{int}]{speed\-Set}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_aa8a6ace3d49a331338744d839550a6f2}
+
+
+\-Calculates the 'magic constant' q used in tentacle generation. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzics 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em speed\-Set} & \-The index of the current speed set \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-A constant, $ q= \frac{speedSet}{numSpeedSet-1} $
+\end{DoxyReturn}
+\-Calculates 'magic constant' q. \-Formula taken from 'von \-Hundelshausen et al.\-: \-Integral \-Structures for \-Sensing and \-Motion' 
+
+\-Definition at line 628 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!calc\-Seed\-Rad@{calc\-Seed\-Rad}}
+\index{calc\-Seed\-Rad@{calc\-Seed\-Rad}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{calc\-Seed\-Rad}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::calc\-Seed\-Rad} (
+\begin{DoxyParamCaption}
+\item[{int}]{speed\-Set, }
+\item[{double}]{l, }
+\item[{double}]{q}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_a745246ed296c34bdd76d66235acea6fe}
+
+
+\-Helper function which calculates the seed radius for a speed set. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em speed\-Set} & \-The index number of the speed set \\
+\hline
+{\em q} & \-Calculated constant \\
+\hline
+{\em l} & \-Calculated seed length for the speed set \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-The calculated seed radius
+\end{DoxyReturn}
+calculate seed radius for the speed set. \-Formula taken from 'von \-Hundelshausen et al.\-: \-Integral \-Structures for \-Sensing and \-Motion' \-Equations are as follows\-: \[ delta phi = TSA \times \frac{pi}{2} \] \[ l = l_min + E_b \times q^(E_f) \] \[ R_j = \frac{l}{delta phi \times (1-q^(0.9))} \]
+
+\-Where $ R_j = \text{Seed Radius for Speed Set j} $, $ delta phi =$ the arc swept by the smallest tentacle, $ l=$ length of the longest tentacle in the set, and $ TSA, E_b, E_f$ are all tuning constants determined empirically. 
+
+\-Definition at line 605 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!calc\-Speed\-Set\-Vel@{calc\-Speed\-Set\-Vel}}
+\index{calc\-Speed\-Set\-Vel@{calc\-Speed\-Set\-Vel}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{calc\-Speed\-Set\-Vel}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::calc\-Speed\-Set\-Vel} (
+\begin{DoxyParamCaption}
+\item[{double}]{min\-Speed, }
+\item[{double}]{max\-Speed, }
+\item[{double}]{q}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_a3e2f2e543781fdb062347f49b328bf25}
+
+
+\-Helper function which calculates the velocity for a speed set. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em min\-Speed} & \-Minimum speed of all speed sets \\
+\hline
+{\em max\-Speed} & \-Maximum speed of all speed sets \\
+\hline
+{\em q} & \-Calculated constant \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-The velocity for a speed set
+\end{DoxyReturn}
+calculate velocity for the speed set. \-Formula taken from 'von \-Hundelshausen et al.\-: \-Integral \-Structures for \-Sensing and \-Motion' \-Equations are as follows\-: \[ V_j = V_s+q^(1.2) \times (V_e-V_s) \]
+
+\-Where $ V_j = \text{Velocity for Speed Set j} $, $ delta phi =$ the arc swept by the smallest tentacle, $ l=$ length of the longest tentacle in the set, and $ TSA, E_b, E_f$ are all tuning constants determined empirically. 
+
+\-Definition at line 620 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!cbegin@{cbegin}}
+\index{cbegin@{cbegin}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{cbegin}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Tentacle\-Generator\-::const\-\_\-iterator} {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::cbegin} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\label{classoryx__path__planning_1_1TentacleGenerator_af4231381d01792c053c30069ab22b639}
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+\begin{DoxyReturn}{\-Returns}
+\-An iterator pointing to the first index \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} in the \doxyref{\-Tentacle\-Generator}{p.}{classoryx__path__planning_1_1TentacleGenerator} 
+\end{DoxyReturn}
+
+
+\-Definition at line 580 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!cend@{cend}}
+\index{cend@{cend}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{cend}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Tentacle\-Generator\-::const\-\_\-iterator} {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::cend} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\label{classoryx__path__planning_1_1TentacleGenerator_a57af25f32e7525b615782c5e8fa68252}
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+\begin{DoxyReturn}{\-Returns}
+\-An iterator pointing to the last index \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} in the \doxyref{\-Tentacle\-Generator}{p.}{classoryx__path__planning_1_1TentacleGenerator} 
+\end{DoxyReturn}
+
+
+\-Definition at line 585 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!end@{end}}
+\index{end@{end}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{end}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Tentacle\-Generator\-::iterator} {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::end} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{classoryx__path__planning_1_1TentacleGenerator_a0d3ae0e276fb3ebf0fe722ea84ac45d1}
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+\begin{DoxyReturn}{\-Returns}
+\-An iterator pointing to the last index \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} in the \doxyref{\-Tentacle\-Generator}{p.}{classoryx__path__planning_1_1TentacleGenerator} 
+\end{DoxyReturn}
+
+
+\-Definition at line 575 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!get\-Num\-Speed\-Sets@{get\-Num\-Speed\-Sets}}
+\index{get\-Num\-Speed\-Sets@{get\-Num\-Speed\-Sets}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{get\-Num\-Speed\-Sets}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::get\-Num\-Speed\-Sets} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\label{classoryx__path__planning_1_1TentacleGenerator_abcfc1d9b617bb96369a87b11d32ad7c9}
+
+
+\-Gets the number of speed sets that were generated. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzics 
+\end{DoxyAuthor}
+\begin{DoxyReturn}{\-Returns}
+\-The number of speed sets that were generated 
+\end{DoxyReturn}
+
+
+\-Definition at line 508 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!get\-Speed\-Set@{get\-Speed\-Set}}
+\index{get\-Speed\-Set@{get\-Speed\-Set}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{get\-Speed\-Set}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf \-Speed\-Set} \& {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::get\-Speed\-Set} (
+\begin{DoxyParamCaption}
+\item[{int}]{speed\-Set}
+\end{DoxyParamCaption}
+) const}\label{classoryx__path__planning_1_1TentacleGenerator_a7626136c263cfee2387b66aa45564adf}
+
+
+\-Looks up a speed set based on index. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em speed\-Set} & \-Index of the \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} to get \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-The \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} at the index 
+\end{DoxyReturn}
+
+
+\-Definition at line 528 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!get\-Speed\-Set@{get\-Speed\-Set}}
+\index{get\-Speed\-Set@{get\-Speed\-Set}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{get\-Speed\-Set}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf \-Speed\-Set} \& {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::get\-Speed\-Set} (
+\begin{DoxyParamCaption}
+\item[{double}]{velocity}
+\end{DoxyParamCaption}
+) const}\label{classoryx__path__planning_1_1TentacleGenerator_a192aa8bc0fc4b456a27dc731bde74d5a}
+
+
+\-Looks up a \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} based on velocity. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em velocity} & \-Velocity to find a closest match for \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-A \-Speed\-Set\-Ptr to the \doxyref{\-Speed\-Set}{p.}{classoryx__path__planning_1_1SpeedSet} who most closely matches the given velocity
+\end{DoxyReturn}
+\-Finds the speed set based on a nearest neighbor search 
+
+\-Definition at line 536 of file \-Tentacles.\-cpp.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!get\-Tentacle@{get\-Tentacle}}
+\index{get\-Tentacle@{get\-Tentacle}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{get\-Tentacle}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf \-Tentacle} \& {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::get\-Tentacle} (
+\begin{DoxyParamCaption}
+\item[{int}]{speed\-Set, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+) const  throw ({\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Access\-Exception}, {\bf oryx\-\_\-path\-\_\-planning\-::\-Speed\-Set\-Access\-Exception})}\label{classoryx__path__planning_1_1TentacleGenerator_a06f68ce414f7c36847c1407eee046172}
+
+
+\-Gets the tentacle from the given speed set and tentacle index. 
+
+\begin{DoxyAuthor}{\-Author}
+\-Adam \-Panzica 
+\end{DoxyAuthor}
+
+\begin{DoxyParams}{\-Parameters}
+{\em speed\-Set} & \-The speed set to look at \\
+\hline
+{\em index} & \-The index of the tentacle to get \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-A \doxyref{\-Tentacle}{p.}{classoryx__path__planning_1_1Tentacle} containing all of the data about the requested tentacle 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{\-Exceptions}
+{\em \doxyref{\-Tentacle\-Access\-Exception}{p.}{classoryx__path__planning_1_1TentacleAccessException}} & if the tentacle index was invalid \\
+\hline
+{\em \doxyref{\-Speed\-Set\-Access\-Exception}{p.}{classoryx__path__planning_1_1SpeedSetAccessException}} & if the speed set index was invalid \\
+\hline
+\end{DoxyExceptions}
+
+
+\-Definition at line 513 of file \-Tentacles.\-cpp.
+
+
+
+\subsection{\-Member \-Data \-Documentation}
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!exp\-\_\-fact\-\_\-@{exp\-\_\-fact\-\_\-}}
+\index{exp\-\_\-fact\-\_\-@{exp\-\_\-fact\-\_\-}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{exp\-\_\-fact\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::exp\-\_\-fact\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_ae7668e48b0d8e2bc35329d2328732d8b}
+
+
+\-Definition at line 571 of file \-Tentacles.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!num\-\_\-speed\-\_\-set\-\_\-@{num\-\_\-speed\-\_\-set\-\_\-}}
+\index{num\-\_\-speed\-\_\-set\-\_\-@{num\-\_\-speed\-\_\-set\-\_\-}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{num\-\_\-speed\-\_\-set\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::num\-\_\-speed\-\_\-set\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_a1ea4ba9c62e7286c75c1d03ccd19f9f9}
+
+
+\-Number of tentacles per speed-\/set. 
+
+
+
+\-Definition at line 570 of file \-Tentacles.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!num\-\_\-tentacles\-\_\-@{num\-\_\-tentacles\-\_\-}}
+\index{num\-\_\-tentacles\-\_\-@{num\-\_\-tentacles\-\_\-}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{num\-\_\-tentacles\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::num\-\_\-tentacles\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_a09b2516db5f3ce6b586c28714efb1337}
+
+
+\-Definition at line 569 of file \-Tentacles.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!speed\-\_\-sets\-\_\-@{speed\-\_\-sets\-\_\-}}
+\index{speed\-\_\-sets\-\_\-@{speed\-\_\-sets\-\_\-}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{speed\-\_\-sets\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf \-Speed\-Set\-Ptr} $>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::speed\-\_\-sets\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_a61a7d4efdb371eb0992185140e88dfc7}
+
+
+\-Exponential factor used to calculate radii. 
+
+
+
+\-Definition at line 572 of file \-Tentacles.\-h.
+
+\index{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}!velocity\-\_\-keys\-\_\-@{velocity\-\_\-keys\-\_\-}}
+\index{velocity\-\_\-keys\-\_\-@{velocity\-\_\-keys\-\_\-}!oryx_path_planning::TentacleGenerator@{oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator}}
+\subsubsection[{velocity\-\_\-keys\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$double$>$ {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-Generator\-::velocity\-\_\-keys\-\_\-}\hspace{0.3cm}{\ttfamily  [private]}}\label{classoryx__path__planning_1_1TentacleGenerator_ace0e092f9b0caa1e832aa5ee5868be63}
+
+
+\-A set containing all of the valid speed sets that have been generated. 
+
+
+
+\-Definition at line 573 of file \-Tentacles.\-h.
+
+
+
+\-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+{\bf \-Tentacles.\-h}\item 
+{\bf \-Tentacles.\-cpp}\end{DoxyCompactItemize}

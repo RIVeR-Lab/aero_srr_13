@@ -1,0 +1,84 @@
+\section{\-Tentacles.\-cpp \-File \-Reference}
+\label{Tentacles_8cpp}\index{\-Tentacles.\-cpp@{\-Tentacles.\-cpp}}
+{\ttfamily \#include \char`\"{}\-Tentacles.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Oryx\-Path\-Planner\-Config.\-h\char`\"{}}\*
+\-Include dependency graph for \-Tentacles.\-cpp\-:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Tentacles_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{\-Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace {\bf oryx\-\_\-path\-\_\-planning}
+\begin{DoxyCompactList}\small\item\em \-Namespace declaration to make implementation of \-Tentacle\-Traverser easier. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{\-Defines}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bf \-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-B\-A\-S\-E}~3.\-5
+\item 
+\#define {\bf \-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-F\-A\-C\-T\-O\-R}~1.\-2
+\item 
+\#define {\bf \-M\-I\-N\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H}~0.\-8
+\item 
+\#define {\bf \-P\-R\-I\-N\-T\-E\-R}~\-R\-O\-S\-\_\-\-D\-E\-B\-U\-G
+\item 
+\#define {\bf \-T\-H\-E\-T\-A\-\_\-\-I\-N\-C\-R\-E\-M\-E\-N\-T}~\-P\-I/1800.\-0
+\end{DoxyCompactItemize}
+\subsection*{\-Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef \*
+{\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-::\-Tentacle\-Traverser} {\bf \-Tent\-Trav}
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Define \-Documentation}
+\index{\-Tentacles.\-cpp@{\-Tentacles.\-cpp}!\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-B\-A\-S\-E@{\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-B\-A\-S\-E}}
+\index{\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-B\-A\-S\-E@{\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-B\-A\-S\-E}!Tentacles.cpp@{\-Tentacles.\-cpp}}
+\subsubsection[{\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-B\-A\-S\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define {\bf \-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-B\-A\-S\-E}~3.\-5}\label{Tentacles_8cpp_ae129e318880d6c255dd690fd05c56eb0}
+
+
+\-Definition at line 26 of file \-Tentacles.\-cpp.
+
+\index{\-Tentacles.\-cpp@{\-Tentacles.\-cpp}!\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-F\-A\-C\-T\-O\-R@{\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-F\-A\-C\-T\-O\-R}}
+\index{\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-F\-A\-C\-T\-O\-R@{\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-F\-A\-C\-T\-O\-R}!Tentacles.cpp@{\-Tentacles.\-cpp}}
+\subsubsection[{\-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-F\-A\-C\-T\-O\-R}]{\setlength{\rightskip}{0pt plus 5cm}\#define {\bf \-E\-X\-P\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H\-\_\-\-F\-A\-C\-T\-O\-R}~1.\-2}\label{Tentacles_8cpp_a469fe07996a3cecca30dcc9bacdb6a52}
+
+
+\-Definition at line 32 of file \-Tentacles.\-cpp.
+
+\index{\-Tentacles.\-cpp@{\-Tentacles.\-cpp}!\-M\-I\-N\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H@{\-M\-I\-N\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H}}
+\index{\-M\-I\-N\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H@{\-M\-I\-N\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H}!Tentacles.cpp@{\-Tentacles.\-cpp}}
+\subsubsection[{\-M\-I\-N\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define {\bf \-M\-I\-N\-\_\-\-T\-E\-N\-T\-A\-C\-L\-E\-\_\-\-L\-E\-N\-G\-T\-H}~0.\-8}\label{Tentacles_8cpp_a9665ead32ec6ee199b8149acce7eaec7}
+
+
+\-Definition at line 20 of file \-Tentacles.\-cpp.
+
+\index{\-Tentacles.\-cpp@{\-Tentacles.\-cpp}!\-P\-R\-I\-N\-T\-E\-R@{\-P\-R\-I\-N\-T\-E\-R}}
+\index{\-P\-R\-I\-N\-T\-E\-R@{\-P\-R\-I\-N\-T\-E\-R}!Tentacles.cpp@{\-Tentacles.\-cpp}}
+\subsubsection[{\-P\-R\-I\-N\-T\-E\-R}]{\setlength{\rightskip}{0pt plus 5cm}\#define {\bf \-P\-R\-I\-N\-T\-E\-R}~\-R\-O\-S\-\_\-\-D\-E\-B\-U\-G}\label{Tentacles_8cpp_a15ef04095568844ee28ee56191c9d903}
+
+
+\-Definition at line 16 of file \-Tentacles.\-cpp.
+
+\index{\-Tentacles.\-cpp@{\-Tentacles.\-cpp}!\-T\-H\-E\-T\-A\-\_\-\-I\-N\-C\-R\-E\-M\-E\-N\-T@{\-T\-H\-E\-T\-A\-\_\-\-I\-N\-C\-R\-E\-M\-E\-N\-T}}
+\index{\-T\-H\-E\-T\-A\-\_\-\-I\-N\-C\-R\-E\-M\-E\-N\-T@{\-T\-H\-E\-T\-A\-\_\-\-I\-N\-C\-R\-E\-M\-E\-N\-T}!Tentacles.cpp@{\-Tentacles.\-cpp}}
+\subsubsection[{\-T\-H\-E\-T\-A\-\_\-\-I\-N\-C\-R\-E\-M\-E\-N\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define {\bf \-T\-H\-E\-T\-A\-\_\-\-I\-N\-C\-R\-E\-M\-E\-N\-T}~\-P\-I/1800.\-0}\label{Tentacles_8cpp_a7b093b9bf7eacfe3d379569d3672e661}
+
+
+\-Definition at line 38 of file \-Tentacles.\-cpp.
+
+
+
+\subsection{\-Typedef \-Documentation}
+\index{\-Tentacles.\-cpp@{\-Tentacles.\-cpp}!\-Tent\-Trav@{\-Tent\-Trav}}
+\index{\-Tent\-Trav@{\-Tent\-Trav}!Tentacles.cpp@{\-Tentacles.\-cpp}}
+\subsubsection[{\-Tent\-Trav}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf oryx\-\_\-path\-\_\-planning\-::\-Tentacle\-::\-Tentacle\-Traverser} {\bf \-Tent\-Trav}}\label{Tentacles_8cpp_a9fce116c4dc10629707fc8e057e235a1}
+
+
+\-Definition at line 45 of file \-Tentacles.\-cpp.
+
