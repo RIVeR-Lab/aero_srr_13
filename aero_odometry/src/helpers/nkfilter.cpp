@@ -84,3 +84,60 @@ void NKFilter::angle_bound(double& raw, const double& zero) const{
 		raw += 2.0*M_PI;
 	}
 }
+
+void NKFilter::odomToStateVectorAndCovar(nav_msgs::OdometryConstPtr measurement, ColumnVector& state, SymmetricMatrix& covar)
+{
+	if(state.size() == constants::STATE_SIZE())
+	{
+	state(constants::X_STATE()) = measurement->pose.pose.position.x;
+	state(constants::Y_STATE()) = measurement->pose.pose.position.y;
+	state(constants::Z_STATE()) = measurement->pose.pose.position.z;
+
+	tf::Quaternion q;
+	tf::quaternionMsgToTF(measurement->pose.pose.orientation, q);
+	tf::Matrix3x3 orientation(q);
+	double z,y,x;
+	orientation.getEulerZYX(z,y,x);
+
+	state(constants::THETA_STATE()) = z;
+	state(constants::GAMMA_STATE()) = x;
+	state(constants::PHI_STATE())   = y;
+
+
+	state(constants::X_DOT_STATE()) = measurement->twist.twist.linear.x;
+	state(constants::Y_DOT_STATE()) = measurement->twist.twist.linear.y;
+	state(constants::Z_DOT_STATE()) = measurement->twist.twist.linear.z;
+	state(constants::THETA_DOT_STATE()) = measurement->twist.twist.angular.z;
+	state(constants::PHI_DOT_STATE())   = measurement->twist.twist.angular.y;
+	state(constants::GAMMA_DOT_STATE()) = measurement->twist.twist.angular.x;
+
+	}
+	else
+	{
+		ROS_ERROR("Tried to place state size %d into mismatched size vector %d", constants::STATE_SIZE(), state.size());
+	}
+
+}
+
+void NKFilter::stateToOdom(nav_msgs::Odometry& message, ColumnVector& state, SymmetricMatrix& covar)
+{
+	if((state.size()==6)&&(covar.size1()==6))
+	{
+		message.pose.pose.position.x = state(constants::X_STATE());
+		message.pose.pose.position.y = state(constants::Y_STATE());
+		message.pose.pose.position.z = state(constants::Z_STATE());
+		tf::Quaternion orientation(state(constants::PHI_STATE()), state(constants::GAMMA_STATE()), state(constants::THETA_STATE()));
+		tf::quaternionTFToMsg(orientation, message.pose.pose.orientation);
+
+		message.twist.twist.linear.x = state(constants::X_DOT_STATE());
+		message.twist.twist.linear.y = state(constants::Y_DOT_STATE());
+		message.twist.twist.linear.z = state(constants::Z_DOT_STATE());
+		message.twist.twist.angular.x= state(constants::GAMMA_DOT_STATE());
+		message.twist.twist.angular.y= state(constants::PHI_DOT_STATE());
+		message.twist.twist.angular.z= state(constants::THETA_DOT_STATE());
+	}
+	else
+	{
+		ROS_ERROR("Not set up to convert from state size %d and covar size %d to Odometry", state.size(), covar.size1());
+	}
+}
