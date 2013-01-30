@@ -19,6 +19,7 @@ NKFilter::NKFilter(int number_of_sensors):
 				prior_(NULL),
 				sys_pdf_(NULL),
 				sys_model_(NULL),
+				measurement_models_(number_of_sensors),
 				filter_init_(false),
 				filter_(NULL),
 				measurement_buffer_(number_of_sensors),
