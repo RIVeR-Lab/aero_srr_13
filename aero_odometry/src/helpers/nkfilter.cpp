@@ -16,11 +16,11 @@
 using namespace aero_odometry;
 
 NKFilter::NKFilter():
-prior_(NULL),
-sys_pdf_(NULL),
-sys_model_(NULL),
-filter_init_(false),
-filter_(NULL)
+		prior_(NULL),
+		sys_pdf_(NULL),
+		sys_model_(NULL),
+		filter_init_(false),
+		filter_(NULL)
 {
 
 	ColumnVector sys_noise_mu(constants::STATE_SIZE());
@@ -68,10 +68,19 @@ NKFilter::~NKFilter()
 
 bool NKFilter::init_filter(const ColumnVector& initial_pose_estimate, const SymmetricMatrix& initial_covar_estimate)
 {
-	this->prior_  = new BFL::Gaussian(initial_pose_estimate, initial_covar_estimate);
-	this->filter_ = new BFL::ExtendedKalmanFilter(prior_);
-	this->filter_init_ = true;
-	return true;
+	if(initial_pose_estimate.size()==constants::STATE_SIZE()&&initial_covar_estimate.size1()==constants::STATE_SIZE())
+	{
+		this->prior_  = new BFL::Gaussian(initial_pose_estimate, initial_covar_estimate);
+
+		this->filter_ = new BFL::ExtendedKalmanFilter(prior_);
+		this->filter_init_ = true;
+		return true;
+	}
+	else
+	{
+		ROS_ERROR("Expected an initial estimate/covar of size %d states, got one of size %d/%d states", constants::STATE_SIZE(), initial_pose_estimate.size(),initial_covar_estimate.size1());
+		return false;
+	}
 }
 
 void NKFilter::angle_bound(double& raw, const double& zero) const{
@@ -90,27 +99,27 @@ void NKFilter::odomToStateVectorAndCovar(nav_msgs::OdometryConstPtr measurement,
 {
 	if(state.size() == constants::STATE_SIZE())
 	{
-	state(constants::X_STATE()) = measurement->pose.pose.position.x;
-	state(constants::Y_STATE()) = measurement->pose.pose.position.y;
-	state(constants::Z_STATE()) = measurement->pose.pose.position.z;
+		state(constants::X_STATE()) = measurement->pose.pose.position.x;
+		state(constants::Y_STATE()) = measurement->pose.pose.position.y;
+		state(constants::Z_STATE()) = measurement->pose.pose.position.z;
 
-	tf::Quaternion q;
-	tf::quaternionMsgToTF(measurement->pose.pose.orientation, q);
-	tf::Matrix3x3 orientation(q);
-	double z,y,x;
-	orientation.getEulerZYX(z,y,x);
+		tf::Quaternion q;
+		tf::quaternionMsgToTF(measurement->pose.pose.orientation, q);
+		tf::Matrix3x3 orientation(q);
+		double z,y,x;
+		orientation.getEulerZYX(z,y,x);
 
-	state(constants::RZ_STATE()) = z;
-	state(constants::RX_STATE()) = x;
-	state(constants::RY_STATE()) = y;
+		state(constants::RZ_STATE()) = z;
+		state(constants::RX_STATE()) = x;
+		state(constants::RY_STATE()) = y;
 
 
-	state(constants::X_DOT_STATE()) = measurement->twist.twist.linear.x;
-	state(constants::Y_DOT_STATE()) = measurement->twist.twist.linear.y;
-	state(constants::Z_DOT_STATE()) = measurement->twist.twist.linear.z;
-	state(constants::RZ_DOT_STATE()) = measurement->twist.twist.angular.z;
-	state(constants::RY_DOT_STATE()) = measurement->twist.twist.angular.y;
-	state(constants::RX_DOT_STATE()) = measurement->twist.twist.angular.x;
+		state(constants::X_DOT_STATE()) = measurement->twist.twist.linear.x;
+		state(constants::Y_DOT_STATE()) = measurement->twist.twist.linear.y;
+		state(constants::Z_DOT_STATE()) = measurement->twist.twist.linear.z;
+		state(constants::RZ_DOT_STATE()) = measurement->twist.twist.angular.z;
+		state(constants::RY_DOT_STATE()) = measurement->twist.twist.angular.y;
+		state(constants::RX_DOT_STATE()) = measurement->twist.twist.angular.x;
 
 	}
 	else
