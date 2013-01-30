@@ -26,13 +26,13 @@ filter_(NULL)
 	sys_noise_mu(constants::X_STATE())           = constants::MU_SYSTEM_NOISE_X();
 	sys_noise_mu(constants::Y_STATE())           = constants::MU_SYSTEM_NOISE_Y();
 	//sys_noise_Mu(constants::Z_STATE())         = constants::MU_SYSTEM_NOISE_Z();
-	sys_noise_mu(constants::THETA_STATE())       = constants::MU_SYSTEM_NOISE_THETA();
+	sys_noise_mu(constants::RZ_STATE())       = constants::MU_SYSTEM_NOISE_RZ();
 	//sys_noise_Mu(constants::PHI_STATE())       = constants::MU_SYSTEM_NOISE_PHI();
 	//sys_noise_Mu(constants::GAMMA_STATE())     = constants::MU_SYSTEM_NOISE_GAMMA();
 	sys_noise_mu(constants::X_DOT_STATE())       = constants::MU_SYSTEM_NOISE_X();
 	sys_noise_mu(constants::Y_DOT_STATE())       = constants::MU_SYSTEM_NOISE_Y();
 	//sys_noise_Mu(constants::Z_DOT_STATE())     = constants::MU_SYSTEM_NOISE_Z();
-	sys_noise_mu(constants::THETA_DOT_STATE())   = constants::MU_SYSTEM_NOISE_THETA();
+	sys_noise_mu(constants::RZ_DOT_STATE())   = constants::MU_SYSTEM_NOISE_RZ();
 	//sys_noise_Mu(constants::PHI_DOT_STATE())   = constants::MU_SYSTEM_NOISE_PHI();
 	//sys_noise_Mu(constants::GAMMA_DOT_STATE()) = constants::MU_SYSTEM_NOISE_GAMMA();
 
@@ -41,13 +41,13 @@ filter_(NULL)
 	sys_noise_cov(constants::X_STATE(), constants::X_STATE())   = constants::SIGMA_SYSTEM_NOISE_X();
 	sys_noise_cov(constants::Y_STATE(), constants::Y_STATE())   = constants::SIGMA_SYSTEM_NOISE_Y();
 	//sys_noise_Cov(constants::Z_STATE(), constants::Z_STATE()) = constants::SIGMA_SYSTEM_NOISE_Z();
-	sys_noise_cov(constants::THETA_STATE(), constants::THETA_STATE())   = constants::SIGMA_SYSTEM_NOISE_THETA();
+	sys_noise_cov(constants::RZ_STATE(), constants::RZ_STATE())   = constants::SIGMA_SYSTEM_NOISE_RZ();
 	//sys_noise_Cov(constants::PHI_STATE(), constants::PHI_STATE())     = constants::SIGMA_SYSTEM_NOISE_PHI();
 	//sys_noise_Cov(constants::GAMMA_STATE(), constants::GAMMA_STATE()) = constants::SIGMA_SYSTEM_NOISE_GAMMA();
 	sys_noise_cov(constants::X_DOT_STATE(), constants::X_DOT_STATE())   = constants::SIGMA_SYSTEM_NOISE_X_DOT();
 	sys_noise_cov(constants::Y_DOT_STATE(), constants::Y_DOT_STATE())   = constants::SIGMA_SYSTEM_NOISE_Y_DOT();
 	//sys_noise_Cov(constants::Z_DOT_STATE(), constants::Z_DOT_STATE()) = constants::SIGMA_SYSTEM_NOISE_Z_DOT();
-	sys_noise_cov(constants::THETA_DOT_STATE(), constants::THETA_DOT_STATE())   = constants::SIGMA_SYSTEM_NOISE_THETA_DOT();
+	sys_noise_cov(constants::RZ_DOT_STATE(), constants::RZ_DOT_STATE())   = constants::SIGMA_SYSTEM_NOISE_RZ_DOT();
 	//sys_noise_Cov(constants::PHI_DOT_STATE(), constants::PHI_DOT_STATE())     = constants::SIGMA_SYSTEM_NOISE_PHI_DOT();
 	//sys_noise_Cov(constants::GAMMA_DOT_STATE(), constants::GAMMA_DOT_STATE()) = constants::SIGMA_SYSTEM_NOISE_GAMMA_DOT();
 
@@ -99,17 +99,17 @@ void NKFilter::odomToStateVectorAndCovar(nav_msgs::OdometryConstPtr measurement,
 	double z,y,x;
 	orientation.getEulerZYX(z,y,x);
 
-	state(constants::THETA_STATE()) = z;
-	state(constants::GAMMA_STATE()) = x;
-	state(constants::PHI_STATE())   = y;
+	state(constants::RZ_STATE()) = z;
+	state(constants::RX_STATE()) = x;
+	state(constants::RY_STATE()) = y;
 
 
 	state(constants::X_DOT_STATE()) = measurement->twist.twist.linear.x;
 	state(constants::Y_DOT_STATE()) = measurement->twist.twist.linear.y;
 	state(constants::Z_DOT_STATE()) = measurement->twist.twist.linear.z;
-	state(constants::THETA_DOT_STATE()) = measurement->twist.twist.angular.z;
-	state(constants::PHI_DOT_STATE())   = measurement->twist.twist.angular.y;
-	state(constants::GAMMA_DOT_STATE()) = measurement->twist.twist.angular.x;
+	state(constants::RZ_DOT_STATE()) = measurement->twist.twist.angular.z;
+	state(constants::RY_DOT_STATE()) = measurement->twist.twist.angular.y;
+	state(constants::RX_DOT_STATE()) = measurement->twist.twist.angular.x;
 
 	}
 	else
@@ -126,15 +126,15 @@ void NKFilter::stateToOdom(nav_msgs::Odometry& message, ColumnVector& state, Sym
 		message.pose.pose.position.x = state(constants::X_STATE());
 		message.pose.pose.position.y = state(constants::Y_STATE());
 		message.pose.pose.position.z = state(constants::Z_STATE());
-		tf::Quaternion orientation(state(constants::PHI_STATE()), state(constants::GAMMA_STATE()), state(constants::THETA_STATE()));
+		tf::Quaternion orientation(state(constants::RY_STATE()), state(constants::RX_STATE()), state(constants::RZ_STATE()));
 		tf::quaternionTFToMsg(orientation, message.pose.pose.orientation);
 
 		message.twist.twist.linear.x = state(constants::X_DOT_STATE());
 		message.twist.twist.linear.y = state(constants::Y_DOT_STATE());
 		message.twist.twist.linear.z = state(constants::Z_DOT_STATE());
-		message.twist.twist.angular.x= state(constants::GAMMA_DOT_STATE());
-		message.twist.twist.angular.y= state(constants::PHI_DOT_STATE());
-		message.twist.twist.angular.z= state(constants::THETA_DOT_STATE());
+		message.twist.twist.angular.x= state(constants::RX_DOT_STATE());
+		message.twist.twist.angular.y= state(constants::RY_DOT_STATE());
+		message.twist.twist.angular.z= state(constants::RZ_DOT_STATE());
 	}
 	else
 	{

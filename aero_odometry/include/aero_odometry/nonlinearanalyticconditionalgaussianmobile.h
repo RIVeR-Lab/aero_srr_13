@@ -29,15 +29,15 @@ public:
 	static double MU_SYSTEM_NOISE_X(){return 1.0;};
 	static double MU_SYSTEM_NOISE_Y(){return 1.0;};
 	static double MU_SYSTEM_NOISE_Z(){return 1.0;};
-	static double MU_SYSTEM_NOISE_THETA(){return 1.0;};
-	static double MU_SYSTEM_NOISE_PHI(){return 1.0;};
-	static double MU_SYSTEM_NOISE_GAMMA(){return 1.0;};
+	static double MU_SYSTEM_NOISE_RZ(){return 1.0;};
+	static double MU_SYSTEM_NOISE_RY(){return 1.0;};
+	static double MU_SYSTEM_NOISE_RX(){return 1.0;};
 	static double MU_SYSTEM_NOISE_X_DOT(){return 1.0;};
 	static double MU_SYSTEM_NOISE_Y_DOT(){return 1.0;};
 	static double MU_SYSTEM_NOISE_Z_DOT(){return 1.0;};
-	static double MU_SYSTEM_NOISE_THETA_DOT(){return 1.0;};
-	static double MU_SYSTEM_NOISE_PHI_DOT(){return 1.0;};
-	static double MU_SYSTEM_NOISE_GAMMA_DOT(){return 1.0;};
+	static double MU_SYSTEM_NOISE_RZ_DOT(){return 1.0;};
+	static double MU_SYSTEM_NOISE_RY_DOT(){return 1.0;};
+	static double MU_SYSTEM_NOISE_RX_DOT(){return 1.0;};
 
 	static double SIGMA_SYSTEM_NOISE_X(){return 1.0;};
 	static double SIGMA_SYSTEM_NOISE_X_DOT(){return 1.0;};
@@ -45,25 +45,26 @@ public:
 	static double SIGMA_SYSTEM_NOISE_Y_DOT(){return 1.0;};
 	static double SIGMA_SYSTEM_NOISE_Z(){return 1.0;};
 	static double SIGMA_SYSTEM_NOISE_Z_DOT(){return 1.0;};
-	static double SIGMA_SYSTEM_NOISE_THETA(){return 1.0;};
-	static double SIGMA_SYSTEM_NOISE_THETA_DOT(){return 1.0;};
-	static double SIGMA_SYSTEM_NOISE_PHI(){return 1.0;};
-	static double SIGMA_SYSTEM_NOISE_PHI_DOT(){return 1.0;};
-	static double SIGMA_SYSTEM_NOISE_GAMMA(){return 1.0;};
-	static double SIGMA_SYSTEM_NOISE_GAMMA_DOT(){return 1.0;};
+	static double SIGMA_SYSTEM_NOISE_RZ(){return 1.0;};
+	static double SIGMA_SYSTEM_NOISE_RZ_DOT(){return 1.0;};
+	static double SIGMA_SYSTEM_NOISE_RY(){return 1.0;};
+	static double SIGMA_SYSTEM_NOISE_RY_DOT(){return 1.0;};
+	static double SIGMA_SYSTEM_NOISE_RX(){return 1.0;};
+	static double SIGMA_SYSTEM_NOISE_RX_DOT(){return 1.0;};
 
 	static int X_STATE(){return 1;}
 	static int Y_STATE(){return 2;}
 	static int Z_STATE(){return 3;}
-	static int X_DOT_STATE(){return 4;}
-	static int Y_DOT_STATE(){return 5;}
-	static int Z_DOT_STATE(){return 6;}
-	static int THETA_STATE(){return 7;}
-	static int PHI_STATE(){return 8;}
-	static int GAMMA_STATE(){return 9;}
-	static int THETA_DOT_STATE(){return 10;}
-	static int PHI_DOT_STATE(){return 11;}
-	static int GAMMA_DOT_STATE(){return 12;}
+	static int RX_STATE(){return 4;}
+	static int RY_STATE(){return 5;}
+	static int RZ_STATE(){return 6;}
+	static int X_DOT_STATE(){return 7;}
+	static int Y_DOT_STATE(){return 8;}
+	static int Z_DOT_STATE(){return 9;}
+	static int RX_DOT_STATE(){return 10;}
+	static int RY_DOT_STATE(){return 11;}
+	static int RZ_DOT_STATE(){return 12;}
+
 
 	static int LINEAR_V_INPUT(){return 1;};
 	static int OMEGA_INPUT(){return 2;};

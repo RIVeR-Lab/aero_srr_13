@@ -45,16 +45,16 @@ ColumnVector NonLinearAnalyticsContionalGaussianMobile::ExpectedValueGet() const
 	 * This is essentially combining the standard linearized x[k] = A(x)*x[k-1]+B(x)*u[k] into single equation
 	 */
 
-	state(constants::X_STATE())        += cos(state(constants::THETA_STATE()))*input(constants::LINEAR_V_INPUT());
-	state(constants::Y_STATE())        += sin(state(constants::THETA_STATE()))*input(constants::LINEAR_V_INPUT());
+	state(constants::X_STATE())        += cos(state(constants::RZ_STATE()))*input(constants::LINEAR_V_INPUT());
+	state(constants::Y_STATE())        += sin(state(constants::RZ_STATE()))*input(constants::LINEAR_V_INPUT());
 	//state(constants::Z_STATE())        += 0;
-	state(constants::THETA_STATE())    += input(constants::OMEGA_INPUT());
+	state(constants::RZ_STATE())    += input(constants::OMEGA_INPUT());
 	//state(constants::PHI_STATE())      += 0;
 	//state(constants::GAMMA_STATE())    += 0;
-	state(constants::X_DOT_STATE())     = cos(state(constants::THETA_STATE()))*input(constants::LINEAR_V_INPUT());
-	state(constants::Y_DOT_STATE())     = sin(state(constants::THETA_STATE()))*input(constants::LINEAR_V_INPUT());
+	state(constants::X_DOT_STATE())     = cos(state(constants::RZ_STATE()))*input(constants::LINEAR_V_INPUT());
+	state(constants::Y_DOT_STATE())     = sin(state(constants::RZ_STATE()))*input(constants::LINEAR_V_INPUT());
 	//state(constants::Z_DOT_STATE())     = 0;
-	state(constants::THETA_DOT_STATE()) = input(constants::OMEGA_INPUT());
+	state(constants::RZ_DOT_STATE()) = input(constants::OMEGA_INPUT());
 	//state(constants::PHI_DOT_STATE())   = 0;
 	//state(constants::GAMMA_DOT_STATE()) = 0;
 
@@ -72,12 +72,12 @@ Matrix NonLinearAnalyticsContionalGaussianMobile::dfGet(unsigned int i) const
 	this->df_(constants::X_STATE(),constants::X_STATE()) = 1;
 	this->df_(constants::Y_STATE(),constants::Y_STATE()) = 1;
 	//this->df_(constants::Z_STATE(),constants::Z_STATE()) = 1;
-	this->df_(constants::THETA_STATE(),constants::THETA_STATE()) = 1;
+	this->df_(constants::RZ_STATE(),constants::RZ_STATE()) = 1;
 	//this->df_(constants::PHI_STATE(),constants::PHI_STATE()) = 1;
 	//this->df_(constants::GAMMA_STATE(),constants::GAMMA_STATE()) = 1;
 
-	this->df_(constants::X_STATE(), constants::THETA_STATE()) = -input(constants::LINEAR_V_INPUT())*sin(state(constants::THETA_STATE()));
-	this->df_(constants::Y_STATE(), constants::THETA_STATE()) =  input(constants::LINEAR_V_INPUT())*cos(state(constants::THETA_STATE()));
+	this->df_(constants::X_STATE(), constants::RZ_STATE()) = -input(constants::LINEAR_V_INPUT())*sin(state(constants::RZ_STATE()));
+	this->df_(constants::Y_STATE(), constants::RZ_STATE()) =  input(constants::LINEAR_V_INPUT())*cos(state(constants::RZ_STATE()));
 
 	return this->df_;
 }
