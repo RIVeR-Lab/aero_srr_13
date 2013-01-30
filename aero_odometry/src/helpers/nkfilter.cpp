@@ -16,6 +16,7 @@
 using namespace aero_odometry;
 
 NKFilter::NKFilter():
+prior_(NULL),
 sys_pdf_(NULL),
 sys_model_(NULL),
 filter_init_(false),
