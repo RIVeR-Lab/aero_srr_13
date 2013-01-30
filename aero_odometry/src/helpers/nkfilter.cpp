@@ -15,12 +15,14 @@
 
 using namespace aero_odometry;
 
-NKFilter::NKFilter():
-		prior_(NULL),
-		sys_pdf_(NULL),
-		sys_model_(NULL),
-		filter_init_(false),
-		filter_(NULL)
+NKFilter::NKFilter(int number_of_sensors):
+				prior_(NULL),
+				sys_pdf_(NULL),
+				sys_model_(NULL),
+				filter_init_(false),
+				filter_(NULL),
+				measurement_buffer_(number_of_sensors),
+				measurement_buffer_last_(number_of_sensors)
 {
 
 	ColumnVector sys_noise_mu(constants::STATE_SIZE());
@@ -56,6 +58,12 @@ NKFilter::NKFilter():
 
 	this->sys_pdf_   = new BFL::NonLinearAnalyticsContionalGaussianMobile(sys_uncertainty);
 	this->sys_model_ = new BFL::AnalyticSystemModelGaussianUncertainty(this->sys_pdf_);
+
+	for (int i = 0; i < number_of_sensors; ++i)
+	{
+		this->measurement_buffer_[i].first = false;
+		this->measurement_buffer_last_[i].first = false;
+	}
 }
 
 NKFilter::~NKFilter()
@@ -149,5 +157,18 @@ void NKFilter::stateToOdom(nav_msgs::Odometry& message, ColumnVector& state, Sym
 	else
 	{
 		ROS_ERROR("Not set up to convert from state size %d and covar size %d to Odometry", state.size(), covar.size1());
+	}
+}
+
+void NKFilter::flushBuffer()
+{
+	BOOST_FOREACH(measurement_data::value_type measurement, this->measurement_buffer_)
+	{
+		//If there was a measurement, copy it to the old measurement buffer and reset its space in the current measurement buffer
+		if(measurement.second.first)
+		{
+			this->measurement_buffer_last_[measurement.first].second = measurement.second;
+			measurement.second.first = false;
+		}
 	}
 }

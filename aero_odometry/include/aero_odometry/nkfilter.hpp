@@ -22,6 +22,7 @@
 #include<boost/circular_buffer.hpp>
 #include<boost/tuple/tuple.hpp>
 #include<boost/unordered_map.hpp>
+#include<boost/foreach.hpp>
 //******************* LOCAL DEPENDANCIES ****************//
 #include<aero_odometry/nonlinearanalyticconditionalgaussianmobile.h>
 //*********************** NAMESPACES ********************//
@@ -39,10 +40,11 @@ namespace aero_odometry
 class NKFilter{
 private:
 	typedef vector< pair< BFL::LinearAnalyticConditionalGaussian*, BFL::LinearAnalyticMeasurementModelGaussianUncertainty*> > measurement_analytics;
-	typedef boost::unordered_map<int, pair<bool, nav_msgs::OdometryConstPtr > > measurement_data;
+	typedef pair<bool, nav_msgs::OdometryConstPtr > measurement_pair;
+	typedef boost::unordered_map<int,  measurement_pair> measurement_data;
 
 public:
-	NKFilter();
+	NKFilter(int number_of_sensors);
 	virtual ~NKFilter();
 
 	bool init_filter(const ColumnVector& initial_pose_estimate, const SymmetricMatrix& initial_covar_estimate);
@@ -77,7 +79,7 @@ public:
 	 * @brief Pushes a new measurement onto the measurement buffer
 	 * @param [in] sensor_index The id of the sensor that the measurement is coming from
 	 * @param [in] measurement  The measurement to add
-	 * @return
+	 * @return true if the measurement was successfully added
 	 */
 	bool addMeasurement(int sensor_index, nav_msgs::OdometryConstPtr measurement);
 
@@ -109,7 +111,7 @@ private:
 	void angle_bound(double& raw, const double& zero) const;
 
 	/**
-	 * @Author Adam Panzica
+	 * @author Adam Panzica
 	 * @brief Converts a nav_msgs::Odometry message into a ColumnVector of state data and SymmetricMatrix of covariance data
 	 * @param [in]  measurement The measurement data
 	 * @param [out] state Resultant state vector
@@ -118,12 +120,18 @@ private:
 	void odomToStateVectorAndCovar(nav_msgs::OdometryConstPtr measurement, ColumnVector& state, SymmetricMatrix& covar);
 
 	/**
-	 * @Author Adam Panzica
+	 * @author Adam Panzica
 	 * @param [out] message The nav_msgs::Odometry to write the state to
 	 * @param [in]  state   The state to use
 	 * @param [in]  covar   The covariance of the state
 	 */
 	void stateToOdom(nav_msgs::Odometry& message, ColumnVector& state, SymmetricMatrix& covar);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Flushes any new contents of measurement_buffer_ to measurement_buffer_last_ and resets it
+	 */
+	void flushBuffer();
 };
 
 } /* END NAMESPACE aero_odometry */;
