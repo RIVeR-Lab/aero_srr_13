@@ -27,6 +27,7 @@ using geometry_msgs::TwistStamped;
 using ros::Time;
 using tf::Quaternion;
 using tf::Point;
+using tf::Vector3;
 
 namespace aero_odometry
 {
@@ -67,7 +68,7 @@ void linearInterpolate(const PoseStamped& previous, const PoseStamped& current, 
 
 /**
  * @author Adam Panzica
- * @author
+ * @author Mitchell Wills
  * @brief Linearly interpolates between two Twists based on time
  * @param [in]  previous       The Twist at the last measurement time
  * @param [in]  previous_time  The ros::Time of the last measurement
@@ -85,7 +86,7 @@ void linearInterpolate(const Twist& previous, const Time& previous_time, const T
 
 /**
  * @author Adam Panzica
- * @author
+ * @author Mitchell Wills
  * @brief Linearly interpolates between two Twists based on time
  * @param [in]  previous       The Twist and time of the last measurement
  * @param [in]  current        The Twist and time of the current measurement
@@ -101,7 +102,7 @@ void linearInterpolate(const Twist& previous, const Time& previous_time, const T
  * \todo extend to use tf to allow for Twists in different frames to be interpolated to, and for an arbitrary output frame to be
  * specified
  */
-void linearInterpolate(const TwistStamped& previous, const TwistStamped& current, const Time& interp_time, TwistStamped& result)
+void linearInterpolate(const TwistStamped& previous, const TwistStamped& current, const Time& interp_time, TwistStamped& result);
 }; /* END aero_orometry */
 
 #endif /* LINEARINTERPOLATION_HPP_ */
