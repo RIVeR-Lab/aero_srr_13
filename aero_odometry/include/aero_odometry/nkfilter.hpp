@@ -47,7 +47,30 @@ public:
 	NKFilter(int number_of_sensors);
 	virtual ~NKFilter();
 
-	bool init_filter(const ColumnVector& initial_pose_estimate, const SymmetricMatrix& initial_covar_estimate);
+	/**
+	 * @author Adam Panzica
+	 * @brief Initializes the filter. Must be called before any updates can be made
+	 * @param [in] initial_pose_estimate  The initial estimate of system state
+	 * @param [in] initial_covar_estimate The initial estimate of system covariance
+	 * @return True if sucessfully initialized, else false
+	 */
+	bool initFilter(const ColumnVector& initial_pose_estimate, const SymmetricMatrix& initial_covar_estimate);
+
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Initializes a sensor which will feed the filter
+	 * @param [in] sensor_index The sensor index of the filter to initialize
+	 * @param [in[ initial_measurement The initial state measurements and covariances for the sensor
+	 * @return true if the sensor was sucessfully initialized, else false
+	 */
+	bool initSensor(int sensor_index, ColumnVector& measurement_noise, nav_msgs::OdometryConstPtr initial_measurement);
+
+	/**
+	 * @author Adam Panzica
+	 * @return True if the NKFilter is fully initialized (filter and sensors)
+	 */
+	bool isInitialized();
 
 	/**
 	 * @brief Updates the filter
@@ -61,9 +84,10 @@ public:
 	/**
 	 * @brief Gets the latest state information (as of the last update) from the filter
 	 * @param [out] state A MatrixWrapper::ColumnVector to write the state information to
+	 * @param [out] covar A MatrixWrapper::SymmetrixMatrix to write the covariance information to
 	 * @return True if state successfully retrieved, else false
 	 */
-	bool getEstimate(ColumnVector& state);
+	bool getEstimate(ColumnVector& state,  SymmetricMatrix& covar);
 
 	/**
 	 * @brief Gets the latest state information (as of the last update) from the filter in the form of a nav_msgs::Odometry message
@@ -84,12 +108,13 @@ public:
 	bool addMeasurement(int sensor_index, nav_msgs::OdometryConstPtr measurement);
 
 private:
-	BFL::Gaussian                                  *prior_;
+	BFL::Gaussian                                  *posterior_;
 	BFL::NonLinearAnalyticsContionalGaussianMobile *sys_pdf_;
 	BFL::AnalyticSystemModelGaussianUncertainty    *sys_model_;
 	measurement_analytics                           measurement_models_;
 
 
+	bool                                            sensors_init_;
 	measurement_data                                measurement_buffer_;
 	measurement_data                                measurement_buffer_last_;
 

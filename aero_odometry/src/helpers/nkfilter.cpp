@@ -16,14 +16,15 @@
 using namespace aero_odometry;
 
 NKFilter::NKFilter(int number_of_sensors):
-				prior_(NULL),
-				sys_pdf_(NULL),
-				sys_model_(NULL),
-				measurement_models_(number_of_sensors),
-				filter_init_(false),
-				filter_(NULL),
-				measurement_buffer_(number_of_sensors),
-				measurement_buffer_last_(number_of_sensors)
+										posterior_(NULL),
+										sys_pdf_(NULL),
+										sys_model_(NULL),
+										measurement_models_(number_of_sensors),
+										filter_init_(false),
+										filter_(NULL),
+										sensors_init_(false),
+										measurement_buffer_(number_of_sensors),
+										measurement_buffer_last_(number_of_sensors)
 {
 
 	ColumnVector sys_noise_mu(constants::STATE_SIZE());
@@ -69,19 +70,19 @@ NKFilter::NKFilter(int number_of_sensors):
 
 NKFilter::~NKFilter()
 {
-	delete this->prior_;
+	delete this->posterior_;
 	delete this->sys_model_;
 	delete this->sys_pdf_;
 	delete this->filter_;
 }
 
-bool NKFilter::init_filter(const ColumnVector& initial_pose_estimate, const SymmetricMatrix& initial_covar_estimate)
+bool NKFilter::initFilter(const ColumnVector& initial_pose_estimate, const SymmetricMatrix& initial_covar_estimate)
 {
 	if(initial_pose_estimate.size()==constants::STATE_SIZE()&&initial_covar_estimate.size1()==constants::STATE_SIZE())
 	{
-		this->prior_  = new BFL::Gaussian(initial_pose_estimate, initial_covar_estimate);
+		this->posterior_  = new BFL::Gaussian(initial_pose_estimate, initial_covar_estimate);
 
-		this->filter_ = new BFL::ExtendedKalmanFilter(prior_);
+		this->filter_ = new BFL::ExtendedKalmanFilter(posterior_);
 		this->filter_init_ = true;
 		return true;
 	}
@@ -91,6 +92,124 @@ bool NKFilter::init_filter(const ColumnVector& initial_pose_estimate, const Symm
 		return false;
 	}
 }
+
+bool NKFilter::initSensor(int sensor_index, ColumnVector& measurement_noise, nav_msgs::OdometryConstPtr initial_measurement)
+{
+	//Check to make sure the sensor exists
+	if(this->measurement_buffer_last_.count(sensor_index)==1)
+	{
+		//Add the sensor's initial measurment into measurement_buffer_last_
+		this->measurement_buffer_last_[sensor_index].first  = true;
+		this->measurement_buffer_last_[sensor_index].second = initial_measurement;
+
+		ColumnVector    i_state(constants::STATE_SIZE());
+		SymmetricMatrix i_covar(constants::STATE_SIZE());
+		this->odomToStateVectorAndCovar(initial_measurement, i_state, i_covar);
+		Matrix H(constants::STATE_SIZE(), constants::STATE_SIZE(), 0);
+		for (int i = 1; i<=constants::STATE_SIZE(); ++i) {
+			if(i_covar(i,i) > 0)
+			{
+				H(i,i) = 1;
+			}
+			else
+			{
+				i_covar(i,i) = std::numeric_limits<double>::max();
+			}
+		}
+
+
+
+		//Initialize its sensor model
+		BFL::Gaussian measurement_uncertanty(measurement_noise, i_covar);
+		this->measurement_models_.at(sensor_index).first  = new BFL::LinearAnalyticConditionalGaussian(H, measurement_uncertanty);
+		this->measurement_models_.at(sensor_index).second = new BFL::LinearAnalyticMeasurementModelGaussianUncertainty(this->measurement_models_.at(sensor_index).first);
+
+		//Check to see if all expected sensors are initialized
+		bool sensor_check = true;
+		BOOST_FOREACH(measurement_data::value_type sensor, this->measurement_buffer_last_)
+		{
+			sensor_check &= sensor.second.first;
+		}
+		if(sensor_check)
+		{
+			this->sensors_init_ = true;
+		}
+		return true;
+	}
+	else
+	{
+		ROS_ERROR("Sensor %d could not be initialized because it doesn't exist!", sensor_index);
+		return false;
+	}
+}
+
+bool NKFilter::isInitialized()
+{
+	return this->sensors_init_&&this->filter_init_;
+}
+
+bool NKFilter::update()
+{
+	//Only run if the filter has been initialized properly
+	if(this->isInitialized())
+	{
+		//Amount of time that has elapsed since last filter update
+		ros::Time update_time = ros::Time::now();
+		double dt = (update_time - this->last_update_time_).toSec();
+
+		//Check to make sure we're not in the past due to clock de-sync
+		if(dt<0)
+		{
+			ROS_ERROR("Cannot Perform Update %f Seconds In the Past!", dt);
+			return false;
+		}
+		ROS_DEBUG_STREAM("Performing Filter Update at "<<update_time.toSec()<<"s With dt="<<dt<<"s");
+
+		//TODO determine which is the most up to date sensor
+		BOOST_FOREACH(measurement_data::value_type measurement, this->measurement_buffer_)
+		{
+			//TODO Actually perform the update on each sensor
+		}
+
+		//Get the new prior data and store it
+		this->posterior_ = this->filter_->PostGet();
+		return true;
+	}
+	else
+	{
+		ROS_ERROR("Cannot Perform Update on Uninitialized Filter/Sensors");
+		return false;
+	}
+}
+
+bool NKFilter::getEstimate(ColumnVector& state, SymmetricMatrix& covar)
+{
+	//Check to see if there is any prior data, then fill state/covar if there is
+	if(this->posterior_!=NULL)
+	{
+		state = this->posterior_->ExpectedValueGet();
+		covar = this->posterior_->CovarianceGet();
+		return true;
+	}
+	else
+	{
+		ROS_ERROR("Cannot Get Estimate Without Performing an Update First!");
+		return false;
+	}
+}
+
+bool NKFilter::getEstimate(nav_msgs::Odometry& state)
+{
+	ColumnVector    t_state(constants::STATE_SIZE());
+	SymmetricMatrix t_covar(constants::STATE_SIZE());
+	if(this->getEstimate(t_state, t_covar))
+	{
+		this->stateToOdom(state, t_state, t_covar);
+		return true;
+	}
+	else return false;
+}
+
 
 void NKFilter::angle_bound(double& raw, const double& zero) const{
 	double diff = raw-zero;
@@ -164,12 +283,12 @@ void NKFilter::stateToOdom(nav_msgs::Odometry& message, ColumnVector& state, Sym
 void NKFilter::flushBuffer()
 {
 	BOOST_FOREACH(measurement_data::value_type measurement, this->measurement_buffer_)
-	{
+					{
 		//If there was a measurement, copy it to the old measurement buffer and reset its space in the current measurement buffer
 		if(measurement.second.first)
 		{
 			this->measurement_buffer_last_[measurement.first].second = measurement.second;
 			measurement.second.first = false;
 		}
-	}
+					}
 }
