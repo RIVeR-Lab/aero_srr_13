@@ -23,7 +23,7 @@ void {\bf done\-Cb} (const actionlib\-::\-Simple\-Client\-Goal\-State \&state, c
 \begin{DoxyCompactList}\small\item\em \-Callback for handling the result from the velocity controller. \end{DoxyCompactList}\item 
 void {\bf feedback\-Cb} (const oryx\-\_\-drive\-\_\-controller\-::\-Velocity\-Command\-Feedback\-Const\-Ptr \&feedback)
 \begin{DoxyCompactList}\small\item\em \-Callback for handling velocity controller feedback. \end{DoxyCompactList}\item 
-void {\bf pc\-C\-B} (const {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-Const\-Ptr} \&message)
+void {\bf pc\-C\-B} (const oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-Const\-Ptr \&message)
 \begin{DoxyCompactList}\small\item\em \-Callback for processing new point cloud data. \end{DoxyCompactList}\item 
 void {\bf send} (double velocity, double radius)
 \begin{DoxyCompactList}\small\item\em \-Sends a command to the base's velocity controller. \end{DoxyCompactList}\item 
@@ -266,7 +266,7 @@ default destructor
 \index{pc\-C\-B@{pc\-C\-B}!LocalPlanner@{\-Local\-Planner}}
 \subsubsection[{pc\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Local\-Planner\-::pc\-C\-B} (
 \begin{DoxyParamCaption}
-\item[{const {\bf oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-Const\-Ptr} \&}]{message}
+\item[{const oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg\-Const\-Ptr \&}]{message}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily  [inline, private]}}\label{classLocalPlanner_af5e5b35b455967277af17dcb6b09fb3b}
 
@@ -278,7 +278,7 @@ default destructor
 \end{DoxyAuthor}
 
 \begin{DoxyParams}{\-Parameters}
-{\em message} & \-The \doxyref{oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg}{p.}{namespaceoryx__path__planning_abde0e023279ca63ce67bd315a09e1b59} message to process\\
+{\em message} & \-The oryx\-\_\-path\-\_\-planning\-::\-Occupancy\-Grid\-Msg message to process\\
 \hline
 \end{DoxyParams}
 \-Takes the data from the \-Point\-Cloud2 message, processes it into a new occupancy grid, and places it on the occupancy grid buffer for processing by the planner 

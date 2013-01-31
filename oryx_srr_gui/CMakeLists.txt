@@ -2,38 +2,23 @@
 # CMake
 ##############################################################################
 
-cmake_minimum_required(VERSION 2.4.6)
+cmake_minimum_required(VERSION 2.8.3)
+project(oryx_srr_gui)
 
 ##############################################################################
 # Ros Initialisation
 ##############################################################################
 
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-rosbuild_init()
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE Debug)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy oryx_msgs)
+find_package(Qt4 REQUIRED QtCore QtGui)
 
 ##############################################################################
 # Qt Environment
 ##############################################################################
 
-# Could use this, but qt-ros would need an updated deb, instead we'll move to catkin
-# rosbuild_include(qt_build qt-ros) 
-rosbuild_find_ros_package(qt_build)
-include(${qt_build_PACKAGE_PATH}/qt-ros.cmake)
-
-rosbuild_prepare_qt4(QtCore QtGui) # Add the appropriate components to the component list here
+INCLUDE(${QT_USE_FILE})
+ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 ##############################################################################
 # Sections
@@ -57,5 +42,7 @@ file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINK
 # Binaries
 ##############################################################################
 
-rosbuild_add_executable(oryx_srr_gui ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC_HPP})
-target_link_libraries(oryx_srr_gui ${QT_LIBRARIES})
+include_directories(include ${QT_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(${PROJECT_BINARY_DIR}) #needed to find generated ui files...
+add_executable(oryx_srr_gui ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC_HPP})
+target_link_libraries(oryx_srr_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})

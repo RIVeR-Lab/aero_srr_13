@@ -55,8 +55,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00009"></a>00009 <span class="preprocessor"></span><span class="preprocessor">#define TRANSLATECONTROLSERVER_H_</span>
 <a name="l00010"></a>00010 <span class="preprocessor"></span>
 <a name="l00011"></a>00011 <span class="preprocessor">#include &lt;ros/ros.h&gt;</span>
-<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;<a class="code" href="TranslateCommandAction_8h.html">oryx_drive_controller/TranslateCommandAction.h</a>&gt;</span>
-<a name="l00013"></a>00013 <span class="preprocessor">#include &lt;<a class="code" href="VelocityTranslate_8h.html">oryx_drive_controller/VelocityTranslate.h</a>&gt;</span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;oryx_drive_controller/TranslateCommandAction.h&gt;</span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include &lt;oryx_drive_controller/VelocityTranslate.h&gt;</span>
 <a name="l00014"></a>00014 <span class="preprocessor">#include &lt;actionlib/server/simple_action_server.h&gt;</span>
 <a name="l00015"></a>00015 
 <a name="l00016"></a><a class="code" href="classTranslateControlServer.html">00016</a> <span class="keyword">class </span><a class="code" href="classTranslateControlServer.html">TranslateControlServer</a> {
@@ -66,13 +66,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00025"></a>00025 
 <a name="l00026"></a>00026 <span class="keyword">private</span>:
 <a name="l00027"></a>00027 
-<a name="l00028"></a>00028         <span class="keywordtype">void</span> <a class="code" href="classTranslateControlServer.html#a0e5f5af1909910dbc210c7b09d2c0866">executeCB</a>(<span class="keyword">const</span> <a class="code" href="namespaceoryx__drive__controller.html#aa7a5aba5e401fc9d72c07dd489080fb9">oryx_drive_controller::TranslateCommandGoalConstPtr</a>&amp; goal);
+<a name="l00028"></a>00028         <span class="keywordtype">void</span> <a class="code" href="classTranslateControlServer.html#a0e5f5af1909910dbc210c7b09d2c0866">executeCB</a>(<span class="keyword">const</span> oryx_drive_controller::TranslateCommandGoalConstPtr&amp; goal);
 <a name="l00029"></a>00029 
 <a name="l00030"></a><a class="code" href="classTranslateControlServer.html#ac2af712474c85b6c91f5a4c10ba45dee">00030</a>         ros::NodeHandle <a class="code" href="classTranslateControlServer.html#ac2af712474c85b6c91f5a4c10ba45dee">n</a>;
 <a name="l00031"></a><a class="code" href="classTranslateControlServer.html#a573578727b5611f4275f7b5debaab90d">00031</a>         ros::Publisher <a class="code" href="classTranslateControlServer.html#a573578727b5611f4275f7b5debaab90d">trans_pub</a>;       
 <a name="l00032"></a><a class="code" href="classTranslateControlServer.html#a374da04a17cc0fe3a957fda2dd2bb139">00032</a>         actionlib::SimpleActionServer&lt;oryx_drive_controller::TranslateCommandAction&gt;    <a class="code" href="classTranslateControlServer.html#a374da04a17cc0fe3a957fda2dd2bb139" title="Publisher for sending velocity-translate messages to controller.">as</a>;
-<a name="l00033"></a><a class="code" href="classTranslateControlServer.html#a4409bee4c271657fe56f729901ba1e4a">00033</a>         <a class="code" href="structoryx__drive__controller_1_1TranslateCommandFeedback__.html">oryx_drive_controller::TranslateCommandFeedback</a> <a class="code" href="classTranslateControlServer.html#a4409bee4c271657fe56f729901ba1e4a">feedback</a>;
-<a name="l00034"></a><a class="code" href="classTranslateControlServer.html#a59eb67af2de81ebb5b251b4f41e36759">00034</a>         <a class="code" href="structoryx__drive__controller_1_1TranslateCommandResult__.html">oryx_drive_controller::TranslateCommandResult</a>   <a class="code" href="classTranslateControlServer.html#a59eb67af2de81ebb5b251b4f41e36759">result</a>;
+<a name="l00033"></a><a class="code" href="classTranslateControlServer.html#a4409bee4c271657fe56f729901ba1e4a">00033</a>         oryx_drive_controller::TranslateCommandFeedback <a class="code" href="classTranslateControlServer.html#a4409bee4c271657fe56f729901ba1e4a">feedback</a>;
+<a name="l00034"></a><a class="code" href="classTranslateControlServer.html#a59eb67af2de81ebb5b251b4f41e36759">00034</a>         oryx_drive_controller::TranslateCommandResult   <a class="code" href="classTranslateControlServer.html#a59eb67af2de81ebb5b251b4f41e36759">result</a>;
 <a name="l00035"></a><a class="code" href="classTranslateControlServer.html#ac840f78258c200e2f4a2f7feb7e9f198">00035</a>         std::string                                                                     <a class="code" href="classTranslateControlServer.html#ac840f78258c200e2f4a2f7feb7e9f198">action_name</a>;
 <a name="l00036"></a>00036 };
 <a name="l00037"></a>00037 
@@ -83,7 +83,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Defines</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Defines</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -96,8 +96,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <br clear="all" />
 <hr size="1"><div style="align: right;">
 <a href="http://ros.org/wiki/oryx_drive_controller">oryx_drive_controller</a><br />
-Author(s): aruis</br />
-<small>autogenerated on Sun Jan 20 2013 12:23:25</small>
+Author(s): </br />
+<small>autogenerated on Sun Jan 27 2013 20:34:16</small>
 </div>
 </body>
 </html>

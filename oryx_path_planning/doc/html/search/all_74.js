@@ -26,6 +26,5 @@ var searchData=
   ['trav_5fweight_5f',['trav_weight_',['../classLocalPlanner.html#a6f668b354b481784a886b7f935f9bef4',1,'LocalPlanner']]],
   ['traversed',['TRAVERSED',['../namespaceoryx__path__planning.html#a4d4dae29f743adb3cb1f7c657a6d15eaa866eda2eb7a2f9be1cedda22cae57425',1,'oryx_path_planning']]],
   ['twist',['twist',['../classLocalPlanner.html#aea03c48eeabeb399d57fedf6d035f722',1,'LocalPlanner']]],
-  ['type',['Type',['../structoryx__path__planning_1_1OccupancyGrid__.html#a6a95630e3ab05808bbf5018fecc39727',1,'oryx_path_planning::OccupancyGrid_::Type()'],['../structoryx__path__planning_1_1OccupancyGridMsg__.html#a1bb82f37818101b98e641c51790505d2',1,'oryx_path_planning::OccupancyGridMsg_::Type()']]],
   ['typedefinitions_2eh',['TypeDefinitions.h',['../TypeDefinitions_8h.html',1,'']]]
 ];
