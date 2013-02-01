@@ -22,29 +22,6 @@
 	<arg name="tentacles/number"	default="81"/>
 	<arg name="tentacles/exp_factor"	default="1.15"/>
 	
-	
-	
-	<include file="oryxsrr.launch">
-    <arg name="platform"      		value="1" />
-    <arg name="velocity_command_topic"	value="cmd_vel" />
-    <arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
-    <arg name="occupancy/update_rate" 	value="$(arg occupancy/update_rate)"/>
-    <arg name="occupancy/x_dimension"	value="$(arg occupancy/x_dimension)"/>
-    <arg name="occupancy/y_dimension"	value="$(arg occupancy/y_dimension)"/>
-    <arg name="occupancy/z_dimension"	value="$(arg occupancy/z_dimension)"/>
-    <arg name="occupancy/x_origin"		value="$(arg occupancy/x_origin)"/>
-    <arg name="occupancy/y_origin"		value="$(arg occupancy/y_origin)"/>
-    <arg name="occupancy/z_origin"		value="$(arg occupancy/z_origin)"/>
-    <arg name="occupancy/grid_resolution"	value="$(arg occupancy/grid_resolution)"/>
-    <arg name="speed_set/number"		value="$(arg speed_set/number)"/>
-    <arg name="speed_set/max_speed"		value="$(arg speed_set/max_speed)"/>
-    <arg name="speed_set/min_speed"		value="$(arg speed_set/min_speed)"/>
-    <arg name="tentacles/number"		value="$(arg tentacles/number)"/>
-    <arg name="tentacles/exp_factor"		value="$(arg tentacles/exp_factor)"/>
-  </include>
-	
-	
-	
   <include file="oryxsrr.launch">
     <arg name="platform"      		value="1" />
     <arg name="velocity_command_topic"	value="cmd_vel" />
@@ -62,5 +39,5 @@
     <arg name="speed_set/min_speed"		value="$(arg speed_set/min_speed)"/>
     <arg name="tentacles/number"		value="$(arg tentacles/number)"/>
     <arg name="tentacles/exp_factor"		value="$(arg tentacles/exp_factor)"/>
-  </include>  
+  </include>
 </launch>
