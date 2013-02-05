@@ -1,8 +1,5 @@
 <launch>
   <!-- ********************ARGUMENTS******************** -->
-	<!-- declare args to be passed in for actionlib topics -->
-	<arg name="velocity_command_topic"	default="oryx/velocity_command_topic" />
-	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
 	<arg name="occupancy_point_cloud_topic"	default="oryx/occupancy_point_cloud_topic" />
 	
@@ -18,16 +15,16 @@
 	
 	<!-- declare speed set arguments -->
 	<arg name="speed_set/number"	default="15"/>
-	<arg name="speed_set/min_speed"	default="0.001"/>
-	<arg name="speed_set/max_speed"	default="1.0"/>
+	<arg name="speed_set/min_speed"	default="0.1"/>
+	<arg name="speed_set/max_speed"	default="1.5"/>
 	
 	<!-- declare tentacle arguments -->
 	<arg name="tentacles/number"	default="81"/>
 	<arg name="tentacles/exp_factor"	default="1.15"/>
 	
-  <include file="oryxsrr.launch">
-    <arg name="platform"      value="0" />
-    <arg name="velocity_command_topic"	value="$(arg velocity_command_topic)" />
+  <include file="$(find aero_srr_bringup)/launch/srr_bringup.launch">
+    <arg name="platform"      		value="1" />
+    <arg name="velocity_command_topic"	value="cmd_vel" />
     <arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
     <arg name="occupancy/update_rate" 	value="$(arg occupancy/update_rate)"/>
     <arg name="occupancy/x_dimension"	value="$(arg occupancy/x_dimension)"/>
