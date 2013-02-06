@@ -1,9 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node11" href="$OryxPathPlanning_8h.html" title="Contains all of the Includes required to complete the oryx_path_planning namespace." alt="" coords="436,83,574,112"/>
-<area shape="rect" id="node13" href="$OryxPathPlanningUtilities_8h.html" title="Header containing definitions that are used throughout the oryx_path_planning package." alt="" coords="488,237,669,267"/>
-<area shape="rect" id="node22" href="$TypeDefinitions_8h.html" title="Common typedefs for the oryx_path_planning namespace." alt="" coords="621,392,744,421"/>
-<area shape="rect" id="node31" href="$Tentacles_8h.html" title="Tentacles.h" alt="" coords="329,160,420,189"/>
-<area shape="rect" id="node39" href="$src_2includes_2OccupancyGrid_8h.html" title="OccupancyGrid.h" alt="" coords="444,160,566,189"/>
-<area shape="rect" id="node28" href="$PointConverter_8hpp.html" title="Header containg class definitions for converting between points." alt="" coords="616,315,749,344"/>
-<area shape="rect" id="node43" href="$OccupancyGridMsg_8h.html" title="oryx_path_planning/OccupancyGridMsg.h" alt="" coords="1557,237,1821,267"/>
-</map>

@@ -1,7 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node3" href="$Tentacles_8cpp.html" title="Tentacles.cpp" alt="" coords="100,83,204,112"/>
-<area shape="rect" id="node5" href="$OryxPathPlanning_8h.html" title="Contains all of the Includes required to complete the oryx_path_planning namespace." alt="" coords="228,83,367,112"/>
-<area shape="rect" id="node7" href="$orxy__path__planning__test_8cpp.html" title="Simple test node." alt="" coords="5,160,192,189"/>
-<area shape="rect" id="node9" href="$oryx__global__planner_8cpp.html" title="//TODO fill in detailed discription here" alt="" coords="216,160,379,189"/>
-<area shape="rect" id="node11" href="$oryx__local__planner_8cpp.html" title="oryx_local_planner.cpp" alt="" coords="403,160,557,189"/>
-</map>
