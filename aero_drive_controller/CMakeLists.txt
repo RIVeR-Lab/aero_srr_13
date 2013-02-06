@@ -78,12 +78,17 @@ include_directories("${PROJECT_SOURCE_DIR}/src/controllers")
 rosbuild_add_boost_directories()
 
 #Add non-node library files to be build
-rosbuild_add_library(${PROJECT_NAME} src/velocity_command/VelocityControlServer.cpp)
-rosbuild_add_library(${PROJECT_NAME} src/translate_command/TranslateControlServer.cpp)
-rosbuild_add_library(${PROJECT_NAME} src/controllers/ArcDriveController.cpp)
+rosbuild_add_library(${PROJECT_NAME}_lib
+  src/velocity_command/VelocityControlServer.cpp
+  src/translate_command/TranslateControlServer.cpp
+  src/controllers/ArcDriveController.cpp
+)
+rosbuild_link_boost(${PROJECT_NAME} thread)
 
 #Build Nodes
 rosbuild_add_executable(oryx_drive_controller src/nodes/oryx_drive_controller.cpp)
+target_link_libraries(oryx_drive_controller ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME}_lib)
+add_dependencies(oryx_drive_controller ${PROJECT_NAME}_gencpp)
+
 rosbuild_add_executable(oryx_drive_controller_test src/nodes/oryx_drive_controller_action_tests.cpp)
-rosbuild_link_boost(oryx_drive_controller thread)
 rosbuild_link_boost(oryx_drive_controller_test thread)

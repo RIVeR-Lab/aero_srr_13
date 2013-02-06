@@ -12,11 +12,11 @@
 #include <ros/ros.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanningUtilities.h"
-#include "oryx_path_planning/OccupancyGridMsg.h"
+#include "aero_path_planning/OccupancyGridMsg.h"
 
 
 
-namespace oryx_path_planning
+namespace aero_path_planning
 {
 //*********************** PROTOTYPES ******************************//
 class OccupancyGridAccessException;
@@ -96,7 +96,7 @@ public:
 	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(int xDim, int yDim, double resolution, const oryx_path_planning::Point& origin, PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(int xDim, int yDim, double resolution, const aero_path_planning::Point& origin, PointTrait_t seedTrait=aero_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
@@ -109,7 +109,7 @@ public:
 	 * @param origin		The origin of the occupancy grid
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const aero_path_planning::Point& origin, aero_path_planning::PointTrait_t seedTrait=aero_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
@@ -121,7 +121,7 @@ public:
 	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
 	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, oryx_path_planning::Point& origin, oryx_path_planning::PointTrait_t seedTrait=oryx_path_planning::UNKNOWN);
+	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, aero_path_planning::Point& origin, aero_path_planning::PointTrait_t seedTrait=aero_path_planning::UNKNOWN);
 
 	/**
 	 * @author	Adam Panzica
@@ -134,7 +134,7 @@ public:
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const oryx_path_planning::Point& origin, const OccupancyGridCloud& cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const aero_path_planning::Point& origin, const OccupancyGridCloud& cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -147,14 +147,14 @@ public:
 	 * @param cloud			The PointCloud to use as the base for the occupancy grid
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
-	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, oryx_path_planning::Point& origin, OccupancyGridCloud& cloud) throw(OccupancyGridAccessException);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, aero_path_planning::Point& origin, OccupancyGridCloud& cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Creates an OccupancyGrid from an oryxsrr_msgs::OccupancyGrid
 	 * @param message	Reference to the message to make the OccupancyGrid from
 	 */
-	OccupancyGrid(const oryx_path_planning::OccupancyGridMsg& message);
+	OccupancyGrid(const aero_path_planning::OccupancyGridMsg& message);
 
 	/**
 	 * Default destructor
@@ -170,7 +170,7 @@ public:
 	 * @return The PointTrait of the point at the given coordinates
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	oryx_path_planning::PointTrait getPointTrait(int x, int y, int z) const throw(OccupancyGridAccessException);
+	aero_path_planning::PointTrait getPointTrait(int x, int y, int z) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -179,7 +179,7 @@ public:
 	 * @return The PointTrait of the point at the given coordinates
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	oryx_path_planning::PointTrait getPointTrait(oryx_path_planning::Point point) const throw(OccupancyGridAccessException);
+	aero_path_planning::PointTrait getPointTrait(aero_path_planning::Point point) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -191,7 +191,7 @@ public:
 	 * @return True if successful, else false
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(int x, int y, int z, oryx_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
+	bool setPointTrait(int x, int y, int z, aero_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -201,7 +201,7 @@ public:
 	 * @return True if successful, else false
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(oryx_path_planning::Point point, oryx_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
+	bool setPointTrait(aero_path_planning::Point point, aero_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
 
 	/**
 	 * Gets the location of the goal point on the occupancy grid, if it exists
@@ -216,12 +216,12 @@ public:
 	 * @param point The point to set as the goal
 	 * @throw OccupancyGridAccessException if the point specified is not on the gird
 	 */
-	void setGoalPoint(oryx_path_planning::Point point) throw(OccupancyGridAccessException);
+	void setGoalPoint(aero_path_planning::Point point) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
-	 * @return	A reference to the PointCloud<oryx_path_planning::PointXYZWithTrait> which backs this occupancy grid
+	 * @return	A reference to the PointCloud<aero_path_planning::PointXYZWithTrait> which backs this occupancy grid
 	 */
 	const OccupancyGridCloud& getGrid() const;
 
@@ -243,7 +243,7 @@ public:
 	 *
 	 * Note that it is up to the caller to properly set the fields in the header other than the stamp
 	 */
-	bool generateMessage(oryx_path_planning::OccupancyGridMsg& message) const;
+	bool generateMessage(aero_path_planning::OccupancyGridMsg& message) const;
 
 	/**
 	 * @author Adam Panzica
@@ -294,8 +294,8 @@ public:
 	 * @param copy_point The point to copy into the grid
 	 * @param origin_corrected True if the x/y/z coordinates in copy_ponit have been offset by the grid origin (aka all positive values)
 	 */
-	void setPoint(oryx_path_planning::Point& copy_point, bool origin_corrected = true);
-	void setPoint(const oryx_path_planning::Point& copy_point, bool origin_corrected = true);
+	void setPoint(aero_path_planning::Point& copy_point, bool origin_corrected = true);
+	void setPoint(const aero_path_planning::Point& copy_point, bool origin_corrected = true);
 
 	/**
 	 * @author	Adam Panzica
@@ -311,7 +311,7 @@ private:
 	 * @param point Coordinates of the point to check
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool boundsCheck(oryx_path_planning::Point& point) const throw(OccupancyGridAccessException);
+	bool boundsCheck(aero_path_planning::Point& point) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -330,10 +330,10 @@ private:
 	 * @param z	z-coord
 	 * @return The point at the given coordinate
 	 */
-	Point& getPoint(oryx_path_planning::Point& point , bool origin_corrected = true);
-	Point& getPoint(const oryx_path_planning::Point& point , bool origin_corrected = true);
-	const Point& getPoint(oryx_path_planning::Point& point , bool origin_corrected = true) const;
-	const Point& getPoint(const oryx_path_planning::Point& point , bool origin_corrected = true) const;
+	Point& getPoint(aero_path_planning::Point& point , bool origin_corrected = true);
+	Point& getPoint(const aero_path_planning::Point& point , bool origin_corrected = true);
+	const Point& getPoint(aero_path_planning::Point& point , bool origin_corrected = true) const;
+	const Point& getPoint(const aero_path_planning::Point& point , bool origin_corrected = true) const;
 
 	/**
 	 * Gets a point out of the point cloud based on integer coordinates
@@ -363,10 +363,10 @@ private:
 	int z_dim_;	///The z dimension of this grid
 	double res_;	///The grid resolution of this occupancy grid
 	bool has_goal_;						///Flag to signal there is a goal point on the grid
-	oryx_path_planning::Point origin_;	///The origin of the occupancy grid
-	oryx_path_planning::Point goal_;		///The location of the goal point on the grid
+	aero_path_planning::Point origin_;	///The origin of the occupancy grid
+	aero_path_planning::Point goal_;		///The location of the goal point on the grid
 	OccupancyGridCloud occ_grid_;			///The point cloud which contains the data for this occupancy grid
-	oryx_path_planning::PointConverter converter_;	///Used to convert the internal integer units to output engineering units
+	aero_path_planning::PointConverter converter_;	///Used to convert the internal integer units to output engineering units
 };
 
 
