@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(oryx_drive_controller)
+project(aero_drive_controller)
 
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation oryx_msgs actionlib_msgs actionlib geometry_msgs)
 find_package(Boost REQUIRED COMPONENTS thread)

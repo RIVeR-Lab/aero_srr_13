@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(oryx_path_planning)
+project(aero_path_planning)
 
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation oryx_msgs tf oryx_drive_controller actionlib_msgs actionlib geometry_msgs pcl pcl_ros oryxsrr_msgs sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation oryx_msgs tf aero_drive_controller actionlib_msgs actionlib geometry_msgs pcl pcl_ros aero_srr_msgs sensor_msgs)
 find_package(Boost REQUIRED COMPONENTS)
 
 #generate msgs
@@ -48,6 +48,8 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/src/OryxPathPlannerConfig.h.in"
   "${PROJECT_BINARY_DIR}/OryxPathPlannerConfig.h"
   )
+
+catkin_package(CATKIN_DEPENDS roscpp std_msgs message_runtime oryx_msgs tf aero_drive_controller actionlib_msgs actionlib geometry_msgs pcl pcl_ros aero_srr_msgs sensor_msgs)
 
 #Link all source folders so that Headers will be properly found
 include_directories("${PROJECT_BINARY_DIR}")

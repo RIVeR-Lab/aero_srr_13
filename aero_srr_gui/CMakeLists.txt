@@ -3,7 +3,7 @@
 ##############################################################################
 
 cmake_minimum_required(VERSION 2.8.3)
-project(oryx_srr_gui)
+project(aero_srr_gui)
 
 ##############################################################################
 # Ros Initialisation
@@ -37,6 +37,12 @@ QT4_WRAP_CPP(QT_MOC_HPP ${QT_MOC})
 ##############################################################################
 
 file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.cpp)
+
+##############################################################################
+# Configure catkin package
+##############################################################################
+
+catkin_package(CATKIN_DEPENDS roscpp rospy oryx_msgs)
 
 ##############################################################################
 # Binaries

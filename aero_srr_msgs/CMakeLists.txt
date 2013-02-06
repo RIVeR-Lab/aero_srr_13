@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(oryxsrr_msgs)
+project(aero_srr_msgs)
 
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation tf oryx_msgs geometry_msgs pcl pcl_ros sensor_msgs)
 
