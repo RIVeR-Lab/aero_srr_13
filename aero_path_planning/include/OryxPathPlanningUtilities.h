@@ -2,7 +2,7 @@
  * @file	OryxPathPlanningUtilities.h
  * @date	Oct 17, 2012
  * @author	Adam Panzica
- * @brief	Header containing definitions that are used throughout the oryx_path_planning package
+ * @brief	Header containing definitions that are used throughout the aero_path_planning package
  */
 
 #ifndef ORYXPATHPLANNINGUTILITIES_H_
@@ -49,7 +49,7 @@
 #error PRINT_POINT is already defined!
 #endif
 
-namespace oryx_path_planning
+namespace aero_path_planning
 {
 
 //*********************** CONSTANTS ******************************//
@@ -112,7 +112,7 @@ public:
 	 * Standard Copy constructor
 	 * @param exception The exception to initialize this exception's fields to
 	 */
-	ChainableException(oryx_path_planning::ChainableException& exception):
+	ChainableException(aero_path_planning::ChainableException& exception):
 		std::runtime_error(exception),
 		cause_(exception.cause_)
 	{
@@ -311,7 +311,7 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 	//Calculate the halfway cuttoff (we can use symmetry after this point to speed up calculations)
 	double halfCutoff = std::atan2(1,1);
 	//Calculate the cutoff point. If it's greater than pi/4, this won't actually matter
-	double fullCutoff = oryx_path_planning::constants::PI()/2.0 - sweep_angle;
+	double fullCutoff = aero_path_planning::constants::PI()/2.0 - sweep_angle;
 	//Calculate initial swept angle
 	double sweptAngle = std::atan2(y-origin.y, x-origin.x);
 	//Draw the first half of the arc, or the whole arc if the sweep angle is less than pi/4
@@ -405,9 +405,9 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 		}
 	}
 	//If we're sweeping more than PI/2, need to use additional symmetry to finish the arc
-	if(sweep_angle>oryx_path_planning::constants::PI()/2){
+	if(sweep_angle>aero_path_planning::constants::PI()/2){
 		ROS_INFO("I'm doing the arc past pi/2");
-		double remainingSweep = sweep_angle-oryx_path_planning::constants::PI()/2;
+		double remainingSweep = sweep_angle-aero_path_planning::constants::PI()/2;
 		for(int index = cloud.size()-1; index>=0; index--){
 			Point pointFinal;
 			Point& point = cloud.at(index);
@@ -532,7 +532,7 @@ inline void castArc(int radius, double sweep_angle, int rgba, Point& origin, Poi
 //	}
 //};
 
-} /* oryx_path_planning */;
+} /* aero_path_planning */;
 
 
 #endif /* ORYXPATHPLANNINGUTILITIES_H_ */

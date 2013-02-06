@@ -15,7 +15,7 @@ action_name(action_name){
 	ROS_INFO("Starting Up Velocity Command Server on <%s>", this->action_name.c_str());
 	this->as.start();
 	//Advertise publishing to the controller's topics
-	this->vel_pub = this->n.advertise<oryx_drive_controller::VelocityArc>(ctrl_velocity_topic, 2);
+	this->vel_pub = this->n.advertise<aero_drive_controller::VelocityArc>(ctrl_velocity_topic, 2);
 }
 
 VelocityControlServer::~VelocityControlServer(){
@@ -26,7 +26,7 @@ VelocityControlServer::~VelocityControlServer(){
  * Currently, all this does is pipe the received goal directly to the ArcDriveController. At some point it should do some
  * more advanced processing and feedback development
  */
-void VelocityControlServer::executeCB(const oryx_drive_controller::VelocityCommandGoalConstPtr& goal){
+void VelocityControlServer::executeCB(const aero_drive_controller::VelocityCommandGoalConstPtr& goal){
 	ROS_INFO("Got Goal <R=%f, V=%f> on <%s>", goal->radius,goal->velocity, this->action_name.c_str());
 	bool success;
 	// check that preempt has not been requested by the client
@@ -39,7 +39,7 @@ void VelocityControlServer::executeCB(const oryx_drive_controller::VelocityComma
 	}
 	else{
 		//Create a new message to send to the controller
-		oryx_drive_controller::VelocityArcPtr msg(new oryx_drive_controller::VelocityArc);
+		aero_drive_controller::VelocityArcPtr msg(new aero_drive_controller::VelocityArc);
 
 		//Build the message
 		msg->radius = goal->radius;

@@ -2,7 +2,7 @@
  * @file	TypeDefinitions.h
  * @date	Nov 1, 2012
  * @author	Adam Panzica
- * @brief	Common typedefs for the oryx_path_planning namespace
+ * @brief	Common typedefs for the aero_path_planning namespace
  */
 
 #ifndef TYPEDEFINITIONS_H_
@@ -11,7 +11,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-namespace oryx_path_planning{
+namespace aero_path_planning{
 
 //*********************** TYPEDEFS ******************************//
 ///Typedef to allow for easier to read code
@@ -26,7 +26,7 @@ typedef boost::shared_ptr<Point> PointPtr;
 ///Typedef to allow for convenient sharing of a PointCloud<pcl::PointXYZRGBA> > via pointer
 typedef boost::shared_ptr<pcl::PointCloud<Point> > PointCloudPtr;
 
-}; /* oryx_path_planning */
+}; /* aero_path_planning */
 
 
 #endif /* TYPEDEFINITIONS_H_ */

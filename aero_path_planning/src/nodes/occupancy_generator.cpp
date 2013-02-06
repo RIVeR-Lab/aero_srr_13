@@ -7,7 +7,7 @@
 #include<ros/ros.h>
 #include<sensor_msgs/PointCloud2.h>
 #include<oryx_msgs/SoftwareStop.h>
-#include"oryx_path_planning/OccupancyGridMsg.h"
+#include"aero_path_planning/OccupancyGridMsg.h"
 #include"OccupancyGrid.h"
 
 ///Macro for printing out warning messages if default parameters are used
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>");
 	ros::init(argc, argv, "Occupancy_Generator");
 	ros::NodeHandle nh;
-	ros::Publisher pub = nh.advertise<oryx_path_planning::OccupancyGridMsg>("oryx/occupancy_point_cloud_topic", 2);
+	ros::Publisher pub = nh.advertise<aero_path_planning::OccupancyGridMsg>("oryx/occupancy_point_cloud_topic", 2);
 	ros::Publisher s_pub = nh.advertise<oryx_msgs::SoftwareStop>("oryx/software_stop", 2);
 
 	//x dimension of occupancy grid
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 	if(!nh.getParam(p_z_dim,	z_dim))			PARAM_WARN(p_z_dim,		z_dim_msg);
 	if(!nh.getParam(p_res,		res))			PARAM_WARN(p_res,		p_res_msg);
 
-	oryx_path_planning::Point origin;
+	aero_path_planning::Point origin;
 	origin.x = 0;
 	origin.y = y_dim/2;
 	origin.z = 0;
@@ -62,16 +62,16 @@ int main(int argc, char **argv)
 	bool stop = true;
 	while(ros::ok())
 	{
-		oryx_path_planning::OccupancyGrid grid(x_dim, y_dim, res, origin, oryx_path_planning::FREE_LOW_COST);
-		oryx_path_planning::PointCloud line_cloud;
-		oryx_path_planning::Point start_point;
+		aero_path_planning::OccupancyGrid grid(x_dim, y_dim, res, origin, aero_path_planning::FREE_LOW_COST);
+		aero_path_planning::PointCloud line_cloud;
+		aero_path_planning::Point start_point;
 		start_point.z=0;
-		start_point.rgba = oryx_path_planning::OBSTACLE;
-		oryx_path_planning::Point end_point;
+		start_point.rgba = aero_path_planning::OBSTACLE;
+		aero_path_planning::Point end_point;
 		end_point.z=0;
-		end_point.rgba = oryx_path_planning::OBSTACLE;
+		end_point.rgba = aero_path_planning::OBSTACLE;
 
-		oryx_path_planning::Point goal_point;
+		aero_path_planning::Point goal_point;
 
 		ROS_INFO("Enter X0: ");
 		std::cin >> start_point.x;
@@ -105,12 +105,12 @@ int main(int argc, char **argv)
 		start_point.getVector4fMap();
 		end_point.getVector4fMap();
 
-		oryx_path_planning::castLine(start_point, end_point, oryx_path_planning::OBSTACLE, line_cloud);
+		aero_path_planning::castLine(start_point, end_point, aero_path_planning::OBSTACLE, line_cloud);
 
-		for(oryx_path_planning::PointCloud::iterator line_itr = line_cloud.begin(); line_itr<line_cloud.end(); line_itr++)
+		for(aero_path_planning::PointCloud::iterator line_itr = line_cloud.begin(); line_itr<line_cloud.end(); line_itr++)
 		{
 			PRINT_POINT("Line Point", (*line_itr));
-			grid.setPointTrait(*line_itr, (oryx_path_planning::PointTrait)line_itr->rgba);
+			grid.setPointTrait(*line_itr, (aero_path_planning::PointTrait)line_itr->rgba);
 		}
 
 		ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 		{
 			ROS_WARN_STREAM(e.what());
 		}
-		oryx_path_planning::OccupancyGridMsg message;
+		aero_path_planning::OccupancyGridMsg message;
 		message.header.frame_id = "base_link";
 		grid.generateMessage(message);
 		pub.publish(message);
