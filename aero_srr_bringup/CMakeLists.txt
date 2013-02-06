@@ -3,4 +3,4 @@ project(aero_srr_bringup)
 
 find_package(catkin REQUIRED)
 
-catkin_package(CATKIN_DEPENDS oryx_drive_controller oryx_path_planning)
+catkin_package(CATKIN_DEPENDS aero_drive_controller aero_path_planning)
