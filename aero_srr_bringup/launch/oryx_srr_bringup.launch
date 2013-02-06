@@ -25,7 +25,7 @@
 	<arg name="tentacles/number"	default="81"/>
 	<arg name="tentacles/exp_factor"	default="1.15"/>
 	
-  <include file="oryxsrr.launch">
+  <include file="$(find aero_srr_bringup)/launch/srr_bringup.launch">
     <arg name="platform"      value="0" />
     <arg name="velocity_command_topic"	value="$(arg velocity_command_topic)" />
     <arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />

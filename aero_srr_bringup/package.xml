@@ -1,0 +1,16 @@
+<package>
+  <name>aero_srr_bringup</name>
+  <version>1.0.0</version>
+  <description>
+    A set of launch scripts for the startup of WPI's AERO Sample Recovery and Return Robot
+  </description>
+  <maintainer email="robot@wpi.edu">WPI RIVeR Lab</maintainer>
+  <license>?</license>
+  <url>http://robot.wpi.edu/wiki/index.php/Oryx</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>aero_drive_controller</run_depend>
+  <run_depend>aero_path_planning</run_depend>
+
+</package>
