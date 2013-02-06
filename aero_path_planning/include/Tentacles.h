@@ -16,7 +16,7 @@
 #include"OryxPathPlanningUtilities.h"
 
 
-namespace oryx_path_planning
+namespace aero_path_planning
 {
 //*********************** PROTOTYPES ******************************//
 class TentacleGenerationException;
@@ -41,7 +41,7 @@ typedef boost::shared_ptr<TentacleGenerator> TentacleGeneratorPtr;
  * @author	Adam Panzica
  * @brief	Exception to flag when there has been a problem generating a tentacle
  */
-class TentacleGenerationException : public oryx_path_planning::ChainableException
+class TentacleGenerationException : public aero_path_planning::ChainableException
 {
 public:
 	/**
@@ -53,7 +53,7 @@ public:
 	 * @param message	The error message describing what went wrong
 	 */
 	TentacleGenerationException(int index, double seedRad, double velocity, std::string& message):
-		oryx_path_planning::ChainableException(generateMessage(index, seedRad, velocity, message))
+		aero_path_planning::ChainableException(generateMessage(index, seedRad, velocity, message))
 	{
 
 	}
@@ -68,7 +68,7 @@ public:
 	 * @param cause		The exception which caused this exception
 	 */
 	TentacleGenerationException(int index, double seedRad, double velocity, std::string& message, std::exception& cause):
-		oryx_path_planning::ChainableException(generateMessage(index, seedRad, velocity, message), cause)
+		aero_path_planning::ChainableException(generateMessage(index, seedRad, velocity, message), cause)
 	{
 	}
 
@@ -91,7 +91,7 @@ private:
  * @author	Adam Panzica
  * @brief	Simple accessor exception that provides some debugging details
  */
-class TentacleAccessException: public oryx_path_planning::ChainableException
+class TentacleAccessException: public aero_path_planning::ChainableException
 {
 public:
 	/**
@@ -105,7 +105,7 @@ public:
 	 * @param message		An optional message discribing what went wrong
 	 */
 	TentacleAccessException(int indexTried, int speedSetIndex, std::string& message = *(new std::string())):
-		oryx_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message))
+		aero_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message))
 	{
 	}
 
@@ -117,7 +117,7 @@ public:
 	 * @param cause			Exception which caused this exception
 	 */
 	TentacleAccessException(int indexTried, int speedSetIndex, std::string& message, std::exception& cause):
-		oryx_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message), cause)
+		aero_path_planning::ChainableException(generateMessage(indexTried, speedSetIndex, message), cause)
 	{
 	}
 
@@ -134,7 +134,7 @@ private:
  * @author	Adam Panzica
  * @brief	Simple accessor exception that provides some debugging details
  */
-class SpeedSetAccessException: public oryx_path_planning::ChainableException
+class SpeedSetAccessException: public aero_path_planning::ChainableException
 {
 public:
 	/**
@@ -143,7 +143,7 @@ public:
 	 * @param message		Optional discriptive error message
 	 */
 	SpeedSetAccessException(int indexTried, std::string& message = *(new std::string())):
-		oryx_path_planning::ChainableException(generateMessage(indexTried, message))
+		aero_path_planning::ChainableException(generateMessage(indexTried, message))
 	{
 	}
 
@@ -163,13 +163,13 @@ private:
 class Tentacle{
 public:
 	///Typedef to allow for convenient naming of tentacle point cloud
-	typedef pcl::PointCloud<oryx_path_planning::Point> TentaclePointCloud;
+	typedef pcl::PointCloud<aero_path_planning::Point> TentaclePointCloud;
 	///Typedef to allow for convenient sharing of a vector of points by pointer
-	typedef boost::shared_ptr<pcl::PointCloud<oryx_path_planning::Point> > TentacleCloudPtr;
-	///Typedef pcl::PointCloud<oryx_path_planning::Point>::iterator for convenience
-	typedef pcl::PointCloud<oryx_path_planning::Point>::iterator iterator;
-	///Typedef pcl::PointCloud<oryx_path_planning::Point>::const_iterator for convenience
-	typedef pcl::PointCloud<oryx_path_planning::Point>::const_iterator const_iterator;
+	typedef boost::shared_ptr<pcl::PointCloud<aero_path_planning::Point> > TentacleCloudPtr;
+	///Typedef pcl::PointCloud<aero_path_planning::Point>::iterator for convenience
+	typedef pcl::PointCloud<aero_path_planning::Point>::iterator iterator;
+	///Typedef pcl::PointCloud<aero_path_planning::Point>::const_iterator for convenience
+	typedef pcl::PointCloud<aero_path_planning::Point>::const_iterator const_iterator;
 
 	/**
 	 * @author	Adam Panzics
@@ -258,7 +258,7 @@ public:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief Helper class for traversing an oryx_path_planning::Tentacle
+	 * @brief Helper class for traversing an aero_path_planning::Tentacle
 	 */
 	class TentacleTraverser
 	{
@@ -297,7 +297,7 @@ public:
 		 * @return	The next Point along the tentacle.
 		 * Will return the last point in the traversal for subsequent calls after the end of the traversal is reached
 		 */
-		const oryx_path_planning::Point& next();
+		const aero_path_planning::Point& next();
 		/**
 		 * @author Adam Panzica
 		 * @brief Gets the length traversed thus far along the Tentacle
@@ -317,8 +317,8 @@ public:
 		bool		empty_;			///True if the iterator has reached the end of the traversal
 		double		length_;			///The current length traversed along the Tentacle
 		double		delta_length_;	///The difference between the current length and last length traversed
-		const oryx_path_planning::Point*	last_point_;	///Pointer to the last point that was passed
-		const oryx_path_planning::Point*	next_point_;	///Pointer to the next point that will be passed
+		const aero_path_planning::Point*	last_point_;	///Pointer to the last point that was passed
+		const aero_path_planning::Point*	next_point_;	///Pointer to the next point that will be passed
 		Tentacle::const_iterator start_;	///The start of an iterator over all the Points along the Tentacle
 		Tentacle::const_iterator end_;		///The end of the iterator of the points along the tentacle
 	};
@@ -403,7 +403,7 @@ public:
 	 * @return A reference to a Tentacle from the speed set
 	 * @throw TentacleAccessException if the tentacle index was invalid
 	 */
-	const Tentacle& getTentacle(int index) const throw(oryx_path_planning::TentacleAccessException);
+	const Tentacle& getTentacle(int index) const throw(aero_path_planning::TentacleAccessException);
 
 	/**
 	 * @author Adam Panzica
@@ -525,7 +525,7 @@ public:
 	 * @throw TentacleAccessException if the tentacle index was invalid
 	 * @throw SpeedSetAccessException if the speed set index was invalid
 	 */
-	const Tentacle& getTentacle(int speedSet, int index) const throw(oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException);
+	const Tentacle& getTentacle(int speedSet, int index) const throw(aero_path_planning::TentacleAccessException, aero_path_planning::SpeedSetAccessException);
 
 	/**
 	 * @author	Adam Panzica

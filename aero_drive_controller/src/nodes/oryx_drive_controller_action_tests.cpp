@@ -7,8 +7,8 @@
 
 #include<ros/ros.h>
 #include<actionlib/client/simple_action_client.h>
-#include<oryx_drive_controller/VelocityCommandAction.h>
-#include<oryx_drive_controller/TranslateCommandAction.h>
+#include<aero_drive_controller/VelocityCommandAction.h>
+#include<aero_drive_controller/TranslateCommandAction.h>
 
 void print_vel_test_info(double rad, double vel){
 	ROS_INFO("Testing Velocity Control: <R=%f, V=%f>", rad, vel);
@@ -29,8 +29,8 @@ int main(int argc, char** argv){
 	nh.getParam(v_action_topic, v_action_topic);
 	nh.getParam(t_action_topic, t_action_topic);
 	//Set up clients
-	actionlib::SimpleActionClient<oryx_drive_controller::VelocityCommandAction> ac_v(v_action_topic, true);
-	actionlib::SimpleActionClient<oryx_drive_controller::TranslateCommandAction> ac_t(t_action_topic, true);
+	actionlib::SimpleActionClient<aero_drive_controller::VelocityCommandAction> ac_v(v_action_topic, true);
+	actionlib::SimpleActionClient<aero_drive_controller::TranslateCommandAction> ac_t(t_action_topic, true);
 	//Wait for connection
 	ROS_INFO("%s is waiting for servers...", ros::this_node::getName().c_str());
 	ac_v.waitForServer();
@@ -39,8 +39,8 @@ int main(int argc, char** argv){
 	ROS_INFO("Got connection to TraverseCommand server!");
 
 	//Set up test commands
-	oryx_drive_controller::VelocityCommandGoal v_goal;
-	oryx_drive_controller::TranslateCommandGoal t_goal;
+	aero_drive_controller::VelocityCommandGoal v_goal;
+	aero_drive_controller::TranslateCommandGoal t_goal;
 
 
 	//Test velocity straight line:
