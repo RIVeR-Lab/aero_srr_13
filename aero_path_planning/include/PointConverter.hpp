@@ -10,7 +10,7 @@
 
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "TypeDefinitions.h"
-namespace oryx_path_planning
+namespace aero_path_planning
 {
 /**
  * @author	Adam Panzica
@@ -107,5 +107,5 @@ private:
 	Eigen::Matrix4f cm_;
 };
 
-};	/* oryx_path_planning */
+};	/* aero_path_planning */
 #endif /* POINTCONVERTER_HPP_ */

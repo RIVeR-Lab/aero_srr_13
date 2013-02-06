@@ -42,10 +42,10 @@
 
 
 
-typedef oryx_path_planning::Tentacle::TentacleTraverser TentTrav;	///Namespace declaration to make implementation of TentacleTraverser easier
+typedef aero_path_planning::Tentacle::TentacleTraverser TentTrav;	///Namespace declaration to make implementation of TentacleTraverser easier
 
 //************************************************ IMPLEMENTATION ***************************************//
-namespace oryx_path_planning
+namespace aero_path_planning
 {
 
 //******************** TENTACLE::TENTACLETRAVERSER ***********************//
@@ -128,7 +128,7 @@ bool TentTrav::hasNext() const
  * Where @f$ d(p_(k-1), p_k) @f$ is the linear distance between points @f$ p_(n-1) \text{ and } p_n @f$ .
  *
  */
-const oryx_path_planning::Point& TentTrav::next()
+const aero_path_planning::Point& TentTrav::next()
 {
 	//If they're not equal, and we're not empty, we're already in the traversal, process the next point
 	if((this->next_point_ != this->last_point_)&&!this->empty_)
@@ -248,7 +248,7 @@ Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index,
 		this->radius_ = std::numeric_limits<double>::infinity();
 		for(double i = 0; i<working_length; i++)
 		{
-			oryx_path_planning::Point coord;
+			aero_path_planning::Point coord;
 			coord.x=i;
 			coord.y=0;
 			coord.z=0;
@@ -267,35 +267,35 @@ Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index,
 		//		tentacleOrigin.x = 0;
 		//		tentacleOrigin.y = -workingRadius;
 		//		tentacleOrigin.z = 0;
-		//		tentacleOrigin.rgba = oryx_path_planning::TENTACLE;
+		//		tentacleOrigin.rgba = aero_path_planning::TENTACLE;
 		//
 		//		workingRadius = std::abs(workingRadius);
 		//		if(this->radius>0){
-		//			castArc(workingRadius, sweepAngle, oryx_path_planning::TENTACLE, tentacleOrigin, this->points);
+		//			castArc(workingRadius, sweepAngle, aero_path_planning::TENTACLE, tentacleOrigin, this->points);
 		//		}
 		//		else{
-		//			castArc(workingRadius, sweepAngle, oryx_path_planning::TENTACLE, tentacleOrigin, this->points, 3);
+		//			castArc(workingRadius, sweepAngle, aero_path_planning::TENTACLE, tentacleOrigin, this->points, 3);
 		//		}
 		//	}
 		//	else{
 		//Tracks the last coordinate so that we don't get duplicates
-		oryx_path_planning::Point last_coord;
+		aero_path_planning::Point last_coord;
 		last_coord.x = 0;
 		last_coord.y = 0;
 		last_coord.z = 0;
 		//The amount to increment theta by
-		double theta_increment	= oryx_path_planning::constants::PI()/((100.0/resolution)*std::abs(this->radius_));
+		double theta_increment	= aero_path_planning::constants::PI()/((100.0/resolution)*std::abs(this->radius_));
 		//Push the first coordinate on
 		this->points_.push_back(last_coord);
 		//Calculate the X and Y coord along the tentacle
 		if(this->radius_>0)
 		{
-			double start_angle = oryx_path_planning::constants::PI()/2.0;
+			double start_angle = aero_path_planning::constants::PI()/2.0;
 			for(double t=start_angle; t>(start_angle-sweep_angle); t-=theta_increment)
 			{
-				oryx_path_planning::Point new_coord;
-				new_coord.y = (oryx_path_planning::roundToGrid(this->radius_*std::sin(t)-this->radius_, resolution));
-				new_coord.x = (oryx_path_planning::roundToGrid(this->radius_*std::cos(t), resolution));
+				aero_path_planning::Point new_coord;
+				new_coord.y = (aero_path_planning::roundToGrid(this->radius_*std::sin(t)-this->radius_, resolution));
+				new_coord.x = (aero_path_planning::roundToGrid(this->radius_*std::cos(t), resolution));
 				new_coord.z = 0;
 				//If we've hit the top of the occupancy grid, break
 				if(new_coord.x>xDim||std::abs(new_coord.y)>yDim) break;
@@ -309,11 +309,11 @@ Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index,
 		}
 		else
 		{
-			double start_angle = oryx_path_planning::constants::PI()/2.0;
+			double start_angle = aero_path_planning::constants::PI()/2.0;
 			for(double t=start_angle; t<(start_angle+sweep_angle); t+=theta_increment){
-				oryx_path_planning::Point new_coord;
-				new_coord.y = (float)(oryx_path_planning::roundToGrid(this->radius_*std::sin(t)-radius_, resolution));
-				new_coord.x = (float)(oryx_path_planning::roundToGrid(this->radius_*std::cos(t), resolution));
+				aero_path_planning::Point new_coord;
+				new_coord.y = (float)(aero_path_planning::roundToGrid(this->radius_*std::sin(t)-radius_, resolution));
+				new_coord.x = (float)(aero_path_planning::roundToGrid(this->radius_*std::cos(t), resolution));
 				new_coord.z = 0;
 				//If we've hit the top of the occupancy grid, break
 				if(new_coord.x>xDim||std::abs(new_coord.y)>yDim) break;
@@ -419,9 +419,9 @@ double SpeedSet::getSeedRad() const
 	return this->seed_rad_;
 }
 
-const Tentacle& SpeedSet::getTentacle(int index)const throw(oryx_path_planning::TentacleAccessException)
+const Tentacle& SpeedSet::getTentacle(int index)const throw(aero_path_planning::TentacleAccessException)
 				{
-	if(index<0||index>(int)getNumTentacle()) throw new oryx_path_planning::TentacleAccessException(index, 0);
+	if(index<0||index>(int)getNumTentacle()) throw new aero_path_planning::TentacleAccessException(index, 0);
 	try
 	{
 		return this->tentacles_.at(index);
@@ -429,7 +429,7 @@ const Tentacle& SpeedSet::getTentacle(int index)const throw(oryx_path_planning::
 	catch (std::exception& e)
 	{
 		std::string message("Something went wrong!");
-		throw new oryx_path_planning::TentacleAccessException(index, 0, message, e);
+		throw new aero_path_planning::TentacleAccessException(index, 0, message, e);
 	}
 				}
 
@@ -510,10 +510,10 @@ int TentacleGenerator::getNumSpeedSets() const
 	return this->speed_sets_.size();
 }
 
-const Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) const throw (oryx_path_planning::TentacleAccessException, oryx_path_planning::SpeedSetAccessException)
+const Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) const throw (aero_path_planning::TentacleAccessException, aero_path_planning::SpeedSetAccessException)
 				{
-	if(speedSet<0||speedSet>(int)this->speed_sets_.size()) throw new oryx_path_planning::SpeedSetAccessException(speedSet);
-	if(index<0||index>(int)this->speed_sets_.at(speedSet)->getNumTentacle()) throw new oryx_path_planning::TentacleAccessException(index, speedSet);
+	if(speedSet<0||speedSet>(int)this->speed_sets_.size()) throw new aero_path_planning::SpeedSetAccessException(speedSet);
+	if(index<0||index>(int)this->speed_sets_.at(speedSet)->getNumTentacle()) throw new aero_path_planning::TentacleAccessException(index, speedSet);
 	try
 	{
 		return this->speed_sets_.at(speedSet)->getTentacle(index);
@@ -521,7 +521,7 @@ const Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) const th
 	catch(std::exception& e)
 	{
 		std::string message("Something Went Wrong!");
-		throw new oryx_path_planning::TentacleAccessException(index, speedSet, message, e);
+		throw new aero_path_planning::TentacleAccessException(index, speedSet, message, e);
 	}
 				}
 
@@ -604,7 +604,7 @@ double TentacleGenerator::calcL(double q)
  */
 double TentacleGenerator::calcSeedRad(int speedSet, double l, double q) const
 {
-	double dphi = 1.2*oryx_path_planning::constants::PI()/2.0;
+	double dphi = 1.2*aero_path_planning::constants::PI()/2.0;
 	PRINTER("Calculated dphi=%f, l=%f",dphi, l);
 	return l/(dphi*(1-std::pow(q,0.9)));
 }

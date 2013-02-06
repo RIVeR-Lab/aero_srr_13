@@ -14,14 +14,14 @@ action_name(action_name) {
 	//Start up the command server
 	as.start();
 	//Advertise to intra-process publisher
-	this->trans_pub = this->n.advertise<oryx_drive_controller::VelocityTranslate>(ctrl_translate_topic, 2);
+	this->trans_pub = this->n.advertise<aero_drive_controller::VelocityTranslate>(ctrl_translate_topic, 2);
 
 }
 
 TranslateControlServer::~TranslateControlServer() {
 }
 
-void TranslateControlServer::executeCB(const oryx_drive_controller::TranslateCommandGoalConstPtr& goal){
+void TranslateControlServer::executeCB(const aero_drive_controller::TranslateCommandGoalConstPtr& goal){
 	ROS_INFO("Got Goal <X_v=%f, Y-v=%f> on <%s>", goal->x_velocity,goal->y_velocity, this->action_name.c_str());
 
 	bool success;
@@ -36,7 +36,7 @@ void TranslateControlServer::executeCB(const oryx_drive_controller::TranslateCom
 
 	else{
 			//Create a new message to send to the controller
-			oryx_drive_controller::VelocityTranslatePtr msg(new oryx_drive_controller::VelocityTranslate);
+			aero_drive_controller::VelocityTranslatePtr msg(new aero_drive_controller::VelocityTranslate);
 
 			//Build the message
 			msg->x_velocity = goal->x_velocity;

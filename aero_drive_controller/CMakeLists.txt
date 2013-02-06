@@ -61,13 +61,13 @@ add_library(${PROJECT_NAME}_lib
   src/controllers/ArcDriveController.cpp
 )
 target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_lib oryx_drive_controller_gencpp)
+add_dependencies(${PROJECT_NAME}_lib ${PROJECT_NAME}_gencpp)
 
 #Build Nodes
 add_executable(oryx_drive_controller src/nodes/oryx_drive_controller.cpp)
 target_link_libraries(oryx_drive_controller ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME}_lib)
-add_dependencies(oryx_drive_controller oryx_drive_controller_gencpp)
+add_dependencies(oryx_drive_controller ${PROJECT_NAME}_gencpp)
 
 add_executable(oryx_drive_controller_test src/nodes/oryx_drive_controller_action_tests.cpp)
 target_link_libraries(oryx_drive_controller_test ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME}_lib)
-add_dependencies(oryx_drive_controller_test oryx_drive_controller_gencpp)
+add_dependencies(oryx_drive_controller_test ${PROJECT_NAME}_gencpp)
