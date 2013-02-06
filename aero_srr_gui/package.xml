@@ -1,14 +1,14 @@
 <package>
-  <name>oryx_srr_gui</name>
+  <name>aero_srr_gui</name>
   <version>1.0.0</version>
   <description>
 
-     GUI elements used by the oryx_srr stack for visualization of system processes
+     GUI elements used by the aero_srr stack for visualization of system processes
 
   </description>
   <maintainer email="robot@wpi.edu">RIVeR Lab</maintainer>
   <license>BSD</license>
-  <url>http://ros.org/wiki/oryx_srr_gui</url>
+  <url>http://ros.org/wiki/aero_srr_gui</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
