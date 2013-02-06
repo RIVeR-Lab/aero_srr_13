@@ -11,8 +11,8 @@
 #include <ros/ros.h>
 #include <oryx_msgs/WheelVelocities.h>
 #include <oryx_msgs/SwervePositions.h>
-#include <oryx_drive_controller/VelocityArc.h>
-#include <oryx_drive_controller/VelocityTranslate.h>
+#include <aero_drive_controller/VelocityArc.h>
+#include <aero_drive_controller/VelocityTranslate.h>
 /**
  * @brief Low level velocity-arc based drive controller
  *
@@ -119,13 +119,13 @@ private:
 	 * Callback for processing the intra-process VelocityArc messages
 	 * @param msg VelocityArc message received
 	 */
-	void processIPVelCB(const oryx_drive_controller::VelocityArcConstPtr& msg);
+	void processIPVelCB(const aero_drive_controller::VelocityArcConstPtr& msg);
 
 	/**
 	 * Callback for processing the intra-process VelocityTranslate messages
 	 * @param msg VelocityTranslate message received
 	 */
-	void processIPTransCB(const oryx_drive_controller::VelocityTranslateConstPtr& msg);
+	void processIPTransCB(const aero_drive_controller::VelocityTranslateConstPtr& msg);
 };
 
 #endif /* ARCDRIVECONTROLLER_H_ */

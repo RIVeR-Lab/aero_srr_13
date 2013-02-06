@@ -8,7 +8,7 @@
 //*********************** SYSTEM DEPENDENCIES ************************************//
 #include<queue>
 #include<actionlib/client/simple_action_client.h>
-#include<oryx_drive_controller/VelocityCommandAction.h>
+#include<aero_drive_controller/VelocityCommandAction.h>
 #include<boost/lexical_cast.hpp>
 #include<boost/circular_buffer.hpp>
 #include<oryx_msgs/SoftwareStop.h>
@@ -16,13 +16,13 @@
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include "OryxPathPlanning.h"
 #include "OryxPathPlannerConfig.h"
-#include "oryx_path_planning/OccupancyGridMsg.h"
+#include "aero_path_planning/OccupancyGridMsg.h"
 
 //*********************** MACROS ************************************//
 ///Number of seconds to wait for connections to other ROS nodes before determining a system failure
 #define CONNECTION_TIMEOUT	5.0
 
-using namespace oryx_path_planning;
+using namespace aero_path_planning;
 
 //*********************** HELPER CLASS DEFINITIONS ******************************//
 
@@ -52,7 +52,7 @@ public:
 	 * @param v_client				Pointer to the velocity client to send commands to the base platform
 	 * @throw std::runtime_error	If the planner is unable to connect to the base platform
 	 */
-	LocalPlanner(int platform, double goalWeight, double travWeight, double diffWeight, double unknWeight, double xDim, double yDim, double zDim, double res, oryx_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
+	LocalPlanner(int platform, double goalWeight, double travWeight, double diffWeight, double unknWeight, double xDim, double yDim, double zDim, double res, aero_path_planning::Point& origin, std::string& v_action_topic, std::string& oc_point_cloud_topic, TentacleGeneratorPtr tentacles) throw(std::runtime_error):
 		v_action_topic_(v_action_topic),
 		pc_topic_(oc_point_cloud_topic),
 		origin_(origin),
@@ -134,8 +134,8 @@ public:
 					int num_points = 0;
 					for(OccupancyGrid::iterator test_itr = working_grid.begin(); test_itr<working_grid.end(); test_itr++)
 					{
-						//ROS_INFO_COND(test_itr->rgba != oryx_path_planning::FREE_LOW_COST, "Found an obsticale point! <%f, %f>", test_itr->x, test_itr->y);
-						if(test_itr->rgba != oryx_path_planning::FREE_LOW_COST)num_points++;
+						//ROS_INFO_COND(test_itr->rgba != aero_path_planning::FREE_LOW_COST, "Found an obsticale point! <%f, %f>", test_itr->x, test_itr->y);
+						if(test_itr->rgba != aero_path_planning::FREE_LOW_COST)num_points++;
 					}
 					ROS_INFO("I Found %d number of interesting points", num_points);
 
@@ -160,28 +160,28 @@ public:
 						//As long as the tentacle has points still, and we're still traversing, continue traversing
 						while(traverser.hasNext()&&traversing)
 						{
-							const oryx_path_planning::Point& point = traverser.next();
+							const aero_path_planning::Point& point = traverser.next();
 							try
 							{
 								switch(working_grid.getPointTrait(point))
 								{
-								case oryx_path_planning::OBSTACLE:
+								case aero_path_planning::OBSTACLE:
 									ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
 									PRINT_POINT("Hit Point", point);
 									traversing = false;
 									break;
-								case oryx_path_planning::GOAL:
+								case aero_path_planning::GOAL:
 									ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
 									traversing = false;
 									hit_goal   = true;
 									break;
-								case oryx_path_planning::FREE_HIGH_COST:
+								case aero_path_planning::FREE_HIGH_COST:
 									length_modifier -= traverser.deltaLength()*this->diff_weight_;
 									break;
-								case oryx_path_planning::TRAVERSED:
+								case aero_path_planning::TRAVERSED:
 									length_modifier -= traverser.deltaLength()*this->trav_weight_;
 									break;
-								case oryx_path_planning::UNKNOWN:
+								case aero_path_planning::UNKNOWN:
 									length_modifier += traverser.deltaLength()*this->unkn_weight_;
 									break;
 								default:
@@ -200,8 +200,8 @@ public:
 							try
 							{
 								//Will throw false if there was no goal point
-								const oryx_path_planning::Point goal_point = working_grid.getGoalPoint();
-								const oryx_path_planning::Point end_point = traverser.next();
+								const aero_path_planning::Point goal_point = working_grid.getGoalPoint();
+								const aero_path_planning::Point end_point = traverser.next();
 								double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
 								ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
 								length_modifier-= dist_to_goal*this->goal_weight_;
@@ -231,10 +231,10 @@ public:
 					Tentacle::TentacleTraverser overlayTraverser(speed_set.getTentacle(longest_index));
 					while(overlayTraverser.hasNext())
 					{
-						oryx_path_planning::Point point = overlayTraverser.next();
+						aero_path_planning::Point point = overlayTraverser.next();
 						try
 						{
-							rendering.setPointTrait(point, oryx_path_planning::TENTACLE);
+							rendering.setPointTrait(point, aero_path_planning::TENTACLE);
 						}catch(std::exception& e){
 							ROS_ERROR("%s", e.what());
 						}
@@ -268,7 +268,7 @@ private:
 	ros::NodeHandle nh_;	///Node handle for publishing/subscribing to topics
 	std::string	v_action_topic_;		///Actionlib topic name to send velocity commands over
 	std::string pc_topic_;			///topic name of the ROS topic to receive new occupancy grid data over
-	oryx_path_planning::Point	origin_;	///The origin to use for the occupancy grids
+	aero_path_planning::Point	origin_;	///The origin to use for the occupancy grids
 	TentacleGeneratorPtr tentacles_;	///Pointer to the tentacle generator which contains the tentacles to use for planning
 	ros::Subscriber 	pc_sub_;		///Subscriber to the ROS topic to receive new occupancy grid data over
 	ros::Subscriber		stop_sub_;	///Subscriber to the ROS topic to receive the software stop message
@@ -276,7 +276,7 @@ private:
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
 
-	actionlib::SimpleActionClient<oryx_drive_controller::VelocityCommandAction> v_client_;	///The actionlib client to set velocity command messages to the base platform with
+	actionlib::SimpleActionClient<aero_drive_controller::VelocityCommandAction> v_client_;	///The actionlib client to set velocity command messages to the base platform with
 
 	/**
 	 * @author	Adam Panzica
@@ -294,12 +294,12 @@ private:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Callback for processing new point cloud data
-	 * @param message The oryx_path_planning::OccupancyGridMsg message to process
+	 * @param message The aero_path_planning::OccupancyGridMsg message to process
 	 *
 	 * Takes the data from the PointCloud2 message, processes it into a new occupancy grid,
 	 * and places it on the occupancy grid buffer for processing by the planner
 	 */
-	void pcCB(const oryx_path_planning::OccupancyGridMsgConstPtr& message){
+	void pcCB(const aero_path_planning::OccupancyGridMsgConstPtr& message){
 		//To prevent processing of stale data, ignore anything received while we shouldn't be planning
 		if(this->should_plan_)
 		{
@@ -352,7 +352,7 @@ private:
 	 */
 	void send(double velocity, double radius)
 	{
-		oryx_drive_controller::VelocityCommandGoal newGoal;
+		aero_drive_controller::VelocityCommandGoal newGoal;
 		newGoal.velocity	= velocity;
 		newGoal.radius		= radius;
 		//Once again, have to used boost::bind because you are inside a class
@@ -368,7 +368,7 @@ private:
 	 * @param result	The result message returned from the velocity controller
 	 */
 	void doneCb(const actionlib::SimpleClientGoalState& state,
-			const oryx_drive_controller::VelocityCommandResultConstPtr& result)
+			const aero_drive_controller::VelocityCommandResultConstPtr& result)
 	{
 		ROS_DEBUG("Finished in state [%s]", state.toString().c_str());
 		ROS_DEBUG("Result: %s", (result->success)?"Successful":"Unsuccessful");
@@ -388,7 +388,7 @@ private:
 	 * @brief	Callback for handling velocity controller feedback
 	 * @param feedback The feedback message that needs to be processed
 	 */
-	void feedbackCb(const oryx_drive_controller::VelocityCommandFeedbackConstPtr& feedback)
+	void feedbackCb(const aero_drive_controller::VelocityCommandFeedbackConstPtr& feedback)
 	{
 		this->current_vel_ = feedback->velocity;
 		this->current_rad_ = feedback->omega;
@@ -399,7 +399,7 @@ private:
 //*********************** NODE IMPLEMENTATION ******************************//
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "oryx_base_planner");
+	ros::init(argc, argv, "aero_base_planner");
 	ros::NodeHandle nh;
 	ros::NodeHandle p_nh("~");
 	//Default Parameter Values
@@ -576,12 +576,12 @@ int main(int argc, char **argv) {
 
 	//Set up Tentacles
 	ROS_INFO("Generating Tentacles...");
-	boost::shared_ptr<TentacleGenerator> tentacle_ptr(new oryx_path_planning::TentacleGenerator (min_speed, max_speed, num_speed_set, num_tent, exp_fact, res, x_dim, y_dim/2));
+	boost::shared_ptr<TentacleGenerator> tentacle_ptr(new aero_path_planning::TentacleGenerator (min_speed, max_speed, num_speed_set, num_tent, exp_fact, res, x_dim, y_dim/2));
 	ROS_INFO("Tentacles Generated!");
 	//Set up client to Drive Controller
 	try
 	{
-		oryx_path_planning::Point origin;
+		aero_path_planning::Point origin;
 		origin.x=x_ori;
 		origin.y=y_ori;
 		origin.z=z_ori;

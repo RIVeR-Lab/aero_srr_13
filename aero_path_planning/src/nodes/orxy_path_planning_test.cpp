@@ -6,7 +6,7 @@
  */
 #include <ros/ros.h>
 #include "OryxPathPlanning.h"
-using namespace oryx_path_planning;
+using namespace aero_path_planning;
 void printSpeedSet(int xDim, int yDim, double resoltuion, SpeedSet& speedSet);
 
 int main(int argc, char **argv) {
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 		Tentacle workingTentacle = generator.getTentacle(firstSpeedSet, 0);
 		Tentacle::TentacleTraverser traverser(workingTentacle);
 		while(traverser.hasNext()){
-			oryx_path_planning::Point travPoint = traverser.next();
+			aero_path_planning::Point travPoint = traverser.next();
 			ROS_INFO("Traversed Point <%f, %f>, total length = %f", travPoint.x, travPoint.y, traverser.lengthTraversed());
 		}
 	}catch (std::exception& e){
@@ -152,8 +152,8 @@ int main(int argc, char **argv) {
 	//Test some exceptions
 	ROS_INFO("Test Some Exceptions:");
 
-	oryx_path_planning::SpeedSetAccessException testE1(100);
-	oryx_path_planning::TentacleAccessException testE2(1, 100, *(new std::string("Testing of Chained Exceptions")), testE1);
+	aero_path_planning::SpeedSetAccessException testE1(100);
+	aero_path_planning::TentacleAccessException testE2(1, 100, *(new std::string("Testing of Chained Exceptions")), testE1);
 
 	try{
 		throw testE2;
@@ -163,35 +163,35 @@ int main(int argc, char **argv) {
 
 	//Test Point Converter
 	ROS_INFO("Testing Point Converter...");
-	oryx_path_planning::Point unConvertedPoint;
+	aero_path_planning::Point unConvertedPoint;
 	unConvertedPoint.x = 100;
 	unConvertedPoint.y = 50;
 	unConvertedPoint.z = 500;
 	unConvertedPoint.rgba = 0;
-	oryx_path_planning::PointConverter converter(.001);
-	oryx_path_planning::Point convertedPoint;
+	aero_path_planning::PointConverter converter(.001);
+	aero_path_planning::Point convertedPoint;
 	converter.convertToEng(unConvertedPoint, convertedPoint);
 	PRINT_POINT("Unconverted:", unConvertedPoint);
 	PRINT_POINT("Converted:", convertedPoint);*/
 
 	//Build the base occupancy grid
 	ROS_INFO("Testing Occupancy Grid...");
-	oryx_path_planning::Point origin;
+	aero_path_planning::Point origin;
 	origin.x=0;
 	origin.y=yDim/2;
 	origin.z=0;
-	oryx_path_planning::OccupancyGrid testGrid(xDim,yDim, res, origin, oryx_path_planning::FREE_LOW_COST);
+	aero_path_planning::OccupancyGrid testGrid(xDim,yDim, res, origin, aero_path_planning::FREE_LOW_COST);
 	ROS_INFO("Occupancy Grid Built");
 
 	try{
 //		//Place a single point on the grid
 //		//ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 //		ROS_INFO("Testing setPoint...");
-//		oryx_path_planning::Point testPoint;
+//		aero_path_planning::Point testPoint;
 //		testPoint.x = 0;
 //		testPoint.y = origin.y;
 //		testPoint.z = 0;
-//		testPoint.rgba = oryx_path_planning::ROBOT;
+//		testPoint.rgba = aero_path_planning::ROBOT;
 //		PRINT_POINT("Placing Point", testPoint);
 //		testGrid.setPoint(testPoint, false);
 //		//ROS_INFO("Resulting Grid:\n%s", testGrid.toString(0,0)->c_str());
@@ -203,19 +203,19 @@ int main(int argc, char **argv) {
 //		lineStart.x = 0;
 //		lineStart.y = yDim-origin.y;
 //		lineStart.z = 0;
-//		lineStart.rgba = oryx_path_planning::OBSTACLE;
+//		lineStart.rgba = aero_path_planning::OBSTACLE;
 //		PRINT_POINT("Start Point", lineStart);
 //		Point lineEnd;
 //		lineEnd.x = xDim;
 //		lineEnd.y = 0;
 //		lineEnd.z = 0;
-//		lineEnd.rgba = oryx_path_planning::GOAL;
+//		lineEnd.rgba = aero_path_planning::GOAL;
 //		PRINT_POINT("End Point", lineEnd);
-//		castLine(lineStart, lineEnd, oryx_path_planning::OBSTACLE, lineCloud);
+//		castLine(lineStart, lineEnd, aero_path_planning::OBSTACLE, lineCloud);
 //		ROS_INFO("Line Generated, placing on grid...");
 //		for(PointCloud::iterator line_itr = lineCloud.begin(); line_itr<lineCloud.end(); line_itr++){
 //			//PRINT_POINT("Line Point", (*line_itr));
-//			testGrid.setPointTrait(*line_itr, (oryx_path_planning::PointTrait_t)line_itr->rgba);
+//			testGrid.setPointTrait(*line_itr, (aero_path_planning::PointTrait_t)line_itr->rgba);
 //		}
 //		//ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 
@@ -226,19 +226,19 @@ int main(int argc, char **argv) {
 		arcCenter.x = 0;
 		arcCenter.y = -55;
 		arcCenter.z = 0;
-		arcCenter.rgba = oryx_path_planning::TENTACLE;
-		castArc(48, 2.312500, oryx_path_planning::OBSTACLE, arcCenter, arcCloud);
+		arcCenter.rgba = aero_path_planning::TENTACLE;
+		castArc(48, 2.312500, aero_path_planning::OBSTACLE, arcCenter, arcCloud);
 		ROS_INFO("Arc generated, placing on grid...");
 		for(PointCloud::iterator arc_itr = arcCloud.begin(); arc_itr<arcCloud.end(); arc_itr++){
 			PRINT_POINT("Arc Point", (*arc_itr));
-			testGrid.setPointTrait(*arc_itr, (oryx_path_planning::PointTrait_t)arc_itr->rgba);
+			testGrid.setPointTrait(*arc_itr, (aero_path_planning::PointTrait_t)arc_itr->rgba);
 		}
 		//PRINT_POINT("Setting a Point on the Grid at Arc Origin", arcCenter);
-		testGrid.setPointTrait(arcCenter, (oryx_path_planning::PointTrait_t)arcCenter.rgba);
+		testGrid.setPointTrait(arcCenter, (aero_path_planning::PointTrait_t)arcCenter.rgba);
 		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 //		//Place a known straight line on the grid
 //		for(double x=0; x<xDim; x+=res){
-//			testGrid.setPointTrait(x, -origin.y, 0.0, oryx_path_planning::OBSTACLE);
+//			testGrid.setPointTrait(x, -origin.y, 0.0, aero_path_planning::OBSTACLE);
 //		}
 //
 //		//Test copying occupancy grids
@@ -260,9 +260,9 @@ int main(int argc, char **argv) {
 			for(unsigned int pi = 0; pi<tentacle.getPoints().size(); pi++){
 				const Point& point = tentacle.getPoints().at(pi);
 				if(std::abs(point.x)<xDim && std::abs(point.y)<yDim){
-					//ROS_INFO("Placing Point <%f,%f,%f,%x>", point.x, point.y, point.z, oryx_path_planning::TENTACLE);
+					//ROS_INFO("Placing Point <%f,%f,%f,%x>", point.x, point.y, point.z, aero_path_planning::TENTACLE);
 					try{
-						testGrid.setPointTrait(point, oryx_path_planning::TENTACLE);
+						testGrid.setPointTrait(point, aero_path_planning::TENTACLE);
 					}catch(std::exception& e){
 
 					}
@@ -287,7 +287,7 @@ void printSpeedSet(int xDim, int yDim, double resolution, SpeedSet& speedSet){
 		Tentacle tentacle = speedSet.getTentacle(t);
 		//ROS_INFO("Got Tentacle %d", t);
 		for(unsigned int p=0; p<tentacle.getPoints().size(); p++){
-			oryx_path_planning::Point point(tentacle.getPoints().at(p));
+			aero_path_planning::Point point(tentacle.getPoints().at(p));
 			//ROS_INFO("Got Point at <%f, %f>", point.x, point.y);
 			point.y+=ySize/2;
 			//ROS_INFO("Placing Point at <%f, %f>", point.x, point.y);

@@ -9,14 +9,14 @@
 #include<ros/ros.h>
 #include<boost/function.hpp>
 #include<boost/unordered_map.hpp>
-#include<oryxsrr_msgs/Command.h>
+#include<aero_srr_msgs/Command.h>
 
 //*********************LOCAL DEPENDENCIES**********************//
 #include"OryxPathPlanning.h"
 #include"OryxPathPlannerConfig.h"
 
 
-using namespace oryx_path_planning;
+using namespace aero_path_planning;
 
 /**
  * @brief Command processing engine for the global planner
@@ -38,7 +38,7 @@ private:
 		WARNING  //!< WARNING Failure to process the command is only a warning
 	} command_criticality;
 
-	typedef boost::function<bool (std::string& data, oryxsrr_msgs::Command::Response& response)> command_func;	///Typedef for the signature of command functions
+	typedef boost::function<bool (std::string& data, aero_srr_msgs::Command::Response& response)> command_func;	///Typedef for the signature of command functions
 	typedef boost::unordered_map<std::string, std::pair<command_func, command_criticality> > command_map;///Typedef for a map of command functions to their command keyword
 public:
 	CommandEngine()
@@ -100,7 +100,7 @@ private:
 	 * @param request The service request
 	 * @param response The service response
 	 */
-	bool commandCB(oryxsrr_msgs::Command::Request& request, oryxsrr_msgs::Command::Response& response)
+	bool commandCB(aero_srr_msgs::Command::Request& request, aero_srr_msgs::Command::Response& response)
 	{
 		std::string command_message("Could Not Process The Command: ");
 		//Check to see if the command is registered
@@ -148,7 +148,7 @@ private:
 	 *
 	 * This command starts the global planner into whatever mode it was in last (or default if there was no mode specified)
 	 */
-	bool startCB(std::string& data, oryxsrr_msgs::Command::Response& response)
+	bool startCB(std::string& data, aero_srr_msgs::Command::Response& response)
 	{
 		return false;
 	}
@@ -161,7 +161,7 @@ private:
 	 *
 	 * This command stops the global planner from running, except to process new commands from the CommandEngine
 	 */
-	bool stopCB(std::string& data, oryxsrr_msgs::Command::Response& response)
+	bool stopCB(std::string& data, aero_srr_msgs::Command::Response& response)
 	{
 		return false;
 	}
@@ -175,7 +175,7 @@ private:
 	 *
 	 * This command puts the global planner into Manual Control mode. It lets it know to expect Joy Messages to control it
 	 */
-	bool manCB(std::string& data, oryxsrr_msgs::Command::Response& response)
+	bool manCB(std::string& data, aero_srr_msgs::Command::Response& response)
 	{
 		return false;
 	}
@@ -188,7 +188,7 @@ private:
 	 *
 	 * This command puts the global planner into Autonomous Control mode.
 	 */
-	bool autoCB(std::string& data, oryxsrr_msgs::Command::Response& response)
+	bool autoCB(std::string& data, aero_srr_msgs::Command::Response& response)
 	{
 		return false;
 	}
@@ -196,7 +196,7 @@ private:
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "oryx_global_planner");
+	ros::init(argc, argv, "aero_global_planner");
 	ros::NodeHandle nh;
 	ros::NodeHandle p_nh("~");
 

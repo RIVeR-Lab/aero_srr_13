@@ -64,16 +64,16 @@ set(CMAKE_CXX_FLAGS "-O1")        ## Optimize
 #build nodes
 add_executable(oryx_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
 target_link_libraries(oryx_path_planning_test ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(oryx_path_planning_test oryx_path_planning_gencpp)
+add_dependencies(oryx_path_planning_test ${PROJECT_NAME}_gencpp)
 
 add_executable(oryx_local_planner src/nodes/oryx_local_planner.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
 target_link_libraries(oryx_local_planner ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(oryx_local_planner oryx_path_planning_gencpp)
+add_dependencies(oryx_local_planner ${PROJECT_NAME}_gencpp)
 
 add_executable(occupancy_generator src/nodes/occupancy_generator.cpp src/helpers/OccupancyGrid.cpp)
 target_link_libraries(occupancy_generator ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(occupancy_generator oryx_path_planning_gencpp)
+add_dependencies(occupancy_generator ${PROJECT_NAME}_gencpp)
 
 add_executable(oryx_global_planner src/nodes/oryx_global_planner.cpp src/helpers/OccupancyGrid.cpp)
 target_link_libraries(oryx_global_planner ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(oryx_global_planner oryx_path_planning_gencpp)
+add_dependencies(oryx_global_planner ${PROJECT_NAME}_gencpp)
