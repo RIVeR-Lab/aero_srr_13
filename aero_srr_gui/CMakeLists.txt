@@ -57,7 +57,7 @@ file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINK
 # Configure catkin package
 ##############################################################################
 
-catkin_package(CATKIN_DEPENDS roscpp rospy oryx_msgs)
+catkin_package(CATKIN_DEPENDS roscpp rospy)
 
 ##############################################################################
 # Binaries
