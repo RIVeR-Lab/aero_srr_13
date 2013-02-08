@@ -10,7 +10,7 @@ project(aero_srr_gui)
 ##############################################################################
 
 
-find_package(catkin REQUIRED COMPONENTS roscpp rospy oryx_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy)
 find_package(Qt4 REQUIRED QtCore QtGui)
 
 ##############################################################################
@@ -42,7 +42,7 @@ file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINK
 # Configure catkin package
 ##############################################################################
 
-catkin_package(CATKIN_DEPENDS roscpp rospy oryx_msgs)
+catkin_package(CATKIN_DEPENDS roscpp rospy)
 
 ##############################################################################
 # Binaries
