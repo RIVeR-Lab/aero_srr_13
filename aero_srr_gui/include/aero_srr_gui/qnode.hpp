@@ -1,5 +1,5 @@
 /**
- * @file /include/oryx_srr_gui/qnode.hpp
+ * @file /include/aero_srr_gui/qnode.hpp
  *
  * @brief Communications central!
  *
@@ -9,8 +9,8 @@
 ** Ifdefs
 *****************************************************************************/
 
-#ifndef oryx_srr_gui_QNODE_HPP_
-#define oryx_srr_gui_QNODE_HPP_
+#ifndef aero_srr_gui_QNODE_HPP_
+#define aero_srr_gui_QNODE_HPP_
 
 /*****************************************************************************
 ** Includes
@@ -26,7 +26,7 @@
 ** Namespaces
 *****************************************************************************/
 
-namespace oryx_srr_gui {
+namespace aero_srr_gui {
 
 /*****************************************************************************
 ** Class
@@ -66,6 +66,6 @@ private:
     QStringListModel logging_model;
 };
 
-}  // namespace oryx_srr_gui
+}  // namespace aero_srr_gui
 
-#endif /* oryx_srr_gui_QNODE_HPP_ */
+#endif /* aero_srr_gui_QNODE_HPP_ */

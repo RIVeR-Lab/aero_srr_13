@@ -11,7 +11,7 @@
 
 #include <QtGui>
 #include <QApplication>
-#include "../include/oryx_srr_gui/main_window.hpp"
+#include "../include/aero_srr_gui/main_window.hpp"
 
 /*****************************************************************************
 ** Main
@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     ** Qt
     **********************/
     QApplication app(argc, argv);
-    oryx_srr_gui::MainWindow w(argc,argv);
+    aero_srr_gui::MainWindow w(argc,argv);
     w.show();
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
     int result = app.exec();
