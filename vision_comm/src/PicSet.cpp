@@ -26,6 +26,7 @@ cv::Mat* PicSet::getNextFrame()
 	file_=string(file);
 	*frame_=imread(location_+file_+ext_);
 	frame_no_++;
+	line_no_=0;
 	return(frame_);
 }
 PicSet::~PicSet() {
