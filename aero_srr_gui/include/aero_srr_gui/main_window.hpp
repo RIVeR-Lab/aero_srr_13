@@ -1,12 +1,12 @@
 /**
- * @file /include/oryx_srr_gui/main_window.hpp
+ * @file /include/aero_srr_gui/main_window.hpp
  *
- * @brief Qt based gui for oryx_srr_gui.
+ * @brief Qt based gui for aero_srr_gui.
  *
  * @date November 2010
  **/
-#ifndef oryx_srr_gui_MAIN_WINDOW_H
-#define oryx_srr_gui_MAIN_WINDOW_H
+#ifndef aero_srr_gui_MAIN_WINDOW_H
+#define aero_srr_gui_MAIN_WINDOW_H
 
 /*****************************************************************************
 ** Includes
@@ -20,7 +20,7 @@
 ** Namespace
 *****************************************************************************/
 
-namespace oryx_srr_gui {
+namespace aero_srr_gui {
 
 /*****************************************************************************
 ** Interface [MainWindow]
@@ -59,6 +59,6 @@ private:
 	QNode qnode;
 };
 
-}  // namespace oryx_srr_gui
+}  // namespace aero_srr_gui
 
-#endif // oryx_srr_gui_MAIN_WINDOW_H
+#endif // aero_srr_gui_MAIN_WINDOW_H
