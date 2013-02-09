@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(aero_drive_controller)
 
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation oryx_msgs actionlib_msgs actionlib geometry_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation actionlib_msgs actionlib geometry_msgs)
 find_package(Boost REQUIRED COMPONENTS thread)
 
 
 #generate actions and msgs
 add_message_files(DIRECTORY msg FILES VelocityArc.msg VelocityTranslate.msg)
 add_action_files(DIRECTORY action FILES TranslateCommand.action VelocityCommand.action)
-generate_messages(DEPENDENCIES std_msgs oryx_msgs actionlib_msgs)
+generate_messages(DEPENDENCIES std_msgs actionlib_msgs)
 
 
 #Get the current date
@@ -42,7 +42,7 @@ configure_file (
   "${PROJECT_BINARY_DIR}/OryxDriveControllerConfig.h"
   )
 
-catkin_package(CATKIN_DEPENDS roscpp message_runtime oryx_msgs actionlib_msgs actionlib geometry_msgs)
+catkin_package(CATKIN_DEPENDS roscpp message_runtime actionlib_msgs actionlib geometry_msgs)
 
 
 #Link all source folders so that Headers will be properly found

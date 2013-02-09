@@ -15,13 +15,13 @@
 #include <string>
 #include <std_msgs/String.h>
 #include <sstream>
-#include "../include/oryx_srr_gui/qnode.hpp"
+#include "../include/aero_srr_gui/qnode.hpp"
 
 /*****************************************************************************
 ** Namespaces
 *****************************************************************************/
 
-namespace oryx_srr_gui {
+namespace aero_srr_gui {
 
 /*****************************************************************************
 ** Implementation
@@ -41,7 +41,7 @@ QNode::~QNode() {
 }
 
 bool QNode::init() {
-	ros::init(init_argc,init_argv,"oryx_srr_gui");
+	ros::init(init_argc,init_argv,"aero_srr_gui");
 	if ( ! ros::master::check() ) {
 		return false;
 	}
@@ -57,7 +57,7 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 	std::map<std::string,std::string> remappings;
 	remappings["__master"] = master_url;
 	remappings["__hostname"] = host_url;
-	ros::init(remappings,"oryx_srr_gui");
+	ros::init(remappings,"aero_srr_gui");
 	if ( ! ros::master::check() ) {
 		return false;
 	}
@@ -124,4 +124,4 @@ void QNode::log( const LogLevel &level, const std::string &msg) {
 	Q_EMIT loggingUpdated(); // used to readjust the scrollbar
 }
 
-}  // namespace oryx_srr_gui
+}  // namespace aero_srr_gui
