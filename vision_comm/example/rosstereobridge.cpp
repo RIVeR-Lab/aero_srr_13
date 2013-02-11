@@ -18,9 +18,9 @@ int main(int argc, char **argv)
 	vector<Mat*> image_pair;
 	double fps;
 
-	if(argc!=3)
+	if(argc!=2)
 	{
-		cout<<"Useage ./"<<argv[0]<<" <input_topic_base> <output>"<<endl;
+		cout<<"Useage ./"<<argv[0]<<" <input_topic_base>"<<endl;
 		return -1;
 	}
 
@@ -31,12 +31,14 @@ int main(int argc, char **argv)
 		rosstereocamera.startTime();
 		image_pair=rosstereocamera.getNextStereoImage();
 		frame=rosstereocamera.getNextFrame();
-		if(!frame)
+		if(frame!=NULL)
 		{
 			fps=rosstereocamera.endTime();
 			rosstereocamera.showImage("Result");
 			rosstereocamera.showPair("Result");
+			waitKey(30);
 		}
+		fps=rosstereocamera.endTime();
 		ros::spinOnce();
 		loop.sleep();
 	}

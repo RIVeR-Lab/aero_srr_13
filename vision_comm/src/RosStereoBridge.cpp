@@ -19,9 +19,9 @@ void RosStereoBridge::stereoCallback(
 {
 	std_msgs::Header header;
 	header.stamp = ros::Time::now();
-	cv_bridge::CvImageConstPtr cv_ptr_left = cv_bridge::toCvShare(left_image_msg, sensor_msgs::image_encodings::MONO8);
-	cv_bridge::CvImageConstPtr cv_ptr_right = cv_bridge::toCvShare(right_image_msg, sensor_msgs::image_encodings::MONO8);
-	cv_bridge::CvImageConstPtr cv_ptr_disp = cv_bridge::toCvShare(disp_image_msg->image, disp_image_msg, sensor_msgs::image_encodings::TYPE_32FC1);
+	cv_bridge::CvImageConstPtr cv_ptr_left = cv_bridge::toCvCopy(left_image_msg, sensor_msgs::image_encodings::MONO8);
+	cv_bridge::CvImageConstPtr cv_ptr_right = cv_bridge::toCvCopy(right_image_msg, sensor_msgs::image_encodings::MONO8);
+	cv_bridge::CvImageConstPtr cv_ptr_disp = cv_bridge::toCvCopy(disp_image_msg->image,  sensor_msgs::image_encodings::TYPE_32FC1);
 	*frame_ = cv_ptr_disp->image;
 	*lframe_ = cv_ptr_left->image;
 	*rframe_ = cv_ptr_right->image;
@@ -33,11 +33,11 @@ void RosStereoBridge::stereoCallback(
 
 RosStereoBridge::RosStereoBridge(std::string basetopic):
     it_(nh_),
-	lframe_sub_( nh_, basetopic.append("/left/camera"), 1 ),
-	rframe_sub_( nh_, basetopic.append("/right/camera"), 1 ),
-	frame_sub_( nh_, basetopic.append("/disparity"), 1 ),
-	lframe_info_sub_( nh_, basetopic.append("/right/camera_info"), 1 ),
-	rframe_info_sub_( nh_, basetopic.append("/left/camera_info"), 1 ),
+	lframe_sub_( nh_, basetopic+std::string("/left/image_rect"), 1 ),
+	rframe_sub_(nh_, basetopic+std::string("/right/image_rect"), 1 ),
+	frame_sub_( nh_, basetopic+std::string("/disparity"), 1 ),
+	lframe_info_sub_( nh_, basetopic+std::string("/left/camera_info"), 1 ),
+	rframe_info_sub_( nh_, basetopic+std::string("/right/camera_info"), 1 ),
 	sync_( SyncPolicy( 100 ), lframe_sub_, rframe_sub_, frame_sub_, lframe_info_sub_, rframe_info_sub_)
 {
 	newframe_=false;
@@ -55,12 +55,19 @@ vector<Mat*> RosStereoBridge::getNextStereoImage()
 }
 void RosStereoBridge::showPair(string wname)
 {
-	imshow(wname.append("left").c_str(),*lframe_);
-	imshow(wname.append("right").c_str(),*rframe_);
+	imshow(wname+std::string("left").c_str(),*lframe_);
+	imshow(wname+std::string("right").c_str(),*rframe_);
 }
 cv::Mat* RosStereoBridge::getNextFrame()
 {
-	return(frame_);
+	if(newframe_)
+	{
+		newframe_=false;
+		line_no_=0;
+		return(frame_);
+	}
+	else
+		return(NULL);
 }
 
 RosStereoBridge::~RosStereoBridge() {
