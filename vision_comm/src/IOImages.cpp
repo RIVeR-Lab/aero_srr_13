@@ -59,7 +59,6 @@ void IOImages::showImage(string wname)
 	sprintf(label,"FPS: %f",fps_);
 	addText(label);
 	imshow(wname.c_str(),*frame_);
-	line_no_=0;
 }
 void IOImages::writeImage(string fname)
 {

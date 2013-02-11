@@ -15,7 +15,9 @@
   <depend package="image_transport" />
   <depend package="image_geometry" />
   <depend package="tf"/>
-
+   <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lvision_comm" />
+  </export>
 </package>
 
 
