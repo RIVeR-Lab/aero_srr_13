@@ -12,13 +12,13 @@
 #include <QtGui>
 #include <QMessageBox>
 #include <iostream>
-#include "../include/oryx_srr_gui/main_window.hpp"
+#include "../include/aero_srr_gui/main_window.hpp"
 
 /*****************************************************************************
 ** Namespaces
 *****************************************************************************/
 
-namespace oryx_srr_gui {
+namespace aero_srr_gui {
 
 using namespace Qt;
 
@@ -129,7 +129,7 @@ void MainWindow::on_actionAbout_triggered() {
 *****************************************************************************/
 
 void MainWindow::ReadSettings() {
-    QSettings settings("Qt-Ros Package", "oryx_srr_gui");
+    QSettings settings("Qt-Ros Package", "aero_srr_gui");
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());
     QString master_url = settings.value("master_url",QString("http://192.168.1.2:11311/")).toString();
@@ -150,7 +150,7 @@ void MainWindow::ReadSettings() {
 }
 
 void MainWindow::WriteSettings() {
-    QSettings settings("Qt-Ros Package", "oryx_srr_gui");
+    QSettings settings("Qt-Ros Package", "aero_srr_gui");
     settings.setValue("master_url",ui.line_edit_master->text());
     settings.setValue("host_url",ui.line_edit_host->text());
     //settings.setValue("topic_name",ui.line_edit_topic->text());
@@ -167,5 +167,5 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	QMainWindow::closeEvent(event);
 }
 
-}  // namespace oryx_srr_gui
+}  // namespace aero_srr_gui
 
