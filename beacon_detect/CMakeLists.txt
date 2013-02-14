@@ -11,8 +11,6 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 rosbuild_init()
 
-find_package(OpenCV REQUIRED)
-
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
@@ -27,7 +25,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(${beacon_detect} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${beacon_detect} thread)
-#rosbuild_add_executable(apriltag examples/apriltags_demo.cpp)
+rosbuild_add_executable(beacondetect src/detect.cpp)
 #target_link_libraries(apriltag ${beacon_detect} )
 
 

@@ -18,10 +18,19 @@ RosBridge::RosBridge(string topic_in, string topic_out):it_(nh_)
 	frame_=new Mat();
 	newimg_=false;
 }
-RosBridge::RosBridge(string topic_out, Mat *img):it_(nh_)
+RosBridge::RosBridge(string topic_in, Mat *img):it_(nh_)
+{
+	file_ = topic_in;
+	subImg_ = it_.subscribe(topic_in.c_str(), 100, &RosBridge::imageCb, this);
+	cout<<"Subscribing to: "<<topic_in.c_str()<<endl;
+	frame_=new Mat();
+	newimg_=false;
+}
+RosBridge::RosBridge(Mat *img,string topic_out):it_(nh_)
 {
 	file_ = "User";
 	pub_ = it_.advertise(topic_out.c_str(), 1);
+	cout<<"Publishing to: "<<topic_out.c_str()<<endl;
 	frame_=img;
 }
 void RosBridge::imageCb(const sensor_msgs::ImageConstPtr& msg)

@@ -25,7 +25,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 find_package(OpenCV REQUIRED)
 
 #common commands for building c++ executables and libraries
-rosbuild_add_library(vision_comm src/IOImages.cpp src/RosBridge.cpp src/RosStereoBridge.cpp)
+rosbuild_add_library(vision_comm src/IOImages.cpp src/RosBridge.cpp src/RosStereoBridge.cpp src/MonoCam.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)

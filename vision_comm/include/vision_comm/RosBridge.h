@@ -27,6 +27,7 @@ class RosBridge: public IOImages {
 public:
 	RosBridge(std::string img, std::string out);
 	RosBridge(std::string out, cv::Mat *img);
+	RosBridge(cv::Mat *img,std::string topic_out);
 	cv::Mat* getNextFrame();
 	void publishFrame();
 	virtual ~RosBridge();

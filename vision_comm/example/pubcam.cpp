@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 
 	if(argc!=3)
 	{
-		cout<<"Usage: ./pubcam <camera_no> <output_topic>"<<endl;
+		cout<<"Usage: rosrun pubcam <camera_no> <output_topic>"<<endl;
 		return -1;
 	}
 
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     }
     frame=camera.getNextFrame();
 
-	RosBridge roscamera(argv[2],frame);
+	RosBridge roscamera(frame,argv[2]);
 
 	ros::Rate loop(10);
 	char ch;
@@ -45,8 +45,8 @@ int main(int argc, char **argv)
 		frame=roscamera.getNextFrame();
 		camera.showImage("Result");
 		roscamera.publishFrame();
-		ch=waitKey(1);
-		ros::spin();
+		ch=waitKey(30);
+		ros::spinOnce();
 		loop.sleep();
 	}
 	return 0;
