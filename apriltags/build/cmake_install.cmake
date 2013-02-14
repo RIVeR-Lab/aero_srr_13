@@ -1,4 +1,4 @@
-# Install script for directory: /home/bpwiselybabu/sandbox/AERO/AERO_vision/beacon_detect
+# Install script for directory: /home/bpwiselybabu/sandbox/AERO/aero_srr/apriltags
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -38,7 +38,7 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
-FILE(WRITE "/home/bpwiselybabu/sandbox/AERO/AERO_vision/beacon_detect/${CMAKE_INSTALL_MANIFEST}" "")
+FILE(WRITE "/home/bpwiselybabu/sandbox/AERO/aero_srr/apriltags/build/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  FILE(APPEND "/home/bpwiselybabu/sandbox/AERO/AERO_vision/beacon_detect/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  FILE(APPEND "/home/bpwiselybabu/sandbox/AERO/aero_srr/apriltags/build/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 ENDFOREACH(file)

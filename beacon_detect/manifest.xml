@@ -10,6 +10,8 @@
   <url>http://ros.org/wiki/beacon_detect</url>
   <depend package="roscpp"/>
   <depend package="opencv2"/>
+  <depend package="apriltags"/>
+  <depend package="vision_comm"/>
 
 </package>
 
