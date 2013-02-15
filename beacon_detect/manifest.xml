@@ -12,6 +12,7 @@
   <depend package="opencv2"/>
   <depend package="apriltags"/>
   <depend package="vision_comm"/>
+  <depend package="tf"/>
 
 </package>
 
