@@ -18,8 +18,8 @@ int main(int argc, char **argv)
 	std::string warn_message("Parameter <%s> Not Set. Using Default Value <%s>");
 	ros::init(argc, argv, "Occupancy_Generator");
 	ros::NodeHandle nh;
-	ros::Publisher pub = nh.advertise<aero_path_planning::OccupancyGridMsg>("oryx/occupancy_point_cloud_topic", 2);
-	ros::Publisher s_pub = nh.advertise<oryx_msgs::SoftwareStop>("oryx/software_stop", 2);
+	ros::Publisher pub = nh.advertise<aero_path_planning::OccupancyGridMsg>("aero/occupancy_point_cloud_topic", 2);
+	ros::Publisher s_pub = nh.advertise<oryx_msgs::SoftwareStop>("aero/software_stop", 2);
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");
