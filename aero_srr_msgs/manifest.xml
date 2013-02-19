@@ -1,0 +1,24 @@
+<package>
+  <name>aero_srr_msgs</name>
+  <version>1.0.0</version>
+  <description>
+
+     Message definitions used by the aero_srr stack
+
+  </description>
+  <maintainer email="robot@wpi.edu">RIVeR Lab</maintainer>
+  <license>BSD</license>
+  <url>http://robot.wpi.edu/wiki/aero_srr_msgs</url>
+
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+  <depend package="tf"/>
+  <depend package="oryx_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
+  <depend package="sensor_msgs"/>
+</package>
+
+

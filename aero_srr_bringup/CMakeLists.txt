@@ -1,6 +1,14 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(aero_srr_bringup)
+cmake_minimum_required(VERSION 2.4.6)
+include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
-find_package(catkin REQUIRED)
+# Set the build type.  Options are:
+#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
+#  Debug          : w/ debug symbols, w/o optimization
+#  Release        : w/o debug symbols, w/ optimization
+#  RelWithDebInfo : w/ debug symbols, w/ optimization
+#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
+#set(ROS_BUILD_TYPE RelWithDebInfo)
 
-catkin_package(CATKIN_DEPENDS aero_drive_controller aero_path_planning)
+#ROS init
+rosbuild_init()
+

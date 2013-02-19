@@ -1,0 +1,22 @@
+<package>
+  <name>aero_drive_controller</name>
+  <version>1.0.0</version>
+  <description>
+
+     aero_drive_controller
+
+  </description>
+  <maintainer email="robot@wpi.edu">aruis</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/oryx_drive_controller</url>
+
+
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
