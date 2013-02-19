@@ -12,7 +12,7 @@
 #include<aero_srr_msgs/Command.h>
 
 //*********************LOCAL DEPENDENCIES**********************//
-#include"OryxPathPlanning.h"
+#include<aero_path_planning/OryxPathPlanning.h>
 #include"OryxPathPlannerConfig.h"
 
 

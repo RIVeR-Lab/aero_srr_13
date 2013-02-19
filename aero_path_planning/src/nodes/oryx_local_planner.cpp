@@ -14,9 +14,9 @@
 #include<oryx_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
-#include "OryxPathPlanning.h"
+#include <aero_path_planning/OryxPathPlanning.h>
 #include "OryxPathPlannerConfig.h"
-#include "aero_path_planning/OccupancyGridMsg.h"
+#include <aero_path_planning/OccupancyGridMsg.h>
 
 //*********************** MACROS ************************************//
 ///Number of seconds to wait for connections to other ROS nodes before determining a system failure

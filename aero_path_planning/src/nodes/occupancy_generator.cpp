@@ -7,8 +7,8 @@
 #include<ros/ros.h>
 #include<sensor_msgs/PointCloud2.h>
 #include<oryx_msgs/SoftwareStop.h>
-#include"aero_path_planning/OccupancyGridMsg.h"
-#include"OccupancyGrid.h"
+#include<aero_path_planning/OccupancyGridMsg.h>
+#include<aero_path_planning/OccupancyGrid.h>
 
 ///Macro for printing out warning messages if default parameters are used
 #define PARAM_WARN(param,value) ROS_WARN(warn_message.c_str(), param.c_str(), value.c_str())
