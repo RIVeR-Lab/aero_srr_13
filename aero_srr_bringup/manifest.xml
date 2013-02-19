@@ -1,6 +1,4 @@
 <package>
-  <name>aero_srr_bringup</name>
-  <version>1.0.0</version>
   <description>
 
      A set of launch scripts for the startup of WPI's AERO Sample Recovery and Return Robot

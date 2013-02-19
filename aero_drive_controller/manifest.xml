@@ -1,6 +1,4 @@
 <package>
-  <name>aero_drive_controller</name>
-  <version>1.0.0</version>
   <description>
 
      aero_drive_controller
@@ -13,6 +11,7 @@
 
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
+  <depend package="oryx_msgs"/>
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
   <depend package="geometry_msgs"/>

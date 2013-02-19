@@ -70,8 +70,6 @@ configure_file (
   "${PROJECT_BINARY_DIR}/OryxPathPlannerConfig.h"
   )
 
-catkin_package(CATKIN_DEPENDS roscpp std_msgs message_runtime oryx_msgs tf aero_drive_controller actionlib_msgs actionlib geometry_msgs pcl pcl_ros aero_srr_msgs sensor_msgs)
-
 #Link all source folders so that Headers will be properly found
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/src")

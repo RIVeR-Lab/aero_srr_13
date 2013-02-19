@@ -83,12 +83,12 @@ rosbuild_add_library(${PROJECT_NAME}_lib
   src/translate_command/TranslateControlServer.cpp
   src/controllers/ArcDriveController.cpp
 )
-rosbuild_link_boost(${PROJECT_NAME} thread)
+rosbuild_link_boost(${PROJECT_NAME}_lib thread)
 
 #Build Nodes
-rosbuild_add_executable(oryx_drive_controller src/nodes/oryx_drive_controller.cpp)
-target_link_libraries(oryx_drive_controller ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME}_lib)
-add_dependencies(oryx_drive_controller ${PROJECT_NAME}_gencpp)
+rosbuild_add_executable(aero_drive_controller src/nodes/oryx_drive_controller.cpp)
+rosbuild_link_boost(aero_drive_controller thread)
+target_link_libraries(aero_drive_controller ${PROJECT_NAME}_lib)
 
-rosbuild_add_executable(oryx_drive_controller_test src/nodes/oryx_drive_controller_action_tests.cpp)
-rosbuild_link_boost(oryx_drive_controller_test thread)
+rosbuild_add_executable(aero_drive_controller_test src/nodes/oryx_drive_controller_action_tests.cpp)
+rosbuild_link_boost(aero_drive_controller_test thread)

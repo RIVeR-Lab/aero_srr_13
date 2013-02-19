@@ -1,6 +1,4 @@
 <package>
-  <name>aero_srr_msgs</name>
-  <version>1.0.0</version>
   <description>
 
      Message definitions used by the aero_srr stack

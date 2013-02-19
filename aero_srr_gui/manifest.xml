@@ -1,6 +1,4 @@
 <package>
-  <name>aero_srr_gui</name>
-  <version>1.0.0</version>
   <description>
 
      GUI elements used by the aero_srr stack for visualization of system processes
@@ -10,14 +8,10 @@
   <license>BSD</license>
   <url>http://ros.org/wiki/aero_srr_gui</url>
 
+  <rosdep name="libqt4-dev"/>
   <depend package="roscpp"/>
   <depend package="rospy"/>
   <depend package="oryx_msgs"/>
-  <depend package="qt_build"/>
-  <depend package="roscpp"/>
-
-
-  <rosdep name="libqt4-dev"/>
   <depend package="qt_build"/>
   <depend package="roscpp"/>
 

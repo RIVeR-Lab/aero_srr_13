@@ -16,12 +16,12 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
+# Set the build type. Options are:
+# Coverage : w/ debug symbols, w/o optimization, w/ code-coverage
+# Debug : w/ debug symbols, w/o optimization
+# Release : w/o debug symbols, w/ optimization
+# RelWithDebInfo : w/ debug symbols, w/ optimization
+# MinSizeRel : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE Debug)
 
 ##############################################################################
@@ -29,7 +29,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 ##############################################################################
 
 # Could use this, but qt-ros would need an updated deb, instead we'll move to catkin
-# rosbuild_include(qt_build qt-ros) 
+# rosbuild_include(qt_build qt-ros)
 rosbuild_find_ros_package(qt_build)
 include(${qt_build_PACKAGE_PATH}/qt-ros.cmake)
 
@@ -52,12 +52,6 @@ QT4_WRAP_CPP(QT_MOC_HPP ${QT_MOC})
 ##############################################################################
 
 file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.cpp)
-
-##############################################################################
-# Configure catkin package
-##############################################################################
-
-catkin_package(CATKIN_DEPENDS roscpp rospy)
 
 ##############################################################################
 # Binaries
