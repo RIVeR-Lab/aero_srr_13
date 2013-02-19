@@ -81,8 +81,8 @@ include_directories("${PROJECT_SOURCE_DIR}/src/helpers")
 rosbuild_add_boost_directories()
 
 #build nodes
-rosbuild_add_executable(oryx_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
-rosbuild_add_executable(oryx_local_planner src/nodes/oryx_local_planner.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
+rosbuild_add_executable(aero_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
+rosbuild_add_executable(aero_local_planner src/nodes/oryx_local_planner.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
 rosbuild_add_executable(occupancy_generator src/nodes/occupancy_generator.cpp src/helpers/OccupancyGrid.cpp)
-rosbuild_add_executable(oryx_global_planner src/nodes/oryx_global_planner.cpp src/helpers/OccupancyGrid.cpp)
+rosbuild_add_executable(aero_global_planner src/nodes/oryx_global_planner.cpp src/helpers/OccupancyGrid.cpp)
 
