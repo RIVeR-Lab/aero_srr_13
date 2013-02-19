@@ -1,7 +1,7 @@
 <launch>
   <!-- ********************ARGUMENTS******************** -->
 	<!-- declare args to be passed in for topics for receiving new PC data -->
-	<arg name="occupancy_point_cloud_topic"	default="oryx/occupancy_point_cloud_topic" />
+	<arg name="occupancy_point_cloud_topic"	default="aero/occupancy_point_cloud_topic" />
 	
 	<!-- declare occupancy grid arguments -->
 	<arg name="occupancy/update_rate"	default="0.2"/>
