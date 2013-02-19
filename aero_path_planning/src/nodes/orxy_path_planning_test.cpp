@@ -5,7 +5,7 @@
  * @brief	Simple test node
  */
 #include <ros/ros.h>
-#include "OryxPathPlanning.h"
+#include <aero_path_planning/OryxPathPlanning.h>
 using namespace aero_path_planning;
 void printSpeedSet(int xDim, int yDim, double resoltuion, SpeedSet& speedSet);
 

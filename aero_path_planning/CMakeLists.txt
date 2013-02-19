@@ -66,7 +66,7 @@ endif(VERBOSITY)
 # configure a header file to pass some of the CMake settings
 # to the source code to use as build-time configuration parameters
 configure_file (
-  "${PROJECT_SOURCE_DIR}/src/OryxPathPlannerConfig.h.in"
+  "${PROJECT_SOURCE_DIR}/include/OryxPathPlannerConfig.h.in"
   "${PROJECT_BINARY_DIR}/OryxPathPlannerConfig.h"
   )
 
