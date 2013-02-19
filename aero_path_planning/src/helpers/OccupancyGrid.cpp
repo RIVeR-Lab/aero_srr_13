@@ -11,7 +11,7 @@
 
 
 
-#include "OccupancyGrid.h"
+#include <aero_path_planning/OccupancyGrid.h>
 
 using namespace aero_path_planning;
 
