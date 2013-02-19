@@ -1,7 +1,7 @@
 <launch>
   <!-- ********************ARGUMENTS******************** -->
 	<!-- declare args to be passed in for topics for receiving new PC data -->
-	<arg name="occupancy_point_cloud_topic"	default="oryx/occupancy_point_cloud_topic" />
+	<arg name="occupancy_point_cloud_topic"	default="aero/occupancy_point_cloud_topic" />
 	
 	<!-- declare occupancy grid arguments -->
 	<arg name="occupancy/update_rate"	default="0.2"/>
@@ -39,5 +39,5 @@
     <arg name="speed_set/min_speed"		value="$(arg speed_set/min_speed)"/>
     <arg name="tentacles/number"		value="$(arg tentacles/number)"/>
     <arg name="tentacles/exp_factor"		value="$(arg tentacles/exp_factor)"/>
-  </include>
+  </include>  
 </launch>

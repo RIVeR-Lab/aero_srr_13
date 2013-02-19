@@ -1,0 +1,17 @@
+<package>
+  <description>
+
+     A set of launch scripts for the startup of WPI's AERO Sample Recovery and Return Robot
+
+  </description>
+  <maintainer email="robot@wpi.edu">aruis</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/oryx_drive_controller</url>
+
+
+  <depend package="aero_drive_controller"/>
+  <depend package="aero_path_planning"/>
+
+</package>
+
+

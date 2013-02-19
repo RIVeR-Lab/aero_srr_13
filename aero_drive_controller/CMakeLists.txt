@@ -1,15 +1,39 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(aero_drive_controller)
+cmake_minimum_required(VERSION 2.4.6)
+include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation oryx_msgs actionlib_msgs actionlib geometry_msgs)
-find_package(Boost REQUIRED COMPONENTS thread)
+# Set the build type.  Options are:
+#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
+#  Debug          : w/ debug symbols, w/o optimization
+#  Release        : w/o debug symbols, w/ optimization
+#  RelWithDebInfo : w/ debug symbols, w/ optimization
+#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
+#set(ROS_BUILD_TYPE RelWithDebInfo)
 
+#setup actionlib
+rosbuild_find_ros_package(actionlib_msgs)
+include(${actionlib_msgs_PACKAGE_PATH}/cmake/actionbuild.cmake)
+genaction()
 
-#generate actions and msgs
-add_message_files(DIRECTORY msg FILES VelocityArc.msg VelocityTranslate.msg)
-add_action_files(DIRECTORY action FILES TranslateCommand.action VelocityCommand.action)
-generate_messages(DEPENDENCIES std_msgs oryx_msgs actionlib_msgs)
+#ROS init
+rosbuild_init()
 
+#set the default path for built executables to the "bin" directory
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+#set the default path for built libraries to the "lib" directory
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+
+#uncomment if you have defined messages
+rosbuild_genmsg()
+#uncomment if you have defined services
+#rosbuild_gensrv()
+
+#common commands for building c++ executables and libraries
+#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
+#target_link_libraries(${PROJECT_NAME} another_library)
+#rosbuild_add_boost_directories()
+#rosbuild_link_boost(${PROJECT_NAME} thread)
+#rosbuild_add_executable(example examples/example.cpp)
+#target_link_libraries(example ${PROJECT_NAME})
 
 #Get the current date
 MACRO (TODAY RESULT) 
@@ -42,9 +66,6 @@ configure_file (
   "${PROJECT_BINARY_DIR}/OryxDriveControllerConfig.h"
   )
 
-catkin_package(CATKIN_DEPENDS roscpp message_runtime oryx_msgs actionlib_msgs actionlib geometry_msgs)
-
-
 #Link all source folders so that Headers will be properly found
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/include")
@@ -52,22 +73,22 @@ include_directories("${PROJECT_SOURCE_DIR}/src/nodes")
 include_directories("${PROJECT_SOURCE_DIR}/src/velocity_command")
 include_directories("${PROJECT_SOURCE_DIR}/src/translate_command")
 include_directories("${PROJECT_SOURCE_DIR}/src/controllers")
-include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+
+#Add the Boost libraries
+rosbuild_add_boost_directories()
 
 #Add non-node library files to be build
-add_library(${PROJECT_NAME}_lib
+rosbuild_add_library(${PROJECT_NAME}_lib
   src/velocity_command/VelocityControlServer.cpp
   src/translate_command/TranslateControlServer.cpp
   src/controllers/ArcDriveController.cpp
 )
-target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_lib ${PROJECT_NAME}_gencpp)
+rosbuild_link_boost(${PROJECT_NAME}_lib thread)
 
 #Build Nodes
-add_executable(oryx_drive_controller src/nodes/oryx_drive_controller.cpp)
-target_link_libraries(oryx_drive_controller ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME}_lib)
-add_dependencies(oryx_drive_controller ${PROJECT_NAME}_gencpp)
+rosbuild_add_executable(aero_drive_controller src/nodes/oryx_drive_controller.cpp)
+rosbuild_link_boost(aero_drive_controller thread)
+target_link_libraries(aero_drive_controller ${PROJECT_NAME}_lib)
 
-add_executable(oryx_drive_controller_test src/nodes/oryx_drive_controller_action_tests.cpp)
-target_link_libraries(oryx_drive_controller_test ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME}_lib)
-add_dependencies(oryx_drive_controller_test ${PROJECT_NAME}_gencpp)
+rosbuild_add_executable(aero_drive_controller_test src/nodes/oryx_drive_controller_action_tests.cpp)
+rosbuild_link_boost(aero_drive_controller_test thread)
