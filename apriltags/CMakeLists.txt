@@ -35,3 +35,4 @@ rosbuild_add_library(apriltag src/TagDetector.cc src/Quad.cc src/GrayModel.cc sr
 rosbuild_add_executable(apriltag-demo example/apriltags_demo.cpp)
 
 target_link_libraries(apriltag-demo apriltag)
+target_link_libraries(apriltag-demo ${OpenCV_LIBRARIES})
