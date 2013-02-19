@@ -1,0 +1,66 @@
+
+<launch ns="aero_path_planning">
+	<!-- ********************ARGUMENTS******************** -->
+	<!-- declare args for platform -->
+	<arg name="platform"			default="0" />
+	<!-- declare args to be passed in for actionlib topics -->
+	<arg name="velocity_command_topic"	default="velocity_command_topic" />
+	
+	<!-- declare args to be passed in for topics for receiving new PC data -->
+	<arg name="occupancy_point_cloud_topic"	default="occupancy_point_cloud_topic" />
+	
+	<!-- declare occupancy grid arguments -->
+	<arg name="occupancy/update_rate"	default="0.2"/>
+	<arg name="occupancy/x_dimension"	default="200"/>
+	<arg name="occupancy/y_dimension"	default="200"/>
+	<arg name="occupancy/z_dimension"	default="0"/>
+	<arg name="occupancy/x_origin"		default="0"/>
+	<arg name="occupancy/y_origin"		default="100"/>
+	<arg name="occupancy/z_origin"		default="0"/>
+	<arg name="occupancy/grid_resolution"	default="0.1"/>
+	
+	<!-- declare speed set arguments -->
+	<arg name="speed_set/number"	default="15"/>
+	<arg name="speed_set/min_speed"	default="0.001"/>
+	<arg name="speed_set/max_speed"	default="1.0"/>
+	
+	<!-- declare tentacle arguments -->
+	<arg name="tentacles/number"	default="81"/>
+	<arg name="tentacles/exp_factor"	default="1.15"/>
+	
+	
+	<!-- ********************PARAMETERS******************** -->
+	<!-- declare occupancy grid parameters -->
+	<group ns="occupancy">
+		<param name="update_rate"	value="$(arg occupancy/update_rate)"/>
+		<param name="x_dimension"	value="$(arg occupancy/x_dimension)"/>
+		<param name="y_dimension"	value="$(arg occupancy/y_dimension)"/>
+		<param name="z_dimension"	value="$(arg occupancy/z_dimension)"/>
+		<param name="x_origin"		value="$(arg occupancy/x_origin)"/>
+		<param name="y_origin"		value="$(arg occupancy/y_origin)"/>
+		<param name="z_origin"		value="$(arg occupancy/z_origin)"/>
+		<param name="grid_resolution"	value="$(arg occupancy/grid_resolution)"/>
+	</group>
+	
+	<!-- declare speed set parameters -->
+	<group ns="speed_set">
+		<param name="number"	value="$(arg speed_set/number)"/>
+		<param name="min_speed"	value="$(arg speed_set/min_speed)"/>
+		<param name="max_speed"	value="$(arg speed_set/max_speed)"/>
+	</group>
+	
+	<!-- declare tentalce parameters -->
+	<group ns="tentacles">
+		<param name="number"	value="$(arg tentacles/number)"/>
+		<param name="exp_factor"	value="$(arg tentacles/exp_factor)"/>
+	</group>
+	
+	
+	<!-- ********************INCLUDES******************** -->
+	<!-- Include Sub-Launch Files -->
+	<include file="$(find aero_path_planning)/launch/aero_local_planner.launch">
+		<arg name="velocity_command_topic"		value="$(arg velocity_command_topic)" />
+		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
+		<arg name="platform"					value="$(arg platform)"  />
+	</include>
+</launch>
