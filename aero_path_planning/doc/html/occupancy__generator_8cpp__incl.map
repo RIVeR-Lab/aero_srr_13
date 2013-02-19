@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node11" href="$OccupancyGrid_8h.html" title="//TODO fill in detailed discription here" alt="" coords="557,83,680,112"/>
-<area shape="rect" id="node14" href="$OryxPathPlanningUtilities_8h.html" title="Header containing definitions that are used throughout the oryx_path_planning package." alt="" coords="512,160,693,189"/>
-<area shape="rect" id="node22" href="$TypeDefinitions_8h.html" title="Common typedefs for the oryx_path_planning namespace." alt="" coords="593,315,716,344"/>
-<area shape="rect" id="node28" href="$PointConverter_8hpp.html" title="Header containg class definitions for converting between points." alt="" coords="640,237,773,267"/>
-</map>
