@@ -1,0 +1,12 @@
+<stack>
+  <description brief="code for WPI's AERO SRR Robot">
+    A set of packages that define the operation of WPI's AERO Sample Recovery and Return Robot
+  </description>
+  <author>Maintained by WPI RIVeR Lab</author>
+  <license>?</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://robot.wpi.edu/wiki/index.php/Oryx</url>
+  <depend stack="ros"/>
+  <depend stack="actionlib"/>
+  <depend stack="navigation"/>
+</stack>
