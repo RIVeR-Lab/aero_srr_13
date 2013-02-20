@@ -10,6 +10,7 @@
 
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/function.hpp>
+#include<queue>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
@@ -37,7 +38,7 @@ namespace aero_path_planning
 		 */
 		typedef boost::function< bool (const aero_path_planning::Point&, const aero_path_planning::OccupancyGrid&)> collision_func_;
 
-		virtual CarrotPathFinder();
+
 		virtual ~CarrotPathFinder();
 
 

@@ -12,6 +12,7 @@
 
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/GlobalPlanner.h>
+#include<aero_path_planning/RRTCarrot.h>
 //**********************NAMESPACES*****************************//
 
 

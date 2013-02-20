@@ -27,19 +27,19 @@ RRTCarrotTree::RRTCarrotTree()
 }
 
 RRTCarrotTree::RRTCarrotTree(const RRTCarrotTree& copy):
-		nodes_(copy.nodes_)
+				nodes_(copy.nodes_)
 {
 
 }
 
 RRTCarrotTree::RRTCarrotTree(const RRTCarrotTree* copy):
-	nodes_(copy->nodes_)
+			nodes_(copy->nodes_)
 {
 
 }
 
 RRTCarrotTree::RRTCarrotTree(int size):
-		nodes_(size)
+				nodes_(size)
 {
 
 }
@@ -84,6 +84,7 @@ RRTCarrotTree& RRTCarrotTree::operator=(RRTCarrotTree const &copy)
 //*********************RRTCarrot*******************************//
 
 RRTCarrot::RRTCarrot(const aero_path_planning::RRTCarrot& copy):
+		step_size_(copy.step_size_),
 		initialized_(copy.initialized_),
 		has_delta_(copy.has_delta_),
 		has_coll_(copy.has_coll_),
@@ -102,6 +103,21 @@ RRTCarrot::RRTCarrot(const aero_path_planning::RRTCarrot& copy):
 }
 
 RRTCarrot::RRTCarrot():
+		step_size_(0),
+		initialized_(false),
+		has_delta_(false),
+		has_coll_(false),
+		has_map_(false),
+		delta_(0),
+		start_tree_(NULL),
+		goal_tree_(NULL),
+		rand_gen_(NULL)
+{
+	this->randInit();
+}
+
+RRTCarrot::RRTCarrot(double step_size):
+		step_size_(step_size),
 		initialized_(false),
 		has_delta_(false),
 		has_coll_(false),
@@ -172,7 +188,7 @@ bool RRTCarrot::setCarrotDelta(double delta)
 
 bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue<aero_path_planning::Point*>& result_path)
 {
-	if(this->isInialized())
+	if(this->initialized_)
 	{
 		return true;
 	}

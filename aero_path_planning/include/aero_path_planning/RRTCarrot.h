@@ -9,7 +9,7 @@
 //License File
 
 //****************SYSTEM DEPENDANCIES**************************//
-
+#include<boost/random.hpp>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/CarrotPathFinder.h>
 //**********************NAMESPACES*****************************//
@@ -183,9 +183,10 @@ private:
 	 * @param [in] tree_node The node on the tree to connect from
 	 * @return True if they fully connected, else false
 	 */
-	bool connect(const RRTNode const *q_rand, const RRTNode const *tree_node);
+	bool connect(const RRTNode* q_rand, const RRTNode* tree_node);
 
 
+	int  step_size_;   ///The distance to step while connecting nodes
 	bool initialized_; ///Flag for signalling that the RRTCarrot is ready for searching
 	bool has_delta_;   ///Flag for signalling that the delta value has been set
 	bool has_coll_;    ///Flag for signalling that the collision function has been set
