@@ -166,7 +166,7 @@ void RRTCarrot::randInit()
 	boost::mt19937 RNG;
 	boost::normal_distribution<> dist(0, 1);
 	this->rand_gen_  = new boost::variate_generator<boost::mt19937, boost::normal_distribution<> >(RNG, dist);
-	this->rand_gen_->engine().seed();
+	this->rand_gen_->engine().seed(ros::Time::now().toSec());
 	this->rand_gen_->distribution().reset();
 }
 
