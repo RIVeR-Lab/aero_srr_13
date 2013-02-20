@@ -59,7 +59,7 @@ private:
 	int         global_x_size_;
 	int         global_y_size_;
 
-	aero_path_planning::CarrotPathFinder path_planner_;
+	aero_path_planning::CarrotPathFinder* path_planner_;
 
 	tf::Transformer     transformer_;
 	ros::NodeHandle     nh_;

@@ -39,16 +39,13 @@ namespace aero_path_planning
 		typedef boost::function< bool (const aero_path_planning::Point&, const aero_path_planning::OccupancyGrid&)> collision_func_;
 
 
-		virtual ~CarrotPathFinder();
-
-
 		/**
 		 * @author Adam Panzica
 		 * @brief Sets the distance, in grid coordinates, that should be between points on the path
 		 * @param [in] delta The minimum distance between points, in grid coordinates
 		 * @return True if sucessfully set, else false
 		 */
-		virtual bool setCarrotDelta(double delta);
+		virtual bool setCarrotDelta(double delta) = 0;
 
 		/**
 		 * @author Adam Panzica
@@ -56,7 +53,7 @@ namespace aero_path_planning
 		 * @param [in] map The map to search over
 		 * @return True if sucessfully set, else false
 		 */
-		virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map);
+		virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map) = 0;
 
 		/**
 		 * @author Adam Panzica
@@ -64,7 +61,7 @@ namespace aero_path_planning
 		 * @param [in] collision_checker The collision checking function to use for searching the map
 		 * @return True if sucessfully set else false
 		 */
-		virtual bool setCollision(collision_func_& collision_checker);
+		virtual bool setCollision(collision_func_& collision_checker) = 0;
 
 		/**
 		 * @author Adam Panzica
@@ -74,7 +71,7 @@ namespace aero_path_planning
 		 * @param [out] result_path A queue to store the resulting path in.
 		 * @return True if a path was found, else false
 		 */
-		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue<aero_path_planning::Point*>& result_path);
+		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue<aero_path_planning::Point*>& result_path) = 0;
 
 		/**
 		 * @author Adam Panzica
@@ -82,7 +79,7 @@ namespace aero_path_planning
 		 * @param [out] type A string to write the discriptive type of the planner to
 		 * @return True if sucessful, else false
 		 */
-		virtual bool getType(std::string& type);
+		virtual bool getPlanningType(std::string& type) const = 0;
 	};
 }; /*END aero_path_planning */
 

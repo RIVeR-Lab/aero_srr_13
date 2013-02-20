@@ -141,7 +141,7 @@ public:
 	virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map);
 	virtual bool setCollision(collision_func_& collision_checker);
 	virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue<aero_path_planning::Point*>& result_path);
-	virtual bool getType(std::string& type) const;
+	virtual bool getPlanningType(std::string& type) const;
 
 	RRTCarrot& operator=(RRTCarrot const &copy);
 

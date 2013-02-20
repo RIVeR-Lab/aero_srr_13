@@ -12,6 +12,7 @@
 #include<boost/foreach.hpp>
 #include<boost/random.hpp>
 #include<boost/random/normal_distribution.hpp>
+#include<pcl/common/distances.h>
 #include<pcl/common/norms.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/RRTCarrot.h>
@@ -199,7 +200,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 	}
 }
 
-bool RRTCarrot::getType(std::string& type) const
+bool RRTCarrot::getPlanningType(std::string& type) const
 {
 	type = "RRT Carrot Planner";
 	return true;

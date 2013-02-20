@@ -20,7 +20,7 @@ using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
 		state_(MANUAL),
-		path_planner_(path_planner),
+		path_planner_(&path_planner),
 		nh_(nh),
 		p_nh_(p_nh)
 {
