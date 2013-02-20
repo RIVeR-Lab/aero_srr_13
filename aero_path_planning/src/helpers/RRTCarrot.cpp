@@ -57,13 +57,23 @@ RRTNode* RRTCarrotTree::findNearestNeighbor(const RRTNode* to_node)const
 	RRTNode* nearest;
 	BOOST_FOREACH(node_deque::value_type item, this->nodes_)
 	{
-		double dist = std::abs(pcl::distances::l2(item.location->getVector4fMap(), to_node->location->getVector4fMap()));
+		double dist = std::abs(pcl::distances::l2(item.location.getVector4fMap(), to_node->location.getVector4fMap()));
 		if(dist<best_distance)
 		{
 			nearest = &item;
 		}
 	}
 	return nearest;
+}
+
+RRTNode* RRTCarrotTree::getLeafNode()
+{
+	return &this->nodes_.back();
+}
+
+RRTNode* RRTCarrotTree::getRootNode()
+{
+	return &this->nodes_.front();
 }
 
 RRTCarrotTree::size_type RRTCarrotTree::size() const
@@ -74,6 +84,19 @@ RRTCarrotTree::size_type RRTCarrotTree::size() const
 void RRTCarrotTree::flushTree()
 {
 	this->nodes_.clear();
+}
+
+void RRTCarrotTree::visualizeTree(sensor_msgs::Image& image, int x_height, int y_height)
+{
+	aero_path_planning::PointCloud treeCloud(x_height, y_height);
+	BOOST_FOREACH(node_deque::value_type item, this->nodes_)
+	{
+		if(item.parent_!= NULL)
+		{
+			castLine(item.parent_->location, item.location, aero_path_planning::TENTACLE, treeCloud);
+		}
+	}
+	pcl::toROSMsg(treeCloud, image);
 }
 
 RRTCarrotTree& RRTCarrotTree::operator=(RRTCarrotTree const &copy)
@@ -187,11 +210,215 @@ bool RRTCarrot::setCarrotDelta(double delta)
 	return true;
 }
 
-bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue<aero_path_planning::Point*>& result_path)
+bool RRTCarrot::sample(RRTNode* node)
+{
+	int x, y, z;
+	this->genLoc(&x, &y, &z);
+	node->location.x = x;
+	node->location.y = y;
+	node->location.z = z;
+	node->location.getVector4fMap() = node->location.getVector4fMap() - this->map_.getOriginPoint().getVector4fMap();
+	return true;
+}
+
+void RRTCarrot::genLoc(int* x, int* y, int* z)
+{
+	*x = this->map_.getXSize()*(*this->rand_gen_)();
+	if(*x<0)
+	{
+		*x=0;
+	}
+	else if(*x>=this->map_.getXSize())
+	{
+		*x=this->map_.getXSize()-1;
+	}
+	*y = this->map_.getYSize()*(*this->rand_gen_)();
+	if(*y<0)
+	{
+		*y=0;
+	}
+	else if(*y>=this->map_.getYSize())
+	{
+		*y=this->map_.getYSize()-1;
+	}
+	*z = this->map_.getZSize()*(*this->rand_gen_)();
+	if(*z<0)
+	{
+		*z=0;
+	}
+	else if(*z>=this->map_.getZSize())
+	{
+		*z=this->map_.getZSize()-1;
+	}
+}
+
+bool RRTCarrot::connect(const RRTNode* q_rand, RRTNode* tree_node, RRTCarrotTree* tree)
+{
+	//Set up the connection properties
+	RRTNode last_node(*tree_node);
+	double dist = std::abs(pcl::distances::l2(last_node.location.getVector4fMap(),q_rand->location.getVector4fMap()));
+	Eigen::Vector4f step_vector(q_rand->location.getVector4fMap()-tree_node->location.getVector4fMap());
+
+	//While we're less than one step-size away from q_rand, step nodes forward
+	while(dist>this->step_size_)
+	{
+		RRTNode next_node;
+
+		//Make a step and see if it's in collision
+		if(this->step(&last_node, step_vector, &next_node))
+		{
+			//If it wasn't, see how close we've gotten to q_rand and add the new node the tree
+			dist = std::abs(pcl::distances::l2(next_node.location.getVector4fMap(),q_rand->location.getVector4fMap()));
+			tree->addNode(next_node);
+			last_node = next_node;
+		}
+		else
+		{
+			//If it was in collision, we're done
+			break;
+		}
+
+	}
+	//If we got within a step size, we sucessfully connected the nodes, add q_rand to the tree
+	if(dist<=this->step_size_)
+	{
+		RRTNode q_node;
+		q_node.parent_ = &last_node;
+		q_node.location = q_rand->location;
+		tree->addNode(q_node);
+		return true;
+	}
+	//Otherwise we didn't fully conect, return false
+	return false;
+}
+
+bool RRTCarrot::step(RRTNode* last_node, const Eigen::Vector4f& step_vector, RRTNode* next_node)
+{
+	double scale       = this->step_size_/step_vector.norm();
+	next_node->location.getVector4fMap() = step_vector*scale+last_node->location.getVector4fMap();
+	next_node->location.x = std::floor(next_node->location.x);
+	next_node->location.y = std::floor(next_node->location.y);
+	next_node->location.z = std::floor(next_node->location.z);
+
+	if(!this->collision_checker_(next_node->location, this->map_))
+	{
+		next_node->parent_ = last_node;
+		return true;
+	}
+	return false;
+}
+
+bool RRTCarrot::allowsPartialPath()
+{
+	return true;
+}
+
+bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::queue<aero_path_planning::Point>& result_path)
 {
 	if(this->initialized_)
 	{
-		return true;
+		std::string search_type;
+		this->getPlanningType(search_type);
+		std::stringstream start_str;
+		start_str<<"("<<start_point.x<<","<<start_point.y<<")";
+		std::stringstream goal_str;
+		goal_str<<"("<<goal_point.x<<","<<goal_point.y<<")";
+		ROS_INFO_STREAM("I'm Performing a "<<search_type<<" Search from start_point <"<<start_str.str()<<"> to <"<<goal_str.str()<<">");
+
+		//Get the current time for timeout checks
+		ros::Time start_time = ros::Time::now();
+
+		//Build the initial nodes, add to trees
+		bool sucess = false;
+		bool time_out = false;
+		RRTNode start_node;
+		start_node.parent_ = NULL;
+		start_node.location= start_point;
+		RRTNode goal_node;
+		goal_node.parent_  = NULL;
+		goal_node.location = goal_point;
+
+		this->start_tree_->flushTree();
+		this->start_tree_->addNode(start_node);
+		this->goal_tree_->flushTree();
+		this->goal_tree_->addNode(goal_node);
+
+		bool from_start = true; //Flag to signal if we're sampling randomly from start_tree or goal_tree
+		RRTCarrotTree* sample_tree = this->start_tree_;
+		RRTCarrotTree* connect_tree= this->goal_tree_;
+
+		ROS_INFO_STREAM("Tree Set Up, Beginning Search!");
+
+		while(!sucess&&!time_out)
+		{
+			//Sample a new random point on the grid
+			RRTNode q_rand;
+			q_rand.parent_ = NULL;
+			this->sample(&q_rand);
+
+			//debug
+			std::stringstream node_str;
+			node_str<<"("<<q_rand.location.x<<","<<q_rand.location.y<<")";
+			ROS_INFO_STREAM("Sampling Point "<<node_str.str());
+
+
+			//Check to see if the point is in collision
+			if(!this->collision_checker_(q_rand.location, this->map_))
+			{
+				//debug
+				ROS_INFO_STREAM("Got a valid sample point!");
+
+				//Swap which tree we're sampling from and witch tree we're connecting to as needed
+				if(!from_start)
+				{
+					std::swap(sample_tree, connect_tree);
+				}
+
+				//Connect the nearest neighbor on the sampling tree to the sampled point
+				this->connect(&q_rand, sample_tree->findNearestNeighbor(&q_rand), sample_tree);
+				//Attempt to connect the sample tree to the connect tree, if sucessfull we're done as we have a path
+				sucess = this->connect(sample_tree->getLeafNode(), connect_tree->getLeafNode(), connect_tree);
+				from_start = !from_start;
+			}
+			else
+			{
+				ROS_INFO("Sampled Point Was In Collision");
+			}
+			time_out = ros::Time::now()-start_time>timeout;
+			//debug
+			ROS_INFO_STREAM("Tree Sizes Thus Far: start_tree="<<this->start_tree_->size()<<" nodes, goal_tree= "<<this->goal_tree_->size()<<" nodes");
+
+		}
+		//Merge the paths together. As the last nodes added to each tree will have been the connect nodes, we use those as entires to merge
+		if(!from_start)
+		{
+			//Make sure we're building a path from the start to the goal
+			std::swap(sample_tree, connect_tree);
+		}
+
+		//Build the final complete path
+		RRTNode* next_node_on_path = NULL;
+		//If we didn't timeout, merge the trees
+		if(!time_out)
+		{
+			this->mergePath(sample_tree->getLeafNode(), connect_tree->getLeafNode());
+			next_node_on_path = connect_tree->getRootNode();
+		}
+		//Otherwise build the path that got closest to goal
+		else
+		{
+			next_node_on_path = sample_tree->findNearestNeighbor(&goal_node);
+		}
+
+		while(next_node_on_path != NULL)
+		{
+			next_node_on_path->location.rgba = aero_path_planning::GOAL;
+			result_path.push(next_node_on_path->location);
+			next_node_on_path = next_node_on_path->parent_;
+		}
+
+		//Built the path, we're done
+		return sucess;
 	}
 	else
 	{
@@ -203,6 +430,27 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 bool RRTCarrot::getPlanningType(std::string& type) const
 {
 	type = "RRT Carrot Planner";
+	return true;
+}
+
+
+bool RRTCarrot::mergePath(RRTNode* path_1_node, RRTNode* path_2_node)
+{
+	RRTNode* new_parent_node = path_1_node;
+	RRTNode* new_child_node  = path_2_node;
+	RRTNode* swap            = NULL;
+	if(path_2_node == NULL || path_1_node == NULL)
+	{
+		return false;
+	}
+	while(new_child_node!=NULL)
+	{
+		swap                    = new_child_node->parent_;
+		new_child_node->parent_ = new_parent_node;
+		new_parent_node         = new_child_node;
+		new_child_node          = swap;
+
+	}
 	return true;
 }
 
