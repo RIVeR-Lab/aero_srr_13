@@ -570,6 +570,11 @@ void OccupancyGrid::setPoint(const Point& copy_point, bool origin_corrected)
 	}
 }
 
+unsigned long OccupancyGrid::size() const
+{
+	return this->x_dim_*this->y_dim_*this->z_dim_;
+}
+
 };
 
 
