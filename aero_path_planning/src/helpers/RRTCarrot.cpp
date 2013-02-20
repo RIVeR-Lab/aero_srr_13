@@ -154,7 +154,7 @@ void RRTCarrot::isInialized()
 bool RRTCarrot::setCollision(collision_func_& collision_checker)
 {
 	this->collision_checker_ = collision_checker;
-	this->has_coll_;
+	this->has_coll_ = true;
 	this->isInialized();
 	return true;
 }
@@ -162,7 +162,7 @@ bool RRTCarrot::setCollision(collision_func_& collision_checker)
 bool RRTCarrot::setSearchMap(const aero_path_planning::OccupancyGrid& map)
 {
 	this->map_ = map;
-	this->has_map_;
+	this->has_map_ = true;
 	//Since assiging a new map would invalidate any trees we've built, delete them if they exist
 	if(this->start_tree_!=NULL)
 	{
@@ -181,7 +181,7 @@ bool RRTCarrot::setSearchMap(const aero_path_planning::OccupancyGrid& map)
 bool RRTCarrot::setCarrotDelta(double delta)
 {
 	this->delta_ = delta;
-	this->has_delta_;
+	this->has_delta_ = true;
 	this->isInialized();
 	return true;
 }
