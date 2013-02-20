@@ -63,7 +63,7 @@ namespace aero_path_planning
 		 * @param [in] collision_checker The collision checking function to use for searching the map
 		 * @return True if sucessfully set else false
 		 */
-		virtual bool setCollision(collision_func_ collision_checker);
+		virtual bool setCollision(collision_func_& collision_checker);
 
 		/**
 		 * @author Adam Panzica
@@ -74,6 +74,14 @@ namespace aero_path_planning
 		 * @return True if a path was found, else false
 		 */
 		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue& result_path);
+
+		/**
+		 * @author Adam Panzica
+		 * @brief Gets the type of the planner
+		 * @param [out] type A string to write the discriptive type of the planner to
+		 * @return True if sucessful, else false
+		 */
+		virtual bool getType(std::string& type);
 	};
 }; /*END aero_path_planning */
 
