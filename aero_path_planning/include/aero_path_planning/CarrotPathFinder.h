@@ -44,10 +44,10 @@ namespace aero_path_planning
 		/**
 		 * @author Adam Panzica
 		 * @brief Sets the distance, in grid coordinates, that should be between points on the path
-		 * @param [in] delta The distance between points, in grid coordinates
+		 * @param [in] delta The minimum distance between points, in grid coordinates
 		 * @return True if sucessfully set, else false
 		 */
-		virtual bool setCarrotDelta(int delta);
+		virtual bool setCarrotDelta(double delta);
 
 		/**
 		 * @author Adam Panzica
@@ -73,7 +73,7 @@ namespace aero_path_planning
 		 * @param [out] result_path A queue to store the resulting path in.
 		 * @return True if a path was found, else false
 		 */
-		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue& result_path);
+		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue<aero_path_planning::Point*>& result_path);
 
 		/**
 		 * @author Adam Panzica

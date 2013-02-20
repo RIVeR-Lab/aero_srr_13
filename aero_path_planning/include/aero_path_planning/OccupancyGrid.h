@@ -280,6 +280,12 @@ public:
 	const_iterator cend() const;
 
 	/**
+	 * @author Adam Panzica
+	 * @return The size of the OccupancyGrid in the form x*y*z
+	 */
+	unsigned long size() const;
+
+	/**
 	 * @author	Adam Panzic
 	 * @brief	Generates a string representation of a slice of the Occupancy Grid
 	 * @param sliceAxis	The axis to create the slice along. O=x-axis, 1 = y-axis, 2=z-axis
