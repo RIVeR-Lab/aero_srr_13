@@ -65,13 +65,25 @@ namespace aero_path_planning
 
 		/**
 		 * @author Adam Panzica
+		 * @brief  Checks to see if the path finder will return partial paths on timeout
+		 * @return True if partial paths are supported, else false
+		 */
+		virtual bool allowsPartialPath() = 0;
+
+		/**
+		 * @author Adam Panzica
 		 * @brief Performs the actual search operation and generates a new path
 		 * @param [in]  start_point The starting point on the map to search
 		 * @param [in]  goal_point  The goal point on the map to generate a point to
+		 * @param [in]  timeout     The amount of time to leat the path finder run before timing out
 		 * @param [out] result_path A queue to store the resulting path in.
-		 * @return True if a path was found, else false
+		 * @return True if a complete path was found, else false
+		 *
+		 * Note that if a timeout occured, the planner may still return a partial path. This will be a per-implementation behavroi however,
+		 * and support should be checked by calling the allowsPartialPath() method
+		 *
 		 */
-		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue<aero_path_planning::Point*>& result_path) = 0;
+		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::queue<aero_path_planning::Point>& result_path) = 0;
 
 		/**
 		 * @author Adam Panzica

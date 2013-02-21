@@ -204,11 +204,19 @@ public:
 	bool setPointTrait(aero_path_planning::Point point, aero_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
 
 	/**
-	 * Gets the location of the goal point on the occupancy grid, if it exists
+	 * @author Adam Panzica
+	 * @brief Gets the location of the goal point on the occupancy grid, if it exists
 	 * @return	A Point containing the coordinates of the goal point, if it exists
 	 * @throw	false if there is no goal point on the grid
 	 */
 	const Point& getGoalPoint() const throw (bool);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Gets the location of the origin for this grid
+	 * @return A reference to the origin of this grid
+	 */
+	const Point& getOriginPoint() const;
 
 	/**
 	 * @author Adam Panzica
@@ -254,6 +262,26 @@ public:
 	 * @todo Currently, it assumes a 2D, XY grid. Will still work with 3D, but will only take the XY plane at Z=0
 	 */
 	bool generateMessage(sensor_msgs::Image& message) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Gets the size of the grid in the X dimention
+	 * @return The size of the grid in the X dimention, in grid units
+	 */
+	int getXSize() const;
+	/**
+	 * @author Adam Panzica
+	 * @brief  Gets the size of the grid in the Y dimention
+	 * @return The size of the grid in the Y dimention, in grid units
+	 */
+	int getYSize() const;
+	/**
+	 * @author Adam Panzica
+	 * @brief  Gets the size of the grid in the Y dimention
+	 * @return The size of the grid in the Y dimention, in grid units
+	 */
+	int getZSize() const;
+
 
 	/**
 	 * @author	Adam Panzica

@@ -26,8 +26,8 @@ namespace aero_path_planning
  */
 struct RRTNode
 {
-	RRTNode*                   parent_;  ///Pointer to the parent node of this node
-	aero_path_planning::Point* location; ///Pointer to the location of this node on a map
+	boost::shared_ptr<RRTNode> parent_;  ///Pointer to the parent node of this node
+	aero_path_planning::Point  location; ///Pointer to the location of this node on a map
 };
 
 /**
@@ -42,7 +42,7 @@ struct RRTNode
 class RRTCarrotTree
 {
 private:
-	typedef std::deque<RRTNode> node_deque;
+	typedef std::deque<boost::shared_ptr<RRTNode> > node_deque;
 public:
 
 	/**
@@ -79,7 +79,7 @@ public:
 	 * @param [in] node The new node to add
 	 * @return True if sucessfully added, else false
 	 */
-	bool addNode(const RRTNode& node);
+	bool addNode(const boost::shared_ptr<RRTNode> node);
 
 	/**
 	 * @author Adam Panzica
@@ -87,13 +87,37 @@ public:
 	 * @param [in] to_node The node to find the nearest neighbor to
 	 * @return A pointer to the node that is the neighest neighbor of the given node
 	 */
-	RRTNode* findNearestNeighbor(const RRTNode* to_node) const;
+	boost::shared_ptr<RRTNode> findNearestNeighbor(const boost::shared_ptr<RRTNode> to_node) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Gets the last leaf node that was added to the tree
+	 * @return Pointer to the last leaf node that was added to the tree
+	 */
+	boost::shared_ptr<RRTNode> getLeafNode();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Gets the root node of a tree
+	 * @return The root node of the tree
+	 */
+	boost::shared_ptr<RRTNode> getRootNode();
 
 	/**
 	 * @author Adam Panzica
 	 * @brief  Empties the tree
 	 */
 	void flushTree();
+
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Creates a visualization of the tree in the form of a sensor_msgs::image
+	 * @param [out] message The Image message to create the visualization in
+	 * @param [in]  x_height The x-width of the image
+	 * @param [in]  y_height The y-width of the image
+	 */
+	void visualizeTree(sensor_msgs::Image& message, int x_height, int y_height);
 
 	typedef node_deque::size_type size_type;
 	/**
@@ -140,7 +164,8 @@ public:
 	virtual bool setCarrotDelta(double delta);
 	virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map);
 	virtual bool setCollision(collision_func_& collision_checker);
-	virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, std::queue<aero_path_planning::Point*>& result_path);
+	virtual bool allowsPartialPath();
+	virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::queue<aero_path_planning::Point>& result_path);
 	virtual bool getPlanningType(std::string& type) const;
 
 	RRTCarrot& operator=(RRTCarrot const &copy);
@@ -163,8 +188,10 @@ private:
 	 * @brief  Generates a new randomly sampled node
 	 * @param  [in] node Pointer to a node to fill with a random location
 	 * @return True if node sucessfully generated, else false
+	 *
+	 * Note: The sampled node is origin corrected for the map being searched
 	 */
-	bool sample(RRTNode* node);
+	bool sample(boost::shared_ptr<RRTNode> node);
 
 	/**
 	 * @author Adam Panzica
@@ -174,16 +201,41 @@ private:
 	 * @param [out] next_node   Node to write the next step location along the vector to
 	 * @return True if sucessfully stepped, else false
 	 */
-	bool step(const RRTNode* last_node, const Eigen::Vector4f& step_vector, RRTNode* next_node);
+	bool step(boost::shared_ptr<RRTNode> last_node, const Eigen::Vector4f& step_vector, boost::shared_ptr<RRTNode> next_node);
 
 	/**
 	 * @author Adam Panzica
 	 * @brief  Attempts to connect a randomly sampled node to a node on the tree
-	 * @param [in] q_rand    The randomly sampled node to connect to
-	 * @param [in] tree_node The node on the tree to connect from
+	 * @param [in]  q_rand    The randomly sampled node to connect to
+	 * @param [in]  tree_node The node on the tree to connect from
+	 * @param [out] tree      The tree to add newly connected nodes to
 	 * @return True if they fully connected, else false
 	 */
-	bool connect(const RRTNode* q_rand, const RRTNode* tree_node);
+	bool connect(const boost::shared_ptr<RRTNode> q_rand, boost::shared_ptr<RRTNode> tree_node, RRTCarrotTree* tree);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Mereges a path that spans two trees
+	 * @param path_1_node The node that should serve as the parent of the merge
+	 * @param path_2_node The node that will be the first child of the merge
+	 * @return True if paths sucessfully merged, else false
+	 *
+	 * This function is intended tp merge a pthat that spans two trees. path_1_node is the terminous of the path on the tree that should serve as the
+	 * 'parent' tree. path_2_node is the terminous of that path in the tree that should act as the child. This function will traverse the path begining
+	 * at path_2_node, overwriting the parent nodes in order to merge the two paths.
+	 */
+	bool mergePath(boost::shared_ptr<RRTNode> path_1_node, boost::shared_ptr<RRTNode> path_2_node);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Generates a new random location on the map
+	 * @param  [out] x pointer to write the x location to
+	 * @param  [out] y pointer to write the y location to
+	 * @param  [out] z pointer to write the z location to
+	 *
+	 * Note that the location is not origin corrected
+	 */
+	void genLoc(int* x, int* y, int* z);
 
 
 	int  step_size_;   ///The distance to step while connecting nodes

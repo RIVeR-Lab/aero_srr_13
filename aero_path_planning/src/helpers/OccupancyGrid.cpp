@@ -577,4 +577,23 @@ unsigned long OccupancyGrid::size() const
 
 };
 
+int OccupancyGrid::getXSize() const
+{
+	return this->x_dim_;
+}
+
+int OccupancyGrid::getYSize() const
+{
+	return this->y_dim_;
+}
+
+int OccupancyGrid::getZSize() const
+{
+	return this->z_dim_;
+}
+
+const Point& OccupancyGrid::getOriginPoint() const
+{
+	return this->origin_;
+}
 
