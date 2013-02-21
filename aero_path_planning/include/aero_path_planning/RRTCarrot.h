@@ -26,7 +26,7 @@ namespace aero_path_planning
  */
 struct RRTNode
 {
-	RRTNode*                   parent_;  ///Pointer to the parent node of this node
+	boost::shared_ptr<RRTNode> parent_;  ///Pointer to the parent node of this node
 	aero_path_planning::Point  location; ///Pointer to the location of this node on a map
 };
 
@@ -42,7 +42,7 @@ struct RRTNode
 class RRTCarrotTree
 {
 private:
-	typedef std::deque<RRTNode> node_deque;
+	typedef std::deque<boost::shared_ptr<RRTNode> > node_deque;
 public:
 
 	/**
@@ -79,7 +79,7 @@ public:
 	 * @param [in] node The new node to add
 	 * @return True if sucessfully added, else false
 	 */
-	bool addNode(const RRTNode& node);
+	bool addNode(const boost::shared_ptr<RRTNode> node);
 
 	/**
 	 * @author Adam Panzica
@@ -87,21 +87,21 @@ public:
 	 * @param [in] to_node The node to find the nearest neighbor to
 	 * @return A pointer to the node that is the neighest neighbor of the given node
 	 */
-	RRTNode* findNearestNeighbor(const RRTNode* to_node) const;
+	boost::shared_ptr<RRTNode> findNearestNeighbor(const boost::shared_ptr<RRTNode> to_node) const;
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the last leaf node that was added to the tree
 	 * @return Pointer to the last leaf node that was added to the tree
 	 */
-	RRTNode* getLeafNode();
+	boost::shared_ptr<RRTNode> getLeafNode();
 
 	/**
 	 * @author Adam Panzica
 	 * @brief  Gets the root node of a tree
 	 * @return The root node of the tree
 	 */
-	RRTNode* getRootNode();
+	boost::shared_ptr<RRTNode> getRootNode();
 
 	/**
 	 * @author Adam Panzica
@@ -191,7 +191,7 @@ private:
 	 *
 	 * Note: The sampled node is origin corrected for the map being searched
 	 */
-	bool sample(RRTNode* node);
+	bool sample(boost::shared_ptr<RRTNode> node);
 
 	/**
 	 * @author Adam Panzica
@@ -201,7 +201,7 @@ private:
 	 * @param [out] next_node   Node to write the next step location along the vector to
 	 * @return True if sucessfully stepped, else false
 	 */
-	bool step(RRTNode* last_node, const Eigen::Vector4f& step_vector, RRTNode* next_node);
+	bool step(boost::shared_ptr<RRTNode> last_node, const Eigen::Vector4f& step_vector, boost::shared_ptr<RRTNode> next_node);
 
 	/**
 	 * @author Adam Panzica
@@ -211,7 +211,7 @@ private:
 	 * @param [out] tree      The tree to add newly connected nodes to
 	 * @return True if they fully connected, else false
 	 */
-	bool connect(const RRTNode* q_rand, RRTNode* tree_node, RRTCarrotTree* tree);
+	bool connect(const boost::shared_ptr<RRTNode> q_rand, boost::shared_ptr<RRTNode> tree_node, RRTCarrotTree* tree);
 
 	/**
 	 * @author Adam Panzica
@@ -224,7 +224,7 @@ private:
 	 * 'parent' tree. path_2_node is the terminous of that path in the tree that should act as the child. This function will traverse the path begining
 	 * at path_2_node, overwriting the parent nodes in order to merge the two paths.
 	 */
-	bool mergePath(RRTNode* path_1_node, RRTNode* path_2_node);
+	bool mergePath(boost::shared_ptr<RRTNode> path_1_node, boost::shared_ptr<RRTNode> path_2_node);
 
 	/**
 	 * @author Adam Panzica

@@ -58,6 +58,21 @@ int main(int argc, char **argv) {
 	end.y   = 20;
 	end.z   = 0;
 	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 51;
+	end.x   = 51;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 52;
+	end.x   = 52;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 52;
+	end.x   = 52;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 53;
+	end.x   = 53;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 54;
+	end.x   = 54;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
 	BOOST_FOREACH(Point point, obstacle)
 	{
 		testGrid.setPointTrait(point, aero_path_planning::OBSTACLE);
@@ -86,10 +101,12 @@ int main(int argc, char **argv) {
 	}
 
 	ros::Publisher path_pub =  nh.advertise<sensor_msgs::PointCloud2>("test_path", 2);
+	ROS_INFO_STREAM("Publishing the Output Path");
 	while(ros::ok())
 	{
 		sensor_msgs::PointCloud2 message;
 		pcl::toROSMsg(path_cloud,message);
+		message.header.frame_id = "/map";
 		path_pub.publish(message);
 		ros::spinOnce();
 	}
