@@ -73,6 +73,8 @@ public:
 	 */
 	RRTCarrotTree(int size);
 
+	~RRTCarrotTree();
+
 	/**
 	 * @author Adam Panzica
 	 * @brief Adds a new node to the tree

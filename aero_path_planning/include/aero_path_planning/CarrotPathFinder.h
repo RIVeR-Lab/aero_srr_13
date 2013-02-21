@@ -29,6 +29,7 @@ namespace aero_path_planning
 	class CarrotPathFinder
 	{
 	public:
+		virtual ~CarrotPathFinder(){};
 		/**
 		 * @author Adam Panzica
 		 * Typedef defining a valid collision checking function. The function should consume

@@ -28,22 +28,27 @@ RRTCarrotTree::RRTCarrotTree()
 }
 
 RRTCarrotTree::RRTCarrotTree(const RRTCarrotTree& copy):
-				nodes_(copy.nodes_)
+						nodes_(copy.nodes_)
 {
 
 }
 
 RRTCarrotTree::RRTCarrotTree(const RRTCarrotTree* copy):
-			nodes_(copy->nodes_)
+					nodes_(copy->nodes_)
 {
 
 }
 
 RRTCarrotTree::RRTCarrotTree(int size):
-				nodes_(size)
+						nodes_(size)
 {
 
 }
+
+RRTCarrotTree::~RRTCarrotTree()
+{
+	this->flushTree();
+};
 
 bool RRTCarrotTree::addNode(const boost::shared_ptr<RRTNode> node)
 {
@@ -83,6 +88,10 @@ RRTCarrotTree::size_type RRTCarrotTree::size() const
 
 void RRTCarrotTree::flushTree()
 {
+	BOOST_FOREACH(node_deque::value_type node, this->nodes_)
+	{
+		node.reset();
+	}
 	this->nodes_.clear();
 }
 
@@ -108,48 +117,53 @@ RRTCarrotTree& RRTCarrotTree::operator=(RRTCarrotTree const &copy)
 //*********************RRTCarrot*******************************//
 
 RRTCarrot::RRTCarrot(const aero_path_planning::RRTCarrot& copy):
-		step_size_(copy.step_size_),
-		initialized_(copy.initialized_),
-		has_delta_(copy.has_delta_),
-		has_coll_(copy.has_coll_),
-		has_map_(copy.has_map_),
-		delta_(copy.delta_),
-		map_(copy.map_),
-		collision_checker_(copy.collision_checker_),
-		start_tree_(NULL),
-		goal_tree_(NULL),
-		rand_gen_(NULL)
+				step_size_(copy.step_size_),
+				initialized_(copy.initialized_),
+				has_delta_(copy.has_delta_),
+				has_coll_(copy.has_coll_),
+				has_map_(copy.has_map_),
+				delta_(copy.delta_),
+				map_(copy.map_),
+				collision_checker_(copy.collision_checker_),
+				start_tree_(NULL),
+				goal_tree_(NULL),
+				rand_gen_(NULL)
 {
-
-	this->start_tree_  = new RRTCarrotTree(copy.start_tree_);
-	this->goal_tree_   = new RRTCarrotTree(copy.goal_tree_);
+	if(copy.start_tree_!=NULL)
+	{
+		this->start_tree_  = new RRTCarrotTree(*copy.start_tree_);
+	}
+	if(copy.goal_tree_!=NULL)
+	{
+		this->goal_tree_   = new RRTCarrotTree(*copy.goal_tree_);
+	}
 	this->randInit();
 }
 
 RRTCarrot::RRTCarrot():
-		step_size_(0),
-		initialized_(false),
-		has_delta_(false),
-		has_coll_(false),
-		has_map_(false),
-		delta_(0),
-		start_tree_(NULL),
-		goal_tree_(NULL),
-		rand_gen_(NULL)
+				step_size_(0),
+				initialized_(false),
+				has_delta_(false),
+				has_coll_(false),
+				has_map_(false),
+				delta_(0),
+				start_tree_(NULL),
+				goal_tree_(NULL),
+				rand_gen_(NULL)
 {
 	this->randInit();
 }
 
 RRTCarrot::RRTCarrot(double step_size):
-		step_size_(step_size),
-		initialized_(false),
-		has_delta_(false),
-		has_coll_(false),
-		has_map_(false),
-		delta_(0),
-		start_tree_(NULL),
-		goal_tree_(NULL),
-		rand_gen_(NULL)
+				step_size_(step_size),
+				initialized_(false),
+				has_delta_(false),
+				has_coll_(false),
+				has_map_(false),
+				delta_(0),
+				start_tree_(NULL),
+				goal_tree_(NULL),
+				rand_gen_(NULL)
 {
 	this->randInit();
 }
@@ -255,7 +269,7 @@ void RRTCarrot::genLoc(int* x, int* y, int* z)
 bool RRTCarrot::connect(const boost::shared_ptr<RRTNode> q_rand, boost::shared_ptr<RRTNode> tree_node, RRTCarrotTree* tree)
 {
 	ROS_INFO_STREAM("Attempting to connect ("<<tree_node->location.x<<","<<tree_node->location.y<<
-			 ") to ("<<q_rand->location.x<<","<<q_rand->location.y<<")");
+			") to ("<<q_rand->location.x<<","<<q_rand->location.y<<")");
 	//Set up the connection properties
 	boost::shared_ptr<RRTNode> last_node(new RRTNode(*tree_node));
 	double dist = std::abs(pcl::distances::l2(last_node->location.getVector4fMap(),q_rand->location.getVector4fMap()));
@@ -308,7 +322,7 @@ bool RRTCarrot::step(boost::shared_ptr<RRTNode> last_node, const Eigen::Vector4f
 	{
 		next_node->parent_ = last_node;
 		ROS_INFO_STREAM("I Stepped ("<<last_node->location.x<<"."<<last_node->location.y<<
-			        ") to ("<<next_node->location.x<<","<<next_node->location.y<<") and set set next_node's parent to "<<next_node->parent_);
+				") to ("<<next_node->location.x<<","<<next_node->location.y<<") and set set next_node's parent to "<<next_node->parent_);
 		return true;
 	}
 	return false;
@@ -451,7 +465,7 @@ bool RRTCarrot::getPlanningType(std::string& type) const
 bool RRTCarrot::mergePath(boost::shared_ptr<RRTNode> path_1_node, boost::shared_ptr<RRTNode> path_2_node)
 {
 	ROS_INFO_STREAM("Merging Path With Bridge At ("<<path_1_node->location.x<<"."<<path_1_node->location.y<<
-			        ") and ("<<path_2_node->location.x<<","<<path_2_node->location.y<<")");
+			") and ("<<path_2_node->location.x<<","<<path_2_node->location.y<<")");
 	boost::shared_ptr<RRTNode> new_parent_node(path_1_node);
 	boost::shared_ptr<RRTNode> new_child_node(path_2_node);
 	boost::shared_ptr<RRTNode> swap;
@@ -462,7 +476,7 @@ bool RRTCarrot::mergePath(boost::shared_ptr<RRTNode> path_1_node, boost::shared_
 	while(new_child_node!=boost::shared_ptr<RRTNode>())
 	{
 		ROS_INFO_STREAM("Connecting ("<<new_child_node->location.x<<"."<<new_child_node->location.y<<
-			        ") and ("<<new_parent_node->location.x<<","<<new_parent_node->location.y<<")");
+				") and ("<<new_parent_node->location.x<<","<<new_parent_node->location.y<<")");
 		swap                    = new_child_node->parent_;
 		new_child_node->parent_ = new_parent_node;
 		new_parent_node         = new_child_node;
