@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "areo_global_planner");
 	ros::NodeHandle nh;
 	ros::NodeHandle p_nh("~");
-	RRTCarrot path_planner(5);
+	RRTCarrot path_planner(1);
 	CarrotPathFinder::collision_func_ cf = boost::bind(&collisionCheck, _1, _2);
 	path_planner.setCollision(cf);
 
@@ -47,15 +47,15 @@ int main(int argc, char **argv) {
 	origin.x = 0;
 	origin.y = 50;
 	origin.z = 0;
-	OccupancyGrid testGrid(200, 200, .25, origin, aero_path_planning::FREE_LOW_COST);
+	OccupancyGrid testGrid(100, 100, .25, origin, aero_path_planning::FREE_LOW_COST);
 	PointCloud obstacle;
 	Point start;
 	start.x = 50;
-	start.y = -20;
+	start.y = -30;
 	start.z = 0;
 	Point end;
 	end.x   = 50;
-	end.y   = 20;
+	end.y   = 30;
 	end.z   = 0;
 	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
 	start.x = 51;
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 		testGrid.setPointTrait(point, aero_path_planning::OBSTACLE);
 	}
 
-	path_planner.setCarrotDelta(5);
+	path_planner.setCarrotDelta(1);
 	path_planner.setSearchMap(testGrid);
 
 	Point start_point;
@@ -91,24 +91,29 @@ int main(int argc, char **argv) {
 	goal_point.z  = 0;
 	std::queue<Point> path;
 	ros::Duration timeout(1000);
-	if(path_planner.search(start_point, goal_point, timeout , path)) ROS_INFO_STREAM("I Found A Solution!");
-	else ROS_INFO("I Timed Out Or Solution Couldn't Be Found");
-	PointCloud path_cloud;
-	while(path.size()!=0)
-	{
-		path_cloud.push_back(path.back());
-		path.pop();
-	}
 
-	ros::Publisher path_pub =  nh.advertise<sensor_msgs::PointCloud2>("test_path", 2);
-	ROS_INFO_STREAM("Publishing the Output Path");
 	while(ros::ok())
 	{
-		sensor_msgs::PointCloud2 message;
-		pcl::toROSMsg(path_cloud,message);
-		message.header.frame_id = "/map";
-		path_pub.publish(message);
-		ros::spinOnce();
+		OccupancyGrid copyGrid(testGrid);
+		if(path_planner.search(start_point, goal_point, timeout , path)) ROS_INFO_STREAM("I Found A Solution!");
+		else ROS_INFO("I Timed Out Or Solution Couldn't Be Found");
+		PointCloud path_cloud;
+		while(path.size()!=0)
+		{
+			path_cloud.push_back(path.front());
+			path.pop();
+		}
+
+		BOOST_FOREACH(Point point, path_cloud)
+		{
+			ROS_INFO_STREAM("I'm Printing Point ("<<point.x<<","<<point.y<<")");
+			copyGrid.setPointTrait(point, aero_path_planning::TENTACLE);
+		}
+		copyGrid.setPointTrait(goal_point, aero_path_planning::GOAL);
+		copyGrid.setPointTrait(start_point, aero_path_planning::UNKNOWN);
+
+		ROS_INFO_STREAM("\n"<<*(copyGrid.toString(0,0)));
+
 	}
 
 	GlobalPlanner planner(nh, p_nh, path_planner);
