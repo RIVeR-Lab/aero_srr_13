@@ -81,7 +81,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src/helpers")
 rosbuild_add_boost_directories()
 
 #build tests
-rosbuild_add_gtest(test/CarrotPathFinderTest test/CarrotPathFinderTest.cpp)
+#rosbuild_add_gtest(test/CarrotPathFinderTest test/CarrotPathFinderTest.cpp)
 
 #build nodes
 rosbuild_add_executable(aero_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
