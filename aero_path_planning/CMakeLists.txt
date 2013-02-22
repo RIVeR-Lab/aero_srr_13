@@ -80,9 +80,12 @@ include_directories("${PROJECT_SOURCE_DIR}/src/helpers")
 #include boost directories
 rosbuild_add_boost_directories()
 
+#build tests
+rosbuild_add_gtest(test/CarrotPathFinderTest test/CarrotPathFinderTest.cpp)
+
 #build nodes
 rosbuild_add_executable(aero_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
 rosbuild_add_executable(aero_local_planner src/nodes/oryx_local_planner.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
 rosbuild_add_executable(occupancy_generator src/nodes/occupancy_generator.cpp src/helpers/OccupancyGrid.cpp)
-rosbuild_add_executable(oryx_global_planner src/nodes/oryx_global_planner.cpp src/helpers/OccupancyGrid.cpp)
+rosbuild_add_executable(oryx_global_planner src/nodes/oryx_global_planner.cpp src/helpers/OccupancyGrid.cpp src/helpers/global_planner.cpp src/helpers/RRTCarrot.cpp)
 rosbuild_add_executable(aero_global_planner src/nodes/aero_global_planner.cpp src/helpers/global_planner.cpp src/helpers/RRTCarrot.cpp src/helpers/OccupancyGrid.cpp)
