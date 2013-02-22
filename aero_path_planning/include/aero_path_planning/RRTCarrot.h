@@ -8,14 +8,14 @@
 
 //License File
 
+#ifndef RRTCARROT_H_
+#define RRTCARROT_H_
+
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/random.hpp>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/CarrotPathFinder.h>
 //**********************NAMESPACES*****************************//
-
-#ifndef RRTCARROT_H_
-#define RRTCARROT_H_
 
 namespace aero_path_planning
 {

@@ -8,15 +8,16 @@
 
 //License File
 
+
+#ifndef PATHFINDER_H_
+#define PATHFINDER_H_
+
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/function.hpp>
 #include<queue>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
-
-#ifndef PATHFINDER_H_
-#define PATHFINDER_H_
 
 namespace aero_path_planning
 {

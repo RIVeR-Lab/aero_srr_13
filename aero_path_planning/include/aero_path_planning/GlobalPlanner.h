@@ -8,6 +8,9 @@
 
 //License File
 
+#ifndef AERO_GLOBAL_PLANNER_H_
+#define AERO_GLOBAL_PLANNER_H_
+
 //****************SYSTEM DEPENDANCIES**************************//
 #include<tf/tf.h>
 #include<sensor_msgs/PointCloud2.h>
@@ -17,9 +20,6 @@
 #include<aero_path_planning/OryxPathPlanning.h>
 #include<aero_path_planning/CarrotPathFinder.h>
 //**********************NAMESPACES*****************************//
-
-#ifndef AERO_GLOBAL_PLANNER_H_
-#define AERO_GLOBAL_PLANNER_H_
 
 namespace aero_path_planning
 {
