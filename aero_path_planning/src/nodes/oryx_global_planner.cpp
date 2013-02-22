@@ -14,6 +14,8 @@
 //*********************LOCAL DEPENDENCIES**********************//
 #include<aero_path_planning/OryxPathPlanning.h>
 #include"OryxPathPlannerConfig.h"
+#include<aero_path_planning/GlobalPlanner.h>
+#include<aero_path_planning/RRTCarrot.h>
 
 
 using namespace aero_path_planning;
@@ -282,6 +284,7 @@ int main(int argc, char **argv)
 	if(!nh.getParam(p_res,		res))			PARAM_WARN(p_res,		p_res_msg);
 
 	ROS_INFO("Global Planner Configuration Parameters Set...");
-
-
+	aero_path_planning::RRTCarrot path(1);
+	aero_path_planning::GlobalPlanner planner(nh, p_nh, path);
+	ros::spin();
 }

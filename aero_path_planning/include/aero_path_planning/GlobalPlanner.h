@@ -48,6 +48,8 @@ private:
 	void planCB(const ros::TimerEvent& event);
 	void setManual();
 
+	void laserCB(const sensor_msgs::PointCloud2ConstPtr);
+
 	State       state_;
 
 	std::string laser_topic_;
@@ -65,7 +67,8 @@ private:
 	ros::NodeHandle     nh_;
 	ros::NodeHandle     p_nh_;
 	ros::Subscriber     joy_sub_;
-
+	ros::Publisher      local_occ_pub_;
+	ros::Subscriber     laser_sub_;
 };
 
 }; /* END aero_path_planning */
