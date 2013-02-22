@@ -123,7 +123,9 @@ void GlobalPlanner::registerTopics()
 	std::string odometry_topic("odometry_topic");
 	std::string command_topic("/global_planning/commands");
 
+
 	this->laser_topic_ = "/laser";
+
 
 	//Get Private Parameters
 	if(!this->p_nh_.getParam(local_planner_topic,this->local_occupancy_topic_))	PARAM_WARN(local_planner_topic,	local_planner_topic);
