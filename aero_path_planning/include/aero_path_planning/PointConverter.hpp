@@ -9,7 +9,7 @@
 #define POINTCONVERTER_HPP_
 
 //*********************** LOCAL DEPENDENCIES ************************************//
-#include "TypeDefinitions.h"
+#include <aero_path_planning/TypeDefinitions.h>
 namespace aero_path_planning
 {
 /**
