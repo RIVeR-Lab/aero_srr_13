@@ -96,3 +96,4 @@ target_link_libraries(aero_global_planner AeroPathPlanning)
 
 #build tests
 rosbuild_add_gtest(test/CarrotPathFinderTest test/CarrotPathFinderTest.cpp)
+target_link_libraries(test/CarrotPathFinderTest AeroPathPlanning)
