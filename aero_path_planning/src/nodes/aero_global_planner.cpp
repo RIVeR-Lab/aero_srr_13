@@ -13,13 +13,21 @@
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/RRTCarrot.h>
 #include<aero_path_planning/GlobalPlanner.h>
+#include<aero_path_planning/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
 
 using namespace aero_path_planning;
 
 bool collisionCheck(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map)
 {
-	if(map.getPointTrait(point)==aero_path_planning::OBSTACLE)
+	try
+	{
+		if(map.getPointTrait(point)==aero_path_planning::OBSTACLE)
+		{
+			return true;
+		}
+	}
+	catch(std::exception& e)
 	{
 		return true;
 	}
@@ -33,6 +41,81 @@ int main(int argc, char **argv) {
 	RRTCarrot path_planner(1);
 	CarrotPathFinder::collision_func_ cf = boost::bind(&collisionCheck, _1, _2);
 	path_planner.setCollision(cf);
+
+	//Build a test occupancy grid
+	Point origin;
+	origin.x = 0;
+	origin.y = 50;
+	origin.z = 0;
+	OccupancyGrid testGrid(100, 100, .25, origin, aero_path_planning::FREE_LOW_COST);
+	PointCloud obstacle;
+	Point start;
+	start.x = 50;
+	start.y = -30;
+	start.z = 0;
+	Point end;
+	end.x   = 50;
+	end.y   = 30;
+	end.z   = 0;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 51;
+	end.x   = 51;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 52;
+	end.x   = 52;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 52;
+	end.x   = 52;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 53;
+	end.x   = 53;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 54;
+	end.x   = 54;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	BOOST_FOREACH(Point point, obstacle)
+	{
+		testGrid.setPointTrait(point, aero_path_planning::OBSTACLE);
+	}
+
+	path_planner.setCarrotDelta(1);
+	path_planner.setSearchMap(testGrid);
+
+	Point start_point;
+	start_point.x = 0;
+	start_point.y = 0;
+	start_point.z = 0;
+	Point goal_point;
+	goal_point.x  = 90;
+	goal_point.y  = 0;
+	goal_point.z  = 0;
+	std::queue<Point> path;
+	ros::Duration timeout(1000);
+
+	while(ros::ok())
+	{
+		OccupancyGrid copyGrid(testGrid);
+		if(path_planner.search(start_point, goal_point, timeout , path)) ROS_INFO_STREAM("I Found A Solution!");
+		else ROS_INFO("I Timed Out Or Solution Couldn't Be Found");
+		PointCloud path_cloud;
+		while(path.size()!=0)
+		{
+			path_cloud.push_back(path.front());
+			path.pop();
+		}
+
+		BOOST_FOREACH(Point point, path_cloud)
+		{
+			ROS_INFO_STREAM("I'm Printing Point ("<<point.x<<","<<point.y<<")");
+			copyGrid.setPointTrait(point, aero_path_planning::TENTACLE);
+		}
+		copyGrid.setPointTrait(goal_point, aero_path_planning::GOAL);
+		copyGrid.setPointTrait(start_point, aero_path_planning::UNKNOWN);
+
+		ROS_INFO_STREAM("\n"<<*(copyGrid.toString(0,0)));
+
+	}
+
 	GlobalPlanner planner(nh, p_nh, path_planner);
 }
 

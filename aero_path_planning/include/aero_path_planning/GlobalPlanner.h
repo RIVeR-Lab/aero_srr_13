@@ -8,6 +8,9 @@
 
 //License File
 
+#ifndef AERO_GLOBAL_PLANNER_H_
+#define AERO_GLOBAL_PLANNER_H_
+
 //****************SYSTEM DEPENDANCIES**************************//
 #include<tf/tf.h>
 #include<sensor_msgs/PointCloud2.h>
@@ -17,9 +20,6 @@
 #include<aero_path_planning/OryxPathPlanning.h>
 #include<aero_path_planning/CarrotPathFinder.h>
 //**********************NAMESPACES*****************************//
-
-#ifndef AERO_GLOBAL_PLANNER_H_
-#define AERO_GLOBAL_PLANNER_H_
 
 namespace aero_path_planning
 {
@@ -48,6 +48,8 @@ private:
 	void planCB(const ros::TimerEvent& event);
 	void setManual();
 
+	void laserCB(const sensor_msgs::PointCloud2ConstPtr);
+
 	State       state_;
 
 	std::string laser_topic_;
@@ -65,7 +67,8 @@ private:
 	ros::NodeHandle     nh_;
 	ros::NodeHandle     p_nh_;
 	ros::Subscriber     joy_sub_;
-
+	ros::Publisher      local_occ_pub_;
+	ros::Subscriber     laser_sub_;
 };
 
 }; /* END aero_path_planning */
