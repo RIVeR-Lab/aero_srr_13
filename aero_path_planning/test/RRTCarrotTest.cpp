@@ -446,6 +446,34 @@ TEST_F(RRTCarrotTestFixture, testConnect)
 	ASSERT_EQ(11, test_tree.size());
 }
 
+TEST_F(RRTCarrotTestFixture, testMergePath)
+{
+	//Set up the planner, and a set of nodes in seperate 'trees' that will get connected
+	this->setUpPlanner();
+
+	node_ptr_t    tree1_node1(new RRTNode());
+	tree1_node1->parent_ = node_ptr_t();
+	node_ptr_t    tree1_node2(new RRTNode());
+	node_ptr_t    tree1_node3(new RRTNode());
+	tree1_node2->parent_=tree1_node1;
+	tree1_node3->parent_=tree1_node3;
+
+	node_ptr_t    tree2_node1(new RRTNode());
+	tree2_node1->parent_ = node_ptr_t();
+	node_ptr_t    tree2_node2(new RRTNode());
+	node_ptr_t    tree2_node3(new RRTNode());
+	tree2_node2->parent_=tree2_node1;
+	tree2_node3->parent_=tree2_node2;
+
+	//Merge the two trees
+	ASSERT_TRUE(this->mergePath(tree1_node3, tree2_node3));
+	//tree2_node1's parent should now be tree2_node2
+	ASSERT_TRUE(this->nodesEqual(tree2_node1->parent_, tree2_node2))<<PRINT_EXPECT_NODE(tree2_node2, tree2_node1->parent_);
+	//tree2_node3's parent should new be tree1_node3
+	ASSERT_TRUE(this->nodesEqual(tree2_node3->parent_, tree1_node3))<<PRINT_EXPECT_NODE(tree1_node3, tree2_node3->parent_);
+
+}
+
 int main(int argc, char **argv)
 {
 	testing::InitGoogleTest(&argc, argv);

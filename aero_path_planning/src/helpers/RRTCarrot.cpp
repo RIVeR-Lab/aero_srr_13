@@ -502,13 +502,13 @@ bool RRTCarrot::mergePath(node_ptr_t path_1_node, node_ptr_t path_2_node)
 {
 	ROS_INFO_STREAM("Merging Path With Bridge At ("<<path_1_node->location_.x<<"."<<path_1_node->location_.y<<
 			") and ("<<path_2_node->location_.x<<","<<path_2_node->location_.y<<")");
-	node_ptr_t new_parent_node(path_1_node);
-	node_ptr_t new_child_node(path_2_node);
-	node_ptr_t swap;
 	if(path_2_node == node_ptr_t() || path_1_node == node_ptr_t())
 	{
 		return false;
 	}
+	node_ptr_t new_parent_node(path_1_node);
+	node_ptr_t new_child_node(path_2_node);
+	node_ptr_t swap;
 	while(new_child_node!=node_ptr_t())
 	{
 		ROS_INFO_STREAM("Connecting ("<<new_child_node->location_.x<<"."<<new_child_node->location_.y<<
