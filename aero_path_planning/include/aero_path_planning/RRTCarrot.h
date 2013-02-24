@@ -19,7 +19,6 @@
 
 namespace aero_path_planning
 {
-
 /**
  * @author Adam Panzica
  * @brief Simple container struct for holding information on an RRT node
@@ -27,8 +26,10 @@ namespace aero_path_planning
 struct RRTNode
 {
 	boost::shared_ptr<RRTNode> parent_;  ///Pointer to the parent node of this node
-	aero_path_planning::Point  location; ///Pointer to the location of this node on a map
+	Point                      location; ///Pointer to the location of this node on a map
 };
+
+typedef boost::shared_ptr<RRTNode> node_ptr_t;
 
 /**
  * @author Adam Panzica
@@ -42,7 +43,7 @@ struct RRTNode
 class RRTCarrotTree
 {
 private:
-	typedef std::deque<boost::shared_ptr<RRTNode> > node_deque;
+	typedef std::deque<node_ptr_t > node_deque;
 public:
 
 	/**
@@ -81,7 +82,7 @@ public:
 	 * @param [in] node The new node to add
 	 * @return True if sucessfully added, else false
 	 */
-	bool addNode(const boost::shared_ptr<RRTNode> node);
+	bool addNode(const node_ptr_t node);
 
 	/**
 	 * @author Adam Panzica
@@ -89,21 +90,21 @@ public:
 	 * @param [in] to_node The node to find the nearest neighbor to
 	 * @return A pointer to the node that is the neighest neighbor of the given node
 	 */
-	boost::shared_ptr<RRTNode> findNearestNeighbor(const boost::shared_ptr<RRTNode> to_node) const;
+	node_ptr_t findNearestNeighbor(const node_ptr_t to_node) const;
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the last leaf node that was added to the tree
 	 * @return Pointer to the last leaf node that was added to the tree
 	 */
-	boost::shared_ptr<RRTNode> getLeafNode();
+	node_ptr_t getLeafNode();
 
 	/**
 	 * @author Adam Panzica
 	 * @brief  Gets the root node of a tree
 	 * @return The root node of the tree
 	 */
-	boost::shared_ptr<RRTNode> getRootNode();
+	node_ptr_t getRootNode();
 
 	/**
 	 * @author Adam Panzica
@@ -193,17 +194,17 @@ private:
 	 *
 	 * Note: The sampled node is origin corrected for the map being searched
 	 */
-	bool sample(boost::shared_ptr<RRTNode> node);
+	bool sample(node_ptr_t node);
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Produces the next node stepping along a vector between nodes
-	 * @param [in]  last_node   The node to step from
+	 * @param [in]  last_node   The node to step with
 	 * @param [in]  step_vector The vector to step along
 	 * @param [out] next_node   Node to write the next step location along the vector to
 	 * @return True if sucessfully stepped, else false
 	 */
-	bool step(boost::shared_ptr<RRTNode> last_node, const Eigen::Vector4f& step_vector, boost::shared_ptr<RRTNode> next_node);
+	bool step(node_ptr_t last_node, const Eigen::Vector4f& step_vector, node_ptr_t next_node);
 
 	/**
 	 * @author Adam Panzica
@@ -213,7 +214,7 @@ private:
 	 * @param [out] tree      The tree to add newly connected nodes to
 	 * @return True if they fully connected, else false
 	 */
-	bool connect(const boost::shared_ptr<RRTNode> q_rand, boost::shared_ptr<RRTNode> tree_node, RRTCarrotTree* tree);
+	bool connect(const node_ptr_t q_rand, node_ptr_t tree_node, RRTCarrotTree* tree);
 
 	/**
 	 * @author Adam Panzica
@@ -226,7 +227,7 @@ private:
 	 * 'parent' tree. path_2_node is the terminous of that path in the tree that should act as the child. This function will traverse the path begining
 	 * at path_2_node, overwriting the parent nodes in order to merge the two paths.
 	 */
-	bool mergePath(boost::shared_ptr<RRTNode> path_1_node, boost::shared_ptr<RRTNode> path_2_node);
+	bool mergePath(node_ptr_t path_1_node, node_ptr_t path_2_node);
 
 	/**
 	 * @author Adam Panzica
@@ -238,6 +239,16 @@ private:
 	 * Note that the location is not origin corrected
 	 */
 	void genLoc(int* x, int* y, int* z);
+
+	/**
+	 * @author Adam panzica
+	 * @brief Calculates the step vector to increment by when connecting q-tree to q-rand
+	 * @param [in]  from_point The Point to calculate the vector from
+	 * @param [in]  to_point   The Point to caluclate the vector to
+	 * @param [out]  vector     The vector to write the result to
+	 * @return True if vector calculated, else false
+	 */
+	bool generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector);
 
 
 	int  step_size_;   ///The distance to step while connecting nodes
