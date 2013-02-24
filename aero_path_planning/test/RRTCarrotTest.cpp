@@ -10,6 +10,7 @@
 
 //****************SYSTEM DEPENDANCIES**************************//
 #include<gtest/gtest.h>
+#include<queue>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/RRTCarrot.h>
 //**********************NAMESPACES*****************************//
@@ -471,6 +472,28 @@ TEST_F(RRTCarrotTestFixture, testMergePath)
 	ASSERT_TRUE(this->nodesEqual(tree2_node1->parent_, tree2_node2))<<PRINT_EXPECT_NODE(tree2_node2, tree2_node1->parent_);
 	//tree2_node3's parent should new be tree1_node3
 	ASSERT_TRUE(this->nodesEqual(tree2_node3->parent_, tree1_node3))<<PRINT_EXPECT_NODE(tree1_node3, tree2_node3->parent_);
+
+}
+
+TEST_F(RRTCarrotTestFixture, testSearch)
+{
+	//set up the planner and a goal point
+	this->setUpPlanner();
+	Point goal_point;
+	goal_point.x = this->x_size_-this->origin_.x;
+	goal_point.x = this->y_size_-this->origin_.x;
+	goal_point.z = 0;
+	std::queue<Point> path;
+	ros::Duration timeout(1);
+	//Perform a search
+	ASSERT_TRUE(this->search(this->origin_, goal_point, timeout, path));
+	ASSERT_FALSE(path.empty());
+	node_ptr_t path_goal(new RRTNode());
+	node_ptr_t path_end(new RRTNode());
+	path_goal->location_ = goal_point;
+	path_end->location_  = path.front();
+	ASSERT_TRUE(this->nodesEqual(path_goal, path_end))<<PRINT_EXPECT_NODE(path_goal, path_end);
+
 
 }
 
