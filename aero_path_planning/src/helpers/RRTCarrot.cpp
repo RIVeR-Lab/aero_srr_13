@@ -522,6 +522,15 @@ bool RRTCarrot::mergePath(node_ptr_t path_1_node, node_ptr_t path_2_node)
 	return true;
 }
 
+bool RRTCarrot::nodesEqual(const node_ptr_t& node1, const node_ptr_t& node2)
+{
+	bool equal_x = node1->location_.x == node2->location_.x;
+	bool equal_y = node1->location_.y == node2->location_.y;
+	bool equal_z = node1->location_.z == node2->location_.z;
+	return equal_x&&equal_y&&equal_z;
+}
+
+
 RRTCarrot& RRTCarrot::operator=(RRTCarrot const &copy)
 {
 	if(this->start_tree_!=NULL&&this->start_tree_!=copy.start_tree_)

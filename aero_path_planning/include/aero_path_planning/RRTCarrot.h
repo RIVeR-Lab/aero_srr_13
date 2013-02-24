@@ -240,6 +240,15 @@ protected:
 	 */
 	bool generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector);
 
+	/**
+	 * @author Adam Panzica
+	 * @brief  Tests to see if two nodes are equal (same location)
+	 * @param node1
+	 * @param node2
+	 * @return True if the nodes have the same location (equality in the RRT sense)
+	 */
+	static bool nodesEqual(const node_ptr_t& node1, const node_ptr_t& node2);
+
 private:
 
 	int  step_size_;   ///The distance to step while connecting nodes
