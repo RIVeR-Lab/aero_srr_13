@@ -204,7 +204,7 @@ protected:
 	 * @param [out] tree      The tree to add newly connected nodes to
 	 * @return True if they fully connected, else false
 	 */
-	bool connect(const node_ptr_t q_rand, node_ptr_t tree_node, RRTCarrotTree* tree);
+	bool connect(const node_ptr_t& q_rand, const node_ptr_t& tree_node, RRTCarrotTree* tree);
 
 	/**
 	 * @author Adam Panzica
@@ -238,7 +238,7 @@ protected:
 	 * @param [out]  vector     The vector to write the result to
 	 * @return True if vector calculated, else false
 	 */
-	bool generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector);
+	 bool generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector) const;
 
 	/**
 	 * @author Adam Panzica

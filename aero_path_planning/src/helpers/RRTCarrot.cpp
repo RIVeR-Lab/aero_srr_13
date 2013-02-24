@@ -284,10 +284,10 @@ void RRTCarrot::genLoc(int* x, int* y, int* z)
 	}
 }
 
-bool RRTCarrot::connect(const node_ptr_t q_rand, node_ptr_t tree_node, RRTCarrotTree* tree)
+bool RRTCarrot::connect(const node_ptr_t& q_rand, const node_ptr_t& tree_node, RRTCarrotTree* tree)
 {
 	//If the node is on the tree already, we already searched it, don't add it
-	if(q_rand->location_.getVector4fMap()==tree_node->location_.getVector4fMap()) return false;
+	if(this->nodesEqual(q_rand, tree_node)) return false;
 
 	ROS_INFO_STREAM("Attempting to connect ("<<tree_node->location_.x<<","<<tree_node->location_.y<<
 			") to ("<<q_rand->location_.x<<","<<q_rand->location_.y<<")");
@@ -356,11 +356,11 @@ bool RRTCarrot::step(const node_ptr_t& last_node, const Eigen::Vector4f& step_ve
 	return false;
 }
 
-bool RRTCarrot::generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector)
+bool RRTCarrot::generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector) const
 {
-	vector       = to_point.getVector4fMap()-from_point.getVector4fMap();
-	double scale = this->step_size_/vector.norm();
-	vector       = vector*scale;
+	vector       =  to_point.getVector4fMap()-from_point.getVector4fMap();
+	double scale =  ((double)this->step_size_)/vector.norm();
+	vector       *= scale;
 	return true;
 }
 

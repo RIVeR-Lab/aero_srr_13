@@ -248,7 +248,7 @@ TEST(CollisionCheckTest, testCollision)
 class RRTCarrotTestFixture : public ::testing::Test, protected RRTCarrot
 {
 protected:
-	RRTCarrotTestFixture()
+	RRTCarrotTestFixture():RRTCarrot(1)
 {
 		//Neded because RRTCarrot uses calls to ros::Time but ROS is not initialized in a test fixture
 		ros::Time::init();
@@ -397,6 +397,8 @@ TEST_F(RRTCarrotTestFixture, testNodesEqual)
 
 TEST_F(RRTCarrotTestFixture, testGenerateStepVector)
 {
+	//Need to set up planner to initialize step size
+	this->setUpPlanner();
 	//Set up some nodes to generate a vector between
 	node_ptr_t start_node(new RRTNode());
 	node_ptr_t end_node(new RRTNode());
@@ -411,9 +413,9 @@ TEST_F(RRTCarrotTestFixture, testGenerateStepVector)
 	//Given a step size of 1, the step vector should be [1;0;0;0]
 	Point vector;
 	vector.getVector4fMap() = step_vector;
-	ASSERT_EQ(1, vector.x);
-	ASSERT_EQ(0, vector.y);
-	ASSERT_EQ(0, vector.z);
+	EXPECT_EQ(1, vector.x);
+	EXPECT_EQ(0, vector.y);
+	EXPECT_EQ(0, vector.z);
 }
 
 //TEST_F(RRTCarrotTestFixture, testConnect)
