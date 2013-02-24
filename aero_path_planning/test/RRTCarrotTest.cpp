@@ -70,6 +70,34 @@ TEST(RRTCarrotTestTree, testAddingNode)
 	ASSERT_EQ(1, test_tree.size());
 }
 
+TEST(RRTCarrotTreeTest, testFlush)
+{
+	int initial_tree_size = 0;
+	RRTCarrotTree test_tree;
+	//The tree should be empty
+	ASSERT_EQ(initial_tree_size, test_tree.size());
+
+	//Push a node onto the tree
+	//Push a node onto the tree
+	node_ptr_t test_node1(new RRTNode());
+	test_node1->location.x = 10;
+	test_node1->location.y = 0;
+	test_node1->location.z = 0;
+
+	test_tree.addNode(test_node1);
+
+	//The tree should now be size one
+	ASSERT_EQ(initial_tree_size+1, test_tree.size());
+
+	//And the number of references to test_node1 should now be 2
+	ASSERT_EQ(2, test_node1.use_count());
+
+	//Flush the tree, size should be 0, number of references should be 1
+	test_tree.flushTree();
+	ASSERT_EQ(initial_tree_size, test_tree.size());
+	ASSERT_EQ(1, test_node1.use_count());
+}
+
 TEST(RRTCarrotTreeTest, testRootLeafAccess)
 {
 	int initial_tree_size = 0;
@@ -89,6 +117,18 @@ TEST(RRTCarrotTreeTest, testRootLeafAccess)
 	//Now this node should be both root and leaf
 	ASSERT_EQ(test_node1->location.getVector4fMap(), test_tree.getLeafNode()->location.getVector4fMap());
 	ASSERT_EQ(test_node1->location.getVector4fMap(), test_tree.getRootNode()->location.getVector4fMap());
+
+	//Push a second node onto the tree
+	node_ptr_t test_node2(new RRTNode());
+	test_node1->location.x = 10;
+	test_node1->location.y = 5;
+	test_node1->location.z = 0;
+
+	test_tree.addNode(test_node2);
+
+	//Now the root node should still be test_node1, but the leaf node should be test_node2
+	ASSERT_EQ(test_node1->location.getVector4fMap(), test_tree.getRootNode()->location.getVector4fMap());
+	ASSERT_EQ(test_node2->location.getVector4fMap(), test_tree.getLeafNode()->location.getVector4fMap());
 }
 
 int main(int argc, char **argv)
