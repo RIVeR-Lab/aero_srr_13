@@ -395,6 +395,27 @@ TEST_F(RRTCarrotTestFixture, testNodesEqual)
 	ASSERT_TRUE (this->nodesEqual(node1, node6));
 }
 
+TEST_F(RRTCarrotTestFixture, testGenerateStepVector)
+{
+	//Set up some nodes to generate a vector between
+	node_ptr_t start_node(new RRTNode());
+	node_ptr_t end_node(new RRTNode());
+	start_node->location_ = this->origin_;
+	end_node->location_.x = 10;
+	end_node->location_.y = 0;
+	end_node->location_.z = 0;
+	Eigen::Vector4f step_vector;
+
+	ASSERT_TRUE(this->generateStepVector(start_node->location_, end_node->location_, step_vector));
+
+	//Given a step size of 1, the step vector should be [1;0;0;0]
+	Point vector;
+	vector.getVector4fMap() = step_vector;
+	ASSERT_EQ(1, vector.x);
+	ASSERT_EQ(0, vector.y);
+	ASSERT_EQ(0, vector.z);
+}
+
 //TEST_F(RRTCarrotTestFixture, testConnect)
 //{
 //	//Set up the planner
@@ -415,8 +436,8 @@ TEST_F(RRTCarrotTestFixture, testNodesEqual)
 //	//The root of test_tree should now be start_node, and the leaf should be end_node
 //	node_ptr_t root_node = test_tree.getRootNode();
 //	node_ptr_t leaf_node = test_tree.getLeafNode();
-//	ASSERT_EQ(start_node, root_node)<<PRINT_EXPECT_NODE(start_node, root_node);
-//	ASSERT_EQ(end_node,   leaf_node)<<PRINT_EXPECT_NODE(end_node,   leaf_node);
+//	ASSERT_TRUE(this->nodesEqual(start_node, root_node))<<PRINT_EXPECT_NODE(start_node, root_node);
+//	ASSERT_TRUE(this->nodesEqual(end_node,   leaf_node))<<PRINT_EXPECT_NODE(end_node,   leaf_node);
 //	//The tree should now contain 10 nodes, since the step size is 1
 //	ASSERT_EQ(10, test_tree.size());
 //}
