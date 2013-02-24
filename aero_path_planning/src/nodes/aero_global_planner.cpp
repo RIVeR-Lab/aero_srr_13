@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 	goal_point.y  = 0;
 	goal_point.z  = 0;
 	std::queue<Point> path;
-	ros::Duration timeout(1000);
+	ros::Duration timeout(1);
 
 	while(ros::ok())
 	{
@@ -113,7 +113,8 @@ int main(int argc, char **argv) {
 		copyGrid.setPointTrait(start_point, aero_path_planning::UNKNOWN);
 
 		ROS_INFO_STREAM("\n"<<*(copyGrid.toString(0,0)));
-
+		std::string input;
+		std::cin >> input;
 	}
 
 	GlobalPlanner planner(nh, p_nh, path_planner);

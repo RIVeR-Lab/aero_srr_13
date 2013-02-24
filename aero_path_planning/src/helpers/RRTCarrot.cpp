@@ -50,16 +50,16 @@ RRTCarrotTree::~RRTCarrotTree()
 	this->flushTree();
 };
 
-bool RRTCarrotTree::addNode(const boost::shared_ptr<RRTNode> node)
+bool RRTCarrotTree::addNode(const node_ptr_t node)
 {
 	this->nodes_.push_back(node);
 	return true;
 }
 
-boost::shared_ptr<RRTNode> RRTCarrotTree::findNearestNeighbor(const boost::shared_ptr<RRTNode> to_node)const
+node_ptr_t RRTCarrotTree::findNearestNeighbor(const node_ptr_t to_node)const
 {
 	double best_distance = std::numeric_limits<double>::infinity();
-	boost::shared_ptr<RRTNode> nearest(new RRTNode());
+	node_ptr_t nearest(new RRTNode());
 	BOOST_FOREACH(node_deque::value_type item, this->nodes_)
 	{
 		double dist = std::abs(pcl::distances::l2(item->location.getVector4fMap(), to_node->location.getVector4fMap()));
@@ -71,12 +71,12 @@ boost::shared_ptr<RRTNode> RRTCarrotTree::findNearestNeighbor(const boost::share
 	return nearest;
 }
 
-boost::shared_ptr<RRTNode> RRTCarrotTree::getLeafNode()
+node_ptr_t RRTCarrotTree::getLeafNode()
 {
 	return this->nodes_.back();
 }
 
-boost::shared_ptr<RRTNode> RRTCarrotTree::getRootNode()
+node_ptr_t RRTCarrotTree::getRootNode()
 {
 	return this->nodes_.front();
 }
@@ -224,7 +224,7 @@ bool RRTCarrot::setCarrotDelta(double delta)
 	return true;
 }
 
-bool RRTCarrot::sample(boost::shared_ptr<RRTNode> node)
+bool RRTCarrot::sample(node_ptr_t node)
 {
 	int x, y, z;
 	this->genLoc(&x, &y, &z);
@@ -266,25 +266,30 @@ void RRTCarrot::genLoc(int* x, int* y, int* z)
 	}
 }
 
-bool RRTCarrot::connect(const boost::shared_ptr<RRTNode> q_rand, boost::shared_ptr<RRTNode> tree_node, RRTCarrotTree* tree)
+bool RRTCarrot::connect(const node_ptr_t q_rand, node_ptr_t tree_node, RRTCarrotTree* tree)
 {
+	//If the node is on the tree already, we already searched it, don't add it
+	if(q_rand->location.getVector4fMap()==tree_node->location.getVector4fMap()) return false;
+
 	ROS_INFO_STREAM("Attempting to connect ("<<tree_node->location.x<<","<<tree_node->location.y<<
 			") to ("<<q_rand->location.x<<","<<q_rand->location.y<<")");
+
 	//Set up the connection properties
-	boost::shared_ptr<RRTNode> last_node(new RRTNode(*tree_node));
-	double dist = std::abs(pcl::distances::l2(last_node->location.getVector4fMap(),q_rand->location.getVector4fMap()));
-	Eigen::Vector4f step_vector(q_rand->location.getVector4fMap()-tree_node->location.getVector4fMap());
+	Eigen::Vector4f step_vector;
+	node_ptr_t      last_node(tree_node);
+	double dist     = std::abs(pcl::distances::l2(last_node->location.getVector4fMap(),q_rand->location.getVector4fMap()));
+	this->generateStepVector(tree_node->location, q_rand->location, step_vector);
 
 	//While we're less than one step-size away from q_rand, step nodes forward
 	while(dist>this->step_size_)
 	{
-		boost::shared_ptr<RRTNode> next_node(new RRTNode());
+		node_ptr_t next_node(new RRTNode());
 
 		//Make a step and see if it's in collision
 		if(this->step(last_node, step_vector, next_node))
 		{
 			//If it wasn't, see how close we've gotten to q_rand and add the new node the tree
-			dist = std::abs(pcl::distances::l2(next_node->location.getVector4fMap(),q_rand->location.getVector4fMap()));
+			dist               = std::abs(pcl::distances::l2(next_node->location.getVector4fMap(),q_rand->location.getVector4fMap()));
 			next_node->parent_ = tree->getLeafNode();
 			tree->addNode(next_node);
 			//Have to do this to ensure pointer changes
@@ -300,32 +305,43 @@ bool RRTCarrot::connect(const boost::shared_ptr<RRTNode> q_rand, boost::shared_p
 	//If we got within a step size, we sucessfully connected the nodes, add q_rand to the tree
 	if(dist<=this->step_size_)
 	{
-		boost::shared_ptr<RRTNode> q_node(new RRTNode());
-		q_node->parent_  = last_node;
-		q_node->location = q_rand->location;
-		tree->addNode(q_node);
+		if(last_node->location.getVector4fMap()!=q_rand->location.getVector4fMap())
+		{
+			node_ptr_t q_node(new RRTNode());
+			q_node->parent_  = last_node;
+			q_node->location = q_rand->location;
+			tree->addNode(q_node);
+		}
 		return true;
 	}
 	//Otherwise we didn't fully conect, return false
 	return false;
 }
 
-bool RRTCarrot::step(boost::shared_ptr<RRTNode> last_node, const Eigen::Vector4f& step_vector, boost::shared_ptr<RRTNode> next_node)
+bool RRTCarrot::step(node_ptr_t last_node, const Eigen::Vector4f& step_vector, node_ptr_t next_node)
 {
-	double scale       = this->step_size_/step_vector.norm();
-	next_node->location.getVector4fMap() = step_vector*scale+last_node->location.getVector4fMap();
-	next_node->location.x = std::floor(next_node->location.x);
-	next_node->location.y = std::floor(next_node->location.y);
-	next_node->location.z = std::floor(next_node->location.z);
+	Point next_point;
+	next_point.getVector4fMap() = last_node->location.getVector4fMap()+step_vector;
+	next_point.x     = std::floor(next_point.x);
+	next_point.y     = std::floor(next_point.y);
+	next_point.z     = std::floor(next_point.z);
 
 	if(!this->collision_checker_(next_node->location, this->map_))
 	{
 		next_node->parent_ = last_node;
-		ROS_INFO_STREAM("I Stepped ("<<last_node->location.x<<"."<<last_node->location.y<<
+		ROS_INFO_STREAM("I Stepped ("<<last_node->location.x<<","<<last_node->location.y<<
 				") to ("<<next_node->location.x<<","<<next_node->location.y<<") and set set next_node's parent to "<<next_node->parent_);
 		return true;
 	}
 	return false;
+}
+
+bool RRTCarrot::generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector)
+{
+	vector       = to_point.getVector4fMap()-from_point.getVector4fMap();
+	double scale = this->step_size_/vector.norm();
+	vector       = vector*scale;
+	return true;
 }
 
 bool RRTCarrot::allowsPartialPath()
@@ -351,12 +367,12 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 		//Build the initial nodes, add to trees
 		bool sucess = false;
 		bool time_out = false;
-		boost::shared_ptr<RRTNode> empty_parent;
-		boost::shared_ptr<RRTNode> start_node (new RRTNode());
-		start_node->parent_ = empty_parent;
+
+		node_ptr_t start_node (new RRTNode());
+		start_node->parent_ = node_ptr_t();
 		start_node->location= start_point;
-		boost::shared_ptr<RRTNode> goal_node(new RRTNode());
-		goal_node->parent_  = empty_parent;
+		node_ptr_t goal_node(new RRTNode());
+		goal_node->parent_  = node_ptr_t();
 		goal_node->location = goal_point;
 
 		this->start_tree_->flushTree();
@@ -373,8 +389,8 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 		while(!sucess&&!time_out&&ros::ok())
 		{
 			//Sample a new random point on the grid
-			boost::shared_ptr<RRTNode> q_rand(new RRTNode());
-			q_rand->parent_ = empty_parent;
+			node_ptr_t q_rand(new RRTNode());
+			q_rand->parent_ = node_ptr_t();
 			this->sample(q_rand);
 
 			//debug
@@ -405,7 +421,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 			{
 				ROS_INFO("Sampled Point Was In Collision");
 			}
-			time_out = ros::Time::now()-start_time>timeout;
+			time_out = (ros::Time::now()-start_time)>timeout;
 			//debug
 			ROS_INFO_STREAM("Tree Sizes Thus Far: start_tree="<<this->start_tree_->size()<<" nodes, goal_tree= "<<this->goal_tree_->size()<<" nodes");
 
@@ -421,7 +437,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 			}
 
 			//Build the final complete path
-			boost::shared_ptr<RRTNode> next_node_on_path;
+			node_ptr_t next_node_on_path;
 			//If we didn't timeout, merge the trees
 			if(!time_out)
 			{
@@ -436,7 +452,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 				next_node_on_path = sample_tree->findNearestNeighbor(goal_node);
 			}
 
-			while(next_node_on_path != empty_parent)
+			while(next_node_on_path != node_ptr_t())
 			{
 				ROS_INFO_STREAM("Adding Node At ("<<next_node_on_path->location.x<<","<<next_node_on_path->location.y<<")");
 				next_node_on_path->location.rgba = aero_path_planning::GOAL;
@@ -462,18 +478,18 @@ bool RRTCarrot::getPlanningType(std::string& type) const
 }
 
 
-bool RRTCarrot::mergePath(boost::shared_ptr<RRTNode> path_1_node, boost::shared_ptr<RRTNode> path_2_node)
+bool RRTCarrot::mergePath(node_ptr_t path_1_node, node_ptr_t path_2_node)
 {
 	ROS_INFO_STREAM("Merging Path With Bridge At ("<<path_1_node->location.x<<"."<<path_1_node->location.y<<
 			") and ("<<path_2_node->location.x<<","<<path_2_node->location.y<<")");
-	boost::shared_ptr<RRTNode> new_parent_node(path_1_node);
-	boost::shared_ptr<RRTNode> new_child_node(path_2_node);
-	boost::shared_ptr<RRTNode> swap;
-	if(path_2_node == swap || path_1_node == swap)
+	node_ptr_t new_parent_node(path_1_node);
+	node_ptr_t new_child_node(path_2_node);
+	node_ptr_t swap;
+	if(path_2_node == node_ptr_t() || path_1_node == node_ptr_t())
 	{
 		return false;
 	}
-	while(new_child_node!=boost::shared_ptr<RRTNode>())
+	while(new_child_node!=node_ptr_t())
 	{
 		ROS_INFO_STREAM("Connecting ("<<new_child_node->location.x<<"."<<new_child_node->location.y<<
 				") and ("<<new_parent_node->location.x<<","<<new_parent_node->location.y<<")");
