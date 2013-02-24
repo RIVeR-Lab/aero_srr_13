@@ -193,13 +193,14 @@ void RRTCarrot::randInit()
 	boost::mt19937 RNG;
 	boost::normal_distribution<> dist(0, 1);
 	this->rand_gen_  = new boost::variate_generator<boost::mt19937, boost::normal_distribution<> >(RNG, dist);
-	this->rand_gen_->engine().seed(ros::Time::now().toSec());
+	this->rand_gen_->engine().seed();
 	this->rand_gen_->distribution().reset();
 }
 
-void RRTCarrot::isInialized()
+bool RRTCarrot::isInialized()
 {
 	this->initialized_ = this->has_coll_&&this->has_delta_&&this->has_map_;
+	return this->initialized_;
 }
 
 bool RRTCarrot::setCollision(collision_func_& collision_checker)
@@ -237,15 +238,19 @@ bool RRTCarrot::setCarrotDelta(double delta)
 	return true;
 }
 
-bool RRTCarrot::sample(node_ptr_t node)
+bool RRTCarrot::sample(node_ptr_t& node)
 {
-	int x, y, z;
-	this->genLoc(&x, &y, &z);
-	node->location_.x = x;
-	node->location_.y = y;
-	node->location_.z = z;
-	node->location_.getVector4fMap() = node->location_.getVector4fMap() - this->map_.getOriginPoint().getVector4fMap();
-	return true;
+	if(this->initialized_)
+	{
+		int x, y, z;
+		this->genLoc(&x, &y, &z);
+		node->location_.x = x;
+		node->location_.y = y;
+		node->location_.z = z;
+		node->location_.getVector4fMap() = node->location_.getVector4fMap() - this->map_.getOriginPoint().getVector4fMap();
+		return true;
+	}
+	else return false;
 }
 
 void RRTCarrot::genLoc(int* x, int* y, int* z)
@@ -331,7 +336,7 @@ bool RRTCarrot::connect(const node_ptr_t q_rand, node_ptr_t tree_node, RRTCarrot
 	return false;
 }
 
-bool RRTCarrot::step(node_ptr_t last_node, const Eigen::Vector4f& step_vector, node_ptr_t next_node)
+bool RRTCarrot::step(const node_ptr_t& last_node, const Eigen::Vector4f& step_vector, node_ptr_t& next_node)
 {
 	Point next_point;
 	next_point.getVector4fMap() = last_node->location_.getVector4fMap()+step_vector;
@@ -339,9 +344,11 @@ bool RRTCarrot::step(node_ptr_t last_node, const Eigen::Vector4f& step_vector, n
 	next_point.y     = std::floor(next_point.y);
 	next_point.z     = std::floor(next_point.z);
 
-	if(!this->collision_checker_(next_node->location_, this->map_))
+
+	if(!this->collision_checker_(next_point, this->map_))
 	{
-		next_node->parent_ = last_node;
+		next_node->location_= next_point;
+		next_node->parent_  = last_node;
 		ROS_INFO_STREAM("I Stepped ("<<last_node->location_.x<<","<<last_node->location_.y<<
 				") to ("<<next_node->location_.x<<","<<next_node->location_.y<<") and set set next_node's parent to "<<next_node->parent_);
 		return true;

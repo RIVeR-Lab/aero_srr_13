@@ -174,7 +174,7 @@ protected:
 	 * @author Adam Panzica
 	 * @brief Returns true when the delta, map and collision_function parameters have been set
 	 */
-	void isInialized();
+	bool isInialized();
 
 	/**
 	 * @author Adam Panzica
@@ -184,7 +184,7 @@ protected:
 	 *
 	 * Note: The sampled node is origin corrected for the map being searched
 	 */
-	bool sample(node_ptr_t node);
+	bool sample(node_ptr_t& node);
 
 	/**
 	 * @author Adam Panzica
@@ -194,7 +194,7 @@ protected:
 	 * @param [out] next_node   Node to write the next step location along the vector to
 	 * @return True if sucessfully stepped, else false
 	 */
-	bool step(node_ptr_t last_node, const Eigen::Vector4f& step_vector, node_ptr_t next_node);
+	bool step(const node_ptr_t& last_node, const Eigen::Vector4f& step_vector, node_ptr_t& next_node);
 
 	/**
 	 * @author Adam Panzica
