@@ -48,7 +48,7 @@ public:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Standard empty constructor for STL compliance
+	 * @brief  Standard empty constructor
 	 */
 	RRTCarrotTree();
 	/**
@@ -63,16 +63,6 @@ public:
 	 * @param [in] copy RRTCarrtTree to copy
 	 */
 	RRTCarrotTree(const RRTCarrotTree* copy);
-	/**
-	 * @author Adam Panzica
-	 * @brief Initializes a new tree with a given guess at tree size
-	 * @param [in] size Sets the initial capacity of the tree
-	 *
-	 * Note that the size parameter isn't a hard maximum, the tree will dynamically
-	 * grow as needed, it is simply used to increase performance by pre-allocating
-	 * space in the tree for nodes.
-	 */
-	RRTCarrotTree(int size);
 
 	~RRTCarrotTree();
 

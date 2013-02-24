@@ -22,10 +22,6 @@
 using namespace aero_path_planning;
 
 //*******************RRTCarrotTree*****************************//
-RRTCarrotTree::RRTCarrotTree()
-{
-
-}
 
 RRTCarrotTree::RRTCarrotTree(const RRTCarrotTree& copy):
 						nodes_(copy.nodes_)
@@ -39,8 +35,8 @@ RRTCarrotTree::RRTCarrotTree(const RRTCarrotTree* copy):
 
 }
 
-RRTCarrotTree::RRTCarrotTree(int size):
-						nodes_(size)
+RRTCarrotTree::RRTCarrotTree():
+						nodes_()
 {
 
 }
@@ -73,12 +69,26 @@ node_ptr_t RRTCarrotTree::findNearestNeighbor(const node_ptr_t to_node)const
 
 node_ptr_t RRTCarrotTree::getLeafNode()
 {
-	return this->nodes_.back();
+	if(this->nodes_.size()>0)
+	{
+		return this->nodes_.back();
+	}
+	else
+	{
+		return node_ptr_t();
+	}
 }
 
 node_ptr_t RRTCarrotTree::getRootNode()
 {
-	return this->nodes_.front();
+	if(this->nodes_.size()>0)
+	{
+		return this->nodes_.front();
+	}
+	else
+	{
+		return node_ptr_t();
+	}
 }
 
 RRTCarrotTree::size_type RRTCarrotTree::size() const
@@ -206,12 +216,12 @@ bool RRTCarrot::setSearchMap(const aero_path_planning::OccupancyGrid& map)
 	{
 		delete this->start_tree_;
 	}
-	this->start_tree_ = new RRTCarrotTree(this->map_.size()/100);
+	this->start_tree_ = new RRTCarrotTree();
 	if(this->goal_tree_!=NULL)
 	{
 		delete this->goal_tree_;
 	}
-	this->goal_tree_  = new RRTCarrotTree(this->map_.size()/100);
+	this->goal_tree_  = new RRTCarrotTree();
 	this->isInialized();
 	return true;
 }
