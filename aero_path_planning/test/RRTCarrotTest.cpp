@@ -18,9 +18,7 @@ using namespace aero_path_planning;
 #define PRINT_NODE_STREAM(node) "[Location: ("<<node->location_.x<<","<<node->location_.y<<","<<node->location_.z<<"), Parent: "<<node->parent_<<"]"
 #define PRINT_EXPECT_NODE(expect,actual) "Expected to get "<<PRINT_NODE_STREAM(expect)<<", Actually got "<<PRINT_NODE_STREAM(actual)
 
-/**
- * Basic test for operation of RRTNode to make sure it does what it should
- */
+//************************************ TEST RRTNODE ***************************************************//
 TEST(RRTNodeTest, testRRTNode)
 {
 	boost::shared_ptr<RRTNode> test_node(new RRTNode);
@@ -40,6 +38,8 @@ TEST(RRTNodeTest, testRRTNode)
 	ASSERT_EQ(test_node->location_.getVector4fMap(), test_node2.parent_->location_.getVector4fMap());
 }
 
+//************************************ TEST RRTCARROTTREE **********************************************//
+
 TEST(RRTCarrotTreeTest, testTreeSetup)
 {
 	RRTCarrotTree test_tree;
@@ -48,7 +48,7 @@ TEST(RRTCarrotTreeTest, testTreeSetup)
 	ASSERT_EQ(0, test_tree.size());
 }
 
-TEST(RRTCarrotTestTree, testAddingNode)
+TEST(RRTCarrotTreeTest, testAddingNode)
 {
 	RRTCarrotTree test_tree;
 
@@ -203,7 +203,49 @@ TEST(RRTCarrotTreeTest, testNearestNeighbor)
 	EXPECT_EQ(test_node3->location_.getVector4fMap(), result3->location_.getVector4fMap())<<PRINT_EXPECT_NODE(test_node3, result3);
 }
 
-class RRTCarrotTestFixture : public ::testing::Test
+//************************************ TEST COLLISIONCHECK ***************************************************//
+
+bool collisionCheck(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map)
+{
+	try
+	{
+		if(map.getPointTrait(point)==aero_path_planning::OBSTACLE)
+		{
+			return true;
+		}
+	}
+	catch(std::exception& e)
+	{
+		return true;
+	}
+	return false;
+}
+
+TEST(CollisionCheckTest, testCollision)
+{
+	Point origin;
+	origin.x=0;
+	origin.y=0;
+	origin.z=0;
+	OccupancyGrid coll_grid(10,10,1,origin);
+	Point obst_point;
+	obst_point.x = 5;
+	obst_point.y = 5;
+	obst_point.z = 0;
+	coll_grid.setPointTrait(obst_point, aero_path_planning::OBSTACLE);
+
+	ASSERT_TRUE(collisionCheck(obst_point, coll_grid));
+
+	Point clear_point;
+	clear_point.x=1;
+	clear_point.y=1;
+	clear_point.z=0;
+	ASSERT_FALSE(collisionCheck(clear_point,coll_grid));
+}
+
+//************************************ TEST RRTCARROT ***************************************************//
+
+class RRTCarrotTestFixture : public ::testing::Test, protected RRTCarrot
 {
 protected:
 	RRTCarrotTestFixture()
@@ -215,18 +257,111 @@ protected:
 		this->origin_.z = 0;
 		this->x_size_   = 50;
 		this->y_size_   = 50;
-		this->test_planner_ = new RRTCarrot();
 }
+	void setUpPlanner()
+	{
+		this->setCarrotDelta(1);
+		CarrotPathFinder::collision_func_ cf;
+		cf = boost::bind(&collisionCheck, _1, _2);
+		this->setCollision(cf);
+		OccupancyGrid search_grid(this->x_size_,this->y_size_,1,this->origin_);
+		this->setSearchMap(search_grid);
+	}
 
 	Point origin_;
 	int   x_size_;
 	int   y_size_;
-	RRTCarrot* test_planner_;
 };
 
 TEST_F(RRTCarrotTestFixture, testSetDelta)
 {
-	ASSERT_TRUE(this->test_planner_->setCarrotDelta(10));
+	ASSERT_TRUE(this->setCarrotDelta(10));
+}
+
+TEST_F(RRTCarrotTestFixture, testSetAllowsIncompPath)
+{
+	ASSERT_TRUE(this->allowsPartialPath());
+}
+
+TEST_F(RRTCarrotTestFixture, testSetCollision)
+{
+	CarrotPathFinder::collision_func_ cf;
+	cf = boost::bind(&collisionCheck, _1, _2);
+	ASSERT_TRUE(this->setCollision(cf));
+}
+
+TEST_F(RRTCarrotTestFixture, testSetMap)
+{
+	OccupancyGrid search_grid(this->x_size_,this->y_size_,1,this->origin_);
+	ASSERT_TRUE(this->setSearchMap(search_grid));
+}
+
+TEST_F(RRTCarrotTestFixture, testInitialization)
+{
+	ASSERT_TRUE(this->setCarrotDelta(1));
+	CarrotPathFinder::collision_func_ cf;
+	cf = boost::bind(&collisionCheck, _1, _2);
+	ASSERT_TRUE(this->setCollision(cf));
+	OccupancyGrid search_grid(this->x_size_,this->y_size_,1,this->origin_);
+	ASSERT_TRUE(this->setSearchMap(search_grid));
+	ASSERT_TRUE(this->isInialized());
+}
+
+TEST_F(RRTCarrotTestFixture, testSample)
+{
+	node_ptr_t q_rand(new RRTNode());
+	//Should fail as the planner is not yet initialized
+	ASSERT_FALSE(this->sample(q_rand));
+
+	//Initializes the planner
+	this->setUpPlanner();
+
+	//Should pass now because the planner is initialized
+	ASSERT_TRUE(this->sample(q_rand));
+	//Make sure the point was actually on the map
+	ASSERT_LE(q_rand->location_.x, this->x_size_);
+	ASSERT_LE(q_rand->location_.y, this->y_size_);
+	ASSERT_LE(q_rand->location_.z, 1);
+	//Make sure that q_rand's use count hasn't increased
+	ASSERT_EQ(1, q_rand.use_count());
+
+	//Take a second sample to ensure they're each unique
+	node_ptr_t q_rand2(new RRTNode());
+	ASSERT_TRUE(this->sample(q_rand2));
+
+	ASSERT_NE(q_rand->location_.getVector4fMap(), q_rand2->location_.getVector4fMap());
+
+}
+
+TEST_F(RRTCarrotTestFixture, testStep)
+{
+	//Set up the planner
+	this->setUpPlanner();
+
+	//Set up some nodes and the step vector
+	node_ptr_t from_node(new RRTNode());
+	node_ptr_t to_node(new RRTNode());
+
+	from_node->location_.x = 0;
+	from_node->location_.y = 0;
+	from_node->location_.z = 0;
+
+	Point step_vector;
+	step_vector.x = 1;
+	step_vector.y = 1;
+	step_vector.z = 0;
+
+	node_ptr_t expected_result(new RRTNode());
+	expected_result->parent_  = from_node;
+	expected_result->location_= step_vector;
+
+	//Step along the vector
+	ASSERT_TRUE(this->step(from_node, step_vector.getVector4fMap(), to_node));
+	//Check to see that we wound up where we should have
+	ASSERT_EQ(expected_result->location_.x, to_node->location_.x)<<PRINT_EXPECT_NODE(expected_result, to_node);
+	ASSERT_EQ(expected_result->location_.y, to_node->location_.y)<<PRINT_EXPECT_NODE(expected_result, to_node);
+	ASSERT_EQ(expected_result->location_.z, to_node->location_.z)<<PRINT_EXPECT_NODE(expected_result, to_node);
+	ASSERT_EQ(expected_result->parent_,     to_node->parent_)    <<PRINT_EXPECT_NODE(expected_result, to_node);
 }
 
 int main(int argc, char **argv)
