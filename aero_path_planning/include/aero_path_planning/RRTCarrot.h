@@ -25,8 +25,8 @@ namespace aero_path_planning
  */
 struct RRTNode
 {
-	boost::shared_ptr<RRTNode> parent_;  ///Pointer to the parent node of this node
-	Point                      location; ///Pointer to the location of this node on a map
+	boost::shared_ptr<RRTNode> parent_;   ///Pointer to the parent node of this node
+	Point                      location_; ///Pointer to the location of this node on a map
 };
 
 typedef boost::shared_ptr<RRTNode> node_ptr_t;
@@ -78,23 +78,23 @@ public:
 	 * @author Adam Panzica
 	 * @brief Finds the nearest neighbor in the euclidian sense in the tree to the given node
 	 * @param [in] to_node The node to find the nearest neighbor to
-	 * @return A pointer to the node that is the neighest neighbor of the given node
+	 * @return A reference to the node_ptr_t to the node that is the neighest neighbor of the given node
 	 */
-	node_ptr_t findNearestNeighbor(const node_ptr_t to_node) const;
+	const node_ptr_t& findNearestNeighbor(const node_ptr_t to_node) const;
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the last leaf node that was added to the tree
 	 * @return Pointer to the last leaf node that was added to the tree
 	 */
-	node_ptr_t getLeafNode();
+	const node_ptr_t& getLeafNode();
 
 	/**
 	 * @author Adam Panzica
 	 * @brief  Gets the root node of a tree
 	 * @return The root node of the tree
 	 */
-	node_ptr_t getRootNode();
+	const node_ptr_t& getRootNode();
 
 	/**
 	 * @author Adam Panzica
@@ -123,8 +123,8 @@ public:
 	RRTCarrotTree& operator=(RRTCarrotTree const &copy);
 
 private:
-
-	node_deque nodes_; ///Container holding all of the nodes in the tree
+	const node_ptr_t empty_node_; ///An 'uninitialized' pointer to an RRTNode, used to allow returning 'NULL' without returning a local variable
+	node_deque       nodes_;      ///Container holding all of the nodes in the tree
 };
 
 /**
@@ -247,6 +247,7 @@ private:
 	bool has_coll_;    ///Flag for signalling that the collision function has been set
 	bool has_map_;     ///Flag for signalling that the map has been set
 	int  delta_;       ///The minimum distance between points on the generated path
+
 
 	aero_path_planning::OccupancyGrid map_; ///The map to search
 	collision_func_ collision_checker_;     ///The collusion checking function
