@@ -15,26 +15,29 @@
 //**********************NAMESPACES*****************************//
 using namespace aero_path_planning;
 
+#define PRINT_NODE_STREAM(node) "[Location: ("<<node->location_.x<<","<<node->location_.y<<","<<node->location_.z<<"), Parent: "<<node->parent_<<"]"
+#define PRINT_EXPECT_NODE(expect,actual) "Expected to get "<<PRINT_NODE_STREAM(expect)<<", Actually got "<<PRINT_NODE_STREAM(actual)
+
 /**
  * Basic test for operation of RRTNode to make sure it does what it should
  */
 TEST(RRTNodeTest, testRRTNode)
 {
 	boost::shared_ptr<RRTNode> test_node(new RRTNode);
-	test_node->location.x = 0;
-	test_node->location.y = 0;
-	test_node->location.z = 0;
-	ASSERT_EQ(0, test_node->location.x);
-	ASSERT_EQ(0, test_node->location.y);
-	ASSERT_EQ(0, test_node->location.z);
+	test_node->location_.x = 0;
+	test_node->location_.y = 0;
+	test_node->location_.z = 0;
+	ASSERT_EQ(0, test_node->location_.x);
+	ASSERT_EQ(0, test_node->location_.y);
+	ASSERT_EQ(0, test_node->location_.z);
 	ASSERT_EQ(boost::shared_ptr<RRTNode>(), test_node->parent_);
 
 	RRTNode test_node2;
-	test_node2.location = test_node->location;
+	test_node2.location_ = test_node->location_;
 	test_node2.parent_  = test_node;
 
-	ASSERT_EQ(test_node->location.getVector4fMap(), test_node2.location.getVector4fMap());
-	ASSERT_EQ(test_node->location.getVector4fMap(), test_node2.parent_->location.getVector4fMap());
+	ASSERT_EQ(test_node->location_.getVector4fMap(), test_node2.location_.getVector4fMap());
+	ASSERT_EQ(test_node->location_.getVector4fMap(), test_node2.parent_->location_.getVector4fMap());
 }
 
 TEST(RRTCarrotTreeTest, testTreeSetup)
@@ -60,9 +63,9 @@ TEST(RRTCarrotTestTree, testAddingNode)
 
 	//Push a node onto the tree
 	node_ptr_t test_node1(new RRTNode());
-	test_node1->location.x = 10;
-	test_node1->location.y = 0;
-	test_node1->location.z = 0;
+	test_node1->location_.x = 10;
+	test_node1->location_.y = 0;
+	test_node1->location_.z = 0;
 
 	ASSERT_TRUE(test_tree.addNode(test_node1));
 
@@ -80,9 +83,9 @@ TEST(RRTCarrotTreeTest, testFlush)
 	//Push a node onto the tree
 	//Push a node onto the tree
 	node_ptr_t test_node1(new RRTNode());
-	test_node1->location.x = 10;
-	test_node1->location.y = 0;
-	test_node1->location.z = 0;
+	test_node1->location_.x = 10;
+	test_node1->location_.y = 0;
+	test_node1->location_.z = 0;
 
 	test_tree.addNode(test_node1);
 
@@ -108,27 +111,76 @@ TEST(RRTCarrotTreeTest, testRootLeafAccess)
 
 	//Push a node onto the tree
 	node_ptr_t test_node1(new RRTNode());
-	test_node1->location.x = 10;
-	test_node1->location.y = 0;
-	test_node1->location.z = 0;
+	test_node1->location_.x = 10;
+	test_node1->location_.y = 0;
+	test_node1->location_.z = 0;
 
 	test_tree.addNode(test_node1);
 
 	//Now this node should be both root and leaf
-	ASSERT_EQ(test_node1->location.getVector4fMap(), test_tree.getLeafNode()->location.getVector4fMap());
-	ASSERT_EQ(test_node1->location.getVector4fMap(), test_tree.getRootNode()->location.getVector4fMap());
+	ASSERT_EQ(test_node1->location_.getVector4fMap(), test_tree.getLeafNode()->location_.getVector4fMap());
+	ASSERT_EQ(test_node1->location_.getVector4fMap(), test_tree.getRootNode()->location_.getVector4fMap());
 
 	//Push a second node onto the tree
 	node_ptr_t test_node2(new RRTNode());
-	test_node1->location.x = 10;
-	test_node1->location.y = 5;
-	test_node1->location.z = 0;
+	test_node1->location_.x = 10;
+	test_node1->location_.y = 5;
+	test_node1->location_.z = 0;
 
 	test_tree.addNode(test_node2);
 
 	//Now the root node should still be test_node1, but the leaf node should be test_node2
-	ASSERT_EQ(test_node1->location.getVector4fMap(), test_tree.getRootNode()->location.getVector4fMap());
-	ASSERT_EQ(test_node2->location.getVector4fMap(), test_tree.getLeafNode()->location.getVector4fMap());
+	ASSERT_EQ(test_node1->location_.getVector4fMap(), test_tree.getRootNode()->location_.getVector4fMap());
+	ASSERT_EQ(test_node2->location_.getVector4fMap(), test_tree.getLeafNode()->location_.getVector4fMap());
+}
+
+TEST(RRTCarrotTreeTest, testNearestNeighbor)
+{
+	RRTCarrotTree test_tree;
+	//The tree should be empty
+	ASSERT_EQ(0, test_tree.size());
+
+	//Push a series of nodes onto the tree
+	node_ptr_t test_node1(new RRTNode());
+	test_node1->location_.x = 0;
+	test_node1->location_.y = 0;
+	test_node1->location_.z = 0;
+
+	node_ptr_t test_node2(new RRTNode());
+	test_node2->location_.x = 10;
+	test_node2->location_.y = 0;
+	test_node2->location_.z = 0;
+
+	node_ptr_t test_node3(new RRTNode());
+	test_node3->location_.x = 0;
+	test_node3->location_.y = 10;
+	test_node3->location_.z = 0;
+
+	test_tree.addNode(test_node2);
+	test_tree.addNode(test_node3);
+	test_tree.addNode(test_node1);
+
+
+	//Find the nearest neighbor to a node at 1,1. Should be test_node1
+	node_ptr_t test_node4(new RRTNode());
+	test_node4->location_.x = 1;
+	test_node4->location_.y = 1;
+	test_node4->location_.z = 0;
+
+
+	node_ptr_t result1 = test_tree.findNearestNeighbor(test_node4);
+	EXPECT_EQ(test_node1->location_.getVector4fMap(), result1->location_.getVector4fMap())<<PRINT_EXPECT_NODE(test_node1, result1);
+
+	//Find the nearest neighbor to a node at 11,1, should be test_node2
+	test_node4->location_.x = 11;
+	node_ptr_t result2 = test_tree.findNearestNeighbor(test_node4);
+	EXPECT_EQ(test_node2->location_.getVector4fMap(), result2->location_.getVector4fMap())<<PRINT_EXPECT_NODE(test_node2, result2);
+
+	//Find the nearest neighbor to a node at 5,11, should be test_node3
+	test_node4->location_.x = 5;
+	test_node4->location_.y = 11;
+	node_ptr_t result3 = test_tree.findNearestNeighbor(test_node4);
+	EXPECT_EQ(test_node3->location_.getVector4fMap(), result3->location_.getVector4fMap())<<PRINT_EXPECT_NODE(test_node3, result3);
 }
 
 int main(int argc, char **argv)
