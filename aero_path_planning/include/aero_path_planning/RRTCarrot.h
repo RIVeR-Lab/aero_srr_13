@@ -163,7 +163,7 @@ public:
 
 	RRTCarrot& operator=(RRTCarrot const &copy);
 
-private:
+protected:
 
 	/**
 	 * @author Adam Panzica
@@ -240,6 +240,7 @@ private:
 	 */
 	bool generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector);
 
+private:
 
 	int  step_size_;   ///The distance to step while connecting nodes
 	bool initialized_; ///Flag for signalling that the RRTCarrot is ready for searching

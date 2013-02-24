@@ -203,6 +203,32 @@ TEST(RRTCarrotTreeTest, testNearestNeighbor)
 	EXPECT_EQ(test_node3->location_.getVector4fMap(), result3->location_.getVector4fMap())<<PRINT_EXPECT_NODE(test_node3, result3);
 }
 
+class RRTCarrotTestFixture : public ::testing::Test
+{
+protected:
+	RRTCarrotTestFixture()
+{
+		//Neded because RRTCarrot uses calls to ros::Time but ROS is not initialized in a test fixture
+		ros::Time::init();
+		this->origin_.x = 0;
+		this->origin_.y = 0;
+		this->origin_.z = 0;
+		this->x_size_   = 50;
+		this->y_size_   = 50;
+		this->test_planner_ = new RRTCarrot();
+}
+
+	Point origin_;
+	int   x_size_;
+	int   y_size_;
+	RRTCarrot* test_planner_;
+};
+
+TEST_F(RRTCarrotTestFixture, testSetDelta)
+{
+	ASSERT_TRUE(this->test_planner_->setCarrotDelta(10));
+}
+
 int main(int argc, char **argv)
 {
 	testing::InitGoogleTest(&argc, argv);
