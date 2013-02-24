@@ -99,4 +99,4 @@ rosbuild_add_executable(aero_global_planner src/nodes/aero_global_planner.cpp)
 target_link_libraries(aero_global_planner ${PROJECT_NAME}_lib)
 
 #build tests
-rosbuild_add_gtest(test/CarrotPathFinderTest test/CarrotPathFinderTest.cpp)
+#rosbuild_add_gtest(test/CarrotPathFinderTest test/CarrotPathFinderTest.cpp)
