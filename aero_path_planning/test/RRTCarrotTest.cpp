@@ -364,6 +364,32 @@ TEST_F(RRTCarrotTestFixture, testStep)
 	ASSERT_EQ(expected_result->parent_,     to_node->parent_)    <<PRINT_EXPECT_NODE(expected_result, to_node);
 }
 
+TEST_F(RRTCarrotTestFixture, testConnect)
+{
+	//Set up the planner
+	this->setUpPlanner();
+
+	//Set up a test tree to write results too
+	RRTCarrotTree test_tree;
+
+	//Set up a start node and an end node that will result in a connected straight line
+	node_ptr_t  start_node(new RRTNode());
+	node_ptr_t  end_node(new RRTNode());
+	start_node->location_=this->origin_;
+	end_node->location_.x = 10;
+	end_node->location_.y = 0;
+
+	//Connect the start node to the end node. This should fully connect as there are no obsticales
+	ASSERT_TRUE(this->connect(end_node, start_node, &test_tree));
+	//The root of test_tree should now be start_node, and the leaf should be end_node
+	node_ptr_t root_node = test_tree.getRootNode();
+	node_ptr_t leaf_node = test_tree.getLeafNode();
+	ASSERT_EQ(start_node, root_node)<<PRINT_EXPECT_NODE(start_node, root_node);
+	ASSERT_EQ(end_node,   leaf_node)<<PRINT_EXPECT_NODE(end_node,   leaf_node);
+	//The tree should now contain 10 nodes, since the step size is 1
+	ASSERT_EQ(10, test_tree.size());
+}
+
 int main(int argc, char **argv)
 {
 	testing::InitGoogleTest(&argc, argv);
