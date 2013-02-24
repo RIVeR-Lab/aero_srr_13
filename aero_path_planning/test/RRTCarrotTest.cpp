@@ -42,23 +42,14 @@ TEST(RRTNodeTest, testRRTNode)
 
 TEST(RRTCarrotTreeTest, testTreeSetup)
 {
-	int initial_tree_size = 0;
 	RRTCarrotTree test_tree;
 
 	//Size should be the initial guess capacity
-	ASSERT_EQ(initial_tree_size, test_tree.size());
-
-	//Test copy
-	RRTCarrotTree test_copy_tree_rf(test_tree);
-	ASSERT_EQ(initial_tree_size, test_copy_tree_rf.size());
-
-	RRTCarrotTree test_copy_tree_ptr(&test_tree);
-	ASSERT_EQ(initial_tree_size, test_copy_tree_ptr.size());
+	ASSERT_EQ(0, test_tree.size());
 }
 
 TEST(RRTCarrotTestTree, testAddingNode)
 {
-	int initial_tree_size = 0;
 	RRTCarrotTree test_tree;
 
 	//Push a node onto the tree
@@ -132,6 +123,35 @@ TEST(RRTCarrotTreeTest, testRootLeafAccess)
 	//Now the root node should still be test_node1, but the leaf node should be test_node2
 	ASSERT_EQ(test_node1->location_.getVector4fMap(), test_tree.getRootNode()->location_.getVector4fMap());
 	ASSERT_EQ(test_node2->location_.getVector4fMap(), test_tree.getLeafNode()->location_.getVector4fMap());
+}
+
+TEST(RRTCarrotTreeTest, testCopy)
+{
+	RRTCarrotTree test_tree;
+
+
+	//Test Copying tree with nodes
+	node_ptr_t test_node1(new RRTNode());
+	test_node1->location_.x = 10;
+	test_node1->location_.y = 0;
+	test_node1->location_.z = 0;
+
+	test_tree.addNode(test_node1);
+
+	RRTCarrotTree test_copy_tree_rf(test_tree);
+	ASSERT_EQ(1, test_copy_tree_rf.size());
+	node_ptr_t result1 = test_copy_tree_rf.getRootNode();
+	ASSERT_EQ(test_node1->location_.getVector4fMap(), result1->location_.getVector4fMap())<<PRINT_EXPECT_NODE(test_node1, result1);
+
+	RRTCarrotTree test_copy_tree_ptr(&test_tree);
+	ASSERT_EQ(1, test_copy_tree_ptr.size());
+	node_ptr_t result2 = test_copy_tree_ptr.getRootNode();
+	ASSERT_EQ(test_node1->location_.getVector4fMap(), result1->location_.getVector4fMap())<<PRINT_EXPECT_NODE(test_node1, result2);
+
+	RRTCarrotTree test_copy_tree_eq = test_tree;
+	ASSERT_EQ(1, test_copy_tree_eq.size());
+	node_ptr_t result3 = test_copy_tree_eq.getRootNode();
+	ASSERT_EQ(test_node1->location_.getVector4fMap(), result1->location_.getVector4fMap())<<PRINT_EXPECT_NODE(test_node1, result3);
 }
 
 TEST(RRTCarrotTreeTest, testNearestNeighbor)
