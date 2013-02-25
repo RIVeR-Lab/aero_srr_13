@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle p_nh("~");
 	RRTCarrot path_planner(1);
+	path_planner.seedSampler(ros::Time::now().toNSec());
 	CarrotPathFinder::collision_func_ cf = boost::bind(&collisionCheck, _1, _2);
 	path_planner.setCollision(cf);
 
@@ -90,7 +91,7 @@ int main(int argc, char **argv) {
 	goal_point.y  = 0;
 	goal_point.z  = 0;
 	std::queue<Point> path;
-	ros::Duration timeout(1000);
+	ros::Duration timeout(1);
 
 	while(ros::ok())
 	{
@@ -106,14 +107,15 @@ int main(int argc, char **argv) {
 
 		BOOST_FOREACH(Point point, path_cloud)
 		{
-			ROS_INFO_STREAM("I'm Printing Point ("<<point.x<<","<<point.y<<")");
+			//ROS_INFO_STREAM("I'm Printing Point ("<<point.x<<","<<point.y<<")");
 			copyGrid.setPointTrait(point, aero_path_planning::TENTACLE);
 		}
 		copyGrid.setPointTrait(goal_point, aero_path_planning::GOAL);
 		copyGrid.setPointTrait(start_point, aero_path_planning::UNKNOWN);
 
 		ROS_INFO_STREAM("\n"<<*(copyGrid.toString(0,0)));
-
+		std::string input;
+		std::cin >> input;
 	}
 
 	GlobalPlanner planner(nh, p_nh, path_planner);
