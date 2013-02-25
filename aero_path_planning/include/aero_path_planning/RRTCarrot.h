@@ -153,6 +153,14 @@ public:
 	RRTCarrot(double step_size);
 	virtual ~RRTCarrot();
 
+	/**
+	 * @author Adam Panzica
+	 * @brief  Seeds the random sample generator
+	 * @param seed Value to seed the sampler with
+	 * @return True if sucessfully seeded
+	 */
+	bool seedSampler(double seed);
+
 
 	virtual bool setCarrotDelta(double delta);
 	virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map);

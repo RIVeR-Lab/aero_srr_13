@@ -197,6 +197,13 @@ void RRTCarrot::randInit()
 	this->rand_gen_->distribution().reset();
 }
 
+bool RRTCarrot::seedSampler(double seed)
+{
+	this->rand_gen_->engine().seed(seed);
+	this->rand_gen_->distribution().reset();
+	return true;
+}
+
 bool RRTCarrot::isInialized()
 {
 	this->initialized_ = this->has_coll_&&this->has_delta_&&this->has_map_;
