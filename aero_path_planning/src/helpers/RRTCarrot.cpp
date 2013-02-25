@@ -14,6 +14,7 @@
 #include<boost/random/normal_distribution.hpp>
 #include<pcl/common/distances.h>
 #include<pcl/common/norms.h>
+#include <boost/math/special_functions/round.hpp>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/RRTCarrot.h>
 //**********************NAMESPACES*****************************//
@@ -313,6 +314,9 @@ bool RRTCarrot::connect(const node_ptr_t& q_rand, const node_ptr_t& tree_node, R
 		//Make a step and see if it's in collision
 		if(this->step(last_node, step_vector, next_node))
 		{
+			//Debug
+			Point step_vector_p;
+			step_vector_p.getVector4fMap() = step_vector;
 			//If it wasn't, see how close we've gotten to q_rand and add the new node the tree
 			dist               = std::abs(pcl::distances::l2(next_node->location_.getVector4fMap(),q_rand->location_.getVector4fMap()));
 			next_node->parent_ = tree->getLeafNode();
@@ -345,11 +349,9 @@ bool RRTCarrot::connect(const node_ptr_t& q_rand, const node_ptr_t& tree_node, R
 
 bool RRTCarrot::step(const node_ptr_t& last_node, const Eigen::Vector4f& step_vector, node_ptr_t& next_node)
 {
+	if(step_vector.norm()<this->step_size_) return false;
 	Point next_point;
 	next_point.getVector4fMap() = last_node->location_.getVector4fMap()+step_vector;
-	next_point.x     = std::floor(next_point.x);
-	next_point.y     = std::floor(next_point.y);
-	next_point.z     = std::floor(next_point.z);
 
 
 	if(!this->collision_checker_(next_point, this->map_))
@@ -366,6 +368,12 @@ bool RRTCarrot::generateStepVector(const Point& from_point, const Point& to_poin
 	vector       =  to_point.getVector4fMap()-from_point.getVector4fMap();
 	double scale =  ((double)this->step_size_)/vector.norm();
 	vector       *= scale;
+	Point round_temp;
+	round_temp.getVector4fMap() = vector;
+	round_temp.x = boost::math::round(round_temp.x);
+	round_temp.y = boost::math::round(round_temp.y);
+	round_temp.z = boost::math::round(round_temp.z);
+	vector       = round_temp.getVector4fMap();
 	return true;
 }
 

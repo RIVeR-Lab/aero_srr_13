@@ -267,6 +267,7 @@ protected:
 		this->setCollision(cf);
 		OccupancyGrid search_grid(this->x_size_,this->y_size_,1,this->origin_);
 		this->setSearchMap(search_grid);
+		this->seedSampler(ros::Time::now().toNSec());
 	}
 
 	Point origin_;
