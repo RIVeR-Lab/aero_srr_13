@@ -24,19 +24,19 @@ using namespace aero_path_planning;
 //*******************RRTCarrotTree*****************************//
 
 RRTCarrotTree::RRTCarrotTree(const RRTCarrotTree& copy):
-						nodes_(copy.nodes_)
+								nodes_(copy.nodes_)
 {
 
 }
 
 RRTCarrotTree::RRTCarrotTree(const RRTCarrotTree* copy):
-					nodes_(copy->nodes_)
+							nodes_(copy->nodes_)
 {
 
 }
 
 RRTCarrotTree::RRTCarrotTree():
-						nodes_()
+								nodes_()
 {
 
 }
@@ -102,9 +102,9 @@ RRTCarrotTree::size_type RRTCarrotTree::size() const
 void RRTCarrotTree::flushTree()
 {
 	BOOST_FOREACH(node_deque::value_type node, this->nodes_)
-	{
+			{
 		node.reset();
-	}
+			}
 	this->nodes_.clear();
 }
 
@@ -130,17 +130,17 @@ RRTCarrotTree& RRTCarrotTree::operator=(RRTCarrotTree const &copy)
 //*********************RRTCarrot*******************************//
 
 RRTCarrot::RRTCarrot(const aero_path_planning::RRTCarrot& copy):
-				step_size_(copy.step_size_),
-				initialized_(copy.initialized_),
-				has_delta_(copy.has_delta_),
-				has_coll_(copy.has_coll_),
-				has_map_(copy.has_map_),
-				delta_(copy.delta_),
-				map_(copy.map_),
-				collision_checker_(copy.collision_checker_),
-				start_tree_(NULL),
-				goal_tree_(NULL),
-				rand_gen_(NULL)
+						step_size_(copy.step_size_),
+						initialized_(copy.initialized_),
+						has_delta_(copy.has_delta_),
+						has_coll_(copy.has_coll_),
+						has_map_(copy.has_map_),
+						delta_(copy.delta_),
+						map_(copy.map_),
+						collision_checker_(copy.collision_checker_),
+						start_tree_(NULL),
+						goal_tree_(NULL),
+						rand_gen_(NULL)
 {
 	if(copy.start_tree_!=NULL)
 	{
@@ -154,29 +154,29 @@ RRTCarrot::RRTCarrot(const aero_path_planning::RRTCarrot& copy):
 }
 
 RRTCarrot::RRTCarrot():
-				step_size_(0),
-				initialized_(false),
-				has_delta_(false),
-				has_coll_(false),
-				has_map_(false),
-				delta_(0),
-				start_tree_(NULL),
-				goal_tree_(NULL),
-				rand_gen_(NULL)
+						step_size_(0),
+						initialized_(false),
+						has_delta_(false),
+						has_coll_(false),
+						has_map_(false),
+						delta_(0),
+						start_tree_(NULL),
+						goal_tree_(NULL),
+						rand_gen_(NULL)
 {
 	this->randInit();
 }
 
 RRTCarrot::RRTCarrot(double step_size):
-				step_size_(step_size),
-				initialized_(false),
-				has_delta_(false),
-				has_coll_(false),
-				has_map_(false),
-				delta_(0),
-				start_tree_(NULL),
-				goal_tree_(NULL),
-				rand_gen_(NULL)
+						step_size_(step_size),
+						initialized_(false),
+						has_delta_(false),
+						has_coll_(false),
+						has_map_(false),
+						delta_(0),
+						start_tree_(NULL),
+						goal_tree_(NULL),
+						rand_gen_(NULL)
 {
 	this->randInit();
 }
@@ -349,8 +349,6 @@ bool RRTCarrot::step(const node_ptr_t& last_node, const Eigen::Vector4f& step_ve
 	{
 		next_node->location_= next_point;
 		next_node->parent_  = last_node;
-		ROS_INFO_STREAM("I Stepped ("<<last_node->location_.x<<","<<last_node->location_.y<<
-				") to ("<<next_node->location_.x<<","<<next_node->location_.y<<") and set set next_node's parent to "<<next_node->parent_);
 		return true;
 	}
 	return false;
@@ -385,7 +383,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 		ros::Time start_time = ros::Time::now();
 
 		//Build the initial nodes, add to trees
-		bool sucess = false;
+		bool success = false;
 		bool time_out = false;
 
 		node_ptr_t start_node (new RRTNode());
@@ -406,7 +404,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 
 		ROS_INFO_STREAM("Tree Set Up, Beginning Search!");
 
-		while(!sucess&&!time_out&&ros::ok())
+		while(!success&&!time_out)
 		{
 			//Sample a new random point on the grid
 			node_ptr_t q_rand(new RRTNode());
@@ -434,8 +432,11 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 				//Connect the nearest neighbor on the sampling tree to the sampled point
 				this->connect(q_rand, sample_tree->findNearestNeighbor(q_rand), sample_tree);
 				//Attempt to connect the sample tree to the connect tree, if sucessfull we're done as we have a path
-				sucess = this->connect(sample_tree->getLeafNode(), connect_tree->getLeafNode(), connect_tree);
-				from_start = !from_start;
+				success = this->connect(sample_tree->getLeafNode(), connect_tree->findNearestNeighbor(sample_tree->getLeafNode()), connect_tree);
+				if(!success)
+			    {
+					from_start = !from_start;
+			    }
 			}
 			else
 			{
@@ -447,42 +448,42 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 
 		}
 		ROS_INFO_STREAM("Connected The Trees or ROS Quit, Building Path If ROS Running...");
-		if(ros::ok())
+		//Merge the paths together. As the last nodes added to each tree will have been the connect nodes, we use those as entires to merge
+		if(!from_start)
 		{
-			//Merge the paths together. As the last nodes added to each tree will have been the connect nodes, we use those as entires to merge
-			if(!from_start)
-			{
-				//Make sure we're building a path from the start to the goal
-				std::swap(sample_tree, connect_tree);
-			}
-
-			//Build the final complete path
-			node_ptr_t next_node_on_path;
-			//If we didn't timeout, merge the trees
-			if(!time_out)
-			{
-				ROS_INFO("Merging Paths...");
-				if(!this->mergePath(sample_tree->getLeafNode(), connect_tree->getLeafNode())) ROS_ERROR("Something Went Wrong Merging Paths!");
-				next_node_on_path = connect_tree->getRootNode();
-			}
-			//Otherwise build the path that got closest to goal
-			else
-			{
-				ROS_INFO("Building Incomplete Path...");
-				next_node_on_path = sample_tree->findNearestNeighbor(goal_node);
-			}
-
-			while(next_node_on_path != node_ptr_t())
-			{
-				ROS_INFO_STREAM("Adding Node At ("<<next_node_on_path->location_.x<<","<<next_node_on_path->location_.y<<")");
-				next_node_on_path->location_.rgba = aero_path_planning::GOAL;
-				result_path.push(next_node_on_path->location_);
-				next_node_on_path = next_node_on_path->parent_;
-			}
+			//Make sure we're building a path from the start to the goal
+			std::swap(sample_tree, connect_tree);
 		}
-		else return false;
-		//Built the path, we're done
-		return sucess;
+
+		//Build the final complete path
+		node_ptr_t next_node_on_path;
+		//If we didn't timeout, merge the trees
+		if(!time_out)
+		{
+			ROS_INFO("Merging Paths...");
+			if(!this->mergePath(sample_tree->getLeafNode(), connect_tree->getLeafNode()))
+			{
+				ROS_ERROR("Something Went Wrong Merging Paths!");
+				return false;
+			}
+			next_node_on_path = connect_tree->getRootNode();
+		}
+		//Otherwise build the path that got closest to goal
+		else
+		{
+			ROS_INFO("Building Incomplete Path...");
+			next_node_on_path = sample_tree->findNearestNeighbor(goal_node);
+		}
+
+		while(next_node_on_path != node_ptr_t())
+		{
+			ROS_INFO_STREAM("Adding Node At ("<<next_node_on_path->location_.x<<","<<next_node_on_path->location_.y<<")");
+			next_node_on_path->location_.rgba = aero_path_planning::GOAL;
+			result_path.push(next_node_on_path->location_);
+			next_node_on_path = next_node_on_path->parent_;
+		}
+		//Built the path or terminated early, we're done
+		return success;
 	}
 	else
 	{
