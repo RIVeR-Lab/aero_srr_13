@@ -30,6 +30,8 @@ rosbuild_add_library(vision_comm src/IOImages.cpp src/RosBridge.cpp src/RosStere
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(testMonoCam example/monocam.cpp)
+rosbuild_add_executable(camera_config src/camera_config.cpp)
+target_link_libraries(camera_config prosilica)
 rosbuild_add_executable(testRosCam example/rosbridge.cpp)
 rosbuild_add_executable(pubcam example/pubcam.cpp)
 #rosbuild_add_executable(testStereoCam example/stereocam.cpp)

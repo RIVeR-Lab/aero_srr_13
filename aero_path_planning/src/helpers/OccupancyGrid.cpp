@@ -176,7 +176,7 @@ OccupancyGrid::OccupancyGrid(const aero_path_planning::OccupancyGridMsg& message
 
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait)
 {
-	ROS_INFO("Grid Size:%d", (int)this->occ_grid_.size());
+	//ROS_INFO("Grid Size:%d", (int)this->occ_grid_.size());
 	for(int x=0; x<this->x_dim_+1; x++)
 	{
 		for(int y=0; y<this->y_dim_+1; y++)
