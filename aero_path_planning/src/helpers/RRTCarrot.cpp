@@ -485,7 +485,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 
 		while(next_node_on_path != node_ptr_t())
 		{
-			ROS_INFO_STREAM("Adding Node At ("<<next_node_on_path->location_.x<<","<<next_node_on_path->location_.y<<")");
+			//ROS_INFO_STREAM("Adding Node At ("<<next_node_on_path->location_.x<<","<<next_node_on_path->location_.y<<")");
 			next_node_on_path->location_.rgba = aero_path_planning::GOAL;
 			result_path.push(next_node_on_path->location_);
 			next_node_on_path = next_node_on_path->parent_;

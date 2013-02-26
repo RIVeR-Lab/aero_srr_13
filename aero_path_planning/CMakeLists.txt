@@ -102,5 +102,5 @@ target_link_libraries(aero_global_planner ${PROJECT_NAME}_lib)
 #rosbuild_add_gtest(test/CarrotPathFinderTest test/CarrotPathFinderTest.cpp)
 #target_link_libraries(test/CarrotPathFinderTest AeroPathPlanning)
 
-rosbuild_add_gtest(test/RRTCarrotTest test/RRTCarrotTest.cpp)
-target_link_libraries(test/RRTCarrotTest ${PROJECT_NAME}_lib )
+rosbuild_add_gtest(test/AeroPathPlanningTests test/AeroPathPlanningTests.cpp test/CastLineTest.cpp test/RRTCarrotTest.cpp)
+target_link_libraries(test/AeroPathPlanningTests ${PROJECT_NAME}_lib )

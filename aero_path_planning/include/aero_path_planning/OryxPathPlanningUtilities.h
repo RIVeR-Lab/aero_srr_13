@@ -19,9 +19,10 @@
 #include <pcl/ros/conversions.h>
 #include <pcl/registration/distances.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <boost/foreach.hpp>
 //*********************** LOCAL DEPENDENCIES ************************************//
-#include "TypeDefinitions.h"
-#include "PointConverter.hpp"
+#include <aero_path_planning/TypeDefinitions.h>
+#include <aero_path_planning/PointConverter.hpp>
 
 //*********************** MACROS ************************************//
 
@@ -48,6 +49,8 @@
 #else
 #error PRINT_POINT is already defined!
 #endif
+
+#define PRINT_POINT_S(prefix, point) prefix<<": Point<"<<point.x<<","<<point.y<<","<<point.z<<">"
 
 namespace aero_path_planning
 {
@@ -207,88 +210,109 @@ inline double gridToReal(int grid, double resolution)
  */
 inline void castLine(Point& startPoint, Point& endPoint, int rgba, PointCloud& cloud)
 {
-	int x_0 = startPoint.x, x_f= endPoint.x, x, delta_x, step_x;
-	int y_0 = startPoint.y, y_f= endPoint.y, y, delta_y, step_y;
-	int z_0 = startPoint.z, z_f= endPoint.z, z, delta_z, step_z;
-	bool s_xy, s_xz;
-	int error_xy, error_xz;
-	int cx, cy, cz;
-	int initial_size = cloud.size();
-
-
-	//Figure out if the line is 'steep' along the xy plane
-	s_xy = std::abs(y_f-y_0)>std::abs(x_f-x_0);
-	if(s_xy){
-		std::swap<int>(x_0, y_0);
-		std::swap<int>(x_f, y_f);
+	//If we got the same start and end point, just push on the start point and finish
+	if(startPoint.getVector4fMap() == endPoint.getVector4fMap())
+	{
+		cloud.push_back(startPoint);
 	}
-	//Figure out if the line is 'steep' along the xz plane
-	s_xz = std::abs(z_f-z_0)>std::abs(x_f-x_0);
-	if(s_xz){
-		std::swap<int>(x_0, z_0);
-		std::swap<int>(x_f, z_f);
-	}
+	else
+	{
+		int x_0 = startPoint.x, x_f= endPoint.x, x, delta_x, step_x;
+		int y_0 = startPoint.y, y_f= endPoint.y, y, delta_y, step_y;
+		int z_0 = startPoint.z, z_f= endPoint.z, z, delta_z, step_z;
+		bool s_xy, s_xz;
+		int error_xy, error_xz;
+		int cx, cy, cz;
+		int initial_size = cloud.size();
 
-	//Calculate the delta in each axis
-	delta_x = std::abs(x_f-x_0);
-	delta_y = std::abs(y_f-y_0);
-	delta_z = std::abs(z_f-z_0);
 
-	//Calculate starting error values
-	error_xy = delta_x/2;
-	error_xz = delta_x/2;
-
-	//Determine line direction
-	(x_0>x_f)?(step_x=-1):(step_x=1);
-	(y_0>y_f)?(step_y=-1):(step_y=1);
-	(z_0>z_f)?(step_z=-1):(step_z=1);
-
-	//Set up initial point
-	y = y_0;
-	z = z_0;
-
-	//ROS_INFO("Calculated Line Parameters: s_xy=%s, s_xz=%s, delta_x=%d, delta_y=%d, delta_z=%d, step_x=%d, step_y=%d, step_z=%d",
-	//(s_xy)?"true":"false",(s_xz)?"true":"false", delta_x, delta_y, delta_z, step_x, step_y, step_z);
-
-	//Iterate across the line
-	for(x = x_0; x<x_f; x+=step_x){
-		//store x,y,z for un-swapping
-		cx = x; cy = y; cz = z;
-
-		//unswap if needed
-		if(s_xz) std::swap<int>(cx, cz);
-		if(s_xy) std::swap<int>(cx, cy);
-
-		//Write out the point
-		Point point;
-		point.x = cx;
-		point.y = cy;
-		point.z = cz;
-		point.rgba = rgba;
-		//PRINT_POINT("Line Calculated", point);
-		cloud.push_back(point);
-
-		//update the y and z axies
-		error_xy -= delta_y;
-		error_xz -= delta_z;
-
-		//step y
-		if(error_xy < 0){
-			y+= step_y;
-			error_xy += delta_x;
+		//Figure out if the line is 'steep' along the xy plane
+		s_xy = std::abs(y_f-y_0)>std::abs(x_f-x_0);
+		if(s_xy){
+			std::swap<int>(x_0, y_0);
+			std::swap<int>(x_f, y_f);
+		}
+		//Figure out if the line is 'steep' along the xz plane
+		s_xz = std::abs(z_f-z_0)>std::abs(x_f-x_0);
+		if(s_xz){
+			std::swap<int>(x_0, z_0);
+			std::swap<int>(x_f, z_f);
 		}
 
-		//step z
-		if(error_xz < 0){
-			z+= step_z;
-			error_xz += delta_x;
+		//Calculate the delta in each axis
+		delta_x = std::abs(x_f-x_0);
+		delta_y = std::abs(y_f-y_0);
+		delta_z = std::abs(z_f-z_0);
+
+		//Calculate starting error values
+		error_xy = delta_x/2;
+		error_xz = delta_x/2;
+
+		//Determine line direction
+		(x_0>x_f)?(step_x=-1):(step_x=1);
+		(y_0>y_f)?(step_y=-1):(step_y=1);
+		(z_0>z_f)?(step_z=-1):(step_z=1);
+
+		//Set up initial point
+		y = y_0;
+		z = z_0;
+
+		//ROS_INFO("Calculated Line Parameters: s_xy=%s, s_xz=%s, delta_x=%d, delta_y=%d, delta_z=%d, step_x=%d, step_y=%d, step_z=%d",
+		//(s_xy)?"true":"false",(s_xz)?"true":"false", delta_x, delta_y, delta_z, step_x, step_y, step_z);
+
+		//Iterate across the line
+		for(x = x_0; x<x_f; x+=step_x){
+			//store x,y,z for un-swapping
+			cx = x; cy = y; cz = z;
+
+			//unswap if needed
+			if(s_xz) std::swap<int>(cx, cz);
+			if(s_xy) std::swap<int>(cx, cy);
+
+			//Write out the point
+			Point point;
+			point.x = cx;
+			point.y = cy;
+			point.z = cz;
+			point.rgba = rgba;
+			//PRINT_POINT("Line Calculated", point);
+			cloud.push_back(point);
+
+			//update the y and z axies
+			error_xy -= delta_y;
+			error_xz -= delta_z;
+
+			//step y
+			if(error_xy < 0){
+				y+= step_y;
+				error_xy += delta_x;
+			}
+
+			//step z
+			if(error_xz < 0){
+				z+= step_z;
+				error_xz += delta_x;
+			}
+		}
+		cloud.push_back(endPoint);
+
+		//ROS_INFO("Line Generated, editing first/last point");
+		//Set the RGBA values of the first and last point to their correct values
+		cloud.at(cloud.size()-(cloud.size()-initial_size)).rgba = startPoint.rgba;
+		cloud.at(cloud.size()-1).rgba = endPoint.rgba;
+
+		//If dx was negative, the cloud will be in reverse order. Need to flip it back around
+		if(endPoint.x-startPoint.x<0)
+		{
+			for (unsigned int i = 0; i < cloud.size()/2; i++)
+			{
+				int swapi       = cloud.size()-1-i;
+				Point swap      = cloud.at(i);
+				cloud.at(i)     = cloud.at(swapi);
+				cloud.at(swapi) = swap;
+			}
 		}
 	}
-
-	//ROS_INFO("Line Generated, editing first/last point");
-	//Set the RGBA values of the first and last point to their correct values
-	cloud.at(cloud.size()-(cloud.size()-initial_size)).rgba = startPoint.rgba;
-	cloud.at(cloud.size()-1).rgba = endPoint.rgba;
 }
 
 /**
