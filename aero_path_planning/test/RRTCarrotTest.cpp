@@ -331,7 +331,7 @@ TEST_F(RRTCarrotTestFixture, testSample)
 	node_ptr_t q_rand2(new RRTNode());
 	ASSERT_TRUE(this->sample(q_rand2));
 
-	ASSERT_NE(q_rand->location_.getVector4fMap(), q_rand2->location_.getVector4fMap());
+	ASSERT_FALSE(this->nodesEqual(q_rand2, q_rand));
 
 }
 
@@ -496,11 +496,5 @@ TEST_F(RRTCarrotTestFixture, testSearch)
 	ASSERT_TRUE(this->nodesEqual(path_goal, path_end))<<PRINT_EXPECT_NODE(path_goal, path_end);
 
 
-}
-
-int main(int argc, char **argv)
-{
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
 }
 
