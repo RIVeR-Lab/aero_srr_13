@@ -296,55 +296,48 @@ bool RRTCarrot::connect(const node_ptr_t& q_rand, const node_ptr_t& tree_node, R
 {
 	//If the node is on the tree already, we already searched it, don't add it
 	if(this->nodesEqual(q_rand, tree_node)) return false;
+	//If the node is less than one step size away from q_rand, we've already connected
+	if((q_rand->location_.getVector4fMap()-tree_node->location_.getVector4fMap()).norm()<this->step_size_)
+	{
+		return true;
+	}
 
 	ROS_INFO_STREAM("Attempting to connect ("<<tree_node->location_.x<<","<<tree_node->location_.y<<
 			") to ("<<q_rand->location_.x<<","<<q_rand->location_.y<<")");
 
 	//Set up the connection properties
-	Eigen::Vector4f step_vector;
-	node_ptr_t      last_node(tree_node);
-	double dist     = std::abs(pcl::distances::l2(last_node->location_.getVector4fMap(),q_rand->location_.getVector4fMap()));
-	this->generateStepVector(tree_node->location_, q_rand->location_, step_vector);
-
-	//While we're less than one step-size away from q_rand, step nodes forward
-	while(dist>this->step_size_)
+	PointCloud line_cloud;
+	aero_path_planning::castLine(tree_node->location_, q_rand->location_, 0, line_cloud);
+	bool connected = true;
+	line_cloud.erase(line_cloud.begin());
+	//While we're less than one step-size away from q_rand, step along the line
+	BOOST_FOREACH(Point next_point, line_cloud)
 	{
-		node_ptr_t next_node(new RRTNode());
-
 		//Make a step and see if it's in collision
-		if(this->step(last_node, step_vector, next_node))
+		if(!this->collision_checker_(next_point, this->map_))
 		{
-			//Debug
-			Point step_vector_p;
-			step_vector_p.getVector4fMap() = step_vector;
-			//If it wasn't, see how close we've gotten to q_rand and add the new node the tree
-			dist               = std::abs(pcl::distances::l2(next_node->location_.getVector4fMap(),q_rand->location_.getVector4fMap()));
-			next_node->parent_ = tree->getLeafNode();
+			node_ptr_t next_node(new RRTNode());
+			next_node->location_= next_point;
+			next_node->parent_  = tree->getLeafNode();
 			tree->addNode(next_node);
-			//Have to do this to ensure pointer changes
-			last_node = next_node;
 		}
 		else
 		{
 			//If it was in collision, we're done
+			connected = false;
 			break;
 		}
 
 	}
-	//If we got within a step size, we sucessfully connected the nodes, add q_rand to the tree
-	if(dist<=this->step_size_)
+	//If we got through the whole line, we sucessfully connected the nodes. Need to add q_rand because the castLine function doesn't include the endpoints
+	if(connected)
 	{
-		if(last_node->location_.getVector4fMap()!=q_rand->location_.getVector4fMap())
-		{
-			node_ptr_t q_node(new RRTNode());
-			q_node->parent_  = last_node;
-			q_node->location_ = q_rand->location_;
-			tree->addNode(q_node);
-		}
-		return true;
+		node_ptr_t q_rand_l (new RRTNode());
+		q_rand_l->location_= q_rand->location_;
+		q_rand_l->parent_  = tree->getLeafNode();
+		tree->addNode(q_rand_l);
 	}
-	//Otherwise we didn't fully conect, return false
-	return false;
+	return connected;
 }
 
 bool RRTCarrot::step(const node_ptr_t& last_node, const Eigen::Vector4f& step_vector, node_ptr_t& next_node)
@@ -492,7 +485,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 
 		while(next_node_on_path != node_ptr_t())
 		{
-			ROS_INFO_STREAM("Adding Node At ("<<next_node_on_path->location_.x<<","<<next_node_on_path->location_.y<<")");
+			//ROS_INFO_STREAM("Adding Node At ("<<next_node_on_path->location_.x<<","<<next_node_on_path->location_.y<<")");
 			next_node_on_path->location_.rgba = aero_path_planning::GOAL;
 			result_path.push(next_node_on_path->location_);
 			next_node_on_path = next_node_on_path->parent_;
@@ -516,8 +509,8 @@ bool RRTCarrot::getPlanningType(std::string& type) const
 
 bool RRTCarrot::mergePath(node_ptr_t path_1_node, node_ptr_t path_2_node)
 {
-	ROS_INFO_STREAM("Merging Path With Bridge At ("<<path_1_node->location_.x<<"."<<path_1_node->location_.y<<
-			") and ("<<path_2_node->location_.x<<","<<path_2_node->location_.y<<")");
+	//ROS_INFO_STREAM("Merging Path With Bridge At ("<<path_1_node->location_.x<<"."<<path_1_node->location_.y<<
+	//		") and ("<<path_2_node->location_.x<<","<<path_2_node->location_.y<<")");
 	if(path_2_node == node_ptr_t() || path_1_node == node_ptr_t())
 	{
 		return false;
@@ -527,8 +520,8 @@ bool RRTCarrot::mergePath(node_ptr_t path_1_node, node_ptr_t path_2_node)
 	node_ptr_t swap;
 	while(new_child_node!=node_ptr_t())
 	{
-		ROS_INFO_STREAM("Connecting ("<<new_child_node->location_.x<<"."<<new_child_node->location_.y<<
-				") and ("<<new_parent_node->location_.x<<","<<new_parent_node->location_.y<<")");
+		//ROS_INFO_STREAM("Connecting ("<<new_child_node->location_.x<<"."<<new_child_node->location_.y<<
+		//		") and ("<<new_parent_node->location_.x<<","<<new_parent_node->location_.y<<")");
 		swap                    = new_child_node->parent_;
 		new_child_node->parent_ = new_parent_node;
 		new_parent_node         = new_child_node;

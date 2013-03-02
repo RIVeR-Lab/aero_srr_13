@@ -79,28 +79,29 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 rosbuild_add_boost_directories()
 
 #build library for non-node sources
-rosbuild_add_library(${PROJECT_NAME}_lib 
+rosbuild_add_library(lib${PROJECT_NAME} 
 		      src/helpers/Tentacles.cpp
 		      src/helpers/OccupancyGrid.cpp
 		      src/helpers/RRTCarrot.cpp
-		      src/helpers/global_planner.cpp)
+		      src/helpers/global_planner.cpp
+		      src/helpers/AeroPathPlanningUtilities.cpp)
 
 
 
 #build nodes
 #rosbuild_add_executable(aero_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
 rosbuild_add_executable(aero_local_planner src/nodes/oryx_local_planner.cpp)
-target_link_libraries(aero_local_planner ${PROJECT_NAME}_lib)
+target_link_libraries(aero_local_planner lib${PROJECT_NAME})
 rosbuild_add_executable(occupancy_generator src/nodes/occupancy_generator.cpp)
-target_link_libraries(occupancy_generator ${PROJECT_NAME}_lib)
+target_link_libraries(occupancy_generator lib${PROJECT_NAME})
 rosbuild_add_executable(oryx_global_planner src/nodes/oryx_global_planner.cpp)
-target_link_libraries(oryx_global_planner ${PROJECT_NAME}_lib)
+target_link_libraries(oryx_global_planner lib${PROJECT_NAME})
 rosbuild_add_executable(aero_global_planner src/nodes/aero_global_planner.cpp)
-target_link_libraries(aero_global_planner ${PROJECT_NAME}_lib)
+target_link_libraries(aero_global_planner lib${PROJECT_NAME})
 
 #build tests
 #rosbuild_add_gtest(test/CarrotPathFinderTest test/CarrotPathFinderTest.cpp)
-#target_link_libraries(test/CarrotPathFinderTest AeroPathPlanning)
+#target_link_libraries(test/CarrotPathFinderTest lib${PROJECT_NAME})
 
-rosbuild_add_gtest(test/RRTCarrotTest test/RRTCarrotTest.cpp)
-target_link_libraries(test/RRTCarrotTest ${PROJECT_NAME}_lib )
+rosbuild_add_gtest(test/AeroPathPlanningTests test/AeroPathPlanningTests.cpp test/CastLineTest.cpp test/RRTCarrotTest.cpp)
+target_link_libraries(test/AeroPathPlanningTests lib${PROJECT_NAME})
