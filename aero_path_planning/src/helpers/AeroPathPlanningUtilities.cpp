@@ -119,7 +119,7 @@ void aero_path_planning::castLine(const Point& startPoint, const Point& endPoint
 		//(s_xy)?"true":"false",(s_xz)?"true":"false", delta_x, delta_y, delta_z, step_x, step_y, step_z);
 
 		//Iterate across the line
-		for(x = x_0; x<x_f; x+=step_x){
+		for(x = x_0; x!=x_f; x+=step_x){
 			//store x,y,z for un-swapping
 			cx = x; cy = y; cz = z;
 
@@ -158,18 +158,6 @@ void aero_path_planning::castLine(const Point& startPoint, const Point& endPoint
 		//Set the RGBA values of the first and last point to their correct values
 		cloud.at(cloud.size()-(cloud.size()-initial_size)).rgba = startPoint.rgba;
 		cloud.at(cloud.size()-1).rgba = endPoint.rgba;
-
-		//If dx was negative, the cloud will be in reverse order. Need to flip it back around
-		if(endPoint.x-startPoint.x<0)
-		{
-			for (unsigned int i = 0; i < cloud.size()/2; i++)
-			{
-				int swapi       = cloud.size()-1-i;
-				Point swap      = cloud.at(i);
-				cloud.at(i)     = cloud.at(swapi);
-				cloud.at(swapi) = swap;
-			}
-		}
 	}
 }
 
