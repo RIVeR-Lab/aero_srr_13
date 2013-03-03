@@ -15,7 +15,6 @@
   <depend package="aero_drive_controller"/>
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
-  <depend package="costmap_2d"/>
   <depend package="geometry_msgs"/>
   <depend package="pcl"/>
   <depend package="pcl_ros"/>
