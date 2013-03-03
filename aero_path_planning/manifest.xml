@@ -15,16 +15,11 @@
   <depend package="aero_drive_controller"/>
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
-  <depend package="costmap_2d"/>
   <depend package="geometry_msgs"/>
   <depend package="pcl"/>
   <depend package="pcl_ros"/>
   <depend package="aero_srr_msgs"/>
   <depend package="sensor_msgs"/>
-  
-  <export>
-    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lros"/>
-  </export>
 
 </package>
 
