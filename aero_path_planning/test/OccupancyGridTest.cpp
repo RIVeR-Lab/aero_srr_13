@@ -77,5 +77,5 @@ using namespace aero_path_planning;
  	ASSERT_EQ(x_size_        , testGrid2D.getXSize());
  	ASSERT_EQ(y_size_        , testGrid2D.getYSize());
  	ASSERT_EQ(z_size_        , testGrid2D.getZSize());
- 	ASSERT_EQ(x_size_*y_size_, testGrid2D.size());
+ 	ASSERT_EQ((x_size_+1)*(y_size_+1), testGrid2D.size());
  }

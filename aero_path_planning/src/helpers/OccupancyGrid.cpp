@@ -59,9 +59,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 										occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
 										converter_(resolution)
 {
-	this->x_dim_	= xDim;
-	this->y_dim_	= yDim;
-	this->z_dim_	= zDim;
+	this->intializeDim(xDim, yDim, zDim);
 	this->res_	= resolution;
 	this->has_goal_ = false;
 
@@ -76,9 +74,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, double resolution, const aero_p
 										occ_grid_((xDim+1)*(yDim+1),1),
 										converter_(resolution)
 {
-	this->x_dim_	= xDim;
-	this->y_dim_	= xDim;
-	this->z_dim_	= 0;
+	this->intializeDim(xDim, yDim, 0);
 	this->res_	= resolution;
 	this->has_goal_ = false;
 
@@ -101,9 +97,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 {
 	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
 	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occ_grid_.size(), (int)cloud.size());
-	this->x_dim_	= xDim;
-	this->y_dim_	= yDim;
-	this->z_dim_	= zDim;
+	this->intializeDim(xDim, yDim, zDim);
 	this->res_	= resolution;
 	this->has_goal_ = false;
 
@@ -131,9 +125,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, ae
 {
 	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
 	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occ_grid_.size(), (int)cloud.size());
-	this->x_dim_	= xDim;
-	this->y_dim_	= yDim;
-	this->z_dim_	= zDim;
+	this->intializeDim(xDim, yDim, zDim);
 	this->res_	= resolution;
 	this->has_goal_ = false;
 
@@ -174,14 +166,21 @@ OccupancyGrid::OccupancyGrid(const aero_path_planning::OccupancyGridMsg& message
 	pcl::fromROSMsg<pcl::PointXYZRGBA>(message.grid_data, this->occ_grid_);
 }
 
+void OccupancyGrid::intializeDim(int x_dim, int y_dim, int z_dim)
+{
+	this->x_dim_ = x_dim+1;
+	this->y_dim_ = y_dim+1;
+	this->z_dim_ = z_dim+1;
+}
+
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait)
 {
 	//ROS_INFO("Grid Size:%d", (int)this->occ_grid_.size());
-	for(int x=0; x<this->x_dim_+1; x++)
+	for(int x=0; x<this->x_dim_; x++)
 	{
-		for(int y=0; y<this->y_dim_+1; y++)
+		for(int y=0; y<this->y_dim_; y++)
 		{
-			for(int z=0; z<this->z_dim_+1; z++)
+			for(int z=0; z<this->z_dim_; z++)
 			{
 				//ROS_INFO("Initializing Point <%d, %d, %d>", x,y,z);
 				//Initialize the point
@@ -450,7 +449,7 @@ boost::shared_ptr<std::string> OccupancyGrid::toString(int sliceAxis, int slice)
 
 int OccupancyGrid::calcIndex(int x, int y, int z) const
 {
-	return x + (this->y_dim_+1) * (y + (this->z_dim_+1) * z);
+	return x + (this->y_dim_) * (y + (this->z_dim_) * z);
 }
 
 const Point& OccupancyGrid::getPoint(const aero_path_planning::Point& point, bool origin_corrected) const
@@ -579,17 +578,17 @@ unsigned long OccupancyGrid::size() const
 
 int OccupancyGrid::getXSize() const
 {
-	return this->x_dim_;
+	return this->x_dim_-1;
 }
 
 int OccupancyGrid::getYSize() const
 {
-	return this->y_dim_;
+	return this->y_dim_-1;
 }
 
 int OccupancyGrid::getZSize() const
 {
-	return this->z_dim_;
+	return this->z_dim_-1;
 }
 
 const Point& OccupancyGrid::getOriginPoint() const
