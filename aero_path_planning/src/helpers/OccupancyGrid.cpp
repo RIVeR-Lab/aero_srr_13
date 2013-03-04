@@ -111,33 +111,6 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 
 }
 
-/**
- * This constructor takes a PointCloud, which may or may not have its points in any particular order, and copies it into
- * the PointCloud which backs this occupancy grid. In the process it organizes the points in such a fashion as to make them
- * accessible quickly by <x,y,z> coordinates without the need for iteration and comparison. Since there is no built in provision
- * to bounds-check the XYZ data in the Points in the given PointCloud, this constructor will throw an exception if a Point in
- * the PointCloud falls outside the grid specified by the xDim, yDim and zDim parameters.
- */
-OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, aero_path_planning::Point& origin, OccupancyGridCloud& cloud) throw(OccupancyGridAccessException):
-										origin_(origin),
-										occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
-										converter_(resolution)
-{
-	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
-	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occ_grid_.size(), (int)cloud.size());
-	this->intializeDim(xDim, yDim, zDim);
-	this->res_	= resolution;
-	this->has_goal_ = false;
-
-	for(unsigned int index = 0; index<cloud.size(); index++)
-	{
-		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", cloud.at(index).x, cloud.at(index).y, cloud.at(index).z, cloud.at(index).rgba);
-		setPoint(cloud.at(index), false);
-		//ROS_INFO("Set Data <%f, %f, %f, %x>", getPoint(cloud.at(index), false).x, getPoint(cloud.at(index), false).y, getPoint(cloud.at(index), false).z, getPoint(cloud.at(index), false).rgba);
-	}
-
-}
-
 OccupancyGrid::OccupancyGrid(const aero_path_planning::OccupancyGridMsg& message):
 									occ_grid_()
 {
