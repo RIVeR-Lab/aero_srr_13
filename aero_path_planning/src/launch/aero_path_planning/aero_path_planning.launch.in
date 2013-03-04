@@ -7,7 +7,7 @@
 	<arg name="velocity_command_topic"	default="velocity_command_topic" />
 	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
-	<arg name="occupancy_point_cloud_topic"	default="aero/local_occupancy_topic" />
+	<arg name=@OCCUPANCY_TOPIC_LIT@	default=@OCCUPANCY_TOPIC_LIT@ />
 	
 	<!-- declare occupancy grid arguments -->
 	<arg name="occupancy/update_rate"	default="0.2"/>

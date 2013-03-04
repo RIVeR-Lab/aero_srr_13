@@ -1,3 +1,8 @@
+#Set all parameters here
+
+set(OCCUPANCY_TOPIC_DEF OCCUPANCY_TOPIC)
+set(OCCUPANCY_TOPIC_LIT "\"aero/occupancy_topic\"")
+
 #Build the parameter header
 configure_file (
   "AeroPathPlanningParameters.h.in"

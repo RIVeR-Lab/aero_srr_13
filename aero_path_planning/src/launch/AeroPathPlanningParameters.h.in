@@ -9,6 +9,6 @@
 #define AEROPATHPLANNINGPARAMETERS_H_
 
 // the configured options and settings for Oryx Drive Controller
-
+#define @OCCUPANCY_TOPIC_DEF@ @OCCUPANCY_TOPIC_LIT@
 
 #endif /* AEROPATHPLANNINGPARAMETERS_H_ */
