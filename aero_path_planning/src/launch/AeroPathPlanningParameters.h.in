@@ -1,0 +1,14 @@
+/**
+ * @file AeroPathPlanningParameters.h
+ *
+ * @date Oct 2, 2012
+ * @author Adam Panzica
+ */
+
+#ifndef AEROPATHPLANNINGPARAMETERS_H_
+#define AEROPATHPLANNINGPARAMETERS_H_
+
+// the configured options and settings for Oryx Drive Controller
+
+
+#endif /* AEROPATHPLANNINGPARAMETERS_H_ */
