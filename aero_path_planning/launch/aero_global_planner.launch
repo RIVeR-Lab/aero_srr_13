@@ -1,0 +1,18 @@
+<launch>
+
+	<!-- ********************ARGUMENTS******************** -->
+	
+	<!-- declare args to be passed in for topics for sending new occupancy grid data -->
+	<arg name="occupancy_point_cloud_topic"	default="occupancy_point_cloud_topic" />
+	
+	
+	<!-- Test Enable Argument -->
+	<arg name="controller_test"			default="false"/>
+	
+	
+	<!-- ********************NODES******************** -->
+	<node name="oryx_global_planner" pkg="aero_path_planning" type="oryx_global_planner" output="screen">
+		<param name="occupancy_point_cloud_topic"	type="str"		value="$(arg occupancy_point_cloud_topic)" />
+	</node>
+	
+</launch>

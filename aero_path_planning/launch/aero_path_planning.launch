@@ -63,4 +63,8 @@
 		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
 		<arg name="platform"					value="$(arg platform)"  />
 	</include>
+
+	<include file="$(find aero_path_planning)/launch/aero_global_planner.launch">
+		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
+	</include>
 </launch>
