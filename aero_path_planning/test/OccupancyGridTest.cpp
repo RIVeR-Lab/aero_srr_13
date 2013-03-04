@@ -32,7 +32,7 @@ using namespace aero_path_planning;
  		zero_.rgba = 0;
 
  		pxpy_.x    = 10;
- 		pxpy_.y    = 5;
+ 		pxpy_.y    = 10;
  		pxpy_.z    = 0;
  		pxpy_.rgba = aero_path_planning::OBSTACLE;
 
@@ -66,7 +66,11 @@ using namespace aero_path_planning;
 
  };
 
- TEST_F(OccupancyGridTest, testBasicSetup)
+ /**
+ * @author Adam Panzica
+ * @brief  Neive tests of constructors
+ */
+ TEST_F(OccupancyGridTest, testBasicSetupAndSize)
  {
  	//Test empty constructor
  	OccupancyGrid testGrid;
@@ -74,8 +78,56 @@ using namespace aero_path_planning;
 
  	//Test 2D constructor
  	OccupancyGrid testGrid2D(x_size_, y_size_, res_, zero_);
- 	ASSERT_EQ(x_size_        , testGrid2D.getXSize());
- 	ASSERT_EQ(y_size_        , testGrid2D.getYSize());
- 	ASSERT_EQ(z_size_        , testGrid2D.getZSize());
+ 	ASSERT_EQ(x_size_  , testGrid2D.getXSize());
+ 	ASSERT_EQ(y_size_  , testGrid2D.getYSize());
+ 	ASSERT_EQ(z_size_  , testGrid2D.getZSize());
  	ASSERT_EQ((x_size_+1)*(y_size_+1), testGrid2D.size());
+
+ 	//Test 3D constructor
+ 	OccupancyGrid testGrid3D(x_size_, y_size_, z_size_, res_, zero_);
+ 	ASSERT_EQ(x_size_  , testGrid3D.getXSize());
+ 	ASSERT_EQ(y_size_  , testGrid3D.getYSize());
+ 	ASSERT_EQ(z_size_  , testGrid3D.getZSize());
+ 	ASSERT_EQ((x_size_+1)*(y_size_+1)*(z_size_+1), testGrid3D.size());
+
+ 	//Test Copy Constructor
+ 	OccupancyGrid testGridCopy(testGrid3D);
+ 	ASSERT_EQ(x_size_  , testGridCopy.getXSize());
+ 	ASSERT_EQ(y_size_  , testGridCopy.getYSize());
+ 	ASSERT_EQ(z_size_  , testGridCopy.getZSize());
+ 	ASSERT_EQ((x_size_+1)*(y_size_+1)*(z_size_+1), testGridCopy.size());
+
+ 	//Test PointCloud based copy constructor
+ 	OccupancyGridCloud copyCloud;
+ 	OccupancyGrid testGridPCCopy(x_size_, y_size_, z_size_, res_, zero_, copyCloud);
+ 	ASSERT_EQ(x_size_  , testGridPCCopy.getXSize());
+ 	ASSERT_EQ(y_size_  , testGridPCCopy.getYSize());
+ 	ASSERT_EQ(z_size_  , testGridPCCopy.getZSize());
+ 	ASSERT_EQ((x_size_+1)*(y_size_+1)*(z_size_+1), testGridPCCopy.size());
  }
+
+ TEST_F(OccupancyGridTest, testPointAccess)
+ {
+ 	//Build a zero-origin'd grid. Can't test negative values here as they would throw exceptions and gtest doesn't support
+ 	OccupancyGrid testGrid3D(x_size_, y_size_, z_size_, res_, zero_);
+
+ 	PointTrait test1 = testGrid3D.getPointTrait(pxpy_.x, pxpy_.y, pxpy_.z);
+ 	PointTrait test2 = testGrid3D.getPointTrait(pxpy_);
+
+ 	ASSERT_EQ(aero_path_planning::UNKNOWN, test1);
+ 	ASSERT_EQ(aero_path_planning::UNKNOWN, test2);
+
+ 	//Build a non-zero origin'd grid.
+ 	OccupancyGrid testGrid3D2(x_size_, y_size_, z_size_, res_, pxpy_, aero_path_planning::FREE_LOW_COST);
+
+ 	PointTrait test3 = testGrid3D2.getPointTrait(pxpy_.x, pxpy_.y, pxpy_.z);
+ 	PointTrait test4 = testGrid3D2.getPointTrait(pxpy_);
+ 	PointTrait test5 = testGrid3D2.getPointTrait(nxny_.x, nxny_.y, nxny_.z);
+ 	PointTrait test6 = testGrid3D2.getPointTrait(nxny_);
+
+ 	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test3);
+ 	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test4);
+ 	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test5);
+ 	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test6);
+ }
+

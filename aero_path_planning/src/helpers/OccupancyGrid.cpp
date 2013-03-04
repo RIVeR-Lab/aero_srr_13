@@ -27,19 +27,6 @@ OccupancyGrid::OccupancyGrid(): occ_grid_()
 	this->has_goal_ = false;
 }
 
-OccupancyGrid::OccupancyGrid(OccupancyGrid& grid):
-										origin_(grid.origin_),
-										occ_grid_(grid.occ_grid_),
-										converter_(grid.converter_)
-{
-	this->x_dim_	= grid.x_dim_;
-	this->y_dim_	= grid.y_dim_;
-	this->z_dim_	= grid.z_dim_;
-	this->res_	= grid.res_;
-	this->has_goal_ = grid.has_goal_;
-	this->goal_     = grid.goal_;
-};
-
 OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
 										origin_(grid.origin_),
 										occ_grid_(grid.occ_grid_),
@@ -95,10 +82,10 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 										occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
 										converter_(resolution)
 {
-	ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
-	ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occ_grid_.size(), (int)cloud.size());
+	//ROS_INFO("Generating new Point Cloud Based Occupancy Grid With Parameters: <%d, %d, %d>", xDim, yDim, zDim);
+	//ROS_INFO("Received cloud Should be Size <%d>, is size <%d>",(int)this->occ_grid_.size(), (int)cloud.size());
 	this->intializeDim(xDim, yDim, zDim);
-	this->res_	= resolution;
+	this->res_	    = resolution;
 	this->has_goal_ = false;
 
 	for(unsigned int index = 0; index<cloud.size(); index++)

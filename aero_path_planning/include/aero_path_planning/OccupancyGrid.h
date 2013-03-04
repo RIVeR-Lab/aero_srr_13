@@ -82,13 +82,6 @@ public:
 
 	/**
 	 * @author	Adam Panzica
-	 * @brief	Default copy constructor
-	 * @param grid The OccupancyGrid to copy
-	 */
-	OccupancyGrid(OccupancyGrid& grid);
-
-	/**
-	 * @author	Adam Panzica
 	 * @brief	Creates a new 2D Occupancy Grid with a given set of dimensions and grid resolution
 	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
 	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
