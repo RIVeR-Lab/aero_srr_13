@@ -5,7 +5,7 @@ This file exists mainly for backwards compatibility.
 
 <launch>
 <group ns="stereo_bottom">
- <include file="$(find aero_srr_bringup)/launch/camera.launch">
+ <include file="$(find vision_comm)/launch/camera.launch">
     <arg name="camera"       value="left" />
     <arg name="ip_address"   value="192.168.1.100" />
     <arg name="trigger_mode" value="fixedrate" />
@@ -13,7 +13,7 @@ This file exists mainly for backwards compatibility.
     <arg name="trig_topic"   value="master_trigger" />
   </include>
 
- <include file="$(find aero_srr_bringup)/launch/camera.launch">
+ <include file="$(find vision_comm)/launch/camera.launch">
     <arg name="camera"       value="right" />
     <arg name="ip_address"   value="192.168.2.100" />
     <arg name="trigger_mode" value="syncin2" />
