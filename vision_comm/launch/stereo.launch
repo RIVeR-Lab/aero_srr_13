@@ -10,7 +10,7 @@ This file exists mainly for backwards compatibility.
     <arg name="ip_address"   value="192.168.1.100" />
     <arg name="trigger_mode" value="fixedrate" />
     <arg name="frame_id"     value="high_def_optical_frame" />
-    <arg name="trig_timestamp_topic" value="master" />
+    <arg name="trig_topic"   value="master_trigger" />
   </include>
 
  <include file="$(find aero_srr_bringup)/launch/camera.launch">
@@ -18,7 +18,7 @@ This file exists mainly for backwards compatibility.
     <arg name="ip_address"   value="192.168.2.100" />
     <arg name="trigger_mode" value="syncin2" />
     <arg name="frame_id"     value="high_def_optical_frame" />
-    <arg name="trig_timestamp_topic" value="/stereo_bottom/left/master" />
+    <arg name="trig_topic"   value="/stereo_bottom/left/master_trigger" />
   </include>
 
 <node pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" name="prosilica_stereo_proc" />
