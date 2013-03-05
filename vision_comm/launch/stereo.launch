@@ -23,7 +23,7 @@ This file exists mainly for backwards compatibility.
 
 <node pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" name="prosilica_stereo_proc" />
 
-<group>
+</group>
 
 <node pkg="image_view" type="stereo_view" respawn="false" name="prosilica_viewer_color">
       <param name="autosize" type="bool" value="False" />
