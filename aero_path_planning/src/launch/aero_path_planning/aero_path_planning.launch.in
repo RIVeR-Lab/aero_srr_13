@@ -1,0 +1,68 @@
+
+<launch>
+	<!-- ********************ARGUMENTS******************** -->
+	<!-- declare args for platform -->
+	<arg name="@PLATFORM_ARG@"			 default=@PLATFORM_VAL@ />
+	<!-- declare args to be passed in for actionlib topics -->
+	<arg name="@VELOCITY_CMD_TOPIC_ARG@" default=@VELOCITY_CMD_TOPIC_VAL@ />
+	
+	<!-- declare args to be passed in for topics for receiving new PC data -->
+	<arg name="@OCCUPANCY_TOPIC_ARG@"	 default=@OCCUPANCY_TOPIC_VAL@ />
+
+	<arg name="@ODOMETRY_TOPIC_ARG@"     default=@ODOMETRY_TOPIC_VAL@ />
+	
+	<!-- declare occupancy grid arguments -->
+	<arg name="@L_OCC_UPDTRT_ARG@"	    default=@L_OCC_UPDTRT_VAL@/>
+	<arg name="@L_OCC_XDIM_ARG@"	    default=@L_OCC_XDIM_VAL@/>
+	<arg name="@L_OCC_YDIM_ARG@"	    default=@L_OCC_YDIM_VAL@/>
+	<arg name="@L_OCC_ZDIM_ARG@"	    default=@L_OCC_ZDIM_VAL@/>
+	<arg name="@L_OCC_XORG_ARG@"	    default=@L_OCC_XORG_VAL@/>
+	<arg name="@L_OCC_YORG_ARG@"	    default=@L_OCC_YORG_VAL@/>
+	<arg name="@L_OCC_ZORG_ARG@"	    default=@L_OCC_ZORG_VAL@/>
+	<arg name="@L_OCC_RES_ARG@"	        default=@L_OCC_RES_VAL@/>
+	
+	<!-- declare speed set arguments -->
+	<arg name="@S_NUMBER_ARG@"	    default=@S_NUMBER_VAL@/>
+	<arg name="@S_MIN_SPEED_ARG@"	default=@S_MIN_SPEED_VAL@/>
+	<arg name="@S_MAX_SPEED_ARG@"	default=@S_MAX_SPEED_VAL@/>
+	
+	<!-- declare tentacle arguments -->
+	<arg name="@T_EXPFACT_ARG@"	        default=@T_EXPFACT_VAL@/>
+	<arg name="@T_NUMBER_ARG@"	        default=@T_NUMBER_VAL@/>
+	
+	
+	<!-- ********************PARAMETERS******************** -->
+	<!-- declare occupancy grid parameters -->
+		<param name="@L_OCC_UPDTRT_ARG@"	value="$(arg @L_OCC_UPDTRT_ARG@)"/>
+		<param name="@L_OCC_XDIM_ARG@"	value="$(arg @L_OCC_XDIM_ARG@)"/>
+		<param name="@L_OCC_YDIM_ARG@"	value="$(arg @L_OCC_YDIM_ARG@)"/>
+		<param name="@L_OCC_ZDIM_ARG@"	value="$(arg @L_OCC_ZDIM_ARG@)"/>
+		<param name="@L_OCC_XORG_ARG@"	value="$(arg @L_OCC_XORG_ARG@)"/>
+		<param name="@L_OCC_YORG_ARG@"	value="$(arg @L_OCC_YORG_ARG@)"/>
+		<param name="@L_OCC_ZORG_ARG@"	value="$(arg @L_OCC_ZORG_ARG@)"/>
+		<param name="@L_OCC_RES_ARG@"	value="$(arg @L_OCC_RES_ARG@)"/>
+	
+	<!-- declare speed set parameters -->
+		<param name="@S_NUMBER_ARG@"	value="$(arg @S_NUMBER_ARG@)"/>
+		<param name="@S_MIN_SPEED_ARG@"	value="$(arg @S_MIN_SPEED_ARG@)"/>
+		<param name="@S_MAX_SPEED_ARG@"	value="$(arg @S_MIN_SPEED_ARG@)"/>
+	
+	<!-- declare tentalce parameters -->
+		<param name="@T_NUMBER_ARG@"	 value="$(arg @T_NUMBER_ARG@)"/>
+		<param name="@T_EXPFACT_ARG@"    value="$(arg @T_EXPFACT_ARG@)"/>
+	
+	
+	<!-- ********************INCLUDES******************** -->
+	<!-- Include Sub-Launch Files -->
+	<include file="$(find aero_path_planning)/launch/aero_local_planner.launch">
+		<arg name="@VELOCITY_CMD_TOPIC_ARG@" value="$(arg @VELOCITY_CMD_TOPIC_ARG@)" />
+		<arg name="@OCCUPANCY_TOPIC_ARG@"	 value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
+		<arg name="@PLATFORM_ARG@"			 value="$(arg @PLATFORM_ARG@)"  />
+		<arg name="@ODOMETRY_TOPIC_ARG@"     value="$(arg @ODOMETRY_TOPIC_ARG@"/>
+	</include>
+
+	<include file="$(find aero_path_planning)/launch/aero_global_planner.launch">
+		<arg name="@OCCUPANCY_TOPIC_ARG@"	 value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
+		<arg name="@ODOMETRY_TOPIC_ARG@"     value="$(arg @ODOMETRY_TOPIC_ARG@"/>
+	</include>
+</launch>
