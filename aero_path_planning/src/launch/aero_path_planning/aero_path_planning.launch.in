@@ -1,13 +1,13 @@
 
-<launch ns="aero_path_planning">
+<launch>
 	<!-- ********************ARGUMENTS******************** -->
 	<!-- declare args for platform -->
-	<arg name="platform"			default="0" />
+	<arg name="@PLATFORM_ARG@"			 default=@PLATFORM_VAL@ />
 	<!-- declare args to be passed in for actionlib topics -->
-	<arg name="velocity_command_topic"	default="velocity_command_topic" />
+	<arg name="@VELOCITY_CMD_TOPIC_ARG@" default=@VELOCITY_CMD_TOPIC_VAL@ />
 	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
-	<arg name=@OCCUPANCY_TOPIC_LIT@	default=@OCCUPANCY_TOPIC_LIT@ />
+	<arg name="@OCCUPANCY_TOPIC_ARG@"	 default=@OCCUPANCY_TOPIC_VAL@ />
 	
 	<!-- declare occupancy grid arguments -->
 	<arg name="occupancy/update_rate"	default="0.2"/>
@@ -51,20 +51,20 @@
 	
 	<!-- declare tentalce parameters -->
 	<group ns="tentacles">
-		<param name="number"	value="$(arg tentacles/number)"/>
-		<param name="exp_factor"	value="$(arg tentacles/exp_factor)"/>
+		<param name="number"	 value="$(arg tentacles/number)"/>
+		<param name="exp_factor" value="$(arg tentacles/exp_factor)"/>
 	</group>
 	
 	
 	<!-- ********************INCLUDES******************** -->
 	<!-- Include Sub-Launch Files -->
 	<include file="$(find aero_path_planning)/launch/aero_local_planner.launch">
-		<arg name="velocity_command_topic"		value="$(arg velocity_command_topic)" />
-		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
-		<arg name="platform"					value="$(arg platform)"  />
+		<arg name="@VELOCITY_CMD_TOPIC_ARG@" value="$(arg @VELOCITY_CMD_TOPIC_ARG@)" />
+		<arg name="@OCCUPANCY_TOPIC_ARG@"	 value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
+		<arg name="@PLATFORM_ARG@"			 value="$(arg @PLATFORM_ARG@)"  />
 	</include>
 
 	<include file="$(find aero_path_planning)/launch/aero_global_planner.launch">
-		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
+		<arg name="@OCCUPANCY_TOPIC_ARG@"	 value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
 	</include>
 </launch>

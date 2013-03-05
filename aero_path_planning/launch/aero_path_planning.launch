@@ -1,13 +1,13 @@
 
-<launch ns="aero_path_planning">
+<launch>
 	<!-- ********************ARGUMENTS******************** -->
 	<!-- declare args for platform -->
-	<arg name="platform"			default="0" />
+	<arg name="aero/platform"			 default="0" />
 	<!-- declare args to be passed in for actionlib topics -->
-	<arg name="velocity_command_topic"	default="velocity_command_topic" />
+	<arg name="aero/velocity_command_topic" default="aero/velocity_command_topic" />
 	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
-	<arg name="occupancy_point_cloud_topic"	default="aero/local_occupancy_topic" />
+	<arg name="aero/occupancy_topic"	 default="aero/occupancy_topic" />
 	
 	<!-- declare occupancy grid arguments -->
 	<arg name="occupancy/update_rate"	default="0.2"/>
@@ -51,20 +51,20 @@
 	
 	<!-- declare tentalce parameters -->
 	<group ns="tentacles">
-		<param name="number"	value="$(arg tentacles/number)"/>
-		<param name="exp_factor"	value="$(arg tentacles/exp_factor)"/>
+		<param name="number"	 value="$(arg tentacles/number)"/>
+		<param name="exp_factor" value="$(arg tentacles/exp_factor)"/>
 	</group>
 	
 	
 	<!-- ********************INCLUDES******************** -->
 	<!-- Include Sub-Launch Files -->
 	<include file="$(find aero_path_planning)/launch/aero_local_planner.launch">
-		<arg name="velocity_command_topic"		value="$(arg velocity_command_topic)" />
-		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
-		<arg name="platform"					value="$(arg platform)"  />
+		<arg name="aero/velocity_command_topic" value="$(arg aero/velocity_command_topic)" />
+		<arg name="aero/occupancy_topic"	 value="$(arg aero/occupancy_topic)" />
+		<arg name="aero/platform"			 value="$(arg aero/platform)"  />
 	</include>
 
 	<include file="$(find aero_path_planning)/launch/aero_global_planner.launch">
-		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
+		<arg name="aero/occupancy_topic"	 value="$(arg aero/occupancy_topic)" />
 	</include>
 </launch>

@@ -1,12 +1,12 @@
 <launch>
 	<!-- ********************ARGUMENTS******************** -->
         <!-- declare args to be passed in for platform -->
-        <arg name="platform"      default="0" />
+        <arg name="aero/platform"      		default="0" />
 	<!-- declare args to be passed in for actionlib topics -->
-	<arg name="velocity_command_topic"	default="velocity_command_topic" />
+	<arg name="aero/velocity_command_topic"	default="aero/velocity_command_topic" />
 	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
-	<arg name="occupancy_point_cloud_topic"	default="occupancy_point_cloud_topic" />
+	<arg name="aero/occupancy_topic"	default="aero/occupancy_topic" />
 	
 	<!-- declare occupancy grid arguments -->
 	<arg name="occupancy/update_rate"	default="0.2"/>
@@ -30,7 +30,7 @@
 
 	<!-- ********************INCLUDES******************** -->
 	<!-- Include Sub-Launch Files -->
-        <group unless="$(arg platform)">
+        <group unless="$(arg aero/platform)">
         <!-- if platform is oryx, bring up the oryx drive controller -->
           <include file="$(find oryx_drive_controller)/launch/oryx_drive_controller.launch">
                 <arg name="velocity_topic"              value="$(arg velocity_command_topic)"/>
@@ -38,9 +38,9 @@
         </group>
         
 	<include file="$(find aero_path_planning)/launch/aero_path_planning.launch">
-                <arg name="platform"                     value="$(arg platform)" />
-		<arg name="velocity_command_topic"	value="$(arg velocity_command_topic)" />
-		<arg name="occupancy_point_cloud_topic"	value="$(arg occupancy_point_cloud_topic)" />
+                <arg name="aero/platform"               value="$(arg aero/platform)" />
+		<arg name="aero/velocity_command_topic"	value="$(arg aero/velocity_command_topic)" />
+		<arg name="aero/occupancy_topic"	value="$(arg aero/occupancy_topic)" />
 		<arg name="occupancy/update_rate" 	value="$(arg occupancy/update_rate)"/>
 		<arg name="occupancy/x_dimension"	value="$(arg occupancy/x_dimension)"/>
 		<arg name="occupancy/y_dimension"	value="$(arg occupancy/y_dimension)"/>

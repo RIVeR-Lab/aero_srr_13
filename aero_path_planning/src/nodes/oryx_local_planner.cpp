@@ -404,13 +404,13 @@ int main(int argc, char **argv) {
 	ros::NodeHandle p_nh("~");
 	//Default Parameter Values
 	//*****************Communication Parameters*******************//
-	std::string v_com_top("velocity_command_topic");
+	std::string v_com_top(VEL_CMD_TOPIC);
 	//std::string t_com_top("translate_command_topic");
-	std::string pc_top("occupancy_point_cloud_topic");
+	std::string pc_top(OCCUPANCY_TOPIC);
 
 	//*****************Configuration Parameters*******************//
 	//The platform that the local planner is running on
-	std::string p_platform("platform");
+	std::string p_platform(PLATFORM);
 	int platform = 0;
 	std::string platform_message("Oryx");
 
@@ -506,19 +506,19 @@ int main(int argc, char **argv) {
 	p_min_speed_msg+="m/s";
 
 	//Goal Weight
-	std::string p_goal_weight("goal_weight");
+	std::string p_goal_weight(GOAL_WEIGHT);
 	double goal_weight = 2;
 	std::string p_goal_weight_msg("");
 	p_goal_weight_msg+= boost::lexical_cast<double>(goal_weight);
 
 	//Traversed Weight
-	std::string p_trav_weight("traversed_weight");
+	std::string p_trav_weight(TRAV_WEIGHT);
 	double trav_weight = 0.1;
 	std::string p_trav_weight_msg("");
 	p_trav_weight_msg+= boost::lexical_cast<double>(trav_weight);
 
 	//Difficulty Weight
-	std::string p_diff_weight("difficult_weight");
+	std::string p_diff_weight(DIFF_WEIGHT);
 	double diff_weight = 0.1;
 	std::string p_diff_weight_msg("");
 	p_diff_weight_msg+= boost::lexical_cast<double>(diff_weight);

@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 
 
 	//Comunication Parameters
-	std::string local_planner_topic("occupancy_point_cloud_topic");
+	std::string local_planner_topic(OCCUPANCY_TOPIC);
 	std::string odometry_topic("odometry_topic");
 	std::string command_topic("/global_planning/commands");
 

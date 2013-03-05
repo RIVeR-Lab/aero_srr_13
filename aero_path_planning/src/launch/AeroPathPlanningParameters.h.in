@@ -9,6 +9,13 @@
 #define AEROPATHPLANNINGPARAMETERS_H_
 
 // the configured options and settings for Oryx Drive Controller
-#define @OCCUPANCY_TOPIC_DEF@ @OCCUPANCY_TOPIC_LIT@
+#define @OCCUPANCY_TOPIC_CDF@     "@OCCUPANCY_TOPIC_ARG@"
+#define @VELOCITY_CMD_TOPIC_CDF@  "@VELOCITY_CMD_TOPIC_ARG@"
+
+#define @PLATFORM_CDF@            "@PLATFORM_ARG@"
+
+#define @GOAL_WEIGHT_CDF@         "@GOAL_WEIGHT_ARG@"
+#define @TRAV_WEIGHT_CDF@         "@TRAV_WEIGHT_ARG@"
+#define @DIFF_WEIGHT_CDF@         "@DIFF_WEIGHT_ARG@"
 
 #endif /* AEROPATHPLANNINGPARAMETERS_H_ */
