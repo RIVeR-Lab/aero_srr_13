@@ -3,7 +3,7 @@
  <include file="$(find vision_comm)/launch/camera.launch">
     <arg name="camera"       value="left" />
     <arg name="ip_address"   value="192.168.1.100" />
-    <arg name="trigger_mode" value="fixedrate" />
+    <arg name="trigger_mode" value="streaming" />
     <arg name="frame_id"     value="high_def_optical_frame" />
     <arg name="trig_topic"   value="master_trigger" />
   </include>
