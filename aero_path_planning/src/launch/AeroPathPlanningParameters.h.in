@@ -19,4 +19,8 @@
 #define @TRAV_WEIGHT_CDF@         "@TRAV_WEIGHT_ARG@"
 #define @DIFF_WEIGHT_CDF@         "@DIFF_WEIGHT_ARG@"
 
+#define @S_MIN_SPEED_CDF@         "@S_MIN_SPEED_ARG@"
+#define @S_MAX_SPEED_CDF@         "@S_MAX_SPEED_ARG@"
+#define @S_NUMBER_CDF@            "@S_NUMBER_ARG@"
+
 #endif /* AEROPATHPLANNINGPARAMETERS_H_ */
