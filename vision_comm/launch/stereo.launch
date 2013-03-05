@@ -27,7 +27,7 @@ This file exists mainly for backwards compatibility.
 
 <node pkg="image_view" type="stereo_view" respawn="false" name="prosilica_viewer_color">
       <param name="autosize" type="bool" value="False" />
-      <remap name="stereo" to="stereo_bottom" />
+      <remap from="stereo" to="stereo_bottom" />
       <remap from="image" to="image_rect" />
     </node>
 <!-- 
