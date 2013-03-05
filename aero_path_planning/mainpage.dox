@@ -2,13 +2,39 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b oryx_path_planning 
+\b aero_path_planning 
 
 <!-- 
 Provide an overview of your package.
 -->
 
--->
+# Launch Files #
+
+Several launch files are included that launch the various nodes in the system with the correct parameters set
+
+## aero_path_planning.launch
+
+This launch file is responsable for bringing up the path-planning system as a whole. It will launch both the local and global planners, and set a number of parameters on the parameter server. It also takes in a number of optional inputs with default values specified.
+
+### Arguments
+
+The following arguments are accepted:
+
+#### aero/platform
+
+Specifies what platform to run on. 0 for Oryx, 1 for AERO. Default value = "0".
+
+#### aero/occupancy_topic
+
+The topic used for passing occupancy grids between the global and local planner. Defaults to "aero/occupancy_topic".
+
+#### aero/velocity_command_topic
+
+The topic used for passing VelocityCommands from the local planner to the underlying platform as specified by aero/platform. Default value = "aero/velocity_command_topic".
+
+#### aero/odometry
+
+The topic used for recieving Odometry messages to the global and local planner. Defaults to "aero/odometry".
 
 
 */
