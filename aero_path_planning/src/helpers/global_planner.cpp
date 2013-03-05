@@ -47,56 +47,56 @@ void GlobalPlanner::loadOccupancyParam()
 	//Configuration Parameters
 	//*****************Configuration Parameters*******************//
 	//Minimum update rate expected of occupancy grid
-	std::string p_up_rate("occupancy/update_rate");
+	std::string p_up_rate(L_OCC_UPDTRT);
 	double update_rate = 0.2;
 	std::string up_rate_msg("");
 	up_rate_msg+= boost::lexical_cast<double>(update_rate);
 	up_rate_msg+="s";
 
 	//x dimension of occupancy grid
-	std::string p_x_dim("occupancy/x_dimension");
+	std::string p_x_dim(L_OCC_XDIM);
 	double x_dim = 200;
 	std::string x_dim_msg("");
 	x_dim_msg+= boost::lexical_cast<double>(x_dim);
 	x_dim_msg+="m";
 
 	//y dimension of occupancy grid
-	std::string p_y_dim("occupancy/y_dimension");
+	std::string p_y_dim(L_OCC_YDIM);
 	double y_dim = 200;
 	std::string y_dim_msg("");
 	y_dim_msg+= boost::lexical_cast<double>(y_dim);
 	y_dim_msg+="m";
 
 	//z dimension of occupancy grid
-	std::string p_z_dim("occupancy/z_dimension");
+	std::string p_z_dim(L_OCC_ZDIM);
 	double z_dim = 0;
 	std::string z_dim_msg("");
 	z_dim_msg+= boost::lexical_cast<double>(z_dim);
 	z_dim_msg+="m";
 
 	//resolution occupancy grid
-	std::string p_res("occupancy/grid_resolution");
+	std::string p_res(L_OCC_RES);
 	double res = .01;
 	std::string p_res_msg("");
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
 
 	//x coord of the origin of the occupancy grids
-	std::string p_x_ori("occupancy/x_origin");
+	std::string p_x_ori(L_OCC_XORG);
 	double x_ori = 0;
 	std::string p_x_ori_msg("");
 	p_x_ori_msg+= boost::lexical_cast<double>(x_ori);
 	p_x_ori_msg+="m";
 
 	//z coord of the origin of the occupancy grids
-	std::string p_z_ori("occupancy/z_origin");
+	std::string p_z_ori(L_OCC_YORG);
 	double z_ori = 0;
 	std::string p_z_ori_msg("");
 	p_z_ori_msg+= boost::lexical_cast<double>(z_ori);
 	p_z_ori_msg+="m";
 
 	//y coord of the origin of the occupancy grids
-	std::string p_y_ori("occupancy/y_origin");
+	std::string p_y_ori(L_OCC_ZORG);
 	double y_ori = y_dim/2;
 	std::string p_y_ori_msg("");
 	p_y_ori_msg+= boost::lexical_cast<double>(y_ori);
@@ -119,8 +119,8 @@ void GlobalPlanner::loadOccupancyParam()
 void GlobalPlanner::registerTopics()
 {
 	//Comunication Parameters
-	std::string local_planner_topic("occupancy_point_cloud_topic");
-	std::string odometry_topic("odometry_topic");
+	std::string local_planner_topic(OCCUPANCY_TOPIC);
+	std::string odometry_topic(ODOMETRY_TOPIC);
 	std::string command_topic("/global_planning/commands");
 
 
@@ -129,7 +129,7 @@ void GlobalPlanner::registerTopics()
 
 	//Get Private Parameters
 	if(!this->p_nh_.getParam(local_planner_topic,this->local_occupancy_topic_))	PARAM_WARN(local_planner_topic,	local_planner_topic);
-	if(!this->p_nh_.getParam(odometry_topic,	odometry_topic))		PARAM_WARN(odometry_topic,		odometry_topic);
+	if(!this->p_nh_.getParam(odometry_topic,	odometry_topic))		        PARAM_WARN(odometry_topic,		odometry_topic);
 
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->laser_topic_, 2, &GlobalPlanner::laserCB, this);

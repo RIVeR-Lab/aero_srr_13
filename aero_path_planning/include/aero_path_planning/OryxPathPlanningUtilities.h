@@ -23,6 +23,7 @@
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include <aero_path_planning/TypeDefinitions.h>
 #include <aero_path_planning/PointConverter.hpp>
+#include "AeroPathPlanningParameters.h"
 
 //*********************** MACROS ************************************//
 

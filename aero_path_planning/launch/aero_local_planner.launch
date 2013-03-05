@@ -2,17 +2,20 @@
 
 	<!-- ********************ARGUMENTS******************** -->
 	<!-- declare args for platform -->
-	<arg name="platform"			default="0" />
+	<arg name="aero/platform"			 default="0"/>
 	<!-- declare args to be passed in for actionlib topics -->
-	<arg name="velocity_command_topic"			default="velocity_command_topic" />
+	<arg name="aero/velocity_command_topic" default="aero/velocity_command_topic" />
 	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
-	<arg name="occupancy_point_cloud_topic"	default="occupancy_point_cloud_topic" />
+	<arg name="aero/occupancy_topic"	 default="aero/occupancy_topic" />
+
+	<arg name="aero/odometry"     default="aero/odometry" />
 	
 	<!-- declare args to be passed in for controlling the huristics used by the tentacle selector -->
-	<arg name="goal_weight"			default="2.0" />
-	<arg name="traversed_weight"	default="0.1" />
-	<arg name="difficult_weight"	default="0.25" />
+	<arg name="aero/goal_weight"	default="2.0" />
+	<arg name="aero/traversed_weight"	default="0.1" />
+	<arg name="aero/difficult_weight"	default="0.25" />
+	<arg name="aero/unknown_weight"	default="0.1" />
 	
 	
 	<!-- Test Enable Argument -->
@@ -21,12 +24,14 @@
 	
 	<!-- ********************NODES******************** -->
 	<node name="aero_local_planner" pkg="aero_path_planning" type="aero_local_planner" output="screen">
-		<param name="velocity_command_topic"		type="str"		value="$(arg velocity_command_topic)" />
-		<param name="occupancy_point_cloud_topic"	type="str"		value="$(arg occupancy_point_cloud_topic)" />
-		<param name="goal_weight"					type="double"	value="$(arg goal_weight)" />
-		<param name="traversed_weight"				type="double"	value="$(arg traversed_weight)" />
-		<param name="difficult_weight"				type="double"	value="$(arg difficult_weight)" />
-		<param name="platform"						type="int"		value="$(arg platform)" />
+		<param name="aero/velocity_command_topic"		type="str"		value="$(arg aero/velocity_command_topic)" />
+		<param name="aero/occupancy_topic"			type="str"		value="$(arg aero/occupancy_topic)" />
+		<param name="aero/odometry"          type="str"      value="$(arg aero/odometry"/>
+		<param name="aero/goal_weight"				type="double"	value="$(arg aero/goal_weight)" />
+		<param name="aero/traversed_weight"				type="double"	value="$(arg aero/traversed_weight)" />
+		<param name="aero/difficult_weight"				type="double"	value="$(arg aero/difficult_weight)" />
+		<param name="aero/unknown_weight"				type="double"	value="$(arg aero/unknown_weight)" />
+		<param name="aero/platform"				type="int"		value="$(arg aero/platform)" />
 	</node>
 	
 </launch>

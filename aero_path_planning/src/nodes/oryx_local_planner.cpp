@@ -404,67 +404,68 @@ int main(int argc, char **argv) {
 	ros::NodeHandle p_nh("~");
 	//Default Parameter Values
 	//*****************Communication Parameters*******************//
-	std::string v_com_top("velocity_command_topic");
+	std::string v_com_top(VEL_CMD_TOPIC);
 	//std::string t_com_top("translate_command_topic");
-	std::string pc_top("occupancy_point_cloud_topic");
+	std::string pc_top(OCCUPANCY_TOPIC);
 
 	//*****************Configuration Parameters*******************//
 	//The platform that the local planner is running on
-	std::string p_platform("platform");
+	std::string p_platform(PLATFORM);
 	int platform = 0;
 	std::string platform_message("Oryx");
 
+		//*****************Configuration Parameters*******************//
 	//Minimum update rate expected of occupancy grid
-	std::string p_up_rate("occupancy/update_rate");
+	std::string p_up_rate(L_OCC_UPDTRT);
 	double update_rate = 0.2;
 	std::string up_rate_msg("");
 	up_rate_msg+= boost::lexical_cast<double>(update_rate);
 	up_rate_msg+="s";
 
 	//x dimension of occupancy grid
-	std::string p_x_dim("occupancy/x_dimension");
+	std::string p_x_dim(L_OCC_XDIM);
 	double x_dim = 200;
 	std::string x_dim_msg("");
 	x_dim_msg+= boost::lexical_cast<double>(x_dim);
 	x_dim_msg+="m";
 
 	//y dimension of occupancy grid
-	std::string p_y_dim("occupancy/y_dimension");
+	std::string p_y_dim(L_OCC_YDIM);
 	double y_dim = 200;
 	std::string y_dim_msg("");
 	y_dim_msg+= boost::lexical_cast<double>(y_dim);
 	y_dim_msg+="m";
 
 	//z dimension of occupancy grid
-	std::string p_z_dim("occupancy/z_dimension");
+	std::string p_z_dim(L_OCC_ZDIM);
 	double z_dim = 0;
 	std::string z_dim_msg("");
 	z_dim_msg+= boost::lexical_cast<double>(z_dim);
 	z_dim_msg+="m";
 
 	//resolution occupancy grid
-	std::string p_res("occupancy/grid_resolution");
+	std::string p_res(L_OCC_RES);
 	double res = .01;
 	std::string p_res_msg("");
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
 
 	//x coord of the origin of the occupancy grids
-	std::string p_x_ori("occupancy/x_origin");
+	std::string p_x_ori(L_OCC_XORG);
 	double x_ori = 0;
 	std::string p_x_ori_msg("");
 	p_x_ori_msg+= boost::lexical_cast<double>(x_ori);
 	p_x_ori_msg+="m";
 
 	//z coord of the origin of the occupancy grids
-	std::string p_z_ori("occupancy/z_origin");
+	std::string p_z_ori(L_OCC_YORG);
 	double z_ori = 0;
 	std::string p_z_ori_msg("");
 	p_z_ori_msg+= boost::lexical_cast<double>(z_ori);
 	p_z_ori_msg+="m";
 
 	//y coord of the origin of the occupancy grids
-	std::string p_y_ori("occupancy/y_origin");
+	std::string p_y_ori(L_OCC_ZORG);
 	double y_ori = y_dim/2;
 	std::string p_y_ori_msg("");
 	p_y_ori_msg+= boost::lexical_cast<double>(y_ori);
@@ -472,59 +473,59 @@ int main(int argc, char **argv) {
 
 
 	//number of tentacles per speed set
-	std::string p_num_tent("tentacles/number");
+	std::string p_num_tent(T_NUMBER);
 	int num_tent = 81;
 	std::string p_num_tent_msg("");
 	p_num_tent_msg+= boost::lexical_cast<double>(num_tent);
 	p_num_tent_msg+=" Tentacles";
 
 	//Exponential Factor to use for generating seed radii
-	std::string p_exp_fact("tentacles/exp_factor");
+	std::string p_exp_fact(T_EXPFACT);
 	double exp_fact = 1.15;
 	std::string p_exp_fact_msg("");
 	p_exp_fact_msg+= boost::lexical_cast<double>(exp_fact);
 
 	//number of tentacles per speed set
-	std::string p_num_speed_set("speed_set/number");
+	std::string p_num_speed_set(S_NUMBER);
 	int num_speed_set = 15;
 	std::string p_numSpeedSet_msg("");
 	p_numSpeedSet_msg+= boost::lexical_cast<double>(num_speed_set);
 	p_numSpeedSet_msg+= " Speed Sets";
 
 	//Max Speed
-	std::string p_max_speed("speed_set/max_speed");
+	std::string p_max_speed(S_MAX_SPEED);
 	double max_speed = 1;
 	std::string p_max_speed_msg("");
 	p_max_speed_msg+= boost::lexical_cast<double>(max_speed);
 	p_max_speed_msg+="m/s";
 
 	//Min Speed
-	std::string p_min_speed("speed_set/min_speed");
+	std::string p_min_speed(S_MIN_SPEED);
 	double min_speed = 1;
 	std::string p_min_speed_msg("");
 	p_min_speed_msg+= boost::lexical_cast<double>(min_speed);
 	p_min_speed_msg+="m/s";
 
 	//Goal Weight
-	std::string p_goal_weight("goal_weight");
+	std::string p_goal_weight(GOAL_WEIGHT);
 	double goal_weight = 2;
 	std::string p_goal_weight_msg("");
 	p_goal_weight_msg+= boost::lexical_cast<double>(goal_weight);
 
 	//Traversed Weight
-	std::string p_trav_weight("traversed_weight");
+	std::string p_trav_weight(TRAV_WEIGHT);
 	double trav_weight = 0.1;
 	std::string p_trav_weight_msg("");
 	p_trav_weight_msg+= boost::lexical_cast<double>(trav_weight);
 
 	//Difficulty Weight
-	std::string p_diff_weight("difficult_weight");
+	std::string p_diff_weight(DIFF_WEIGHT);
 	double diff_weight = 0.1;
 	std::string p_diff_weight_msg("");
 	p_diff_weight_msg+= boost::lexical_cast<double>(diff_weight);
 
 	//Unkown Terrain Weight
-	std::string p_unkn_weight("unknown_weight");
+	std::string p_unkn_weight(UNKN_WEIGHT);
 	double unkn_weight = 0.1;
 	std::string p_unkn_weight_msg("");
 	p_unkn_weight_msg+= boost::lexical_cast<double>(unkn_weight);
