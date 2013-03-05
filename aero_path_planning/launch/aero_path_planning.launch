@@ -12,14 +12,14 @@
 	<arg name="aero/odometry"     default="aero/odometry" />
 	
 	<!-- declare occupancy grid arguments -->
-	<arg name="occupancy/update_rate"	default="0.2"/>
-	<arg name="occupancy/x_dimension"	default="200"/>
-	<arg name="occupancy/y_dimension"	default="200"/>
-	<arg name="occupancy/z_dimension"	default="0"/>
-	<arg name="occupancy/x_origin"		default="0"/>
-	<arg name="occupancy/y_origin"		default="100"/>
-	<arg name="occupancy/z_origin"		default="0"/>
-	<arg name="occupancy/grid_resolution"	default="0.1"/>
+	<arg name="aero/occupancy/local/update_rate"	    default="0.2"/>
+	<arg name="aero/occupancy/local/x_dim"	    default="200"/>
+	<arg name="aero/occupancy/local/y_dim"	    default="200"/>
+	<arg name="aero/occupancy/local/z_dim"	    default="0"/>
+	<arg name="aero/occupancy/local/x_org"	    default="0"/>
+	<arg name="aero/occupancy/local/y_org"	    default="100"/>
+	<arg name="aero/occupancy/local/z_org"	    default="0"/>
+	<arg name="aero/occupancy/local/res"	        default="0.1"/>
 	
 	<!-- declare speed set arguments -->
 	<arg name="speed_set/number"	    default="15"/>
@@ -27,20 +27,20 @@
 	<arg name="speed_set/max_speed"	default="1.5"/>
 	
 	<!-- declare tentacle arguments -->
-	<arg name="tentacles/number"	default="81"/>
-	<arg name="tentacles/exp_factor"	default="1.15"/>
+	<arg name="aero/tentacles/exp_fact"	        default="1.15"/>
+	<arg name="aero/tentacles/number"	        default="81"/>
 	
 	
 	<!-- ********************PARAMETERS******************** -->
 	<!-- declare occupancy grid parameters -->
-		<param name="update_rate"	value="$(arg occupancy/update_rate)"/>
-		<param name="x_dimension"	value="$(arg occupancy/x_dimension)"/>
-		<param name="y_dimension"	value="$(arg occupancy/y_dimension)"/>
-		<param name="z_dimension"	value="$(arg occupancy/z_dimension)"/>
-		<param name="x_origin"		value="$(arg occupancy/x_origin)"/>
-		<param name="y_origin"		value="$(arg occupancy/y_origin)"/>
-		<param name="z_origin"		value="$(arg occupancy/z_origin)"/>
-		<param name="grid_resolution"	value="$(arg occupancy/grid_resolution)"/>
+		<param name="aero/occupancy/local/update_rate"	value="$(arg aero/occupancy/local/update_rate)"/>
+		<param name="aero/occupancy/local/x_dim"	value="$(arg aero/occupancy/local/x_dim)"/>
+		<param name="aero/occupancy/local/y_dim"	value="$(arg aero/occupancy/local/y_dim)"/>
+		<param name="aero/occupancy/local/z_dim"	value="$(arg aero/occupancy/local/z_dim)"/>
+		<param name="aero/occupancy/local/x_org"	value="$(arg aero/occupancy/local/x_org)"/>
+		<param name="aero/occupancy/local/y_org"	value="$(arg aero/occupancy/local/y_org)"/>
+		<param name="aero/occupancy/local/z_org"	value="$(arg aero/occupancy/local/z_org)"/>
+		<param name="aero/occupancy/local/res"	value="$(arg aero/occupancy/local/res)"/>
 	
 	<!-- declare speed set parameters -->
 		<param name="speed_set/number"	value="$(arg speed_set/number)"/>
@@ -48,8 +48,8 @@
 		<param name="speed_set/max_speed"	value="$(arg speed_set/min_speed)"/>
 	
 	<!-- declare tentalce parameters -->
-		<param name="number"	 value="$(arg tentacles/number)"/>
-		<param name="exp_factor" value="$(arg tentacles/exp_factor)"/>
+		<param name="aero/tentacles/number"	 value="$(arg aero/tentacles/number)"/>
+		<param name="aero/tentacles/exp_fact"    value="$(arg aero/tentacles/exp_fact)"/>
 	
 	
 	<!-- ********************INCLUDES******************** -->

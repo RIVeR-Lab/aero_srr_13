@@ -15,6 +15,7 @@
 	<arg name="@GOAL_WEIGHT_ARG@"	default=@GOAL_WEIGHT_VAL@ />
 	<arg name="@TRAV_WEIGHT_ARG@"	default=@TRAV_WEIGHT_VAL@ />
 	<arg name="@DIFF_WEIGHT_ARG@"	default=@DIFF_WEIGHT_VAL@ />
+	<arg name="@UNKN_WEIGHT_ARG@"	default=@UNKN_WEIGHT_VAL@ />
 	
 	
 	<!-- Test Enable Argument -->
@@ -29,6 +30,7 @@
 		<param name="@GOAL_WEIGHT_ARG@"				type="double"	value="$(arg @GOAL_WEIGHT_ARG@)" />
 		<param name="@TRAV_WEIGHT_ARG@"				type="double"	value="$(arg @TRAV_WEIGHT_ARG@)" />
 		<param name="@DIFF_WEIGHT_ARG@"				type="double"	value="$(arg @DIFF_WEIGHT_ARG@)" />
+		<param name="@UNKN_WEIGHT_ARG@"				type="double"	value="$(arg @UNKN_WEIGHT_ARG@)" />
 		<param name="@PLATFORM_ARG@"				type="int"		value="$(arg @PLATFORM_ARG@)" />
 	</node>
 	

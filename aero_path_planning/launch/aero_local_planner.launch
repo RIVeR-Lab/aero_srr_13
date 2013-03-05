@@ -15,6 +15,7 @@
 	<arg name="aero/goal_weight"	default="2.0" />
 	<arg name="aero/traversed_weight"	default="0.1" />
 	<arg name="aero/difficult_weight"	default="0.25" />
+	<arg name="aero/unknown_weight"	default="0.1" />
 	
 	
 	<!-- Test Enable Argument -->
@@ -29,6 +30,7 @@
 		<param name="aero/goal_weight"				type="double"	value="$(arg aero/goal_weight)" />
 		<param name="aero/traversed_weight"				type="double"	value="$(arg aero/traversed_weight)" />
 		<param name="aero/difficult_weight"				type="double"	value="$(arg aero/difficult_weight)" />
+		<param name="aero/unknown_weight"				type="double"	value="$(arg aero/unknown_weight)" />
 		<param name="aero/platform"				type="int"		value="$(arg aero/platform)" />
 	</node>
 	

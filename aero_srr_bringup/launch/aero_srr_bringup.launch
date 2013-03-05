@@ -1,43 +1,8 @@
 <launch>
   <!-- ********************ARGUMENTS******************** -->
-	<!-- declare args to be passed in for topics for receiving new PC data -->
-	<arg name="aero/occupancy_topic"	default="aero/occupancy_topic" />
-	
-	<!-- declare occupancy grid arguments -->
-	<arg name="occupancy/update_rate"	default="0.2"/>
-	<arg name="occupancy/x_dimension"	default="200"/>
-	<arg name="occupancy/y_dimension"	default="200"/>
-	<arg name="occupancy/z_dimension"	default="0"/>
-	<arg name="occupancy/x_origin"		default="0"/>
-	<arg name="occupancy/y_origin"		default="100"/>
-	<arg name="occupancy/z_origin"		default="0"/>
-	<arg name="occupancy/grid_resolution"	default="0.01"/>
-	
-	<!-- declare speed set arguments -->
-	<arg name="speed_set/number"	default="15"/>
-	<arg name="speed_set/min_speed"	default="0.1"/>
-	<arg name="speed_set/max_speed"	default="1.5"/>
-	
-	<!-- declare tentacle arguments -->
-	<arg name="tentacles/number"	default="81"/>
-	<arg name="tentacles/exp_factor"	default="1.15"/>
 	
   <include file="$(find aero_srr_bringup)/launch/srr_bringup.launch">
-    <arg name="aero/platform"      		value="1" />
+    <arg name="aero/platform"      		    value="1" />
     <arg name="aero/velocity_command_topic"	value="cmd_vel" />
-    <arg name="aero/occupancy_topic"	        value="$(arg aero/occupancy_topic)" />
-    <arg name="occupancy/update_rate" 	        value="$(arg occupancy/update_rate)"/>
-    <arg name="occupancy/x_dimension"	        value="$(arg occupancy/x_dimension)"/>
-    <arg name="occupancy/y_dimension"	        value="$(arg occupancy/y_dimension)"/>
-    <arg name="occupancy/z_dimension"	        value="$(arg occupancy/z_dimension)"/>
-    <arg name="occupancy/x_origin"		value="$(arg occupancy/x_origin)"/>
-    <arg name="occupancy/y_origin"		value="$(arg occupancy/y_origin)"/>
-    <arg name="occupancy/z_origin"		value="$(arg occupancy/z_origin)"/>
-    <arg name="occupancy/grid_resolution"	value="$(arg occupancy/grid_resolution)"/>
-    <arg name="speed_set/number"		value="$(arg speed_set/number)"/>
-    <arg name="speed_set/max_speed"		value="$(arg speed_set/max_speed)"/>
-    <arg name="speed_set/min_speed"		value="$(arg speed_set/min_speed)"/>
-    <arg name="tentacles/number"		value="$(arg tentacles/number)"/>
-    <arg name="tentacles/exp_factor"		value="$(arg tentacles/exp_factor)"/>
   </include>  
 </launch>
