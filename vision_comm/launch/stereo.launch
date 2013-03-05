@@ -4,16 +4,13 @@ This file exists mainly for backwards compatibility.
 -->
 
 <launch>
-   <node name="set_master" pkg="vision_comm" type="camera_config">
-    <param name="IP"   value="192.168.1.100" />
-    <param name="SyncOut2Mode" value="Exposing" />
-   </node>
 <group ns="stereo_bottom">
  <include file="$(find aero_srr_bringup)/launch/camera.launch">
     <arg name="camera"       value="left" />
     <arg name="ip_address"   value="192.168.1.100" />
-    <arg name="trigger_mode" value="streaming" />
+    <arg name="trigger_mode" value="fixedrate" />
     <arg name="frame_id"     value="high_def_optical_frame" />
+    <arg name="trig_timestamp_topic" value="master" />
   </include>
 
  <include file="$(find aero_srr_bringup)/launch/camera.launch">
@@ -21,8 +18,18 @@ This file exists mainly for backwards compatibility.
     <arg name="ip_address"   value="192.168.2.100" />
     <arg name="trigger_mode" value="syncin2" />
     <arg name="frame_id"     value="high_def_optical_frame" />
+    <arg name="trig_timestamp_topic" value="/stereo_bottom/left/master" />
   </include>
- </group>
+
+<node pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" name="prosilica_stereo_proc" />
+
+<group>
+
+<node pkg="image_view" type="stereo_view" respawn="false" name="prosilica_viewer_color">
+      <param name="autosize" type="bool" value="False" />
+      <remap name="stereo" to="stereo_bottom" />
+      <remap from="image" to="image_rect" />
+    </node>
 <!-- 
   <remap from="stereo/left/image_raw" to="left/image_raw" />
   <remap from="stereo/right/image_raw" to="right/image_raw" />

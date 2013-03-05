@@ -21,6 +21,7 @@ You can uncomment the viewer at bottom if you want to view the image stream.
   -->
   <arg name="guid" default="" />
   <arg name="ip_address" default="" />
+  <arg name="trig_timestamp_topic" default="" />
 
   <!-- Trigger mode: 'streaming' or 'polled' -->
   <arg name="trigger_mode" default="streaming" />
@@ -36,6 +37,7 @@ You can uncomment the viewer at bottom if you want to view the image stream.
     <param name="ip_address" type="str" value="$(arg ip_address)" />
     <param name="trigger_mode" value="$(arg trigger_mode)" />
     <param name="frame_id" value="$(arg frame_id)" />
+    <param name="trig_timestamp_topic" value="$(arg trig_timestamp_topic)" />
   </node>
 
   <!-- If running in polled mode, change ns to match your service call argument. -->
@@ -65,13 +67,13 @@ You can uncomment the viewer at bottom if you want to view the image stream.
       -->
 
     
-    <node pkg="image_proc" type="image_proc" respawn="false" name="prosilica_image_proc" />
+    <!--<node pkg="image_proc" type="image_proc" respawn="false" name="prosilica_image_proc" />
     <node pkg="image_view" type="image_view" respawn="false" name="prosilica_viewer_color">
       <param name="autosize" type="bool" value="False" />
       <param name="window_name" type="str" value="$(arg camera)" />
       <remap from="image" to="image_color" />
     </node>
-    
+    -->
 
   </group>
 
