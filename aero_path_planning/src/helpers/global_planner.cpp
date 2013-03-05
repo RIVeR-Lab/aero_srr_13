@@ -120,7 +120,7 @@ void GlobalPlanner::registerTopics()
 {
 	//Comunication Parameters
 	std::string local_planner_topic(OCCUPANCY_TOPIC);
-	std::string odometry_topic("odometry_topic");
+	std::string odometry_topic(ODOMETRY_TOPIC);
 	std::string command_topic("/global_planning/commands");
 
 

@@ -6,15 +6,20 @@ set(OCCUPANCY_TOPIC_ARG aero/occupancy_topic)
 set(OCCUPANCY_TOPIC_CDF OCCUPANCY_TOPIC)
 set(OCCUPANCY_TOPIC_VAL "\"aero/occupancy_topic\"")
 
-#Parameter defining what platform we're on
-set(PLATFORM_ARG aero/platform)
-set(PLATFORM_CDF PLATFORM)
-set(PLATFORM_VAL "\"0\"")
-
 #Parameter defining the velocity command topic
 set(VELOCITY_CMD_TOPIC_ARG aero/velocity_command_topic)
 set(VELOCITY_CMD_TOPIC_CDF VEL_CMD_TOPIC)
 set(VELOCITY_CMD_TOPIC_VAL "\"aero/velocity_command_topic\"")
+
+#Paramter defining the odometry topic
+set(ODOMETRY_TOPIC_ARG aero/odometry)
+set(ODOMETRY_TOPIC_CDF ODOMETRY_TOPIC)
+set(ODOMETRY_TOPIC_VAL "\"aero/odometry\"")
+
+#Parameter defining what platform we're on
+set(PLATFORM_ARG aero/platform)
+set(PLATFORM_CDF PLATFORM)
+set(PLATFORM_VAL "\"0\"")
 
 #Parameters for defining tentacle selection huristics
 set(GOAL_WEIGHT_ARG aero/goal_weight)

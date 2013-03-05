@@ -8,6 +8,8 @@
 	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
 	<arg name="aero/occupancy_topic"	 default="aero/occupancy_topic" />
+
+	<arg name="aero/odometry"     default="aero/odometry" />
 	
 	<!-- declare args to be passed in for controlling the huristics used by the tentacle selector -->
 	<arg name="aero/goal_weight"	default="2.0" />
@@ -23,6 +25,7 @@
 	<node name="aero_local_planner" pkg="aero_path_planning" type="aero_local_planner" output="screen">
 		<param name="aero/velocity_command_topic"		type="str"		value="$(arg aero/velocity_command_topic)" />
 		<param name="aero/occupancy_topic"			type="str"		value="$(arg aero/occupancy_topic)" />
+		<param name="aero/odometry"          type="str"      value="$(arg aero/odometry"/>
 		<param name="aero/goal_weight"				type="double"	value="$(arg aero/goal_weight)" />
 		<param name="aero/traversed_weight"				type="double"	value="$(arg aero/traversed_weight)" />
 		<param name="aero/difficult_weight"				type="double"	value="$(arg aero/difficult_weight)" />

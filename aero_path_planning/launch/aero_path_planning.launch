@@ -8,6 +8,8 @@
 	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
 	<arg name="aero/occupancy_topic"	 default="aero/occupancy_topic" />
+
+	<arg name="aero/odometry"     default="aero/odometry" />
 	
 	<!-- declare occupancy grid arguments -->
 	<arg name="occupancy/update_rate"	default="0.2"/>
@@ -62,9 +64,11 @@
 		<arg name="aero/velocity_command_topic" value="$(arg aero/velocity_command_topic)" />
 		<arg name="aero/occupancy_topic"	 value="$(arg aero/occupancy_topic)" />
 		<arg name="aero/platform"			 value="$(arg aero/platform)"  />
+		<arg name="aero/odometry"     value="$(arg aero/odometry"/>
 	</include>
 
 	<include file="$(find aero_path_planning)/launch/aero_global_planner.launch">
 		<arg name="aero/occupancy_topic"	 value="$(arg aero/occupancy_topic)" />
+		<arg name="aero/odometry"     value="$(arg aero/odometry"/>
 	</include>
 </launch>

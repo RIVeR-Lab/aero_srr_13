@@ -4,6 +4,8 @@
 	
 	<!-- declare args to be passed in for topics for sending new occupancy grid data -->
 	<arg name="aero/occupancy_topic"	default="aero/occupancy_topic" />
+
+	<arg name="aero/odometry"     default="aero/odometry" />
 	
 	
 	<!-- Test Enable Argument -->
@@ -13,6 +15,7 @@
 	<!-- ********************NODES******************** -->
 	<node name="oryx_global_planner" pkg="aero_path_planning" type="oryx_global_planner" output="screen">
 		<param name="aero/occupancy_topic"	type="str"		value="$(arg aero/occupancy_topic)" />
+		<param name="aero/odometry"          type="str"      value="$(arg aero/odometry"/>
 	</node>
 	
 </launch>
