@@ -167,12 +167,12 @@ public:
 								switch(working_grid.getPointTrait(point))
 								{
 								case aero_path_planning::OBSTACLE:
-									ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
+									//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
 									PRINT_POINT("Hit Point", point);
 									traversing = false;
 									break;
 								case aero_path_planning::GOAL:
-									ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
+									//ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
 									traversing = false;
 									hit_goal   = true;
 									break;
@@ -193,7 +193,7 @@ public:
 								ROS_ERROR("%s", e.what());
 							}
 						}
-						ROS_INFO_STREAM("I'm Checking The Distance To Goal");
+						//ROS_INFO_STREAM("I'm Checking The Distance To Goal");
 						//Modify length based on closeness to goal, if there is one
 						if(has_goal)
 						{
@@ -401,8 +401,9 @@ private:
 	void visualizeTentacle(int speed_set, int tentacle)
 	{
 	  sensor_msgs::PointCloud2 message;
-	  message.header.frame_id = "/laser";
 	  pcl::toROSMsg(this->tentacles_->getSpeedSet(speed_set).getTentacle(tentacle).getPoints(), message);
+	  message.header.frame_id = "/laser";
+	  message.header.stamp    = ros::Time::now();
 	  this->tent_pub_.publish(message);
 	}
 
