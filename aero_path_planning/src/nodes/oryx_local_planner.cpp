@@ -70,6 +70,7 @@ public:
 		this->z_dim_ = zDim;
 		this->res_  = res;
 		this->pc_sub_ = nh_.subscribe(this->pc_topic_, 1, &LocalPlanner::pcCB, this);
+		this->tent_pub_= nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
 		this->should_plan_ = true;
 		this->current_rad_ = 0;
 		this->current_vel_ = 0;
@@ -128,9 +129,9 @@ public:
 				if(!this->occupancy_buffer_.empty())
 				{
 					OccupancyGrid	working_grid= this->occupancy_buffer_.front();
-					SpeedSet	  	speed_set   = this->tentacles_->getSpeedSet(this->current_vel_);
+					SpeedSet	  	speed_set   = this->tentacles_->getSpeedSet(2);
 
-					ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", working_grid.toString(0,0).get()->c_str());
+					//ROS_INFO("I'm Processing The Following Occupancy Grid:\n%s", working_grid.toString(0,0).get()->c_str());
 					int num_points = 0;
 					for(OccupancyGrid::iterator test_itr = working_grid.begin(); test_itr<working_grid.end(); test_itr++)
 					{
@@ -228,8 +229,10 @@ public:
 					current_velocity = speed_set.getTentacle(longest_index).getVel();
 					//Print out the selected tentacle on the grid
 					ROS_INFO("I Selected Tentacle %d, length %f", longest_index, longest_length);
+					
 					Tentacle::TentacleTraverser overlayTraverser(speed_set.getTentacle(longest_index));
-					while(overlayTraverser.hasNext())
+					visualizeTentacle(2, longest_index);
+					/*while(overlayTraverser.hasNext())
 					{
 						aero_path_planning::Point point = overlayTraverser.next();
 						try
@@ -239,7 +242,7 @@ public:
 							ROS_ERROR("%s", e.what());
 						}
 					}
-					ROS_INFO("This Is The Occupancy Grid With Selected Tentacle Overlaid:\n%s", rendering.toString(0,0)->c_str());
+					//ROS_INFO("This Is The Occupancy Grid With Selected Tentacle Overlaid:\n%s", rendering.toString(0,0)->c_str());*/
 					this->occupancy_buffer_.pop_front();
 				}
 				//Send the velocity command to the platform
@@ -273,6 +276,7 @@ private:
 	ros::Subscriber 	pc_sub_;		///Subscriber to the ROS topic to receive new occupancy grid data over
 	ros::Subscriber		stop_sub_;	///Subscriber to the ROS topic to receive the software stop message
 	ros::Publisher		vel_pub_;	///Publisher for Twist messages to a platform that takes them
+	ros::Publisher          tent_pub_;       ///Publisher for visualizing selected tentacles
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
 
@@ -305,8 +309,8 @@ private:
 		{
 			ROS_INFO("I Got new Occupancy Grid Data!");
 			OccupancyGrid recievedGrid(*message);
-			ROS_INFO("Grid Processed...");
-			ROS_INFO("Callback got the grid:\n%s", recievedGrid.toString(0,0)->c_str());
+			//ROS_INFO("Grid Processed...");
+			//ROS_INFO("Callback got the grid:\n%s", recievedGrid.toString(0,0)->c_str());
 			this->occupancy_buffer_.push_back(recievedGrid);
 		}
 	}
@@ -339,7 +343,7 @@ private:
 	void twist(double x_dot, double omega)
 	{
 		geometry_msgs::Twist message;
-		message.linear.x  = 0;
+		message.linear.x  = x_dot;
 		message.angular.z = omega;
 		this->vel_pub_.publish(message);
 	}
@@ -393,6 +397,13 @@ private:
 		this->current_vel_ = feedback->velocity;
 		this->current_rad_ = feedback->omega;
 	};
+	
+	void visualizeTentacle(int speed_set, int tentacle)
+	{
+	  sensor_msgs::PointCloud2 message;
+	  pcl::toROSMsg(this->tentacles_->getSpeedSet(speed_set).getTentacle(tentacle).getPoints(), message);
+	  this->tent_pub_.publish(message);
+	}
 
 };
 
