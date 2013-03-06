@@ -405,9 +405,9 @@ private:
 	  for(int i=0; i<cloud.size(); i++)
 	  {
 	    Point& point = cloud.at(i);
-	    point.x = point.x*.01;
-	    point.y = point.y*.01;
-	    point.z = point.z*.01;
+	    point.x = point.x*.1;
+	    point.y = point.y*.1;
+	    point.z = point.z*.1;
 	  }
 	  pcl::toROSMsg(cloud , message);
 	  message.header.frame_id = "/laser";
