@@ -3,6 +3,6 @@
 	
   <include file="$(find aero_srr_bringup)/launch/srr_bringup.launch">
     <arg name="aero/platform"      		    value="1" />
-    <arg name="aero/velocity_command_topic"	value="cmd_vel" />
+    <arg name="aero/velocity_command_topic"	    value="/clearpath/husky/robots/defaul/cmd_vel" />
   </include>  
 </launch>
