@@ -401,6 +401,7 @@ private:
 	void visualizeTentacle(int speed_set, int tentacle)
 	{
 	  sensor_msgs::PointCloud2 message;
+	  message.header.frame_id = "/laser";
 	  pcl::toROSMsg(this->tentacles_->getSpeedSet(speed_set).getTentacle(tentacle).getPoints(), message);
 	  this->tent_pub_.publish(message);
 	}
