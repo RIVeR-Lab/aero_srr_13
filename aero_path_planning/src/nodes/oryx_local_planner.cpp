@@ -401,7 +401,15 @@ private:
 	void visualizeTentacle(int speed_set, int tentacle)
 	{
 	  sensor_msgs::PointCloud2 message;
-	  pcl::toROSMsg(this->tentacles_->getSpeedSet(speed_set).getTentacle(tentacle).getPoints(), message);
+	  OccupancyGridCloud cloud(this->tentacles_->getSpeedSet(speed_set).getTentacle(tentacle).getPoints());
+	  for(int i=0; i<cloud.size(); i++)
+	  {
+	    Point& point = cloud.at(i);
+	    point.x = point.x*.01;
+	    point.y = point.y*.01;
+	    point.z = point.z*.01;
+	  }
+	  pcl::toROSMsg(cloud , message);
 	  message.header.frame_id = "/laser";
 	  message.header.stamp    = ros::Time::now();
 	  this->tent_pub_.publish(message);
