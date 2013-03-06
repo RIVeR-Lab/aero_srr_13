@@ -32,19 +32,19 @@ set(PLATFORM_VAL "\"0\"")
 #Parameters for defining tentacle selection huristics
 set(GOAL_WEIGHT_ARG ${R_NS}/goal_weight)
 set(GOAL_WEIGHT_CDF GOAL_WEIGHT)
-set(GOAL_WEIGHT_VAL "\"2.0\"")
+set(GOAL_WEIGHT_VAL "\"0.0\"")
 
 set(TRAV_WEIGHT_ARG ${R_NS}/traversed_weight)
 set(TRAV_WEIGHT_CDF TRAV_WEIGHT)
-set(TRAV_WEIGHT_VAL "\"0.1\"")
+set(TRAV_WEIGHT_VAL "\"0.0\"")
 
 set(DIFF_WEIGHT_ARG ${R_NS}/difficult_weight)
 set(DIFF_WEIGHT_CDF DIFF_WEIGHT)
-set(DIFF_WEIGHT_VAL "\"0.25\"")
+set(DIFF_WEIGHT_VAL "\"0.0\"")
 
 set(UNKN_WEIGHT_ARG ${R_NS}/unknown_weight)
 set(UNKN_WEIGHT_CDF UNKN_WEIGHT)
-set(UNKN_WEIGHT_VAL "\"0.1\"")
+set(UNKN_WEIGHT_VAL "\"0.0\"")
 
 #Parameters for speed_sets on param server
 set(S_MIN_SPEED_ARG ${S_NS}/min_speed)

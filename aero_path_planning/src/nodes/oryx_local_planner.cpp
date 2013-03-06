@@ -402,12 +402,11 @@ private:
 	{
 	  sensor_msgs::PointCloud2 message;
 	  OccupancyGridCloud cloud(this->tentacles_->getSpeedSet(speed_set).getTentacle(tentacle).getPoints());
+	  PointConverter converter(this->res_);
 	  for(int i=0; i<cloud.size(); i++)
 	  {
 	    Point& point = cloud.at(i);
-	    point.x = point.x*.1;
-	    point.y = point.y*.1;
-	    point.z = point.z*.1;
+	    converter.convertToEng(point, point);
 	  }
 	  pcl::toROSMsg(cloud , message);
 	  message.header.frame_id = "/laser";

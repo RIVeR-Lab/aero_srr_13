@@ -145,7 +145,7 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr message)
 	origin.z = 0;
 	OccupancyGrid local_map(this->local_x_size_, this->local_y_size_, .01, origin, aero_path_planning::UNKNOWN);
 	pcl::fromROSMsg(*message, scan_cloud);
-	aero_path_planning::PointConverter converter(.01);
+	aero_path_planning::PointConverter converter(.1);
 	BOOST_FOREACH(Point point, scan_cloud)
 	{
 		converter.convertToGrid(point, point);
