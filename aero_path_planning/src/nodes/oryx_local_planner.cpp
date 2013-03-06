@@ -74,6 +74,8 @@ public:
 		this->should_plan_ = true;
 		this->current_rad_ = 0;
 		this->current_vel_ = 0;
+		
+		this->vel_timer_ = nh_.createTimer(ros::Duration(1/20), &LocalPlanner::velUpdateCB, this);
 
 		std::string software_stop_topic("oryx/software_stop");
 
@@ -246,7 +248,8 @@ public:
 					this->occupancy_buffer_.pop_front();
 				}
 				//Send the velocity command to the platform
-				sendVelCom(current_radius, current_velocity);
+				this->set_vel_ = current_velocity;
+				this->set_rad_ = current_radius;
 			}
 			//spin to let ROS process callbacks
 			ros::spinOnce();
@@ -268,6 +271,8 @@ private:
 	double	res_;		///resolution the occupancy grid to use, in real units per grid unit
 	double	current_vel_;	///Current Velocity of the Platform
 	double	current_rad_;	///Current Radius followed by the Platform
+	double  set_vel_;	///The target velocity to set the robot to
+	double  set_rad_;	///The target radius to set the robot to
 	ros::NodeHandle nh_;	///Node handle for publishing/subscribing to topics
 	std::string	v_action_topic_;		///Actionlib topic name to send velocity commands over
 	std::string pc_topic_;			///topic name of the ROS topic to receive new occupancy grid data over
@@ -277,11 +282,20 @@ private:
 	ros::Subscriber		stop_sub_;	///Subscriber to the ROS topic to receive the software stop message
 	ros::Publisher		vel_pub_;	///Publisher for Twist messages to a platform that takes them
 	ros::Publisher          tent_pub_;       ///Publisher for visualizing selected tentacles
+	ros::Timer             vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
 
 	actionlib::SimpleActionClient<aero_drive_controller::VelocityCommandAction> v_client_;	///The actionlib client to set velocity command messages to the base platform with
 
+	/**
+	 * Timer callback to send data to the platform at a constant rate
+	 */
+	void velUpdateCB(const ros::TimerEvent& event)
+	{
+	  this->sendVelCom(this->set_vel_, this->set_rad_);
+	}
+	
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Callback for handling the SoftwareStop message
