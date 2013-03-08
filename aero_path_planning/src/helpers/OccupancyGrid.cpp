@@ -88,6 +88,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 	this->res_	    = resolution;
 	this->has_goal_ = false;
 
+#pragma omp parallel for
 	for(unsigned int index = 0; index<cloud.size(); index++)
 	{
 		//ROS_INFO("Extracted Data <%f, %f, %f, %x>", cloud.at(index).x, cloud.at(index).y, cloud.at(index).z, cloud.at(index).rgba);
@@ -136,6 +137,7 @@ void OccupancyGrid::intializeDim(int x_dim, int y_dim, int z_dim)
 void OccupancyGrid::intializeGrid(PointTrait_t seedTrait)
 {
 	//ROS_INFO("Grid Size:%d", (int)this->occ_grid_.size());
+#pragma omp parallel for	//pragma that tells OpenMP to parallelize this loop
 	for(int x=0; x<this->x_dim_; x++)
 	{
 		for(int y=0; y<this->y_dim_; y++)
@@ -157,11 +159,12 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait)
 
 void OccupancyGrid::searchForGoal()
 {
-	for(OccupancyGridCloud::iterator search_itr= this->occ_grid_.begin(); search_itr< this->occ_grid_.end(); search_itr++)
+#pragma omp parallel for
+	for(int i = 0; i< this->occ_grid_.size(); i++)
 	{
-		if(search_itr->rgba==aero_path_planning::GOAL)
+		if(this->occ_grid_.at(i).rgba==aero_path_planning::GOAL)
 		{
-			this->goal_ = *search_itr;
+			this->goal_     = this->occ_grid_.at(i);
 			this->has_goal_ = true;
 		}
 	}
