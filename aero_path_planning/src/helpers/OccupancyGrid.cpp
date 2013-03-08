@@ -173,15 +173,16 @@ void OccupancyGrid::searchForGoal()
 OccupancyGrid::~OccupancyGrid(){}
 
 PointTrait OccupancyGrid::getPointTrait(int x, int y, int z)const throw(OccupancyGridAccessException)
-				{
+{
 	Point workingPoint;
 	workingPoint.x = x;
 	workingPoint.y = y;
 	workingPoint.z = z;
 	return getPointTrait(workingPoint);
-				}
+}
 
-PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAccessException){
+PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAccessException)
+{
 	point.getVector4fMap()+=this->origin_.getVector4fMap();
 	if(boundsCheck(point)){
 		try{
@@ -194,7 +195,8 @@ PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAcc
 }
 
 
-bool OccupancyGrid::setPointTrait(int x, int y, int z, PointTrait trait)throw(OccupancyGridAccessException){
+bool OccupancyGrid::setPointTrait(int x, int y, int z, PointTrait trait)throw(OccupancyGridAccessException)
+{
 	Point working_point;
 	working_point.x = x;
 	working_point.y = y;
@@ -203,7 +205,7 @@ bool OccupancyGrid::setPointTrait(int x, int y, int z, PointTrait trait)throw(Oc
 }
 
 bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyGridAccessException)
-				{
+{
 	point.getVector4fMap()+=this->origin_.getVector4fMap();
 	if(boundsCheck(point))
 	{
@@ -224,16 +226,43 @@ bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyG
 		}
 	}
 	return false;
-				}
+}
+
+bool OccupancyGrid::setPointTrait(const aero_path_planning::PointCloud& points) throw(OccupancyGridAccessException)
+{
+	bool sucess = true;
+#pragma omp parallel for
+	for (int i = 0; i < points.size(); i++)
+	{
+		try
+		{
+			this->setPointTrait(points.at(i), static_cast<aero_path_planning::PointTrait>(points.at(i).rgba));
+		}
+		catch(std::runtime_error& e1)
+		{
+			sucess = false;
+		}
+	}
+	if(sucess)
+	{
+		return sucess;
+	}
+	else
+	{
+		std::string message("Could not copy a point in the cloud onto the grid as it was out of bounds");
+		OccupancyGridAccessException e(message);
+		throw e;
+	}
+}
 
 const Point& OccupancyGrid::getGoalPoint() const throw (bool)
-				{
+{
 	if(this->has_goal_)
 	{
 		return this->goal_;
 	}
 	else throw false;
-				}
+}
 
 void OccupancyGrid::setGoalPoint(aero_path_planning::Point point) throw(OccupancyGridAccessException)
 				{
