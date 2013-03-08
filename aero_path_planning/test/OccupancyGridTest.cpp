@@ -131,3 +131,31 @@ using namespace aero_path_planning;
  	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test6);
  }
 
+TEST_F(OccupancyGridTest, testPointTraitSetting)
+{
+ 	//Build a non-zero origin'd grid.
+ 	OccupancyGrid testGrid3D(x_size_, y_size_, z_size_, res_, pxpy_, aero_path_planning::FREE_LOW_COST);
+ 	//Sanity check
+ 	PointTrait test1 = testGrid3D.getPointTrait(pxpy_);
+ 	PointTrait test2 = testGrid3D.getPointTrait(nxny_);
+ 	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test1);
+ 	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test2);
+
+ 	//Set some points to be obstacles
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(pxpy_, aero_path_planning::OBSTACLE));
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(pxny_, aero_path_planning::OBSTACLE));
+ 	//Set some points to be unknown
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(nxny_, aero_path_planning::UNKNOWN));
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(nxpy_, aero_path_planning::UNKNOWN));
+
+ 	//Check to see that those point traits were actually set
+ 	PointTrait test3 = testGrid3D.getPointTrait(pxpy_);
+ 	PointTrait test4 = testGrid3D.getPointTrait(nxny_);
+ 	PointTrait test5 = testGrid3D.getPointTrait(nxpy_);
+ 	PointTrait test6 = testGrid3D.getPointTrait(pxny_);
+
+ 	ASSERT_EQ(aero_path_planning::OBSTACLE, test3);
+ 	ASSERT_EQ(aero_path_planning::UNKNOWN,  test4);
+ 	ASSERT_EQ(aero_path_planning::UNKNOWN,  test5);
+ 	ASSERT_EQ(aero_path_planning::OBSTACLE, test6);
+}
