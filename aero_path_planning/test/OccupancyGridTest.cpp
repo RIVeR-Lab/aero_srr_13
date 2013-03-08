@@ -131,3 +131,69 @@ using namespace aero_path_planning;
  	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test6);
  }
 
+TEST_F(OccupancyGridTest, testPointTraitSetting)
+{
+ 	//Build a non-zero origin'd grid.
+ 	OccupancyGrid testGrid3D(x_size_, y_size_, z_size_, res_, pxpy_, aero_path_planning::FREE_LOW_COST);
+ 	//Sanity check
+ 	PointTrait test1 = testGrid3D.getPointTrait(pxpy_);
+ 	PointTrait test2 = testGrid3D.getPointTrait(nxny_);
+ 	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test1);
+ 	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test2);
+
+ 	//Set some points to be obstacles
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(pxpy_, aero_path_planning::OBSTACLE));
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(pxny_, aero_path_planning::OBSTACLE));
+ 	//Set some points to be unknown
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(nxny_, aero_path_planning::UNKNOWN));
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(nxpy_, aero_path_planning::UNKNOWN));
+
+ 	//Check to see that those point traits were actually set
+ 	PointTrait test3 = testGrid3D.getPointTrait(pxpy_);
+ 	PointTrait test4 = testGrid3D.getPointTrait(nxny_);
+ 	PointTrait test5 = testGrid3D.getPointTrait(nxpy_);
+ 	PointTrait test6 = testGrid3D.getPointTrait(pxny_);
+
+ 	ASSERT_EQ(aero_path_planning::OBSTACLE, test3);
+ 	ASSERT_EQ(aero_path_planning::UNKNOWN,  test4);
+ 	ASSERT_EQ(aero_path_planning::UNKNOWN,  test5);
+ 	ASSERT_EQ(aero_path_planning::OBSTACLE, test6);
+}
+
+TEST_F(OccupancyGridTest, testGroupPointTraitSetting)
+{
+	//Build a zero origin'd grid.
+	OccupancyGrid testGrid3D(x_size_, y_size_, z_size_, res_, zero_, aero_path_planning::FREE_LOW_COST);
+
+	//Build a point cloud with a whole bunch of points in it
+	PointCloud testPatch;
+	for(int x=0; x<x_size_/2+1; x++)
+	{
+		for(int y=0; y<y_size_/2+1; y++)
+		{
+			for(int z=0; z<z_size_/2+1; z++)
+			{
+				Point point;
+				point.x=x;
+				point.y=y;
+				point.z=z;
+				point.rgba = aero_path_planning::OBSTACLE;
+				testPatch.push_back(point);
+			}
+		}
+	}
+	//Copy the patch into the test grid
+	ASSERT_TRUE(testGrid3D.setPointTrait(testPatch));
+
+	//Check a whole bunch of points
+	EXPECT_EQ(aero_path_planning::OBSTACLE, testGrid3D.getPointTrait(0,0,0));
+	EXPECT_EQ(aero_path_planning::OBSTACLE, testGrid3D.getPointTrait(1,0,0));
+	EXPECT_EQ(aero_path_planning::OBSTACLE, testGrid3D.getPointTrait(0,3,0));
+	EXPECT_EQ(aero_path_planning::OBSTACLE, testGrid3D.getPointTrait(3,3,0));
+	EXPECT_EQ(aero_path_planning::OBSTACLE, testGrid3D.getPointTrait(4,2,0));
+	EXPECT_EQ(aero_path_planning::OBSTACLE, testGrid3D.getPointTrait(1,5,0));
+
+	//Check to make sure we didn't copy points we shouldn't have
+	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, testGrid3D.getPointTrait(x_size_,y_size_,z_size_));
+
+}
