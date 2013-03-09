@@ -32,7 +32,7 @@ struct MutexType
 
 	MutexType(const MutexType& ) { omp_init_lock(&lock_); }
 	MutexType& operator= (const MutexType& ) { return *this; }
-public:
+private:
 	omp_lock_t lock_;
 };
 #else
@@ -49,6 +49,7 @@ struct MutexType
  */
 struct ScopedLock
 {
+public:
 	explicit ScopedLock(MutexType& m) : mut(m), locked(true) { mut.Lock(); }
 	~ScopedLock() { Unlock(); }
 	void Unlock() { if(!locked) return; locked=false; mut.Unlock(); }
@@ -56,7 +57,7 @@ struct ScopedLock
 private:
 	MutexType& mut;
 	bool locked;
-private: // prevent copying the scoped lock.
+    // prevent copying the scoped lock.
 	void operator=(const ScopedLock&);
 	ScopedLock(const ScopedLock&);
 };
@@ -71,8 +72,8 @@ template <class Fitness, class Data>
 class FitnessQueue
 {
 private:
-	typedef std::pair<Fitness, Data> data_pair_t;			///Typedef for the data-fitness pair
-	typedef boost::shared_ptr<data_pair_t> data_pair_ptr_t; ///Typedef for a shared_ptr to the data contained in the queue
+	typedef std::pair<Fitness, Data> DataPair_t;			///Typedef for the data-fitness pair
+	typedef boost::shared_ptr<DataPair_t> DataPairPtr_t; ///Typedef for a shared_ptr to the data contained in the queue
 
 	class comparitor
 	{
@@ -84,15 +85,15 @@ private:
 		 * @param [in] b pointer to the second value to compare
 		 * @return (a->first < b->first)
 		 */
-		bool operator() (const data_pair_ptr_t& a, const data_pair_ptr_t& b) const;
+		bool operator() (const DataPairPtr_t& a, const DataPairPtr_t& b) const;
 
 	};
 
 
-	typedef std::priority_queue<data_pair_ptr_t, std::vector<data_pair_ptr_t>, comparitor > priority_queue;
+	typedef std::priority_queue<DataPairPtr_t, std::vector<DataPairPtr_t>, comparitor > PriorityQueue_t;
 
-	priority_queue queue_;
-	MutexType lock_;
+	PriorityQueue_t  queue_; ///The backing priority queue used to hold the data in the FitnessQueue
+	mutable MutexType lock_;  ///The mutex used to lock the queue. Needs to be mutable to allow Top to be const, which it is in terms of queue data
 
 public:
 	FitnessQueue();
@@ -141,7 +142,7 @@ FitnessQueue<Fitness, Data>::FitnessQueue():
 }
 
 template<class Fitness, class Data>
-bool FitnessQueue<Fitness, Data>::comparitor::operator ()(const FitnessQueue::data_pair_ptr_t& a, const FitnessQueue::data_pair_ptr_t& b) const
+bool FitnessQueue<Fitness, Data>::comparitor::operator ()(const FitnessQueue::DataPairPtr_t& a, const FitnessQueue::DataPairPtr_t& b) const
 {
 	return a->first<b->first;
 }
@@ -161,8 +162,8 @@ unsigned int FitnessQueue<Fitness, Data>::size() const
 template<class Fitness, class Data>
 void FitnessQueue<Fitness, Data>::push (const Fitness& fitness, const Data& data)
 {
-	ScopedLock lck(lock_); // locks the mutex
-	data_pair_ptr_t item(new data_pair_t(fitness, data));
+	ScopedLock lck(this->lock_); // locks the mutex
+	DataPairPtr_t item(new DataPair_t(fitness, data));
 	this->queue_.push(item);
 	// automatically releases the lock when lck goes out of scope.
 }
@@ -170,7 +171,7 @@ void FitnessQueue<Fitness, Data>::push (const Fitness& fitness, const Data& data
 template<class Fitness, class Data>
 const Data& FitnessQueue<Fitness, Data>::top() const
 {
-	ScopedLock lck(lock_); // locks the mutex
+	ScopedLock lck(this->lock_); // locks the mutex
 	return this->queue_.top()->second;
 	// automatically releases the lock when lck goes out of scope.
 }
@@ -178,7 +179,7 @@ const Data& FitnessQueue<Fitness, Data>::top() const
 template<class Fitness, class Data>
 void FitnessQueue<Fitness, Data>::pop()
 {
-	ScopedLock lck(lock_);//locks the mutex
+	ScopedLock lck(this->lock_);//locks the mutex
 	this->queue_.pop();
 	// automatically releases the lock when lck goes out of scope.
 }
