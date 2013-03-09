@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 	try
 	{
 		LocalPlanner planner(nh, p_nh);
-		planner.doPlanning();
+		ros::spin();
 	}
 	catch(std::exception& e)
 	{

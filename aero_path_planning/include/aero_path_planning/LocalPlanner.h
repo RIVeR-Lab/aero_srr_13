@@ -38,12 +38,6 @@ public:
 	 */
 	virtual ~LocalPlanner();
 
-	/**
-	 * @author	Adam Panzica
-	 * @brief	Does the actual work of implementing the Driving with Tentacles algorithm
-	 *
-	 */
-	void doPlanning();
 private:
 
 	int		platform_;		///flat marking what platform we're running on
@@ -64,19 +58,26 @@ private:
 	std::string	v_action_topic_;		///Actionlib topic name to send velocity commands over
 	std::string pc_topic_;			///topic name of the ROS topic to receive new occupancy grid data over
 
-	ros::NodeHandle nh_;	///Node handle for publishing/subscribing to topics
-	ros::NodeHandle p_nh_;  ///Nodes handle to load private params
-	ros::Subscriber 	pc_sub_;		///Subscriber to the ROS topic to receive new occupancy grid data over
-	ros::Subscriber		stop_sub_;	///Subscriber to the ROS topic to receive the software stop message
-	ros::Publisher		vel_pub_;	///Publisher for Twist messages to a platform that takes them
-	ros::Publisher          tent_pub_;       ///Publisher for visualizing selected tentacles
-	ros::Timer             vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
+	ros::NodeHandle nh_;	    ///Node handle for publishing/subscribing to topics
+	ros::NodeHandle p_nh_;      ///Nodes handle to load private params
+	ros::Subscriber pc_sub_;    ///Subscriber to the ROS topic to receive new occupancy grid data over
+	ros::Subscriber	stop_sub_;	///Subscriber to the ROS topic to receive the software stop message
+	ros::Publisher	vel_pub_;	///Publisher for Twist messages to a platform that takes them
+	ros::Publisher  tent_pub_;  ///Publisher for visualizing selected tentacles
+	ros::Timer      vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
+	ros::Timer      plan_timer_;///Timer that will attempt to select a new tentacle at a constant rate
 
 	aero_path_planning::Point	origin_;	///The origin to use for the occupancy grids
 	TentacleGeneratorPtr tentacles_;	///Pointer to the tentacle generator which contains the tentacles to use for planning
 
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
+
+	/**
+	 * @author	Adam Panzica
+	 * @brief	Timer Callback that attempts to select a new tentacle
+	 */
+	void planningCB(const ros::TimerEvent& event);
 
 	/**
 	 * Timer callback to send data to the platform at a constant rate
@@ -101,14 +102,16 @@ private:
 	void pcCB(const aero_path_planning::OccupancyGridMsgConstPtr& message);
 
 	/**
-	 * Performs platform specific sending of velocity commands
+	 * @author Adam Panzica
+	 * @brief Performs platform specific sending of velocity commands
 	 * @param velocity The linear velocity in +x to follow
 	 * @param radius The radius of curvature to follow
 	 */
 	void sendVelCom(double velocity, double radius);
 
 	/**
-	 * Sends out geometery_msgs::Twist messages to the platform
+	 * @author Adam Panzica
+	 * @brief Sends out geometery_msgs::Twist messages to the platform
 	 * @param x_dot The linear velocity in +x
 	 * @param omega The angular velocity around +z
 	 */
@@ -117,11 +120,40 @@ private:
 
 	void visualizeTentacle(int speed_set, int tentacle);
 
+	/**
+	 * @author Adam Panzica
+	 * @brief  Loads parameters from the parameter server
+	 */
 	void loadParam();
 
+	/**
+	 * @author Adam Panzica
+	 * @brief  Subscribes/Advertises topics with ROS
+	 */
 	void regTopic();
 
+	/**
+	 * @author Adam Panzica
+	 * @brief  Regesters timers with ROS
+	 */
 	void regTimers();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Selects the best tentacle to follow
+	 * @param [in]  current_vel  The current velocity of the robot, in m/s
+	 * @param [in]  search_grid  The current local occupancy grid to search
+	 * @param [out] speedset_idx The speed set index of the selected tentacle
+	 * @param [out] tentacle_idx The tentacle index of the selected tentacle
+	 * @return True if a tentacle was successfully selected, or false if there were no valid tentacles
+	 */
+	bool selectTentacle(const double& current_vel, const OccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx);
+
+	/**
+	 * @author Adam Panzica
+	 * @return True if there is an obstruction within the bump-sensor radius of the robot
+	 */
+	bool bumpSwitch();
 
 };
 
