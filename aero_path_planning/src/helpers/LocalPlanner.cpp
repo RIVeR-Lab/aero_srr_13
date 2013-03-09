@@ -277,7 +277,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 					{
 					case aero_path_planning::OBSTACLE:
 						//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
-						PRINT_POINT("Hit Point", point);
+						//PRINT_POINT("Hit Point", point);
 						traversing = false;
 						break;
 					case aero_path_planning::GOAL:
