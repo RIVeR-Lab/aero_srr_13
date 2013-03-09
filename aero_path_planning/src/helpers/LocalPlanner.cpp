@@ -17,9 +17,9 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-														nh_(nh),
-														p_nh_(p_nh),
-														occupancy_buffer_(2)
+																nh_(nh),
+																p_nh_(p_nh),
+																occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Oryx Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -346,30 +346,24 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 
 void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
-	while(ros::ok())
+	if(should_plan_)
 	{
-		if(should_plan_)
+		//Grab the next occupancy grid to process
+		if(!this->occupancy_buffer_.empty())
 		{
-			//Grab the next occupancy grid to process
-			if(!this->occupancy_buffer_.empty())
-			{
-				OccupancyGrid	working_grid= this->occupancy_buffer_.front();
-				int speedset_idx = 0;
-				int tentacle_idx = 0;
+			OccupancyGrid	working_grid= this->occupancy_buffer_.front();
+			int speedset_idx = 0;
+			int tentacle_idx = 0;
 
-				//select the best tentacle
-				this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
-				//Update the current radius and velocity
-				this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
-				this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
-				visualizeTentacle(speedset_idx, tentacle_idx);
-				this->occupancy_buffer_.pop_front();
-			}
+			//select the best tentacle
+			this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
+			//Update the current radius and velocity
+			this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
+			this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
+			visualizeTentacle(speedset_idx, tentacle_idx);
+			this->occupancy_buffer_.pop_front();
 		}
-		//spin to let ROS process callbacks
-		ros::spinOnce();
 	}
-
 }
 
 void LocalPlanner::velUpdateCB(const ros::TimerEvent& event)
@@ -390,7 +384,6 @@ void LocalPlanner::pcCB(const aero_path_planning::OccupancyGridMsgConstPtr& mess
 	//To prevent processing of stale data, ignore anything received while we shouldn't be planning
 	if(this->should_plan_)
 	{
-		ROS_INFO("I Got new Occupancy Grid Data!");
 		OccupancyGrid recievedGrid(*message);
 		//ROS_INFO("Grid Processed...");
 		//ROS_INFO("Callback got the grid:\n%s", recievedGrid.toString(0,0)->c_str());
