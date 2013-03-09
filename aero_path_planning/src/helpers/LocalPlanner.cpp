@@ -255,7 +255,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	SpeedSet fast_set    = this->tentacles_->getSpeedSet(3);
 	bool   has_goal      = true;
 	bool   hit_goal      = false;
-#pragma omp parallel for
+//#pragma omp parallel for
 	for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 	{
 		//If we already hit the goal, short circuit since we can't break from OpenMP loops
@@ -326,9 +326,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 
 
 			double tent_fitness = traverser.lengthTraversed()+length_modifier;
-			boost::shared_ptr< std::pair<int, int> > tent_details(new std::pair<int, int>);
-			tent_details->first = current_set.getIndex();
-			tent_details->second= working_tentacle.getIndex();
+			boost::shared_ptr< std::pair<int, int> > tent_details(new std::pair<int, int>(current_set.getIndex(), working_tentacle.getIndex()));
 			//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
 			if(hit_goal)
 			{
