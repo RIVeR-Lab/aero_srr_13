@@ -7,3 +7,5 @@ rosbuild_add_library(${PROJECT_NAME}OccupancyGrid
 		      Tentacles.cpp)
 rosbuild_add_library(${PROJECT_NAME}Planners 
 		      RRTCarrot.cpp)
+rosbuild_add_library(${PROJECT_NAME}FitnessQueue
+		      FitnessQueue.cpp)

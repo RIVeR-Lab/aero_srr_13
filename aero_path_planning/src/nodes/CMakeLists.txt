@@ -3,7 +3,7 @@
 
 #Build the Local Planner Node
 rosbuild_add_executable(aero_local_planner oryx_local_planner.cpp)
-target_link_libraries(aero_local_planner ${PROJECT_NAME}Core ${PROJECT_NAME}OccupancyGrid)
+target_link_libraries(aero_local_planner ${PROJECT_NAME}Core ${PROJECT_NAME}OccupancyGrid ${PROJECT_NAME}FitnessQueue)
 
 #Build the Occupancy Generator test node
 rosbuild_add_executable(occupancy_generator occupancy_generator.cpp)

@@ -3,4 +3,4 @@
 #target_link_libraries(test/CarrotPathFinderTest lib${PROJECT_NAME})
 
 rosbuild_add_gtest(AeroPathPlanningTests AeroPathPlanningTests.cpp CastLineTest.cpp RRTCarrotTest.cpp OccupancyGridTest.cpp)
-target_link_libraries(AeroPathPlanningTests ${PROJECT_NAME}Core ${PROJECT_NAME}OccupancyGrid ${PROJECT_NAME}Planners)
+target_link_libraries(AeroPathPlanningTests ${PROJECT_NAME}Core ${PROJECT_NAME}OccupancyGrid ${PROJECT_NAME}Planners ${PROJECT_NAME}FitnessQueue)
