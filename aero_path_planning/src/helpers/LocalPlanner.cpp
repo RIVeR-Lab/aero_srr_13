@@ -348,6 +348,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
 	if(should_plan_)
 	{
+		ROS_INFO("I'm Planning!");
 		//Grab the next occupancy grid to process
 		if(!this->occupancy_buffer_.empty())
 		{
@@ -368,6 +369,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 
 void LocalPlanner::velUpdateCB(const ros::TimerEvent& event)
 {
+	ROS_INFO("I'm Updating Velocity!");
 	this->sendVelCom(this->set_vel_, this->set_rad_);
 }
 

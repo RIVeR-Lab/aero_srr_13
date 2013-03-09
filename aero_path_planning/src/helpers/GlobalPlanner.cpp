@@ -137,7 +137,7 @@ void GlobalPlanner::registerTopics()
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr message)
 {
-	ROS_INFO("Got a new Laser Scan!");
+	//ROS_INFO("Got a new Laser Scan!");
 	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
 	Point origin;
 	origin.x = 0;

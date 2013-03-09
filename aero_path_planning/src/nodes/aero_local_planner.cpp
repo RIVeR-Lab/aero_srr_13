@@ -18,22 +18,14 @@ using namespace aero_path_planning;
 
 //*********************** NODE IMPLEMENTATION ******************************//
 
-int main(int argc, char **argv) {
-	ros::init(argc, argv, "aero_base_planner");
+int main(int argc, char **argv)
+{
+	ros::init(argc, argv, "aero_local_planner");
 	ros::NodeHandle nh;
 	ros::NodeHandle p_nh("~");
 
-	//Set up client to Drive Controller
-	try
-	{
-		LocalPlanner planner(nh, p_nh);
-		ros::spin();
-	}
-	catch(std::exception& e)
-	{
-		ROS_FATAL("%s, %s",e.what(), "Shutting Down");
-		ros::shutdown();
-	}
+	LocalPlanner planner(nh, p_nh);
+	ros::spin();
 }
 
 
