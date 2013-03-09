@@ -407,7 +407,7 @@ void LocalPlanner::sendVelCom(double velocity, double radius)
 		ROS_ERROR("Platform Oryx is no longer supported");
 		break;
 	case 1:
-		twist(velocity, velocity/radius);
+		twist(velocity, velocity/(radius/10.0));
 		break;
 	default:
 		break;
@@ -418,6 +418,23 @@ void LocalPlanner::sendVelCom(double velocity, double radius)
 void LocalPlanner::twist(double x_dot, double omega)
 {
 	geometry_msgs::Twist message;
+	if(std::abs(x_dot)<0.01)
+	{
+		x_dot = 0;
+	}
+	else if(std::abs(x_dot)<0.15)
+	{
+		x_dot = x_dot/std::abs(x_dot)*0.15;
+	}
+
+	if(std::abs(omega)<0.01)
+	{
+		omega = 0;
+	}
+	else if(std::abs(omega)<0.1)
+	{
+		omega = omega/std::abs(omega)*0.1;
+	}
 	message.linear.x  = x_dot;
 	message.angular.z = omega;
 	this->vel_pub_.publish(message);
