@@ -256,7 +256,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	bool   has_goal      = true;
 	bool   hit_goal      = false;
 #pragma omp parallel for
-	for(int i=0; i<current_set.getNumTentacle(); i++)
+	for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 	{
 		//If we already hit the goal, short circuit since we can't break from OpenMP loops
 		if(!hit_goal)
