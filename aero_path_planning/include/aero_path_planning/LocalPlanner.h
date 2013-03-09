@@ -12,7 +12,6 @@
 #include<ros/ros.h>
 #include<queue>
 #include<actionlib/client/simple_action_client.h>
-#include<aero_drive_controller/VelocityCommandAction.h>
 #include<boost/circular_buffer.hpp>
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
