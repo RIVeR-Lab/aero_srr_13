@@ -21,7 +21,7 @@ LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std
 																p_nh_(p_nh),
 																occupancy_buffer_(2)
 {
-	ROS_INFO("Starting Up Oryx Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
+	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
 	this->loadParam();
 	this->regTopic();
@@ -306,19 +306,19 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 			//Modify length based on closeness to goal, if there is one
 			if(has_goal)
 			{
-				ROS_INFO_STREAM("There is a goal...");
+				//ROS_INFO_STREAM("There is a goal...");
 				try
 				{
 					//Will throw false if there was no goal point
 					const aero_path_planning::Point goal_point = search_grid.getGoalPoint();
 					const aero_path_planning::Point end_point = traverser.next();
 					double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
-					ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
+					//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
 					length_modifier-= dist_to_goal*this->goal_weight_;
 				}
 				catch(bool& e)
 				{
-					ROS_INFO("There is not a goal");
+					//ROS_INFO("There is not a goal");
 					//There was no goal, set the flag
 					has_goal = e;
 				}
