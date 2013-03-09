@@ -2,7 +2,7 @@
 #rosbuild_add_executable(aero_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
 
 #Build the Local Planner Node
-rosbuild_add_executable(aero_local_planner oryx_local_planner.cpp)
+rosbuild_add_executable(aero_local_planner aero_local_planner.cpp)
 target_link_libraries(aero_local_planner ${PROJECT_NAME}Core)
 
 #Build the Occupancy Generator test node
