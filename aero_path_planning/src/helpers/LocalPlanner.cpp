@@ -17,9 +17,9 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																nh_(nh),
-																p_nh_(p_nh),
-																occupancy_buffer_(2)
+																		nh_(nh),
+																		p_nh_(p_nh),
+																		occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -249,7 +249,7 @@ LocalPlanner::~LocalPlanner(){};
 
 bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx)
 {
-	FitnessQueue<double, std::pair<int, int> > best_tentacle_candidates;
+	FitnessQueue<double, boost::shared_ptr<std::pair<int, int> > > best_tentacle_candidates;
 	SpeedSet slow_set    = this->tentacles_->getSpeedSet(1);
 	SpeedSet current_set = this->tentacles_->getSpeedSet(2);
 	SpeedSet fast_set    = this->tentacles_->getSpeedSet(3);
@@ -326,7 +326,9 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 
 
 			double tent_fitness = traverser.lengthTraversed()+length_modifier;
-			std::pair<int, int> tent_details(current_set.getIndex(), working_tentacle.getIndex());
+			boost::shared_ptr< std::pair<int, int> > tent_details(new std::pair<int, int>);
+			tent_details->first = current_set.getIndex();
+			tent_details->second= working_tentacle.getIndex();
 			//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
 			if(hit_goal)
 			{
@@ -336,8 +338,8 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 		}
 	}
 
-	speedset_idx = best_tentacle_candidates.top().first;
-	tentacle_idx = best_tentacle_candidates.top().second;
+	speedset_idx = best_tentacle_candidates.top()->first;
+	tentacle_idx = best_tentacle_candidates.top()->second;
 
 	ROS_INFO("I Selected Speed Set %d, Tentacle %d", speedset_idx, tentacle_idx);
 
