@@ -10,7 +10,6 @@
 
 //********************** SYSTEM DEPENDANCIES **********************//
 #include<queue>
-#include<boost/function.hpp>
 #include<boost/shared_ptr.hpp>
 #ifdef _OPENMP
 # include <omp.h>
@@ -26,15 +25,15 @@ namespace aero_path_planning
  */
 struct MutexType
 {
-	MutexType() { omp_init_lock(&lock); }
-	~MutexType() { omp_destroy_lock(&lock); }
-	void Lock() { omp_set_lock(&lock); }
-	void Unlock() { omp_unset_lock(&lock); }
+	MutexType() { omp_init_lock(&lock_); }
+	~MutexType() { omp_destroy_lock(&lock_); }
+	void Lock() { omp_set_lock(&lock_); }
+	void Unlock() { omp_unset_lock(&lock_); }
 
-	MutexType(const MutexType& ) { omp_init_lock(&lock); }
+	MutexType(const MutexType& ) { omp_init_lock(&lock_); }
 	MutexType& operator= (const MutexType& ) { return *this; }
 public:
-	omp_lock_t lock;
+	omp_lock_t lock_;
 };
 #else
 struct MutexType
@@ -77,6 +76,7 @@ private:
 
 	class comparitor
 	{
+	public:
 		/**
 		 * @author Adam Panzica
 		 * @brief  Function for comparing two data-fitness pairs
@@ -91,10 +91,11 @@ private:
 
 	typedef std::priority_queue<data_pair_ptr_t, std::vector<data_pair_ptr_t>, comparitor > priority_queue;
 
-	priority_queue queue;
-	MutexType lock;
+	priority_queue queue_;
+	MutexType lock_;
 
 public:
+	FitnessQueue();
 
 	/**
 	 * @author Adam Panzica
@@ -130,6 +131,59 @@ public:
 	void pop();
 
 };
+
+
+//************************ IMPLEMENTATION (TEMPLATED, MUST GO IN HEADER) ****************************//
+template<class Fitness, class Data>
+FitnessQueue<Fitness, Data>::FitnessQueue():
+	queue_(comparitor())
+{
+}
+
+template<class Fitness, class Data>
+bool FitnessQueue<Fitness, Data>::comparitor::operator ()(const FitnessQueue::data_pair_ptr_t& a, const FitnessQueue::data_pair_ptr_t& b) const
+{
+	return a->first<b->first;
+}
+
+template<class Fitness, class Data>
+bool FitnessQueue<Fitness, Data>::empty() const
+{
+	return this->queue_.empty();
+}
+
+template<class Fitness, class Data>
+unsigned int FitnessQueue<Fitness, Data>::size() const
+{
+	return this->queue_.size();
+}
+
+template<class Fitness, class Data>
+void FitnessQueue<Fitness, Data>::push (const Fitness& fitness, const Data& data)
+{
+	ScopedLock lck(lock_); // locks the mutex
+	data_pair_ptr_t item(new data_pair_t(fitness, data));
+	this->queue_.push(item);
+	// automatically releases the lock when lck goes out of scope.
+}
+
+template<class Fitness, class Data>
+const Data& FitnessQueue<Fitness, Data>::top() const
+{
+	ScopedLock lck(lock_); // locks the mutex
+	return this->queue_.top()->second;
+	// automatically releases the lock when lck goes out of scope.
+}
+
+template<class Fitness, class Data>
+void FitnessQueue<Fitness, Data>::pop()
+{
+	ScopedLock lck(lock_);//locks the mutex
+	this->queue_.pop();
+	// automatically releases the lock when lck goes out of scope.
+}
+
+
 
 };
 
