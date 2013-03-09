@@ -339,7 +339,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	speedset_idx = best_tentacle_candidates.top()->first;
 	tentacle_idx = best_tentacle_candidates.top()->second;
 
-	ROS_INFO("I Selected Speed Set %d, Tentacle %d", speedset_idx, tentacle_idx);
+	ROS_INFO("Tentacles Searched: %d, I Selected Speed Set %d, Tentacle %d", best_tentacle_candidates.size(), speedset_idx, tentacle_idx);
 
 	return true;
 }
