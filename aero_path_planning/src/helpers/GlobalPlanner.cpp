@@ -1,5 +1,5 @@
 /**
- * @file global_planner.cpp
+ * @file GlobalPlanner.cpp
  *
  * @date   Feb 19, 2013
  * @author Adam Panzica
@@ -9,7 +9,7 @@
 //License File
 
 //****************SYSTEM DEPENDANCIES**************************//
-
+#include<boost/foreach.hpp>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/GlobalPlanner.h>
 #include<aero_path_planning/RRTCarrot.h>
@@ -137,8 +137,8 @@ void GlobalPlanner::registerTopics()
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr message)
 {
-	ROS_INFO("Got a new Laser Scan!");
-	PointCloud scan_cloud;
+	//ROS_INFO("Got a new Laser Scan!");
+	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
 	Point origin;
 	origin.x = 0;
 	origin.y = this->local_y_size_/2;
@@ -146,15 +146,21 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr message)
 	OccupancyGrid local_map(this->local_x_size_, this->local_y_size_, .01, origin, aero_path_planning::UNKNOWN);
 	pcl::fromROSMsg(*message, scan_cloud);
 	aero_path_planning::PointConverter converter(.1);
-	BOOST_FOREACH(Point point, scan_cloud)
+
+#pragma omp parallel for
+	for(int i=0; i<(int)scan_cloud.size(); i++)
 	{
-		converter.convertToGrid(point, point);
-		point.z = 0;
+		Point opoint;
+		opoint.x = scan_cloud.at(i).x;
+		opoint.y = scan_cloud.at(i).y;
+		opoint.z = 0;
+		converter.convertToGrid(opoint, opoint);
+
 		Point on_grid;
-		on_grid.getVector4fMap() = point.getVector4fMap()+origin.getVector4fMap();
+		on_grid.getVector4fMap() = opoint.getVector4fMap()+origin.getVector4fMap();
 		if(on_grid.x>=0&&on_grid.x<this->local_x_size_&&on_grid.y>0&&on_grid.y<this->local_y_size_)
 		{
-			local_map.setPointTrait(point, aero_path_planning::OBSTACLE);
+			local_map.setPointTrait(opoint, aero_path_planning::OBSTACLE);
 		}
 	}
 
