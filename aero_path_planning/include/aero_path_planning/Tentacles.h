@@ -225,6 +225,12 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @return The index of the tentacle
+	 */
+	int getIndex() const;
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Gets the x/y coordinates of all the points long this tentacle
 	 * @return A reference to a vector containing a set of pairs which represent the x/y coordinates relative to robot-center
 	 */
@@ -327,6 +333,7 @@ public:
 	typedef boost::shared_ptr<TentacleTraverser> TentacleTraverserPtr;
 
 private:
+	int    index_;
 	double radius_;									///Radius of the Tentacle
 	double velocity_;								///Velocity of the Tentacle
 	TentaclePointCloud points_; 						///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
@@ -384,6 +391,7 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates all of the tentacles with the given parameters
+	 * @param index         The index of the speed set
 	 * @param expFact 		The exponential factor parameter used to calculate the radius of the tentacle
 	 * @param seedRad 		The seed radius for the speed set
 	 * @param seedLength	The seed length that was used to calculate the seed radius
@@ -393,7 +401,7 @@ public:
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 * @param velocity		The velocity that the tentacle is to be traveled at
 	 */
-	SpeedSet(double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity);
+	SpeedSet(int index, double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity);
 	virtual ~SpeedSet();
 
 	/**
@@ -411,6 +419,12 @@ public:
 	 * @return The number of tentacles in the SpeedSet
 	 */
 	unsigned int getNumTentacle() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The index of the speed set
+	 */
+	int getIndex() const;
 
 	/**
 	 * @author	Adam Panzica
@@ -452,6 +466,7 @@ public:
 
 
 private:
+	int    index_;
 	double velocity_;
 	double seed_rad_;
 	std::vector<Tentacle> tentacles_;	///A vector containing all of the tentacles for this speed set
