@@ -192,12 +192,14 @@ double TentTrav::deltaLength() const
  */
 Tentacle::Tentacle()
 {
+	this->index_  = 0;
 	this->radius_ = 0;
 	this->velocity_ = 0;
 }
 
 Tentacle::Tentacle(const Tentacle& Tentacle):
-														points_(Tentacle.points_)
+				index_(Tentacle.index_),
+				points_(Tentacle.points_)
 {
 	this->radius_ = Tentacle.radius_;
 	this->velocity_ = Tentacle.velocity_;
@@ -206,8 +208,8 @@ Tentacle::Tentacle(const Tentacle& Tentacle):
 Tentacle::~Tentacle(){};
 
 Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException):
-										index_(index),
-										points_()
+												index_(index),
+												points_()
 {
 
 	this->velocity_= velocity;
@@ -390,7 +392,8 @@ SpeedSet::SpeedSet()
 }
 
 SpeedSet::SpeedSet(const SpeedSet& SpeedSet):
-															tentacles_(SpeedSet.tentacles_)
+		index_(SpeedSet.index_),
+																	tentacles_(SpeedSet.tentacles_)
 {
 	this->seed_rad_  = SpeedSet.seed_rad_;
 	this->velocity_ = SpeedSet.velocity_;
@@ -398,7 +401,7 @@ SpeedSet::SpeedSet(const SpeedSet& SpeedSet):
 
 
 SpeedSet::SpeedSet(int index, double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity):
-										index_(index)
+												index_(index)
 {
 	this->seed_rad_  = seedRad;
 	this->velocity_ = velocity;
@@ -432,7 +435,7 @@ double SpeedSet::getSeedRad() const
 }
 
 const Tentacle& SpeedSet::getTentacle(int index)const throw(aero_path_planning::TentacleAccessException)
-		{
+				{
 	if(index<0||index>(int)getNumTentacle())
 	{
 		aero_path_planning::TentacleAccessException e(index, 0);
@@ -451,7 +454,7 @@ const Tentacle& SpeedSet::getTentacle(int index)const throw(aero_path_planning::
 			throw exception;
 		}
 	}
-		}
+				}
 
 SpeedSet::iterator SpeedSet::begin()
 {
@@ -483,8 +486,8 @@ TentacleGenerator::TentacleGenerator()
 }
 
 TentacleGenerator::TentacleGenerator(TentacleGenerator& TentacleGenerator):
-												speed_sets_(TentacleGenerator.speed_sets_),
-												velocity_keys_(TentacleGenerator.velocity_keys_)
+														speed_sets_(TentacleGenerator.speed_sets_),
+														velocity_keys_(TentacleGenerator.velocity_keys_)
 {
 	this->num_speed_set_ = TentacleGenerator.num_speed_set_;
 	this->num_tentacles_= TentacleGenerator.num_tentacles_;
@@ -492,8 +495,8 @@ TentacleGenerator::TentacleGenerator(TentacleGenerator& TentacleGenerator):
 }
 
 TentacleGenerator::TentacleGenerator(const TentacleGenerator& TentacleGenerator):
-												speed_sets_(TentacleGenerator.speed_sets_),
-												velocity_keys_(TentacleGenerator.velocity_keys_)
+														speed_sets_(TentacleGenerator.speed_sets_),
+														velocity_keys_(TentacleGenerator.velocity_keys_)
 {
 	this->num_speed_set_ = TentacleGenerator.num_speed_set_;
 	this->num_tentacles_= TentacleGenerator.num_tentacles_;
@@ -531,7 +534,7 @@ int TentacleGenerator::getNumSpeedSets() const
 }
 
 const Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) const throw (aero_path_planning::TentacleAccessException, aero_path_planning::SpeedSetAccessException)
-{
+		{
 	if(speedSet<0||speedSet>(int)this->speed_sets_.size())
 	{
 		aero_path_planning::SpeedSetAccessException e(speedSet);
@@ -554,7 +557,7 @@ const Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) const th
 			throw new aero_path_planning::TentacleAccessException(index, speedSet, message, e);
 		}
 	}
-}
+		}
 
 const SpeedSet& TentacleGenerator::getSpeedSet(int speedSet) const
 {

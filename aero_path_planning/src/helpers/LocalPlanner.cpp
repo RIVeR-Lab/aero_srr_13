@@ -255,7 +255,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	SpeedSet fast_set    = this->tentacles_->getSpeedSet(3);
 	bool   has_goal      = true;
 	bool   hit_goal      = false;
-//#pragma omp parallel for
+#pragma omp parallel for
 	for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 	{
 		//If we already hit the goal, short circuit since we can't break from OpenMP loops
@@ -326,6 +326,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 
 
 			double tent_fitness = traverser.lengthTraversed()+length_modifier;
+			//ROS_INFO("Searched Tentacle %d in set %d with fitness %f",current_set.getIndex(), working_tentacle.getIndex(), tent_fitness);
 			boost::shared_ptr< std::pair<int, int> > tent_details(new std::pair<int, int>(current_set.getIndex(), working_tentacle.getIndex()));
 			//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
 			if(hit_goal)
@@ -339,7 +340,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	speedset_idx = best_tentacle_candidates.top()->first;
 	tentacle_idx = best_tentacle_candidates.top()->second;
 
-	ROS_INFO("Tentacles Searched: %d, I Selected Speed Set %d, Tentacle %d", best_tentacle_candidates.size(), speedset_idx, tentacle_idx);
+	//ROS_INFO("Tentacles Searched: %d, I Selected Speed Set %d, Tentacle %d", best_tentacle_candidates.size(), speedset_idx, tentacle_idx);
 
 	return true;
 }
@@ -348,7 +349,6 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
 	if(should_plan_)
 	{
-		ROS_INFO("I'm Planning!");
 		//Grab the next occupancy grid to process
 		if(!this->occupancy_buffer_.empty())
 		{
@@ -365,11 +365,15 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			this->occupancy_buffer_.pop_front();
 		}
 	}
+	else
+	{
+		this->set_vel_ = 0;
+		this->set_rad_ = 0;
+	}
 }
 
 void LocalPlanner::velUpdateCB(const ros::TimerEvent& event)
 {
-	ROS_INFO("I'm Updating Velocity!");
 	this->sendVelCom(this->set_vel_, this->set_rad_);
 }
 
@@ -440,7 +444,8 @@ void LocalPlanner::visualizeTentacle(int speed_set, int tentacle)
 	sensor_msgs::PointCloud2 message;
 	OccupancyGridCloud cloud(this->tentacles_->getSpeedSet(speed_set).getTentacle(tentacle).getPoints());
 	PointConverter converter(this->res_);
-	for(int i=0; i<cloud.size(); i++)
+#pragma omp parallel for
+	for(int i=0; i<(int)cloud.size(); i++)
 	{
 		Point& point = cloud.at(i);
 		converter.convertToEng(point, point);
