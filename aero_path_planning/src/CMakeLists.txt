@@ -93,6 +93,10 @@ set(L_OCC_RES_CDF L_OCC_RES)
 set(L_OCC_RES_VAL "\"0.1\"")
 
 #Parameters for tentacle generation
+set(T_MINLNTH_ARG "${R_NS}/${T_NS}/min_length")
+set(T_MINLNTH_CDF T_MINLNTH)
+set(T_MINLNTH_VAL "\"10\"")
+
 set(T_EXPFACT_ARG "${R_NS}/${T_NS}/exp_fact")
 set(T_EXPFACT_CDF T_EXPFACT)
 set(T_EXPFACT_VAL "\"1.15\"")
