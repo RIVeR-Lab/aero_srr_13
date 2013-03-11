@@ -9,6 +9,7 @@
 //*********** SYSTEM DEPENDANCIES ****************//
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_base/AeroBase.h>
+#include "AeroBaseParams.h"
 //***********    NAMESPACES     ****************//
 
 
@@ -29,12 +30,25 @@ void AeroBase::loadParams()
 {
 	ROS_INFO("Loading Params...");
 	this->robot_ = "robot";
-	this->imu_   = "imu";
+	this->nh_.getParam(TF_BASE_NAME, this->robot_);
+
+	this->imu_ = "imu";
+	this->nh_.getParam(TF_IMU_NAME, this->imu_);
+
 	this->boom_  = "boom";
+	this->nh_.getParam(TF_BOOM_NAME, this->imu_);
+
 	this->left_cam_ = "left_camera";
+	this->nh_.getParam(TF_LCAM_NAME, this->left_cam_);
+
 	this->right_cam_= "right_camera";
+	this->nh_.getParam(TF_RCAM_NAME, this->right_cam_);
+
 	this->lidar_    = "lidar";
+	this->nh_.getParam(TF_LCAM_NAME, this->lidar_);
+
 	this->arm_base_ = "arm_base";
+	this->nh_.getParam(TF_ARM_NAME, this->arm_base_);
 
 }
 
