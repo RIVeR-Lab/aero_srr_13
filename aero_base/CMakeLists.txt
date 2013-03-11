@@ -29,4 +29,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+#Include the BINARY directory so we can find automatically generated headers
+include_directories(${PROJECT_BINARY_DIR})
+
 add_subdirectory(src)

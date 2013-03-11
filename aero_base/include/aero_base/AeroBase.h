@@ -15,7 +15,19 @@
 //************ LOCAL DEPENDANCIES ****************//
 
 //***********    NAMESPACES     ****************//
+namespace aero_base
+{
 
+class AeroBase
+{
+public:
+	AeroBase(ros::NodeHandle& nh, ros::NodeHandle& p_nh);
 
+private:
+	ros::NodeHandle nh_;
+	ros::NodeHandle p_nh_;
+};
+
+};
 
 #endif /* AEROBASE_H_ */
