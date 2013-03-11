@@ -29,7 +29,7 @@
 	<!-- declare tentacle arguments -->
 	<arg name="@T_EXPFACT_ARG@"	        default=@T_EXPFACT_VAL@/>
 	<arg name="@T_NUMBER_ARG@"	        default=@T_NUMBER_VAL@/>
-	<arg name="@T_MINLTH_ARG@"	        default=@T_MINLTH_VAL@/>
+	<arg name="@T_MINLNTH_ARG@"	        default=@T_MINLNTH_VAL@/>
 	
 	
 	<!-- ********************PARAMETERS******************** -->
@@ -49,7 +49,7 @@
 		<param name="@S_MAX_SPEED_ARG@"	value="$(arg @S_MIN_SPEED_ARG@)"/>
 	
 	<!-- declare tentalce parameters -->
-		<param name="@T_MINLTH_ARG@"	 value="$(arg @T_MINLTH_ARG@)"/>
+		<param name="@T_MINLNTH_ARG@"	 value="$(arg @T_MINLNTH_ARG@)"/>
 		<param name="@T_NUMBER_ARG@"	 value="$(arg @T_NUMBER_ARG@)"/>
 		<param name="@T_EXPFACT_ARG@"    value="$(arg @T_EXPFACT_ARG@)"/>
 	
