@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "aero_base_node");
 	ros::NodeHandle nh;
-	ros::NodeHandle p_nh;
+	ros::NodeHandle p_nh("~");
 
 	AeroBase aero_base(nh, p_nh);
 
