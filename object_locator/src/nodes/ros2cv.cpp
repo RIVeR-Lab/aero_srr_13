@@ -133,7 +133,17 @@ void ImageConverter::computeDisparity()
 	cv::Mat disp(  heightL, widthL, CV_16S );
 	cv::Mat vdisp( heightL, widthL, CV_8U );
 	cv::Mat dispn( heightL, widthL, CV_32F );
-	cv::StereoSGBM stereoBM(-256,512,21, 8*15*15,32*15*15,0,5,5);
+	int minDisp = -300;
+	int numDisp = 512+32;
+	int SADSize = 17;
+	int P1 = 8*SADSize*SADSize;
+	int P2 = 32*SADSize*SADSize;
+	int disp12MaxDiff = 1;
+	int preFilterCap = 2;
+	int uniqueness = 6;
+	int specSize = 450;   //reduces noise
+	int specRange = 10;
+	cv::StereoSGBM stereoBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange);
 
 	stereoBM(img1_rect, img2_rect, disp);
 
@@ -152,7 +162,7 @@ void ImageConverter::computeDisparity()
 	cv::imshow(WINDOWRight, img2_rect);
 	cv::Mat point_cloud;
 	this->stereo_model.projectDisparityImageTo3d(disp, point_cloud);
-	ROS_INFO_STREAM("Point Cloud Value: "<<point_cloud.at<unsigned int>(100,100));
+//	ROS_INFO_STREAM("Point Cloud Value: "<<point_cloud.at<unsigned int>(100,100));
 	cv::waitKey(3);
 
 }
