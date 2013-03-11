@@ -55,7 +55,7 @@ void AeroBase::loadParams()
 void AeroBase::registerTimers()
 {
 	ROS_INFO("Registering Timers...");
-	this->update_timer_ = this->nh_.createTimer(ros::Duration(1/10), &AeroBase::updateCB, this);
+	this->update_timer_ = this->nh_.createTimer(ros::Duration(1.0/10.0), &AeroBase::updateCB, this);
 }
 
 void AeroBase::buildTransforms()

@@ -249,8 +249,8 @@ void LocalPlanner::regTopic()
 
 void LocalPlanner::regTimers()
 {
-	this->vel_timer_ = nh_.createTimer(ros::Duration(1/20), &LocalPlanner::velUpdateCB, this);
-	this->plan_timer_= nh_.createTimer(ros::Duration(1/5), &LocalPlanner::planningCB, this);
+	this->vel_timer_ = nh_.createTimer(ros::Duration(1.0/20.0), &LocalPlanner::velUpdateCB, this);
+	this->plan_timer_= nh_.createTimer(ros::Duration(1.0/20.0), &LocalPlanner::planningCB, this);
 }
 
 LocalPlanner::~LocalPlanner(){};
