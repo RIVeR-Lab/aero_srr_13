@@ -207,7 +207,7 @@ Tentacle::Tentacle(const Tentacle& Tentacle):
 
 Tentacle::~Tentacle(){};
 
-Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException):
+Tentacle::Tentacle(double expFact, double seedRad, double min_length, double seedLength, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException):
 												index_(index),
 												points_()
 {
@@ -238,11 +238,11 @@ Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index,
 	if(index<halfway_index)
 	{
 		//ROS_INFO("Small Index %d, raw working length is %f",index, seedLength+2*std::sqrt((double)index/(double)halfwayIndex));
-		working_length = roundToGrid(seedLength+2*std::sqrt((double)index/(double)halfway_index), resolution);
+		working_length = roundToGrid(seedLength+min_length*std::sqrt((double)index/(double)halfway_index), resolution);
 	}
 	else{
 		//ROS_INFO("Large Index %d, raw working length is %f",index, seedLength+2*std::sqrt(((double)index-(double)halfwayIndex)/(double)halfwayIndex));
-		working_length = roundToGrid(seedLength+2*std::sqrt(((double)index-(double)halfway_index)/(double)halfway_index), resolution);
+		working_length = roundToGrid(seedLength+min_length*std::sqrt(((double)index-(double)halfway_index)/(double)halfway_index), resolution);
 	}
 
 	//Check for special case of an effectively straight line
@@ -400,7 +400,7 @@ SpeedSet::SpeedSet(const SpeedSet& SpeedSet):
 }
 
 
-SpeedSet::SpeedSet(int index, double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity):
+SpeedSet::SpeedSet(int index, double min_length, double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity):
 												index_(index)
 {
 	this->seed_rad_  = seedRad;
@@ -408,7 +408,7 @@ SpeedSet::SpeedSet(int index, double expFact, double seedRad, double seedLength,
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++)
 	{
-		this->tentacles_.push_back(Tentacle(expFact, seedRad, seedLength, t, numTent, resolution, xDim, yDim, velocity));
+		this->tentacles_.push_back(Tentacle(expFact, seedRad, min_length, seedLength, t, numTent, resolution, xDim, yDim, velocity));
 	}
 }
 
@@ -503,7 +503,7 @@ TentacleGenerator::TentacleGenerator(const TentacleGenerator& TentacleGenerator)
 	this->exp_fact_     = TentacleGenerator.exp_fact_;
 }
 
-TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim)
+TentacleGenerator::TentacleGenerator(double min_length, double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim)
 {
 	this->exp_fact_ 		= expFact;
 	this->num_tentacles_	= numTentacles;
@@ -520,7 +520,7 @@ TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSp
 		l = calcL(q);
 		vel = calcSpeedSetVel(minSpeed, maxSpeed, q);
 		PRINTER("Calculated q=%f",q);
-		this->speed_sets_.push_back(SpeedSetPtr(new SpeedSet(v, expFact, calcSeedRad(v, l, q), l, numTentacles, resolution, xDim, yDim, vel)));
+		this->speed_sets_.push_back(SpeedSetPtr(new SpeedSet(v, min_length, expFact, calcSeedRad(v, l, q), l, numTentacles, resolution, xDim, yDim, vel)));
 		this->velocity_keys_.push_back(vel);
 	}
 	PRINTER("Speed Sets Complete!");

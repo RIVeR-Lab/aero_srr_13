@@ -196,6 +196,7 @@ public:
 	 * @brief Creates a new Tentacle using the given parameters for its construction
 	 * @param exp_fact 		The exponential factor parameter used to calculate the radius of the tentacle
 	 * @param seed_rad 		The seed radius for the speed set the tentacle is in
+	 * @param min_length    The length of the shortest tentacle in the slowest speed-set
 	 * @param seed_length	The seed length that was used to calculate the seed radius
 	 * @param index			The tentacle index of this tentacle
 	 * @param num_tent		The total number of tentacles in the speed set
@@ -206,7 +207,7 @@ public:
 	 * @throw TentacleGenerationException If there is a problem generating the tentacle
 	 *
 	 */
-	Tentacle(double exp_fact, double seed_rad, double seed_length, int index, int num_tent, double resolution, int x_dim, int y_dim, double velocity) throw (TentacleGenerationException);
+	Tentacle(double exp_fact, double seed_rad, double min_length, double seed_length, int index, int num_tent, double resolution, int x_dim, int y_dim, double velocity) throw (TentacleGenerationException);
 	virtual ~Tentacle();
 
 	/**
@@ -392,6 +393,7 @@ public:
 	 * @author Adam Panzica
 	 * @brief Generates all of the tentacles with the given parameters
 	 * @param index         The index of the speed set
+	 * @param min_length    The length of the shortest tentacle in the slowest speed-set
 	 * @param expFact 		The exponential factor parameter used to calculate the radius of the tentacle
 	 * @param seedRad 		The seed radius for the speed set
 	 * @param seedLength	The seed length that was used to calculate the seed radius
@@ -401,7 +403,7 @@ public:
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 * @param velocity		The velocity that the tentacle is to be traveled at
 	 */
-	SpeedSet(int index, double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity);
+	SpeedSet(int index, double min_length, double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity);
 	virtual ~SpeedSet();
 
 	/**
@@ -511,6 +513,7 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates a set of tentacles for each speed set
+	 * @param min_length    The length of the shortest tentacle in the slowest speed-set
 	 * @param minSpeed		The speed of the slowest speed set
 	 * @param maxSpeed		The speed of the fastest speed set
 	 * @param numSpeedSet	The number of speed sets to generate
@@ -520,7 +523,7 @@ public:
 	 * @param xDim			The length of the x-axis of the occupancy grid, in the positive x-direction and of the same units as resolution
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 */
-	TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim);
+	TentacleGenerator(double min_length, double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim);
 	virtual ~TentacleGenerator();
 
 	/**
