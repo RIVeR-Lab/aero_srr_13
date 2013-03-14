@@ -17,6 +17,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <object_locator/ros2cv.h>
 #include <opencv2/opencv.hpp>
+#include "opencv2/objdetect/objdetect.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include <iostream>
 
 namespace object_locator
 {
@@ -32,7 +35,9 @@ public:
 	void imageCbRight(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info);
 	void computeDisparity();
 	void computeDisparityCb(const ros::TimerEvent& event);
-
+	void detectAndDisplay( cv::Mat frame );
+	cv_bridge::CvImagePtr mat_left;
+	cv_bridge::CvImagePtr mat_right;
 
 private:
 	ros::Timer disp_timer;
@@ -46,9 +51,10 @@ private:
 	sensor_msgs::Image right_image;
 	sensor_msgs::CameraInfo left_info;
 	sensor_msgs::CameraInfo right_info;
+	std::string cascade_path;
+	cv::CascadeClassifier cascade;
 
-	cv_bridge::CvImagePtr mat_left;
-	cv_bridge::CvImagePtr mat_right;
+
 	image_geometry::StereoCameraModel stereo_model;
 	char* WINDOWLeft;
 	char* WINDOWRight;
@@ -56,6 +62,7 @@ private:
 	cv::Mat disparity;
 	bool gotLeft;
 	bool gotRight;
+	int ctr;
 };
 
 

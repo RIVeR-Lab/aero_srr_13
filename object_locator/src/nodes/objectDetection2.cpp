@@ -17,7 +17,7 @@ using namespace cv;
 void detectAndDisplay( Mat frame );
 
 /** Global variables */
-string face_cascade_name = "/home/srr/ObjectDetectionData/exec/cascade/cascade.xml";
+string face_cascade_name = "/home/srr/ObjectDetectionData/exec/cascadeHOGBlur/cascade.xml";
 CascadeClassifier face_cascade;
 string window_name = "Capture - Face detection";
 
@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
 
   CvCapture* capture;
   Mat frame;
+  Mat out;
   std::cout << "running" << std::endl;
   //-- 1. Load the cascade
   if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
@@ -44,7 +45,12 @@ int main(int argc, char **argv) {
 
       //-- 3. Apply the classifier to the frame
       if( !frame.empty() )
-       { detectAndDisplay( frame ); }
+       {
+    	  GaussianBlur( frame, frame, Size(9, 9), 2, 2 );
+    	  detectAndDisplay( frame );
+//    	  dct(frame, out);
+
+       }
       else
        { printf(" --(!) No captured frame -- Break!"); break; }
 

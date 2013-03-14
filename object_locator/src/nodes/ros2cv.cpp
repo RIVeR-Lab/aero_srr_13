@@ -16,9 +16,11 @@ ImageConverter::ImageConverter()
 
 {
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_ = it_.subscribeCamera("/stereo_bottom/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_bottom/right/image_raw", 1, &ImageConverter::imageCbRight, this);
-	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
+	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
+//	image_right_ = it_.subscribeCamera("/stereo_bottom/right/image_raw", 1, &ImageConverter::imageCbRight, this);
+//	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
+	cascade_path = "/home/srr/ObjectDetectionData/exec/cascadeHOGBlur/cascade.xml";
+	ctr = 0;
 
 	cv::namedWindow(WINDOWLeft);
 	cv::namedWindow(WINDOWRight);
@@ -29,11 +31,12 @@ ImageConverter::~ImageConverter()
 {
 	cv::destroyWindow(WINDOWLeft);
 	cv::destroyWindow(WINDOWRight);
-	cv::namedWindow(WINDOWDisparity);
+	cv::destroyWindow(WINDOWDisparity);
 }
 
 void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW)
 {
+
 	try
 	{
 		cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
@@ -48,13 +51,21 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 	//    if (cv_ptr->image.rows > 60 && cv_ptr->image.cols > 60)
 	//      cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
 
-
+	std::stringstream s;
+	s << "/home/srr/ObjectDetectionData/samplesCam3/" << ctr<<".png";
+	std::cout << s.str()<<std::endl;
 	cv::Mat img;
 	img = cv_ptr->image;
 	//    cv::imshow(WINDOW, img);
-	cv::waitKey(3);
-
+	   int c = cv::waitKey(10);
+	         if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctr++;}
 	image_pub_.publish(cv_ptr->toImageMsg());
+	  if( !cascade.load( cascade_path ) )
+		  {
+			  printf("--(!)Error loading\n");
+		  }
+//		    	 cv::GaussianBlur( img, img, cv::Size(9, 9), 2, 2 );
+//		    	 detectAndDisplay( img);
 }
 
 void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -62,6 +73,8 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_image = *msg;
 	left_info  = *cam_info;
 	gotLeft = true;
+	processImage(left_image, mat_left, WINDOWLeft);
+
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
@@ -174,6 +187,35 @@ void ImageConverter::computeDisparityCb(const ros::TimerEvent& event)
 		gotLeft = false;
 		gotRight = false;
 	}
+}
+void ImageConverter::detectAndDisplay( cv::Mat frame )
+{
+
+//	  std::cout << "running" << std::endl;
+   std::vector<cv::Rect> faces;
+   cv::Mat frame_gray;
+
+   cv::cvtColor( frame, frame_gray, CV_BGR2GRAY );
+   cv::equalizeHist( frame_gray, frame_gray );
+
+   //-- Detect faces
+   cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0, cv::Size(80, 80) );
+
+   for( size_t i = 0; i < faces.size(); i++ )
+    {
+      cv::Mat faceROI = frame_gray( faces[i] );
+
+      //-- In each face, detect eyes
+
+         //-- Draw the face
+         cv::Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
+         cv::ellipse( frame, center, cv::Size( faces[i].width/2, faces[i].height/2), 0, 0, 360, cv::Scalar( 255, 0, 0 ), 2, 8, 0 );
+//   	  std::cout << "stuck" << std::endl;
+
+    }
+   //-- Show what you got
+   cv::imshow( WINDOWLeft, frame );
+
 }
 
 int main(int argc, char** argv)
