@@ -21,7 +21,6 @@ ImageConverter::ImageConverter()
 //	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
 	cascade_path = "/home/srr/ObjectDetectionData/exec/cascadeHOGBlur/cascade.xml";
 	ctr = 0;
-
 	cv::namedWindow(WINDOWLeft);
 	cv::namedWindow(WINDOWRight);
 	cv::namedWindow(WINDOWDisparity);
