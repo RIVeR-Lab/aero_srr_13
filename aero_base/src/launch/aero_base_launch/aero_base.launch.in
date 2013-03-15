@@ -1,0 +1,40 @@
+<launch>
+
+	<!-- Load Parameters onto the server -->
+	<group ns="@R_NS@">
+		<group ns="@T_NS@">
+			<group ns="@T_IMU@">
+				<param name="frame" value="@T_IMU@"/>
+				
+			</group>
+			
+			<group ns="@T_ARM@">
+				<param name="frame" value="@T_ARM@"/>
+				
+			</group>
+			
+			<group ns="@T_LFC@">
+				<param name="frame" value="@T_LFC@"/>
+				
+			</group>
+			
+			<group ns="@T_RTC@">
+				<param name="frame" value="@T_RTC@"/>
+				
+			</group>
+			
+			<group ns="@T_BOM@">
+				<param name="frame" value="@T_BOM@"/>
+				
+			</group>
+			
+			<group ns="@T_LDR@">
+				<param name="frame" value="@T_LDR@"/>
+				
+			</group>
+		</group>
+	</group>
+	
+	<node name="aero_base_node" pkg="aero_base" type="aero_base_node" />
+
+</launch>

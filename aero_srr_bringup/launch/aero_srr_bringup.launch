@@ -4,5 +4,8 @@
   <include file="$(find aero_srr_bringup)/launch/srr_bringup.launch">
     <arg name="aero/platform"      		    value="1" />
     <arg name="aero/velocity_command_topic"	    value="/clearpath/robots/default/cmd_vel" />
+  </include>
+
+  <include file="$(find aero_base)/launch/aero_base.launch">
   </include>  
 </launch>
