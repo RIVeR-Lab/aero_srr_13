@@ -126,6 +126,13 @@ void LocalPlanner::loadParam()
 	p_y_ori_msg+="m";
 
 
+	//Minimum length of tentacles
+	std::string p_min_tent(T_MINLNTH);
+	double min_tent = 10;
+	std::string p_min_tent_msg("");
+	p_min_tent_msg+= boost::lexical_cast<double>(min_tent);
+	p_min_tent_msg+="m";
+
 	//number of tentacles per speed set
 	std::string p_num_tent(T_NUMBER);
 	int num_tent = 81;
@@ -221,6 +228,7 @@ void LocalPlanner::loadParam()
 	if(!nh_.getParam(p_y_ori,	y_ori))			     PARAM_WARN(p_y_ori,	p_y_ori_msg);
 	if(!nh_.getParam(p_z_ori,	z_ori))			     PARAM_WARN(p_z_ori,	p_z_ori_msg);
 	if(!nh_.getParam(p_res,		this->res_))		 PARAM_WARN(p_res,		p_res_msg);
+	if(!nh_.getParam(p_min_tent,	min_tent))		 PARAM_WARN(p_min_tent,	p_min_tent_msg);
 	if(!nh_.getParam(p_num_tent,	num_tent))		 PARAM_WARN(p_num_tent,	p_num_tent_msg);
 	if(!nh_.getParam(p_exp_fact,	exp_fact))		 PARAM_WARN(p_exp_fact,	p_exp_fact_msg);
 	if(!nh_.getParam(p_num_speed_set, num_speed_set))PARAM_WARN(p_num_speed_set,	p_numSpeedSet_msg);
@@ -229,7 +237,7 @@ void LocalPlanner::loadParam()
 	this->origin_.x = x_ori;
 	this->origin_.y = y_ori;
 	this->origin_.z = z_ori;
-	this->tentacles_ = TentacleGeneratorPtr(new TentacleGenerator(min_speed,max_speed,num_speed_set, num_tent, exp_fact, this->res_, this->x_dim_, this->y_dim_));
+	this->tentacles_ = TentacleGeneratorPtr(new TentacleGenerator(min_tent, min_speed,max_speed,num_speed_set, num_tent, exp_fact, this->res_, this->x_dim_, this->y_dim_));
 }
 
 void LocalPlanner::regTopic()
