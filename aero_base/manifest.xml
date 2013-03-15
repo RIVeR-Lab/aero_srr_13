@@ -1,0 +1,17 @@
+<package>
+  <description brief="aero_base">
+
+     aero_base
+
+  </description>
+  <author>parallels</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aero_base</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="tf"/>
+
+</package>
+
+
