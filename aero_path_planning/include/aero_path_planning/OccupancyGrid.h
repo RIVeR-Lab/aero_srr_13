@@ -173,6 +173,18 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief  Sets the point traits for a group of points all at once
+	 * @param  [in] points The points to copy into the grid
+	 * @return true if sucessful, else false
+	 *
+	 * This method will the PointTrait of all points in the OccupancyGrid that corrispond to Points in the given point cloud.
+	 * Note that the RGBA field of the Points in the cloud is used to determine the type of PointTrait to set, so this should
+	 * set appropriately.
+	 */
+	bool setPointTrait(const aero_path_planning::PointCloud& points) throw(OccupancyGridAccessException);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Gets the location of the goal point on the occupancy grid, if it exists
 	 * @return	A Point containing the coordinates of the goal point, if it exists
 	 * @throw	false if there is no goal point on the grid

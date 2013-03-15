@@ -192,12 +192,14 @@ double TentTrav::deltaLength() const
  */
 Tentacle::Tentacle()
 {
+	this->index_  = 0;
 	this->radius_ = 0;
 	this->velocity_ = 0;
 }
 
 Tentacle::Tentacle(const Tentacle& Tentacle):
-						points_(Tentacle.points_)
+				index_(Tentacle.index_),
+				points_(Tentacle.points_)
 {
 	this->radius_ = Tentacle.radius_;
 	this->velocity_ = Tentacle.velocity_;
@@ -205,8 +207,9 @@ Tentacle::Tentacle(const Tentacle& Tentacle):
 
 Tentacle::~Tentacle(){};
 
-Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException):
-							points_()
+Tentacle::Tentacle(double expFact, double seedRad, double min_length, double seedLength, int index, int numTent, double resolution, int xDim, int yDim, double velocity) throw (TentacleGenerationException):
+												index_(index),
+												points_()
 {
 
 	this->velocity_= velocity;
@@ -235,11 +238,11 @@ Tentacle::Tentacle(double expFact, double seedRad, double seedLength, int index,
 	if(index<halfway_index)
 	{
 		//ROS_INFO("Small Index %d, raw working length is %f",index, seedLength+2*std::sqrt((double)index/(double)halfwayIndex));
-		working_length = roundToGrid(seedLength+2*std::sqrt((double)index/(double)halfway_index), resolution);
+		working_length = roundToGrid(seedLength+min_length*std::sqrt((double)index/(double)halfway_index), resolution);
 	}
 	else{
 		//ROS_INFO("Large Index %d, raw working length is %f",index, seedLength+2*std::sqrt(((double)index-(double)halfwayIndex)/(double)halfwayIndex));
-		working_length = roundToGrid(seedLength+2*std::sqrt(((double)index-(double)halfway_index)/(double)halfway_index), resolution);
+		working_length = roundToGrid(seedLength+min_length*std::sqrt(((double)index-(double)halfway_index)/(double)halfway_index), resolution);
 	}
 
 	//Check for special case of an effectively straight line
@@ -343,6 +346,11 @@ const Tentacle::TentaclePointCloud& Tentacle::getPoints() const
 	return this->points_;
 }
 
+int Tentacle::getIndex() const
+{
+	return this->index_;
+}
+
 /**
  * Calculated via the following formula:
  * @f[ y = floor(\frac{radius \times \cosine(theta)}{scale}+rshift) @f]
@@ -384,25 +392,32 @@ SpeedSet::SpeedSet()
 }
 
 SpeedSet::SpeedSet(const SpeedSet& SpeedSet):
-							tentacles_(SpeedSet.tentacles_)
+		index_(SpeedSet.index_),
+																	tentacles_(SpeedSet.tentacles_)
 {
 	this->seed_rad_  = SpeedSet.seed_rad_;
 	this->velocity_ = SpeedSet.velocity_;
 }
 
 
-SpeedSet::SpeedSet(double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity)
+SpeedSet::SpeedSet(int index, double min_length, double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity):
+												index_(index)
 {
 	this->seed_rad_  = seedRad;
 	this->velocity_ = velocity;
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++)
 	{
-		this->tentacles_.push_back(Tentacle(expFact, seedRad, seedLength, t, numTent, resolution, xDim, yDim, velocity));
+		this->tentacles_.push_back(Tentacle(expFact, seedRad, min_length, seedLength, t, numTent, resolution, xDim, yDim, velocity));
 	}
 }
 
 SpeedSet::~SpeedSet(){};
+
+int SpeedSet::getIndex() const
+{
+	return this->index_;
+}
 
 unsigned int SpeedSet::getNumTentacle() const
 {
@@ -421,15 +436,23 @@ double SpeedSet::getSeedRad() const
 
 const Tentacle& SpeedSet::getTentacle(int index)const throw(aero_path_planning::TentacleAccessException)
 				{
-	if(index<0||index>(int)getNumTentacle()) throw new aero_path_planning::TentacleAccessException(index, 0);
-	try
+	if(index<0||index>(int)getNumTentacle())
 	{
-		return this->tentacles_.at(index);
+		aero_path_planning::TentacleAccessException e(index, 0);
+		throw e;
 	}
-	catch (std::exception& e)
+	else
 	{
-		std::string message("Something went wrong!");
-		throw new aero_path_planning::TentacleAccessException(index, 0, message, e);
+		try
+		{
+			return this->tentacles_.at(index);
+		}
+		catch (std::exception& e)
+		{
+			std::string message("Something went wrong!");
+			aero_path_planning::TentacleAccessException exception(index, 0, message, e);
+			throw exception;
+		}
 	}
 				}
 
@@ -463,8 +486,8 @@ TentacleGenerator::TentacleGenerator()
 }
 
 TentacleGenerator::TentacleGenerator(TentacleGenerator& TentacleGenerator):
-				speed_sets_(TentacleGenerator.speed_sets_),
-				velocity_keys_(TentacleGenerator.velocity_keys_)
+														speed_sets_(TentacleGenerator.speed_sets_),
+														velocity_keys_(TentacleGenerator.velocity_keys_)
 {
 	this->num_speed_set_ = TentacleGenerator.num_speed_set_;
 	this->num_tentacles_= TentacleGenerator.num_tentacles_;
@@ -472,15 +495,15 @@ TentacleGenerator::TentacleGenerator(TentacleGenerator& TentacleGenerator):
 }
 
 TentacleGenerator::TentacleGenerator(const TentacleGenerator& TentacleGenerator):
-				speed_sets_(TentacleGenerator.speed_sets_),
-				velocity_keys_(TentacleGenerator.velocity_keys_)
+														speed_sets_(TentacleGenerator.speed_sets_),
+														velocity_keys_(TentacleGenerator.velocity_keys_)
 {
 	this->num_speed_set_ = TentacleGenerator.num_speed_set_;
 	this->num_tentacles_= TentacleGenerator.num_tentacles_;
 	this->exp_fact_     = TentacleGenerator.exp_fact_;
 }
 
-TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim)
+TentacleGenerator::TentacleGenerator(double min_length, double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim)
 {
 	this->exp_fact_ 		= expFact;
 	this->num_tentacles_	= numTentacles;
@@ -497,7 +520,7 @@ TentacleGenerator::TentacleGenerator(double minSpeed, double maxSpeed, int numSp
 		l = calcL(q);
 		vel = calcSpeedSetVel(minSpeed, maxSpeed, q);
 		PRINTER("Calculated q=%f",q);
-		this->speed_sets_.push_back(SpeedSetPtr(new SpeedSet(expFact, calcSeedRad(v, l, q), l, numTentacles, resolution, xDim, yDim, vel)));
+		this->speed_sets_.push_back(SpeedSetPtr(new SpeedSet(v, min_length, expFact, calcSeedRad(v, l, q), l, numTentacles, resolution, xDim, yDim, vel)));
 		this->velocity_keys_.push_back(vel);
 	}
 	PRINTER("Speed Sets Complete!");
@@ -511,19 +534,30 @@ int TentacleGenerator::getNumSpeedSets() const
 }
 
 const Tentacle& TentacleGenerator::getTentacle(int speedSet, int index) const throw (aero_path_planning::TentacleAccessException, aero_path_planning::SpeedSetAccessException)
-				{
-	if(speedSet<0||speedSet>(int)this->speed_sets_.size()) throw new aero_path_planning::SpeedSetAccessException(speedSet);
-	if(index<0||index>(int)this->speed_sets_.at(speedSet)->getNumTentacle()) throw new aero_path_planning::TentacleAccessException(index, speedSet);
-	try
+		{
+	if(speedSet<0||speedSet>(int)this->speed_sets_.size())
 	{
-		return this->speed_sets_.at(speedSet)->getTentacle(index);
+		aero_path_planning::SpeedSetAccessException e(speedSet);
+		throw e;
 	}
-	catch(std::exception& e)
+	else if(index<0||index>(int)this->speed_sets_.at(speedSet)->getNumTentacle())
 	{
-		std::string message("Something Went Wrong!");
-		throw new aero_path_planning::TentacleAccessException(index, speedSet, message, e);
+		aero_path_planning::TentacleAccessException e(index, speedSet);
+		throw e;
 	}
-				}
+	else
+	{
+		try
+		{
+			return this->speed_sets_.at(speedSet)->getTentacle(index);
+		}
+		catch(std::exception& e)
+		{
+			std::string message("Something Went Wrong!");
+			throw new aero_path_planning::TentacleAccessException(index, speedSet, message, e);
+		}
+	}
+		}
 
 const SpeedSet& TentacleGenerator::getSpeedSet(int speedSet) const
 {

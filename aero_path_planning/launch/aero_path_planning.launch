@@ -29,6 +29,7 @@
 	<!-- declare tentacle arguments -->
 	<arg name="aero/tentacles/exp_fact"	        default="1.15"/>
 	<arg name="aero/tentacles/number"	        default="81"/>
+	<arg name=""	        default=/>
 	
 	
 	<!-- ********************PARAMETERS******************** -->
@@ -48,6 +49,7 @@
 		<param name="speed_set/max_speed"	value="$(arg speed_set/min_speed)"/>
 	
 	<!-- declare tentalce parameters -->
+		<param name=""	 value="$(arg )"/>
 		<param name="aero/tentacles/number"	 value="$(arg aero/tentacles/number)"/>
 		<param name="aero/tentacles/exp_fact"    value="$(arg aero/tentacles/exp_fact)"/>
 	

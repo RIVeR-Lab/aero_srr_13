@@ -1,5 +1,5 @@
 /**
- * @file global_planner.h
+ * @file GlobalPlanner.h
  *
  * @date   Feb 19, 2013
  * @author Adam Panzica
