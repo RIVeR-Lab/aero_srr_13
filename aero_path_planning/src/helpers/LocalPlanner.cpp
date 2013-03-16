@@ -106,13 +106,13 @@ void LocalPlanner::loadParam()
 	p_x_ori_msg<<x_ori<<"m";
 
 	//z coord of the origin of the occupancy grids
-	std::string p_z_ori(L_OCC_YORG);
+	std::string p_z_ori(L_OCC_ZORG);
 	double z_ori = 0;
 	std::stringstream p_z_ori_msg;
 	p_z_ori_msg<<z_ori<<"m";
 
 	//y coord of the origin of the occupancy grids
-	std::string p_y_ori(L_OCC_ZORG);
+	std::string p_y_ori(L_OCC_YORG);
 	double y_ori = this->y_dim_/2;
 	std::stringstream p_y_ori_msg;
 	p_y_ori_msg<<y_ori<<"m";
