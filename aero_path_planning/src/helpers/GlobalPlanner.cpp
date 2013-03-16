@@ -10,6 +10,7 @@
 
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/foreach.hpp>
+#include<pcl_ros/transforms.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/GlobalPlanner.h>
 #include<aero_path_planning/RRTCarrot.h>
@@ -23,6 +24,7 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_pa
 		state_(MANUAL),
 		path_planner_(&path_planner),
 		nh_(nh),
+		transformer_(nh),
 		p_nh_(p_nh)
 {
 	ROS_INFO("Initializing Global Planner...");
@@ -33,7 +35,7 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_pa
 	ROS_INFO("Registering Topics...");
 	this->registerTopics();
 
-	ROS_INFO("Aero Global Planner Running!");
+	ROS_INFO("Global Planner Running!");
 
 }
 
@@ -168,4 +170,33 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr message)
 	local_map.generateMessage(message_out);
 	this->local_occ_pub_.publish(message_out);
 
+}
+
+bool GlobalPlanner::lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const
+{
+	bool success = this->transformer_.canTransform(this->global_frame_, this->lidar_frame_, ros::Time::now());
+	if(success)
+	{
+		return pcl_ros::transformPointCloud(this->global_frame_, scan_cloud, result_cloud, this->transformer_);
+	}
+	else
+	{
+		return success;
+	}
+}
+
+void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_cloud, aero_path_planning::PointCloud& result_cloud) const
+{
+	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
+	pcl::fromROSMsg(scan_cloud, copy_cloud);
+
+	for(int i=0; i<(int)copy_cloud.size(); i++)
+	{
+		aero_path_planning::Point copy_point;
+		copy_point.x    = copy_cloud.at(i).x;
+		copy_point.y    = copy_cloud.at(i).y;
+		copy_point.z    = copy_cloud.at(i).z;
+		copy_point.rgba = aero_path_planning::OBSTACLE;
+		result_cloud.push_back(copy_point);
+	}
 }
