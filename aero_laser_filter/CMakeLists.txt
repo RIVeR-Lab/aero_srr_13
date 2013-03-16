@@ -32,6 +32,6 @@ find_package(Eigen REQUIRED)
 include_directories(${EIGEN_INCLUDE_DIRS})
 add_definitions(${EIGEN_DEFINITIONS})
 
-rosbuild_add_executable(myPointCloud src/myPointCloud.cpp)
+add_subdirectory(src)
 
 #target_link_libraries(example ${PROJECT_NAME})

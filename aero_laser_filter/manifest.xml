@@ -1,10 +1,10 @@
 <package>
-  <description brief="polly_laser">
+  <description brief="aero_laser_filter">
 
-     polly_laser
+    Package containg filters for processing LIDAR data for the AERO platform
 
   </description>
-  <author>WPI-RIVERLAB-POLLY</author>
+  <author>WPI-RIVERLAB</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/polly_laser</url>
