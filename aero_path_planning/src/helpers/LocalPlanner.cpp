@@ -17,9 +17,9 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																		nh_(nh),
-																		p_nh_(p_nh),
-																		occupancy_buffer_(2)
+																						nh_(nh),
+																						p_nh_(p_nh),
+																						occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -260,90 +260,106 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	typedef std::pair<int, int> TentacleData_t;
 	typedef boost::shared_ptr<TentacleData_t > TentacleDataPtr_t;
 	FitnessQueue<double,  TentacleDataPtr_t> best_tentacle_candidates;
-	SpeedSet slow_set    = this->tentacles_->getSpeedSet(1);
-	SpeedSet current_set = this->tentacles_->getSpeedSet(2);
-	SpeedSet fast_set    = this->tentacles_->getSpeedSet(3);
+	std::vector<SpeedSet> sets;
+
+	SpeedSet current_set = this->tentacles_->getSpeedSet(this->current_vel_);
+	sets.push_back(current_set);
+
+	if(current_set.getIndex()!=0)
+	{
+		SpeedSet slow_set    = this->tentacles_->getSpeedSet(current_set.getIndex()-1);
+		sets.push_back(slow_set);
+	}
+	if(current_set.getIndex()<this->tentacles_->getNumSpeedSets())
+	{
+		SpeedSet fast_set    = this->tentacles_->getSpeedSet(current_set.getIndex()+1);
+		sets.push_back(fast_set);
+	}
 	bool   has_goal      = true;
 	bool   hit_goal      = false;
-#pragma omp parallel for
-	for(int i=0; i<(int)current_set.getNumTentacle(); i++)
+	for(int s=0; s<(int)sets.size(); s++)
 	{
-		//If we already hit the goal, short circuit since we can't break from OpenMP loops
-		if(!hit_goal)
+		SpeedSet cur_set(sets.at(s));
+#pragma omp parallel for
+		for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 		{
-			double length_modifier = 0;
-			bool traversing = true;
-			Tentacle working_tentacle = current_set.getTentacle(i);
-			Tentacle::TentacleTraverser traverser(working_tentacle);
-			length_modifier = 0;
-
-			//As long as the tentacle has points still, and we're still traversing, continue traversing
-			while(traverser.hasNext()&&traversing)
+			//If we already hit the goal, short circuit since we can't break from OpenMP loops
+			if(!hit_goal)
 			{
-				const aero_path_planning::Point& point = traverser.next();
-				try
+				double length_modifier = 0;
+				bool traversing = true;
+				Tentacle working_tentacle = cur_set.getTentacle(i);
+				Tentacle::TentacleTraverser traverser(working_tentacle);
+				length_modifier = 0;
+
+				//As long as the tentacle has points still, and we're still traversing, continue traversing
+				while(traverser.hasNext()&&traversing)
 				{
-					switch(search_grid.getPointTrait(point))
+					const aero_path_planning::Point& point = traverser.next();
+					try
 					{
-					case aero_path_planning::OBSTACLE:
-						//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
-						//PRINT_POINT("Hit Point", point);
-						traversing = false;
-						break;
-					case aero_path_planning::GOAL:
-						//ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
-						traversing = false;
-						hit_goal   = true;
-						break;
-					case aero_path_planning::FREE_HIGH_COST:
-						length_modifier -= traverser.deltaLength()*this->diff_weight_;
-						break;
-					case aero_path_planning::TRAVERSED:
-						length_modifier -= traverser.deltaLength()*this->trav_weight_;
-						break;
-					case aero_path_planning::UNKNOWN:
-						length_modifier += traverser.deltaLength()*this->unkn_weight_;
-						break;
-					default:
-						break;
+						switch(search_grid.getPointTrait(point))
+						{
+						case aero_path_planning::OBSTACLE:
+							//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
+							//PRINT_POINT("Hit Point", point);
+							traversing = false;
+							break;
+						case aero_path_planning::GOAL:
+							//ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
+							traversing = false;
+							hit_goal   = true;
+							break;
+						case aero_path_planning::FREE_HIGH_COST:
+							length_modifier -= traverser.deltaLength()*this->diff_weight_;
+							break;
+						case aero_path_planning::TRAVERSED:
+							length_modifier -= traverser.deltaLength()*this->trav_weight_;
+							break;
+						case aero_path_planning::UNKNOWN:
+							length_modifier += traverser.deltaLength()*this->unkn_weight_;
+							break;
+						default:
+							break;
+						}
+					}catch(OccupancyGridAccessException& e)
+					{
+						ROS_ERROR("%s", e.what());
 					}
-				}catch(OccupancyGridAccessException& e)
-				{
-					ROS_ERROR("%s", e.what());
 				}
-			}
-			//ROS_INFO_STREAM("I'm Checking The Distance To Goal");
-			//Modify length based on closeness to goal, if there is one
-			if(has_goal)
-			{
-				//ROS_INFO_STREAM("There is a goal...");
-				try
+				//ROS_INFO_STREAM("I'm Checking The Distance To Goal");
+				//Modify length based on closeness to goal, if there is one
+				if(has_goal)
 				{
-					//Will throw false if there was no goal point
-					const aero_path_planning::Point goal_point = search_grid.getGoalPoint();
-					const aero_path_planning::Point end_point = traverser.next();
-					double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
-					//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
-					length_modifier-= dist_to_goal*this->goal_weight_;
+					//ROS_INFO_STREAM("There is a goal...");
+					try
+					{
+						//Will throw false if there was no goal point
+						const aero_path_planning::Point goal_point = search_grid.getGoalPoint();
+						const aero_path_planning::Point end_point = traverser.next();
+						double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
+						//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
+						length_modifier-= dist_to_goal*this->goal_weight_;
+					}
+					catch(bool& e)
+					{
+						//ROS_INFO("There is not a goal");
+						//There was no goal, set the flag
+						has_goal = e;
+					}
 				}
-				catch(bool& e)
-				{
-					//ROS_INFO("There is not a goal");
-					//There was no goal, set the flag
-					has_goal = e;
-				}
-			}
 
 
-			double tent_fitness = traverser.lengthTraversed()+length_modifier;
-			//ROS_INFO("Searched Tentacle %d in set %d with fitness %f",current_set.getIndex(), working_tentacle.getIndex(), tent_fitness);
-			TentacleDataPtr_t tent_details(new TentacleData_t(current_set.getIndex(), working_tentacle.getIndex()));
-			//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
-			if(hit_goal)
-			{
-				tent_fitness = std::numeric_limits<double>::max();
+				double tent_fitness = traverser.lengthTraversed()+length_modifier;
+				//ROS_INFO("Searched Tentacle %d in set %d with fitness %f",current_set.getIndex(), working_tentacle.getIndex(), tent_fitness);
+				TentacleDataPtr_t tent_details(new TentacleData_t(cur_set.getIndex(), working_tentacle.getIndex()));
+				//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
+				if(hit_goal)
+				{
+					tent_fitness = std::numeric_limits<double>::max();
+				}
+				best_tentacle_candidates.push(tent_fitness, tent_details);
 			}
-			best_tentacle_candidates.push(tent_fitness, tent_details);
 		}
 	}
 
