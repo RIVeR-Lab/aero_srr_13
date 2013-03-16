@@ -257,7 +257,9 @@ LocalPlanner::~LocalPlanner(){};
 
 bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx)
 {
-	FitnessQueue<double, boost::shared_ptr<std::pair<int, int> > > best_tentacle_candidates;
+	typedef std::pair<int, int> TentacleData_t;
+	typedef boost::shared_ptr<TentacleData_t > TentacleDataPtr_t;
+	FitnessQueue<double,  TentacleDataPtr_t> best_tentacle_candidates;
 	SpeedSet slow_set    = this->tentacles_->getSpeedSet(1);
 	SpeedSet current_set = this->tentacles_->getSpeedSet(2);
 	SpeedSet fast_set    = this->tentacles_->getSpeedSet(3);
@@ -335,7 +337,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 
 			double tent_fitness = traverser.lengthTraversed()+length_modifier;
 			//ROS_INFO("Searched Tentacle %d in set %d with fitness %f",current_set.getIndex(), working_tentacle.getIndex(), tent_fitness);
-			boost::shared_ptr< std::pair<int, int> > tent_details(new std::pair<int, int>(current_set.getIndex(), working_tentacle.getIndex()));
+			TentacleDataPtr_t tent_details(new TentacleData_t(current_set.getIndex(), working_tentacle.getIndex()));
 			//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
 			if(hit_goal)
 			{
