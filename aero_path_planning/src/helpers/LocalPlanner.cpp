@@ -72,124 +72,111 @@ void LocalPlanner::loadParam()
 	//Minimum update rate expected of occupancy grid
 	std::string p_up_rate(L_OCC_UPDTRT);
 	double update_rate = 0.2;
-	std::string up_rate_msg("");
-	up_rate_msg+= boost::lexical_cast<double>(update_rate);
-	up_rate_msg+="s";
+	std::stringstream up_rate_msg;
+	up_rate_msg<<update_rate<<"s";
 
 	//x dimension of occupancy grid
 	std::string p_x_dim(L_OCC_XDIM);
 	this->x_dim_ = 200;
-	std::string x_dim_msg("");
-	x_dim_msg+= boost::lexical_cast<double>(this->x_dim_);
-	x_dim_msg+="m";
+	std::stringstream x_dim_msg;
+	x_dim_msg<<this->x_dim_<<"m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim(L_OCC_YDIM);
 	this->y_dim_ = 200;
-	std::string y_dim_msg("");
-	y_dim_msg+= boost::lexical_cast<double>(this->y_dim_);
-	y_dim_msg+="m";
+	std::stringstream y_dim_msg;
+	y_dim_msg<<this->y_dim_<<"m";
 
 	//z dimension of occupancy grid
 	std::string p_z_dim(L_OCC_ZDIM);
 	this->z_dim_ = 0;
-	std::string z_dim_msg("");
-	z_dim_msg+= boost::lexical_cast<double>(this->z_dim_);
-	z_dim_msg+="m";
+	std::stringstream z_dim_msg;
+	z_dim_msg<<this->z_dim_<<"m";
 
 	//resolution occupancy grid
 	std::string p_res(L_OCC_RES);
 	this->res_ = .01;
-	std::string p_res_msg("");
-	p_res_msg+= boost::lexical_cast<double>(this->res_);
-	p_res_msg+="m";
+	std::stringstream p_res_msg;
+	p_res_msg<<this->res_<<"m";
 
 	//x coord of the origin of the occupancy grids
 	std::string p_x_ori(L_OCC_XORG);
 	double x_ori = 0;
-	std::string p_x_ori_msg("");
-	p_x_ori_msg+= boost::lexical_cast<double>(x_ori);
-	p_x_ori_msg+="m";
+	std::stringstream p_x_ori_msg;
+	p_x_ori_msg<<x_ori<<"m";
 
 	//z coord of the origin of the occupancy grids
 	std::string p_z_ori(L_OCC_YORG);
 	double z_ori = 0;
-	std::string p_z_ori_msg("");
-	p_z_ori_msg+= boost::lexical_cast<double>(z_ori);
-	p_z_ori_msg+="m";
+	std::stringstream p_z_ori_msg;
+	p_z_ori_msg<<z_ori<<"m";
 
 	//y coord of the origin of the occupancy grids
 	std::string p_y_ori(L_OCC_ZORG);
 	double y_ori = this->y_dim_/2;
-	std::string p_y_ori_msg("");
-	p_y_ori_msg+= boost::lexical_cast<double>(y_ori);
-	p_y_ori_msg+="m";
+	std::stringstream p_y_ori_msg;
+	p_y_ori_msg<<y_ori<<"m";
 
 
 	//Minimum length of tentacles
 	std::string p_min_tent(T_MINLNTH);
 	double min_tent = 10;
-	std::string p_min_tent_msg("");
-	p_min_tent_msg+= boost::lexical_cast<double>(min_tent);
-	p_min_tent_msg+="m";
+	std::stringstream p_min_tent_msg;
+	p_min_tent_msg<<min_tent<<"m";
 
 	//number of tentacles per speed set
 	std::string p_num_tent(T_NUMBER);
 	int num_tent = 81;
-	std::string p_num_tent_msg("");
-	p_num_tent_msg+= boost::lexical_cast<double>(num_tent);
-	p_num_tent_msg+=" Tentacles";
+	std::stringstream p_num_tent_msg;
+	p_num_tent_msg<<num_tent<<" Tentacles";
 
 	//Exponential Factor to use for generating seed radii
 	std::string p_exp_fact(T_EXPFACT);
 	double exp_fact = 1.15;
-	std::string p_exp_fact_msg("");
-	p_exp_fact_msg+= boost::lexical_cast<double>(exp_fact);
+	std::stringstream p_exp_fact_msg;
+	p_exp_fact_msg<<exp_fact;
 
 	//number of tentacles per speed set
 	std::string p_num_speed_set(S_NUMBER);
 	int num_speed_set = 15;
-	std::string p_numSpeedSet_msg("");
-	p_numSpeedSet_msg+= boost::lexical_cast<double>(num_speed_set);
-	p_numSpeedSet_msg+= " Speed Sets";
+	std::stringstream p_numSpeedSet_msg;
+	p_numSpeedSet_msg<<num_speed_set<<" Speed Sets";
 
 	//Max Speed
 	std::string p_max_speed(S_MAX_SPEED);
 	double max_speed = 1;
-	std::string p_max_speed_msg("");
-	p_max_speed_msg+= boost::lexical_cast<double>(max_speed);
-	p_max_speed_msg+="m/s";
+	std::stringstream p_max_speed_msg;
+	p_max_speed_msg<<max_speed<<"m/s";
 
 	//Min Speed
 	std::string p_min_speed(S_MIN_SPEED);
 	double min_speed = 1;
-	std::string p_min_speed_msg("");
-	p_min_speed_msg+= boost::lexical_cast<double>(min_speed);
-	p_min_speed_msg+="m/s";
+	std::stringstream p_min_speed_msg;
+	p_min_speed_msg<<min_speed<<"m/s";
 
 	//Goal Weight
 	std::string p_goal_weight(GOAL_WEIGHT);
 	double goal_weight = 2;
-	std::string p_goal_weight_msg("");
-	p_goal_weight_msg+= boost::lexical_cast<double>(goal_weight);
+	std::stringstream p_goal_weight_msg;
+	p_goal_weight_msg<<goal_weight;
 
 	//Traversed Weight
 	std::string p_trav_weight(TRAV_WEIGHT);
 	double trav_weight = 0.1;
-	std::string p_trav_weight_msg("");
-	p_trav_weight_msg+= boost::lexical_cast<double>(trav_weight);
+	std::stringstream p_trav_weight_msg;
+	p_trav_weight_msg<<trav_weight;
 
 	//Difficulty Weight
 	std::string p_diff_weight(DIFF_WEIGHT);
 	double diff_weight = 0.1;
-	std::string p_diff_weight_msg("");
-	p_diff_weight_msg+= boost::lexical_cast<double>(diff_weight);
+	std::stringstream p_diff_weight_msg;
+	p_diff_weight_msg<<diff_weight;
 
 	//Unkown Terrain Weight
 	std::string p_unkn_weight(UNKN_WEIGHT);
 	double unkn_weight = 0.1;
-	std::string p_unkn_weight_msg("");
-	p_unkn_weight_msg+= boost::lexical_cast<double>(unkn_weight);
+	std::stringstream p_unkn_weight_msg;
+	p_unkn_weight_msg<<unkn_weight;
 
 	//Get Private Parameters
 	if(!p_nh_.getParam(p_platform, this->platform_))
@@ -212,28 +199,28 @@ void LocalPlanner::loadParam()
 		}
 		ROS_INFO_STREAM("Running on Platform: "<<platform_message);
 	}
-	if(!p_nh_.getParam(this->v_action_topic_,  this->v_action_topic_))	PARAM_WARN(this->v_action_topic_,  this->v_action_topic_);
-	if(!p_nh_.getParam(this->pc_topic_,	       this->pc_topic_))	    PARAM_WARN(this->pc_topic_,	       this->pc_topic_);
+	if(!p_nh_.getParam(this->v_action_topic_,  this->v_action_topic_))	PARAM_WARN(this->v_action_topic_, this->v_action_topic_);
+	if(!p_nh_.getParam(this->pc_topic_,	       this->pc_topic_))	PARAM_WARN(this->pc_topic_,	     this->pc_topic_);
 
-	if(!p_nh_.getParam(p_goal_weight,	this->goal_weight_))    PARAM_WARN(p_goal_weight, p_goal_weight_msg);
-	if(!p_nh_.getParam(p_trav_weight,	this->trav_weight_))    PARAM_WARN(p_trav_weight, p_trav_weight_msg);
-	if(!p_nh_.getParam(p_diff_weight,	this->diff_weight_))    PARAM_WARN(p_diff_weight, p_diff_weight_msg);
-	if(!p_nh_.getParam(p_unkn_weight,	this->unkn_weight_))    PARAM_WARN(p_unkn_weight, p_unkn_weight_msg);
+	if(!p_nh_.getParam(p_goal_weight,	this->goal_weight_))    PARAM_WARN(p_goal_weight, p_goal_weight_msg.str());
+	if(!p_nh_.getParam(p_trav_weight,	this->trav_weight_))    PARAM_WARN(p_trav_weight, p_trav_weight_msg.str());
+	if(!p_nh_.getParam(p_diff_weight,	this->diff_weight_))    PARAM_WARN(p_diff_weight, p_diff_weight_msg.str());
+	if(!p_nh_.getParam(p_unkn_weight,	this->unkn_weight_))    PARAM_WARN(p_unkn_weight, p_unkn_weight_msg.str());
 	//Get Public Parameters
-	if(!nh_.getParam(p_up_rate,	update_rate))	     PARAM_WARN(p_up_rate,	up_rate_msg);
-	if(!nh_.getParam(p_x_dim,	this->x_dim_))		 PARAM_WARN(p_x_dim,	x_dim_msg);
-	if(!nh_.getParam(p_y_dim,	this->y_dim_))		 PARAM_WARN(p_y_dim,	y_dim_msg);
-	if(!nh_.getParam(p_z_dim,	this->z_dim_))		 PARAM_WARN(p_z_dim,	z_dim_msg);
-	if(!nh_.getParam(p_x_ori,	x_ori))			     PARAM_WARN(p_x_ori,	p_x_ori_msg);
-	if(!nh_.getParam(p_y_ori,	y_ori))			     PARAM_WARN(p_y_ori,	p_y_ori_msg);
-	if(!nh_.getParam(p_z_ori,	z_ori))			     PARAM_WARN(p_z_ori,	p_z_ori_msg);
-	if(!nh_.getParam(p_res,		this->res_))		 PARAM_WARN(p_res,		p_res_msg);
-	if(!nh_.getParam(p_min_tent,	min_tent))		 PARAM_WARN(p_min_tent,	p_min_tent_msg);
-	if(!nh_.getParam(p_num_tent,	num_tent))		 PARAM_WARN(p_num_tent,	p_num_tent_msg);
-	if(!nh_.getParam(p_exp_fact,	exp_fact))		 PARAM_WARN(p_exp_fact,	p_exp_fact_msg);
-	if(!nh_.getParam(p_num_speed_set, num_speed_set))PARAM_WARN(p_num_speed_set,	p_numSpeedSet_msg);
-	if(!nh_.getParam(p_max_speed,	max_speed))		 PARAM_WARN(p_max_speed,	    p_max_speed_msg);
-	if(!nh_.getParam(p_min_speed,	min_speed))		 PARAM_WARN(p_min_speed,	    p_min_speed_msg);
+	if(!nh_.getParam(p_up_rate,	update_rate))       PARAM_WARN(p_up_rate,	up_rate_msg.str());
+	if(!nh_.getParam(p_x_dim,	this->x_dim_))		 PARAM_WARN(p_x_dim,	x_dim_msg.str());
+	if(!nh_.getParam(p_y_dim,	this->y_dim_))		 PARAM_WARN(p_y_dim,	y_dim_msg.str());
+	if(!nh_.getParam(p_z_dim,	this->z_dim_))		 PARAM_WARN(p_z_dim,	z_dim_msg.str());
+	if(!nh_.getParam(p_x_ori,	x_ori))             PARAM_WARN(p_x_ori,	p_x_ori_msg.str());
+	if(!nh_.getParam(p_y_ori,	y_ori))             PARAM_WARN(p_y_ori,	p_y_ori_msg.str());
+	if(!nh_.getParam(p_z_ori,	z_ori))			 PARAM_WARN(p_z_ori,	p_z_ori_msg.str());
+	if(!nh_.getParam(p_res,		this->res_))		 PARAM_WARN(p_res,		p_res_msg.str());
+	if(!nh_.getParam(p_min_tent,	min_tent))		 PARAM_WARN(p_min_tent,	p_min_tent_msg.str());
+	if(!nh_.getParam(p_num_tent,	num_tent))		 PARAM_WARN(p_num_tent,	p_num_tent_msg.str());
+	if(!nh_.getParam(p_exp_fact,	exp_fact))		 PARAM_WARN(p_exp_fact,	p_exp_fact_msg.str());
+	if(!nh_.getParam(p_num_speed_set, num_speed_set))PARAM_WARN(p_num_speed_set,	p_numSpeedSet_msg.str());
+	if(!nh_.getParam(p_max_speed,	max_speed))    PARAM_WARN(p_max_speed,	     p_max_speed_msg.str());
+	if(!nh_.getParam(p_min_speed,	min_speed))    PARAM_WARN(p_min_speed,	     p_min_speed_msg.str());
 	this->origin_.x = x_ori;
 	this->origin_.y = y_ori;
 	this->origin_.z = z_ori;
