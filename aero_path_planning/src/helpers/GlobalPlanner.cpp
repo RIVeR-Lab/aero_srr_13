@@ -21,11 +21,11 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-		state_(MANUAL),
-		path_planner_(&path_planner),
-		nh_(nh),
-		transformer_(nh),
-		p_nh_(p_nh)
+				state_(MANUAL),
+				path_planner_(&path_planner),
+				nh_(nh),
+				transformer_(nh),
+				p_nh_(p_nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -50,72 +50,110 @@ void GlobalPlanner::loadOccupancyParam()
 	//*****************Configuration Parameters*******************//
 	//Minimum update rate expected of occupancy grid
 	std::string p_up_rate(L_OCC_UPDTRT);
-	double update_rate = 0.2;
-	std::string up_rate_msg("");
-	up_rate_msg+= boost::lexical_cast<double>(update_rate);
-	up_rate_msg+="s";
+	this->local_update_rate_ = 1.0/40.0;
+	std::stringstream up_rate_msg;
+	up_rate_msg<<this->local_update_rate_<<"s";
 
 	//x dimension of occupancy grid
 	std::string p_x_dim(L_OCC_XDIM);
-	double x_dim = 200;
-	std::string x_dim_msg("");
-	x_dim_msg+= boost::lexical_cast<double>(x_dim);
-	x_dim_msg+="m";
+	this->local_x_size_ = 200;
+	std::stringstream x_dim_msg;
+	x_dim_msg<<this->local_x_size_<<"m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim(L_OCC_YDIM);
-	double y_dim = 200;
-	std::string y_dim_msg("");
-	y_dim_msg+= boost::lexical_cast<double>(y_dim);
-	y_dim_msg+="m";
+	this->local_y_size_ = 200;
+	std::stringstream y_dim_msg;
+	y_dim_msg<<this->local_y_size_<<"m";
 
 	//z dimension of occupancy grid
 	std::string p_z_dim(L_OCC_ZDIM);
-	double z_dim = 0;
-	std::string z_dim_msg("");
-	z_dim_msg+= boost::lexical_cast<double>(z_dim);
-	z_dim_msg+="m";
+	this->local_z_size_ = 0;
+	std::stringstream z_dim_msg;
+	z_dim_msg<<this->local_z_size_<<"m";
 
 	//resolution occupancy grid
 	std::string p_res(L_OCC_RES);
-	double res = .01;
-	std::string p_res_msg("");
-	p_res_msg+= boost::lexical_cast<double>(res);
-	p_res_msg+="m";
+	this->local_res_ = .01;
+	std::stringstream p_res_msg;
+	p_res_msg<<this->local_res_<<"m";
 
 	//x coord of the origin of the occupancy grids
 	std::string p_x_ori(L_OCC_XORG);
-	double x_ori = 0;
-	std::string p_x_ori_msg("");
-	p_x_ori_msg+= boost::lexical_cast<double>(x_ori);
-	p_x_ori_msg+="m";
-
-	//z coord of the origin of the occupancy grids
-	std::string p_z_ori(L_OCC_YORG);
-	double z_ori = 0;
-	std::string p_z_ori_msg("");
-	p_z_ori_msg+= boost::lexical_cast<double>(z_ori);
-	p_z_ori_msg+="m";
+	this->local_x_ori_ = 0;
+	std::stringstream p_x_ori_msg;
+	p_x_ori_msg<<this->local_x_ori_<<"m";
 
 	//y coord of the origin of the occupancy grids
-	std::string p_y_ori(L_OCC_ZORG);
-	double y_ori = y_dim/2;
-	std::string p_y_ori_msg("");
-	p_y_ori_msg+= boost::lexical_cast<double>(y_ori);
-	p_y_ori_msg+="m";
+	std::string p_y_ori(L_OCC_YORG);
+	this->local_y_ori_ = this->local_y_size_/2;
+	std::stringstream p_y_ori_msg;
+	p_y_ori_msg<<this->local_y_ori_<<"m";
+
+	//z coord of the origin of the occupancy grids
+	std::string p_z_ori(L_OCC_ZORG);
+	this->local_z_ori_ = 0;
+	std::stringstream p_z_ori_msg;
+	p_z_ori_msg<<this->local_z_ori_<<"m";
+
+	//x dimension of global occupancy grid
+	std::string pg_x_dim(G_OCC_XDIM);
+	this->global_x_size_ = 5000;
+	std::stringstream gx_dim_msg;
+	gx_dim_msg<<this->global_x_size_<<"m";
+
+	//y dimension of global occupancy grid
+	std::string pg_y_dim(G_OCC_YDIM);
+	this->global_y_size_ = 5000;
+	std::stringstream gy_dim_msg;
+	gy_dim_msg<<this->global_y_size_<<"m";
+
+	//z dimension of global occupancy grid
+	std::string pg_z_dim(G_OCC_ZDIM);
+	this->global_z_size_ = 0;
+	std::stringstream gz_dim_msg;
+	gz_dim_msg<<this->global_z_size_<<"m";
+
+	//resolution global occupancy grid
+	std::string pg_res(G_OCC_RES);
+	this->global_res_ = .01;
+	std::stringstream pg_res_msg;
+	pg_res_msg<<this->global_res_<<"m";
+
+	//x coord of the global origin of the occupancy grids
+	std::string pg_x_ori(G_OCC_XORG);
+	this->global_x_ori_ = 0;
+	std::stringstream pg_x_ori_msg;
+	pg_x_ori_msg<<this->global_x_ori_<<"m";
+
+	//y coord of the global origin of the occupancy grids
+	std::string pg_y_ori(G_OCC_YORG);
+	this->global_y_ori_ = 0;
+	std::stringstream pg_y_ori_msg;
+	pg_y_ori_msg<<this->global_y_ori_<<"m";
+
+	//z coord of the global origin of the occupancy grids
+	std::string pg_z_ori(G_OCC_ZORG);
+	this->global_z_ori_ = 0;
+	std::stringstream pg_z_ori_msg;
+	pg_z_ori_msg<<this->global_z_ori_<<"m";
 
 	//Get Public Parameters
-	if(!this->nh_.getParam(p_up_rate,	update_rate))	PARAM_WARN(p_up_rate,	up_rate_msg);
-	if(!this->nh_.getParam(p_x_dim,	x_dim))				PARAM_WARN(p_x_dim,		x_dim_msg);
-	if(!this->nh_.getParam(p_y_dim,	y_dim))				PARAM_WARN(p_y_dim,		y_dim_msg);
-	if(!this->nh_.getParam(p_z_dim,	z_dim))				PARAM_WARN(p_z_dim,		z_dim_msg);
-	if(!this->nh_.getParam(p_x_ori,	x_ori))				PARAM_WARN(p_x_ori,		p_x_ori_msg);
-	if(!this->nh_.getParam(p_y_ori,	y_ori))				PARAM_WARN(p_y_ori,		p_y_ori_msg);
-	if(!this->nh_.getParam(p_z_ori,	z_ori))				PARAM_WARN(p_z_ori,		p_z_ori_msg);
-	if(!this->nh_.getParam(p_res,	res))				PARAM_WARN(p_res,		p_res_msg);
-
-	this->local_x_size_ = x_dim;
-	this->local_y_size_ = y_dim;
+	if(!this->nh_.getParam(p_up_rate,	this->local_update_rate_))	PARAM_WARN(p_up_rate,	up_rate_msg.str());
+	if(!this->nh_.getParam(p_x_dim,	 this->local_x_size_))			PARAM_WARN(p_x_dim,		x_dim_msg.str());
+	if(!this->nh_.getParam(p_y_dim,	 this->local_y_size_))			PARAM_WARN(p_y_dim,		y_dim_msg.str());
+	if(!this->nh_.getParam(p_z_dim,	 this->local_z_size_))			PARAM_WARN(p_z_dim,		z_dim_msg.str());
+	if(!this->nh_.getParam(p_x_ori,	 this->local_x_ori_))			PARAM_WARN(p_x_ori,		p_x_ori_msg.str());
+	if(!this->nh_.getParam(p_y_ori,	 this->local_y_ori_))			PARAM_WARN(p_y_ori,		p_y_ori_msg.str());
+	if(!this->nh_.getParam(p_z_ori,	 this->local_z_ori_))			PARAM_WARN(p_z_ori,		p_z_ori_msg.str());
+	if(!this->nh_.getParam(p_res,	 this->local_res_))				PARAM_WARN(p_res,		p_res_msg.str());
+	if(!this->nh_.getParam(pg_x_dim, this->global_x_size_))			PARAM_WARN(p_x_dim,		x_dim_msg.str());
+	if(!this->nh_.getParam(pg_y_dim, this->global_y_size_))			PARAM_WARN(p_y_dim,		y_dim_msg.str());
+	if(!this->nh_.getParam(pg_z_dim, this->global_z_size_))			PARAM_WARN(p_z_dim,		z_dim_msg.str());
+	if(!this->nh_.getParam(pg_x_ori, this->global_x_ori_))			PARAM_WARN(p_x_ori,		p_x_ori_msg.str());
+	if(!this->nh_.getParam(pg_y_ori, this->global_y_ori_))			PARAM_WARN(p_y_ori,		p_y_ori_msg.str());
+	if(!this->nh_.getParam(pg_z_ori, this->global_z_ori_))			PARAM_WARN(p_z_ori,		p_z_ori_msg.str());
+	if(!this->nh_.getParam(pg_res,	 this->global_res_))			PARAM_WARN(p_res,		p_res_msg.str());
 }
 
 void GlobalPlanner::registerTopics()
@@ -126,18 +164,25 @@ void GlobalPlanner::registerTopics()
 	std::string command_topic("/global_planning/commands");
 
 
-	this->laser_topic_ = "/laser";
-
+	this->laser_topic_           = "/laser";
+	this->local_occupancy_topic_ = local_planner_topic;
+	this->odom_topic_            = odometry_topic;
 
 	//Get Private Parameters
 	if(!this->p_nh_.getParam(local_planner_topic,this->local_occupancy_topic_))	PARAM_WARN(local_planner_topic,	local_planner_topic);
-	if(!this->p_nh_.getParam(odometry_topic,	odometry_topic))		        PARAM_WARN(odometry_topic,		odometry_topic);
+	if(!this->p_nh_.getParam(odometry_topic,	 this->odom_topic_))		    PARAM_WARN(odometry_topic,		odometry_topic);
 
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->laser_topic_, 2, &GlobalPlanner::laserCB, this);
+	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
 }
 
-void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr message)
+void GlobalPlanner::registerTimers()
+{
+	this->chunck_timer_ = this->nh_.createTimer(this->local_update_rate_, &GlobalPlanner::chunckCB, this);
+}
+
+void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
 	//ROS_INFO("Got a new Laser Scan!");
 	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
@@ -199,4 +244,14 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 		copy_point.rgba = aero_path_planning::OBSTACLE;
 		result_cloud.push_back(copy_point);
 	}
+}
+
+void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
+{
+	this->last_odom_ = *message;
+}
+
+void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
+{
+
 }

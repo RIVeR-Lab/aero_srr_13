@@ -43,12 +43,17 @@ public:
 private:
 	void loadOccupancyParam();
 	void registerTopics();
+	void registerTimers();
 	void buildGlobalMap();
 
 	void planCB(const ros::TimerEvent& event);
 	void setManual();
 
-	void laserCB(const sensor_msgs::PointCloud2ConstPtr);
+	void laserCB(const sensor_msgs::PointCloud2ConstPtr& message);
+
+	void odomCB(const nav_msgs::OdometryConstPtr& message);
+
+	void chunckCB(const ros::TimerEvent& event);
 
 	/**
 	 * @author Adam Panzica
@@ -71,7 +76,7 @@ private:
 
 	std::string laser_topic_;
 	std::string local_occupancy_topic_;
-	std::string combined_odom_topic_;
+	std::string odom_topic_;
 
 	std::string global_frame_;
 	std::string local_frame_;
@@ -79,10 +84,25 @@ private:
 
 	int         local_x_size_;
 	int         local_y_size_;
+	int         local_z_size_;
+	int         local_x_ori_;
+	int         local_y_ori_;
+	int         local_z_ori_;
+	double      local_res_;
+	double      local_update_rate_;
 	int         global_x_size_;
 	int         global_y_size_;
+	int         global_z_size_;
+	int         global_x_ori_;
+	int         global_y_ori_;
+	int         global_z_ori_;
+	double      global_res_;
+
+	nav_msgs::Odometry    last_odom_;
 
 	aero_path_planning::CarrotPathFinder* path_planner_;
+	aero_path_planning::OccupancyGridPtr  global_map_;
+	aero_path_planning::PointCloud        carrot_path_;
 
 	ros::NodeHandle       nh_;
 	tf::TransformListener transformer_;
@@ -90,6 +110,8 @@ private:
 	ros::Subscriber       joy_sub_;
 	ros::Publisher        local_occ_pub_;
 	ros::Subscriber       laser_sub_;
+	ros::Subscriber       odom_sub_;
+	ros::Timer            chunck_timer_;
 };
 
 }; /* END aero_path_planning */
