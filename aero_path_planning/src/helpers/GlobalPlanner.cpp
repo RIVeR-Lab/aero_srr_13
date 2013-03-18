@@ -22,20 +22,19 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-								state_(MANUAL),
-								path_planner_(&path_planner),
-								path_threshold_(1.0),
-								nh_(nh),
-								p_nh_(p_nh),
-								transformer_(nh)
+										state_(MANUAL),
+										path_planner_(&path_planner),
+										path_threshold_(1.0),
+										nh_(nh),
+										p_nh_(p_nh),
+										transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
-
-	ROS_INFO("Loading Occupancy Grid Parameters...");
 	this->loadOccupancyParam();
-	ROS_INFO("Registering Topics...");
 	this->registerTopics();
+	this->registerTimers();
+	this->buildGlobalMap();
 
 	ROS_INFO("Global Planner Running!");
 
@@ -48,6 +47,7 @@ GlobalPlanner::~GlobalPlanner()
 
 void GlobalPlanner::loadOccupancyParam()
 {
+	ROS_INFO_STREAM("Loading Global Configuration Params...");
 	//Configuration Parameters
 	//*****************Configuration Parameters*******************//
 	//Update rate to generate local occupancy grid
@@ -100,7 +100,7 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//Update rate to generate local occupancy grid
 	std::string pg_up_rate(G_OCC_UPDTRT);
-	this->local_update_rate_ = 30.0;
+	this->global_update_rate_ = 30.0;
 	std::stringstream gup_rate_msg;
 	gup_rate_msg<<this->global_update_rate_<<"s";
 
@@ -156,17 +156,18 @@ void GlobalPlanner::loadOccupancyParam()
 	if(!this->nh_.getParam(p_y_ori,	 this->local_y_ori_))			PARAM_WARN(p_y_ori,		p_y_ori_msg.str());
 	if(!this->nh_.getParam(p_z_ori,	 this->local_z_ori_))			PARAM_WARN(p_z_ori,		p_z_ori_msg.str());
 	if(!this->nh_.getParam(p_res,	 this->local_res_))				PARAM_WARN(p_res,		p_res_msg.str());
-	if(!this->nh_.getParam(pg_x_dim, this->global_x_size_))			PARAM_WARN(p_x_dim,		x_dim_msg.str());
-	if(!this->nh_.getParam(pg_y_dim, this->global_y_size_))			PARAM_WARN(p_y_dim,		y_dim_msg.str());
-	if(!this->nh_.getParam(pg_z_dim, this->global_z_size_))			PARAM_WARN(p_z_dim,		z_dim_msg.str());
-	if(!this->nh_.getParam(pg_x_ori, this->global_x_ori_))			PARAM_WARN(p_x_ori,		p_x_ori_msg.str());
-	if(!this->nh_.getParam(pg_y_ori, this->global_y_ori_))			PARAM_WARN(p_y_ori,		p_y_ori_msg.str());
-	if(!this->nh_.getParam(pg_z_ori, this->global_z_ori_))			PARAM_WARN(p_z_ori,		p_z_ori_msg.str());
-	if(!this->nh_.getParam(pg_res,	 this->global_res_))			PARAM_WARN(p_res,		p_res_msg.str());
+	if(!this->nh_.getParam(pg_x_dim, this->global_x_size_))			PARAM_WARN(pg_x_dim,	gx_dim_msg.str());
+	if(!this->nh_.getParam(pg_y_dim, this->global_y_size_))			PARAM_WARN(pg_y_dim,	gy_dim_msg.str());
+	if(!this->nh_.getParam(pg_z_dim, this->global_z_size_))			PARAM_WARN(pg_z_dim,	gz_dim_msg.str());
+	if(!this->nh_.getParam(pg_x_ori, this->global_x_ori_))			PARAM_WARN(pg_x_ori,	pg_x_ori_msg.str());
+	if(!this->nh_.getParam(pg_y_ori, this->global_y_ori_))			PARAM_WARN(pg_y_ori,	pg_y_ori_msg.str());
+	if(!this->nh_.getParam(pg_z_ori, this->global_z_ori_))			PARAM_WARN(pg_z_ori,    pg_z_ori_msg.str());
+	if(!this->nh_.getParam(pg_res,	 this->global_res_))			PARAM_WARN(pg_res,		pg_res_msg.str());
 }
 
 void GlobalPlanner::registerTopics()
 {
+	ROS_INFO_STREAM("Registering Global Topics...");
 	//Comunication Parameters
 	std::string local_planner_topic(OCCUPANCY_TOPIC);
 	std::string odometry_topic(ODOMETRY_TOPIC);
@@ -188,8 +189,20 @@ void GlobalPlanner::registerTopics()
 
 void GlobalPlanner::registerTimers()
 {
-	this->chunck_timer_ = this->nh_.createTimer(this->local_update_rate_,  &GlobalPlanner::chunckCB, this);
-	this->plan_timer_   = this->nh_.createTimer(this->global_update_rate_, &GlobalPlanner::planCB,   this);
+	ROS_INFO_STREAM("Registering Global Timers...");
+	this->chunck_timer_ = this->nh_.createTimer(ros::Duration(this->local_update_rate_),  &GlobalPlanner::chunckCB, this);
+	this->plan_timer_   = this->nh_.createTimer(ros::Duration(this->global_update_rate_), &GlobalPlanner::planCB,   this);
+}
+
+void GlobalPlanner::buildGlobalMap()
+{
+	ROS_INFO_STREAM("Building initial global map!");
+	Point origin;
+	origin.x = this->global_x_ori_;
+	origin.y = this->global_y_ori_;
+	origin.z = this->global_z_ori_;
+	origin.rgba = aero_path_planning::UNKNOWN;
+	this->global_map_ = OccupancyGridPtr(new OccupancyGrid(this->global_x_size_, this->global_y_size_, this->global_z_size_, this->global_res_, origin, aero_path_planning::UNKNOWN, this->global_frame_));
 }
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
@@ -258,6 +271,7 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 
 void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
 {
+	ROS_INFO_STREAM("I Got New Odometry Data!");
 	this->last_odom_ = *message;
 	if(!this->carrot_path_.empty())
 	{
@@ -286,6 +300,7 @@ void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
 
 void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 {
+	ROS_INFO_STREAM("I'm Chunking the Global Map!");
 	Point origin;
 	origin.x = this->local_x_ori_;
 	origin.y = this->local_y_ori_;
@@ -327,6 +342,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 
 void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
 {
+	ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped goal_point_m;
@@ -350,12 +366,30 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 			ROS_ERROR_STREAM("Error Copying Next Carrot Path Point to Local Grid!:"<<e.what());
 		}
 	}
+	else
+	{
+		ROS_WARN("I don't have a path to follow currently!");
+	}
 }
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
+	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
 	this->carrot_path_ = std::queue<Point>();
 	Point start_point;
+	start_point.x = 0;
+	start_point.y = 0;
+	start_point.z = 0;
 	Point goal_point;
-	this->path_planner_->search(start_point, goal_point, this->plan_timerout_, this->carrot_path_);
+	goal_point.x  = this->global_x_size_-1;
+	goal_point.y  = this->global_y_size_-1;
+	goal_point.z  = 0;
+	if(this->path_planner_!=NULL)
+	{
+		this->path_planner_->search(start_point, goal_point, this->plan_timerout_, this->carrot_path_);
+	}
+	else
+	{
+		ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
+	}
 }
