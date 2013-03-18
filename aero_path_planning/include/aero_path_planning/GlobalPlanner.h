@@ -94,6 +94,8 @@ private:
 	 * @author Adam Panzica
 	 * @brief  Callback for handling Odometry messages
 	 * @param message
+	 *
+	 * This callback handles advancing the CarrotPath
 	 */
 	void odomCB(const nav_msgs::OdometryConstPtr& message);
 
@@ -147,12 +149,14 @@ private:
 	int         global_y_ori_;          ///Location of the y origin of the global OccupancyGrid, in grid units
 	int         global_z_ori_;          ///Location of the z origin of the global OccupancyGrid, in grid units
 	double      global_res_;            ///Global occupancy grid resolution
+	double      global_update_rate_;    ///Update frequency for planning on the global path
 
 	nav_msgs::Odometry    last_odom_;   ///The odometry data received by the planner
 
-	aero_path_planning::CarrotPathFinder* path_planner_; ///The current global planner strategy
-	aero_path_planning::OccupancyGridPtr  global_map_;   ///The global OccupancyGrid
-	aero_path_planning::PointCloud        carrot_path_;  ///The current set of goal points in the global frame
+	aero_path_planning::CarrotPathFinder* path_planner_;  ///The current global planner strategy
+	aero_path_planning::OccupancyGridPtr  global_map_;    ///The global OccupancyGrid
+	std::queue<Point>                     carrot_path_;   ///The current set of points on the global path
+	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in grid units_
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system
@@ -163,6 +167,8 @@ private:
 	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state
 	ros::Timer            chunck_timer_;  ///Timer to chunk global map into local map
+	ros::Timer            plan_timer_;    ///Timer to plan on the global map
+	ros::Duration         plan_timerout_; ///Timeout to produce global plans
 };
 
 }; /* END aero_path_planning */

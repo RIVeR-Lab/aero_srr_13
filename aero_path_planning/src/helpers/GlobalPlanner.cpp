@@ -11,6 +11,7 @@
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/foreach.hpp>
 #include<pcl_ros/transforms.h>
+#include<geometry_msgs/PoseStamped.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/GlobalPlanner.h>
 #include<aero_path_planning/RRTCarrot.h>
@@ -21,11 +22,12 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-				state_(MANUAL),
-				path_planner_(&path_planner),
-				nh_(nh),
-				transformer_(nh),
-				p_nh_(p_nh)
+								state_(MANUAL),
+								path_planner_(&path_planner),
+								path_threshold_(1.0),
+								nh_(nh),
+								p_nh_(p_nh),
+								transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -48,7 +50,7 @@ void GlobalPlanner::loadOccupancyParam()
 {
 	//Configuration Parameters
 	//*****************Configuration Parameters*******************//
-	//Minimum update rate expected of occupancy grid
+	//Update rate to generate local occupancy grid
 	std::string p_up_rate(L_OCC_UPDTRT);
 	this->local_update_rate_ = 1.0/40.0;
 	std::stringstream up_rate_msg;
@@ -96,6 +98,12 @@ void GlobalPlanner::loadOccupancyParam()
 	std::stringstream p_z_ori_msg;
 	p_z_ori_msg<<this->local_z_ori_<<"m";
 
+	//Update rate to generate local occupancy grid
+	std::string pg_up_rate(G_OCC_UPDTRT);
+	this->local_update_rate_ = 30.0;
+	std::stringstream gup_rate_msg;
+	gup_rate_msg<<this->global_update_rate_<<"s";
+
 	//x dimension of global occupancy grid
 	std::string pg_x_dim(G_OCC_XDIM);
 	this->global_x_size_ = 5000;
@@ -140,6 +148,7 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//Get Public Parameters
 	if(!this->nh_.getParam(p_up_rate,	this->local_update_rate_))	PARAM_WARN(p_up_rate,	up_rate_msg.str());
+	if(!this->nh_.getParam(pg_up_rate,	this->global_update_rate_))	PARAM_WARN(pg_up_rate,	gup_rate_msg.str());
 	if(!this->nh_.getParam(p_x_dim,	 this->local_x_size_))			PARAM_WARN(p_x_dim,		x_dim_msg.str());
 	if(!this->nh_.getParam(p_y_dim,	 this->local_y_size_))			PARAM_WARN(p_y_dim,		y_dim_msg.str());
 	if(!this->nh_.getParam(p_z_dim,	 this->local_z_size_))			PARAM_WARN(p_z_dim,		z_dim_msg.str());
@@ -179,7 +188,8 @@ void GlobalPlanner::registerTopics()
 
 void GlobalPlanner::registerTimers()
 {
-	this->chunck_timer_ = this->nh_.createTimer(this->local_update_rate_, &GlobalPlanner::chunckCB, this);
+	this->chunck_timer_ = this->nh_.createTimer(this->local_update_rate_,  &GlobalPlanner::chunckCB, this);
+	this->plan_timer_   = this->nh_.createTimer(this->global_update_rate_, &GlobalPlanner::planCB,   this);
 }
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
@@ -249,6 +259,29 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
 {
 	this->last_odom_ = *message;
+	if(!this->carrot_path_.empty())
+	{
+		geometry_msgs::PointStamped trans_point_m;
+		geometry_msgs::PointStamped odom_point_m;
+		odom_point_m.header = message->header;
+		odom_point_m.point  = message->pose.pose.position;
+
+		//Shift the robot location from the odometry frame to the global one
+		this->transformer_.transformPoint(this->global_frame_, odom_point_m, trans_point_m);
+
+		//Check the distance between the current robot location and the next path goal point.
+		//If within threshold, pop the path goal point
+		Point current_point;
+		current_point.x = trans_point_m.point.x;
+		current_point.y = trans_point_m.point.y;
+		current_point.z = trans_point_m.point.z;
+
+		double dist = pcl::distances::l2(current_point.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
+		if(std::abs(dist)<this->path_threshold_)
+		{
+			this->carrot_path_.pop();
+		}
+	}
 }
 
 void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
@@ -283,8 +316,22 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 		}
 	}
 
+	//Copy the current goal point to the occupancy grid
+	if(!this->carrot_path_.empty())
+	{
+		local_grid.setGoalPoint(this->carrot_path_.front());
+	}
+
 	//Send the new local grid to the local planner
 	OccupancyGridMsg occ_grid_msg;
 	local_grid.generateMessage(occ_grid_msg);
 	this->local_occ_pub_.publish(occ_grid_msg);
+}
+
+void GlobalPlanner::planCB(const ros::TimerEvent& event)
+{
+	this->carrot_path_ = std::queue<Point>();
+	Point start_point;
+	Point goal_point;
+	this->path_planner_->search(start_point, goal_point, this->plan_timerout_, this->carrot_path_);
 }
