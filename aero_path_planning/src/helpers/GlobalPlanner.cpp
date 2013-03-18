@@ -253,5 +253,38 @@ void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
 
 void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 {
+	Point origin;
+	origin.x = this->local_x_ori_;
+	origin.y = this->local_y_ori_;
+	origin.z = this->local_z_ori_;
+	origin.rgb = aero_path_planning::ROBOT;
+	OccupancyGrid local_grid(this->local_x_size_, this->local_y_size_, this->local_z_size_, this->local_res_, origin, aero_path_planning::UNKNOWN);
 
+	OccupancyGridCloud copyCloud;
+	//Transform the coordinates of the local grid to the global frame
+	pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
+	//Copy the data in the global frame at the transformed local-coordinates into the local grid
+#pragma omp parallel for
+	for(int i=0; i<(int)copyCloud.size(); i++)
+	{
+		try
+		{
+			//Get rid of any rounding issues
+			copyCloud.at(i).x = std::floor(copyCloud.at(i).x);
+			copyCloud.at(i).y = std::floor(copyCloud.at(i).y);
+			copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
+
+			//Copy the PointTrait data from the global frame to the local frame
+			local_grid.setPointTrait(local_grid.getGrid().at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
+		}
+		catch(std::runtime_error& e)
+		{
+			//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
+		}
+	}
+
+	//Send the new local grid to the local planner
+	OccupancyGridMsg occ_grid_msg;
+	local_grid.generateMessage(occ_grid_msg);
+	this->local_occ_pub_.publish(occ_grid_msg);
 }
