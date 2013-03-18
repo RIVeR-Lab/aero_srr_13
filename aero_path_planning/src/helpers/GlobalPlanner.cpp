@@ -291,7 +291,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	origin.y = this->local_y_ori_;
 	origin.z = this->local_z_ori_;
 	origin.rgb = aero_path_planning::ROBOT;
-	OccupancyGrid local_grid(this->local_x_size_, this->local_y_size_, this->local_z_size_, this->local_res_, origin, aero_path_planning::UNKNOWN);
+	OccupancyGrid local_grid(this->local_x_size_, this->local_y_size_, this->local_z_size_, this->local_res_, origin, aero_path_planning::UNKNOWN, this->local_frame_);
 
 	OccupancyGridCloud copyCloud;
 	//Transform the coordinates of the local grid to the global frame
@@ -315,17 +315,41 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 			//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
 		}
 	}
-
 	//Copy the current goal point to the occupancy grid
-	if(!this->carrot_path_.empty())
-	{
-		local_grid.setGoalPoint(this->carrot_path_.front());
-	}
+	this->copyNextGoalToGrid(local_grid);
+
 
 	//Send the new local grid to the local planner
 	OccupancyGridMsg occ_grid_msg;
 	local_grid.generateMessage(occ_grid_msg);
 	this->local_occ_pub_.publish(occ_grid_msg);
+}
+
+void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
+{
+	if(!this->carrot_path_.empty())
+	{
+		geometry_msgs::PointStamped goal_point_m;
+		goal_point_m.point.x = this->carrot_path_.front().x;
+		goal_point_m.point.x = this->carrot_path_.front().y;
+		goal_point_m.point.x = this->carrot_path_.front().z;
+		goal_point_m.header.frame_id = this->global_frame_;
+		goal_point_m.header.stamp    = ros::Time::now();
+		this->transformer_.transformPoint(grid.getFrameId(), goal_point_m, goal_point_m);
+		Point goal_point;
+		goal_point.x = goal_point_m.point.x;
+		goal_point.y = goal_point_m.point.y;
+		goal_point.z = goal_point_m.point.z;
+
+		try
+		{
+			grid.setGoalPoint(goal_point);
+		}
+		catch(std::runtime_error& e)
+		{
+			ROS_ERROR_STREAM("Error Copying Next Carrot Path Point to Local Grid!:"<<e.what());
+		}
+	}
 }
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
