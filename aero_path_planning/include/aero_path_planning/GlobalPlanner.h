@@ -133,7 +133,7 @@ private:
 
 	State       state_;
 
-	std::string laser_topic_;           ///Topic name for receiving LIDAR point clouds
+	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
 	std::string local_occupancy_topic_; ///Topic name for communicating with the local planner
 	std::string odom_topic_;            ///Topic name for receiving odometry data
 	std::string state_topic_;           ///Topic name for receiving robot state from the supervisor

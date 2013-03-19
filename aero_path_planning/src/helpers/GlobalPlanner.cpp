@@ -174,7 +174,7 @@ void GlobalPlanner::registerTopics()
 	std::string command_topic("/global_planning/commands");
 
 
-	this->laser_topic_           = "/laser";
+	this->global_laser_topic_    = "aero/global/laser";
 	this->local_occupancy_topic_ = local_planner_topic;
 	this->odom_topic_            = odometry_topic;
 
@@ -183,7 +183,7 @@ void GlobalPlanner::registerTopics()
 	if(!this->p_nh_.getParam(odometry_topic,	 this->odom_topic_))		    PARAM_WARN(odometry_topic,		odometry_topic);
 
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
-	this->laser_sub_     = this->nh_.subscribe(this->laser_topic_, 2, &GlobalPlanner::laserCB, this);
+	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
 	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
 }
 
