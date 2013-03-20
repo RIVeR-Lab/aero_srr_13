@@ -8,6 +8,7 @@ set(L_NS local)
 set(G_NS global)
 set(T_NS tentacles)
 set(S_NS speed_set)
+set(SP_NS supervisor)
 
 #Parameter for the topic for exchanging OccupancyGrids between the global and local planner
 set(OCCUPANCY_TOPIC_ARG ${R_NS}/occupancy_topic)
@@ -23,6 +24,16 @@ set(VELOCITY_CMD_TOPIC_VAL "\"${R_NS}/velocity_command_topic\"")
 set(ODOMETRY_TOPIC_ARG ${R_NS}/odometry)
 set(ODOMETRY_TOPIC_CDF ODOMETRY_TOPIC)
 set(ODOMETRY_TOPIC_VAL "\"${R_NS}/odometry\"")
+
+#Paramter defining the joy topic
+set(JOY_TOPIC_ARG /joy)
+set(JOY_TOPIC_CDF JOY_TOPIC)
+set(JOY_TOPIC_VAL "\"/joy\"")
+
+#Paramter defining the state topic
+set(STATE_TOPIC_ARG ${R_NS}/${SP_NS}/state)
+set(STATE_TOPIC_CDF STATE_TOPIC)
+set(STATE_TOPIC_VAL "\"${R_NS}/${SP_NS}/state\"")
 
 #Parameter defining what platform we're on
 set(PLATFORM_ARG ${R_NS}/platform)

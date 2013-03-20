@@ -52,8 +52,9 @@ void LocalPlanner::loadParam()
 	//Default Parameter Values
 	//*****************Communication Parameters*******************//
 	this->v_action_topic_ = VEL_CMD_TOPIC;
-	//std::string t_com_top("translate_command_topic");
 	this->pc_topic_       = OCCUPANCY_TOPIC;
+	this->state_topic_    = JOY_TOPIC;
+	this->joy_topic_      = STATE_TOPIC;
 
 	//*****************Configuration Parameters*******************//
 	//The platform that the local planner is running on
@@ -193,7 +194,9 @@ void LocalPlanner::loadParam()
 		ROS_INFO_STREAM("Running on Platform: "<<platform_message);
 	}
 	if(!p_nh_.getParam(this->v_action_topic_,  this->v_action_topic_))	PARAM_WARN(this->v_action_topic_, this->v_action_topic_);
-	if(!p_nh_.getParam(this->pc_topic_,	       this->pc_topic_))	PARAM_WARN(this->pc_topic_,	     this->pc_topic_);
+	if(!p_nh_.getParam(this->pc_topic_,	       this->pc_topic_))	    PARAM_WARN(this->pc_topic_,	      this->pc_topic_);
+	if(!p_nh_.getParam(this->state_topic_,     this->state_topic_))	    PARAM_WARN(this->state_topic_,    this->state_topic_);
+	if(!p_nh_.getParam(this->joy_topic_,	   this->joy_topic_))	    PARAM_WARN(this->joy_topic_,	  this->joy_topic_);
 
 	if(!p_nh_.getParam(p_goal_weight,	this->goal_weight_))    PARAM_WARN(p_goal_weight, p_goal_weight_msg.str());
 	if(!p_nh_.getParam(p_trav_weight,	this->trav_weight_))    PARAM_WARN(p_trav_weight, p_trav_weight_msg.str());
@@ -222,9 +225,11 @@ void LocalPlanner::loadParam()
 
 void LocalPlanner::regTopic()
 {
-	this->pc_sub_  = this->nh_.subscribe(this->pc_topic_, 1, &LocalPlanner::pcCB, this);
-	this->vel_pub_ = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
-	this->tent_pub_= this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
+	this->pc_sub_    = this->nh_.subscribe(this->pc_topic_,    2, &LocalPlanner::pcCB,    this);
+	this->state_sub_ = this->nh_.subscribe(this->state_topic_, 2, &LocalPlanner::stateCB, this);
+	this->joy_sub_   = this->nh_.subscribe(this->joy_topic_,   2, &LocalPlanner::joyCB,   this);
+	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
+	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
 
 	std::string software_stop_topic("aero/software_stop");
 
