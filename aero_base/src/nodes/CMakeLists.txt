@@ -1,0 +1,2 @@
+rosbuild_add_executable(aero_base_node aero_base_node.cpp)
+target_link_libraries(aero_base_node ${PROJECT_NAME}Core)

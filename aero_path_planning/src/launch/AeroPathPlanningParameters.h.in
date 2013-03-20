@@ -33,6 +33,7 @@
 #define @L_OCC_ZORG_CDF@          "@L_OCC_ZORG_ARG@"
 #define @L_OCC_RES_CDF@           "@L_OCC_RES_ARG@"
 
+#define @T_MINLNTH_CDF@           "@T_MINLNTH_ARG@"
 #define @T_EXPFACT_CDF@           "@T_EXPFACT_ARG@"
 #define @T_NUMBER_CDF@            "@T_NUMBER_ARG@"
 

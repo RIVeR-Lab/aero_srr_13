@@ -196,6 +196,7 @@ public:
 	 * @brief Creates a new Tentacle using the given parameters for its construction
 	 * @param exp_fact 		The exponential factor parameter used to calculate the radius of the tentacle
 	 * @param seed_rad 		The seed radius for the speed set the tentacle is in
+	 * @param min_length    The length of the shortest tentacle in the slowest speed-set
 	 * @param seed_length	The seed length that was used to calculate the seed radius
 	 * @param index			The tentacle index of this tentacle
 	 * @param num_tent		The total number of tentacles in the speed set
@@ -206,7 +207,7 @@ public:
 	 * @throw TentacleGenerationException If there is a problem generating the tentacle
 	 *
 	 */
-	Tentacle(double exp_fact, double seed_rad, double seed_length, int index, int num_tent, double resolution, int x_dim, int y_dim, double velocity) throw (TentacleGenerationException);
+	Tentacle(double exp_fact, double seed_rad, double min_length, double seed_length, int index, int num_tent, double resolution, int x_dim, int y_dim, double velocity) throw (TentacleGenerationException);
 	virtual ~Tentacle();
 
 	/**
@@ -222,6 +223,12 @@ public:
 	 * @return	The velocity data of the tentacle
 	 */
 	double getVel() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The index of the tentacle
+	 */
+	int getIndex() const;
 
 	/**
 	 * @author Adam Panzica
@@ -327,6 +334,7 @@ public:
 	typedef boost::shared_ptr<TentacleTraverser> TentacleTraverserPtr;
 
 private:
+	int    index_;
 	double radius_;									///Radius of the Tentacle
 	double velocity_;								///Velocity of the Tentacle
 	TentaclePointCloud points_; 						///A vector containing a set of Points which represent the x/y coordinates relative to robot-center that this tentacle touches
@@ -384,6 +392,8 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates all of the tentacles with the given parameters
+	 * @param index         The index of the speed set
+	 * @param min_length    The length of the shortest tentacle in the slowest speed-set
 	 * @param expFact 		The exponential factor parameter used to calculate the radius of the tentacle
 	 * @param seedRad 		The seed radius for the speed set
 	 * @param seedLength	The seed length that was used to calculate the seed radius
@@ -393,7 +403,7 @@ public:
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 * @param velocity		The velocity that the tentacle is to be traveled at
 	 */
-	SpeedSet(double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity);
+	SpeedSet(int index, double min_length, double expFact, double seedRad, double seedLength, int numTent, double resolution, int xDim, int yDim, double velocity);
 	virtual ~SpeedSet();
 
 	/**
@@ -411,6 +421,12 @@ public:
 	 * @return The number of tentacles in the SpeedSet
 	 */
 	unsigned int getNumTentacle() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The index of the speed set
+	 */
+	int getIndex() const;
 
 	/**
 	 * @author	Adam Panzica
@@ -452,6 +468,7 @@ public:
 
 
 private:
+	int    index_;
 	double velocity_;
 	double seed_rad_;
 	std::vector<Tentacle> tentacles_;	///A vector containing all of the tentacles for this speed set
@@ -496,6 +513,7 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Generates a set of tentacles for each speed set
+	 * @param min_length    The length of the shortest tentacle in the slowest speed-set
 	 * @param minSpeed		The speed of the slowest speed set
 	 * @param maxSpeed		The speed of the fastest speed set
 	 * @param numSpeedSet	The number of speed sets to generate
@@ -505,7 +523,7 @@ public:
 	 * @param xDim			The length of the x-axis of the occupancy grid, in the positive x-direction and of the same units as resolution
 	 * @param yDim			The length of the y-axis of the occupancy grid, in the positive y-direction and of the same units as resolution
 	 */
-	TentacleGenerator(double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim);
+	TentacleGenerator(double min_length, double minSpeed, double maxSpeed, int numSpeedSet, int numTentacles, double expFact, double resolution, int xDim, int yDim);
 	virtual ~TentacleGenerator();
 
 	/**
