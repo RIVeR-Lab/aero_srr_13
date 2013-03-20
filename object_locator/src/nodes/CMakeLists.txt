@@ -1,13 +1,10 @@
 rosbuild_add_executable(ros2cv ros2cv.cpp)
 add_executable(objDet objectDetection2.cpp)
 add_executable(cap frameSave.cpp)
-add_executable(ball pinkballDetect.cpp)
-add_executable(tune hsvtuner.cpp)
-add_executable(bg bgSub.cpp)
+
+
 
 target_link_libraries(ros2cv ${OpenCV_LIBS})
 target_link_libraries(objDet ${OpenCV_LIBS})
 target_link_libraries(cap ${OpenCV_LIBS})
-target_link_libraries(ball ${OpenCV_LIBS})
-target_link_libraries(tune ${OpenCV_LIBS})
-target_link_libraries(bg ${OpenCV_LIBS})
+
