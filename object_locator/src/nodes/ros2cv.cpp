@@ -23,7 +23,7 @@ ImageConverter::ImageConverter()
 //	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 
 //	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
-	cascade_path = "/home/srr/ObjectDetectionData/exec/cascadeHOGBlackLDD/cascade.xml";
+	cascade_path = "/home/srr/ObjectDetectionData/exec/cascadeHOGWHA/cascade.xml";
 	ctr = 0;
 	cv::namedWindow(WINDOWLeft);
 //	cv::namedWindow(WINDOWRight);
@@ -336,7 +336,8 @@ void ImageConverter::detectAndDisplay( cv::Mat frame )
    //-- Detect faces
 //   cascade.detectMultiScale( frame_gray, faces, 1.1, 35, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDA
 //   cascade.detectMultiScale( frame_gray, faces, 1.1, 15, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDB
-   cascade.detectMultiScale( frame_gray, faces, 1.1, 35, 0, cv::Size(70, 70), cv::Size(90,90) );
+//   cascade.detectMultiScale( frame_gray, faces, 1.1, 35, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDD
+   cascade.detectMultiScale( frame_gray, faces, 1.1, 295, 0, cv::Size(70, 100), cv::Size(150,215) ); // works for WHA
 
    for( size_t i = 0; i < faces.size(); i++ )
     {
