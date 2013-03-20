@@ -15,9 +15,11 @@
 #include<boost/circular_buffer.hpp>
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
+#include<sensor_msgs/Joy.h>
 //********************** LOCAL  DEPENDANCIES **********************//
 #include <aero_path_planning/OryxPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
+#include <aero_srr_msgs/AeroState.h>
 
 namespace aero_path_planning
 {
@@ -41,6 +43,7 @@ private:
 
 	int		platform_;		///flat marking what platform we're running on
 	bool	should_plan_;	///Flag for signaling if the local planner should be running
+	bool    tentacle_mode_; ///Flag for signalling if the local planner should be running in tetacle mode
 
 	double	goal_weight_;	///weighting factor to bias tentacle selection towards the goal point
 	double	trav_weight_;	///weighting factor to bias tentacle selection away from previously traversed points
@@ -102,6 +105,20 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief  Callback for handling joy messages for manual/servo control
+	 * @param message
+	 */
+	void joyCB(const sensor_msgs::JoyConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Handles changes to the robot's mission state
+	 * @param message The current state of the robot
+	 */
+	void stateCB(const aero_srr_msgs::AeroStateConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Performs platform specific sending of velocity commands
 	 * @param velocity The linear velocity in +x to follow
 	 * @param radius The radius of curvature to follow
@@ -153,6 +170,25 @@ private:
 	 * @return True if there is an obstruction within the bump-sensor radius of the robot
 	 */
 	bool bumpSwitch();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Switches the local planner into manual control mode
+	 */
+	void setManualMode();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Switches the local planner into tentacle control mode
+	 */
+	void setTentacleMode();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Sets the local planner to safe mode (will not move)
+	 * @param [in] stop True to set safe mode, false to release it
+	 */
+	void setSafeMode(bool safe);
 
 };
 

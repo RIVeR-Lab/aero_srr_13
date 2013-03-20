@@ -29,4 +29,7 @@ uint8 SAFESTOP=6
 
 #The robot is currently shutting down
 uint8 SHUTDOWN=7
+
+#The robot is currenlty in manual mode
+uint8 MANUAL=8
 ##############################################

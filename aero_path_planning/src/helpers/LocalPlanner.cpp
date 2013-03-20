@@ -17,26 +17,19 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																						nh_(nh),
-																						p_nh_(p_nh),
-																						occupancy_buffer_(2)
+																								nh_(nh),
+																								p_nh_(p_nh),
+																								occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
+
+	this->current_rad_ = 0;
+	this->current_vel_ = 0;
 
 	this->loadParam();
 	this->regTopic();
 	this->regTimers();
-
-	this->should_plan_ = true;
-	this->current_rad_ = 0;
-	this->current_vel_ = 0;
-
-
-
-	std::string software_stop_topic("aero/software_stop");
-
-	if(!this->nh_.getParam(software_stop_topic, software_stop_topic))ROS_WARN("%s not set, using default value %s", software_stop_topic.c_str(), software_stop_topic.c_str());
-	this->stop_sub_ = nh_.subscribe(software_stop_topic, 1, &LocalPlanner::stopCB, this);
+	this->setTentacleMode();
 
 	switch(this->platform_)
 	{
@@ -232,6 +225,11 @@ void LocalPlanner::regTopic()
 	this->pc_sub_  = this->nh_.subscribe(this->pc_topic_, 1, &LocalPlanner::pcCB, this);
 	this->vel_pub_ = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
 	this->tent_pub_= this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
+
+	std::string software_stop_topic("aero/software_stop");
+
+	if(!this->nh_.getParam(software_stop_topic, software_stop_topic))ROS_WARN("%s not set, using default value %s", software_stop_topic.c_str(), software_stop_topic.c_str());
+	this->stop_sub_ = nh_.subscribe(software_stop_topic, 1, &LocalPlanner::stopCB, this);
 }
 
 void LocalPlanner::regTimers()
@@ -392,7 +390,14 @@ void LocalPlanner::velUpdateCB(const ros::TimerEvent& event)
 
 void LocalPlanner::stopCB(const aero_srr_msgs::SoftwareStopConstPtr& message){
 	//Need to flip as message is true when should stop
-	this->should_plan_ = !message->stop;
+	if(message->stop)
+	{
+		this->setSafeMode(true);
+	}
+	else
+	{
+		this->setSafeMode(false);
+	}
 	ROS_WARN("Oryx Local Path Planner Received A Software Stop Message [%s]: %s",(message->stop)?"Stop":"Go", message->message.c_str());
 	//If we were told to stop, clear the buffer so we don't process stale data at wakeup
 	if(!this->should_plan_)this->occupancy_buffer_.clear();
@@ -407,6 +412,55 @@ void LocalPlanner::pcCB(const aero_path_planning::OccupancyGridMsgConstPtr& mess
 		//ROS_INFO("Grid Processed...");
 		//ROS_INFO("Callback got the grid:\n%s", recievedGrid.toString(0,0)->c_str());
 		this->occupancy_buffer_.push_back(recievedGrid);
+	}
+}
+
+void LocalPlanner::joyCB(const sensor_msgs::JoyConstPtr& message)
+{
+	//Check to make sure we're in manual mode and weapons free
+	if(!this->tentacle_mode_&&this->should_plan_)
+	{
+		//Dead-man switch check
+		if(message->buttons.at(1))
+		{
+			ROS_INFO_STREAM("Received Joy Message: \n"<<*message);
+		}
+		else
+		{
+			ROS_WARN_STREAM_THROTTLE(5, "Dead-man switch not pressed!");
+		}
+	}
+	else
+	{
+		if(!this->should_plan_)
+		{
+			ROS_WARN_STREAM_THROTTLE(5, "Cannot Move, Local Planner is in Safe Mode!");
+		}
+	}
+}
+
+void LocalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
+{
+	typedef aero_srr_msgs::AeroState State_t;
+	switch(message->state)
+	{
+	case State_t::ERROR:
+	case State_t::SAFESTOP:
+	case State_t::SHUTDOWN:
+		this->setSafeMode(true);
+		break;
+	case State_t::SEARCH:
+	case State_t::NAVOBJ:
+	case State_t::HOME:
+		this->setTentacleMode();
+		break;
+	case State_t::MANUAL:
+	case State_t::COLLECT:
+		this->setManualMode();
+		break;
+	default:
+		ROS_ERROR_STREAM("Received Unknown Robot State: "<<message->state);
+		break;
 	}
 }
 
@@ -469,3 +523,26 @@ void LocalPlanner::visualizeTentacle(int speed_set, int tentacle)
 	this->tent_pub_.publish(message);
 }
 
+
+void LocalPlanner::setManualMode()
+{
+	ROS_INFO_STREAM("Local Planner Set to Manual Control!");
+	this->setSafeMode(false);
+	this->tentacle_mode_= false;
+	this->plan_timer_.stop();
+}
+
+void LocalPlanner::setTentacleMode()
+{
+	ROS_INFO_STREAM("Local Planner Set to Tentacles Control!");
+	this->setSafeMode(false);
+	this->tentacle_mode_ = true;
+	this->plan_timer_.start();
+}
+
+void LocalPlanner::setSafeMode(bool safe)
+{
+	std::string mode(safe?("Safe"):("Free"));
+	ROS_INFO_STREAM("Local Planner Set to "<<mode<<" Mode!");
+	this->should_plan_ = !safe;
+}
