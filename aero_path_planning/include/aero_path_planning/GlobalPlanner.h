@@ -3,7 +3,7 @@
  *
  * @date   Feb 19, 2013
  * @author Adam Panzica
- * @brief \todo
+ * @brief Class definition for GlobalPlanner
  */
 
 //License File
@@ -100,7 +100,7 @@ private:
 	void odomCB(const nav_msgs::OdometryConstPtr& message);
 
 	/**
-	 * @brief Adam Panzica
+	 * @author Adam Panzica
 	 * @brief Chunks the global map into a local OccupancyGrid and sends it to the local planner
 	 * @param event
 	 */

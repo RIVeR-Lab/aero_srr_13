@@ -3,7 +3,7 @@
  *
  * @date   Feb 19, 2013
  * @author Adam Panzica
- * @brief \todo
+ * @brief Implementaiton of GlobalPlanner
  */
 
 //License File
