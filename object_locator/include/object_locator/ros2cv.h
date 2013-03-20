@@ -20,6 +20,7 @@
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
+#include "cxcore.h"
 
 namespace object_locator
 {
@@ -36,6 +37,8 @@ public:
 	void computeDisparity();
 	void computeDisparityCb(const ros::TimerEvent& event);
 	void detectAndDisplay( cv::Mat frame );
+	void test(cv::Mat img,const char* WINDOW);
+	void tune(cv::Mat img, const char* WINDOW);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 
@@ -63,6 +66,14 @@ private:
 	bool gotLeft;
 	bool gotRight;
 	int ctr;
+	int HuethresH,
+	HuethresL,
+	SatthresL,
+	SatthresH,
+	ValthresL,
+	ValthresH,
+	erosionCount,
+	blurSize;
 };
 
 
