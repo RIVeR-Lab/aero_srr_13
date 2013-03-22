@@ -4,8 +4,8 @@ namespace roboteq_driver{
 
 RoboteqMotorController::RoboteqMotorController(double rotations_per_meter1,
 					       double rotations_per_meter2,
-					       int maxMPS1,
-					       int maxMPS2,
+					       double maxMPS1,
+					       double maxMPS2,
 					       int ppr1,
 					       int ppr2):
 	rotations_per_meter1_(rotations_per_meter1),
@@ -15,6 +15,32 @@ RoboteqMotorController::RoboteqMotorController(double rotations_per_meter1,
 	ppr1_(ppr1),
 	ppr2_(ppr2){
 
+}
+RoboteqMotorController::~RoboteqMotorController(){
+	close();
+}
+
+
+void RoboteqMotorController::open(std::string port){
+	int status = device_.Connect(port);
+	if(status != RQ_SUCCESS){
+		if(status==RQ_UNRECOGNIZED_DEVICE){
+			throw Exception("Error connecting to device. The device is not recognized.");
+		}
+		else if(status==RQ_UNRECOGNIZED_VERSION){
+			throw Exception("Error connecting to device. Invalid device version.");
+		}
+		else if(status==RQ_ERR_OPEN_PORT){
+			throw Exception("Error connecting to device. Error occurred while trying to open the communication port.");
+		}
+		else{
+			throw Exception("Error connecting to device.");
+		}
+	}
+	//Wait 10 ms before sending another command to device
+	sleepms(10);
+
+	//Configure the device
 	//set encoders pulse per rotation
 	setConfig(_EPPR, 1, ppr1_);
 	setConfig(_EPPR, 2, ppr2_);
@@ -32,30 +58,6 @@ RoboteqMotorController::RoboteqMotorController(double rotations_per_meter1,
 	//set motors mode to closed-loop speed
 	setConfig(_MMOD, 1, 2);
 	setConfig(_MMOD, 2, 2);
-}
-RoboteqMotorController::~RoboteqMotorController(){
-	close();
-}
-
-
-void RoboteqMotorController::open(std::string port){
-	int status = device_.Connect("/dev/ttyUSB0");
-	if(status != RQ_SUCCESS){
-		if(status==RQ_UNRECOGNIZED_DEVICE){
-			throw Exception("Error connecting to device. The device is not recognized.");
-		}
-		else if(status==RQ_UNRECOGNIZED_VERSION){
-			throw Exception("Error connecting to device. Invalid device version.");
-		}
-		else if(status==RQ_ERR_OPEN_PORT){
-			throw Exception("Error connecting to device. Error occurred while trying to open the communication port.");
-		}
-		else{
-			throw Exception("Error connecting to device.");
-		}
-	}
-	//Wait 10 ms before sending another command to device
-	sleepms(10);
 }
 
 void RoboteqMotorController::close(){

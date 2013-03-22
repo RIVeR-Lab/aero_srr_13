@@ -43,7 +43,7 @@ class RoboteqMotorController{
 	 * @param ppr2 the pulses per rotation for encoder 2 (motor 2)
 	 */
 	RoboteqMotorController(double rotations_per_meter1, double rotations_per_meter2,
-			       int maxMPS1, int maxMPS2,
+			       double maxMPS1, double maxMPS2,
 			       int ppr1, int ppr2);
 	~RoboteqMotorController();
 	/**
