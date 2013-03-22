@@ -1,0 +1,9 @@
+<launch>
+    <node pkg="roboteq_driver" type="roboteq_manager" name="roboteq_manager">
+      <param name="rotations_per_meter" value="2.5" />
+      <param name="maxMPS" value="2.0" />
+      <param name="ppr" value="500" />
+      <param name="feedbackRate" value="5" />
+      <param name="port" value="/dev/ttyUSB0" />
+    </node>
+</launch>

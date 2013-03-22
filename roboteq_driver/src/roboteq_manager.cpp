@@ -59,6 +59,7 @@ int main(int argc, char **argv){
   int ppr;
   double feedbackRate;
   std::string port;
+  //TODO error if parameter not set
   ros::param::get("~rotations_per_meter", rotations_per_meter);
   ros::param::get("~maxMPS", maxMPS);
   ros::param::get("~ppr", ppr);
