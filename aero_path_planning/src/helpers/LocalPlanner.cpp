@@ -53,8 +53,8 @@ void LocalPlanner::loadParam()
 	//*****************Communication Parameters*******************//
 	this->v_action_topic_ = VEL_CMD_TOPIC;
 	this->pc_topic_       = OCCUPANCY_TOPIC;
-	this->state_topic_    = JOY_TOPIC;
-	this->joy_topic_      = STATE_TOPIC;
+	this->state_topic_    = STATE_TOPIC;
+	this->joy_topic_      = JOY_TOPIC;
 
 	//*****************Configuration Parameters*******************//
 	//The platform that the local planner is running on
