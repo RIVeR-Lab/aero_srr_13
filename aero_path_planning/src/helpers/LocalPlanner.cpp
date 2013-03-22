@@ -449,6 +449,7 @@ void LocalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 	typedef aero_srr_msgs::AeroState State_t;
 	switch(message->state)
 	{
+	case State_t::STARTUP:
 	case State_t::ERROR:
 	case State_t::SAFESTOP:
 	case State_t::SHUTDOWN:
