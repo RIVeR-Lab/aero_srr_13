@@ -1,0 +1,22 @@
+/**
+ * @file   AeroSupervisorParameters.h
+ *
+ * @date   Mar 22, 2013
+ * @author Adam Panzica
+ * @brief  Parameter definitions
+ */
+
+#ifndef AEROSUPERVISORPARAMETERS_H_
+#define AEROSUPERVISORPARAMETERS_H_
+
+//*********** SYSTEM DEPENDANCIES ****************//
+//************ LOCAL DEPENDANCIES ****************//
+
+//***********    NAMESPACES     ****************//
+
+//@auto_gen_warn@
+
+#define @STATE_TOPIC_CDF@  "@STATE_TOPIC_ARG@"
+#define @CTRLMD_TOPIC_CDF@ "@CTRLMD_TOPIC_ARG@"
+
+#endif /* AEROSUPERVISORPARAMETERS_H_ */

@@ -15,9 +15,11 @@
 #include<boost/circular_buffer.hpp>
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
+#include<sensor_msgs/Joy.h>
 //********************** LOCAL  DEPENDANCIES **********************//
 #include <aero_path_planning/OryxPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
+#include <aero_srr_msgs/AeroState.h>
 
 namespace aero_path_planning
 {
@@ -39,27 +41,33 @@ public:
 
 private:
 
-	int		platform_;		///flat marking what platform we're running on
-	bool	should_plan_;	///Flag for signaling if the local planner should be running
+	int		platform_;		    ///flat marking what platform we're running on
+	bool	should_plan_;	    ///Flag for signaling if the local planner should be running
+	bool    tentacle_mode_;     ///Flag for signalling if the local planner should be running in tetacle mode
 
-	double	goal_weight_;	///weighting factor to bias tentacle selection towards the goal point
-	double	trav_weight_;	///weighting factor to bias tentacle selection away from previously traversed points
-	double	diff_weight_;	///weighting factor to bias tentacle selection away from difficult terrain
-	double  unkn_weight_;	///weighting factor to bias tentacle selection towards unknown terrain
-	double	x_dim_;		///x dimension of the occupancy grid to use, in real units
-	double	y_dim_;		///y dimension of the occupancy grid to use, in real units
-	double	z_dim_;		///z dimension of the occupancy grid to use, in real units
-	double	res_;		///resolution the occupancy grid to use, in real units per grid unit
-	double	current_vel_;	///Current Velocity of the Platform
-	double	current_rad_;	///Current Radius followed by the Platform
-	double  set_vel_;	///The target velocity to set the robot to
-	double  set_rad_;	///The target radius to set the robot to
-	std::string	v_action_topic_;		///Actionlib topic name to send velocity commands over
-	std::string pc_topic_;			///topic name of the ROS topic to receive new occupancy grid data over
+	double	goal_weight_;	    ///weighting factor to bias tentacle selection towards the goal point
+	double	trav_weight_;	    ///weighting factor to bias tentacle selection away from previously traversed points
+	double	diff_weight_;	    ///weighting factor to bias tentacle selection away from difficult terrain
+	double  unkn_weight_;	    ///weighting factor to bias tentacle selection towards unknown terrain
+	double	x_dim_;		        ///x dimension of the occupancy grid to use, in real units
+	double	y_dim_;		        ///y dimension of the occupancy grid to use, in real units
+	double	z_dim_;		        ///z dimension of the occupancy grid to use, in real units
+	double	res_;		        ///resolution the occupancy grid to use, in real units per grid unit
+	double	current_vel_;	    ///Current Velocity of the Platform
+	double	current_rad_;	    ///Current Radius followed by the Platform
+	double  set_vel_;	        ///The target velocity to set the robot to
+	double  set_rad_;	        ///The target radius to set the robot to
+
+	std::string	v_action_topic_;///Actionlib topic name to send velocity commands over
+	std::string pc_topic_;		///topic name of the ROS topic to receive new occupancy grid data over
+	std::string state_topic_;   ///Topic name of the ROS topic to receive new AeroState messages over
+	std::string joy_topic_;     ///Topic name of the ROS topic to receive Joy messages over
 
 	ros::NodeHandle nh_;	    ///Node handle for publishing/subscribing to topics
 	ros::NodeHandle p_nh_;      ///Nodes handle to load private params
 	ros::Subscriber pc_sub_;    ///Subscriber to the ROS topic to receive new occupancy grid data over
+	ros::Subscriber state_sub_; ///Subscriber to the ROS topic to receive AeroState messages
+	ros::Subscriber joy_sub_;   ///Subscriber to the ROS topic to receive Joy messages
 	ros::Subscriber	stop_sub_;	///Subscriber to the ROS topic to receive the software stop message
 	ros::Publisher	vel_pub_;	///Publisher for Twist messages to a platform that takes them
 	ros::Publisher  tent_pub_;  ///Publisher for visualizing selected tentacles
@@ -99,6 +107,20 @@ private:
 	 * and places it on the occupancy grid buffer for processing by the planner
 	 */
 	void pcCB(const aero_path_planning::OccupancyGridMsgConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Callback for handling joy messages for manual/servo control
+	 * @param message
+	 */
+	void joyCB(const sensor_msgs::JoyConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Handles changes to the robot's mission state
+	 * @param message The current state of the robot
+	 */
+	void stateCB(const aero_srr_msgs::AeroStateConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
@@ -153,6 +175,25 @@ private:
 	 * @return True if there is an obstruction within the bump-sensor radius of the robot
 	 */
 	bool bumpSwitch();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Switches the local planner into manual control mode
+	 */
+	void setManualMode();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Switches the local planner into tentacle control mode
+	 */
+	void setTentacleMode();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Sets the local planner to safe mode (will not move)
+	 * @param [in] stop True to set safe mode, false to release it
+	 */
+	void setSafeMode(bool safe);
 
 };
 

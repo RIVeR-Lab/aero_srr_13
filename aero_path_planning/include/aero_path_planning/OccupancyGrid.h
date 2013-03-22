@@ -88,8 +88,9 @@ public:
 	 * @param resolution	A conversion factor to go from the integer unit representation to an engineering unit representation
 	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
+	 * @param frame_id      The tf frame that the grid is in reference to
 	 */
-	OccupancyGrid(int xDim, int yDim, double resolution, const aero_path_planning::Point& origin, PointTrait_t seedTrait=aero_path_planning::UNKNOWN);
+	OccupancyGrid(int xDim, int yDim, double resolution, const aero_path_planning::Point& origin, PointTrait_t seedTrait=aero_path_planning::UNKNOWN, const std::string& frame_id = "/robot");
 
 	/**
 	 * @author	Adam Panzica
@@ -101,8 +102,9 @@ public:
 	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
 	 * @param origin		The origin of the occupancy grid
 	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
+	 * @param frame_id      The tf frame that the grid is in reference to
 	 */
-	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const aero_path_planning::Point& origin, aero_path_planning::PointTrait_t seedTrait=aero_path_planning::UNKNOWN);
+	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const aero_path_planning::Point& origin, aero_path_planning::PointTrait_t seedTrait=aero_path_planning::UNKNOWN,  const std::string& frame_id = "/robot");
 
 	/**
 	 * @author	Adam Panzica
@@ -261,6 +263,12 @@ public:
 	 * @return The size of the grid in the Y dimention, in grid units
 	 */
 	int getZSize() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return Gets the tf frame_id that this grid is relative to
+	 */
+	const std::string& getFrameId() const;
 
 
 	/**

@@ -380,13 +380,6 @@ public:
 	 * @brief	Copy constructor
 	 * @param SpeedSet SpeedSet to copy
 	 */
-	SpeedSet(SpeedSet& SpeedSet);
-
-	/**
-	 * @author	Adam Panzica
-	 * @brief	Copy constructor
-	 * @param SpeedSet SpeedSet to copy
-	 */
 	SpeedSet(const SpeedSet& SpeedSet);
 
 	/**
