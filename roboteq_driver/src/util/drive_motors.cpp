@@ -25,8 +25,10 @@ int main(int argc, char **argv){
 	printf("Running motors at (%f, %f) for %fs\n", leftSpeed, rightSpeed, runTime);
 	roboteq_driver::RoboteqMotorController controller(2.0, 2.0, 2.0, 2.0, 250, 250);
 	controller.open(argv[1]);
-	for(double time = 0; time<runTime; time+=0.1)
+	for(double time = 0; time<runTime; time+=0.1){
 		controller.setSpeed(leftSpeed, rightSpeed);
+		sleepms(100);
+	}
 	controller.setSpeed(0, 0);
 	controller.close();
 	return 0;
