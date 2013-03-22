@@ -84,15 +84,15 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 //	    cv::imshow(WINDOW, img);
 
 
-	  if( !cascade.load( cascade_path ) )
-		  {
-			  printf("--(!)Error loading\n");
-		  }
+//	  if( !cascade.load( cascade_path ) )
+//		  {
+//			  printf("--(!)Error loading\n");
+//		  }
 //		    	 cv::GaussianBlur( img, img, cv::Size(9, 9), 2, 2 );
 
-	  imshow(WINDOW,img);
+//	  imshow(WINDOW,img);
 
-		  	   int c = cv::waitKey(10);
+//		  	   int c = cv::waitKey(10);
 //		  	         if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctr++;}
 //		    	 detectAndDisplay( img);
 //	  	  	  	  test(img, WINDOW);
@@ -230,49 +230,49 @@ void ImageConverter::computeDisparity()
 	//	  cv::imshow(WINDOWDisparity, this->disparity);
 
 	//Auto grab info
-//	cv::Mat Kl(3,3,CV_64F, this->left_info.K.elems);
-//	cv::Mat Rl(3,3,CV_64F, this->left_info.R.elems);
-//	cv::Mat Pl(3,4,CV_64F, this->left_info.P.elems);
-//	cv::Mat Dl(1,5,CV_64F, this->left_info.D.data());
-//	uint heightL = this->left_info.height;
-//	uint widthL = this->left_info.width;
-//
-//	cv::Mat Kr(3,3,CV_64F, this->right_info.K.elems);
-//	cv::Mat Rr(3,3,CV_64F, this->right_info.R.elems);
-//	cv::Mat Pr(3,4,CV_64F, this->right_info.P.elems);
-//	cv::Mat Dr(1,5,CV_64F, this->right_info.D.data());
-//	uint heightR = this->right_info.height;
-//	uint widthR = this->right_info.width;
-// Manual Info
-	float Klm[3][3] = {{1200.576576, 0, 660.281868},{ 0, 1201.521424, 363.013750},{ 0, 0, 1}};
-	float Rlm[3][3] = {{0.999936,-.000728, 0.01281},{ 0.000728,1,0.000019},{-0.011281,-0.000011,0.999936}};
-	float Plm[3][4] = {{1185.777062,0,641.420067,0},{0,1185.777062,358.743057,0},{0,0,1,0}};
-	float Dlm[1][5] = {-0.248229,0.107929,-0.000605,-0.000647,0};
-		cv::Mat Kl(3,3,CV_64F, Klm);
-		cv::Mat Rl(3,3,CV_64F, Rlm);
-		cv::Mat Pl(3,4,CV_64F, Plm);
-		cv::Mat Dl(1,5,CV_64F, Dlm);
-//		cv::Mat Kl=(cv::Mat_<float>(3,3)<<1200.576576, 0, 660.281868, 0, 1201.521424, 363.013750, 0, 0, 1);
-//		cv::Mat Rl=(cv::Mat_<float>(3,3)<<0.999936,-.000728, 0.01281, 0.000728,1,0.000019,-0.011281,-0.000011,0.999936);
-//		cv::Mat Pl=(cv::Mat_<float>(3,4)<<1185.777062,0,641.420067,0,0,1185.777062,358.743057,0,0,0,1,0);
-//		cv::Mat Dl=(cv::Mat_<float>(1,5)<<-0.248229,0.107929,-0.000605,-0.000647,0);
-		uint heightL = 734;
-		uint widthL = 1292;
+	cv::Mat Kl(3,3,CV_64F, this->left_info.K.elems);
+	cv::Mat Rl(3,3,CV_64F, this->left_info.R.elems);
+	cv::Mat Pl(3,4,CV_64F, this->left_info.P.elems);
+	cv::Mat Dl(1,5,CV_64F, this->left_info.D.data());
+	uint heightL = this->left_info.height;
+	uint widthL = this->left_info.width;
 
-		float Krm[3][3] = {{1194.235157,0,644186461},{ 0,1195.051692, 355.258135},{ 0, 0, 1}};
-		float Rrm[3][3] = {{0.999987,0.001926,0.004714},{-0.001926,0.999998,-0.000020},{-0.004714,0.000011,0.999989}};
-		float Prm[3][4] = {{1185.777062,0,641.420067,-116.860986},{0,1185.777062,358.743057,0},{0,0,1,0}};
-		float Drm[1][5] = {-0.244669,0.097783,0.000396,0.000700,0};
-//		cv::Mat Kr=(cv::Mat_<float>(3,3)<<1194.235157,0,644.186461,0,1195.051692, 355.258135, 0,0,1);
-//		cv::Mat Rr=(cv::Mat_<float>(3,3)<<0.999987,0.001926,0.004714,-0.001926,0.999998,-0.000020,-0.004714,0.000011,0.999989);
-//		cv::Mat Pr=(cv::Mat_<float>(3,4)<<1185.777062,0,641.420067,-116.860986,0,1185,777062,358.743057,0,0,0,1,0);
-//		cv::Mat Dr=(cv::Mat_<float>(1,5)<<-0.244669,0.097783,0.000396,0.000700,0);
-			cv::Mat Kr(3,3,CV_64F, Krm);
-			cv::Mat Rr(3,3,CV_64F, Rrm);
-			cv::Mat Pr(3,4,CV_64F, Prm);
-			cv::Mat Dr(1,5,CV_64F, Drm);
-		uint heightR = 734;
-		uint widthR = 1292;
+	cv::Mat Kr(3,3,CV_64F, this->right_info.K.elems);
+	cv::Mat Rr(3,3,CV_64F, this->right_info.R.elems);
+	cv::Mat Pr(3,4,CV_64F, this->right_info.P.elems);
+	cv::Mat Dr(1,5,CV_64F, this->right_info.D.data());
+	uint heightR = this->right_info.height;
+	uint widthR = this->right_info.width;
+// Manual Info
+//	float Klm[3][3] = {{1200.576576, 0, 660.281868},{ 0, 1201.521424, 363.013750},{ 0, 0, 1}};
+//	float Rlm[3][3] = {{0.999936,-.000728, 0.01281},{ 0.000728,1,0.000019},{-0.011281,-0.000011,0.999936}};
+//	float Plm[3][4] = {{1185.777062,0,641.420067,0},{0,1185.777062,358.743057,0},{0,0,1,0}};
+//	float Dlm[1][5] = {-0.248229,0.107929,-0.000605,-0.000647,0};
+//		cv::Mat Kl(3,3,CV_64F, Klm);
+//		cv::Mat Rl(3,3,CV_64F, Rlm);
+//		cv::Mat Pl(3,4,CV_64F, Plm);
+//		cv::Mat Dl(1,5,CV_64F, Dlm);
+////		cv::Mat Kl=(cv::Mat_<float>(3,3)<<1200.576576, 0, 660.281868, 0, 1201.521424, 363.013750, 0, 0, 1);
+////		cv::Mat Rl=(cv::Mat_<float>(3,3)<<0.999936,-.000728, 0.01281, 0.000728,1,0.000019,-0.011281,-0.000011,0.999936);
+////		cv::Mat Pl=(cv::Mat_<float>(3,4)<<1185.777062,0,641.420067,0,0,1185.777062,358.743057,0,0,0,1,0);
+////		cv::Mat Dl=(cv::Mat_<float>(1,5)<<-0.248229,0.107929,-0.000605,-0.000647,0);
+//		uint heightL = 734;
+//		uint widthL = 1292;
+//
+//		float Krm[3][3] = {{1194.235157,0,644186461},{ 0,1195.051692, 355.258135},{ 0, 0, 1}};
+//		float Rrm[3][3] = {{0.999987,0.001926,0.004714},{-0.001926,0.999998,-0.000020},{-0.004714,0.000011,0.999989}};
+//		float Prm[3][4] = {{1185.777062,0,641.420067,-116.860986},{0,1185.777062,358.743057,0},{0,0,1,0}};
+//		float Drm[1][5] = {-0.244669,0.097783,0.000396,0.000700,0};
+////		cv::Mat Kr=(cv::Mat_<float>(3,3)<<1194.235157,0,644.186461,0,1195.051692, 355.258135, 0,0,1);
+////		cv::Mat Rr=(cv::Mat_<float>(3,3)<<0.999987,0.001926,0.004714,-0.001926,0.999998,-0.000020,-0.004714,0.000011,0.999989);
+////		cv::Mat Pr=(cv::Mat_<float>(3,4)<<1185.777062,0,641.420067,-116.860986,0,1185,777062,358.743057,0,0,0,1,0);
+////		cv::Mat Dr=(cv::Mat_<float>(1,5)<<-0.244669,0.097783,0.000396,0.000700,0);
+//			cv::Mat Kr(3,3,CV_64F, Krm);
+//			cv::Mat Rr(3,3,CV_64F, Rrm);
+//			cv::Mat Pr(3,4,CV_64F, Prm);
+//			cv::Mat Dr(1,5,CV_64F, Drm);
+//		uint heightR = 734;
+//		uint widthR = 1292;
 
 
 	//	  CvMat Klm = Kl;
@@ -339,8 +339,8 @@ void ImageConverter::computeDisparity()
 
 	cv::resize(disp, vdisp1,size);
 	cv::imshow(WINDOWDisparity, vdisp1 );
-//	cv::imshow(WINDOWLeft, img1_rect);
-//	cv::imshow(WINDOWRight, img2_rect);
+	cv::imshow(WINDOWLeft, img1_rect);
+	cv::imshow(WINDOWRight, img2_rect);
 	cv::Mat point_cloud;
 //	this->stereo_model.projectDisparityImageTo3d(disp, point_cloud);
 //	ROS_INFO_STREAM("Point Cloud Value: "<<point_cloud.at<unsigned int>(100,100));
