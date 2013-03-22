@@ -46,6 +46,12 @@ void updateFeedback(const ros::TimerEvent& e){
 	feedback_pub.publish(feedback);
 }
 
+#define define_and_get_param(type, var_name, param_name, default_value)	\
+	type var_name(default_value);						\
+	if(!ros::param::get(param_name, var_name))\
+		ROS_WARN_STREAM("Parameter <"<<param_name<<"> not set. Using default value '"<<var_name<<"'")
+	
+
 int main(int argc, char **argv){
   ros::init(argc, argv, "roboteq_manager");
   
@@ -54,20 +60,14 @@ int main(int argc, char **argv){
   ROS_INFO("Initializing RoboteqDevice");
 
 
-  double rotations_per_meter;
-  double maxMPS;
-  int ppr;
-  double feedbackRate;
-  std::string port;
-  //TODO error if parameter not set
-  ros::param::get("~rotations_per_meter", rotations_per_meter);
-  ros::param::get("~maxMPS", maxMPS);
-  ros::param::get("~ppr", ppr);
-  ros::param::get("~feedbackRate", feedbackRate);
-  ros::param::get("~port", port);
+  define_and_get_param(double, rotations_per_meter, "~rotations_per_meter", 1);
+  define_and_get_param(double, max_mps, "~max_mps", 1);
+  define_and_get_param(int, ppr, "~ppr", 250);
+  define_and_get_param(double, feedback_rate, "~feedback_rate", 1);
+  define_and_get_param(std::string, port, "~port", "/dev/ttyUSB0");
 
   controller = new roboteq_driver::RoboteqMotorController(rotations_per_meter, rotations_per_meter,
-							  maxMPS, maxMPS,
+							  max_mps, max_mps,
 							  ppr, ppr);
 
   controller->open(port);
@@ -76,9 +76,11 @@ int main(int argc, char **argv){
 
   twist_sub = n.subscribe("cmd_vel", 1000, twistCallback);
   feedback_pub = n.advertise<roboteq_driver::RoboteqFeedback>("motor_feedback", 1000);
-  ros::Timer feedback_timer = n.createTimer(ros::Duration(1/feedbackRate), updateFeedback);
+  ros::Timer feedback_timer = n.createTimer(ros::Duration(1/feedback_rate), updateFeedback);
   
   ros::spin();
+
+  controller->setSpeed(0, 0);
 
   delete controller;
 
