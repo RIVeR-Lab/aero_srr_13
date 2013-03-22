@@ -6,4 +6,4 @@ add_executable(cap frameSave.cpp)
 target_link_libraries(ros2cv ${OpenCV_LIBS})
 target_link_libraries(objDet ${OpenCV_LIBS})
 target_link_libraries(cap ${OpenCV_LIBS})
-target_link_libraries(rosDisp ${OpenCV_LIBS})
+
