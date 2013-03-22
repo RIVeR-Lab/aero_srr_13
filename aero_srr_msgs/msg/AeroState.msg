@@ -32,4 +32,7 @@ uint8 SHUTDOWN=7
 
 #The robot is currenlty in manual mode
 uint8 MANUAL=8
+
+#The robot is currently in startup mode
+uint8 STARTUP=9
 ##############################################

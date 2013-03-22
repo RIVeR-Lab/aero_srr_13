@@ -29,4 +29,6 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+include_directories("${PROJECT_BINARY_DIR}")
+
 add_subdirectory(src)
