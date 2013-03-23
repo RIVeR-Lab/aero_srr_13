@@ -8,6 +8,7 @@
 #include "Constants.h"
 #include <exception>
 #include <stdexcept>
+#include <stdint.h>
 
 namespace roboteq_driver{
 
@@ -18,8 +19,17 @@ class Exception : public std::runtime_error{
 
 class RoboteqMotorController{
  private:
+        typedef int8_t MotorMode;
+	const static MotorMode MOTOR_MODE_UNDEFINED = -1;
+	const static MotorMode MOTOR_MODE_POWER = 0;
+	const static MotorMode MOTOR_MODE_RPM = 1;
+	const static MotorMode MOTOR_MODE_POSITION_REL = 2;
+	const static MotorMode MOTOR_MODE_POSITION_COUNT = 3;
+	const static MotorMode MOTOR_MODE_POSITION_TRACKING = 4;
+	const static MotorMode MOTOR_MODE_TORQUE = 5;
+
 	const static int GO_COMMAND_BOUND = 1000;
-	const static double MOTOR_AMP_SCALE = 10;
+	const static double MOTOR_AMP_SCALE = 0.1;
 	/**
 	 * degree C/mV
 	 */
@@ -35,15 +45,10 @@ class RoboteqMotorController{
 	void getValue(int operatingItem, int index, int& value);
  public:
 	/**
-	 * @param rotations_per_meter1 the rotations per meter for motor 1
-	 * @param rotations_per_meter2 the rotations per meter for motor 2
-	 * @param maxMPS1 the maximum meters per second for motor 1
-	 * @param maxMPS2 the maximum meters per second for motor 2
 	 * @param ppr1 the pulses per rotation for encoder 1 (motor 1)
 	 * @param ppr2 the pulses per rotation for encoder 2 (motor 2)
 	 */
-	RoboteqMotorController(double rotations_per_meter1, double rotations_per_meter2,
-			       double maxMPS1, double maxMPS2,
+	RoboteqMotorController(double maxRPM1, double maxRPM2,
 			       int ppr1, int ppr2);
 	~RoboteqMotorController();
 	/**
@@ -58,26 +63,20 @@ class RoboteqMotorController{
 	/*
 	 * Configuration
 	 */
-	/**
-	 * set the acceleration of the motors in m/s^2
-	 */
-	void setAccel(double chan1, double chan2);
-	/**
-	 * set the deceleration of the motors in m/s^2
-	 */
-	void setDecel(double chan1, double chan2);
-	/**
-	 * set the timeout for the serial connection (0 to disable)
-	 */
 	void setSerialWatchdog(int time);
 
 	/*
 	 * Action
 	 */
 	/**
-	 * set the speed of each motor (in m/s)
+	 * set the speed of a motor (in rad/s)
 	 */
-	void setSpeed(double chan1, double chan2);
+	void setRPM(uint8_t chan, double speed);
+	/**
+	 * set the power of a motor (-1.0 to 1.0)
+	 */
+	void setPower(uint8_t chan, double power);
+	void setMotorMode(uint8_t chan, MotorMode mode);
 
 	/*
 	 * Sensors
@@ -85,19 +84,23 @@ class RoboteqMotorController{
 	/**
 	 * get the current draw of each motor (in A)
 	 */
-	void getCurrent(double& chan1, double& chan2);
+	void getCurrent(uint8_t chan, double& value);
 	/**
 	 * get the temperature of each motor (in C)
 	 */
-	void getTemp(double& chan1, double& chan2);
+	void getTemp(uint8_t chan, double& value);
+	/**
+	 * get the absolute position of each motor
+	 */
+	void getPosition(uint8_t chan, int32_t& value);
  private:
-	const double rotations_per_meter1_;
-	const double rotations_per_meter2_;
-	const double maxMPS1_;
-	const double maxMPS2_;
+	const double maxRPM1_;
+	const double maxRPM2_;
 	const int ppr1_;
 	const int ppr2_;
 	RoboteqDevice device_;
+	MotorMode motor_mode1_;
+	MotorMode motor_mode2_;
 };
 
 }

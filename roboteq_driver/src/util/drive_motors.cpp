@@ -24,13 +24,26 @@ int main(int argc, char **argv){
 		return 1;
 	}
 	printf("Running motors at (%f, %f) for %fs\n", leftSpeed, rightSpeed, runTime);
-	roboteq_driver::RoboteqMotorController controller(2.0, 2.0, 2.0, 2.0, 250, 250);
+	roboteq_driver::RoboteqMotorController controller(1000.0, 1000.0, 5000, 5000);
 	controller.open(argv[1]);
 	for(double time = 0; time<runTime; time+=0.1){
-		controller.setSpeed(leftSpeed, rightSpeed);
-		usleep(100000);
+	  controller.setRPM(1, leftSpeed);
+	  controller.setRPM(2, rightSpeed);
+	  int32_t left, right;
+	  double leftf, rightf;
+	  controller.getPosition(1, left);
+	  controller.getPosition(2, right);
+	  printf("Pos: %i, %i\n", left, right);
+	  controller.getCurrent(1, leftf);
+	  controller.getCurrent(2, rightf);
+	  printf("Current: %f, %f\n", leftf, rightf);
+	  controller.getTemp(1, leftf);
+	  controller.getTemp(2, rightf);
+	  printf("Temp: %f, %f\n", leftf, rightf);
+	  usleep(100000);
 	}
-	controller.setSpeed(0, 0);
+	controller.setPower(1, 0);
+	controller.setPower(2, 0);
 	controller.close();
 	return 0;
 }

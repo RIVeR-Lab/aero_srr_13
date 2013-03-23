@@ -1,19 +1,18 @@
 #include "roboteq_driver/roboteq_motor_controller.h"
+#include <stdio.h>
 
 namespace roboteq_driver{
 
-RoboteqMotorController::RoboteqMotorController(double rotations_per_meter1,
-					       double rotations_per_meter2,
-					       double maxMPS1,
-					       double maxMPS2,
+RoboteqMotorController::RoboteqMotorController(double maxRPM1,
+					       double maxRPM2,
 					       int ppr1,
 					       int ppr2):
-	rotations_per_meter1_(rotations_per_meter1),
-	rotations_per_meter2_(rotations_per_meter2),
-	maxMPS1_(maxMPS1),
-	maxMPS2_(maxMPS2),
+	maxRPM1_(maxRPM1),
+	maxRPM2_(maxRPM2),
 	ppr1_(ppr1),
-	ppr2_(ppr2){
+	ppr2_(ppr2),
+	motor_mode1_(MOTOR_MODE_UNDEFINED),
+	motor_mode2_(MOTOR_MODE_UNDEFINED){
 
 }
 RoboteqMotorController::~RoboteqMotorController(){
@@ -42,22 +41,28 @@ void RoboteqMotorController::open(std::string port){
 
 	//Configure the device
 	//set encoders pulse per rotation
-	//	setConfig(_EPPR, 1, ppr1_);
-	//	setConfig(_EPPR, 2, ppr2_);
+	setConfig(_EPPR, 1, ppr1_);
+	setConfig(_EPPR, 2, ppr2_);
 	//set encoders usage to feedback
-	//	setConfig(_EMOD, 1, 1+16);
-	//	setConfig(_EMOD, 2, 1+32);
+	setConfig(_EMOD, 1, 18);
+	setConfig(_EMOD, 2, 34);
 
+	//TODO configure temp pins
 	//setup analog inputs for temp (unused mode)
-	//	setConfig(_AINA, 1, 0);
-	//	setConfig(_AINA, 2, 0);
+	setConfig(_AMOD, 1, 1);
+	setConfig(_AMOD, 4, 1);
 
 	//set motors max rpm
-	//	setConfig(_MXRPM, 1, maxMPS1_*rotations_per_meter1_);
-	//	setConfig(_MXRPM, 2, maxMPS2_*rotations_per_meter2_);
-	//set motors mode to closed-loop speed
-	//	setConfig(_MMOD, 1, 2);
-	//	setConfig(_MMOD, 2, 2);
+	//setConfig(_MXRPM, 1, maxRPM1_);
+	//setConfig(_MXRPM, 2, maxRPM2_);
+
+
+	//Initialize to initial values
+	motor_mode1_ = motor_mode2_ = MOTOR_MODE_UNDEFINED;//make sure to reset local values
+	setMotorMode(1, MOTOR_MODE_POWER);
+	setMotorMode(2, MOTOR_MODE_POWER);
+	setPower(1, 0);
+	setPower(2, 0);
 }
 
 void RoboteqMotorController::close(){
@@ -128,7 +133,7 @@ void RoboteqMotorController::setConfig(int configItem, int value){
 	}
 }
 void RoboteqMotorController::getValue(int operatingItem, int index, int& value){
-	int status = device_.GetConfig(operatingItem, index, value);
+	int status = device_.GetValue(operatingItem, index, value);
 	if(status!=RQ_SUCCESS){
 		if(status==RQ_ERR_NOT_CONNECTED)
 			throw Exception("The device is not connected (call open)");
@@ -154,42 +159,74 @@ void RoboteqMotorController::getValue(int operatingItem, int index, int& value){
 /*
  * Configuration
  */
-void RoboteqMotorController::setAccel(double chan1, double chan2){
-	setCommand(_ACCEL, 1, chan1*rotations_per_meter1_);
-	setCommand(_ACCEL, 2, chan2*rotations_per_meter2_);
-}
-void RoboteqMotorController::setDecel(double chan1, double chan2){
-	setCommand(_DECEL, 1, chan1*rotations_per_meter1_);
-	setCommand(_DECEL, 2, chan2*rotations_per_meter2_);
-}
 void RoboteqMotorController::setSerialWatchdog(int time){
 	setConfig(_RWD, time);
 }
 
+
+static inline double limit(double val, double min, double max){
+  if(val<min)
+    return min;
+  if(val>max)
+    return max;
+  return val;
+}
 /*
  * Action
  */
-void RoboteqMotorController::setSpeed(double chan1, double chan2){
-	setCommand(_GO, 1, GO_COMMAND_BOUND*chan1/maxMPS1_);
-	setCommand(_GO, 2, GO_COMMAND_BOUND*chan2/maxMPS2_);
+void RoboteqMotorController::setMotorMode(uint8_t chan, MotorMode new_mode){
+  if(chan==1){
+    if(motor_mode1_!=new_mode){
+      motor_mode1_ = new_mode;
+      setConfig(_MMOD, 1, new_mode);
+    }
+  }
+  else if(chan==2){
+      motor_mode2_ = new_mode;
+      setConfig(_MMOD, 2, new_mode);
+  }
+  else
+    throw Exception("Invalid motor channel");
+}
+void RoboteqMotorController::setRPM(uint8_t chan, double speed){
+  setMotorMode(chan, MOTOR_MODE_RPM);
+  if(chan==1)
+    setCommand(_GO, 1, GO_COMMAND_BOUND*limit(speed, -maxRPM1_, maxRPM1_)/maxRPM1_);
+  else if(chan==2)
+    setCommand(_GO, 2, GO_COMMAND_BOUND*limit(speed, -maxRPM2_, maxRPM2_)/maxRPM2_);
+  else
+    throw Exception("Invalid motor channel");
+}
+void RoboteqMotorController::setPower(uint8_t chan, double power){
+  setMotorMode(chan, MOTOR_MODE_POWER);
+  if(chan==1)
+    setCommand(_GO, 1, GO_COMMAND_BOUND*limit(power, -1, 1));
+  else if(chan==2)
+    setCommand(_GO, 2, GO_COMMAND_BOUND*limit(power, -1, 1));
+  else
+    throw Exception("Invalid motor channel");
 }
 
 /*
  * Sensors
  */
-void RoboteqMotorController::getCurrent(double& chan1, double& chan2){
-	int current1, current2;
-	getValue(_MOTAMPS, 1, current1);
-	getValue(_MOTAMPS, 2, current2);
-	chan1 = current1*MOTOR_AMP_SCALE;
-	chan2 = current2*MOTOR_AMP_SCALE;
+void RoboteqMotorController::getCurrent(uint8_t chan, double& value){
+  int current;
+  getValue(_MOTAMPS, chan, current);
+  value = current*MOTOR_AMP_SCALE;
 }
-void RoboteqMotorController::getTemp(double& chan1, double& chan2){
-	int an1, an2;
-	getValue(_ANAIN, 1, an1);
-	getValue(_ANAIN, 2, an2);
-	chan1 = an1*TEMP_SCALE+TEMP_OFFSET;
-	chan2 = an2*TEMP_SCALE+TEMP_OFFSET;
+void RoboteqMotorController::getTemp(uint8_t chan, double& value){
+  int an;
+  if(chan==1)
+    getValue(_AI, 1, an);
+  else if(chan==2)
+    getValue(_AI, 4, an);
+  else
+    throw Exception("Invalid motor channel");
+  value = an*TEMP_SCALE+TEMP_OFFSET;
+}
+void RoboteqMotorController::getPosition(uint8_t chan, int32_t& value){
+  getValue(_C, chan, value);
 }
 
 }
