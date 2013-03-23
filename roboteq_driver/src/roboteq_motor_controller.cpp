@@ -37,27 +37,27 @@ void RoboteqMotorController::open(std::string port){
 			throw Exception("Error connecting to device.");
 		}
 	}
-	//Wait 10 ms before sending another command to device
-	sleepms(10);
+	//Wait 100 ms before sending another command to device
+	sleepms(100);
 
 	//Configure the device
 	//set encoders pulse per rotation
-	setConfig(_EPPR, 1, ppr1_);
-	setConfig(_EPPR, 2, ppr2_);
+	//	setConfig(_EPPR, 1, ppr1_);
+	//	setConfig(_EPPR, 2, ppr2_);
 	//set encoders usage to feedback
-	setConfig(_EMOD, 1, 1+16);
-	setConfig(_EMOD, 2, 1+32);
+	//	setConfig(_EMOD, 1, 1+16);
+	//	setConfig(_EMOD, 2, 1+32);
 
 	//setup analog inputs for temp (unused mode)
-	setConfig(_AINA, 1, 0);
-	setConfig(_AINA, 2, 0);
+	//	setConfig(_AINA, 1, 0);
+	//	setConfig(_AINA, 2, 0);
 
 	//set motors max rpm
-	setConfig(_MXRPM, 1, maxMPS1_*rotations_per_meter1_);
-	setConfig(_MXRPM, 2, maxMPS2_*rotations_per_meter2_);
+	//	setConfig(_MXRPM, 1, maxMPS1_*rotations_per_meter1_);
+	//	setConfig(_MXRPM, 2, maxMPS2_*rotations_per_meter2_);
 	//set motors mode to closed-loop speed
-	setConfig(_MMOD, 1, 2);
-	setConfig(_MMOD, 2, 2);
+	//	setConfig(_MMOD, 1, 2);
+	//	setConfig(_MMOD, 2, 2);
 }
 
 void RoboteqMotorController::close(){
@@ -84,6 +84,8 @@ void RoboteqMotorController::setCommand(int commandItem, int index, int value){
 		else
 			throw Exception("Failed to set device command.");
 	}
+	//Wait 10 ms before sending another command to device
+	sleepms(10);
 }
 void RoboteqMotorController::setConfig(int configItem, int index, int value){
 	int status = device_.SetConfig(configItem, index, value);
@@ -105,6 +107,8 @@ void RoboteqMotorController::setConfig(int configItem, int index, int value){
 		else
 			throw Exception("Failed to set device configuration.");
 	}
+	//Wait 10 ms before sending another command to device
+	sleepms(10);
 }
 void RoboteqMotorController::setConfig(int configItem, int value){
 	int status = device_.SetConfig(configItem, value);
@@ -126,6 +130,8 @@ void RoboteqMotorController::setConfig(int configItem, int value){
 		else
 			throw Exception("Failed to set device configuration.");
 	}
+	//Wait 10 ms before sending another command to device
+	sleepms(10);
 }
 void RoboteqMotorController::getValue(int operatingItem, int index, int& value){
 	int status = device_.GetConfig(operatingItem, index, value);
@@ -147,6 +153,8 @@ void RoboteqMotorController::getValue(int operatingItem, int index, int& value){
 		else
 			throw Exception("Failed to get operating item value.");
 	}
+	//Wait 10 ms before sending another command to device
+	sleepms(10);
 }
 
 

@@ -2,6 +2,7 @@
 #include "geometry_msgs/Twist.h"
 #include "roboteq_driver/roboteq_motor_controller.h"
 #include "roboteq_driver/RoboteqFeedback.h"
+#include "aero_srr_msgs/SoftwareStop.h"
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
@@ -9,19 +10,32 @@ static boost::mutex controller_mutex;
 roboteq_driver::RoboteqMotorController* controller;
 ros::Publisher feedback_pub;
 ros::Subscriber twist_sub;
+ros::Subscriber pause_sub;
+bool is_paused = false;
+
 
 void drive(double u, double w){
 	//TODO do inverse kinematics here...
-	double left_speed = u-w;
+	double left_speed = -u+w;
 	double right_speed = u+w;
 	{
 		boost::lock_guard<boost::mutex> lock(controller_mutex);
-		controller->setSpeed(left_speed, right_speed);
+		if(is_paused)
+			controller->setSpeed(0, 0);
+		else
+			controller->setSpeed(left_speed, right_speed);
 	}
 }
 
 void twistCallback(const geometry_msgs::Twist::ConstPtr& msg){
 	drive(msg->linear.x, msg->angular.z);
+}
+void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
+	{
+		boost::lock_guard<boost::mutex> lock(controller_mutex);
+		is_paused = msg->stop;
+		controller->setSpeed(0, 0);
+	}
 }
 
 void updateFeedback(const ros::TimerEvent& e){
@@ -75,6 +89,7 @@ int main(int argc, char **argv){
   ROS_INFO("Initialization Complete");
 
   twist_sub = n.subscribe("cmd_vel", 1000, twistCallback);
+  pause_sub = n.subscribe("/pause", 1000, pauseCallback);
   feedback_pub = n.advertise<roboteq_driver::RoboteqFeedback>("motor_feedback", 1000);
   ros::Timer feedback_timer = n.createTimer(ros::Duration(1/feedback_rate), updateFeedback);
   

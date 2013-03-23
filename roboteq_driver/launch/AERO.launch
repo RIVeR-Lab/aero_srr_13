@@ -1,9 +1,11 @@
 <launch>
-    <node pkg="roboteq_driver" type="roboteq_manager" name="roboteq_manager">
-      <param name="rotations_per_meter" value="2.5" />
-      <param name="max_mps" value="2.0" />
-      <param name="ppr" value="500" />
-      <param name="feedback_rate" value="5" />
-      <param name="port" value="/dev/ttyUSB0" />
-    </node>
+  <node pkg="roboteq_driver" type="roboteq_manager" name="roboteq_manager">
+    <!-- WHEEL_DIAMETER = 330mm -->
+    <!-- rotations_per_meter=1/(2*PI*(WHEEL_DIAMETER/2)) -->
+    <param name="rotations_per_meter" value="0.9646" />
+    <param name="max_mps" value="0.75" />
+    <param name="ppr" value="200000" />
+    <param name="feedback_rate" value="5" />
+    <param name="port" value="/dev/ttyACM0" />
+  </node>
 </launch>
