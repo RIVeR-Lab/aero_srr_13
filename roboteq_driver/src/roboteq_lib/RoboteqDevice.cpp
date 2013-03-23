@@ -358,5 +358,5 @@ string ReplaceString(string source, string find, string replacement)
 
 void sleepms(int milliseconds)
 {
-	usleep(milliseconds / 1000);
+	usleep(milliseconds * 1000);
 }

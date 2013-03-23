@@ -1,5 +1,6 @@
 #include "roboteq_driver/roboteq_motor_controller.h"
 #include <stdio.h>
+#include <unistd.h>
 
 int main(int argc, char **argv){
 	if(argc!=5){
@@ -27,7 +28,7 @@ int main(int argc, char **argv){
 	controller.open(argv[1]);
 	for(double time = 0; time<runTime; time+=0.1){
 		controller.setSpeed(leftSpeed, rightSpeed);
-		sleepms(100);
+		usleep(100000);
 	}
 	controller.setSpeed(0, 0);
 	controller.close();
