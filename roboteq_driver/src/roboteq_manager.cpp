@@ -1,7 +1,8 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 #include "roboteq_driver/roboteq_motor_controller.h"
-#include "roboteq_driver/RoboteqFeedback.h"
+#include "roboteq_driver/RoboteqGroupInfo.h"
+#include "roboteq_driver/RoboteqGroupMotorControl.h"
 #include "aero_srr_msgs/SoftwareStop.h"
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
@@ -14,7 +15,7 @@ ros::Subscriber pause_sub;
 bool is_paused = false;
 
 
-void drive(double u, double w){
+/*void drive(double u, double w){
 	//TODO do inverse kinematics here...
 	double left_speed = -u+w;
 	double right_speed = u+w;
@@ -27,9 +28,9 @@ void drive(double u, double w){
 	}
 }
 
-void twistCallback(const geometry_msgs::Twist::ConstPtr& msg){
+void twistCallback(const roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg){
 	drive(msg->linear.x, msg->angular.z);
-}
+	}*/
 void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
 	{
 		boost::lock_guard<boost::mutex> lock(controller_mutex);
@@ -39,23 +40,33 @@ void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
 }
 
 void updateFeedback(const ros::TimerEvent& e){
-	double leftCurrent, rightCurrent;
-	double leftTemp, rightTemp;
+	double chan1Current, chan2Current;
+	double chan1Temp, chan2Temp;
+	uint64_t chan1Encoder, chan2Encoder;
 	{
 		boost::lock_guard<boost::mutex> lock(controller_mutex);
 		controller->getCurrent(leftCurrent, rightCurrent);
 		controller->getTemp(leftTemp, rightTemp);
 	}
-	roboteq_driver::RoboteqFeedback feedback;
+	roboteq_driver::RoboteqGroupInfo feedback;
 	feedback.header.stamp = ros::Time::now();
-	feedback.left.temp.header = feedback.header;
-	feedback.right.temp.header = feedback.header;
 
-	feedback.left.temp.temperature = leftTemp;
-	feedback.right.temp.temperature = rightTemp;
+	roboteq_driver::RoboteqMotorInfo chan1Feedback;
+	roboteq_driver::RoboteqMotorInfo chan2Feedback;
+	chan1Feedback.temp.header = feedback.header;
+	chan2Feedback.temp.header = feedback.header;
 
-	feedback.left.current = leftCurrent;
-	feedback.right.current = rightCurrent;
+	chan1Feedback.temp.temperature = chan1Temp;
+	chan2Feedback.temp.temperature = chan2Temp;
+
+	chan1Feedback.current = chan1Current;
+	chan2Feedback.current = chan2Current;
+
+	chan1Feedback.encoder = chan1Encoder;
+	chan2Feedback.encoder = chan2Encoder;
+
+	feedback.motors[0] = chan1Feedback;
+	feedback.motors[1] = chan2Feedback;
 
 	feedback_pub.publish(feedback);
 }
@@ -73,9 +84,6 @@ int main(int argc, char **argv){
 
   ROS_INFO("Initializing RoboteqDevice");
 
-
-  define_and_get_param(double, rotations_per_meter, "~rotations_per_meter", 1);
-  define_and_get_param(double, max_mps, "~max_mps", 1);
   define_and_get_param(int, ppr, "~ppr", 250);
   define_and_get_param(double, feedback_rate, "~feedback_rate", 1);
   define_and_get_param(std::string, port, "~port", "/dev/ttyUSB0");
@@ -90,7 +98,7 @@ int main(int argc, char **argv){
 
   twist_sub = n.subscribe("cmd_vel", 1000, twistCallback);
   pause_sub = n.subscribe("/pause", 1000, pauseCallback);
-  feedback_pub = n.advertise<roboteq_driver::RoboteqFeedback>("motor_feedback", 1000);
+  feedback_pub = n.advertise<roboteq_driver::RoboteqGroupInfo>("motor_feedback", 1000);
   ros::Timer feedback_timer = n.createTimer(ros::Duration(1/feedback_rate), updateFeedback);
   
   ros::spin();

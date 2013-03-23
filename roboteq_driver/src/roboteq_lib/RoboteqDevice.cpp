@@ -46,7 +46,6 @@ int RoboteqDevice::Connect(string port)
 	}
 
 	cout<<"succeeded."<<endl;
-	//fcntl (handle, F_SETFL, O_APPEND | O_NONBLOCK);
 	fcntl (handle, F_SETFL, 0);
 
 	cout<<"Initializing port...";
@@ -138,7 +137,6 @@ int RoboteqDevice::ReadAll(string &str)
 	char buf[BUFFER_SIZE + 1] = "";
 
 	str = "";
-	int i = 0;
 	while((countRcv = read(handle, buf, BUFFER_SIZE)) > 0)
 	{
 		str.append(buf, countRcv);
@@ -173,7 +171,7 @@ int RoboteqDevice::IssueCommand(string commandType, string command, string args,
 	if(status != RQ_SUCCESS)
 		return status;
 
-	usleep(waitms * 1000l);
+	sleepms(waitms);
 
 	status = ReadAll(read);
 	if(status != RQ_SUCCESS)

@@ -84,8 +84,6 @@ void RoboteqMotorController::setCommand(int commandItem, int index, int value){
 		else
 			throw Exception("Failed to set device command.");
 	}
-	//Wait 10 ms before sending another command to device
-	sleepms(10);
 }
 void RoboteqMotorController::setConfig(int configItem, int index, int value){
 	int status = device_.SetConfig(configItem, index, value);
@@ -107,8 +105,6 @@ void RoboteqMotorController::setConfig(int configItem, int index, int value){
 		else
 			throw Exception("Failed to set device configuration.");
 	}
-	//Wait 10 ms before sending another command to device
-	sleepms(10);
 }
 void RoboteqMotorController::setConfig(int configItem, int value){
 	int status = device_.SetConfig(configItem, value);
@@ -130,8 +126,6 @@ void RoboteqMotorController::setConfig(int configItem, int value){
 		else
 			throw Exception("Failed to set device configuration.");
 	}
-	//Wait 10 ms before sending another command to device
-	sleepms(10);
 }
 void RoboteqMotorController::getValue(int operatingItem, int index, int& value){
 	int status = device_.GetConfig(operatingItem, index, value);
@@ -153,8 +147,6 @@ void RoboteqMotorController::getValue(int operatingItem, int index, int& value){
 		else
 			throw Exception("Failed to get operating item value.");
 	}
-	//Wait 10 ms before sending another command to device
-	sleepms(10);
 }
 
 
