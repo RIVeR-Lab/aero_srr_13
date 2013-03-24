@@ -84,7 +84,7 @@ void StereoNode::configure()
 	// Exposure
      cam_l_->setExposure(0, prosilica::Auto);
      cam_r_->setExposure(0, prosilica::Auto);
-	 tPvUint32 us = 200000.00;
+	 tPvUint32 us = 20000.00;
      cam_l_->setAttribute("ExposureAutoMax", us);
      cam_r_->setAttribute("ExposureAutoMax", us);
 
@@ -241,6 +241,7 @@ void StereoNode::start()
 	
 	cam_l_->start(prosilica::FixedRate, prosilica::Continuous);
 	cam_r_->start(prosilica::SyncIn2, prosilica::Continuous);
+	//not there in the GC095
 	//cam_l_->runCommand("TimeStampReset");
 	//cam_r_->runCommand("TimeStampReset");
 
@@ -299,7 +300,7 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     unsigned long Timestamph=frame->TimestampHi;
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
-    double sec = t/clock_l_;
+    double sec = t/double(clock_l_);
     ROS_INFO("Left trig time %f",sec);
     trig_time_l_.fromSec(sec);
     img.header.stamp = cam_info.header.stamp = trig_time_l_;
@@ -316,9 +317,9 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     unsigned long Timestamph=frame->TimestampHi;
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
-    unsigned long nsec= t/clock_r_;
-    ROS_INFO("right trig time %ld",nsec);
-    trig_time_r_.fromNSec(nsec);
+    double sec= t/double(clock_r_);
+    ROS_INFO("right trig time %f",sec);
+    trig_time_r_.fromSec(sec);
     img.header.stamp = cam_info.header.stamp = trig_time_r_;
 
     if (!frameToImage(frame, img))
