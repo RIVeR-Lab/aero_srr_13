@@ -94,7 +94,7 @@ void StereoNode::configure()
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 
-	 tPvUint32 freq = 20.00;
+	 tPvFloat32 freq = 20.00;
 	 cam_l_->setAttribute("FrameRate",freq);
 
       start();
