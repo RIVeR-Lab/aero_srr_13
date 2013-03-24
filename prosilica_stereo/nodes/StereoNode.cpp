@@ -299,9 +299,9 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     unsigned long Timestamph=frame->TimestampHi;
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
-    unsigned int long nsec = t/clock_l_;
-    ROS_INFO("Left trig time %ld",nsec);
-    trig_time_l_.fromNSec(nsec);
+    double sec = t/clock_l_;
+    ROS_INFO("Left trig time %f",sec);
+    trig_time_l_.fromSec(sec);
     img.header.stamp = cam_info.header.stamp = trig_time_l_;
 
     if (!frameToImage(frame, img))
