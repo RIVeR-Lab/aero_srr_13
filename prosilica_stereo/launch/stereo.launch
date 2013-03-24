@@ -1,6 +1,6 @@
 <launch>
 
-<node name="stero_driver" pkg="prosilica_stereo" type="stereo_node" output="screen">
+<node name="stero_bottom" pkg="prosilica_stereo" type="stereo_node" output="screen">
     <param name="master_ip" type="str" value="192.168.1.100" />
     <param name="slave_ip" type="str" value="192.168.2.100" />
     <param name="master_frameid" value="left_camera" />
