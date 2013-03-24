@@ -41,7 +41,7 @@ int RoboteqDevice::Connect(string port)
 	handle = open(port.c_str(), O_RDWR |O_NOCTTY | O_NDELAY);
 	if(handle == RQ_INVALID_HANDLE)
 	{
-		cout<<"failed."<<endl;
+         	cout<<"failed. (errno="<<errno<<")"<<endl;
 		return RQ_ERR_OPEN_PORT;
 	}
 
