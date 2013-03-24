@@ -336,7 +336,7 @@ void StereoNode::publishImageL(tPvFrame* frame)
 void StereoNode::publishImageR(tPvFrame* frame)
 {
    if (processFrameR(frame, img_r_, cam_info_r_))
-      streaming_pub_l_.publish(img_r_, cam_info_r_);
+      streaming_pub_r_.publish(img_r_, cam_info_r_);
 }
 
 StereoNode::~StereoNode() {
