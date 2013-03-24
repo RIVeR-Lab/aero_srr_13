@@ -82,13 +82,6 @@ public:
 
 	/**
 	 * @author	Adam Panzica
-	 * @brief	Default copy constructor
-	 * @param grid The OccupancyGrid to copy
-	 */
-	OccupancyGrid(OccupancyGrid& grid);
-
-	/**
-	 * @author	Adam Panzica
 	 * @brief	Creates a new 2D Occupancy Grid with a given set of dimensions and grid resolution
 	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
 	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
@@ -113,18 +106,6 @@ public:
 
 	/**
 	 * @author	Adam Panzica
-	 * @brief	Creates a new Occupancy Grid with a given set of dimensions and grid resolution
-	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
-	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
-	 * @param zDim			The size of the occupancy grid in some integer unit the y-axis
-	 * @param resolution	A conversion factor to go from the integer unit representation to an engineering unit representation
-	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
-	 * @param seedTrait		The PointTrait to initialize the values in the occupancy grid to (defaults to UNKOWN)
-	 */
-	OccupancyGrid(double xDim, double yDim, double zDim, double resolution, aero_path_planning::Point& origin, aero_path_planning::PointTrait_t seedTrait=aero_path_planning::UNKNOWN);
-
-	/**
-	 * @author	Adam Panzica
 	 * @brief	Creates a new OccupancyGrid which uses a supplied PointCloud as its base
 	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
 	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
@@ -135,19 +116,6 @@ public:
 	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
 	 */
 	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const aero_path_planning::Point& origin, const OccupancyGridCloud& cloud) throw(OccupancyGridAccessException);
-
-	/**
-	 * @author	Adam Panzica
-	 * @brief	Creates a new OccupancyGrid which uses a supplied PointCloud as its base
-	 * @param xDim			The size of the occupancy grid in some integer unit in the x-axis
-	 * @param yDim			The size of the occupancy grid in some integer unit the y-axis
-	 * @param zDim			The size of the occupancy grid in some integer unit the y-axis
-	 * @param resolution	A conversion factor to go from the integer unit representation to an engineering unit representation
-	 * @param origin		The origin of the occupancy grid, in integer unit coordinates
-	 * @param cloud			The PointCloud to use as the base for the occupancy grid
-	 * @throw OccupancyGridAccessException If there is a point in the PointCloud that doesn't fit in the specified occupancy grid size
-	 */
-	OccupancyGrid(int xDim, int yDim, int zDim, double resolution, aero_path_planning::Point& origin, OccupancyGridCloud& cloud) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -202,6 +170,18 @@ public:
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
 	bool setPointTrait(aero_path_planning::Point point, aero_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Sets the point traits for a group of points all at once
+	 * @param  [in] points The points to copy into the grid
+	 * @return true if sucessful, else false
+	 *
+	 * This method will the PointTrait of all points in the OccupancyGrid that corrispond to Points in the given point cloud.
+	 * Note that the RGBA field of the Points in the cloud is used to determine the type of PointTrait to set, so this should
+	 * set appropriately.
+	 */
+	bool setPointTrait(const aero_path_planning::PointCloud& points) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author Adam Panzica
@@ -338,6 +318,12 @@ public:
 	 */
 	const PointConverter& getConverter() const;
 private:
+
+	/**
+	* @author Adam Panzica
+	* @brief  Intializes the dimmensions of the grid
+	*/
+	void intializeDim(int x_dim, int y_dim, int z_dim);
 
 	/**
 	 * @author	Adam Panzica

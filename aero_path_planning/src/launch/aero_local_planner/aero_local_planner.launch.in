@@ -1,0 +1,37 @@
+<launch>
+
+	<!-- ********************ARGUMENTS******************** -->
+	<!-- declare args for platform -->
+	<arg name="@PLATFORM_ARG@"			 default=@PLATFORM_VAL@/>
+	<!-- declare args to be passed in for actionlib topics -->
+	<arg name="@VELOCITY_CMD_TOPIC_ARG@" default=@VELOCITY_CMD_TOPIC_VAL@ />
+	
+	<!-- declare args to be passed in for topics for receiving new PC data -->
+	<arg name="@OCCUPANCY_TOPIC_ARG@"	 default=@OCCUPANCY_TOPIC_VAL@ />
+
+	<arg name="@ODOMETRY_TOPIC_ARG@"     default=@ODOMETRY_TOPIC_VAL@ />
+	
+	<!-- declare args to be passed in for controlling the huristics used by the tentacle selector -->
+	<arg name="@GOAL_WEIGHT_ARG@"	default=@GOAL_WEIGHT_VAL@ />
+	<arg name="@TRAV_WEIGHT_ARG@"	default=@TRAV_WEIGHT_VAL@ />
+	<arg name="@DIFF_WEIGHT_ARG@"	default=@DIFF_WEIGHT_VAL@ />
+	<arg name="@UNKN_WEIGHT_ARG@"	default=@UNKN_WEIGHT_VAL@ />
+	
+	
+	<!-- Test Enable Argument -->
+	<arg name="controller_test"			default="false"/>
+	
+	
+	<!-- ********************NODES******************** -->
+	<node name="aero_local_planner" pkg="aero_path_planning" type="aero_local_planner" output="screen">
+		<param name="@VELOCITY_CMD_TOPIC_ARG@"		type="str"		value="$(arg @VELOCITY_CMD_TOPIC_ARG@)" />
+		<param name="@OCCUPANCY_TOPIC_ARG@"			type="str"		value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
+		<param name="@ODOMETRY_TOPIC_ARG@"          type="str"      value="$(arg @ODOMETRY_TOPIC_ARG@"/>
+		<param name="@GOAL_WEIGHT_ARG@"				type="double"	value="$(arg @GOAL_WEIGHT_ARG@)" />
+		<param name="@TRAV_WEIGHT_ARG@"				type="double"	value="$(arg @TRAV_WEIGHT_ARG@)" />
+		<param name="@DIFF_WEIGHT_ARG@"				type="double"	value="$(arg @DIFF_WEIGHT_ARG@)" />
+		<param name="@UNKN_WEIGHT_ARG@"				type="double"	value="$(arg @UNKN_WEIGHT_ARG@)" />
+		<param name="@PLATFORM_ARG@"				type="int"		value="$(arg @PLATFORM_ARG@)" />
+	</node>
+	
+</launch>

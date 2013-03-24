@@ -1,0 +1,21 @@
+<launch>
+
+	<!-- ********************ARGUMENTS******************** -->
+	
+	<!-- declare args to be passed in for topics for sending new occupancy grid data -->
+	<arg name="@OCCUPANCY_TOPIC_ARG@"	default=@OCCUPANCY_TOPIC_VAL@ />
+
+	<arg name="@ODOMETRY_TOPIC_ARG@"     default=@ODOMETRY_TOPIC_VAL@ />
+	
+	
+	<!-- Test Enable Argument -->
+	<arg name="controller_test"			default="false"/>
+	
+	
+	<!-- ********************NODES******************** -->
+	<node name="oryx_global_planner" pkg="aero_path_planning" type="oryx_global_planner" output="screen">
+		<param name="@OCCUPANCY_TOPIC_ARG@"	type="str"		value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
+		<param name="@ODOMETRY_TOPIC_ARG@"          type="str"      value="$(arg @ODOMETRY_TOPIC_ARG@"/>
+	</node>
+	
+</launch>

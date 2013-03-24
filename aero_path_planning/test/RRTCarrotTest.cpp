@@ -95,7 +95,6 @@ TEST(RRTCarrotTreeTest, testFlush)
 
 TEST(RRTCarrotTreeTest, testRootLeafAccess)
 {
-	int initial_tree_size = 0;
 	RRTCarrotTree test_tree;
 	//The tree should be empty
 	ASSERT_EQ(boost::shared_ptr<RRTNode>(), test_tree.getLeafNode());
@@ -444,8 +443,8 @@ TEST_F(RRTCarrotTestFixture, testConnect)
 	node_ptr_t leaf_node = test_tree.getLeafNode();
 	ASSERT_TRUE(this->nodesEqual(start_node, root_node))<<PRINT_EXPECT_NODE(start_node, root_node);
 	ASSERT_TRUE(this->nodesEqual(end_node,   leaf_node))<<PRINT_EXPECT_NODE(end_node,   leaf_node);
-	//The tree should now contain 10 nodes, since the step size is 1
-	ASSERT_EQ(11, test_tree.size());
+	//The tree should now contain 12 nodes, since the step size is 1
+	ASSERT_EQ(12, test_tree.size());
 }
 
 TEST_F(RRTCarrotTestFixture, testMergePath)

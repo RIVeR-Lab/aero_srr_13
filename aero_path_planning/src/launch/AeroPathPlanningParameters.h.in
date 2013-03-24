@@ -1,0 +1,40 @@
+/**
+ * @file AeroPathPlanningParameters.h
+ *
+ * @date Oct 2, 2012
+ * @author Adam Panzica
+ */
+
+#ifndef AEROPATHPLANNINGPARAMETERS_H_
+#define AEROPATHPLANNINGPARAMETERS_H_
+
+// the configured options and settings for Oryx Drive Controller
+#define @OCCUPANCY_TOPIC_CDF@     "@OCCUPANCY_TOPIC_ARG@"
+#define @VELOCITY_CMD_TOPIC_CDF@  "@VELOCITY_CMD_TOPIC_ARG@"
+#define @ODOMETRY_TOPIC_CDF@      "@ODOMETRY_TOPIC_ARG@"
+
+#define @PLATFORM_CDF@            "@PLATFORM_ARG@"
+
+#define @GOAL_WEIGHT_CDF@         "@GOAL_WEIGHT_ARG@"
+#define @TRAV_WEIGHT_CDF@         "@TRAV_WEIGHT_ARG@"
+#define @DIFF_WEIGHT_CDF@         "@DIFF_WEIGHT_ARG@"
+#define @UNKN_WEIGHT_CDF@         "@UNKN_WEIGHT_ARG@"
+
+#define @S_MIN_SPEED_CDF@         "@S_MIN_SPEED_ARG@"
+#define @S_MAX_SPEED_CDF@         "@S_MAX_SPEED_ARG@"
+#define @S_NUMBER_CDF@            "@S_NUMBER_ARG@"
+
+#define @L_OCC_UPDTRT_CDF@		  "@L_OCC_UPDTRT_ARG@"
+#define @L_OCC_XDIM_CDF@          "@L_OCC_XDIM_ARG@"
+#define @L_OCC_YDIM_CDF@          "@L_OCC_YDIM_ARG@"
+#define @L_OCC_ZDIM_CDF@          "@L_OCC_ZDIM_ARG@"
+#define @L_OCC_XORG_CDF@          "@L_OCC_XORG_ARG@"
+#define @L_OCC_YORG_CDF@          "@L_OCC_YORG_ARG@"
+#define @L_OCC_ZORG_CDF@          "@L_OCC_ZORG_ARG@"
+#define @L_OCC_RES_CDF@           "@L_OCC_RES_ARG@"
+
+#define @T_MINLNTH_CDF@           "@T_MINLNTH_ARG@"
+#define @T_EXPFACT_CDF@           "@T_EXPFACT_ARG@"
+#define @T_NUMBER_CDF@            "@T_NUMBER_ARG@"
+
+#endif /* AEROPATHPLANNINGPARAMETERS_H_ */
