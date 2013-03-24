@@ -84,7 +84,7 @@ void StereoNode::configure()
 	// Exposure
      cam_l_->setExposure(0, prosilica::Auto);
      cam_r_->setExposure(0, prosilica::Auto);
-	 tPvUint32 us = 20000.00;
+	 tPvUint32 us = 200000.00;
      cam_l_->setAttribute("ExposureAutoMax", us);
      cam_r_->setAttribute("ExposureAutoMax", us);
 
