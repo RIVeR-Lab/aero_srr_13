@@ -1,0 +1,21 @@
+<package>
+  <description brief="aero_srr_supervisor">
+
+     aero_srr_supervisor
+
+  </description>
+  <author>parallels</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aero_srr_supervisor</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="tf"/>
+  <depend package="aero_srr_msgs"/>
+  <depend package="aero_path_planning"/>
+
+</package>
+
+

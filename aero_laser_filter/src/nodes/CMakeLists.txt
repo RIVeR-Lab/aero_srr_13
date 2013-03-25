@@ -1,0 +1,1 @@
+rosbuild_add_executable(aero_laser_filter aero_laser_filter.cpp)
