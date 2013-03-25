@@ -36,8 +36,8 @@ void RoboteqMotorController::open(std::string port){
 			throw Exception("Error connecting to device.");
 		}
 	}
-	//Wait 100 ms before sending another command to device
-	sleepms(100);
+	//Wait 10 ms before sending another command to device
+	usleep(10*1000);
 
 	//Configure the device
 	//set encoders pulse per rotation
@@ -182,8 +182,10 @@ void RoboteqMotorController::setMotorMode(uint8_t chan, MotorMode new_mode){
     }
   }
   else if(chan==2){
+    if(motor_mode2_!=new_mode){
       motor_mode2_ = new_mode;
       setConfig(_MMOD, 2, new_mode);
+    }
   }
   else
     throw Exception("Invalid motor channel");

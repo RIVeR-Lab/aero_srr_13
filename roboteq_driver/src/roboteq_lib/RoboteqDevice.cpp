@@ -17,7 +17,6 @@ using namespace std;
 
 RoboteqDevice::RoboteqDevice()
 {
-	handle = RQ_INVALID_HANDLE;
 }
 RoboteqDevice::~RoboteqDevice()
 {
@@ -26,7 +25,7 @@ RoboteqDevice::~RoboteqDevice()
 
 bool RoboteqDevice::IsConnected()
 {
-	return handle != RQ_INVALID_HANDLE;
+  return serial_port.is_open();
 }
 int RoboteqDevice::Connect(string port)
 {
@@ -36,21 +35,11 @@ int RoboteqDevice::Connect(string port)
 		Disconnect();
 	}
 
-	//Open port.
-	cout<<"Opening port: '"<<port<<"'...";
-	handle = open(port.c_str(), O_RDWR |O_NOCTTY | O_NDELAY);
-	if(handle == RQ_INVALID_HANDLE)
-	{
-         	cout<<"failed. (errno="<<errno<<")"<<endl;
-		return RQ_ERR_OPEN_PORT;
+	if(serial_port.open(port, B9600, 7, serial_parity_even)<0){
+	  cout<<"Opening port: '"<<port<<"'..."<<"failed."<<endl;
+	  return RQ_ERR_OPEN_PORT;
 	}
-
-	cout<<"succeeded."<<endl;
-	fcntl (handle, F_SETFL, 0);
-
-	cout<<"Initializing port...";
-	InitPort();
-	cout<<"...done."<<endl;
+	cout<<"Opening port: '"<<port<<"'..."<<"succeeded."<<endl;
 
 	int status;
 	string response;
@@ -70,48 +59,13 @@ int RoboteqDevice::Connect(string port)
 		return RQ_UNRECOGNIZED_VERSION;
 	}
 
-	cout<<response.substr(8, 4)<<"."<<endl;
+	cout<<response<<"."<<endl;
 	return RQ_SUCCESS;
 }
 void RoboteqDevice::Disconnect()
 {
 	if(IsConnected())
-		close(handle);
-
-	handle = RQ_INVALID_HANDLE;
-}
-
-void RoboteqDevice::InitPort()
-{
-	if(!IsConnected())
-		return;
-
-	//Get the existing Comm Port Attributes in cwrget
-	int BAUDRATE = B9600;
-	struct termios newtio;
-	tcgetattr (handle, &newtio);
-
-	//Set the Tx and Rx Baud Rate to 9600
-	cfsetospeed (&newtio, (speed_t)BAUDRATE);
-	cfsetispeed (&newtio, (speed_t)BAUDRATE);
-
-	//Enable the Receiver and  Set local Mode
-	newtio.c_iflag = IGNBRK;		/* Ignore Break Condition & no processing under input options*/
-	newtio.c_lflag = 0;			/* Select the RAW Input Mode through Local options*/
-	newtio.c_oflag = 0;			/* Select the RAW Output Mode through Local options*/
-	newtio.c_cflag |= (CLOCAL | CREAD);	/* Select the Local Mode & Enable Receiver through Control options*/
-
-	//Set Data format to 7E1
-	newtio.c_cflag &= ~CSIZE;		/* Mask the Character Size Bits through Control options*/
-	newtio.c_cflag |= CS7;			/* Select Character Size to 7-Bits through Control options*/
-	newtio.c_cflag |= PARENB;		/* Select the Parity Enable through Control options*/
-	newtio.c_cflag &= ~PARODD;		/* Select the Even Parity through Control options*/
-
-	//cwrset.c_iflag |= (INPCK|ISTRIP);
-	//cwrset.c_cc[VMIN] = 6;
-
-	//Set the New Comm Port Attributes through cwrset
-	tcsetattr (handle, TCSANOW, &newtio);	/* Set the attribute NOW without waiting for Data to Complete*/
+		serial_port.close();
 }
 
 int RoboteqDevice::Write(string str)
@@ -120,39 +74,11 @@ int RoboteqDevice::Write(string str)
 		return RQ_ERR_NOT_CONNECTED;
 
 	//cout<<"Writing: "<<ReplaceString(str, "\r", "\r\n");
-	int countSent = write(handle, str.c_str(), str.length());
+	int countSent = serial_port.write(str.c_str(), str.length(), 10);
 
 	//Verify weather the Transmitting Data on UART was Successful or Not
 	if(countSent < 0)
 		return RQ_ERR_TRANSMIT_FAILED;
-
-	return RQ_SUCCESS;
-}
-int RoboteqDevice::ReadAll(string &str)
-{
-	int countRcv;
-	if(!IsConnected())
-		return RQ_ERR_NOT_CONNECTED;
-
-	char buf[BUFFER_SIZE + 1] = "";
-
-	str = "";
-	while((countRcv = read(handle, buf, BUFFER_SIZE)) > 0)
-	{
-		str.append(buf, countRcv);
-
-		//No further data.
-		if(countRcv < BUFFER_SIZE)
-			break;
-	}
-
-	if(countRcv < 0)
-	{
-		if(errno == EAGAIN)
-			return RQ_ERR_SERIAL_IO;
-		else
-			return RQ_ERR_SERIAL_RECEIVE;
-	}
 
 	return RQ_SUCCESS;
 }
@@ -171,33 +97,39 @@ int RoboteqDevice::IssueCommand(string commandType, string command, string args,
 	if(status != RQ_SUCCESS)
 		return status;
 
-	sleepms(waitms);
+	char buf[BUFFER_SIZE];
+	while((status = serial_port.read_line(buf, BUFFER_SIZE, '\r', 10))>=0){//read in command echo
+	  //cout << "Got command echo: "<<buf<<endl;
+	  if(strstr(buf, (commandType+command).c_str())==buf)
+	    break;
+	}
+	if(status<=0){
+	  //cout << "Got echo read status: "<<status<<" errno="<<errno<<" buf="<<buf<<endl;
+	  return status;
+	}
 
-	status = ReadAll(read);
-	if(status != RQ_SUCCESS)
+	status = serial_port.read_line(buf, BUFFER_SIZE, '\r', 10);//read in result
+	//cout << "Got command value: "<<buf<<endl;
+	if(status<0)
 		return status;
+
+	response = buf;
 
 	if(isplusminus)
 	{
-		if(read.length() < 2)
-			return RQ_INVALID_RESPONSE;
-
-		response = read.substr(read.length() - 2, 1);
-		return RQ_SUCCESS;
+	  if(status != 1)//length of response
+	    return RQ_INVALID_RESPONSE;
+	  return RQ_SUCCESS;
 	}
 
 
-	string::size_type pos = read.rfind(command + "=");
+	string::size_type pos = response.rfind(command + "=");
 	if(pos == string::npos)
 		return RQ_INVALID_RESPONSE;
 
 	pos += command.length() + 1;
 
-	string::size_type carriage = read.find("\r", pos);
-	if(carriage == string::npos)
-		return RQ_INVALID_RESPONSE;
-
-	response = read.substr(pos, carriage - pos);
+	response = response.substr(pos, status - pos);
 
 	return RQ_SUCCESS;
 }
@@ -342,19 +274,3 @@ int RoboteqDevice::GetValue(int operatingItem, int &result)
 }
 
 
-string ReplaceString(string source, string find, string replacement)
-{
-	string::size_type pos = 0;
-    while((pos = source.find(find, pos)) != string::npos)
-	{
-        source.replace(pos, find.size(), replacement);
-        pos++;
-    }
-
-	return source;
-}
-
-void sleepms(int milliseconds)
-{
-	usleep(milliseconds * 1000);
-}

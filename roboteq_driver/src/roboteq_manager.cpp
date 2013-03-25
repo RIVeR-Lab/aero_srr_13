@@ -13,10 +13,14 @@ roboteq_driver::RoboteqMotorController* controller;
 ros::Publisher feedback_pub;
 ros::Subscriber control_sub;
 ros::Subscriber pause_sub;
+
+roboteq_driver::RoboteqGroupMotorControl::ConstPtr control_msg;
 bool is_paused = false;
 
-
-void controlCallback(const roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg){
+void controlTimerCallback(const ros::TimerEvent& e){
+  roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg = control_msg;
+  if(!msg)
+    return;
   {
     boost::lock_guard<boost::mutex> lock(controller_mutex);
     BOOST_FOREACH(roboteq_driver::RoboteqMotorControl motorControl, msg->motors){
@@ -30,6 +34,9 @@ void controlCallback(const roboteq_driver::RoboteqGroupMotorControl::ConstPtr& m
 	ROS_WARN("Control mode %d not implemented", motorControl.control_mode);
     }
   }
+}
+void controlCallback(const roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg){
+  control_msg = msg;
 }
 void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
 	{
@@ -50,7 +57,7 @@ static void getFeedback(uint8_t chan, roboteq_driver::RoboteqMotorInfo& chanFeed
 
 	controller->getPosition(chan, chanFeedback.position);
 }
-void updateFeedback(const ros::TimerEvent& e){
+void feedbackTimerCallback(const ros::TimerEvent& e){
 
 	roboteq_driver::RoboteqGroupInfo feedback;
 	roboteq_driver::RoboteqMotorInfo chan1Feedback;
@@ -86,6 +93,7 @@ int main(int argc, char **argv){
   define_and_get_param(double, max_rpm, "~max_rpm", 250);
   define_and_get_param(int, ppr, "~ppr", 250);
   define_and_get_param(double, feedback_rate, "~feedback_rate", 1);
+  define_and_get_param(double, control_rate, "~control_rate", 10);
   define_and_get_param(std::string, port, "~port", "/dev/ttyACM0");
   define_and_get_param(std::string, control_topic, "~control_topic", "roboteq_control");
   define_and_get_param(std::string, info_topic, "~info_topic", "roboteq_info");
@@ -100,7 +108,8 @@ int main(int argc, char **argv){
   control_sub = n.subscribe(control_topic, 1000, controlCallback);
   pause_sub = n.subscribe(pause_topic, 1000, pauseCallback);
   feedback_pub = n.advertise<roboteq_driver::RoboteqGroupInfo>(info_topic, 1000);
-  ros::Timer feedback_timer = n.createTimer(ros::Duration(1/feedback_rate), updateFeedback);
+  ros::Timer feedback_timer = n.createTimer(ros::Duration(1/feedback_rate), feedbackTimerCallback);
+  ros::Timer control_timer = n.createTimer(ros::Duration(1/control_rate), controlTimerCallback);
   
   ros::spin();
 

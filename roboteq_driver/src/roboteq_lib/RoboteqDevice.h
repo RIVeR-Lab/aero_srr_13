@@ -1,21 +1,15 @@
 #ifndef __RoboteqDevice_H_
 #define __RoboteqDevice_H_
 
-using namespace std;
+#include "serial_driver_base/serial_port.h"
 
-string ReplaceString(string source, string find, string replacement);
-void sleepms(int milliseconds);
+using namespace std;
 
 class RoboteqDevice
 {
 private:
-	int device_fd;
-	int fd0;
-	int handle;
-
+  DriverSerialPort serial_port;
 protected:
-	void InitPort();
-
 	int Write(string str);
 	int ReadAll(string &str);
 
