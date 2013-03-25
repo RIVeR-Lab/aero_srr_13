@@ -57,6 +57,11 @@ StereoNode::StereoNode(const ros::NodeHandle& node_handle) : nh_(node_handle),
 	{
 		freq_=float(freq);
 	}
+	int exp
+	if (local_nh.getParam("exposure", exp) && (exp!=0))
+	{
+		exposure_=exp;
+	}
     // Record some attributes of the camera
     tPvUint32 dummy;
     PvAttrRangeUint32(cam_l_->handle(), "Width", &dummy, &sensor_width_);
@@ -89,7 +94,7 @@ void StereoNode::configure()
 	// Exposure
      cam_l_->setExposure(0, prosilica::Auto);
      cam_r_->setExposure(0, prosilica::Auto);
-	 tPvUint32 us = 20000.00;
+	 tPvUint32 us = exposure_;
      cam_l_->setAttribute("ExposureAutoMax", us);
      cam_r_->setAttribute("ExposureAutoMax", us);
 
