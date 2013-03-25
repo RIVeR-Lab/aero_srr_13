@@ -9,7 +9,7 @@
   <url>http://ros.org/wiki/oryx_drive_controller</url>
 
 
-  <depend package="aero_drive_controller"/>
+  <depend package="aero_laser_filter"/>
   <depend package="aero_path_planning"/>
 
 </package>
