@@ -313,7 +313,7 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
     double sec = t/double(clock_l_);
-    if(count==1)
+    if(count%5==0)
     {
     	boost::mutex::scoped_lock(sync_);
       	offset_l_=sec;
@@ -336,7 +336,7 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
     double sec= t/double(clock_r_);
-    if(count==1)
+    if(count%5==0)
     {
     	boost::mutex::scoped_lock(sync_);
       	offset_r_=sec;
