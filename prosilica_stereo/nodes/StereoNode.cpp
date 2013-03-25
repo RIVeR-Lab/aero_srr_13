@@ -242,8 +242,8 @@ void StereoNode::start()
 	//assuming left as the maseter
 	//can be multithreaded using boost at this point!!
 
-	cam_l_->startThread(prosilica::FixedRate, prosilica::Continuous);
-	cam_r_->startThread(prosilica::SyncIn2, prosilica::Continuous);
+	cam_l_->start(prosilica::FixedRate, prosilica::Continuous);
+	cam_r_->start(prosilica::SyncIn2, prosilica::Continuous);
 	//not there in the GC095
 	//cam_l_->runCommand("TimeStampReset");
 	//cam_r_->runCommand("TimeStampReset");
