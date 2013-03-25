@@ -1,0 +1,6 @@
+<launch>
+  <!-- Bring up anything related to the LIDAR here -->
+  <include file="$(find aero_laser_filter)/launch/aero_laser_filter.launch">
+  </include>
+  
+</launch>

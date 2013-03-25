@@ -7,5 +7,8 @@
   </include>
 
   <include file="$(find aero_base)/launch/aero_base.launch">
+  </include> 
+  
+  <include file="$(find aero_srr_bringup)/launch/aero_srr_laser.launch">
   </include>  
 </launch>

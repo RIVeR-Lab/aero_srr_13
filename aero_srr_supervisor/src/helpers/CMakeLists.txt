@@ -1,0 +1,1 @@
+rosbuild_add_library(${PROJECT_NAME}_supervisor Supervisor.cpp)

@@ -1,0 +1,2 @@
+rosbuild_add_executable(aero_srr_supervisor aero_srr_supervisor.cpp)
+target_link_libraries(aero_srr_supervisor ${PROJECT_NAME}_supervisor)
