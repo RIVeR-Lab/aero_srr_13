@@ -311,6 +311,7 @@ void ImageConverter::computeDisparity()
 	geometry_msgs::PointStamped camera_point, world_point;
 	for(int i = 0; i< (int)detection_list_.size(); i++)
 	{
+		cout << endl;
 		cout << "In detection #"<< i+1 << "/"<< detection_list_.size() <<endl;
 		Point2d obj_centroid(detection_list_.at(i)->first,detection_list_.at(i)->second);
 		Point3d obj_3d;
