@@ -57,7 +57,7 @@ StereoNode::StereoNode(const ros::NodeHandle& node_handle) : nh_(node_handle),
 	{
 		freq_=float(freq);
 	}
-	int exp
+	int exp;
 	if (local_nh.getParam("exposure", exp) && (exp!=0))
 	{
 		exposure_=exp;
@@ -104,7 +104,8 @@ void StereoNode::configure()
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 	 cam_l_->setAttribute("FrameRate",freq_);
-
+	 cam_l_->setAttributeEnum("SyncOut2Invert", "Off");
+	 cam_l_->setAttributeEnum("SyncOut2Mode", "Exposing");
       start();
 }
 void StereoNode::loadIntrinsics()
