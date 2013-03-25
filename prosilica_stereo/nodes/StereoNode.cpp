@@ -312,7 +312,7 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
     double sec = t/double(clock_l_);
-    ROS_INFO("Left trig time %f",sec);
+    ROS_INFO("Left trig frame no: %d time %f",count,sec);
     trig_time_l_.fromSec(sec);
     img.header.stamp = cam_info.header.stamp = trig_time_l_;
 
@@ -329,7 +329,7 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
     double sec= t/double(clock_r_);
-    ROS_INFO("right trig time %f",sec);
+    ROS_INFO("Right trig frame no: %d time %f",count,sec);
     trig_time_r_.fromSec(sec);
     img.header.stamp = cam_info.header.stamp = trig_time_r_;
 
