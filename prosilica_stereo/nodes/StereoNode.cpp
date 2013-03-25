@@ -105,7 +105,7 @@ void StereoNode::configure()
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 	 cam_l_->setAttribute("FrameRate",freq_);
 	 cam_l_->setAttributeEnum("SyncOut2Invert", "Off");
-	 cam_l_->setAttributeEnum("SyncOut2Mode", "Exposing");
+	 cam_l_->setAttributeEnum("SyncOut2Mode", "Imaging");
       start();
 }
 void StereoNode::loadIntrinsics()
