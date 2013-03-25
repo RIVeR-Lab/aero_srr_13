@@ -20,6 +20,14 @@
 	<arg name="@L_OCC_YORG_ARG@"	    default=@L_OCC_YORG_VAL@/>
 	<arg name="@L_OCC_ZORG_ARG@"	    default=@L_OCC_ZORG_VAL@/>
 	<arg name="@L_OCC_RES_ARG@"	        default=@L_OCC_RES_VAL@/>
+	<arg name="@G_OCC_UPDTRT_ARG@"	    default=@G_OCC_UPDTRT_VAL@/>
+	<arg name="@G_OCC_XDIM_ARG@"	    default=@G_OCC_XDIM_VAL@/>
+	<arg name="@G_OCC_YDIM_ARG@"	    default=@G_OCC_YDIM_VAL@/>
+	<arg name="@G_OCC_ZDIM_ARG@"	    default=@G_OCC_ZDIM_VAL@/>
+	<arg name="@G_OCC_XORG_ARG@"	    default=@G_OCC_XORG_VAL@/>
+	<arg name="@G_OCC_YORG_ARG@"	    default=@G_OCC_YORG_VAL@/>
+	<arg name="@G_OCC_ZORG_ARG@"	    default=@G_OCC_ZORG_VAL@/>
+	<arg name="@G_OCC_RES_ARG@"	        default=@G_OCC_RES_VAL@/>
 	
 	<!-- declare speed set arguments -->
 	<arg name="@S_NUMBER_ARG@"	    default=@S_NUMBER_VAL@/>
@@ -65,6 +73,6 @@
 
 	<include file="$(find aero_path_planning)/launch/aero_global_planner.launch">
 		<arg name="@OCCUPANCY_TOPIC_ARG@"	 value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
-		<arg name="@ODOMETRY_TOPIC_ARG@"     value="$(arg @ODOMETRY_TOPIC_ARG@"/>
+		<arg name="@ODOMETRY_TOPIC_ARG@"     value="$(arg @ODOMETRY_TOPIC_ARG@)"/>
 	</include>
 </launch>

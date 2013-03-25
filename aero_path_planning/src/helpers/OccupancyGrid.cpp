@@ -41,7 +41,7 @@ OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
 };
 
 
-OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const aero_path_planning::Point& origin, PointTrait_t seedTrait):
+OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, const aero_path_planning::Point& origin, PointTrait_t seedTrait,  const std::string& frame_id):
 										origin_(origin),
 										occ_grid_((xDim+1)*(yDim+1)*(zDim+1),1),
 										converter_(resolution)
@@ -49,6 +49,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 	this->intializeDim(xDim, yDim, zDim);
 	this->res_	= resolution;
 	this->has_goal_ = false;
+	this->occ_grid_.header.frame_id = frame_id;
 
 	//ROS_INFO("Calculated Occupancy Grid Size: %d", this->occGrid.get()->size());
 	//Initialize the grid
@@ -56,7 +57,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 
 }
 
-OccupancyGrid::OccupancyGrid(int xDim, int yDim, double resolution, const aero_path_planning::Point& origin, PointTrait_t seedTrait):
+OccupancyGrid::OccupancyGrid(int xDim, int yDim, double resolution, const aero_path_planning::Point& origin, PointTrait_t seedTrait,  const std::string& frame_id):
 										origin_(origin),
 										occ_grid_((xDim+1)*(yDim+1),1),
 										converter_(resolution)
@@ -64,6 +65,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, double resolution, const aero_p
 	this->intializeDim(xDim, yDim, 0);
 	this->res_	= resolution;
 	this->has_goal_ = false;
+	this->occ_grid_.header.frame_id = frame_id;
 
 	//ROS_INFO("Calculated Occupancy Grid Size: %d", this->occGrid.get()->size());
 	//Initialize the grid
@@ -87,6 +89,7 @@ OccupancyGrid::OccupancyGrid(int xDim, int yDim, int zDim, double resolution, co
 	this->intializeDim(xDim, yDim, zDim);
 	this->res_	    = resolution;
 	this->has_goal_ = false;
+	this->occ_grid_.header.frame_id = cloud.header.frame_id;
 
 #pragma omp parallel for
 	for(unsigned int index = 0; index<cloud.size(); index++)
@@ -288,14 +291,16 @@ const OccupancyGridCloud& OccupancyGrid::getGrid() const
 
 bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message) const
 {
-	message->header.stamp = ros::Time::now();
+	message->header.frame_id = this->occ_grid_.header.frame_id;
+	message->header.stamp    = ros::Time::now();
 	pcl::toROSMsg<pcl::PointXYZRGBA>(this->occ_grid_, *message);
 	return true;
 }
 
 bool OccupancyGrid::generateMessage(aero_path_planning::OccupancyGridMsg& message) const
 {
-	message.header.stamp = ros::Time::now();
+	message.header.frame_id = this->occ_grid_.header.frame_id;
+	message.header.stamp    = ros::Time::now();
 	//Pack grid data
 	message.x_dim = this->x_dim_;
 	message.y_dim = this->y_dim_;
@@ -586,5 +591,10 @@ int OccupancyGrid::getZSize() const
 const Point& OccupancyGrid::getOriginPoint() const
 {
 	return this->origin_;
+}
+
+const std::string& OccupancyGrid::getFrameId() const
+{
+	return this->occ_grid_.header.frame_id;
 }
 
