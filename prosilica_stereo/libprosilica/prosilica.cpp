@@ -210,9 +210,9 @@ void Camera::setFrameCallback(boost::function<void (tPvFrame*)> callback)
 
 void Camera::start(FrameStartTriggerMode fmode, AcquisitionMode amode)
 {
-  assert( FSTmode_ == None && fmode != None );
+  //assert( FSTmode_ == None && fmode != None );
   ///@todo verify this assert again
-  assert( fmode == SyncIn1 || fmode == SyncIn2 || fmode == Software || !userCallback_.empty() );
+  //assert( fmode == SyncIn1 || fmode == SyncIn2 || fmode == Software || !userCallback_.empty() );
   
   // set camera in acquisition mode
   CHECK_ERR( PvCaptureStart(handle_), "Could not start capture");
