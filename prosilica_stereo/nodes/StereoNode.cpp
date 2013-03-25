@@ -309,9 +309,16 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     unsigned long count=frame->FrameCount;
     unsigned long Timestampl=frame->TimestampLo;
     unsigned long Timestamph=frame->TimestampHi;
+
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
     double sec = t/double(clock_l_);
+    if(count==1)
+    {
+    	boost::mutex::scoped_lock(sync_);
+      	offset_l_=sec;
+    }
+
     ROS_INFO("Left trig frame no: %d time %f",count,sec);
     trig_time_l_.fromSec(sec);
     img.header.stamp = cam_info.header.stamp = trig_time_l_;
@@ -329,8 +336,18 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
     double sec= t/double(clock_r_);
-    ROS_INFO("Right trig frame no: %d time %f",count,sec);
-    trig_time_r_.fromSec(sec);
+    if(count==1)
+    {
+    	boost::mutex::scoped_lock(sync_);
+      	offset_r_=sec;
+    }
+    float skew=0;
+    if((offset_l_!=0)&&(offset_r_!=0))
+    {
+    	skew=offset_l_-offset_r_;
+    }
+    ROS_INFO("Right trig frame no: %d time %f",count,sec+skew);
+    trig_time_r_.fromSec(sec+skew);
     img.header.stamp = cam_info.header.stamp = trig_time_r_;
 
     if (!frameToImage(frame, img))
