@@ -38,11 +38,11 @@ StereoNode::StereoNode(const ros::NodeHandle& node_handle) : nh_(node_handle),
 
 	if (local_nh.getParam("master_ip", ip_str_l) && !ip_str_l.empty())
 	{
-	  	cam_l_.reset( new prosilica::Camera(ip_str_l.c_str()) );
+	  	cam_l_.reset( new prosilica::Camera(ip_str_l.c_str(),20) );
 	}
 	if (local_nh.getParam("slave_ip", ip_str_r) && !ip_str_r.empty())
 	{
-	    cam_r_.reset( new prosilica::Camera(ip_str_r.c_str()) );
+	    cam_r_.reset( new prosilica::Camera(ip_str_r.c_str(),20) );
 	}
 	if (local_nh.getParam("master_frameid", frameid_l) && !frameid_l.empty())
 	{
