@@ -15,10 +15,10 @@
 using namespace object_locator;
 
 DetectionManager::DetectionManager(double threshold_dist, double growth_rate, double shrink_rate, double threshold_det):
-						threshold_dist_(threshold_dist),
-						growth_rate_(growth_rate),
-						shrink_rate_(shrink_rate),
-						threshold_det_(threshold_det)
+								threshold_dist_(threshold_dist),
+								growth_rate_(growth_rate),
+								shrink_rate_(shrink_rate),
+								threshold_det_(threshold_det)
 {
 
 }
@@ -84,14 +84,18 @@ void DetectionManager::addDetection(const tf::Point& detection)
 
 void DetectionManager::shrink()
 {
-	for(DetectionArray_t::iterator itr = this->detections_.begin(); itr!=this->detections_.end(); itr++)
-	{
-		(*itr)->second-= this->growth_rate_;
-		if((*itr)->second <= 0)
+
+		for(DetectionArray_t::iterator itr = this->detections_.begin(); itr!=this->detections_.end(); itr++)
 		{
-			this->detections_.erase(itr);
+
+			(*itr)->second-= this->shrink_rate_;
+//			if((*itr)->second <= 0)
+//			{
+//				this->detections_.erase(itr);
+//			}
+
 		}
-	}
+
 }
 
 bool DetectionManager::getDetection(tf::Point& detection, double& confidence) const

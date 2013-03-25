@@ -24,6 +24,9 @@
 #include <iostream>
 #include "cxcore.h"
 #include <aero_srr_msgs/ObjectLocationMsg.h>
+#include <tf/transform_listener.h>
+#include <object_locator/DetectionManager.h>
+#include <geometry_msgs/PointStamped.h>
 
 namespace object_locator
 {
@@ -61,7 +64,12 @@ private:
 	sensor_msgs::CameraInfo right_info;
 	std::string cascade_path;
 	cv::CascadeClassifier cascade;
+	tf::TransformListener optimus_prime;
+	object_locator::DetectionManager sherlock;
 
+	typedef std::pair<int, int> Detection_t;
+	typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
+	std::vector<DetectionPtr_t> detection_list_;
 
 	image_geometry::StereoCameraModel stereo_model;
 	char* WINDOWLeft;
@@ -71,9 +79,7 @@ private:
 	bool gotLeft;
 	bool gotRight;
 	int ctr;
-	bool haveObj;
 	bool objset;
-	cv::Point2d obj_centroid;
 	int HuethresH,
 	HuethresL,
 	SatthresL,

@@ -13,8 +13,10 @@ ImageConverter::ImageConverter()
   WINDOWLeft ("Left Camera"),
   WINDOWRight ("Right Camera"),
   WINDOWDisparity ("Disparity"),
+  sherlock(.2, .1,.05, .5),
   gotLeft(false),
   gotRight(false)
+
 
 {
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("aero/obj_xyz",2);
@@ -40,8 +42,7 @@ ImageConverter::ImageConverter()
 			ValthresH = 100,
 			erosionCount = 1,
 			blurSize = 3;
-	obj_centroid.x = 0;
-	obj_centroid.y = 0;
+	DetectionPtr_t(new Detection_t(0,0));
 
 	//	cvNamedWindow("Color Tune",CV_WINDOW_NORMAL);
 	//	cvCreateTrackbar( "Hue UpperT","Color Tune", &HuethresH, 255, 0 );
@@ -307,34 +308,68 @@ void ImageConverter::computeDisparity()
 
 
 	cv::Point3d real_xyz;
-	if(haveObj && (obj_centroid.x >=0) && (obj_centroid.y >=0)){
-		std::cout << "Checking disparity at  " << obj_centroid.x <<","<<obj_centroid.y<< std::endl;
-		int disp_val = vdisp1.at<uchar>(obj_centroid.x,obj_centroid.y);
+	geometry_msgs::PointStamped camera_point, world_point;
+	for(int i = 0; i< (int)detection_list_.size(); i++)
+	{
+		cout << "In detection #"<< i+1 << "/"<< detection_list_.size() <<endl;
+		Point2d obj_centroid(detection_list_.at(i)->first,detection_list_.at(i)->second);
+		Point3d obj_3d;
 
-		cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
-		this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,real_xyz);
-		cout << "Disp: "<< disp_val << endl << "X: "<< real_xyz.x << endl << "Y: " << real_xyz.y << endl << "Z: " << real_xyz.z << endl;
-		//	ROS_INFO_STREAM("Point Cloud Value: "<<point_cloud.at<unsigned int>(100,100));
-		aero_srr_msgs::ObjectLocationMsg msg;
-		msg.header.frame_id = "/stereo_bottom/center";
-		msg.header.stamp = ros::Time::now();
-
-		msg.point.x = real_xyz.x;
-		msg.point.y = real_xyz.y;
-		msg.point.z = real_xyz.z;
-		ObjLocationPub.publish(msg);
-		cv::imshow(WINDOWDisparity, vdisp1 );
-		cv::waitKey(3);
+		std::cout << "Checking disparity at  " << obj_centroid.x <<","<< obj_centroid.y << std::endl;
+		std::cout << "Range (rows,cols): " << vdisp1.rows <<","<< vdisp1.cols << std::endl;
+		if(obj_centroid.x < vdisp1.cols && obj_centroid.y < vdisp1.rows)
+		{
+			cout << "Getting Disparity" <<endl;
+			int disp_val = vdisp1.at<uchar>(obj_centroid.y,obj_centroid.x);
+			cout << "Recieved Disparity of "<< disp_val <<endl;
+//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
+			this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,obj_3d);
+			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
+			tf::Point detection(obj_3d.x,obj_3d.y, obj_3d.z);
+			cout << "adding detection to camera_point" <<endl;
+			tf::pointTFToMsg(detection, camera_point.point);
+			camera_point.header.frame_id = "/stereo_bottom/center";
+			camera_point.header.stamp = ros::Time(0);
+			world_point.header.frame_id = "/world";
+			world_point.header.stamp = ros::Time(0);
+			cout << "Transforming camera to world" <<endl;
+			optimus_prime.transformPoint("/world",camera_point, world_point);
+			cout << "Adding TFT to msg" <<endl;
+			tf::pointTFToMsg(detection, world_point.point);
+			sherlock.addDetection(detection);
+			cout << "Added detection to manager" <<endl;
+		}
 
 	}
+	tf::Point detection;
+	cout << "Clearing list" <<endl;
+	detection_list_.clear();
+	DetectionPtr_t(new Detection_t(0,0));
+	cout << "Shrinking Detection manager list" <<endl;
+	sherlock.shrink();
+	cout << "Finished shrinking list" <<endl;
+	double confidence;
+	if(sherlock.getDetection(detection, confidence))
+	{
+		cout<<"I Got A Detection: "<< endl << "X:" << detection.getX() <<", Y: "<< detection.getY() << ", Z: " << detection.getZ() <<", "<< confidence<<std::endl;
+		aero_srr_msgs::ObjectLocationMsg msg;
 
+		msg.header.frame_id = world_point.header.frame_id;
+		msg.header.stamp = ros::Time::now();
 
+		tf::pointTFToMsg(detection, msg.point);
 
+		ObjLocationPub.publish(msg);
+	}
 
-
-
+	cv::imshow(WINDOWDisparity, vdisp1 );
+	cv::waitKey(3);
 
 }
+
+
+
+
 void ImageConverter::computeDisparityCb(const ros::TimerEvent& event)
 {
 	if (gotLeft && gotRight)
@@ -375,12 +410,7 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 15, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDB
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDD 35
 	cascade.detectMultiScale( frame_gray, faces, 1.1, 445, 0, cv::Size(70, 100), cv::Size(150,215) ); // works for WHA
-	if (faces.size() <1)
-		haveObj = false;
-	else
-	{
-		haveObj = true;
-	}
+
 
 	for( size_t i = 0; i < faces.size(); i++ )
 	{
@@ -392,11 +422,8 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 		cv::Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
 		cv::ellipse( frame, center, cv::Size( faces[i].width/2, faces[i].height/2), 0, 0, 360, cv::Scalar( 255, 0, 0 ), 2, 8, 0 );
 		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-		if(i == 2)
-		{
-			obj_centroid.x = center.x;
-			obj_centroid.y = center.y;
-		}
+
+		detection_list_.push_back(DetectionPtr_t(new Detection_t(center.x, center.y)));
 
 
 
