@@ -20,6 +20,14 @@
 	<arg name="aero/occupancy/local/y_org"	    default="100"/>
 	<arg name="aero/occupancy/local/z_org"	    default="0"/>
 	<arg name="aero/occupancy/local/res"	        default="0.1"/>
+	<arg name="aero/occupancy/global/update_rate"	    default="0.2"/>
+	<arg name="aero/occupancy/global/x_dim"	    default="5000"/>
+	<arg name="aero/occupancy/global/y_dim"	    default="5000"/>
+	<arg name="aero/occupancy/global/z_dim"	    default="0"/>
+	<arg name="aero/occupancy/global/x_org"	    default="0"/>
+	<arg name="aero/occupancy/global/y_org"	    default="0"/>
+	<arg name="aero/occupancy/global/z_org"	    default="0"/>
+	<arg name="aero/occupancy/global/res"	        default="0.1"/>
 	
 	<!-- declare speed set arguments -->
 	<arg name="speed_set/number"	    default="15"/>
@@ -29,6 +37,7 @@
 	<!-- declare tentacle arguments -->
 	<arg name="aero/tentacles/exp_fact"	        default="1.15"/>
 	<arg name="aero/tentacles/number"	        default="81"/>
+	<arg name="aero/tentacles/min_length"	        default="10"/>
 	
 	
 	<!-- ********************PARAMETERS******************** -->
@@ -48,6 +57,7 @@
 		<param name="speed_set/max_speed"	value="$(arg speed_set/min_speed)"/>
 	
 	<!-- declare tentalce parameters -->
+		<param name="aero/tentacles/min_length"	 value="$(arg aero/tentacles/min_length)"/>
 		<param name="aero/tentacles/number"	 value="$(arg aero/tentacles/number)"/>
 		<param name="aero/tentacles/exp_fact"    value="$(arg aero/tentacles/exp_fact)"/>
 	
@@ -63,6 +73,6 @@
 
 	<include file="$(find aero_path_planning)/launch/aero_global_planner.launch">
 		<arg name="aero/occupancy_topic"	 value="$(arg aero/occupancy_topic)" />
-		<arg name="aero/odometry"     value="$(arg aero/odometry"/>
+		<arg name="aero/odometry"     value="$(arg aero/odometry)"/>
 	</include>
 </launch>

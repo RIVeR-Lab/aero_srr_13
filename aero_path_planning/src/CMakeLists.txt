@@ -8,6 +8,7 @@ set(L_NS local)
 set(G_NS global)
 set(T_NS tentacles)
 set(S_NS speed_set)
+set(SP_NS supervisor)
 
 #Parameter for the topic for exchanging OccupancyGrids between the global and local planner
 set(OCCUPANCY_TOPIC_ARG ${R_NS}/occupancy_topic)
@@ -23,6 +24,16 @@ set(VELOCITY_CMD_TOPIC_VAL "\"${R_NS}/velocity_command_topic\"")
 set(ODOMETRY_TOPIC_ARG ${R_NS}/odometry)
 set(ODOMETRY_TOPIC_CDF ODOMETRY_TOPIC)
 set(ODOMETRY_TOPIC_VAL "\"${R_NS}/odometry\"")
+
+#Paramter defining the joy topic
+set(JOY_TOPIC_ARG /joy)
+set(JOY_TOPIC_CDF JOY_TOPIC)
+set(JOY_TOPIC_VAL "\"/joy\"")
+
+#Paramter defining the state topic
+set(STATE_TOPIC_ARG ${R_NS}/${SP_NS}/state)
+set(STATE_TOPIC_CDF STATE_TOPIC)
+set(STATE_TOPIC_VAL "\"${R_NS}/${SP_NS}/state\"")
 
 #Parameter defining what platform we're on
 set(PLATFORM_ARG ${R_NS}/platform)
@@ -92,7 +103,44 @@ set(L_OCC_RES_ARG "${R_NS}/${O_NS}/${L_NS}/res")
 set(L_OCC_RES_CDF L_OCC_RES)
 set(L_OCC_RES_VAL "\"0.1\"")
 
+#Parameters for global occupancy grid information
+set(G_OCC_UPDTRT_ARG "${R_NS}/${O_NS}/${G_NS}/update_rate")
+set(G_OCC_UPDTRT_CDF G_OCC_UPDTRT)
+set(G_OCC_UPDTRT_VAL "\"0.2\"")
+
+set(G_OCC_XDIM_ARG "${R_NS}/${O_NS}/${G_NS}/x_dim")
+set(G_OCC_XDIM_CDF G_OCC_XDIM)
+set(G_OCC_XDIM_VAL "\"5000\"")
+
+set(G_OCC_YDIM_ARG "${R_NS}/${O_NS}/${G_NS}/y_dim")
+set(G_OCC_YDIM_CDF G_OCC_YDIM)
+set(G_OCC_YDIM_VAL "\"5000\"")
+
+set(G_OCC_ZDIM_ARG "${R_NS}/${O_NS}/${G_NS}/z_dim")
+set(G_OCC_ZDIM_CDF G_OCC_ZDIM)
+set(G_OCC_ZDIM_VAL "\"0\"")
+
+set(G_OCC_XORG_ARG "${R_NS}/${O_NS}/${G_NS}/x_org")
+set(G_OCC_XORG_CDF G_OCC_XORG)
+set(G_OCC_XORG_VAL "\"0\"")
+
+set(G_OCC_YORG_ARG "${R_NS}/${O_NS}/${G_NS}/y_org")
+set(G_OCC_YORG_CDF G_OCC_YORG)
+set(G_OCC_YORG_VAL "\"0\"")
+
+set(G_OCC_ZORG_ARG "${R_NS}/${O_NS}/${G_NS}/z_org")
+set(G_OCC_ZORG_CDF G_OCC_ZORG)
+set(G_OCC_ZORG_VAL "\"0\"")
+
+set(G_OCC_RES_ARG "${R_NS}/${O_NS}/${G_NS}/res")
+set(G_OCC_RES_CDF G_OCC_RES)
+set(G_OCC_RES_VAL "\"0.1\"")
+
 #Parameters for tentacle generation
+set(T_MINLNTH_ARG "${R_NS}/${T_NS}/min_length")
+set(T_MINLNTH_CDF T_MINLNTH)
+set(T_MINLNTH_VAL "\"10\"")
+
 set(T_EXPFACT_ARG "${R_NS}/${T_NS}/exp_fact")
 set(T_EXPFACT_CDF T_EXPFACT)
 set(T_EXPFACT_VAL "\"1.15\"")

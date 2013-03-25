@@ -15,7 +15,7 @@
 	<!-- ********************NODES******************** -->
 	<node name="oryx_global_planner" pkg="aero_path_planning" type="oryx_global_planner" output="screen">
 		<param name="aero/occupancy_topic"	type="str"		value="$(arg aero/occupancy_topic)" />
-		<param name="aero/odometry"          type="str"      value="$(arg aero/odometry"/>
+		<param name="aero/odometry"  type="str"      value="$(arg aero/odometry)"/>
 	</node>
 	
 </launch>

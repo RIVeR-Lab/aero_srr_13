@@ -1,0 +1,6 @@
+<launch>
+  <!-- launch the filtering nodes here-->
+  <node name="aero_laser_filter" pkg="aero_laser_filter" type="aero_laser_filter" output="screen">
+  </node>
+  
+</launch>
