@@ -146,7 +146,8 @@ public:
   static const size_t USER_MEMORY_SIZE = 512;
   void writeUserMemory(const char* data, size_t size);
   void readUserMemory(char* data, size_t size);
-
+  void startThread(FrameStartTriggerMode fmode, AcquisitionMode amode);
+  void stopThread();
   //! Get raw PvApi camera handle.
   tPvHandle handle();
   
@@ -159,6 +160,7 @@ private:
   AcquisitionMode Amode_;
   boost::function<void (tPvFrame*)> userCallback_;
   boost::mutex frameMutex_;
+  boost::thread VidThread_;
 
   void setup();
   

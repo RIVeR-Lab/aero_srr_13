@@ -20,7 +20,7 @@
   <depend package="driver_base" />
   <depend package="dynamic_reconfigure" />
   <depend package="camera_calibration_parsers" />
-  <depend package="prosilica_camera" />
+
 
 </package>
 
