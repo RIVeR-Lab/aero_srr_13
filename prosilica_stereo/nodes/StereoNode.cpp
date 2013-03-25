@@ -329,7 +329,7 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
    return true;
 }
  bool StereoNode::processFrameR(tPvFrame* frame, sensor_msgs::Image &img, sensor_msgs::CameraInfo &cam_info)
- {ged
+ {
     unsigned long count=frame->FrameCount;
     unsigned long Timestampl=frame->TimestampLo;
     unsigned long Timestamph=frame->TimestampHi;
