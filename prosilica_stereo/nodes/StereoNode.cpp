@@ -50,7 +50,7 @@ StereoNode::StereoNode(const ros::NodeHandle& node_handle) : nh_(node_handle),
 	}
 	if (local_nh.getParam("slave_frameid", frameid_r) && !frameid_r.empty())
 	{
-		img_l_.header.frame_id = cam_info_l_.header.frame_id=frameid_r;
+		img_r_.header.frame_id = cam_info_r_.header.frame_id=frameid_r;
 	}
 	double freq;
 	if (local_nh.getParam("freq", freq) && (freq!=0))
@@ -329,7 +329,7 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
    return true;
 }
  bool StereoNode::processFrameR(tPvFrame* frame, sensor_msgs::Image &img, sensor_msgs::CameraInfo &cam_info)
- {
+ {ged
     unsigned long count=frame->FrameCount;
     unsigned long Timestampl=frame->TimestampLo;
     unsigned long Timestamph=frame->TimestampHi;
