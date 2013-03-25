@@ -52,6 +52,11 @@ StereoNode::StereoNode(const ros::NodeHandle& node_handle) : nh_(node_handle),
 	{
 		img_l_.header.frame_id = cam_info_l_.header.frame_id=frameid_r;
 	}
+	double freq;
+	if (local_nh.getParam("freq", freq) && (freq!=0))
+	{
+		freq_=float(freq);
+	}
     // Record some attributes of the camera
     tPvUint32 dummy;
     PvAttrRangeUint32(cam_l_->handle(), "Width", &dummy, &sensor_width_);
@@ -94,8 +99,7 @@ void StereoNode::configure()
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 
-	 tPvFloat32 freq = 20.00;
-	 cam_l_->setAttribute("FrameRate",freq);
+	 cam_l_->setAttribute("FrameRate",freq_);
 
       start();
 }
