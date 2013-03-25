@@ -49,10 +49,12 @@ class StereoNode {
 	ros::ServiceServer set_camera_info_srv_l_,set_camera_info_srv_r_;
 
 	// Camera
+	boost::thread LeftCamThread_,RightCamThread_;
 	boost::scoped_ptr<prosilica::Camera> cam_l_, cam_r_;
 	bool running_;
 	tPvUint32 sensor_width_, sensor_height_; // full resolution dimensions (maybe should be in lib)
 	tPvUint32 clock_l_,clock_r_;
+	tPvFloat32 freq_;
 
 	// Hardware triggering
 	ros::Time trig_time_l_,trig_time_r_;

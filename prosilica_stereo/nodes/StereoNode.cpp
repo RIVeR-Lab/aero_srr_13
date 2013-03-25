@@ -52,6 +52,11 @@ StereoNode::StereoNode(const ros::NodeHandle& node_handle) : nh_(node_handle),
 	{
 		img_l_.header.frame_id = cam_info_l_.header.frame_id=frameid_r;
 	}
+	double freq;
+	if (local_nh.getParam("freq", freq) && (freq!=0))
+	{
+		freq_=float(freq);
+	}
     // Record some attributes of the camera
     tPvUint32 dummy;
     PvAttrRangeUint32(cam_l_->handle(), "Width", &dummy, &sensor_width_);
@@ -93,9 +98,7 @@ void StereoNode::configure()
 
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
-
-	 tPvFloat32 freq = 20.00;
-	 cam_l_->setAttribute("FrameRate",freq);
+	 cam_l_->setAttribute("FrameRate",freq_);
 
       start();
 }
@@ -238,7 +241,7 @@ void StereoNode::start()
 
 	//assuming left as the maseter
 	//can be multithreaded using boost at this point!!
-	
+
 	cam_l_->start(prosilica::FixedRate, prosilica::Continuous);
 	cam_r_->start(prosilica::SyncIn2, prosilica::Continuous);
 	//not there in the GC095
@@ -250,7 +253,9 @@ void StereoNode::start()
 
 void StereoNode::stop()
 {
-   if (!running_) return;
+   cam_l_->stopThread();
+   cam_r_->stopThread();
+
    cam_l_->stop(); // Must stop camera before streaming_pub_.
    cam_r_->stop();
    //trigger_sub_.shutdown();

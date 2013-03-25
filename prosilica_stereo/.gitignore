@@ -1,5 +1,6 @@
 #Stuff built by rosmake
 /build
+/nodes/CMakeFiles
 /bin
 /lib/*.so
 #Stuff added by make eclipse-project

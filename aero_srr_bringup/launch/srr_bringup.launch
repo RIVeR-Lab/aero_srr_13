@@ -8,12 +8,6 @@
 
 	<!-- ********************INCLUDES******************** -->
 	<!-- Include Sub-Launch Files -->
-        <group unless="$(arg aero/platform)">
-        <!-- if platform is oryx, bring up the oryx drive controller -->
-          <include file="$(find oryx_drive_controller)/launch/oryx_drive_controller.launch">
-                <arg name="velocity_topic"              value="$(arg aero/velocity_command_topic)"/>
-          </include>
-        </group>
         
 	<include file="$(find aero_path_planning)/launch/aero_path_planning.launch">
 		<arg name="aero/platform"               value="$(arg aero/platform)" />
