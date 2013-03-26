@@ -95,6 +95,7 @@ private:
 	double growth_rate_;
 	double shrink_rate_;
 	double threshold_det_;
+	double max_condifdence_;
 	DetectionPtr     highest_confidance_;
 	DetectionArray_t detections_;
 };
