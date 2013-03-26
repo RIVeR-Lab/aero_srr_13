@@ -35,10 +35,7 @@ int RoboteqDevice::Connect(string port)
 		Disconnect();
 	}
 
-	if(serial_port.open(port, B9600, 7, serial_parity_even)<0){
-	  cout<<"Opening port: '"<<port<<"'..."<<"failed."<<endl;
-	  return RQ_ERR_OPEN_PORT;
-	}
+	serial_port.open(port, B9600, 7, serial_driver::serial_parity_even);
 	cout<<"Opening port: '"<<port<<"'..."<<"succeeded."<<endl;
 
 	int status;
@@ -68,70 +65,44 @@ void RoboteqDevice::Disconnect()
 		serial_port.close();
 }
 
-int RoboteqDevice::Write(string str)
-{
-	if(!IsConnected())
-		return RQ_ERR_NOT_CONNECTED;
-
-	//cout<<"Writing: "<<ReplaceString(str, "\r", "\r\n");
-	int countSent = serial_port.write(str.c_str(), str.length(), 10);
-
-	//Verify weather the Transmitting Data on UART was Successful or Not
-	if(countSent < 0)
-		return RQ_ERR_TRANSMIT_FAILED;
-
-	return RQ_SUCCESS;
-}
-
 int RoboteqDevice::IssueCommand(string commandType, string command, string args, int waitms, string &response, bool isplusminus)
 {
-	int status;
-	string read;
-	response = "";
+  string read;
+  response = "";
 
-	if(args == "")
-		status = Write(commandType + command + "\r");
-	else
-		status = Write(commandType + command + " " + args + "\r");
+  if(args == "")
+    serial_port.write(commandType + command + "\r", 10);
+  else
+    serial_port.write(commandType + command + " " + args + "\r", 10);
 
-	if(status != RQ_SUCCESS)
-		return status;
+  char buf[BUFFER_SIZE];
+  while(true){//read in command echo
+    serial_port.read_line(buf, BUFFER_SIZE, '\r', 10);
+    if(strstr(buf, (commandType+command).c_str())==buf)
+      break;
+  }
 
-	char buf[BUFFER_SIZE];
-	while((status = serial_port.read_line(buf, BUFFER_SIZE, '\r', 10))>=0){//read in command echo
-	  //cout << "Got command echo: "<<buf<<endl;
-	  if(strstr(buf, (commandType+command).c_str())==buf)
-	    break;
-	}
-	if(status<=0){
-	  //cout << "Got echo read status: "<<status<<" errno="<<errno<<" buf="<<buf<<endl;
-	  return status;
-	}
+  int num_read = serial_port.read_line(buf, BUFFER_SIZE, '\r', 10);//read in result
 
-	status = serial_port.read_line(buf, BUFFER_SIZE, '\r', 10);//read in result
-	//cout << "Got command value: "<<buf<<endl;
-	if(status<0)
-		return status;
+  response = buf;
 
-	response = buf;
-
-	if(isplusminus)
-	{
-	  if(status != 1)//length of response
-	    return RQ_INVALID_RESPONSE;
-	  return RQ_SUCCESS;
-	}
+  if(isplusminus)
+    {
+      if(num_read != 1)//length of response
+	return RQ_INVALID_RESPONSE;
+      return RQ_SUCCESS;
+    }
 
 
-	string::size_type pos = response.rfind(command + "=");
-	if(pos == string::npos)
-		return RQ_INVALID_RESPONSE;
+  string::size_type pos = response.rfind(command + "=");
+  if(pos == string::npos)
+    return RQ_INVALID_RESPONSE;
 
-	pos += command.length() + 1;
+  pos += command.length() + 1;
 
-	response = response.substr(pos, status - pos);
+  response = response.substr(pos, num_read - pos);
 
-	return RQ_SUCCESS;
+  return RQ_SUCCESS;
 }
 int RoboteqDevice::IssueCommand(string commandType, string command, int waitms, string &response, bool isplusminus)
 {

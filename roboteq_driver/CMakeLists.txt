@@ -28,8 +28,6 @@ rosbuild_genmsg()
 
 include_directories(include src/roboteq_lib)
 
-rosbuild_add_library(serial_driver_base src/serial_lib.cpp)
-
 rosbuild_add_library(${PROJECT_NAME}RoboteqLib src/roboteq_lib/RoboteqDevice.cpp src/roboteq_motor_controller.cpp)
 target_link_libraries(${PROJECT_NAME}RoboteqLib serial_driver_base)
 

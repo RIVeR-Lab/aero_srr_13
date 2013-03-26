@@ -8,7 +8,7 @@ using namespace std;
 class RoboteqDevice
 {
 private:
-  DriverSerialPort serial_port;
+  serial_driver::DriverSerialPort serial_port;
 protected:
 	int Write(string str);
 	int ReadAll(string &str);
