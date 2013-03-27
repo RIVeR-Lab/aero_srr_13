@@ -36,7 +36,7 @@ void Arm_Controller::ObjectPosition(
 
 	geometry_msgs::PoseStamped arm_pose;
 
-	listener.transformPose("arm_base", object_pos, arm_pose);
+	listener.transformPose("arm_base", *object_pos, arm_pose);
 
 	grasp_rpy.setEulerYPR(3.14, 0, 0);
 	grasp_rpy.getRotation(grasp_quaternion);
@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle param_nh("~");
 
 	std::string ArmPose("ArmPose"); ///String containing the topic name for arm position
-	std::string ObjectPose("ObjectPose"); ///String containing the topic name for object position
+	std::string ObjectPose("aero/stereo_bottom/object_pose"); ///String containing the topic name for object position
 
 	if (argc < 1) {
 		ROS_INFO(
