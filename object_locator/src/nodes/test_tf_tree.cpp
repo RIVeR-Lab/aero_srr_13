@@ -12,10 +12,14 @@
 tf::TransformBroadcaster* broadcast;
 void broadcastTimer(const ros::TimerEvent& event)
 {
-	tf::Transform tf;
-	tf.setOrigin(tf::Vector3(1, 1, 1));
+	tf::Transform tf, armbase;
+	tf.setOrigin(tf::Vector3(0, 0, 0));
 	tf.setRotation(tf::Quaternion(0, 0, 0));
 	broadcast->sendTransform(tf::StampedTransform(tf, ros::Time(0),  "/stereo_bottom/center", "/world"));
+
+	armbase.setOrigin(tf::Vector3(0, 0, 0));
+	armbase.setRotation(tf::Quaternion(0, 0, 0));
+	broadcast->sendTransform(tf::StampedTransform(armbase, ros::Time(0),  "/arm_base", "/world"));
 }
 
 int main(int argc, char **argv)
