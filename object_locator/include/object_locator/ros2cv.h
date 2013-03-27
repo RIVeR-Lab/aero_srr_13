@@ -9,24 +9,21 @@
 #define ROS2CV_H_
 
 
-
+#include <object_locator/typedefinitions.h>
 #include <image_geometry/stereo_camera_model.h>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <object_locator/ros2cv.h>
-#include <opencv2/opencv.hpp>
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
-#include "cxcore.h"
+#include <cxcore.h>
 #include <aero_srr_msgs/ObjectLocationMsg.h>
 #include <tf/transform_listener.h>
 #include <object_locator/DetectionManager.h>
 #include <geometry_msgs/PointStamped.h>
+
+
+
 
 namespace object_locator
 {
@@ -43,8 +40,7 @@ public:
 	void computeDisparity();
 	void computeDisparityCb(const ros::TimerEvent& event);
 	void detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW);
-	void test(cv::Mat img,const char* WINDOW);
-	void tune(cv::Mat img, const char* WINDOW);
+	void buildMsg(const tf::Point& point, geometry_msgs::PoseStamped& msg) const;
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 
@@ -63,7 +59,7 @@ private:
 	sensor_msgs::CameraInfo left_info;
 	sensor_msgs::CameraInfo right_info;
 	std::string cascade_path;
-	cv::CascadeClassifier cascade;
+	CascadeClassifier_t cascade;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
@@ -75,7 +71,7 @@ private:
 	char* WINDOWLeft;
 	char* WINDOWRight;
 	char* WINDOWDisparity;
-	cv::Mat disparity;
+	Mat_t disparity;
 	bool gotLeft;
 	bool gotRight;
 	int ctr;
@@ -87,7 +83,7 @@ private:
 	ValthresL,
 	ValthresH,
 	erosionCount,
-	blurSize;
+	blurSize,CUDA_ENABLED;
 };
 
 

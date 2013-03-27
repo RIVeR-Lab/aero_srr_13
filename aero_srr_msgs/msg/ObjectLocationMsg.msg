@@ -16,7 +16,7 @@ uint8 WOODEN_BLOCK=3
 ##############################################
 
 #Location of the object
-geometry_msgs/Point point
+geometry_msgs/PoseStamped pose
 
 #Confidence within location
 float64 confidence 
