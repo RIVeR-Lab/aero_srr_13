@@ -243,9 +243,9 @@ void ImageConverter::computeDisparity()
 //			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point.point);
 			camera_point.header.frame_id = "/stereo_bottom/center";
-			camera_point.header.stamp = ros::Time(0);
+			camera_point.header.stamp = ros::Time::now();
 			world_point.header.frame_id = "/world";
-			world_point.header.stamp = ros::Time(0);
+			world_point.header.stamp = ros::Time::now();
 //			cout << "Transforming camera to world" <<endl;
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
