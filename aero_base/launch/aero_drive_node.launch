@@ -1,5 +1,8 @@
 <launch>
-  <node pkg="roboteq_driver" type="roboteq_manager" name="aero_drive_roboteq_manager">
+  <arg name="odom_topic" default="/odom" />
+  <arg name="velocity_command_topic" default="/cmd_vel" />
+
+  <!--<node pkg="roboteq_driver" type="roboteq_manager" name="aero_drive_roboteq_manager">
     <param name="max_rpm" value="500" />
     <param name="ppr" value="5000" />
     <param name="feedback_rate" value="5" />
@@ -13,6 +16,6 @@
     <param name="rotations_per_meter" value="45" />
     <param name="base_width" value="0.6" />
     <param name="roboteq_manager_topic" value="drive_cmd" />
-    <param name="twist_topic" value="cmd_vel" />
-  </node>
+    <param name="twist_topic" value="$(arg velocity_command_topic)" />
+  </node>-->
 </launch>
