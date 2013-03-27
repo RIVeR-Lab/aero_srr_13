@@ -77,12 +77,12 @@ int RoboteqDevice::IssueCommand(string commandType, string command, string args,
 
   char buf[BUFFER_SIZE];
   while(true){//read in command echo
-    serial_port.read_line(buf, BUFFER_SIZE, '\r', 10);
+    serial_port.read_until(buf, BUFFER_SIZE, '\r', 10);
     if(strstr(buf, (commandType+command).c_str())==buf)
       break;
   }
 
-  int num_read = serial_port.read_line(buf, BUFFER_SIZE, '\r', 10);//read in result
+  int num_read = serial_port.read_until(buf, BUFFER_SIZE, '\r', 10);//read in result
 
   response = buf;
 
