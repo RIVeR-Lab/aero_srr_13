@@ -26,7 +26,7 @@ ImageConverter::ImageConverter()
 
 
 	//********ROS subscriptions and published topics***************
-	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("aero/stereo_bottom/object_pose",2);
+	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
 	image_left_ = it_.subscribeCamera("/stereo_bottom/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	image_right_ = it_.subscribeCamera("/stereo_bottom/right/image_raw", 1, &ImageConverter::imageCbRight, this);
@@ -177,16 +177,16 @@ void ImageConverter::computeDisparity()
 	Mat_t disp(  heightL, widthL, CV_16S );
 	Mat_t vdisp( heightL, widthL, CV_8UC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
-	int minDisp = -128-32;               //-128-32;
-	int numDisp = 256+80;               //256+80;
+	int minDisp = 0;               //-128-32;
+	int numDisp = 80;               //256+80;
 	int SADSize = 10;				//10
 	int P1 = 8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  1	; // 1;
 	int preFilterCap =   2; //  2;
 	int uniqueness = 1;
-	int specSize =   20; //20;   //reduces noise
-	int specRange = 1  ;//1;
+	int specSize =   50; //20;   //reduces noise
+	int specRange = 5  ;//1;
 
 #ifdef CUDA_ENABLED
 
@@ -223,7 +223,7 @@ void ImageConverter::computeDisparity()
 	geometry_msgs::PointStamped camera_point, world_point;
 	for(int i = 0; i< (int)detection_list_.size(); i++)
 	{
-		cout << endl;
+//		cout << endl;
 //		cout << "In detection #"<< i+1 << "/"<< detection_list_.size() <<endl;
 		Point2d obj_centroid(detection_list_.at(i)->first,detection_list_.at(i)->second);
 		Point3d obj_3d;
@@ -242,10 +242,11 @@ void ImageConverter::computeDisparity()
 			tf::Point detection(obj_3d.x,obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point.point);
+			ros::Time tZero(0);
 			camera_point.header.frame_id = "/stereo_bottom/center";
-			camera_point.header.stamp = ros::Time(0);
+			camera_point.header.stamp = tZero;
 			world_point.header.frame_id = "/world";
-			world_point.header.stamp = ros::Time(0);
+			world_point.header.stamp = tZero;
 //			cout << "Transforming camera to world" <<endl;
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
