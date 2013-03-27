@@ -20,17 +20,17 @@ This file exists mainly for backwards compatibility.
     <arg name="frame_id"     value="high_def_optical_frame" />
     <arg name="trig_topic"   value="/stereo_bottom/left/master_trigger" />
   </include>
-
+<!--
 <node pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" name="prosilica_stereo_proc" />
-
+-->
 </group>
-
+<!--
 <node pkg="image_view" type="stereo_view" respawn="false" name="prosilica_viewer_color">
       <param name="autosize" type="bool" value="False" />
       <remap from="stereo" to="stereo_bottom" />
       <remap from="image" to="image_rect" />
     </node>
-<!-- 
+ 
   <remap from="stereo/left/image_raw" to="left/image_raw" />
   <remap from="stereo/right/image_raw" to="right/image_raw" />
  
