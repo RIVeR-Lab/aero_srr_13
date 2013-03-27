@@ -1,0 +1,14 @@
+<package>
+  <description brief="aero_obj_track">
+
+     aero_obj_track
+
+  </description>
+  <author>MDeDonato</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aero_obj_track</url>
+
+</package>
+
+
