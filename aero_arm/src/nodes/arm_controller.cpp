@@ -41,7 +41,7 @@ void Arm_Controller::ObjectPosition(
 	grasp_rpy.setEulerYPR(3.14, 0, 0);
 	grasp_rpy.getRotation(grasp_quaternion);
 
-	arm_pose.pose.orientation = grasp_quaternion;
+	tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
 	arm_pose.pose.position.z +=0.05;
 
 	pub_arm_position.publish(arm_pose);
