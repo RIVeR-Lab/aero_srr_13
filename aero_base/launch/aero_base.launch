@@ -1,0 +1,47 @@
+<launch>
+  <arg name="odom_topic" default="/odom" />
+  <arg name="imu_topic" default="/imu" />
+  <arg name="velocity_command_topic" default="/cmd_vel" />
+
+  <!-- Load Parameters onto the server -->
+  <group ns="aero">
+    <group ns="transform">
+      <group ns="imu">
+	<param name="frame" value="imu"/>
+      </group>
+      
+      <group ns="arm_base">
+	<param name="frame" value="arm_base"/>
+      </group>
+      
+      <group ns="left_camera">
+	<param name="frame" value="left_camera"/>
+      </group>
+      
+      <group ns="right_camera">
+	<param name="frame" value="right_camera"/>
+      </group>
+      
+      <group ns="boom">
+	<param name="frame" value="boom"/>
+      </group>
+      
+      <group ns="lidar">
+	<param name="frame" value="lidar"/>
+      </group>
+    </group>
+  </group>
+  
+  <!--<node name="aero_base_node" pkg="aero_base" type="aero_base_node" />-->
+
+  <!--<node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
+    <param name="device_id" value="kvh-1750" />
+    <param name="imu_topic" value="$(arg imu_topic)" />
+  </node>-->
+
+  <include file="$(find aero_base)/launch/aero_drive_node.launch">
+    <arg name="odom_topic" value="$(arg odom_topic)" />
+    <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
+  </include>
+
+</launch>
