@@ -224,44 +224,44 @@ void ImageConverter::computeDisparity()
 	for(int i = 0; i< (int)detection_list_.size(); i++)
 	{
 		cout << endl;
-		cout << "In detection #"<< i+1 << "/"<< detection_list_.size() <<endl;
+//		cout << "In detection #"<< i+1 << "/"<< detection_list_.size() <<endl;
 		Point2d obj_centroid(detection_list_.at(i)->first,detection_list_.at(i)->second);
 		Point3d obj_3d;
 
 
-		std::cout << "Checking disparity at  " << obj_centroid.x <<","<< obj_centroid.y << std::endl;
-		std::cout << "Range (rows,cols): " << vdisp1.rows <<","<< vdisp1.cols << std::endl;
+//		std::cout << "Checking disparity at  " << obj_centroid.x <<","<< obj_centroid.y << std::endl;
+//		std::cout << "Range (rows,cols): " << vdisp1.rows <<","<< vdisp1.cols << std::endl;
 		if(obj_centroid.x < vdisp1.cols && obj_centroid.y < vdisp1.rows)
 		{
-			cout << "Getting Disparity" <<endl;
+//			cout << "Getting Disparity" <<endl;
 			int disp_val = vdisp1.at<uchar>(obj_centroid.y,obj_centroid.x);
-			cout << "Recieved Disparity of "<< disp_val <<endl;
+//			cout << "Recieved Disparity of "<< disp_val <<endl;
 			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
 			this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,obj_3d);
-			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
+//			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
 			tf::Point detection(obj_3d.x,obj_3d.y, obj_3d.z);
-			cout << "adding detection to camera_point" <<endl;
+//			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point.point);
 			camera_point.header.frame_id = "/stereo_bottom/center";
 			camera_point.header.stamp = ros::Time(0);
 			world_point.header.frame_id = "/world";
 			world_point.header.stamp = ros::Time(0);
-			cout << "Transforming camera to world" <<endl;
+//			cout << "Transforming camera to world" <<endl;
 			optimus_prime.transformPoint("/world",camera_point, world_point);
-			cout << "Adding TFT to msg" <<endl;
+//			cout << "Adding TFT to msg" <<endl;
 			tf::pointTFToMsg(detection, world_point.point);
 			sherlock.addDetection(detection);
-			cout << "Added detection to manager" <<endl;
+//			cout << "Added detection to manager" <<endl;
 		}
 
 	}
 	tf::Point detection;
-	cout << "Clearing list" <<endl;
+//	cout << "Clearing list" <<endl;
 	detection_list_.clear();
 	DetectionPtr_t(new Detection_t(0,0));
-	cout << "Shrinking Detection manager list" <<endl;
+//	cout << "Shrinking Det/ection manager list" <<endl;
 	sherlock.shrink();
-	cout << "Finished shrinking list" <<endl;
+//	cout << "Finished shrinking list" <<endl;
 	double confidence;
 	if(sherlock.getDetection(detection, confidence))
 	{
@@ -342,14 +342,14 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 		//-- Draw the face
 		cv::Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
 		cv::ellipse( frame, center, cv::Size( faces[i].width/2, faces[i].height/2), 0, 0, 360, cv::Scalar( 255, 0, 0 ), 2, 8, 0 );
-		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
 		detection_list_.push_back(DetectionPtr_t(new Detection_t(center.x, center.y)));
 
 
 
 	}
-	std::cout << "Finished Searching for Objects"<< std::endl;
+//	std::cout << "Finished Searching for Objects"<< std::endl;
 	//-- Show what you got
 	cv::imshow( WINDOWLeft, frame );
 
