@@ -240,6 +240,8 @@ void ImageConverter::computeDisparity()
 	cv::Mat Dl(1,5,CV_64F, this->left_info.D.data());
 	uint heightL = this->left_info.height;
 	uint widthL = this->left_info.width;
+//	uint heightL = 367;
+//	uint widthL = 646;
 
 	cv::Mat Kr(3,3,CV_64F, this->right_info.K.elems);
 	cv::Mat Rr(3,3,CV_64F, this->right_info.R.elems);
@@ -247,6 +249,8 @@ void ImageConverter::computeDisparity()
 	cv::Mat Dr(1,5,CV_64F, this->right_info.D.data());
 	uint heightR = this->right_info.height;
 	uint widthR = this->right_info.width;
+//	uint heightR = 367;
+//		uint widthR = 646;
 
 
 	cv::Mat mx1(heightL, widthL, CV_32FC1);
@@ -267,6 +271,10 @@ void ImageConverter::computeDisparity()
 
 	cv::Mat left_gray;
 	cv::Mat right_gray;
+	cv::Mat Lds_img;
+	cv::Mat Rds_img;
+//	resize(mat_left->image,Lds_img,size);
+//	resize(mat_left->image,Rds_img,size);
 
 	cv::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
 	cv::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
@@ -275,22 +283,22 @@ void ImageConverter::computeDisparity()
 
 
 	cv::Mat disp(  heightL, widthL, CV_16S );
-	cv::Mat vdisp( heightL, widthL, CV_8U );
+	cv::Mat vdisp( heightL, widthL, CV_8UC1 );
 	cv::Mat dispn( heightL, widthL, CV_32F );
-	int minDisp = -128-32;
-	int numDisp = 256+80;
-	int SADSize = 10;
+	int minDisp = -128-32;               //-128-32;
+	int numDisp = 256+80;               //256+80;
+	int SADSize = 10;				//10
 	int P1 = 8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
-	int disp12MaxDiff = 1;
-	int preFilterCap = 2;
+	int disp12MaxDiff =  1	; // 1;
+	int preFilterCap =   2; //  2;
 	int uniqueness = 1;
-	int specSize = 20;   //reduces noise
-	int specRange = 1;
-	cv::StereoSGBM stereoBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange);
-
-	stereoBM(img1_rect, img2_rect, disp);
-
+	int specSize =   20; //20;   //reduces noise
+	int specRange = 1  ;//1;
+	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
+//	cv::StereoBM stereoBM(StereoBM::BASIC_PRESET,numDisp, SADSize);
+	stereoSGBM(img1_rect, img2_rect, disp);
+//	stereoBM(img1_rect, img2_rect, disp);
 
 	//    cv::erode(disp, disp, NULL, 2);
 	//    cv::dilate(disp, disp, NULL, 2);
@@ -410,7 +418,7 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 35, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDA
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 15, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDB
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDD 35
-	cascade.detectMultiScale( frame_gray, faces, 1.1, 445, 0, cv::Size(70, 100), cv::Size(150,215) ); // works for WHA
+	cascade.detectMultiScale( frame_gray, faces, 1.1, 455, 0, cv::Size(70, 100), cv::Size(150,215) ); // works for WHA
 
 
 	for( size_t i = 0; i < faces.size(); i++ )
