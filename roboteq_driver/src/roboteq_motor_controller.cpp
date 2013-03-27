@@ -1,6 +1,8 @@
 #include "roboteq_driver/roboteq_motor_controller.h"
 #include <stdio.h>
 
+using namespace serial_driver;
+
 namespace roboteq_driver{
 
 RoboteqMotorController::RoboteqMotorController(double maxRPM1,
