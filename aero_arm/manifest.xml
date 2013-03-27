@@ -1,23 +1,16 @@
 <package>
   <description brief="aero_arm">
 
-     aero_arm
-
+    aero_arm
   </description>
-  <author>MDeDonato</author>
+  <author>mdedonato</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/aero_arm</url>
+  <url>http://ros.org/wiki/aero_base</url>
   <depend package="roscpp"/>
   <depend package="rospy"/>
-  <depend package="tf"/>  
-  
-    <depend package="nav_msgs"/>
+  <depend package="tf"/>
   <depend package="geometry_msgs"/>
-  <depend package="std_msgs"/>
-  <depend package="sensor_msgs"/>
-    <depend package="jaco_driver"/>
-  
 </package>
 
 

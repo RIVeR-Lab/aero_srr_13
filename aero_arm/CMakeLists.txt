@@ -29,5 +29,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_executable(arm_controller src/nodes/arm_controller.cpp )
+
+
+#Testers
+#rosbuild_add_executable(test_jaco_arm_control src/nodes/test_jaco_arm_controller.cpp )
+#Nodes
+rosbuild_add_executable(aero_arm_controller src/nodes/arm_controller.cpp )
+
 
