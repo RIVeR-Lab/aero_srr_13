@@ -32,12 +32,12 @@
     </group>
   </group>
   
-  <!--<node name="aero_base_node" pkg="aero_base" type="aero_base_node" />-->
+  <node name="aero_base_node" pkg="aero_base" type="aero_base_node" />
 
-  <!--<node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
+  <node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
     <param name="device_id" value="kvh-1750" />
     <param name="imu_topic" value="$(arg imu_topic)" />
-  </node>-->
+  </node>
 
   <include file="$(find aero_base)/launch/aero_drive_node.launch">
     <arg name="odom_topic" value="$(arg odom_topic)" />

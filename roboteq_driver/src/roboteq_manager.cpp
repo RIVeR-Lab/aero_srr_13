@@ -56,6 +56,8 @@ static void getFeedback(uint8_t chan, roboteq_driver::RoboteqMotorInfo& chanFeed
 	chanFeedback.temp.header.stamp = ros::Time::now();
 
 	controller->getPosition(chan, chanFeedback.position);
+
+	controller->getVelocity(chan, chanFeedback.velocity);
 }
 void feedbackTimerCallback(const ros::TimerEvent& e){
 

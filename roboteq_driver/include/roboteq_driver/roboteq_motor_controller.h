@@ -109,6 +109,10 @@ class RoboteqMotorController{
    * get the absolute position of each motor
    */
   void getPosition(uint8_t chan, int32_t& value);
+  /**
+   * get the velocity of each motor
+   */
+  void getVelocity(uint8_t chan, int32_t& value);
  private:
   const double maxRPM1_;
   const double maxRPM2_;

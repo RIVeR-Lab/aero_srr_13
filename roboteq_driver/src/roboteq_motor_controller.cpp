@@ -232,5 +232,8 @@ void RoboteqMotorController::getTemp(uint8_t chan, double& value){
 void RoboteqMotorController::getPosition(uint8_t chan, int32_t& value){
   getValue(_C, chan, value);
 }
+void RoboteqMotorController::getVelocity(uint8_t chan, int32_t& value){
+  getValue(_S, chan, value);
+}
 
 }
