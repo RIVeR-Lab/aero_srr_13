@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle param_nh("~");
 
 	std::string ArmPose("ArmPose"); ///String containing the topic name for arm position
-	std::string ObjectPose("/aero/stereo_bottom/object_pose"); ///String containing the topic name for object position
+	std::string ObjectPose("ObjectPose"); ///String containing the topic name for object position
 
 	if (argc < 1) {
 		ROS_INFO(
