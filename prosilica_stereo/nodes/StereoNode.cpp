@@ -38,11 +38,11 @@ StereoNode::StereoNode(const ros::NodeHandle& node_handle) : nh_(node_handle),
 
 	if (local_nh.getParam("master_ip", ip_str_l) && !ip_str_l.empty())
 	{
-	  	cam_l_.reset( new prosilica::Camera(ip_str_l.c_str()) );
+	  	cam_l_.reset( new prosilica::Camera(ip_str_l.c_str(),20) );
 	}
 	if (local_nh.getParam("slave_ip", ip_str_r) && !ip_str_r.empty())
 	{
-	    cam_r_.reset( new prosilica::Camera(ip_str_r.c_str()) );
+	    cam_r_.reset( new prosilica::Camera(ip_str_r.c_str(),20) );
 	}
 	if (local_nh.getParam("master_frameid", frameid_l) && !frameid_l.empty())
 	{
@@ -50,12 +50,17 @@ StereoNode::StereoNode(const ros::NodeHandle& node_handle) : nh_(node_handle),
 	}
 	if (local_nh.getParam("slave_frameid", frameid_r) && !frameid_r.empty())
 	{
-		img_l_.header.frame_id = cam_info_l_.header.frame_id=frameid_r;
+		img_r_.header.frame_id = cam_info_r_.header.frame_id=frameid_r;
 	}
 	double freq;
 	if (local_nh.getParam("freq", freq) && (freq!=0))
 	{
 		freq_=float(freq);
+	}
+	int exp;
+	if (local_nh.getParam("exposure", exp) && (exp!=0))
+	{
+		exposure_=exp;
 	}
     // Record some attributes of the camera
     tPvUint32 dummy;
@@ -89,7 +94,7 @@ void StereoNode::configure()
 	// Exposure
      cam_l_->setExposure(0, prosilica::Auto);
      cam_r_->setExposure(0, prosilica::Auto);
-	 tPvUint32 us = 20000.00;
+	 tPvUint32 us = exposure_;
      cam_l_->setAttribute("ExposureAutoMax", us);
      cam_r_->setAttribute("ExposureAutoMax", us);
 
@@ -99,7 +104,8 @@ void StereoNode::configure()
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 	 cam_l_->setWhiteBalance(0, 0, prosilica::Auto);
 	 cam_l_->setAttribute("FrameRate",freq_);
-
+	 cam_l_->setAttributeEnum("SyncOut2Invert", "Off");
+	 cam_l_->setAttributeEnum("SyncOut2Mode", "Exposing");
       start();
 }
 void StereoNode::loadIntrinsics()
@@ -242,8 +248,8 @@ void StereoNode::start()
 	//assuming left as the maseter
 	//can be multithreaded using boost at this point!!
 
-	cam_l_->start(prosilica::FixedRate, prosilica::Continuous);
-	cam_r_->start(prosilica::SyncIn2, prosilica::Continuous);
+	cam_l_->startThread(prosilica::FixedRate, prosilica::Continuous);
+	cam_r_->startThread(prosilica::SyncIn2, prosilica::Continuous);
 	//not there in the GC095
 	//cam_l_->runCommand("TimeStampReset");
 	//cam_r_->runCommand("TimeStampReset");
@@ -303,10 +309,17 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     unsigned long count=frame->FrameCount;
     unsigned long Timestampl=frame->TimestampLo;
     unsigned long Timestamph=frame->TimestampHi;
+
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
     double sec = t/double(clock_l_);
-    ROS_INFO("Left trig time %f",sec);
+    if(count%5==0)
+    {
+    	boost::mutex::scoped_lock(sync_);
+      	offset_l_=sec;
+    }
+
+    ROS_INFO("Left trig frame no: %d time %f",count,sec);
     trig_time_l_.fromSec(sec);
     img.header.stamp = cam_info.header.stamp = trig_time_l_;
 
@@ -323,8 +336,18 @@ static bool frameToImage(tPvFrame* frame, sensor_msgs::Image &image)
     uint64_t t=(Timestamph<<32);
     t+=Timestampl;
     double sec= t/double(clock_r_);
-    ROS_INFO("right trig time %f",sec);
-    trig_time_r_.fromSec(sec);
+    if(count%5==0)
+    {
+    	boost::mutex::scoped_lock(sync_);
+      	offset_r_=sec;
+    }
+    float skew=0;
+    if((offset_l_!=0)&&(offset_r_!=0))
+    {
+    	skew=offset_l_-offset_r_;
+    }
+    ROS_INFO("Right trig frame no: %d time %f",count,sec+skew);
+    trig_time_r_.fromSec(sec+skew);
     img.header.stamp = cam_info.header.stamp = trig_time_r_;
 
     if (!frameToImage(frame, img))
