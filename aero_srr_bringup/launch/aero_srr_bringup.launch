@@ -1,7 +1,7 @@
 <launch>
   <!-- ********************ARGUMENTS******************** -->
   <arg name="areo/imu_topic"              value="aero/imu"/>
-  <arg name="areo/odom_topic"             value="aero/odom"/>
+  <arg name="aero/odom_topic"             value="aero/odom"/>
   <arg name="aero/odom_topic_ekf"         value="aero/odom_ekf"/>
   <arg name="aero/velocity_command_topic" value="aero/base/cmd_vel"/>
 	
