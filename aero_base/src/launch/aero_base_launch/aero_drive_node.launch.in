@@ -2,6 +2,7 @@
   <arg name="odom_topic" default="/odom" />
   <arg name="velocity_command_topic" default="/cmd_vel" />
 
+  <!-- Launch Motor Controller Driver -->
   <node pkg="roboteq_driver" type="roboteq_manager" name="aero_drive_roboteq_manager">
     <param name="max_rpm" value="500" />
     <param name="ppr" value="5000" />
@@ -12,6 +13,7 @@
     <param name="info_topic" value="aero_drive_feedback" />
     <param name="pause_topic" value="/pause" />
   </node>
+  <!-- Launch Driver Controller -->
   <node pkg="aero_base" type="aero_drive_node" name="aero_drive_node">
     <param name="rotations_per_meter" value="8" />
     <param name="base_width" value="0.6" />
