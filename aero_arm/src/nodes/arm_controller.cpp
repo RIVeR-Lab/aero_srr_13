@@ -44,7 +44,11 @@ void Arm_Controller::ObjectPosition(
 	ROS_INFO("RY = %f", object->pose.pose.orientation.y);
 	ROS_INFO("RZ = %f", object->pose.pose.orientation.z);
 	ROS_INFO("RW = %f", object->pose.pose.orientation.w);
+
+	object->pose.header.frame_id = object->header.frame_id;
+
 	listener.transformPose("arm_base", object->pose, arm_pose);
+
 
 	ROS_INFO("Transformed MSG");
 	ROS_INFO("X = %f", arm_pose.pose.position.x);
