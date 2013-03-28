@@ -30,15 +30,32 @@ Arm_Controller::Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,
 }
 
 void Arm_Controller::ObjectPosition(
-		const geometry_msgs::PoseStampedConstPtr& object_pos) {
+		const aero_srr_msgs::ObjectLocationMsgConstPtr& object) {
 	tf::Matrix3x3 grasp_rpy;
 	tf::Quaternion grasp_quaternion;
 
 	geometry_msgs::PoseStamped arm_pose;
+	ROS_INFO("Raw MSG");
+	ROS_INFO("X = %f", object->pose.pose.position.x);
+	ROS_INFO("Y = %f", object->pose.pose.position.y);
+	ROS_INFO("Z = %f", object->pose.pose.position.z);
 
-	listener.transformPose("arm_base", *object_pos, arm_pose);
+	ROS_INFO("RX = %f", object->pose.pose.orientation.x);
+	ROS_INFO("RY = %f", object->pose.pose.orientation.y);
+	ROS_INFO("RZ = %f", object->pose.pose.orientation.z);
+	ROS_INFO("RW = %f", object->pose.pose.orientation.w);
+	listener.transformPose("arm_base", object->pose, arm_pose);
 
-	grasp_rpy.setEulerYPR(3.14, 0, 0);
+	ROS_INFO("Transformed MSG");
+	ROS_INFO("X = %f", arm_pose.pose.position.x);
+	ROS_INFO("Y = %f", arm_pose.pose.position.y);
+	ROS_INFO("Z = %f", arm_pose.pose.position.z);
+
+	ROS_INFO("RX = %f", arm_pose.pose.orientation.x);
+	ROS_INFO("RY = %f", arm_pose.pose.orientation.y);
+	ROS_INFO("RZ = %f", arm_pose.pose.orientation.z);
+	ROS_INFO("RW = %f", arm_pose.pose.orientation.w);
+	grasp_rpy.setEulerYPR(0, 0, 3.14);
 	grasp_rpy.getRotation(grasp_quaternion);
 
 	tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
