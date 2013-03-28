@@ -35,6 +35,9 @@ void Arm_Controller::ObjectPosition(
 	tf::Quaternion grasp_quaternion;
 
 	geometry_msgs::PoseStamped arm_pose;
+
+	geometry_msgs::PoseStamped object_pose(object->pose);
+
 	ROS_INFO("Raw MSG");
 	ROS_INFO("X = %f", object->pose.pose.position.x);
 	ROS_INFO("Y = %f", object->pose.pose.position.y);
@@ -45,9 +48,9 @@ void Arm_Controller::ObjectPosition(
 	ROS_INFO("RZ = %f", object->pose.pose.orientation.z);
 	ROS_INFO("RW = %f", object->pose.pose.orientation.w);
 
-	object->pose.header.frame_id = object->header.frame_id;
+	object_pose.header.frame_id = object->header.frame_id;
 
-	listener.transformPose("arm_base", object->pose, arm_pose);
+	listener.transformPose("arm_base", object_pose, arm_pose);
 
 
 	ROS_INFO("Transformed MSG");
