@@ -271,8 +271,9 @@ void ImageConverter::computeDisparity()
 
 		msg.header.frame_id = world_point.header.frame_id;
 		msg.header.stamp = ros::Time::now();
+		msg.pose.header.frame_id = world_point.header.frame_id;
+		msg.pose.header.stamp = ros::Time::now();
 		buildMsg(detection, msg.pose);
-
 		ObjLocationPub.publish(msg);
 	}
 
