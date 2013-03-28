@@ -69,6 +69,8 @@ void DetectionManager::addDetection(const tf::Point& detection)
 		{
 			if(item->second < this->max_condifdence_)
 			{
+
+				item->first = (item->first+detection)/2;
 				item->second += this->growth_rate_;
 			}
 			growth = true;

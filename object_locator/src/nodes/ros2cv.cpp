@@ -15,7 +15,7 @@ ImageConverter::ImageConverter()
   WINDOWLeft ("Left Camera"),
   WINDOWRight ("Right Camera"),
   WINDOWDisparity ("Disparity"),
-  sherlock(.2, .1,.05, .5),
+  sherlock(.5, .15,.05, .5),
   gotLeft(false),
   gotRight(false)
 
@@ -177,16 +177,16 @@ void ImageConverter::computeDisparity()
 	Mat_t disp(  heightL, widthL, CV_16S );
 	Mat_t vdisp( heightL, widthL, CV_8UC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
-	int minDisp = 0;               //-128-32;
-	int numDisp = 80;               //256+80;
+	int minDisp = -128-32;      //0         //-128-32;
+	int numDisp = 256+80;       //80        //256+80;
 	int SADSize = 10;				//10
-	int P1 = 8*SADSize*SADSize;
+	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  1	; // 1;
 	int preFilterCap =   2; //  2;
 	int uniqueness = 1;
-	int specSize =   50; //20;   //reduces noise
-	int specRange = 5  ;//1;
+	int specSize =   50; //50 //20;   //reduces noise
+	int specRange = 1  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
 
@@ -194,7 +194,7 @@ void ImageConverter::computeDisparity()
 	gpuBM(img1_rect, img2_rect, disp);
 
 #else
-	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
+	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, true);
 	stereoSGBM(img1_rect, img2_rect, disp);
 	//cv::StereoBM stereoBM(StereoBM::BASIC_PRESET,numDisp, SADSize);
 	//	stereoBM(img1_rect, img2_rect, disp);
