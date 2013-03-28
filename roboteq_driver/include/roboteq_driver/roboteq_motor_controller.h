@@ -112,7 +112,7 @@ class RoboteqMotorController{
   /**
    * get the velocity of each motor
    */
-  void getVelocity(uint8_t chan, int32_t& value);
+  void getVelocity(uint8_t chan, double& value);
  private:
   const double maxRPM1_;
   const double maxRPM2_;

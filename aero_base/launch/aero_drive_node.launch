@@ -13,7 +13,7 @@
     <param name="pause_topic" value="/pause" />
   </node>
   <node pkg="aero_base" type="aero_drive_node" name="aero_drive_node">
-    <param name="rotations_per_meter" value="45" />
+    <param name="rotations_per_meter" value="8" />
     <param name="base_width" value="0.6" />
     <param name="roboteq_manager_cmd_topic" value="drive_cmd" />
     <param name="roboteq_manager_feedback_topic" value="aero_drive_feedback" />

@@ -2,6 +2,6 @@
 
 uint8 channel
 int32 position
-int32 velocity
+float64 velocity
 float64 current
 sensor_msgs/Temperature temp

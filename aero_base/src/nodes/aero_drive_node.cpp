@@ -27,9 +27,8 @@ double base_width = 0.6;
  * @param w the angular velocity of the robot
  */
 void drive_vel(double u, double w){
-  double left_speed = u - (base_width/2 * w /2);
-  double right_speed = u + (base_width/2 * w /2);
-  ROS_WARN("Publishing %f, %f", left_speed, right_speed);
+  double left_speed = -u + ((base_width * w) / 4);
+  double right_speed = u + ((base_width * w) / 4);
   motor_controller->setRPM(left_speed*rotations_per_meter*60, right_speed*rotations_per_meter*60);
 }
 
@@ -37,15 +36,15 @@ void drive_vel(double u, double w){
  * callback for twist messages
  */
 void twistCallback(const geometry_msgs::Twist::ConstPtr& msg) {
-  drive_vel(msg->linear.x, msg->linear.z);
+  drive_vel(msg->linear.x, msg->angular.z);
 }
 
 
 void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& msg) {
   roboteq_driver::RoboteqMotorInfo left = msg->motors[0];
   roboteq_driver::RoboteqMotorInfo right = msg->motors[1];
-  double u1 = left.velocity/rotations_per_meter/60;
-  double u2 = right.velocity/rotations_per_meter/60;
+  double u1 = -left.velocity/(rotations_per_meter*60);
+  double u2 = right.velocity/(rotations_per_meter*60);
 
   nav_msgs::Odometry odom_msg;
   odom_msg.pose.covariance.assign(-1);
@@ -53,7 +52,7 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   odom_msg.twist.covariance[0] = 1;
   odom_msg.twist.covariance[35] = 1;
   odom_msg.twist.twist.linear.x = (u1 + u2)/2;
-  odom_msg.twist.twist.angular.z = (u2 - u1)/base_width;
+  odom_msg.twist.twist.angular.z = (u2 - u1)/(base_width/2);
   odom_pub.publish(odom_msg);
 
 }
@@ -79,7 +78,7 @@ int main(int argc, char **argv) {
 	if(!ros::param::get("~twist_topic", twist_topic))
 	  ROS_WARN_STREAM("Parameter <~twist_topic> not set. Using default value '"<<twist_topic<<"'");
 	std::string odom_topic = "odom";
-	if(!ros::param::get("~odom_topic", twist_topic))
+	if(!ros::param::get("~odom_topic", odom_topic))
 	  ROS_WARN_STREAM("Parameter <~odom_topic> not set. Using default value '"<<odom_topic<<"'");
 
 
