@@ -248,9 +248,10 @@ void ImageConverter::computeDisparity()
 			world_point.header.frame_id = "/world";
 			world_point.header.stamp = tZero;
 //			cout << "Transforming camera to world" <<endl;
+
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
-			tf::pointTFToMsg(detection, world_point.point);
+			tf::pointMsgToTF(world_point.point,detection);
 			sherlock.addDetection(detection);
 //			cout << "Added detection to manager" <<endl;
 		}
@@ -271,8 +272,9 @@ void ImageConverter::computeDisparity()
 
 		msg.header.frame_id = world_point.header.frame_id;
 		msg.header.stamp = ros::Time::now();
+		msg.pose.header.frame_id = world_point.header.frame_id;
+		msg.pose.header.stamp = ros::Time::now();
 		buildMsg(detection, msg.pose);
-
 		ObjLocationPub.publish(msg);
 	}
 
