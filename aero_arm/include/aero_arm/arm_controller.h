@@ -36,6 +36,9 @@ private:
 	ros::NodeHandle nh_;
 	ros::Subscriber sub_object_position;
 	ros::Publisher pub_arm_position;
+	ros::Publisher pub_arm_position_raw;
+	ros::Publisher pub_arm_position_trans;
+
 	tf::TransformListener listener;
 
 

@@ -27,6 +27,11 @@ Arm_Controller::Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,
 	this->pub_arm_position = nh.advertise<geometry_msgs::PoseStamped>(ArmPose,
 			2);
 
+	this->pub_arm_position_raw = nh.advertise<geometry_msgs::PoseStamped>("Raw",
+			2);
+	this->pub_arm_position_trans = nh.advertise<geometry_msgs::PoseStamped>("Trans",
+				2);
+
 }
 
 void Arm_Controller::ObjectPosition(
@@ -37,6 +42,8 @@ void Arm_Controller::ObjectPosition(
 	geometry_msgs::PoseStamped arm_pose;
 
 	geometry_msgs::PoseStamped object_pose(object->pose);
+
+	pub_arm_position_raw.publish(object_pose);
 
 	ROS_INFO("Raw MSG");
 	ROS_INFO("X = %f", object->pose.pose.position.x);
@@ -51,6 +58,7 @@ void Arm_Controller::ObjectPosition(
 	object_pose.header.frame_id = object->header.frame_id;
 
 	listener.transformPose("arm_base", object_pose, arm_pose);
+	pub_arm_position_trans.publish(arm_pose);
 
 
 	ROS_INFO("Transformed MSG");
@@ -66,7 +74,7 @@ void Arm_Controller::ObjectPosition(
 	grasp_rpy.getRotation(grasp_quaternion);
 
 	tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
-	arm_pose.pose.position.z += 0.05;
+	//arm_pose.pose.position.z += 0.05;
 
 	ROS_INFO("Grasp MSG");
 	ROS_INFO("X = %f", arm_pose.pose.position.x);
