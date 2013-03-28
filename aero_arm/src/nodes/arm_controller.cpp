@@ -41,9 +41,6 @@ void Arm_Controller::ObjectPosition(
 
 	geometry_msgs::PoseStamped arm_pose;
 
-	geometry_msgs::PoseStamped object_pose(object->pose);
-
-	pub_arm_position_raw.publish(object_pose);
 
 	ROS_INFO("Raw MSG");
 	ROS_INFO("X = %f", object->pose.pose.position.x);
@@ -55,9 +52,8 @@ void Arm_Controller::ObjectPosition(
 	ROS_INFO("RZ = %f", object->pose.pose.orientation.z);
 	ROS_INFO("RW = %f", object->pose.pose.orientation.w);
 
-	object_pose.header.frame_id = object->header.frame_id;
 
-	listener.transformPose("arm_base", object_pose, arm_pose);
+	listener.transformPose("arm_base", object->pose, arm_pose);
 	pub_arm_position_trans.publish(arm_pose);
 
 
