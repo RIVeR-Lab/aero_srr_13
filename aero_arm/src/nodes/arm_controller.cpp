@@ -53,6 +53,7 @@ void Arm_Controller::ObjectPosition(
 	ROS_INFO("RW = %f", object->pose.pose.orientation.w);
 
 
+	listener.waitForTransform("arm_base", object->pose.header.frame_id, object->pose.header.stamp, ros::Duration(1.0) );
 	listener.transformPose("arm_base", object->pose, arm_pose);
 	pub_arm_position_trans.publish(arm_pose);
 
