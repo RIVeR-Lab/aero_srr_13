@@ -15,7 +15,7 @@ ImageConverter::ImageConverter()
   WINDOWLeft ("Left Camera"),
   WINDOWRight ("Right Camera"),
   WINDOWDisparity ("Disparity"),
-  sherlock(.2, .1,.05, .5),
+  sherlock(.5, .15,.05, .5),
   gotLeft(false),
   gotRight(false)
 
