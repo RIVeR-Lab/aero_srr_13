@@ -66,7 +66,17 @@ void Arm_Controller::ObjectPosition(
 	grasp_rpy.getRotation(grasp_quaternion);
 
 	tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
-	arm_pose.pose.position.z +=0.05;
+	arm_pose.pose.position.z += 0.05;
+
+	ROS_INFO("Grasp MSG");
+	ROS_INFO("X = %f", arm_pose.pose.position.x);
+	ROS_INFO("Y = %f", arm_pose.pose.position.y);
+	ROS_INFO("Z = %f", arm_pose.pose.position.z);
+
+	ROS_INFO("RX = %f", arm_pose.pose.orientation.x);
+	ROS_INFO("RY = %f", arm_pose.pose.orientation.y);
+	ROS_INFO("RZ = %f", arm_pose.pose.orientation.z);
+	ROS_INFO("RW = %f", arm_pose.pose.orientation.w);
 
 	pub_arm_position.publish(arm_pose);
 }
