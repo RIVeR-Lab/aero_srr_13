@@ -15,14 +15,16 @@ ros::Subscriber control_sub;
 ros::Subscriber pause_sub;
 
 roboteq_driver::RoboteqGroupMotorControl::ConstPtr control_msg;
+bool is_new = false;
 bool is_paused = false;
 
 void controlTimerCallback(const ros::TimerEvent& e){
   roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg = control_msg;
-  if(!msg)
+  if(!is_new || !msg)
     return;
   {
     boost::lock_guard<boost::mutex> lock(controller_mutex);
+    is_new = false;
     BOOST_FOREACH(roboteq_driver::RoboteqMotorControl motorControl, msg->motors){
       if(is_paused)
 	controller->setPower(motorControl.channel, 0);
@@ -37,6 +39,7 @@ void controlTimerCallback(const ros::TimerEvent& e){
 }
 void controlCallback(const roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg){
   control_msg = msg;
+  is_new = true;
 }
 void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
 	{
