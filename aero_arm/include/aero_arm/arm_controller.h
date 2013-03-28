@@ -17,7 +17,7 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/Point.h>
-
+#include <aero_srr_msgs/ObjectLocationMsg.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
@@ -30,7 +30,7 @@ namespace aero_arm {
 class Arm_Controller {
 public:
 	Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,std::string ArmPose);
-	void ObjectPosition(const geometry_msgs::PoseStampedConstPtr& object_pos);
+	void ObjectPosition(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
 
 private:
 	ros::NodeHandle nh_;

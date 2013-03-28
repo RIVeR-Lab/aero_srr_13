@@ -11,6 +11,8 @@
   <depend package="rospy"/>
   <depend package="tf"/>
   <depend package="geometry_msgs"/>
+    <depend package="aero_srr_msgs"/>
+  
 </package>
 
 
