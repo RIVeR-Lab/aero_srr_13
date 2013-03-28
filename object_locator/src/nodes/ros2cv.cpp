@@ -238,7 +238,7 @@ void ImageConverter::computeDisparity()
 //			cout << "Recieved Disparity of "<< disp_val <<endl;
 			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
 			this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,obj_3d);
-			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
+//			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
 			tf::Point detection(obj_3d.x,obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point.point);
@@ -251,7 +251,7 @@ void ImageConverter::computeDisparity()
 
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
-			tf::pointTFToMsg(detection, world_point.point);
+			tf::pointMsgToTF(world_point.point,detection);
 			sherlock.addDetection(detection);
 //			cout << "Added detection to manager" <<endl;
 		}
