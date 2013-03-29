@@ -51,6 +51,7 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   odom_msg.twist.covariance.assign(-1);
   odom_msg.twist.covariance[0] = 1;
   odom_msg.twist.covariance[35] = 1;
+  odom_msg.child_frame_id = "/odom";
   odom_msg.twist.twist.linear.x = (u1 + u2)/2;
   odom_msg.twist.twist.angular.z = (u2 - u1)/(base_width/2);
   odom_pub.publish(odom_msg);
