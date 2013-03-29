@@ -28,8 +28,8 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_ = it_.subscribeCamera("/stereo_bottom/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_bottom/right/image_raw", 1, &ImageConverter::imageCbRight, this);
+	image_left_ = it_.subscribeCamera("/stereo_top/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/stereo_top/right/image_raw", 1, &ImageConverter::imageCbRight, this);
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 
@@ -68,10 +68,11 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 		ROS_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
-
-	//	std::stringstream s;
-	//	s << "/home/srr/ObjectDetectionData/samplesColor/" << ctr<<".png";
-	//	std::cout << s.str()<<std::endl;
+//
+//		std::stringstream s,d;
+//		s << "/home/srr/ObjectDetectionData/Stereo/Left/" << ctr<<".png";
+//		d << "/home/srr/ObjectDetectionData/Stereo/Right/" << ctr<<".png";
+//		std::cout << s.str()<<std::endl;
 	Mat_t img(cv_ptr->image);
 	//	std::cout << "displaying image"<<std::endl;
 	//	    cv::imshow(WINDOW, img);
@@ -79,10 +80,11 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 
 
 
-	//	  imshow(WINDOW,img);
+		  imshow(WINDOW,img);
 
-	//		  	   int c = cv::waitKey(10);
-	//		  	         if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctr++;}
+//			  	   int c = cv::waitKey(10);
+//			  	         if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctr++;}
+//			  	         if( (char)c == 'd' ) { cv::imwrite(d.str(), img); ctr++;}
 	//		    	 detectAndDisplay( img);
 	//	  	  	  	  test(img, WINDOW);
 	//		    	 tune(img,WINDOW);
@@ -95,7 +97,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_info  = *cam_info;
 	gotLeft = true;
 	detectAndDisplay(left_image,mat_left,WINDOWLeft);
-	//	processImage(left_image, mat_left, WINDOWLeft);
+		processImage(left_image, mat_left, WINDOWLeft);
 
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -103,6 +105,7 @@ void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const s
 	right_image = *msg;
 	right_info  = *cam_info;
 	gotRight = true;
+	processImage(right_image, mat_right, WINDOWRight);
 }
 
 
@@ -159,7 +162,7 @@ void ImageConverter::computeDisparity()
 	Mat_t Lds_img;
 	Mat_t Rds_img;
 	//	resize(mat_left->image,Lds_img,size);
-	//	resize(mat_left->image,Rds_img,size);
+	//	resize(mat_right->image,Rds_img,size);
 
 #ifdef CUDA_ENABLED
 	gpu::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
@@ -172,21 +175,22 @@ void ImageConverter::computeDisparity()
 	cv::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
 	remap(left_gray,img1_rect, mx1, my1, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 	remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+
 #endif
 
 	Mat_t disp(  heightL, widthL, CV_16S );
 	Mat_t vdisp( heightL, widthL, CV_8UC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
-	int minDisp = -128-32;      //0         //-128-32;
-	int numDisp = 256+80;       //80        //256+80;
-	int SADSize = 10;				//10
+	int minDisp = -50;      //0         //-128-32;
+	int numDisp = 16*21;       //80        //256+80;
+	int SADSize = 7;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  1	; // 1;
-	int preFilterCap =   2; //  2;
-	int uniqueness = 1;
-	int specSize =   50; //50 //20;   //reduces noise
-	int specRange = 1  ;  //5 //1;
+	int preFilterCap =   31; //  2;
+	int uniqueness = 5;
+	int specSize =   1000; //50 //20;   //reduces noise
+	int specRange = 31  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
 
@@ -205,7 +209,7 @@ void ImageConverter::computeDisparity()
 
 	//    cvConvertScale(disp, dispn, 1.0/16);
 	//	 cv::filterSpeckles(disp, 200, 24, 13);
-	//    cv::normalize( disp, vdisp, 0, 256, CV_MINMAX );
+	normalize( disp, vdisp, 0, 256, CV_MINMAX );
 
 	Mat_t vdisp1;
 #ifdef CUDA_ENABLED
