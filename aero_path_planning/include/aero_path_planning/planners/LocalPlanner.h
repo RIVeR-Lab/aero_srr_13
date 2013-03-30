@@ -17,7 +17,7 @@
 #include<geometry_msgs/Twist.h>
 #include<sensor_msgs/Joy.h>
 //********************** LOCAL  DEPENDANCIES **********************//
-#include <aero_path_planning/OryxPathPlanning.h>
+#include <aero_path_planning/utilities/OryxPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
 #include <aero_srr_msgs/AeroState.h>
 

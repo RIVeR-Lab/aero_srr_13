@@ -14,7 +14,7 @@
 #include <ros/ros.h>
 #include <boost/shared_ptr.hpp>
 //************ LOCAL DEPENDANCIES ****************//
-#include <aero_path_planning/CarrotPathFinder.h>
+#include <aero_path_planning/planning_strategies/CarrotPathFinder.h>
 //***********    NAMESPACES     ****************//
 
 namespace aero_path_planning
@@ -56,7 +56,7 @@ public:
 	 * @author Adam Panzica
 	 * @return The location of this node
 	 */
-	const Point& getLocation();
+	const Point& getLocation() const;
 
 	/**
 	 * @author Adam Panzica

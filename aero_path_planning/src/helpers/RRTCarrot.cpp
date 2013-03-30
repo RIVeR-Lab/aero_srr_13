@@ -16,7 +16,7 @@
 #include<pcl/common/norms.h>
 #include <boost/math/special_functions/round.hpp>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/RRTCarrot.h>
+#include<aero_path_planning/planning_strategies/RRTCarrot.h>
 //**********************NAMESPACES*****************************//
 
 

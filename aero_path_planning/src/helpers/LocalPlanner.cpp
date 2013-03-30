@@ -8,8 +8,8 @@
 //********************** SYSTEM DEPENDANCIES **********************//
 
 //********************** LOCAL  DEPENDANCIES **********************//
-#include <aero_path_planning/LocalPlanner.h>
-#include <aero_path_planning/FitnessQueue.h>
+#include <aero_path_planning/planners/LocalPlanner.h>
+#include <aero_path_planning/utilities/FitnessQueue.h>
 #include "OryxPathPlannerConfig.h"
 
 using namespace aero_path_planning;

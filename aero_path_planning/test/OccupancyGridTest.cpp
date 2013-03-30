@@ -11,7 +11,7 @@
 //****************SYSTEM DEPENDANCIES**************************//
 #include<gtest/gtest.h>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/OccupancyGrid.h>
+#include<aero_path_planning/utilities/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
 using namespace aero_path_planning;
 

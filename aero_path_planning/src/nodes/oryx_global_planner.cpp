@@ -12,10 +12,10 @@
 #include<aero_srr_msgs/Command.h>
 
 //*********************LOCAL DEPENDENCIES**********************//
-#include<aero_path_planning/OryxPathPlanning.h>
+#include<aero_path_planning/utilities/OryxPathPlanning.h>
 #include"OryxPathPlannerConfig.h"
-#include<aero_path_planning/GlobalPlanner.h>
-#include<aero_path_planning/RRTCarrot.h>
+#include<aero_path_planning/planners/GlobalPlanner.h>
+#include<aero_path_planning/planning_strategies/RRTCarrot.h>
 
 
 using namespace aero_path_planning;

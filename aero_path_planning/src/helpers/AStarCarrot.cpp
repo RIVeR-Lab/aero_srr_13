@@ -9,7 +9,7 @@
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <pcl/registration/distances.h>
 //************ LOCAL DEPENDANCIES ****************//
-#include <aero_path_planning/AStarCarrot.h>
+#include <aero_path_planning/planning_strategies/AStarCarrot.h>
 //***********    NAMESPACES     ****************//
 
 using namespace aero_path_planning;
@@ -92,6 +92,11 @@ double AStarNode::getH() const
 double AStarNode::getF() const
 {
 	return this->f_;
+}
+
+const aero_path_planning::Point& AStarNode::getLocation() const
+{
+	return this->location_;
 }
 
 AStarNode& AStarNode::operator= (AStarNode const & rhs)
