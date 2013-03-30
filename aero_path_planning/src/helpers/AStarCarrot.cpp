@@ -15,6 +15,9 @@
 using namespace aero_path_planning;
 using namespace aero_path_planning::astar_utilities;
 
+
+//********************* HURISTIC/COST FUNCTIONS *********************//
+
 double ed_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal)
 {
 	return pcl::distances::l2(point.getVector4fMap(), goal.getVector4fMap());
@@ -63,6 +66,8 @@ AStarNode::AStarNode(const AStarNodePtr& copy)
 	*this = *copy;
 }
 
+//********************* ASTARNODE IMPLEMENTATION *********************//
+
 AStarNode::AStarNode(const Point& location, const Point& goal, const AStarNodePtr parent, cost_func cost, huristic_func huristic):
 		location_(location),
 		parent_(parent),
@@ -99,6 +104,11 @@ const aero_path_planning::Point& AStarNode::getLocation() const
 	return this->location_;
 }
 
+bool AStarNode::sameLocation(const AStarNode& node) const
+{
+	return this->location_.getVector4fMap() == node.getLocation().getVector4fMap();
+}
+
 AStarNode& AStarNode::operator= (AStarNode const & rhs)
 {
 	this->location_ = rhs.location_;
@@ -130,7 +140,48 @@ bool       AStarNode::operator==(AStarNode const & rhs) const
 	return this->getF() == rhs.getF();
 }
 
+//********************* ASTARPLANNER *********************//
 
 
+bool AStarCarrot::setCarrotDelta(double delta)
+{
+	this->delta_     = delta;
+	this->has_delta_ = true;
+	return true;
+}
 
+bool AStarCarrot::setSearchMap(const aero_path_planning::OccupancyGrid& map)
+{
+	this->map_     = map;
+	this->has_map_ = true;
+	return true;
+}
 
+bool AStarCarrot::setCollision(collision_func_& collision_checker)
+{
+	this->collision_checker_ = collision_checker;
+	this->has_coll_          = true;
+	return true;
+}
+
+bool AStarCarrot::allowsPartialPath()
+{
+	return false;
+}
+
+bool AStarCarrot::getPlanningType(std::string& type) const
+{
+	type = "A* Carrot";
+	return true;
+}
+
+AStarCarrot& AStarCarrot::operator =(const AStarCarrot& copy)
+{
+	this->collision_checker_ = copy.collision_checker_;
+	this->delta_             = copy.delta_;
+	this->has_coll_          = copy.has_coll_;
+	this->has_delta_         = copy.has_delta_;
+	this->has_map_           = copy.has_map_;
+	this->map_               = copy.map_;
+	return *this;
+}

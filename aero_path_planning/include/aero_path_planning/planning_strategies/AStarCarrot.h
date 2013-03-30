@@ -15,6 +15,7 @@
 #include <boost/shared_ptr.hpp>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/planning_strategies/CarrotPathFinder.h>
+#include <aero_path_planning/utilities/FitnessQueue.h>
 //***********    NAMESPACES     ****************//
 
 namespace aero_path_planning
@@ -43,6 +44,10 @@ double eculidian_distance_huristic(const aero_path_planning::Point& point, const
  */
 double point_trait_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point);
 
+/**
+ * @author Adam Panzica
+ * @brief  Simple node class for use with an A* search based on an OccupancyGrid
+ */
 class AStarNode
 {
 public:
@@ -50,6 +55,15 @@ public:
 	AStarNode();
 	AStarNode(const AStarNodePtr& copy);
 	AStarNode(const AStarNode&    copy);
+
+	/**
+	 * @author Adam Panzica
+	 * @param [in] location  The location of this node in search space
+	 * @param [in] goal      The goal location in seach space
+	 * @param [in] parent    The parent AStarNode of this node
+	 * @param [in] cost      The cost_func to use with calculating the cost of this node
+	 * @param [in] huristic  The huristic_func to use whith calculating the huristic value of this node
+	 */
 	AStarNode(const Point& location, const Point& goal, const AStarNodePtr parent, cost_func cost, huristic_func huristic);
 
 	/**
@@ -76,19 +90,51 @@ public:
 	 */
 	double getF() const;
 
+	/**
+	 * @author Adam Panzica
+	 * @param [in] node The node to compare against
+	 * @return true if the nodes are at the same location
+	 */
+	bool sameLocation(const AStarNode& node) const;
+
 	AStarNode& operator= (AStarNode const & rhs);
+	/**
+	 * @author Adam Panzica
+	 * @param rhs
+	 * @return this->f_ < rhs.f_
+	 */
 	bool       operator< (AStarNode const & rhs) const;
+	/**
+	 * @author Adam Panzica
+	 * @param rhs
+	 * @return this->f_ <= rhs.f_
+	 */
 	bool       operator<=(AStarNode const & rhs) const;
+	/**
+	 * @author Adam Panzica
+	 * @param rhs
+	 * @return this->f_ > rhs.f_
+	 */
 	bool       operator> (AStarNode const & rhs) const;
+	/**
+	 * @author Adam Panzica
+	 * @param rhs
+	 * @return this->f_ >= rhs.f_
+	 */
 	bool       operator>=(AStarNode const & rhs) const;
+	/**
+	 * @author Adam Panzica
+	 * @param rhs
+	 * @return this->f_ == rhs.f_
+	 */
 	bool       operator==(AStarNode const & rhs) const;
 
 private:
-	aero_path_planning::Point location_;
-	AStarNodePtr parent_;
-	double g_;
-	double h_;
-	double f_;
+	aero_path_planning::Point location_; ///The location of this node in seach space
+	AStarNodePtr parent_;                ///The parent AStarNode of this node
+	double g_;                           ///The total cost of moving to this node
+	double h_;                           ///The huristic value of this node
+	double f_;                           ///The fitness of this node, \[f=g+h\]
 };
 
 }
@@ -97,6 +143,30 @@ class AStarCarrot : public aero_path_planning::CarrotPathFinder
 {
 public:
 	AStarCarrot();
+	AStarCarrot(const AStarCarrot& copy);
+	AStarCarrot(double step_size);
+	virtual ~AStarCarrot();
+
+	virtual bool setCarrotDelta(double delta);
+	virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map);
+	virtual bool setCollision(collision_func_& collision_checker);
+	virtual bool allowsPartialPath();
+	virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::queue<aero_path_planning::Point>& result_path);
+	virtual bool getPlanningType(std::string& type) const;
+
+	AStarCarrot& operator=(AStarCarrot const &copy);
+
+private:
+	typedef astar_utilities::AStarNode Node_t;
+	typedef astar_utilities::AStarNode::AStarNodePtr NodePtr_t;
+
+	bool has_delta_;
+	bool has_map_;
+	bool has_coll_;
+
+	int                               delta_;
+	aero_path_planning::OccupancyGrid map_;
+	collision_func_                   collision_checker_;
 };
 
 }
