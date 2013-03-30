@@ -1,40 +1,49 @@
 <launch>
+  <arg name="odom_topic" default="/odom" />
+  <arg name="imu_topic" default="/imu" />
+  <arg name="velocity_command_topic" default="/cmd_vel" />
 
-	<!-- Load Parameters onto the server -->
-	<group ns="@R_NS@">
-		<group ns="@T_NS@">
-			<group ns="@T_IMU@">
-				<param name="frame" value="@T_IMU@"/>
-				
-			</group>
-			
-			<group ns="@T_ARM@">
-				<param name="frame" value="@T_ARM@"/>
-				
-			</group>
-			
-			<group ns="@T_LFC@">
-				<param name="frame" value="@T_LFC@"/>
-				
-			</group>
-			
-			<group ns="@T_RTC@">
-				<param name="frame" value="@T_RTC@"/>
-				
-			</group>
-			
-			<group ns="@T_BOM@">
-				<param name="frame" value="@T_BOM@"/>
-				
-			</group>
-			
-			<group ns="@T_LDR@">
-				<param name="frame" value="@T_LDR@"/>
-				
-			</group>
-		</group>
-	</group>
-	
-	<node name="aero_base_node" pkg="aero_base" type="aero_base_node" />
+  <!-- Load Parameters onto the server -->
+  <group ns="@R_NS@">
+    <group ns="@T_NS@">
+      <group ns="@T_IMU@">
+	<param name="frame" value="@T_IMU@"/>
+      </group>
+      
+      <group ns="@T_ARM@">
+	<param name="frame" value="@T_ARM@"/>
+      </group>
+      
+      <group ns="@T_LFC@">
+	<param name="frame" value="@T_LFC@"/>
+      </group>
+      
+      <group ns="@T_RTC@">
+	<param name="frame" value="@T_RTC@"/>
+      </group>
+      
+      <group ns="@T_BOM@">
+	<param name="frame" value="@T_BOM@"/>
+      </group>
+      
+      <group ns="@T_LDR@">
+	<param name="frame" value="@T_LDR@"/>
+      </group>
+    </group>
+  </group>
+  
+  <node name="aero_base_node" pkg="aero_base" type="aero_base_node" />
+
+  <!-- Launch IMU Driver -->
+  <node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
+    <param name="device_id" value="kvh-1750" />
+    <param name="imu_topic" value="$(arg imu_topic)" />
+  </node>
+
+  <!-- Launch Driver Controller and Drive motor driver -->
+  <include file="$(find aero_base)/launch/aero_drive_node.launch">
+    <arg name="odom_topic" value="$(arg odom_topic)" />
+    <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
+  </include>
 
 </launch>
