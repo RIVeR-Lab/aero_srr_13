@@ -38,7 +38,8 @@ ImageConverter::ImageConverter()
 
 	//Cascade Trained xml file locations
 	cascade_path = "/home/srr/ObjectDetectionData/exec/cascadeHOGWHA/cascade.xml";
-	ctr = 0;
+	ctrLeft = 0;
+	ctrRight = 0;
 	cv::namedWindow(WINDOWLeft);
 	cv::namedWindow(WINDOWRight);
 	cv::namedWindow(WINDOWDisparity);
@@ -69,10 +70,7 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 		return;
 	}
 //
-//		std::stringstream s,d;
-//		s << "/home/srr/ObjectDetectionData/Stereo/Left/" << ctr<<".png";
-//		d << "/home/srr/ObjectDetectionData/Stereo/Right/" << ctr<<".png";
-//		std::cout << s.str()<<std::endl;
+
 	Mat_t img(cv_ptr->image);
 	//	std::cout << "displaying image"<<std::endl;
 	//	    cv::imshow(WINDOW, img);
@@ -82,13 +80,32 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 
 		  imshow(WINDOW,img);
 
-//			  	   int c = cv::waitKey(10);
-//			  	         if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctr++;}
-//			  	         if( (char)c == 'd' ) { cv::imwrite(d.str(), img); ctr++;}
+
 	//		    	 detectAndDisplay( img);
 	//	  	  	  	  test(img, WINDOW);
 	//		    	 tune(img,WINDOW);
 	image_pub_.publish(cv_ptr->toImageMsg());
+}
+void ImageConverter::saveImage(const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, int O)
+{
+	try
+	{
+		cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
+	}
+	catch (cv_bridge::Exception& e)
+	{
+		ROS_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+	Mat_t img(cv_ptr->image);
+	std::stringstream s,d;
+	s << "/home/srr/ObjectDetectionData/Stereo/Left/" << ctrLeft<<".png";
+	d << "/home/srr/ObjectDetectionData/Stereo/Right/" << ctrRight<<".png";
+	std::cout << s.str()<<std::endl;
+	std::cout << d.str()<<std::endl;
+	   int c = cv::waitKey(5);
+	   if(O == 0){if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctrLeft++;}}
+	   else{if( (char)c == 'd' ) { cv::imwrite(d.str(), img); ctrRight++;}}
 }
 
 void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -97,7 +114,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_info  = *cam_info;
 	gotLeft = true;
 	detectAndDisplay(left_image,mat_left,WINDOWLeft);
-		processImage(left_image, mat_left, WINDOWLeft);
+//		saveImage(left_image, mat_left,0);
 
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -105,7 +122,7 @@ void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const s
 	right_image = *msg;
 	right_info  = *cam_info;
 	gotRight = true;
-	processImage(right_image, mat_right, WINDOWRight);
+//	saveImage(right_image, mat_right,1);
 }
 
 
@@ -181,16 +198,16 @@ void ImageConverter::computeDisparity()
 	Mat_t disp(  heightL, widthL, CV_16S );
 	Mat_t vdisp( heightL, widthL, CV_8UC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
-	int minDisp = -50;      //0         //-128-32;
-	int numDisp = 16*21;       //80        //256+80;
-	int SADSize = 7;				//10
+	int minDisp = 0;      //0         //-128-32;
+	int numDisp = 192;       //80        //256+80;
+	int SADSize = 10;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  1	; // 1;
 	int preFilterCap =   31; //  2;
-	int uniqueness = 5;
-	int specSize =   1000; //50 //20;   //reduces noise
-	int specRange = 31  ;  //5 //1;
+	int uniqueness = 12;
+	int specSize =   100; //50 //20;   //reduces noise
+	int specRange = 20  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
 
