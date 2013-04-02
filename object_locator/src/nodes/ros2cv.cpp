@@ -206,7 +206,7 @@ void ImageConverter::computeDisparity()
 	int disp12MaxDiff =  1	; // 1;
 	int preFilterCap =   31; //  2;
 	int uniqueness = 12;
-	int specSize =   100; //50 //20;   //reduces noise
+	int specSize =   1000; //50 //20;   //reduces noise
 	int specRange = 20  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
