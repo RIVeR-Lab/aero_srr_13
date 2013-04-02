@@ -199,15 +199,15 @@ void ImageConverter::computeDisparity()
 	Mat_t vdisp( heightL, widthL, CV_8UC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 192;       //80        //256+80;
+	int numDisp = 256;       //80        //256+80;
 	int SADSize = 10;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  1	; // 1;
 	int preFilterCap =   31; //  2;
-	int uniqueness = 12;
-	int specSize =   1000; //50 //20;   //reduces noise
-	int specRange = 20  ;  //5 //1;
+	int uniqueness = 15;
+	int specSize =   500; //50 //20;   //reduces noise
+	int specRange = 31  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
 
