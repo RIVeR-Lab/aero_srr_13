@@ -42,6 +42,7 @@ public:
 	void computeDisparityCb(const ros::TimerEvent& event);
 	void detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW);
 	void buildMsg(const tf::Point& point, geometry_msgs::PoseStamped& msg) const;
+	void saveImage(const sensor_msgs::Image& msg,cv_bridge::CvImagePtr& cv_ptr, int O);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 
@@ -75,7 +76,7 @@ private:
 	Mat_t disparity;
 	bool gotLeft;
 	bool gotRight;
-	int ctr;
+	int ctrLeft,ctrRight;
 	bool objset;
 	int HuethresH,
 	HuethresL,
