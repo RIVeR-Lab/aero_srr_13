@@ -7,7 +7,7 @@ This file exists mainly for backwards compatibility.
 <group ns="stereo_bottom">
  <include file="$(find vision_comm)/launch/camera.launch">
     <arg name="camera"       value="left" />
-    <arg name="ip_address"   value="192.168.1.100" />
+    <arg name="ip_address"   value="192.168.3.100" />
     <arg name="trigger_mode" value="fixedrate" />
     <arg name="frame_id"     value="high_def_optical_frame" />
     <arg name="trig_topic"   value="master_trigger" />
@@ -15,22 +15,22 @@ This file exists mainly for backwards compatibility.
 
  <include file="$(find vision_comm)/launch/camera.launch">
     <arg name="camera"       value="right" />
-    <arg name="ip_address"   value="192.168.2.100" />
+    <arg name="ip_address"   value="192.168.4.100" />
     <arg name="trigger_mode" value="syncin2" />
     <arg name="frame_id"     value="high_def_optical_frame" />
     <arg name="trig_topic"   value="/stereo_bottom/left/master_trigger" />
   </include>
-
+<!--
 <node pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" name="prosilica_stereo_proc" />
-
+-->
 </group>
-
+<!--
 <node pkg="image_view" type="stereo_view" respawn="false" name="prosilica_viewer_color">
       <param name="autosize" type="bool" value="False" />
       <remap from="stereo" to="stereo_bottom" />
       <remap from="image" to="image_rect" />
     </node>
-<!-- 
+ 
   <remap from="stereo/left/image_raw" to="left/image_raw" />
   <remap from="stereo/right/image_raw" to="right/image_raw" />
  

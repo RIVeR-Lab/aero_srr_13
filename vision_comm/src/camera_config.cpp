@@ -23,14 +23,14 @@ int main(int argc, char** argv)
     // Open camera at specified IP address
     prosilica::Camera cam(ip.c_str());
     // Load factory settings
-    cam.setAttributeEnum("ConfigFileIndex", "Factory");
-    cam.runCommand("ConfigFileLoad");
+    //cam.setAttributeEnum("ConfigFileIndex", "Factory");
+    //cam.runCommand("ConfigFileLoad");
     // Write settings for signaling exposure
-    cam.setAttributeEnum("SyncOut2Invert", "Off");
-    cam.setAttributeEnum("SyncOut2Mode", sync.c_str());
+    //cam.setAttributeEnum("SyncOut2Invert", "Off");
+    //cam.setAttributeEnum("SyncOut2Mode", sync.c_str());
     // Save settings to config file 1
     cam.setAttributeEnum("ConfigFileIndex", "1");
-    cam.runCommand("ConfigFileSave");
+    cam.runCommand("ConfigFileLoad");
     // Always load config file 1 on power up
     cam.setAttributeEnum("ConfigFilePowerUp", "1");
   }
