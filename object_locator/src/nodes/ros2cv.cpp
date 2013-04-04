@@ -78,7 +78,7 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 
 
 
-		  imshow(WINDOW,img);
+//		  imshow(WINDOW,img);
 
 
 	//		    	 detectAndDisplay( img);
