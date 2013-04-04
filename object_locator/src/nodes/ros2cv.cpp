@@ -28,7 +28,7 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_ = it_.subscribeCamera("/stereo_top/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
+	image_left_ = it_.subscribeCamera("/prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	image_right_ = it_.subscribeCamera("/stereo_top/right/image_raw", 1, &ImageConverter::imageCbRight, this);
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
@@ -37,7 +37,7 @@ ImageConverter::ImageConverter()
 	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
 
 	//Cascade Trained xml file locations
-	cascade_path = "/home/srr/ObjectDetectionData/exec/cascadeHOGWHA/cascade.xml";
+	cascade_path = "/home/srr/ObjectDetectionData/exec/cascade007/cascade.xml";
 	ctrLeft = 0;
 	ctrRight = 0;
 	cv::namedWindow(WINDOWLeft);
@@ -354,8 +354,10 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 35, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDA
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 15, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDB
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDD 35
-	cascade.detectMultiScale( frame_gray, faces, 1.1, 455, 0, cv::Size(70, 100), cv::Size(150,215) ); // works for WHA
-
+//	cascade.detectMultiScale( frame_gray, faces, 1.1, 455, 0, cv::Size(70, 100), cv::Size(150,215) ); // works for WHA
+//	cascade.detectMultiScale( frame_gray, faces, 1.1, 55, 0, cv::Size(75, 112), cv::Size(120, 190) ); // works for WHA comb
+//	cascade.detectMultiScale( frame_gray, faces, 1.1, 25, 0, cv::Size(70, 100), cv::Size(150, 215) ); // works for WHA 7 samp close
+	cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(40, 70), cv::Size(70, 100) ); // works for WHA 7samp
 
 	for( size_t i = 0; i < faces.size(); i++ )
 	{
