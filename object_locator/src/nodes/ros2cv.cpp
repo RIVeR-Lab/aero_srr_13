@@ -289,7 +289,10 @@ void ImageConverter::computeDisparity()
 	object_type type;
 	if(sherlock.getDetection(detection, type, confidence))
 	{
-		cout<<"I Got A Detection: "<< endl << "X:" << detection.getX() <<", Y: "<< detection.getY() << ", Z: " << detection.getZ() <<", "<< confidence<<std::endl;
+		cout<<"I Got A Detection: "<< endl << "X:" << detection.getX()
+								           <<", Y: "<< detection.getY()
+								           << ", Z: " << detection.getZ()
+								           <<", "<< confidence<<"of type: "<< type << std::endl;
 		aero_srr_msgs::ObjectLocationMsg msg;
 
 		msg.header.frame_id = world_point.header.frame_id;
