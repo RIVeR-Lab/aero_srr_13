@@ -68,7 +68,8 @@ private:
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
-	typedef std::pair<int, int> Detection_t;
+	typedef std::pair<int, int> PixPoint_t;
+	typedef std::pair<PixPoint_t, object_type> Detection_t;
 	typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
 	std::vector<DetectionPtr_t> detection_list_;
 

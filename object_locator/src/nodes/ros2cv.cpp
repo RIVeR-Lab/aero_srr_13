@@ -46,7 +46,7 @@ ImageConverter::ImageConverter()
 	cv::namedWindow(WINDOWDisparity);
 	objset = false;
 
-	DetectionPtr_t(new Detection_t(0,0));
+
 
 }
 
@@ -246,8 +246,8 @@ void ImageConverter::computeDisparity()
 	for(int i = 0; i< (int)detection_list_.size(); i++)
 	{
 //		cout << endl;
-//		cout << "In detection #"<< i+1 << "/"<< detection_list_.size() <<endl;
-		Point2d obj_centroid(detection_list_.at(i)->first,detection_list_.at(i)->second);
+//		cout << "In detection #"<< i+1 << "/"<< detection_list_WHA.size() <<endl;
+		Point2d obj_centroid(detection_list_.at(i)->first.first,detection_list_.at(i)->first.second);
 		Point3d obj_3d;
 
 
@@ -274,7 +274,7 @@ void ImageConverter::computeDisparity()
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
 			tf::pointMsgToTF(world_point.point,detection);
-			sherlock.addDetection(detection);
+			sherlock.addDetection(detection, detection_list_.at(i)->second);
 //			cout << "Added detection to manager" <<endl;
 		}
 
@@ -282,12 +282,12 @@ void ImageConverter::computeDisparity()
 	tf::Point detection;
 //	cout << "Clearing list" <<endl;
 	detection_list_.clear();
-	DetectionPtr_t(new Detection_t(0,0));
 //	cout << "Shrinking Det/ection manager list" <<endl;
 	sherlock.shrink();
 //	cout << "Finished shrinking list" <<endl;
 	double confidence;
-	if(sherlock.getDetection(detection, confidence))
+	object_type type;
+	if(sherlock.getDetection(detection, type, confidence))
 	{
 		cout<<"I Got A Detection: "<< endl << "X:" << detection.getX() <<", Y: "<< detection.getY() << ", Z: " << detection.getZ() <<", "<< confidence<<std::endl;
 		aero_srr_msgs::ObjectLocationMsg msg;
@@ -405,7 +405,11 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
-		detection_list_.push_back(DetectionPtr_t(new Detection_t(center.x, center.y)));
+		DetectionPtr_t newDetection(new Detection_t());
+		newDetection->first.first  = center.x;
+		newDetection->first.second = center.y;
+		newDetection->second       = WHA;
+		detection_list_.push_back(newDetection);
 
 
 
@@ -425,7 +429,11 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
-//		detection_list_.push_back(DetectionPtr_t(new Detection_t(center.x, center.y)));
+		DetectionPtr_t newDetection(new Detection_t());
+		newDetection->first.first  = center.x;
+		newDetection->first.second = center.y;
+		newDetection->second       = PINK_BALL;
+		detection_list_.push_back(newDetection);
 
 
 

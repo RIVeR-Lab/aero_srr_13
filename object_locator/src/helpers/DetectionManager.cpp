@@ -60,17 +60,17 @@ double DetectionManager::averageConfidance() const
 	}
 }
 
-void DetectionManager::addDetection(const tf::Point& detection)
+void DetectionManager::addDetection(const tf::Point& detection,const object_type type)
 {
 	bool growth = false;
 	BOOST_FOREACH(DetectionArray_t::value_type item, this->detections_)
 	{
-		if(item->first.distance(detection) <= this->threshold_dist_ )
+		if(item->first.first.distance(detection) <= this->threshold_dist_  && item->first.second == type)
 		{
 			if(item->second < this->max_condifdence_)
 			{
 
-				item->first = (item->first+detection)/2;
+				item->first.first = (item->first.first+detection)/2;
 				item->second += this->growth_rate_;
 			}
 			growth = true;
@@ -84,7 +84,11 @@ void DetectionManager::addDetection(const tf::Point& detection)
 
 	if(!growth)
 	{
-		this->detections_.push_back(DetectionPtr(new Detection_t(detection, this->growth_rate_)));
+		DetectionPtr newDetection(new Detection_t());
+		newDetection->first.first  = detection;
+		newDetection->first.second = type;
+		newDetection->second       = this->growth_rate_;
+		this->detections_.push_back(newDetection);
 	}
 }
 
@@ -95,20 +99,22 @@ void DetectionManager::shrink()
 		{
 
 			(*itr)->second-= this->shrink_rate_;
-//			if((*itr)->second <= 0)
-//			{
-//				this->detections_.erase(itr);
-//			}
+			if((*itr)->second <= 0)
+			{
+				this->detections_.erase(itr);
+			}
 
 		}
 
 }
 
-bool DetectionManager::getDetection(tf::Point& detection, double& confidence) const
+bool DetectionManager::getDetection(tf::Point& detection,object_type &type, double& confidence) const
 {
 	if(this->size() > 0)
 	{
-		DetectionPtr best_conf(new Detection_t(detection, 0));
+		DetectionPtr best_conf(new Detection_t());
+		best_conf->first.first = detection;
+		best_conf->second = 0;
 		BOOST_FOREACH(DetectionArray_t::value_type item, this->detections_)
 		{
 			if((item->second > this->threshold_det_) && (item->second > best_conf->second))
@@ -119,7 +125,7 @@ bool DetectionManager::getDetection(tf::Point& detection, double& confidence) co
 
 		if(best_conf->second > this->threshold_det_)
 		{
-			detection = best_conf->first;
+			detection = best_conf->first.first;
 			confidence= best_conf->second;
 			return true;
 		}
