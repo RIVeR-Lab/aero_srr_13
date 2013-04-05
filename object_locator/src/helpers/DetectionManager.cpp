@@ -127,6 +127,7 @@ bool DetectionManager::getDetection(tf::Point& detection,object_type &type, doub
 		{
 			detection = best_conf->first.first;
 			confidence= best_conf->second;
+			type = best_conf->first.second;
 			return true;
 		}
 		else
