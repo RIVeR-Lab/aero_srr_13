@@ -99,10 +99,10 @@ void DetectionManager::shrink()
 		{
 
 			(*itr)->second-= this->shrink_rate_;
-			if((*itr)->second <= 0)
-			{
-				this->detections_.erase(itr);
-			}
+//			if((*itr)->second <= 0)
+//			{
+//				this->detections_.erase(itr);
+//			}
 
 		}
 

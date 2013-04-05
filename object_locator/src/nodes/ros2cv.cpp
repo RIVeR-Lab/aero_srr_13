@@ -45,11 +45,7 @@ ImageConverter::ImageConverter()
 	cv::namedWindow(WINDOWRight);
 	cv::namedWindow(WINDOWDisparity);
 	objset = false;
-	DetectionPtr_t aBlankDetection(new Detection_t());
-	aBlankDetection->first.first  = 0;
-	aBlankDetection->first.second = 0;
-	aBlankDetection->second       = WHA;
-	detection_list_.push_back(aBlankDetection);
+
 
 
 }
