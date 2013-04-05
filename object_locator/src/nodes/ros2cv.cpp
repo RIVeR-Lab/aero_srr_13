@@ -79,7 +79,7 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 
 
 
-		  imshow(WINDOW,img);
+//		  imshow(WINDOW,img);
 
 
 	//		    	 detectAndDisplay( img);
@@ -114,7 +114,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_image = *msg;
 	left_info  = *cam_info;
 	gotLeft = true;
-//	detectAndDisplay(left_image,mat_left,WINDOWLeft);
+	detectAndDisplay(left_image,mat_left,WINDOWLeft);
 //		saveImage(left_image, mat_left,0);
 
 }
