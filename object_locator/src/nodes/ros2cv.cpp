@@ -37,7 +37,8 @@ ImageConverter::ImageConverter()
 	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
 
 	//Cascade Trained xml file locations
-	cascade_path = "/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
+	cascade_path_WHA = "/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
+	cascade_path_PINK = "/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	ctrLeft = 0;
 	ctrRight = 0;
 	cv::namedWindow(WINDOWLeft);
@@ -78,7 +79,7 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 
 
 
-//		  imshow(WINDOW,img);
+		  imshow(WINDOW,img);
 
 
 	//		    	 detectAndDisplay( img);
@@ -113,7 +114,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_image = *msg;
 	left_info  = *cam_info;
 	gotLeft = true;
-	detectAndDisplay(left_image,mat_left,WINDOWLeft);
+//	detectAndDisplay(left_image,mat_left,WINDOWLeft);
 //		saveImage(left_image, mat_left,0);
 
 }
@@ -298,10 +299,29 @@ void ImageConverter::computeDisparity()
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
 	}
-
+//	Mat_t cmapped;
+//	cmapped = gray2bgr(vdisp1);
 	cv::imshow(WINDOWDisparity, vdisp1 );
 	cv::waitKey(3);
 
+}
+Mat_t ImageConverter::gray2bgr(Mat_t img)
+{
+	Mat_t BGR( img.rows, img.cols, CV_32FC3 );
+	for (int i = 0; i <img.rows; i ++)
+	{
+		for(int j=0; j<img.cols;j++)
+		{
+			BGR.at<Vec3i>(i,j)[0] =  std::abs(sin((img.at<double>(i,j))*2.0*3.14+0.0*3.14));
+			BGR.at<Vec3i>(i,j)[1] = std::abs(sin((img.at<double>(i,j))*2.0*3.14+(-0.1)*3.14));
+			BGR.at<Vec3i>(i,j)[2]= std::abs(sin((img.at<double>(i,j))*2.0*3.14+(-0.3)*3.14));
+			cout <<"D:" <<img.at<uchar>(i,j) << endl;
+			cout <<"S:" <<img.at<Scalar>(i,j) << endl;
+		}
+	}
+
+
+	return BGR;
 }
 
 void ImageConverter::buildMsg(const tf::Point& point, geometry_msgs::PoseStamped& msg) const
@@ -337,14 +357,21 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	}
 	Mat_t frame;
 	frame = cv_ptr->image;
-	if( !cascade.load( cascade_path ) )
+	if( !cascade_WHA.load( cascade_path_WHA))
 	{
 		printf("--(!)Error loading\n");
 	}
+
+	if( !cascade_PINK.load(cascade_path_PINK))
+		{
+			printf("--(!)Error loading\n");
+		}
 	cv::GaussianBlur( frame, frame, cv::Size(9, 9), 2, 2 );
 
-	std::vector<cv::Rect> faces;
-	std::vector<cv::Rect> pink;
+	std::vector<cv::Rect> WHA_faces;
+	std::vector<cv::Rect> PINK_faces;
+	std::vector<std::vector<cv::Rect> > Detections;
+
 	Mat_t frame_gray;
 
 	cv::cvtColor( frame, frame_gray, CV_BGR2GRAY );
@@ -358,20 +385,47 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 //	cascade.detectMultiScale( frame_gray, faces, 1.1, 55, 0, cv::Size(75, 112), cv::Size(120, 190) ); // works for WHA comb
 //	cascade.detectMultiScale( frame_gray, faces, 1.1, 25, 0, cv::Size(70, 100), cv::Size(150, 215) ); // works for WHA 7 samp close
 //	cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(40, 70), cv::Size(70, 100) ); // works for WHA 007
-	cascade.detectMultiScale( frame_gray, faces, 1.1, 5, 0, cv::Size(65, 70), cv::Size(85, 90) ); // works for WHA 007
+	cascade_WHA.detectMultiScale( frame_gray, WHA_faces, 1.1, 5, 0, cv::Size(65, 70), cv::Size(85, 90) ); // works for WHAground !&
+	cascade_PINK.detectMultiScale( frame_gray, PINK_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for PINK !&
 
-	for( size_t i = 0; i < faces.size(); i++ )
+
+	for( size_t i = 0; i < WHA_faces.size(); i++ )
 	{
-		Mat_t faceROI = frame_gray( faces[i] );
+//		cout << "Entered circle drawing loop" << endl;
+
+
+		Mat_t faceROI = frame_gray( WHA_faces[i] );
 
 		//-- In each face, detect eyes
 
 		//-- Draw the face
-		cv::Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
-		cv::ellipse( frame, center, cv::Size( faces[i].width/2, faces[i].height/2), 0, 0, 360, cv::Scalar( 255, 0, 0 ), 2, 8, 0 );
-//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+		cv::Point center( WHA_faces[i].x + WHA_faces[i].width/2, WHA_faces[i].y + WHA_faces[i].height/2 );
+
+		cv::ellipse( frame, center, cv::Size( WHA_faces[i].width/2, WHA_faces[i].height/2), 0, 0, 360, cv::Scalar( 255, 0, 0 ), 2, 8, 0 );
+
+		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
 		detection_list_.push_back(DetectionPtr_t(new Detection_t(center.x, center.y)));
+
+
+
+	}
+	for( size_t j = 0; j < PINK_faces.size(); j++ )
+	{
+//		cout << "Entered circle drawing loop" << endl;
+
+
+		Mat_t faceROI = frame_gray( PINK_faces[j] );
+
+		//-- In each face, detect eyes
+
+		//-- Draw the face
+		cv::Point center( PINK_faces[j].x + PINK_faces[j].width/2, PINK_faces[j].y + PINK_faces[j].height/2 );
+		cv::ellipse( frame, center, cv::Size( PINK_faces[j].width/2, PINK_faces[j].height/2), 0, 0, 360, cv::Scalar( 0, 255, 0 ), 2, 8, 0 );
+
+		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+
+//		detection_list_.push_back(DetectionPtr_t(new Detection_t(center.x, center.y)));
 
 
 
@@ -386,6 +440,8 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 
 
 }
+
+
 
 int main(int argc, char** argv)
 {

@@ -21,6 +21,7 @@
 #include <tf/transform_listener.h>
 #include <object_locator/DetectionManager.h>
 #include <geometry_msgs/PointStamped.h>
+#include <math.h>
 
 
 
@@ -43,6 +44,7 @@ public:
 	void detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW);
 	void buildMsg(const tf::Point& point, geometry_msgs::PoseStamped& msg) const;
 	void saveImage(const sensor_msgs::Image& msg,cv_bridge::CvImagePtr& cv_ptr, int O);
+	Mat_t gray2bgr(Mat_t img);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 
@@ -60,8 +62,9 @@ private:
 	sensor_msgs::Image right_image;
 	sensor_msgs::CameraInfo left_info;
 	sensor_msgs::CameraInfo right_info;
-	std::string cascade_path;
-	CascadeClassifier_t cascade;
+	std::string cascade_path_WHA,
+				cascade_path_PINK;
+	CascadeClassifier_t cascade_WHA, cascade_PINK;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
