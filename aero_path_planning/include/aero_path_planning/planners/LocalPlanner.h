@@ -15,9 +15,8 @@
 #include<boost/circular_buffer.hpp>
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
-#include<sensor_msgs/Joy.h>
 //********************** LOCAL  DEPENDANCIES **********************//
-#include <aero_path_planning/utilities/OryxPathPlanning.h>
+#include <aero_path_planning/utilities/AeroPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
 #include <aero_srr_msgs/AeroState.h>
 
@@ -61,7 +60,7 @@ private:
 	std::string	v_action_topic_;///Actionlib topic name to send velocity commands over
 	std::string pc_topic_;		///topic name of the ROS topic to receive new occupancy grid data over
 	std::string state_topic_;   ///Topic name of the ROS topic to receive new AeroState messages over
-	std::string joy_topic_;     ///Topic name of the ROS topic to receive Joy messages over
+	std::string man_topic_;     ///Topic name of the ROS topic to receive Joy messages over
 
 	ros::NodeHandle nh_;	    ///Node handle for publishing/subscribing to topics
 	ros::NodeHandle p_nh_;      ///Nodes handle to load private params
@@ -110,10 +109,10 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Callback for handling joy messages for manual/servo control
+	 * @brief  Callback for handling Twist for manual/servo control
 	 * @param message
 	 */
-	void joyCB(const sensor_msgs::JoyConstPtr& message);
+	void manTwistCB(const geometry_msgs::TwistConstPtr& message);
 
 	/**
 	 * @author Adam Panzica

@@ -12,7 +12,7 @@
 #define @OCCUPANCY_TOPIC_CDF@     "@OCCUPANCY_TOPIC_ARG@"
 #define @VELOCITY_CMD_TOPIC_CDF@  "@VELOCITY_CMD_TOPIC_ARG@"
 #define @ODOMETRY_TOPIC_CDF@      "@ODOMETRY_TOPIC_ARG@"
-#define @JOY_TOPIC_CDF@           "@JOY_TOPIC_ARG@"
+#define @MAN_TOPIC_CDF@           "@MAN_TOPIC_ARG@"
 #define @STATE_TOPIC_CDF@         "@STATE_TOPIC_ARG@"
 
 #define @PLATFORM_CDF@            "@PLATFORM_ARG@"

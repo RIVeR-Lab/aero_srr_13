@@ -11,7 +11,7 @@
 //****************SYSTEM DEPENDANCIES**************************//
 
 //*****************LOCAL DEPENDANCIES**************************//
-#include <aero_path_planning/utilities/OryxPathPlanningUtilities.h>
+#include <aero_path_planning/utilities/AeroPathPlanningUtilities.h>
 //**********************NAMESPACES*****************************//
 
 using namespace aero_path_planning;

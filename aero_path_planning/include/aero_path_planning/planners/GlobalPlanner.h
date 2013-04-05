@@ -17,7 +17,7 @@
 #include<nav_msgs/Odometry.h>
 
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/utilities/OryxPathPlanning.h>
+#include<aero_path_planning/utilities/AeroPathPlanning.h>
 #include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
 //**********************NAMESPACES*****************************//
 

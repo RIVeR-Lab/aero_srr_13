@@ -11,7 +11,7 @@
 //*********************** SYSTEM DEPENDENCIES ************************************//
 #include <ros/ros.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
-#include <aero_path_planning/utilities/OryxPathPlanningUtilities.h>
+#include <aero_path_planning/utilities/AeroPathPlanningUtilities.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
 
 

@@ -54,7 +54,7 @@ void LocalPlanner::loadParam()
 	this->v_action_topic_ = VEL_CMD_TOPIC;
 	this->pc_topic_       = OCCUPANCY_TOPIC;
 	this->state_topic_    = STATE_TOPIC;
-	this->joy_topic_      = JOY_TOPIC;
+	this->man_topic_      = MAN_TOPIC;
 
 	//*****************Configuration Parameters*******************//
 	//The platform that the local planner is running on
@@ -196,7 +196,7 @@ void LocalPlanner::loadParam()
 	if(!p_nh_.getParam(this->v_action_topic_,  this->v_action_topic_))	PARAM_WARN(this->v_action_topic_, this->v_action_topic_);
 	if(!p_nh_.getParam(this->pc_topic_,	       this->pc_topic_))	    PARAM_WARN(this->pc_topic_,	      this->pc_topic_);
 	if(!p_nh_.getParam(this->state_topic_,     this->state_topic_))	    PARAM_WARN(this->state_topic_,    this->state_topic_);
-	if(!p_nh_.getParam(this->joy_topic_,	   this->joy_topic_))	    PARAM_WARN(this->joy_topic_,	  this->joy_topic_);
+	if(!p_nh_.getParam(this->man_topic_,	   this->man_topic_))	    PARAM_WARN(this->man_topic_,	  this->man_topic_);
 
 	if(!p_nh_.getParam(p_goal_weight,	this->goal_weight_))    PARAM_WARN(p_goal_weight, p_goal_weight_msg.str());
 	if(!p_nh_.getParam(p_trav_weight,	this->trav_weight_))    PARAM_WARN(p_trav_weight, p_trav_weight_msg.str());
@@ -227,7 +227,7 @@ void LocalPlanner::regTopic()
 {
 	this->pc_sub_    = this->nh_.subscribe(this->pc_topic_,    2, &LocalPlanner::pcCB,    this);
 	this->state_sub_ = this->nh_.subscribe(this->state_topic_, 2, &LocalPlanner::stateCB, this);
-	this->joy_sub_   = this->nh_.subscribe(this->joy_topic_,   2, &LocalPlanner::joyCB,   this);
+	this->joy_sub_   = this->nh_.subscribe(this->man_topic_,   2, &LocalPlanner::manTwistCB,   this);
 	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
 	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
 
@@ -420,20 +420,12 @@ void LocalPlanner::pcCB(const aero_path_planning::OccupancyGridMsgConstPtr& mess
 	}
 }
 
-void LocalPlanner::joyCB(const sensor_msgs::JoyConstPtr& message)
+void LocalPlanner::manTwistCB(const geometry_msgs::TwistConstPtr& message)
 {
 	//Check to make sure we're in manual mode and weapons free
 	if(!this->tentacle_mode_&&this->should_plan_)
 	{
-		//Dead-man switch check
-		if(message->buttons.at(1))
-		{
-			ROS_INFO_STREAM("Received Joy Message: \n"<<*message);
-		}
-		else
-		{
-			ROS_WARN_STREAM_THROTTLE(5, "Dead-man switch not pressed!");
-		}
+		this->twist(message->linear.x, message->angular.z);
 	}
 	else
 	{
