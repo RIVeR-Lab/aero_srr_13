@@ -12,18 +12,10 @@
 //********************LOCAL DEPENDENCIES*******************************//
 
 //********************NAMESPACES***************************************//
-using std::string;
-namespace aero_odometry{
-class Defaults{
-private:
-	Defaults(){};
-	virtual ~Defaults(){};
-public:
-	static double
-};
+
 
 int main(int argc, char **argv) {
-
+	return 1;
 }
 
-};
+
