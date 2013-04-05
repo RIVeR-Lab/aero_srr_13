@@ -18,8 +18,9 @@ namespace hd_driver{
  */
 class HDMotorController{
  private:
-  typedef char memory_value_t;
-  typedef char register_value_t;
+  typedef int32_t memory_value_t;
+  typedef int32_t register_value_t;
+  typedef uint16_t register_t;
   typedef enum{
     memory_bank_flash = 'f',
     memory_bank_ram = 'r',
@@ -44,6 +45,19 @@ class HDMotorController{
     //misc vars
     variable_input_voltage = 0x1d,
     variable_baud_rate = 0x90,
+
+
+    //position loop run time variables
+    variable_motor_position = 0x32,
+    variable_load_position = 0x17,
+    variable_following_error = 0x35,
+
+    //position loop inputs from trajectory generator
+    variable_commanded_position = 0x3d,
+    variable_limited_position = 0x2d,
+    variable_profile_velocity = 0x3B,
+    variable_profile_acceleration = 0x3C,
+
   } variable_t;
 
 //Status register bits
@@ -78,7 +92,6 @@ class HDMotorController{
 #define STATUS_VELOCITY_WINDOW_MAX (1<<28)
 #define STATUS_PHASE_NOT_INITIALIZED (1<<29)
 #define STATUS_COMMAND_FAULT (1<<30)
-//#define STATUS_ (1<<31)
 
 //Trajectory Register bits
 #define TRAJECTORY_CAM_TAVLE_UNDERFLOW (1<<9)
@@ -104,7 +117,7 @@ class HDMotorController{
 #define FAULT_COMMAND_INPUT_LOST (1<<12)
 
   typedef enum{
-    position_profile_absolue_trapazoidal = 0,
+    position_profile_absolute_trapazoidal = 0,
     position_profile_absolute_scurve = 1,
     position_profile_relative_trapazoidal = 256,
     position_profile_relative_scurve = 257,
@@ -115,8 +128,6 @@ class HDMotorController{
     trajectory_update_move = 1,
     trajectory_home = 2,
   } trajectory_command_t;
-  typedef enum{
-  } register_t;
   typedef enum{
     amplifier_disabled = 0,
     amplifier_current_programmed = 1,
@@ -161,6 +172,11 @@ class HDMotorController{
    * @param state the new state of the amplifier
    */
   void set_state(amplifier_state_t state);
+  void set_position(int32_t position);
+  int get_position();
+  uint32_t get_status();
+  uint32_t get_trajectory_status();
+
 
  private:
   /**

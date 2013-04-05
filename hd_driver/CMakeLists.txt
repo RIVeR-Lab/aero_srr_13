@@ -17,13 +17,20 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 
-rosbuild_add_executable(hd_manager src/hd_manager.cpp src/hd_motor_controller.cpp)
+rosbuild_add_library(hd_motor_controller_lib src/hd_motor_controller.cpp)
+
+rosbuild_add_executable(hd_manager src/hd_manager.cpp)
+target_link_libraries(hd_manager hd_motor_controller_lib)
+
+rosbuild_add_executable(set_position src/util/set_position.cpp)
+target_link_libraries(set_position hd_motor_controller_lib)
+
