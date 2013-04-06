@@ -7,6 +7,7 @@
 #include <boost/thread/locks.hpp>
 #include <boost/foreach.hpp>
 #include "serial_driver_base/serial_port.h"
+#include "serial_driver_base/driver_util.h"
 
 static boost::mutex controller_mutex;
 hd_driver::HDMotorController* controller = NULL;
@@ -14,6 +15,8 @@ ros::Publisher feedback_pub;
 ros::ServiceServer control_srv;
 ros::Subscriber pause_sub;
 bool is_paused = false;
+
+std::string reference_frame("/hd_reference_frame");
 
 bool controlCallback(hd_driver::SetPosition::Request  &req,
 		     hd_driver::SetPosition::Response &res){
@@ -56,11 +59,15 @@ void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
   }
 }
 
+uint32_t next_sequence_number = 0;
 void feedbackTimerCallback(const ros::TimerEvent& e){
   try{
     hd_driver::HDMotorInfo msg;
     {
       boost::lock_guard<boost::mutex> lock(controller_mutex);
+      msg.header.stamp = ros::Time::now();
+      msg.header.frame_id = reference_frame;
+      msg.header.seq = next_sequence_number++;
       msg.position = controller->get_position();
     }
     feedback_pub.publish(msg);
@@ -69,11 +76,6 @@ void feedbackTimerCallback(const ros::TimerEvent& e){
   }
 }
 
-#define define_and_get_param(type, var_name, param_name, default_value)	\
-	type var_name(default_value);						\
-	if(!ros::param::get(param_name, var_name))\
-		ROS_WARN_STREAM("Parameter <"<<param_name<<"> not set. Using default value '"<<var_name<<"'")
-	
 
 int main(int argc, char **argv){
   ros::init(argc, argv, "hd_manager");
@@ -83,6 +85,7 @@ int main(int argc, char **argv){
   ROS_INFO("Initializing HD device");
 
   define_and_get_param(double, feedback_rate, "~feedback_rate", 1);
+  get_param(reference_frame, "~reference_frame");
   define_and_get_param(std::string, port, "~port", "/dev/ttyUSB0");
   define_and_get_param(std::string, control_service, "~control_service", "hd_control");
   define_and_get_param(std::string, info_topic, "~info_topic", "hd_info");
@@ -94,7 +97,7 @@ int main(int argc, char **argv){
   try{
     controller->open(port);
   } catch(serial_driver::Exception& e){
-    ROS_ERROR_STREAM("Error opening port: "<<e.what());
+    ROS_FATAL_STREAM("Error opening port: "<<e.what());
     delete controller;
     return 1;
   }

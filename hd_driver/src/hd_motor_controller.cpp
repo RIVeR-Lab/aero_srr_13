@@ -51,6 +51,7 @@ uint32_t HDMotorController::get_trajectory_status(){
 /*
  * PRIVATE RAW FUNCTIONS
  */
+//Defined as macros so that exception macros give proper line numbers
 #define parse_error(command, buf)			\
   int error_code;\
   if(sscanf(buf, "e %d", &error_code)==1)\

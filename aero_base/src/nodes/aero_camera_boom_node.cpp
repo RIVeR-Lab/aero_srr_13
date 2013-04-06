@@ -10,7 +10,8 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
-#include <tf/transform_datatypes.h>
+#include <tf/tf.h>
+#include <tf/transform_broadcaster.h>
 #include "hd_driver/HDMotorInfo.h"
 #include "hd_driver/SetPosition.h"
 //************ LOCAL DEPENDANCIES ****************//
@@ -23,6 +24,7 @@ static ros::ServiceClient hd_control_srv;
 static ros::ServiceServer pose_control_srv;
 
 double ticks_per_radian = 1.0;
+std::string target_frame("/camera_boom_rot");
 
 bool poseControlCallback(aero_base::SetPose::Request  &req,
 		     aero_base::SetPose::Response &res){
@@ -34,9 +36,15 @@ bool poseControlCallback(aero_base::SetPose::Request  &req,
 
 
 void hdFeedbackCallback(const hd_driver::HDMotorInfo::ConstPtr& msg) {
+  static tf::TransformBroadcaster tf_broadcaster;
   geometry_msgs::Pose pose_msg;
   pose_msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, msg->position/ticks_per_radian);
   pose_pub.publish(pose_msg);
+  
+  tf::Transform transform;
+  transform.setOrigin( tf::Vector3(0, 0, 0) );
+  transform.setRotation( tf::createQuaternionFromRPY(0, 0, msg->position/ticks_per_radian) );
+  tf_broadcaster.sendTransform(tf::StampedTransform(transform, msg->header.stamp, msg->header.frame_id, target_frame));
 }
 
 int main(int argc, char **argv) {
@@ -45,6 +53,9 @@ int main(int argc, char **argv) {
 
   if(!ros::param::get("~ticks_per_radian", ticks_per_radian))
     ROS_WARN_STREAM("Parameter <~ticks_per_radian> not set. Using default value '"<<ticks_per_radian<<"'");
+
+  if(!ros::param::get("~target_frame", target_frame))
+    ROS_WARN_STREAM("Parameter <~target_frame> not set. Using default value '"<<target_frame<<"'");
 
 	    
   std::string hd_control_service = "hd_control";
