@@ -1,7 +1,14 @@
 <launch>
-  <arg name="odom_topic" default="/odom" />
   <arg name="imu_topic" default="/imu" />
+
+  //Drive Base
+  <arg name="odom_topic" default="/odom" />
   <arg name="velocity_command_topic" default="/cmd_vel" />
+
+  //Camera Boom
+  <arg name="camera_boom_pose_topic" default="/camera_boom_pose" />
+  <arg name="camera_boom_control_service" default="/camer_boom_control" />
+
 
   <!-- Load Parameters onto the server -->
   <group ns="@R_NS@">
@@ -44,6 +51,12 @@
   <include file="$(find aero_base)/launch/aero_drive_node.launch">
     <arg name="odom_topic" value="$(arg odom_topic)" />
     <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
+  </include>
+
+  <!-- Launch Camera Boom Controller and motor driver -->
+  <include file="$(find aero_base)/launch/aero_camera_boom_node.launch">
+    <arg name="pose_topic" value="$(arg camera_boom_pose_topic)" />
+    <arg name="pose_control_service" value="$(arg camera_boom_control_service)" />
   </include>
 
 </launch>
