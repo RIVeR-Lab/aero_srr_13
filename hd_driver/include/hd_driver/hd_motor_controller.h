@@ -17,7 +17,7 @@ namespace hd_driver{
  * Make sure to call close when you are done with the device.
  */
 class HDMotorController{
- private:
+ public:
   typedef int32_t memory_value_t;
   typedef int32_t register_value_t;
   typedef uint16_t register_t;
