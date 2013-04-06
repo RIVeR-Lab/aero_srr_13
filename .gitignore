@@ -41,3 +41,5 @@ aero_base/launch
 aero_path_planning/src/aero_path_planning
 aero_srr_msgs/src/aero_srr_msgs
 roboteq_driver/src/roboteq_driver
+hd_driver/src/hd_driver
+aero_base/src/aero_base
