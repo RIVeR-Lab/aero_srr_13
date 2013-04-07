@@ -6,7 +6,7 @@
 #include <exception>
 #include <stdexcept>
 #include <stdint.h>
-#include "serial_driver_base/serial_port.h"
+#include "device_driver_base/serial_port.h"
 
 namespace hd_driver{
 
@@ -222,7 +222,7 @@ class HDMotorController{
   register_value_t get_register(register_t register_id);
 
  private:
-  serial_driver::DriverSerialPort serial_port_;
+  device_driver::DriverSerialPort serial_port_;
 };
 
 }

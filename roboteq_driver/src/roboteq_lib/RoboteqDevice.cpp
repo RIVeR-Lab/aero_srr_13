@@ -35,7 +35,7 @@ int RoboteqDevice::Connect(string port)
 		Disconnect();
 	}
 
-	serial_port.open(port, B9600, 7, serial_driver::serial_parity_even);
+	serial_port.open(port, B9600, 7, device_driver::serial_parity_even);
 	cout<<"Opening port: '"<<port<<"'..."<<"succeeded."<<endl;
 
 	int status;

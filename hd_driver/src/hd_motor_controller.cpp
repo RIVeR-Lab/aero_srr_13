@@ -1,7 +1,7 @@
 #include "hd_driver/hd_motor_controller.h"
 #include <stdio.h>
 
-using namespace serial_driver;
+using namespace device_driver;
 
 namespace hd_driver{
 
@@ -55,8 +55,8 @@ uint32_t HDMotorController::get_trajectory_status(){
 #define parse_error(command, buf)			\
   int error_code;\
   if(sscanf(buf, "e %d", &error_code)==1)\
-    SERIAL_DRIVER_EXCEPT(Exception, "Error doing "#command", got error code %d", error_code);\
-  SERIAL_DRIVER_EXCEPT(CorruptDataException, "Error doing "#command", invalid response")
+    DRIVER_EXCEPT(Exception, "Error doing "#command", got error code %d", error_code);\
+  DRIVER_EXCEPT(CorruptDataException, "Error doing "#command", invalid response")
 
 #define parse_ok_or_error(command, buf)		\
   if(streq("ok", buf))\

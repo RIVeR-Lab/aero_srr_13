@@ -6,8 +6,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/foreach.hpp>
-#include "serial_driver_base/serial_port.h"
-#include "serial_driver_base/driver_util.h"
+#include "device_driver_base/serial_port.h"
+#include "device_driver_base/driver_util.h"
 
 static boost::mutex controller_mutex;
 hd_driver::HDMotorController* controller = NULL;
@@ -43,7 +43,7 @@ bool controlCallback(hd_driver::SetPosition::Request  &req,
 	return false;
       return true;
     }
-  } catch(serial_driver::Exception& e){
+  } catch(device_driver::Exception& e){
     ROS_WARN_STREAM("Error setting motor position: "<<e.what());
   }
   return false;
@@ -71,7 +71,7 @@ void feedbackTimerCallback(const ros::TimerEvent& e){
       msg.position = controller->get_position();
     }
     feedback_pub.publish(msg);
-  } catch(serial_driver::Exception& e){
+  } catch(device_driver::Exception& e){
     ROS_WARN_STREAM("Error reading motor info: "<<e.what());
   }
 }
@@ -85,7 +85,7 @@ int main(int argc, char **argv){
   ROS_INFO("Initializing HD device");
 
   define_and_get_param(double, feedback_rate, "~feedback_rate", 1);
-  get_param(reference_frame, "~reference_frame");
+  device_driver::get_param(reference_frame, "~reference_frame");
   define_and_get_param(std::string, port, "~port", "/dev/ttyUSB0");
   define_and_get_param(std::string, control_service, "~control_service", "hd_control");
   define_and_get_param(std::string, info_topic, "~info_topic", "hd_info");
@@ -96,7 +96,7 @@ int main(int argc, char **argv){
 
   try{
     controller->open(port);
-  } catch(serial_driver::Exception& e){
+  } catch(device_driver::Exception& e){
     ROS_FATAL_STREAM("Error opening port: "<<e.what());
     delete controller;
     return 1;

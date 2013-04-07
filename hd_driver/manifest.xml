@@ -14,7 +14,7 @@
   <depend package="sensor_msgs"/>
   <depend package="geometry_msgs"/>
   <depend package="aero_srr_msgs"/>
-  <depend package="serial_driver_base"/>
+  <depend package="device_driver_base"/>
 
 </package>
 

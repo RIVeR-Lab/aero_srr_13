@@ -7,8 +7,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/foreach.hpp>
-#include "serial_driver_base/driver_util.h"
-#include "serial_driver_base/serial_port.h"
+#include "device_driver_base/driver_util.h"
 
 static boost::mutex controller_mutex;
 roboteq_driver::RoboteqMotorController* controller;
@@ -39,7 +38,7 @@ void controlTimerCallback(const ros::TimerEvent& e){
 	  ROS_WARN("Control mode %d not implemented", motorControl.control_mode);
       }
     }
-  } catch(serial_driver::Exception& e){
+  } catch(device_driver::Exception& e){
     ROS_WARN_STREAM("Error setting motor: "<<e.what());
   }
 }
@@ -53,7 +52,7 @@ void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
     is_paused = msg->stop;
     controller->setPower(1, 0);
     controller->setPower(2, 0);
-  } catch(serial_driver::Exception& e){
+  } catch(device_driver::Exception& e){
     ROS_WARN_STREAM("Error pausing motor: "<<e.what());
   }
 }
@@ -88,7 +87,7 @@ void feedbackTimerCallback(const ros::TimerEvent& e){
     feedback.motors.push_back(chan2Feedback);
 
     feedback_pub.publish(feedback);
-  } catch(serial_driver::Exception& e){
+  } catch(device_driver::Exception& e){
     ROS_WARN_STREAM("Error reading motor info: "<<e.what());
   }
 }
@@ -113,7 +112,7 @@ int main(int argc, char **argv){
 
   try{
     controller->open(port);
-  } catch(serial_driver::Exception& e){
+  } catch(device_driver::Exception& e){
     ROS_FATAL_STREAM("Error opening port: "<<e.what());
     delete controller;
     return 1;
