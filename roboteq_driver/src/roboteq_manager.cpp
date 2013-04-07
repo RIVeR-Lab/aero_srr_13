@@ -7,6 +7,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/foreach.hpp>
+#include "serial_driver_base/driver_util.h"
+#include "serial_driver_base/serial_port.h"
 
 static boost::mutex controller_mutex;
 roboteq_driver::RoboteqMotorController* controller;
@@ -19,22 +21,26 @@ bool is_new = false;
 bool is_paused = false;
 
 void controlTimerCallback(const ros::TimerEvent& e){
-  roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg = control_msg;
-  if(!is_new || !msg)
-    return;
-  {
-    boost::lock_guard<boost::mutex> lock(controller_mutex);
-    is_new = false;
-    BOOST_FOREACH(roboteq_driver::RoboteqMotorControl motorControl, msg->motors){
-      if(is_paused)
-	controller->setPower(motorControl.channel, 0);
-      else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::RPM)
-	controller->setRPM(motorControl.channel, motorControl.setpoint);
-      else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::POWER)
-	controller->setPower(motorControl.channel, motorControl.setpoint);
-      else
-	ROS_WARN("Control mode %d not implemented", motorControl.control_mode);
+  try{
+    roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg = control_msg;
+    if(!is_new || !msg)
+      return;
+    {
+      boost::lock_guard<boost::mutex> lock(controller_mutex);
+      is_new = false;
+      BOOST_FOREACH(roboteq_driver::RoboteqMotorControl motorControl, msg->motors){
+	if(is_paused)
+	  controller->setPower(motorControl.channel, 0);
+	else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::RPM)
+	  controller->setRPM(motorControl.channel, motorControl.setpoint);
+	else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::POWER)
+	  controller->setPower(motorControl.channel, motorControl.setpoint);
+	else
+	  ROS_WARN("Control mode %d not implemented", motorControl.control_mode);
+      }
     }
+  } catch(serial_driver::Exception& e){
+    ROS_WARN_STREAM("Error setting motor: "<<e.what());
   }
 }
 void controlCallback(const roboteq_driver::RoboteqGroupMotorControl::ConstPtr& msg){
@@ -42,58 +48,57 @@ void controlCallback(const roboteq_driver::RoboteqGroupMotorControl::ConstPtr& m
   is_new = true;
 }
 void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
-	{
-		boost::lock_guard<boost::mutex> lock(controller_mutex);
-		is_paused = msg->stop;
-		controller->setPower(1, 0);
-		controller->setPower(2, 0);
-	}
+  try {
+    boost::lock_guard<boost::mutex> lock(controller_mutex);
+    is_paused = msg->stop;
+    controller->setPower(1, 0);
+    controller->setPower(2, 0);
+  } catch(serial_driver::Exception& e){
+    ROS_WARN_STREAM("Error pausing motor: "<<e.what());
+  }
 }
 
 static void getFeedback(uint8_t chan, roboteq_driver::RoboteqMotorInfo& chanFeedback){
-	chanFeedback.channel = chan;
+  chanFeedback.channel = chan;
 
-	controller->getCurrent(chan, chanFeedback.current);
+  controller->getCurrent(chan, chanFeedback.current);
 
-	controller->getTemp(chan, chanFeedback.temp.temperature);
-	chanFeedback.temp.header.stamp = ros::Time::now();
+  controller->getTemp(chan, chanFeedback.temp.temperature);
+  chanFeedback.temp.header.stamp = ros::Time::now();
 
-	controller->getPosition(chan, chanFeedback.position);
+  controller->getPosition(chan, chanFeedback.position);
 
-	controller->getVelocity(chan, chanFeedback.velocity);
+  controller->getVelocity(chan, chanFeedback.velocity);
 }
 void feedbackTimerCallback(const ros::TimerEvent& e){
+  try{
+    roboteq_driver::RoboteqGroupInfo feedback;
+    roboteq_driver::RoboteqMotorInfo chan1Feedback;
+    roboteq_driver::RoboteqMotorInfo chan2Feedback;
+    {
 
-	roboteq_driver::RoboteqGroupInfo feedback;
-	roboteq_driver::RoboteqMotorInfo chan1Feedback;
-	roboteq_driver::RoboteqMotorInfo chan2Feedback;
-	{
+      boost::lock_guard<boost::mutex> lock(controller_mutex);
+      feedback.header.stamp = ros::Time::now();
 
-		boost::lock_guard<boost::mutex> lock(controller_mutex);
-		feedback.header.stamp = ros::Time::now();
+      getFeedback(1, chan1Feedback);
+      getFeedback(2, chan2Feedback);
+    }
 
-		getFeedback(1, chan1Feedback);
-		getFeedback(2, chan2Feedback);
-	}
+    feedback.motors.push_back(chan1Feedback);
+    feedback.motors.push_back(chan2Feedback);
 
-	feedback.motors.push_back(chan1Feedback);
-	feedback.motors.push_back(chan2Feedback);
-
-	feedback_pub.publish(feedback);
+    feedback_pub.publish(feedback);
+  } catch(serial_driver::Exception& e){
+    ROS_WARN_STREAM("Error reading motor info: "<<e.what());
+  }
 }
-
-#define define_and_get_param(type, var_name, param_name, default_value)	\
-	type var_name(default_value);						\
-	if(!ros::param::get(param_name, var_name))\
-		ROS_WARN_STREAM("Parameter <"<<param_name<<"> not set. Using default value '"<<var_name<<"'")
-	
 
 int main(int argc, char **argv){
   ros::init(argc, argv, "roboteq_manager");
   
   ros::NodeHandle n;
 
-  ROS_INFO("Initializing RoboteqDevice");
+  ROS_INFO("Initializing Roboteq Device");
 
   define_and_get_param(double, max_rpm, "~max_rpm", 250);
   define_and_get_param(int, ppr, "~ppr", 250);
@@ -106,9 +111,15 @@ int main(int argc, char **argv){
 
   controller = new roboteq_driver::RoboteqMotorController(max_rpm, max_rpm, ppr, ppr);
 
-  controller->open(port);
+  try{
+    controller->open(port);
+  } catch(serial_driver::Exception& e){
+    ROS_FATAL_STREAM("Error opening port: "<<e.what());
+    delete controller;
+    return 1;
+  }
 
-  ROS_INFO("Initialization Complete");
+  ROS_INFO("Roboteq Device Initialization Complete");
 
   control_sub = n.subscribe(control_topic, 1000, controlCallback);
   pause_sub = n.subscribe(pause_topic, 1000, pauseCallback);
