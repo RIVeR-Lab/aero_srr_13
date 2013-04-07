@@ -92,10 +92,17 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @return The parent node of this node
+	 */
+	const AStarNodePtr& getParent() const;
+
+	/**
+	 * @author Adam Panzica
 	 * @param [in] node The node to compare against
 	 * @return true if the nodes are at the same location
 	 */
 	bool sameLocation(const AStarNode& node) const;
+
 
 	AStarNode& operator= (AStarNode const & rhs);
 	/**
@@ -144,7 +151,6 @@ class AStarCarrot : public aero_path_planning::CarrotPathFinder
 public:
 	AStarCarrot();
 	AStarCarrot(const AStarCarrot& copy);
-	AStarCarrot(double step_size);
 	virtual ~AStarCarrot();
 
 	virtual bool setCarrotDelta(double delta);
@@ -167,6 +173,11 @@ private:
 	int                               delta_;
 	aero_path_planning::OccupancyGrid map_;
 	collision_func_                   collision_checker_;
+
+	bool calcNeighbors(const Point& point, std::vector<Point> neighbors) const;
+
+	void buildSolutionPath(const Node_t& goal_node, std::queue<Point>& path) const;
+
 };
 
 }
