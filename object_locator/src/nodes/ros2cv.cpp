@@ -28,13 +28,13 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_ = it_.subscribeCamera("/stereo_top/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_top/right/image_raw", 1, &ImageConverter::imageCbRight, this);
+	image_left_ = it_.subscribeCamera("/stereo_bottom/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
+//	image_right_ = it_.subscribeCamera("/stereo_top/right/image_raw", 1, &ImageConverter::imageCbRight, this);
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 
 	//********ROS Timer for Disparity image cb**************
-	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
+//	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
 
 	//Cascade Trained xml file locations
 	cascade_path_WHA = "/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
