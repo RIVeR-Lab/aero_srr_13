@@ -50,6 +50,7 @@
   <!-- Launch Driver Controller and Drive motor driver -->
   <include file="$(find aero_base)/launch/aero_drive_node.launch">
     <arg name="odom_topic" value="$(arg odom_topic)" />
+    <arg name="odom_frame" value="/odom" />
     <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
   </include>
 

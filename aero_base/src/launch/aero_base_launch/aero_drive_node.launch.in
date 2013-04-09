@@ -1,5 +1,6 @@
 <launch>
   <arg name="odom_topic" default="/odom" />
+  <arg name="odom_frame" default="/odom" />
   <arg name="velocity_command_topic" default="/cmd_vel" />
 
   <!-- Launch Motor Controller Driver -->
@@ -21,5 +22,6 @@
     <param name="roboteq_manager_feedback_topic" value="aero_drive_feedback" />
     <param name="twist_topic" value="$(arg velocity_command_topic)" />
     <param name="odom_topic" value="$(arg odom_topic)" />
+    <param name="odom_frame" value="$(arg odom_frame)" />
   </node>
 </launch>
