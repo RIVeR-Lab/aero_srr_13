@@ -1,6 +1,7 @@
-#include <object_locator/ros2cv.h>
+#include <object_locator/lower_detector_node.h>
 #include <opencv2/gpu/gpu.hpp>
 #include <opencv2/gpu/gpumat.hpp>
+#include "ObjectLocatorParams.h"
 //#include <opencv2/gpu/stream_accessor.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
@@ -28,7 +29,7 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_ = it_.subscribeCamera("/prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
+	image_left_ = it_.subscribeCamera(BOTTOM_LEFT_IMAGE_TOPIC, 1, &ImageConverter::imageCbLeft, this);
 //	image_right_ = it_.subscribeCamera("/stereo_top/right/image_raw", 1, &ImageConverter::imageCbRight, this);
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);

@@ -1,12 +1,12 @@
 /*
- * ros2cv.h
+ * LOWER_DETECTOR_NODE.h
  *
  *  Created on: Mar 7, 2013
  *      Author: ssr
  */
 
-#ifndef ROS2CV_H_
-#define ROS2CV_H_
+#ifndef LOWER_DETECTOR_NODE_H_
+#define LOWER_DETECTOR_NODE_H_
 
 
 #include <object_locator/typedefinitions.h>
@@ -92,4 +92,4 @@ private:
 
 
 
-#endif /* ROS2CV_H_ */
+#endif /* LOWER_DETECTOR_NODE_H_ */

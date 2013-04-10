@@ -5,7 +5,7 @@
  *      Author: srr
  */
 
-#include <object_locator/ros2cv.h>
+#include <object_locator/lower_detector_node.h>
 #include "opencv2/gpu/gpu.hpp"
 
 using namespace object_locator;
