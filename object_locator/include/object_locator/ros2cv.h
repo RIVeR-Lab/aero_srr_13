@@ -63,8 +63,10 @@ private:
 	sensor_msgs::CameraInfo left_info;
 	sensor_msgs::CameraInfo right_info;
 	std::string cascade_path_WHA,
-				cascade_path_PINK;
-	CascadeClassifier_t cascade_WHA, cascade_PINK;
+				cascade_path_PINK,
+				cascade_path_WHASUN;
+
+	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
@@ -82,14 +84,7 @@ private:
 	bool gotRight;
 	int ctrLeft,ctrRight;
 	bool objset;
-	int HuethresH,
-	HuethresL,
-	SatthresL,
-	SatthresH,
-	ValthresL,
-	ValthresH,
-	erosionCount,
-	blurSize,CUDA_ENABLED;
+	int CUDA_ENABLED;
 };
 
 
