@@ -22,7 +22,7 @@
 #include <object_locator/DetectionManager.h>
 #include <geometry_msgs/PointStamped.h>
 #include <math.h>
-
+#include <queue>
 
 
 

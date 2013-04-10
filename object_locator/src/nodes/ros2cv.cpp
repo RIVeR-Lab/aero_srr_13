@@ -98,10 +98,11 @@ void ImageConverter::saveImage(const sensor_msgs::Image& msg, cv_bridge::CvImage
 		ROS_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
+
 	Mat_t img(cv_ptr->image);
 	std::stringstream s,d;
 	s << "/home/srr/ObjectDetectionData/Stereo/Left/" << ctrLeft<<".png";
-	d << "/home/srr/ObjectDetectionData/Stereo/Right/" << ctrRight<<".png";
+//	d << "/home/srr/ObjectDetectionData/Stereo/Right/" << ctrRight<<".png";
 	std::cout << s.str()<<std::endl;
 	std::cout << d.str()<<std::endl;
 	   int c = cv::waitKey(5);
@@ -115,11 +116,12 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_info  = *cam_info;
 	gotLeft = true;
 	detectAndDisplay(left_image,mat_left,WINDOWLeft);
-//		saveImage(left_image, mat_left,0);
+		saveImage(left_image, mat_left,0);
 
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
+
 	right_image = *msg;
 	right_info  = *cam_info;
 	gotRight = true;
@@ -402,7 +404,7 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 //	cascade.detectMultiScale( frame_gray, faces, 1.1, 55, 0, cv::Size(75, 112), cv::Size(120, 190) ); // works for WHA comb
 //	cascade.detectMultiScale( frame_gray, faces, 1.1, 25, 0, cv::Size(70, 100), cv::Size(150, 215) ); // works for WHA 7 samp close
 //	cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(40, 70), cv::Size(70, 100) ); // works for WHA 007
-	cascade_WHA.detectMultiScale( frame_gray, WHA_faces, 1.1, 5, 0, cv::Size(65, 70), cv::Size(85, 90) ); // works for WHAground !&
+	cascade_WHA.detectMultiScale( frame_gray, WHA_faces, 1.1, 5, 0, cv::Size(52,59), cv::Size(85, 90) ); // works for WHAground !&
 	cascade_PINK.detectMultiScale( frame_gray, PINK_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for PINK !&
 
 
