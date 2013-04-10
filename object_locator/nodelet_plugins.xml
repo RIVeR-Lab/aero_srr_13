@@ -1,0 +1,7 @@
+<library path="lib/libDisparityStage">
+  <class name="object_locator/DisparityStage" type="object_locator::DisparityStage" base_class_type="nodelet::Nodelet">
+  <description>
+	This nodelet calculates disparity given a stereo pair.
+  </description>
+  </class>
+</library>
