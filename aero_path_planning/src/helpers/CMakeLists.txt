@@ -7,6 +7,6 @@ rosbuild_add_library(${PROJECT_NAME}OccupancyGrid
 		      OccupancyGrid.cpp
 		      Tentacles.cpp)      
 rosbuild_add_library(${PROJECT_NAME}Planners 
-		      RRTCarrot.cpp)
+		      RRTCarrot.cpp AStarCarrot.cpp)
 		      
 target_link_libraries(${PROJECT_NAME}Core ${PROJECT_NAME}OccupancyGrid ${PROJECT_NAME}Planners )

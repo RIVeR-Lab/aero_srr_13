@@ -13,8 +13,8 @@
 #include<pcl_ros/transforms.h>
 #include<geometry_msgs/PoseStamped.h>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/GlobalPlanner.h>
-#include<aero_path_planning/RRTCarrot.h>
+#include<aero_path_planning/planners/GlobalPlanner.h>
+#include<aero_path_planning/planning_strategies/RRTCarrot.h>
 #include<aero_path_planning/OccupancyGridMsg.h>
 //**********************NAMESPACES*****************************//
 

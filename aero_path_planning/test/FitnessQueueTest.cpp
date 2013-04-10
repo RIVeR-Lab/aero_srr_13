@@ -8,8 +8,8 @@
 //********************** SYSTEM DEPENDANCIES **********************//
 #include<gtest/gtest.h>
 //********************** LOCAL  DEPENDANCIES **********************//
-#include<aero_path_planning/OryxPathPlanning.h>
-#include<aero_path_planning/FitnessQueue.h>
+#include<aero_path_planning/utilities/OryxPathPlanning.h>
+#include<aero_path_planning/utilities/FitnessQueue.h>
 using namespace aero_path_planning;
 TEST(FitnessQueueTests, testConstructor)
 {

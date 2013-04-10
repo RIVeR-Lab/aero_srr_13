@@ -14,17 +14,20 @@
 //*********************** NAMESPACES ********************//
 
 
-namespace aero_odometry
-{
+
 void aero_odometry::linearInterpolate(const Pose& previous, const Time& previous_time, const Pose& current, const Time& current_time, const Time& interp_time, Pose& result)
 {
 	//extract the position/rotation data
-	Quaternion pq(previous.orientation);
-	Quaternion cq(current.orientation);
-	Point      pp(previous.orientation);
-	Point      cp(current.position);
+	Quaternion pq;
+	Quaternion cq;
+	Point      pp;
+	Point      cp;
+	tf::quaternionMsgToTF(previous.orientation, pq);
+	tf::quaternionMsgToTF(current.orientation, cq);
+	tf::pointMsgToTF(previous.position, pp);
+	tf::pointMsgToTF(current.position, cp);
 	//Calculate the %change in time
-	double scale        = (interp_time-previous_time)/(current_time-previous_time);
+	double scale        = (interp_time-previous_time).toSec()/(current_time-previous_time).toSec();
 
 	//Linearly interpolate the orientation Quaternion
 	tf::quaternionTFToMsg((((cq - pq)*scale+pq).normalize()), result.orientation);
@@ -44,12 +47,16 @@ void aero_odometry::linearInterpolate(const PoseStamped& previous, const PoseSta
 
 void aero_odometry::linearInterpolate(const Twist& previous, const Time& previous_time, const Twist& current, const Time& current_time, const Time& interp_time, Twist& result){
 	//extract the linear and angular velocities
-	Vector3 pl(previous.linear);
-	Vector3 cl(current.linear);
-	Vector3 pa(previous.angular);
-	Vector3 ca(current.angular);
+	Vector3 pl;
+	Vector3 cl;
+	Vector3 pa;
+	Vector3 ca;
+	tf::vector3MsgToTF(previous.linear, pl);
+	tf::vector3MsgToTF(current.linear, cl);
+	tf::vector3MsgToTF(previous.angular, pa);
+	tf::vector3MsgToTF(current.angular, ca);
 	//Calculate the %change in time
-	double scale = (interp_time-previous_time)/(current_time-previous_time);
+	double scale = (interp_time-previous_time).toSec()/(current_time-previous_time).toSec();
 
 	//Linearly interpolate the linear velocity
 	tf::vector3TFToMsg((cl-pl)*scale+pl, result.linear);
@@ -64,6 +71,4 @@ void aero_odometry::linearInterpolate(const TwistStamped& previous, const TwistS
 	Time c_time(current.header.stamp.sec,  current.header.stamp.nsec);
 	aero_odometry::linearInterpolate(previous.twist, p_time, current.twist, c_time, interp_time, result.twist);
 }
-
-}; /*END NAMESPACE aero_odometry */
 
