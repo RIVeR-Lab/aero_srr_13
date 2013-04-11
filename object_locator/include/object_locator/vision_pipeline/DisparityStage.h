@@ -14,6 +14,8 @@
 #include <object_locator/SyncImagesAndDisparity.h>
 #include <object_locator/typedefinitions.h>
 #include <cv_bridge/cv_bridge.h>
+#include <dynamic_reconfigure/server.h>
+#include <object_locator/DisparityStageConfig.h>
 
 namespace object_locator
 {
@@ -57,8 +59,20 @@ namespace object_locator
 		 */
 		virtual void generateDispMsg(const object_locator::SyncImageMsg& raw_imgs, Mat_t& disparity, object_locator::SyncImagesAndDisparity& msg)const;
 
+
+		/**
+		 * @author Adam Panzica
+		 * @brief Callback for handling dynamic_reconfigure requests
+		 * @param config
+		 * @param level
+		 */
+		virtual void drCB(object_locator::DisparityStageConfig &config, uint32_t level);
+
 		ros::Subscriber sync_image_sub_;
 		ros::Publisher  disp_image_pub_;
+
+		dynamic_reconfigure::Server<object_locator::DisparityStageConfig> dr_server_;
+
 		std::string input_topic_, output_topic_;
 		int minDisp_;
 		int numDisp_;

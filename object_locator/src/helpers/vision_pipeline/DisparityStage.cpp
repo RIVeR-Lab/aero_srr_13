@@ -17,12 +17,14 @@ PLUGINLIB_DECLARE_CLASS(object_locator, DisparityStage,
 namespace enc = sensor_msgs::image_encodings;
 using namespace object_locator;
 
-void DisparityStage::onInit() {
+void DisparityStage::onInit()
+{
 	loadParams();
 	registerTopics();
 }
 
-void DisparityStage::loadParams(){
+void DisparityStage::loadParams()
+{
 	this->input_topic_="disparity_stage/stereo_pair";
 	this->output_topic_="disparity_stage/disparity";
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
@@ -74,6 +76,7 @@ void DisparityStage::registerTopics()
 {
 	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&DisparityStage::recieveImageCb,this);
 	this->disp_image_pub_ = this->getNodeHandle().advertise<object_locator::SyncImagesAndDisparity>(this->output_topic_,2);
+	this->dr_server_.setCallback(boost::bind(&DisparityStage::drCB, this, _1, _2));
 }
 
 void DisparityStage::recieveImageCb(const object_locator::SyncImageMsgConstPtr& msg)const
@@ -132,5 +135,10 @@ void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_img
 	carrier.toImageMsg(disparity_image);
 	msg.disparity_image = disparity_image;
 	msg.images          = raw_imgs;
+
+}
+
+void DisparityStage::drCB(object_locator::DisparityStageConfig& config, uint32_t level)
+{
 
 }
