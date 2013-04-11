@@ -18,6 +18,7 @@
 	<depend package="image_geometry" />
 	<depend package="aero_srr_msgs" />
 	<depend package="nodelet" />
+	<depend package="dynamic_reconfigure"/>
 	<export>
 		<nodelet plugin="${prefix}/nodelet_plugins.xml" />
 	</export>
