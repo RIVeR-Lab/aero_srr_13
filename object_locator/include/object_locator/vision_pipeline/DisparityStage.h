@@ -70,6 +70,7 @@ namespace object_locator
 		int uniqueness_;
 		int specSize_;
 		int specRange_;
+		bool fullDp_;
 	};
 }
 
