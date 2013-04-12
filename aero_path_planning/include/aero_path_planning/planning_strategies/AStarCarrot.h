@@ -207,6 +207,8 @@ private:
 
 	bool canSearch() const;
 
+	bool openSetContains(const NodePtr_t& node, const aero_path_planning::FitnessQueue<Node_t, NodePtr_t>& open_set) const;
+
 };
 
 }

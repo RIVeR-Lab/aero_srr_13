@@ -10,6 +10,7 @@
 #include <pcl/registration/distances.h>
 #include <list>
 #include <iostream>
+#include <boost/unordered_map.hpp>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/planning_strategies/AStarCarrot.h>
 //***********    NAMESPACES     ****************//
@@ -51,9 +52,9 @@ double astar_utilities::pt_cost(const aero_path_planning::Point& this_point, con
 }
 
 AStarNode::AStarNode():
-		g_(0),
-		h_(0),
-		f_(std::numeric_limits<double>::infinity())
+				g_(0),
+				h_(0),
+				f_(std::numeric_limits<double>::infinity())
 {
 
 }
@@ -71,9 +72,9 @@ AStarNode::AStarNode(const AStarNodePtr& copy)
 //********************* ASTARNODE IMPLEMENTATION *********************//
 
 AStarNode::AStarNode(const Point& location, const Point& goal, const AStarNodePtr parent, cost_func cost, huristic_func huristic):
-		location_(location),
-		parent_(parent),
-		h_(huristic(location, goal))
+				location_(location),
+				parent_(parent),
+				h_(huristic(location, goal))
 {
 	if(parent != AStarNodePtr())
 	{
@@ -113,7 +114,12 @@ const AStarNode::AStarNodePtr& AStarNode::getParent() const
 
 bool AStarNode::sameLocation(const AStarNode& node) const
 {
-	return this->location_.getVector4fMap() == node.getLocation().getVector4fMap();
+	bool same = true;
+	same &= this->location_.x == node.getLocation().x;
+	same &= this->location_.y == node.getLocation().y;
+	same &= this->location_.z == node.getLocation().z;
+
+	return same;
 }
 
 AStarNode& AStarNode::operator= (AStarNode const & rhs)
@@ -128,30 +134,30 @@ AStarNode& AStarNode::operator= (AStarNode const & rhs)
 
 bool       AStarNode::operator< (AStarNode const & rhs) const
 {
-	return this->getF() < rhs.getF();
+	return this->getF() > rhs.getF();
 }
 bool       AStarNode::operator> (AStarNode const & rhs) const
 {
-	return this->getF() > rhs.getF();
+	return this->getF() < rhs.getF();
 }
 bool       AStarNode::operator<= (AStarNode const & rhs) const
-{
-	return this->getF() <= rhs.getF();
-}
-bool       AStarNode::operator>= (AStarNode const & rhs) const
-{
+		{
 	return this->getF() >= rhs.getF();
-}
+		}
+bool       AStarNode::operator>= (AStarNode const & rhs) const
+		{
+	return this->getF() <= rhs.getF();
+		}
 bool       AStarNode::operator==(AStarNode const & rhs) const
-{
+		{
 	return this->getF() == rhs.getF();
-}
+		}
 
 //********************* ASTARPLANNER *********************//
 AStarCarrot::AStarCarrot():
-		has_delta_(false),
-		has_map_(false),
-		has_coll_(false)
+				has_delta_(false),
+				has_map_(false),
+				has_coll_(false)
 {
 	this->setUpNeighborPoints();
 }
@@ -314,6 +320,27 @@ bool AStarCarrot::canSearch() const
 	return this->has_coll_&&this->has_map_&&this->has_delta_;
 }
 
+bool AStarCarrot::openSetContains(const NodePtr_t& node, const aero_path_planning::FitnessQueue<Node_t, NodePtr_t>& open_set) const
+{
+	typedef aero_path_planning::FitnessQueue<Node_t, NodePtr_t>::const_iterator citr_t;
+	bool contains = false;
+
+//	ROS_INFO_STREAM("I'm checking the open set for "<<node);
+
+	for(citr_t itr = open_set.c_begin(); itr < open_set.c_end(); itr++)
+	{
+//		ROS_INFO_STREAM("Comparing "<<(*itr)->second);
+		if((*itr)->second->sameLocation(*node))
+		{
+//			ROS_INFO_STREAM(node<<" was in the open set!");
+			contains = true;
+			break;
+		}
+	}
+
+	return contains;
+}
+
 bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros::Duration& timeout, std::queue<Point>& result_path)
 {
 	bool success    = false;
@@ -326,8 +353,8 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		huristic_func hursf = boost::bind(&ed_huristic, _1, _2);
 
 		//Create open/closed sets
-		aero_path_planning::FitnessQueue<double, NodePtr_t> open_set;
-		std::list<NodePtr_t>                                closed_set;
+		aero_path_planning::FitnessQueue<Node_t, NodePtr_t> open_set;
+		boost::unordered_map<std::string, NodePtr_t>        closed_set;
 		std::vector<Point>                                  neighbors;
 
 		//Set timout checking conditions
@@ -336,7 +363,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 
 		//Set up the initial node
 		NodePtr_t start_node(new Node_t(start_point, goal_point, NodePtr_t(), costf, hursf));
-		open_set.push(start_node->getF(), start_node);
+		open_set.push(*start_node, start_node);
 
 		//Set up a node to use to check for the termination condition, and will contain the solution path head
 		//upon search compleation
@@ -345,44 +372,79 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 
 		ROS_INFO_STREAM("I'm Searching with "<<PRINT_POINT_S("Start Point", start_point)<<" and "<<PRINT_POINT_S("Goal Point", goal_point));
 
-		while(!success&&(current_time-start_time)<timeout&&open_set.size()>0)
+		bool timeout_c = false;
+		bool os_empty  = false;
+		while(!success&&!timeout_c&&!os_empty)
 		{
+			ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
+			os_empty  = open_set.empty();
+			timeout_c = (current_time-start_time)>timeout;
 			//Get the next node to expand
 			NodePtr_t current_node = open_set.top();
 			open_set.pop();
 
 			ROS_INFO_STREAM("I'm Expanding "<<current_node<<"...");
 
+			std::stringstream node_rep;
+			node_rep<<PRINT_POINT_S("",current_node->getLocation());
+
 			//Check to see if we hit the goal
 			if(current_node->sameLocation(goal_node_dummy))
 			{
 				ROS_INFO_STREAM("I Hit the "<<PRINT_POINT_S("Goal: ", goal_node_dummy.getLocation())<<" with "<<current_node);
-				closed_set.push_back(current_node);
+				closed_set[node_rep.str()] = current_node;
 				goal_node_dummy = *current_node;
 				success         = true;
 			}
 
 			//Add the current node to the closed set
-			ROS_INFO_STREAM("I'm pushing "<<current_node<<"onto the closed set...");
-			closed_set.push_back(current_node);
 
-			//Get the neighbors to the current node and add them to the open set
-			neighbors.clear();
-			this->calcNeighbors(current_node->getLocation(), neighbors);
-			ROS_INFO_STREAM("I got "<<neighbors.size()<<" neighbors for "<<current_node);
-
-			for(unsigned int i=0; i<neighbors.size(); i++)
+			if(closed_set.count(node_rep.str())==0)
 			{
-				if(!this->collision_checker_(neighbors.at(i), this->map_))
+				ROS_INFO_STREAM("I'm pushing "<<current_node<<"onto the closed set...");
+				closed_set[node_rep.str()] = current_node;
+
+				//Get the neighbors to the current node and add them to the open set
+				neighbors.clear();
+				this->calcNeighbors(current_node->getLocation(), neighbors);
+				ROS_INFO_STREAM("I got "<<neighbors.size()<<" neighbors for "<<current_node);
+
+				for(unsigned int i=0; i<neighbors.size(); i++)
 				{
-					NodePtr_t node(new Node_t(neighbors.at(i), goal_point, current_node, costf, hursf));
-					ROS_INFO_STREAM("I'm adding the neighbor of "<<current_node<<", "<<node<<" to the open set");
-					open_set.push(node->getF(), node);
+					//Check to see if the neighbor is free
+					if(!this->collision_checker_(neighbors.at(i), this->map_))
+					{
+						NodePtr_t node(new Node_t(neighbors.at(i), goal_point, current_node, costf, hursf));
+						std::stringstream neighbor_rep;
+						neighbor_rep<<PRINT_POINT_S("",node->getLocation());
+
+						//Check to see if we've already expanded the neighbor node
+						if(closed_set.count(neighbor_rep.str())==0 && !this->openSetContains(node, open_set))
+						{
+							ROS_INFO_STREAM("I'm adding "<<node<<" to the open set");
+							open_set.push(*node, node);
+						}
+					}
 				}
 			}
-			std::string pause;
-			std::cin>>pause;
+			else
+			{
+				ROS_INFO_STREAM(current_node<<" was already in the closed set");
+			}
 
+//			std::string pause;
+	//		std::cin>>pause;
+
+		}
+		//If we timed out, say so
+		if(timeout_c)
+		{
+			ROS_WARN("I Could Not Find A Solution In Time");
+		}
+		//If we ran out of nodes without finding a solution, say so
+		if(os_empty)
+		{
+			ROS_WARN("I expanded every node in the grid without a solution");
 		}
 
 		//If we got a path, stuff the solution vector

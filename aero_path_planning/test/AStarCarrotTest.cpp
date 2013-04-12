@@ -52,9 +52,9 @@ protected:
 		zero_point_.z = 0;
 		zero_point_.rgba = app::FREE_LOW_COST;
 
-		goal_point_.x = 50;
-		goal_point_.y = 50;
-		goal_point_.z = 50;
+		goal_point_.x = 49;
+		goal_point_.y = 49;
+		goal_point_.z = 0;
 		goal_point_.rgba = app::GOAL;
 
 		test_node_zero_  = AStarNodePtr(new asu::AStarNode(zero_point_, goal_point_, AStarNodePtr(), cf_, hf_));
@@ -90,6 +90,13 @@ TEST_F(AStarCarrotTestFixture, testAStarNode)
 	test_point1.y = 0;
 	test_point1.z = 0;
 	test_point1.rgba = app::FREE_LOW_COST;
+
+	app::Point test_point3;
+	test_point3.x = 1;
+	test_point3.y = 0;
+
+	ASSERT_TRUE(test_point1.getVector4fMap()==test_point3.getVector4fMap());
+
 	app::Point test_point2;
 	test_point2.x = 1;
 	test_point2.y = 10;
@@ -171,6 +178,11 @@ TEST_F(AStarCarrotTestFixture, testCollision)
 	clear_point.y=1;
 	clear_point.z=0;
 	ASSERT_FALSE(collisionCheck(clear_point,coll_grid));
+
+	app::Point off_map;
+	off_map.x = 100;
+	off_map.y = -1;
+	ASSERT_TRUE(collisionCheck(off_map,coll_grid));
 }
 
 //************************************ TEST AStarCarrot ***************************************************//
