@@ -76,7 +76,9 @@ void DisparityStage::registerTopics()
 {
 	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&DisparityStage::recieveImageCb,this);
 	this->disp_image_pub_ = this->getNodeHandle().advertise<object_locator::SyncImagesAndDisparity>(this->output_topic_,2);
-	this->dr_server_.setCallback(boost::bind(&DisparityStage::drCB, this, _1, _2));
+
+	this->dr_server_ = DRServerPtr(new DRServer_t(this->getPrivateNodeHandle()));
+	this->dr_server_->setCallback(boost::bind(&DisparityStage::drCB, this, _1, _2));
 }
 
 void DisparityStage::recieveImageCb(const object_locator::SyncImageMsgConstPtr& msg)const
@@ -138,7 +140,43 @@ void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_img
 
 }
 
-void DisparityStage::drCB(object_locator::DisparityStageConfig &config, uint32_t level)
+void DisparityStage::drCB(Config_t &config, uint32_t level)
 {
+	this->disp12MaxDiff_ = config.disp12_max_diff;
 
+	if(config.p1 < config.p2)
+	{
+		this->P1_        = config.p1;
+		this->P2_        = config.p2;
+	}
+	else
+	{
+		ROS_WARN_STREAM("Cannot set P1 ("<<config.p1<<") greater than P2 ("<<config.p2<<")");
+	}
+
+	if(config.sad_size%2!=0)
+	{
+		this->SADSize_   = config.sad_size;
+	}
+	else
+	{
+		ROS_WARN_STREAM("SADsize must be an odd number, got "<<config.sad_size);
+	}
+
+	this->fullDp_        = config.full_dp;
+	this->minDisp_       = config.min_disp;
+
+	if(config.num_disp%16==0)
+	{
+		this->numDisp_   = config.num_disp;
+	}
+	else
+	{
+		ROS_WARN_STREAM("Number of Disparities must be divisible by 16, got "<<config.num_disp);
+	}
+
+	this->preFilterCap_  = config.pre_filter_cap;
+	this->specRange_     = config.speckle_range;
+	this->specSize_      = config.speckle_window_size;
+	this->uniqueness_    = config.uniqueness_ratio;
 }
