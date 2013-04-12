@@ -138,7 +138,7 @@ void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_img
 
 }
 
-void DisparityStage::drCB(object_locator::DisparityStageConfig& config, uint32_t level)
+void DisparityStage::drCB(object_locator::DisparityStageConfig &config, uint32_t level)
 {
 
 }

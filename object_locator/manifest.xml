@@ -21,6 +21,7 @@
 	<depend package="dynamic_reconfigure"/>
 	<export>
 		<nodelet plugin="${prefix}/nodelet_plugins.xml" />
+		
 	</export>
 </package>
 

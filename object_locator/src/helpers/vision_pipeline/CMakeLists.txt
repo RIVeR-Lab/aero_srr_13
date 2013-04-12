@@ -1,1 +1,3 @@
 rosbuild_add_library(DisparityStage DisparityStage.cpp)
+rosbuild_add_library(SAMStage SAMStage.cpp)
+target_link_libraries(SAMStage Detman)

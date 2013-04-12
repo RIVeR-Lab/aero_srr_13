@@ -5,7 +5,7 @@ rosbuild_add_executable(camera_tf_tree_node camera_tf_tree_node.cpp)
 add_executable(gpu gputest.cpp)
 
 
-target_link_libraries(lower_detector_node ${OpenCV_LIBS} ${PROJECT_NAME}_detman)
+target_link_libraries(lower_detector_node ${OpenCV_LIBS} Detman)
 target_link_libraries(objDet ${OpenCV_LIBS})
 target_link_libraries(cap ${OpenCV_LIBS})
 target_link_libraries(gpu ${OpenCV_LIBS})

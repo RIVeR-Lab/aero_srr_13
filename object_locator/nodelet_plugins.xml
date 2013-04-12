@@ -5,3 +5,11 @@
   </description>
   </class>
 </library>
+
+<library path="lib/libSAMStage">
+  <class name="object_locator/SAMStage" type="object_locator::SAMStage" base_class_type="nodelet::Nodelet">
+  <description>
+	This nodelet does simultaneous acquisiton of objects based on a cascaded trained model.
+  </description>
+  </class>
+</library>

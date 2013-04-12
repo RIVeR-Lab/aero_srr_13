@@ -2,5 +2,9 @@
   <node pkg="nodelet" type="nodelet" name="vision_pipeline"  args="manager" output="screen"/>
 
   <node pkg="nodelet" type="nodelet" name="DisparityStage" args="load object_locator/DisparityStage vision_pipeline" output="screen">
-  </node>                 
+  </node>
+  
+  <node pkg="nodelet" type="nodelet" name="SAMStage" args="load object_locator/SAMStage vision_pipeline" output="screen">
+  </node>
+       
 </launch>
