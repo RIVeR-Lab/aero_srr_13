@@ -89,7 +89,7 @@ void Arm_Controller::ObjectPosition(
 int main(int argc, char **argv) {
 
 	/* Set up ROS */
-	ros::init(argc, argv, "aero_arm_controller");
+	ros::init(argc, argv, "arm_controller");
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
