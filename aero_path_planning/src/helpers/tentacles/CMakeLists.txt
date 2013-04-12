@@ -1,0 +1,2 @@
+rosbuild_add_library(Tentacles Tentacles.cpp)
+target_link_libraries(Tentacles AeroUtilities)
