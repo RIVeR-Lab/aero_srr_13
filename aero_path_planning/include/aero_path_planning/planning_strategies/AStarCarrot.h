@@ -33,7 +33,7 @@ typedef boost::function<double (aero_path_planning::Point, aero_path_planning::P
  * @param [in] goal  The goal point to measure the huristic to
  * @return The euclidian distance between the points
  */
-double eculidian_distance_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal);
+double ed_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal);
 
 /**
  * @author Adam Panzica
@@ -42,7 +42,7 @@ double eculidian_distance_huristic(const aero_path_planning::Point& point, const
  * @param [in] last_point The last point in the chain to use for calculating cost
  * @return The cost for moving to this_point @todo fill in actual math here
  */
-double point_trait_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point);
+double pt_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point);
 
 /**
  * @author Adam Panzica

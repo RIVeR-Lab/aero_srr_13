@@ -19,12 +19,12 @@ using namespace aero_path_planning::astar_utilities;
 
 //********************* HURISTIC/COST FUNCTIONS *********************//
 
-double ed_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal)
+double astar_utilities::ed_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal)
 {
 	return pcl::distances::l2(point.getVector4fMap(), goal.getVector4fMap());
 }
 
-double pt_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point)
+double astar_utilities::pt_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point)
 {
 	double pcost = 0;
 
@@ -46,7 +46,7 @@ double pt_cost(const aero_path_planning::Point& this_point, const aero_path_plan
 		break;
 	}
 
-	return ed_huristic(this_point, last_point)*pcost;
+	return astar_utilities::ed_huristic(this_point, last_point)*pcost;
 }
 
 AStarNode::AStarNode():
