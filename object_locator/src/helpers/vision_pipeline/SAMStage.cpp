@@ -60,7 +60,7 @@ void SAMStage::loadParams() {
 	this->getPrivateNodeHandle().getParam(thresh_det, thresh_det_);
 
 	this->sherlock_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
-
+	cv::namedWindow(WINDOWLeft);
 }
 
 void SAMStage::registerTopics() {
@@ -174,7 +174,7 @@ void SAMStage::fetchAndRetrieve(const sensor_msgs::Image& msg) {
 		newDetection->second = WHA;
 		detection_list_.push_back(newDetection);
 
-		cv::imshow("Left_Camera", img->image);
+		cv::imshow(WINDOWLeft, img->image);
 		cv::waitKey(3);
 
 	}

@@ -69,7 +69,8 @@ namespace object_locator
 		//********Cascade Classifier Specific Variables************//
 		std::string cascade_path_WHA_,
 					cascade_path_PINK_,
-					cascade_path_WHASUN_;
+					cascade_path_WHASUN_,
+					WINDOWLeft;
 		CascadeClassifier_t cascade_WHA_, cascade_PINK_, cascade_WHASUN_;
 
 		//********TF point related variables**********************//
