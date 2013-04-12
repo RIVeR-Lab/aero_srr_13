@@ -24,6 +24,11 @@ namespace object_locator
 	public:
 		virtual void onInit();
 	protected:
+
+		typedef object_locator::DisparityStageConfig Config_t;
+		typedef dynamic_reconfigure::Server<Config_t> DRServer_t;
+		typedef boost::shared_ptr<DRServer_t> DRServerPtr;
+
 		void loadParams();
 		void registerTopics();
 
@@ -66,12 +71,12 @@ namespace object_locator
 		 * @param config
 		 * @param level
 		 */
-		virtual void drCB(object_locator::DisparityStageConfig &config, uint32_t level);
+		virtual void drCB(Config_t &config, uint32_t level);
 
 		ros::Subscriber sync_image_sub_;
 		ros::Publisher  disp_image_pub_;
 
-		dynamic_reconfigure::Server<object_locator::DisparityStageConfig> dr_server_;
+		DRServerPtr dr_server_;
 
 		std::string input_topic_, output_topic_;
 		int minDisp_;
