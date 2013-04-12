@@ -136,6 +136,19 @@ public:
 	 */
 	bool       operator==(AStarNode const & rhs) const;
 
+	friend std::ostream& operator<<(std::ostream& in, const AStarNode& rhs)
+	{
+		std::string parent((rhs.getParent()!=AStarNode::AStarNodePtr())?("Yes"):("No"));
+		in<<"Node(Location: "<<rhs.getLocation().x<<","<<rhs.getLocation().y<<", Parent: "<<parent
+		  <<", G:"<<rhs.getG()<<",H:"<<rhs.getH()<<",F:"<<rhs.getF()<<")";
+		return in;
+	}
+
+	friend std::ostream& operator<<(std::ostream& in, const AStarNodePtr& rhs)
+	{
+		return in<<(*rhs);
+	}
+
 private:
 	aero_path_planning::Point location_; ///The location of this node in seach space
 	AStarNodePtr parent_;                ///The parent AStarNode of this node
@@ -143,6 +156,9 @@ private:
 	double h_;                           ///The huristic value of this node
 	double f_;                           ///The fitness of this node, \[f=g+h\]
 };
+
+
+
 
 }
 
@@ -174,9 +190,22 @@ private:
 	aero_path_planning::OccupancyGrid map_;
 	collision_func_                   collision_checker_;
 
-	bool calcNeighbors(const Point& point, std::vector<Point> neighbors) const;
+	Point n_pxy_;
+	Point n_xpy_;
+	Point n_nxy_;
+	Point n_xny_;
+	Point n_dpxpy_;
+	Point n_dnxpy_;
+	Point n_dpxny_;
+	Point n_dnxny_;
+
+	void setUpNeighborPoints();
+
+	bool calcNeighbors(const Point& point, std::vector<Point>& neighbors) const;
 
 	void buildSolutionPath(const Node_t& goal_node, std::queue<Point>& path) const;
+
+	bool canSearch() const;
 
 };
 
