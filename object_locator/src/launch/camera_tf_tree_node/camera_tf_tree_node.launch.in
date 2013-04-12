@@ -1,0 +1,6 @@
+<launch>
+
+	<node name="camera_tf_tree_node" pkg="object_locator" type="camera_tf_tree_node" output="screen"/>
+	
+</launch>
+	

@@ -1,6 +1,7 @@
-#include <object_locator/ros2cv.h>
+#include <object_locator/lower_detector_node.h>
 #include <opencv2/gpu/gpu.hpp>
 #include <opencv2/gpu/gpumat.hpp>
+#include "ObjectLocatorParams.h"
 //#include <opencv2/gpu/stream_accessor.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
@@ -28,23 +29,26 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_ = it_.subscribeCamera("/stereo_bottom/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_bottom/right/image_raw", 1, &ImageConverter::imageCbRight, this);
+	image_left_ = it_.subscribeCamera(BOTTOM_LEFT_IMAGE_TOPIC, 1, &ImageConverter::imageCbLeft, this);
+//	image_right_ = it_.subscribeCamera("/stereo_top/right/image_raw", 1, &ImageConverter::imageCbRight, this);
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 
 	//********ROS Timer for Disparity image cb**************
-	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
+//	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
 
 	//Cascade Trained xml file locations
-	cascade_path = "/home/srr/ObjectDetectionData/exec/cascadeHOGWHA/cascade.xml";
-	ctr = 0;
+	cascade_path_WHA = "/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
+	cascade_path_PINK = "/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
+	cascade_path_WHASUN = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
+	ctrLeft = 0;
+	ctrRight = 0;
 	cv::namedWindow(WINDOWLeft);
 	cv::namedWindow(WINDOWRight);
 	cv::namedWindow(WINDOWDisparity);
 	objset = false;
 
-	DetectionPtr_t(new Detection_t(0,0));
+
 
 }
 
@@ -68,10 +72,8 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 		ROS_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
+//
 
-	//	std::stringstream s;
-	//	s << "/home/srr/ObjectDetectionData/samplesColor/" << ctr<<".png";
-	//	std::cout << s.str()<<std::endl;
 	Mat_t img(cv_ptr->image);
 	//	std::cout << "displaying image"<<std::endl;
 	//	    cv::imshow(WINDOW, img);
@@ -79,14 +81,35 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 
 
 
-	//	  imshow(WINDOW,img);
+//		  imshow(WINDOW,img);
 
-	//		  	   int c = cv::waitKey(10);
-	//		  	         if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctr++;}
+
 	//		    	 detectAndDisplay( img);
 	//	  	  	  	  test(img, WINDOW);
 	//		    	 tune(img,WINDOW);
 	image_pub_.publish(cv_ptr->toImageMsg());
+}
+void ImageConverter::saveImage(const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, int O)
+{
+	try
+	{
+		cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
+	}
+	catch (cv_bridge::Exception& e)
+	{
+		ROS_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+
+	Mat_t img(cv_ptr->image);
+	std::stringstream s,d;
+	s << "/home/srr/ObjectDetectionData/Stereo/Left/" << ctrLeft<<".png";
+//	d << "/home/srr/ObjectDetectionData/Stereo/Right/" << ctrRight<<".png";
+	std::cout << s.str()<<std::endl;
+	std::cout << d.str()<<std::endl;
+	   int c = cv::waitKey(5);
+	   if(O == 0){if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctrLeft++;}}
+	   else{if( (char)c == 'd' ) { cv::imwrite(d.str(), img); ctrRight++;}}
 }
 
 void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -95,14 +118,16 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_info  = *cam_info;
 	gotLeft = true;
 	detectAndDisplay(left_image,mat_left,WINDOWLeft);
-	//	processImage(left_image, mat_left, WINDOWLeft);
+//		saveImage(left_image, mat_left,0);
 
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
+
 	right_image = *msg;
 	right_info  = *cam_info;
 	gotRight = true;
+//	saveImage(right_image, mat_right,1);
 }
 
 
@@ -159,7 +184,7 @@ void ImageConverter::computeDisparity()
 	Mat_t Lds_img;
 	Mat_t Rds_img;
 	//	resize(mat_left->image,Lds_img,size);
-	//	resize(mat_left->image,Rds_img,size);
+	//	resize(mat_right->image,Rds_img,size);
 
 #ifdef CUDA_ENABLED
 	gpu::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
@@ -172,21 +197,22 @@ void ImageConverter::computeDisparity()
 	cv::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
 	remap(left_gray,img1_rect, mx1, my1, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 	remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+
 #endif
 
 	Mat_t disp(  heightL, widthL, CV_16S );
 	Mat_t vdisp( heightL, widthL, CV_8UC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
-	int minDisp = -128-32;      //0         //-128-32;
-	int numDisp = 256+80;       //80        //256+80;
-	int SADSize = 10;				//10
+	int minDisp = 0;      //0         //-128-32;
+	int numDisp = 224;       //80        //256+80;
+	int SADSize = 9;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  1	; // 1;
-	int preFilterCap =   2; //  2;
-	int uniqueness = 1;
-	int specSize =   50; //50 //20;   //reduces noise
-	int specRange = 1  ;  //5 //1;
+	int preFilterCap =   31; //  2;
+	int uniqueness = 10;
+	int specSize =   900; //50 //20;   //reduces noise
+	int specRange = 31  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
 
@@ -205,7 +231,7 @@ void ImageConverter::computeDisparity()
 
 	//    cvConvertScale(disp, dispn, 1.0/16);
 	//	 cv::filterSpeckles(disp, 200, 24, 13);
-	//    cv::normalize( disp, vdisp, 0, 256, CV_MINMAX );
+	normalize( disp, vdisp, 0, 256, CV_MINMAX );
 
 	Mat_t vdisp1;
 #ifdef CUDA_ENABLED
@@ -224,8 +250,8 @@ void ImageConverter::computeDisparity()
 	for(int i = 0; i< (int)detection_list_.size(); i++)
 	{
 //		cout << endl;
-//		cout << "In detection #"<< i+1 << "/"<< detection_list_.size() <<endl;
-		Point2d obj_centroid(detection_list_.at(i)->first,detection_list_.at(i)->second);
+//		cout << "In detection #"<< i+1 << "/"<< detection_list_WHA.size() <<endl;
+		Point2d obj_centroid(detection_list_.at(i)->first.first,detection_list_.at(i)->first.second);
 		Point3d obj_3d;
 
 
@@ -252,7 +278,7 @@ void ImageConverter::computeDisparity()
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
 			tf::pointMsgToTF(world_point.point,detection);
-			sherlock.addDetection(detection);
+			sherlock.addDetection(detection, detection_list_.at(i)->second);
 //			cout << "Added detection to manager" <<endl;
 		}
 
@@ -260,14 +286,31 @@ void ImageConverter::computeDisparity()
 	tf::Point detection;
 //	cout << "Clearing list" <<endl;
 	detection_list_.clear();
-	DetectionPtr_t(new Detection_t(0,0));
 //	cout << "Shrinking Det/ection manager list" <<endl;
 	sherlock.shrink();
 //	cout << "Finished shrinking list" <<endl;
 	double confidence;
-	if(sherlock.getDetection(detection, confidence))
+	object_type type;
+	if(sherlock.getDetection(detection, type, confidence))
 	{
-		cout<<"I Got A Detection: "<< endl << "X:" << detection.getX() <<", Y: "<< detection.getY() << ", Z: " << detection.getZ() <<", "<< confidence<<std::endl;
+		std::string typeString;
+		switch(type)
+		{
+		case WHA:
+			typeString = "White Hook Object";
+			break;
+		case PINK_BALL:
+			typeString = "Pink Tennis Ball";
+			break;
+		default:
+			typeString = "Unknown";
+			break;
+
+		}
+		cout<<"I Got A Detection: "<< endl << "X:" << detection.getX()
+								           <<", Y: "<< detection.getY()
+								           << ", Z: " << detection.getZ()
+								           <<", "<< confidence<<", of type: "<< typeString << std::endl;
 		aero_srr_msgs::ObjectLocationMsg msg;
 
 		msg.header.frame_id = world_point.header.frame_id;
@@ -277,10 +320,29 @@ void ImageConverter::computeDisparity()
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
 	}
-
+//	Mat_t cmapped;
+//	cmapped = gray2bgr(vdisp1);
 	cv::imshow(WINDOWDisparity, vdisp1 );
 	cv::waitKey(3);
 
+}
+Mat_t ImageConverter::gray2bgr(Mat_t img)
+{
+	Mat_t BGR( img.rows, img.cols, CV_32FC3 );
+	for (int i = 0; i <img.rows; i ++)
+	{
+		for(int j=0; j<img.cols;j++)
+		{
+			BGR.at<Vec3i>(i,j)[0] =  std::abs(sin((img.at<double>(i,j))*2.0*3.14+0.0*3.14));
+			BGR.at<Vec3i>(i,j)[1] = std::abs(sin((img.at<double>(i,j))*2.0*3.14+(-0.1)*3.14));
+			BGR.at<Vec3i>(i,j)[2]= std::abs(sin((img.at<double>(i,j))*2.0*3.14+(-0.3)*3.14));
+			cout <<"D:" <<img.at<uchar>(i,j) << endl;
+			cout <<"S:" <<img.at<Scalar>(i,j) << endl;
+		}
+	}
+
+
+	return BGR;
 }
 
 void ImageConverter::buildMsg(const tf::Point& point, geometry_msgs::PoseStamped& msg) const
@@ -316,14 +378,24 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	}
 	Mat_t frame;
 	frame = cv_ptr->image;
-	if( !cascade.load( cascade_path ) )
+	if( !cascade_WHA.load( cascade_path_WHA))
 	{
 		printf("--(!)Error loading\n");
 	}
+
+	if( !cascade_PINK.load(cascade_path_PINK))
+		{
+			printf("--(!)Error loading\n");
+		}
+	if( !cascade_WHASUN.load(cascade_path_WHASUN))
+		{
+			printf("--(!)Error loading\n");
+		}
 	cv::GaussianBlur( frame, frame, cv::Size(9, 9), 2, 2 );
 
-	std::vector<cv::Rect> faces;
-	std::vector<cv::Rect> pink;
+	std::vector<cv::Rect> WHA_faces, PINK_faces, SUN_faces;
+	std::vector<std::vector<cv::Rect> > Detections;
+
 	Mat_t frame_gray;
 
 	cv::cvtColor( frame, frame_gray, CV_BGR2GRAY );
@@ -333,21 +405,84 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 35, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDA
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 15, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDB
 	//   cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(70, 70), cv::Size(90,90) ); // works for LDD 35
-	cascade.detectMultiScale( frame_gray, faces, 1.1, 455, 0, cv::Size(70, 100), cv::Size(150,215) ); // works for WHA
+//	cascade.detectMultiScale( frame_gray, faces, 1.1, 455, 0, cv::Size(70, 100), cv::Size(150,215) ); // works for WHA
+//	cascade.detectMultiScale( frame_gray, faces, 1.1, 55, 0, cv::Size(75, 112), cv::Size(120, 190) ); // works for WHA comb
+//	cascade.detectMultiScale( frame_gray, faces, 1.1, 25, 0, cv::Size(70, 100), cv::Size(150, 215) ); // works for WHA 7 samp close
+//	cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(40, 70), cv::Size(70, 100) ); // works for WHA 007
+	cascade_WHA.detectMultiScale( frame_gray, WHA_faces, 1.1, 5, 0, cv::Size(52,59), cv::Size(85, 90) ); // works for WHAground !&
+	cascade_PINK.detectMultiScale( frame_gray, PINK_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for PINK !&
+	cascade_WHASUN.detectMultiScale( frame_gray, SUN_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for PINK !&
 
 
-	for( size_t i = 0; i < faces.size(); i++ )
+	for( size_t i = 0; i < WHA_faces.size(); i++ )
 	{
-		Mat_t faceROI = frame_gray( faces[i] );
+//		cout << "Entered circle drawing loop" << endl;
+
+
+		Mat_t faceROI = frame_gray( WHA_faces[i] );
 
 		//-- In each face, detect eyes
 
 		//-- Draw the face
-		cv::Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
-		cv::ellipse( frame, center, cv::Size( faces[i].width/2, faces[i].height/2), 0, 0, 360, cv::Scalar( 255, 0, 0 ), 2, 8, 0 );
-//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+		cv::Point center( WHA_faces[i].x + WHA_faces[i].width/2, WHA_faces[i].y + WHA_faces[i].height/2 );
 
-		detection_list_.push_back(DetectionPtr_t(new Detection_t(center.x, center.y)));
+		cv::ellipse( frame, center, cv::Size( WHA_faces[i].width/2, WHA_faces[i].height/2), 0, 0, 360, cv::Scalar( 255, 0, 0 ), 2, 8, 0 );
+
+		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+
+		DetectionPtr_t newDetection(new Detection_t());
+		newDetection->first.first  = center.x;
+		newDetection->first.second = center.y;
+		newDetection->second       = WHA;
+		detection_list_.push_back(newDetection);
+
+
+
+	}
+	for( size_t j = 0; j < PINK_faces.size(); j++ )
+	{
+//		cout << "Entered circle drawing loop" << endl;
+
+
+		Mat_t faceROI = frame_gray( PINK_faces[j] );
+
+		//-- In each face, detect eyes
+
+		//-- Draw the face
+		cv::Point center( PINK_faces[j].x + PINK_faces[j].width/2, PINK_faces[j].y + PINK_faces[j].height/2 );
+		cv::ellipse( frame, center, cv::Size( PINK_faces[j].width/2, PINK_faces[j].height/2), 0, 0, 360, cv::Scalar( 0, 255, 0 ), 2, 8, 0 );
+
+		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+
+		DetectionPtr_t newDetection(new Detection_t());
+		newDetection->first.first  = center.x;
+		newDetection->first.second = center.y;
+		newDetection->second       = PINK_BALL;
+		detection_list_.push_back(newDetection);
+
+
+
+	}
+	for( size_t j = 0; j < SUN_faces.size(); j++ )
+	{
+//		cout << "Entered circle drawing loop" << endl;
+
+
+		Mat_t faceROI = frame_gray( SUN_faces[j] );
+
+		//-- In each face, detect eyes
+
+		//-- Draw the face
+		cv::Point center( SUN_faces[j].x + SUN_faces[j].width/2, SUN_faces[j].y + SUN_faces[j].height/2 );
+		cv::ellipse( frame, center, cv::Size( SUN_faces[j].width/2, SUN_faces[j].height/2), 0, 0, 360, cv::Scalar( 0, 0, 255 ), 2, 8, 0 );
+
+		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+
+		DetectionPtr_t newDetection(new Detection_t());
+		newDetection->first.first  = center.x;
+		newDetection->first.second = center.y;
+		newDetection->second       = WHA;
+		detection_list_.push_back(newDetection);
 
 
 
@@ -362,6 +497,8 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 
 
 }
+
+
 
 int main(int argc, char** argv)
 {

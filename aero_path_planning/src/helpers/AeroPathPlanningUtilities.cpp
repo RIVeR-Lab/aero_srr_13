@@ -11,7 +11,7 @@
 //****************SYSTEM DEPENDANCIES**************************//
 
 //*****************LOCAL DEPENDANCIES**************************//
-#include <aero_path_planning/OryxPathPlanningUtilities.h>
+#include <aero_path_planning/utilities/AeroPathPlanningUtilities.h>
 //**********************NAMESPACES*****************************//
 
 using namespace aero_path_planning;
@@ -168,7 +168,7 @@ void aero_path_planning::castArc(const int& radius, const double& sweep_angle, c
 	int diagonalInc = 10 - 4*radius;
 	int rightInc = 6;
 	//Calculate the halfway cuttoff (we can use symmetry after this point to speed up calculations)
-	double halfCutoff = std::atan2(1,1);
+	double halfCutoff = std::atan2(1.0,1.0);
 	//Calculate the cutoff point. If it's greater than pi/4, this won't actually matter
 	double fullCutoff = aero_path_planning::constants::PI()/2.0 - sweep_angle;
 	//Calculate initial swept angle

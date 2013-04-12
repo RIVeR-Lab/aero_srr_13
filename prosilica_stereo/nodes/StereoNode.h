@@ -55,6 +55,9 @@ class StereoNode {
 	tPvUint32 sensor_width_, sensor_height_; // full resolution dimensions (maybe should be in lib)
 	tPvUint32 clock_l_,clock_r_;
 	tPvFloat32 freq_;
+	double offset_l_,offset_r_;
+	long int exposure_;
+	boost::mutex sync_;
 
 	// Hardware triggering
 	ros::Time trig_time_l_,trig_time_r_;

@@ -6,7 +6,7 @@
  */
 
 //************************************************ INCLUDES ***************************************//
-#include <aero_path_planning/Tentacles.h>
+#include <aero_path_planning/utilities/Tentacles.h>
 #include"OryxPathPlannerConfig.h"
 
 //************************************************ MACROS ***************************************//
@@ -45,8 +45,7 @@
 typedef aero_path_planning::Tentacle::TentacleTraverser TentTrav;	///Namespace declaration to make implementation of TentacleTraverser easier
 
 //************************************************ IMPLEMENTATION ***************************************//
-namespace aero_path_planning
-{
+using namespace aero_path_planning;
 
 //******************** TENTACLE::TENTACLETRAVERSER ***********************//
 /**
@@ -664,7 +663,6 @@ double TentacleGenerator::calcQ(int speedSet) const
 	return (double)speedSet/((double)this->num_speed_set_-1);
 }
 
-};
 
 //************************************************ UNDEFS ***************************************//
 #undef MIN_TENTACLE_LENGTH

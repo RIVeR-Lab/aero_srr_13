@@ -13,6 +13,7 @@
 #include <ros/ros.h>
 #include <tf/tf.h>
 #include <boost/shared_ptr.hpp>
+#include <object_locator/classifierTypes.h>
 //************ LOCAL DEPENDANCIES ****************//
 
 //***********    NAMESPACES     ****************//
@@ -22,7 +23,8 @@ namespace object_locator
 class DetectionManager
 {
 private:
-	typedef std::pair<tf::Point, double> Detection_t;
+	typedef std::pair<tf::Point, object_type> Data_t;
+	typedef std::pair<Data_t, double> Detection_t;
 	typedef boost::shared_ptr<Detection_t> DetectionPtr;
 	typedef std::list<DetectionPtr> DetectionArray_t;
 public:
@@ -62,11 +64,11 @@ public:
 	 * @author Adam Panzica
 	 * @brief  Adds a detection to the manager
 	 * @param [in] detection The detection to add. Should be in the same frame as all other added detections
-	 *
+	 * @param [in] type The type of detection to add.
 	 * This method processes a new detection. If the detection is within the specified threshold distance of another detection,
 	 * it will increase the confidence of that detection, otherwise it will create a new detection with a default starting confidance
 	 */
-	void addDetection(const tf::Point& detection);
+	void addDetection(const tf::Point& detection, const object_type type);
 
 	/**
 	 * @author Adam Panzica
@@ -79,9 +81,10 @@ public:
 	 * @brief  Gets the most confident detection that passes the detection threshold
 	 * @param [out] detection  Point to write the best detection to, if any
 	 * @param [out] confidence The confidence value of the returned detection, if any
+	 * @param [out] type 	   The type of the detection. ex. PINK_BALL, WHA
 	 * @return True if there was a point that was past the confidence threshold, else false
 	 */
-	bool getDetection(tf::Point& detection, double& confidence) const;
+	bool getDetection(tf::Point& detection, object_type &type, double& confidence) const;
 
 	/**
 	 * @author Adam Panzica

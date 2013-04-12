@@ -6,5 +6,6 @@
     <param name="master_frameid" value="left_camera" />
     <param name="slave_frameid" value="right_camera" />
     <param name="freq" type="double" value="10" />
+    <param name="exposure" type="int" value="20000" />
   </node>
 </launch>

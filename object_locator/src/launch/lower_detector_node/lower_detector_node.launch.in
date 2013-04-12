@@ -1,0 +1,22 @@
+<launch>
+
+	<!-- ********************ARGUMENTS******************** -->
+	<!-- declare args for camera communication -->
+	<arg name="@BOTTOM_LEFT_IMAGE_TOPIC_ARG@"			 default=@BOTTOM_LEFT_IMAGE_TOPIC_VAL@/>
+	<arg name="@BOTTOM_LEFT_INFO_TOPIC_ARG@"			 default=@BOTTOM_LEFT_INFO_TOPIC_VAL@/>
+	<arg name="@BOTTOM_RIGHT_IMAGE_TOPIC_ARG@"			 default=@BOTTOM_RIGHT_IMAGE_TOPIC_VAL@/>
+	<arg name="@BOTTOM_RIGHT_INFO_TOPIC_ARG@"			 default=@BOTTOM_RIGHT_INFO_TOPIC_VAL@/>
+	
+
+	
+	<!-- ********************NODES******************** -->
+	<node name="lower_detector_node" pkg="object_locator" type="lower_detector_node" output="screen">
+		<param name="@BOTTOM_LEFT_IMAGE_TOPIC_ARG@"		type="str"		value="$(arg @BOTTOM_LEFT_IMAGE_TOPIC_ARG@)" />
+		<param name="@BOTTOM_LEFT_INFO_TOPIC_ARG@"		type="str"		value="$(arg @BOTTOM_LEFT_INFO_TOPIC_ARG@)" />
+		
+		<param name="@BOTTOM_RIGHT_IMAGE_TOPIC_ARG@"		type="str"		value="$(arg @BOTTOM_RIGHT_IMAGE_TOPIC_ARG@)" />
+		<param name="@BOTTOM_RIGHT_INFO_TOPIC_ARG@"			type="str"		value="$(arg @BOTTOM_RIGHT_INFO_TOPIC_ARG@)" />
+
+	</node>
+	
+</launch>

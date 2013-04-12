@@ -1,0 +1,4 @@
+add_subdirectory(lower_detector_node)
+add_subdirectory(camera_tf_tree_node)
+add_subdirectory(object_locator)
+add_subdirectory(vision_pipeline)
