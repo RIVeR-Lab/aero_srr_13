@@ -14,7 +14,7 @@
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/random.hpp>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/CarrotPathFinder.h>
+#include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
 //**********************NAMESPACES*****************************//
 
 namespace aero_path_planning

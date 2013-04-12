@@ -11,9 +11,9 @@
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/bind.hpp>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/RRTCarrot.h>
-#include<aero_path_planning/GlobalPlanner.h>
-#include<aero_path_planning/OccupancyGrid.h>
+#include<aero_path_planning/planning_strategies/RRTCarrot.h>
+#include<aero_path_planning/planners/GlobalPlanner.h>
+#include<aero_path_planning/utilities/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
 
 using namespace aero_path_planning;

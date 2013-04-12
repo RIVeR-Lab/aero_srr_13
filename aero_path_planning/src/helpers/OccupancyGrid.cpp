@@ -11,12 +11,10 @@
 
 
 
-#include <aero_path_planning/OccupancyGrid.h>
+#include <aero_path_planning/utilities/OccupancyGrid.h>
 
 using namespace aero_path_planning;
 
-namespace aero_path_planning
-{
 
 OccupancyGrid::OccupancyGrid(): occ_grid_()
 {
@@ -163,7 +161,7 @@ void OccupancyGrid::intializeGrid(PointTrait_t seedTrait)
 void OccupancyGrid::searchForGoal()
 {
 #pragma omp parallel for
-	for(int i = 0; i< this->occ_grid_.size(); i++)
+	for(int i = 0; i< (int)this->occ_grid_.size(); i++)
 	{
 		if(this->occ_grid_.at(i).rgba==aero_path_planning::GOAL)
 		{
@@ -235,7 +233,7 @@ bool OccupancyGrid::setPointTrait(const aero_path_planning::PointCloud& points) 
 {
 	bool sucess = true;
 #pragma omp parallel for
-	for (int i = 0; i < points.size(); i++)
+	for (int i = 0; i < (int)points.size(); i++)
 	{
 		try
 		{
@@ -571,7 +569,6 @@ unsigned long OccupancyGrid::size() const
 	return this->x_dim_*this->y_dim_*this->z_dim_;
 }
 
-};
 
 int OccupancyGrid::getXSize() const
 {

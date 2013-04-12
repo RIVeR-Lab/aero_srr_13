@@ -16,7 +16,7 @@
 #include<boost/function.hpp>
 #include<queue>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/OccupancyGrid.h>
+#include<aero_path_planning/utilities/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
 
 namespace aero_path_planning
