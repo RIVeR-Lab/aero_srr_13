@@ -8,7 +8,7 @@
 //*********************** SYSTEM DEPENDENCIES ************************************//
 #include<boost/lexical_cast.hpp>
 //*********************** LOCAL DEPENDENCIES ************************************//
-#include<aero_path_planning/LocalPlanner.h>
+#include<aero_path_planning/planners/LocalPlanner.h>
 
 using namespace aero_path_planning;
 

@@ -25,10 +25,10 @@ set(ODOMETRY_TOPIC_ARG ${R_NS}/odometry)
 set(ODOMETRY_TOPIC_CDF ODOMETRY_TOPIC)
 set(ODOMETRY_TOPIC_VAL "\"${R_NS}/odometry\"")
 
-#Paramter defining the joy topic
-set(JOY_TOPIC_ARG /joy)
-set(JOY_TOPIC_CDF JOY_TOPIC)
-set(JOY_TOPIC_VAL "\"/joy\"")
+#Paramter defining the manual contorl twist topic
+set(MAN_TOPIC_ARG ${R_NS}/manual_twist_topic)
+set(MAN_TOPIC_CDF MAN_TOPIC)
+set(MAN_TOPIC_VAL "\"/manual_twist_topic\"")
 
 #Paramter defining the state topic
 set(STATE_TOPIC_ARG ${R_NS}/${SP_NS}/state)
@@ -148,6 +148,12 @@ set(T_EXPFACT_VAL "\"1.15\"")
 set(T_NUMBER_ARG "${R_NS}/${T_NS}/number")
 set(T_NUMBER_CDF T_NUMBER)
 set(T_NUMBER_VAL "\"81\"")
+
+#Build the parameter header
+configure_file (
+  "AeroPathPlanningParameters.h.in"
+  "${PROJECT_BINARY_DIR}/AeroPathPlanningParameters.h"
+)
 
 add_subdirectory(helpers)
 add_subdirectory(nodes)
