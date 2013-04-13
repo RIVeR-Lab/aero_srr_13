@@ -22,12 +22,12 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-										state_(MANUAL),
-										path_planner_(&path_planner),
-										path_threshold_(1.0),
-										nh_(nh),
-										p_nh_(p_nh),
-										transformer_(nh)
+												state_(MANUAL),
+												path_planner_(&path_planner),
+												path_threshold_(1.0),
+												nh_(nh),
+												p_nh_(p_nh),
+												transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -35,6 +35,9 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_pa
 	this->registerTopics();
 	this->registerTimers();
 	this->buildGlobalMap();
+
+	this->cf_ = boost::bind(&GlobalPlanner::checkCollision, this, _1, _2);
+	this->planCB(ros::TimerEvent());
 
 	ROS_INFO("Global Planner Running!");
 
@@ -381,15 +384,35 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 	start_point.y = 0;
 	start_point.z = 0;
 	Point goal_point;
-	goal_point.x  = this->global_x_size_-1;
-	goal_point.y  = this->global_y_size_-1;
+	goal_point.x  = 100;
+	goal_point.y  = 100;
 	goal_point.z  = 0;
 	if(this->path_planner_!=NULL)
 	{
+		this->path_planner_->setCollision(this->cf_);
+		this->path_planner_->setCarrotDelta(10);
+		this->path_planner_->setSearchMap(*this->global_map_);
 		this->path_planner_->search(start_point, goal_point, this->plan_timerout_, this->carrot_path_);
 	}
 	else
 	{
 		ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
 	}
+}
+
+bool GlobalPlanner::checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const
+{
+	bool collision = false;
+	try
+	{
+		if(map.getPointTrait(point)==aero_path_planning::OBSTACLE)
+		{
+			collision = true;
+		}
+	}
+	catch(std::exception& e)
+	{
+		collision = true;
+	}
+	return collision;
 }
