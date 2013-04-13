@@ -348,7 +348,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 
 	if(this->canSearch())
 	{
-		ROS_INFO("I'm Searching!");
+		//ROS_INFO("I'm Searching!");
 		//Set up the huristics
 		cost_func     costf = boost::bind(&pt_cost, _1, _2);
 		huristic_func hursf = boost::bind(&ed_huristic, _1, _2);
@@ -371,20 +371,20 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		Node_t    goal_node_dummy(goal_point, goal_point, NodePtr_t(), costf, hursf);
 
 
-		ROS_INFO_STREAM("I'm Searching with "<<PRINT_POINT_S("Start Point", start_point)<<" and "<<PRINT_POINT_S("Goal Point", goal_point));
+		//ROS_INFO_STREAM("I'm Searching with "<<PRINT_POINT_S("Start Point", start_point)<<" and "<<PRINT_POINT_S("Goal Point", goal_point));
 
 		bool timeout_c = false;
 		bool os_empty  = false;
 		while(!success&&!timeout_c&&!os_empty)
 		{
-			ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
+			//ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
 			os_empty  = open_set.empty();
 			timeout_c = (current_time-start_time)>timeout;
 			//Get the next node to expand
 			NodePtr_t current_node = open_set.top();
 			open_set.pop();
 
-			ROS_INFO_STREAM("I'm Expanding "<<current_node<<"...");
+			//ROS_INFO_STREAM("I'm Expanding "<<current_node<<"...");
 
 			std::stringstream node_rep;
 			node_rep<<PRINT_POINT_S("",current_node->getLocation());
@@ -392,7 +392,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 			//Check to see if we hit the goal
 			if(current_node->sameLocation(goal_node_dummy))
 			{
-				ROS_INFO_STREAM("I Hit the "<<PRINT_POINT_S("Goal: ", goal_node_dummy.getLocation())<<" with "<<current_node);
+				//ROS_INFO_STREAM("I Hit the "<<PRINT_POINT_S("Goal: ", goal_node_dummy.getLocation())<<" with "<<current_node);
 				closed_set[node_rep.str()] = current_node;
 				goal_node_dummy = *current_node;
 				success         = true;
@@ -402,13 +402,13 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 
 			if(closed_set.count(node_rep.str())==0)
 			{
-				ROS_INFO_STREAM("I'm pushing "<<current_node<<"onto the closed set...");
+				//ROS_INFO_STREAM("I'm pushing "<<current_node<<"onto the closed set...");
 				closed_set[node_rep.str()] = current_node;
 
 				//Get the neighbors to the current node and add them to the open set
 				neighbors.clear();
 				this->calcNeighbors(current_node->getLocation(), neighbors);
-				ROS_INFO_STREAM("I got "<<neighbors.size()<<" neighbors for "<<current_node);
+				//ROS_INFO_STREAM("I got "<<neighbors.size()<<" neighbors for "<<current_node);
 
 				for(unsigned int i=0; i<neighbors.size(); i++)
 				{
@@ -422,7 +422,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 						//Check to see if we've already expanded the neighbor node
 						if(closed_set.count(neighbor_rep.str())==0 && !this->openSetContains(node, open_set))
 						{
-							ROS_INFO_STREAM("I'm adding "<<node<<" to the open set");
+							//ROS_INFO_STREAM("I'm adding "<<node<<" to the open set");
 							open_set.push(*node, node);
 						}
 					}
@@ -430,7 +430,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 			}
 			else
 			{
-				ROS_INFO_STREAM(current_node<<" was already in the closed set");
+				//ROS_INFO_STREAM(current_node<<" was already in the closed set");
 			}
 
 //			std::string pause;
@@ -451,7 +451,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		//If we got a path, stuff the solution vector
 		if(success)
 		{
-			ROS_INFO_STREAM("I Got A Solution, Generating Solution Path");
+			//ROS_INFO_STREAM("I Got A Solution, Generating Solution Path");
 			this->buildSolutionPath(goal_node_dummy, result_path);
 		}
 	}
