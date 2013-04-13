@@ -13,7 +13,8 @@
 #include <aero_path_planning/planning_strategies/AStarCarrot.h>
 //***********    NAMESPACES     ****************//
 
-
+#define PRINT_POINT_STREAM(point) "[Location: ("<<point.x<<","<<point.y<<","<<point.z<<")]"
+#define PRINT_EXPECT_POINT(expect,actual) "Expected to get "<<PRINT_POINT_STREAM(expect)<<", Actually got "<<PRINT_POINT_STREAM(actual)
 #define PRINT_NODE_STREAM(nodeptr) "[Location: ("<<nodeptr->getLocation().x<<","<<nodeptr->getLocation().y<<","<<nodeptr->getLocation().z<<"), Parent: "<<nodeptr->getParent()<<"]"
 #define PRINT_EXPECT_NODE(expect,actual) "Expected to get "<<PRINT_NODE_STREAM(expect)<<", Actually got "<<PRINT_NODE_STREAM(actual)
 
@@ -95,7 +96,7 @@ TEST_F(AStarCarrotTestFixture, testAStarNode)
 	test_point3.x = 1;
 	test_point3.y = 0;
 
-	ASSERT_TRUE(test_point1.getVector4fMap()==test_point3.getVector4fMap());
+	EXPECT_TRUE(test_point1.getVector4fMap()==test_point3.getVector4fMap());
 
 	app::Point test_point2;
 	test_point2.x = 1;
@@ -108,17 +109,17 @@ TEST_F(AStarCarrotTestFixture, testAStarNode)
 	AStarNodePtr goal_node(new asu::AStarNode(goal_point_, goal_point_, second_node, cf_, hf_));
 
 	//First Node should have a cost of 1
-	ASSERT_EQ(1, first_node->getG());
+	EXPECT_EQ(1, first_node->getG());
 
 	//Second Node should have a cost of 11
-	ASSERT_EQ(11, second_node->getG());
+	EXPECT_EQ(11, second_node->getG());
 
-	ASSERT_FALSE(goal_node->sameLocation(test_node_zero_));
-	ASSERT_EQ(goal_node->getLocation().getVector4fMap(), goal_point_.getVector4fMap());
-	ASSERT_EQ(goal_node->getParent(), second_node)<<PRINT_EXPECT_NODE(first_node, goal_node->getParent());
-	ASSERT_NE(goal_node->getG(), test_node_zero_->getG());
-	ASSERT_NE(goal_node->getH(), test_node_zero_->getH());
-	ASSERT_FALSE((*goal_node)==(*test_node_zero_));
+	EXPECT_FALSE(goal_node->sameLocation(test_node_zero_));
+	EXPECT_EQ(goal_node->getLocation().getVector4fMap(), goal_point_.getVector4fMap());
+	EXPECT_EQ(goal_node->getParent(), second_node)<<PRINT_EXPECT_NODE(first_node, goal_node->getParent());
+	EXPECT_NE(goal_node->getG(), test_node_zero_->getG());
+	EXPECT_NE(goal_node->getH(), test_node_zero_->getH());
+	EXPECT_FALSE((*goal_node)==(*test_node_zero_));
 }
 
 //************************************ TEST HURISTIC FUNCTION ***************************************************//
@@ -130,14 +131,14 @@ TEST_F(AStarCarrotTestFixture, testHuristic)
 	test_point.z = 0;
 	test_point.rgba = app::FREE_LOW_COST;
 
-	ASSERT_EQ(1, hf_(zero_point_, test_point));
+	EXPECT_EQ(1, hf_(zero_point_, test_point));
 
 	test_point.x = -1;
-	ASSERT_EQ(1, hf_(zero_point_, test_point));
+	EXPECT_EQ(1, hf_(zero_point_, test_point));
 
 	test_point.y = 10;
 	test_point.x = 0;
-	ASSERT_EQ(10, hf_(zero_point_, test_point));
+	EXPECT_EQ(10, hf_(zero_point_, test_point));
 }
 
 //************************************ TEST COST FUNCTION ***************************************************//
@@ -147,13 +148,13 @@ TEST_F(AStarCarrotTestFixture, testCost)
 	test_point.x = 1;
 	test_point.rgba = app::FREE_LOW_COST;
 
-	ASSERT_EQ(1, cf_(test_point, zero_point_));
+	EXPECT_EQ(1, cf_(test_point, zero_point_));
 
 	test_point.rgba = app::FREE_HIGH_COST;
-	ASSERT_EQ(2, cf_(test_point, zero_point_));
+	EXPECT_EQ(2, cf_(test_point, zero_point_));
 
 	test_point.rgba = app::TRAVERSED;
-	ASSERT_EQ(1.25, cf_(test_point, zero_point_));
+	EXPECT_EQ(1.25, cf_(test_point, zero_point_));
 }
 
 //************************************ TEST COLLISIONCHECK ***************************************************//
@@ -171,18 +172,18 @@ TEST_F(AStarCarrotTestFixture, testCollision)
 	obst_point.z = 0;
 	coll_grid.setPointTrait(obst_point, aero_path_planning::OBSTACLE);
 
-	ASSERT_TRUE(collisionCheck(obst_point, coll_grid));
+	EXPECT_TRUE(collisionCheck(obst_point, coll_grid));
 
 	app::Point clear_point;
 	clear_point.x=1;
 	clear_point.y=1;
 	clear_point.z=0;
-	ASSERT_FALSE(collisionCheck(clear_point,coll_grid));
+	EXPECT_FALSE(collisionCheck(clear_point,coll_grid));
 
 	app::Point off_map;
 	off_map.x = 100;
 	off_map.y = -1;
-	ASSERT_TRUE(collisionCheck(off_map,coll_grid));
+	EXPECT_TRUE(collisionCheck(off_map,coll_grid));
 }
 
 //************************************ TEST AStarCarrot ***************************************************//
@@ -195,14 +196,16 @@ TEST_F(AStarCarrotTestFixture, testAStarCarrot)
 	std::queue<app::Point> result_path;
 	ros::Duration timeout(10);
 
-	ASSERT_FALSE(test_planner.search(zero_point_, goal_point_, timeout , result_path));
-	ASSERT_FALSE(test_planner.allowsPartialPath());
+	EXPECT_FALSE(test_planner.search(zero_point_, goal_point_, timeout , result_path));
+	EXPECT_FALSE(test_planner.allowsPartialPath());
 
-	ASSERT_TRUE(test_planner.setCarrotDelta(5));
-	ASSERT_TRUE(test_planner.setCollision(clf_));
-	ASSERT_TRUE(test_planner.setSearchMap(test_map));
+	EXPECT_TRUE(test_planner.setCarrotDelta(5));
+	EXPECT_TRUE(test_planner.setCollision(clf_));
+	EXPECT_TRUE(test_planner.setSearchMap(test_map));
 
 	//Search an empty map. Should create a straight path from start to goal
 	clear_queue<app::Point>(result_path);
-	ASSERT_TRUE(test_planner.search(zero_point_, goal_point_, timeout , result_path));
+	EXPECT_TRUE(test_planner.search(zero_point_, goal_point_, timeout , result_path));
+	EXPECT_TRUE(result_path.size()>0);
+	EXPECT_EQ(zero_point_.getVector4fMap(), result_path.front().getVector4fMap())<<PRINT_EXPECT_POINT(zero_point_, result_path.front());
 }

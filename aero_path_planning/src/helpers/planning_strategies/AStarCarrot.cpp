@@ -78,7 +78,7 @@ AStarNode::AStarNode(const Point& location, const Point& goal, const AStarNodePt
 {
 	if(parent != AStarNodePtr())
 	{
-		this->g_ = cost(location, parent->getLocation())+parent->getG();
+		this->g_ =  cost(location, parent->getLocation())+parent->getG();
 	}
 	else
 	{
@@ -307,10 +307,11 @@ void AStarCarrot::buildSolutionPath(const Node_t& goal_node, std::queue<Point>& 
 		temp_path.push_back(path_node->getLocation());
 		path_node = path_node->getParent();
 	}
+	temp_path.push_back(path_node->getLocation());
 
-	BOOST_FOREACH(std::vector<Point>::value_type point, temp_path)
+	for(int i=temp_path.size()-1; i>0; i--)
 	{
-		path.push(point);
+		path.push(temp_path.at(i));
 	}
 
 }
