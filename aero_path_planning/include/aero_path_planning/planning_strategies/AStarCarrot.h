@@ -33,7 +33,7 @@ typedef boost::function<double (aero_path_planning::Point, aero_path_planning::P
  * @param [in] goal  The goal point to measure the huristic to
  * @return The euclidian distance between the points
  */
-double eculidian_distance_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal);
+double ed_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal);
 
 /**
  * @author Adam Panzica
@@ -42,7 +42,7 @@ double eculidian_distance_huristic(const aero_path_planning::Point& point, const
  * @param [in] last_point The last point in the chain to use for calculating cost
  * @return The cost for moving to this_point @todo fill in actual math here
  */
-double point_trait_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point);
+double pt_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point);
 
 /**
  * @author Adam Panzica
@@ -92,10 +92,17 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @return The parent node of this node
+	 */
+	const AStarNodePtr& getParent() const;
+
+	/**
+	 * @author Adam Panzica
 	 * @param [in] node The node to compare against
 	 * @return true if the nodes are at the same location
 	 */
 	bool sameLocation(const AStarNode& node) const;
+
 
 	AStarNode& operator= (AStarNode const & rhs);
 	/**
@@ -129,6 +136,19 @@ public:
 	 */
 	bool       operator==(AStarNode const & rhs) const;
 
+	friend std::ostream& operator<<(std::ostream& in, const AStarNode& rhs)
+	{
+		std::string parent((rhs.getParent()!=AStarNode::AStarNodePtr())?("Yes"):("No"));
+		in<<"Node(Location: "<<rhs.getLocation().x<<","<<rhs.getLocation().y<<", Parent: "<<parent
+		  <<", G:"<<rhs.getG()<<",H:"<<rhs.getH()<<",F:"<<rhs.getF()<<")";
+		return in;
+	}
+
+	friend std::ostream& operator<<(std::ostream& in, const AStarNodePtr& rhs)
+	{
+		return in<<(*rhs);
+	}
+
 private:
 	aero_path_planning::Point location_; ///The location of this node in seach space
 	AStarNodePtr parent_;                ///The parent AStarNode of this node
@@ -137,6 +157,9 @@ private:
 	double f_;                           ///The fitness of this node, \[f=g+h\]
 };
 
+
+
+
 }
 
 class AStarCarrot : public aero_path_planning::CarrotPathFinder
@@ -144,7 +167,6 @@ class AStarCarrot : public aero_path_planning::CarrotPathFinder
 public:
 	AStarCarrot();
 	AStarCarrot(const AStarCarrot& copy);
-	AStarCarrot(double step_size);
 	virtual ~AStarCarrot();
 
 	virtual bool setCarrotDelta(double delta);
@@ -167,6 +189,26 @@ private:
 	int                               delta_;
 	aero_path_planning::OccupancyGrid map_;
 	collision_func_                   collision_checker_;
+
+	Point n_pxy_;
+	Point n_xpy_;
+	Point n_nxy_;
+	Point n_xny_;
+	Point n_dpxpy_;
+	Point n_dnxpy_;
+	Point n_dpxny_;
+	Point n_dnxny_;
+
+	void setUpNeighborPoints();
+
+	bool calcNeighbors(const Point& point, std::vector<Point>& neighbors) const;
+
+	void buildSolutionPath(const Node_t& goal_node, std::queue<Point>& path) const;
+
+	bool canSearch() const;
+
+	bool openSetContains(const NodePtr_t& node, const aero_path_planning::FitnessQueue<Node_t, NodePtr_t>& open_set) const;
+
 };
 
 }

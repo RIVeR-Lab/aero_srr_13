@@ -1,0 +1,14 @@
+<package>
+  <description brief="aero_slam">
+
+     aero_slam
+
+  </description>
+  <author>bpwiselybabu</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aero_slam</url>
+
+</package>
+
+

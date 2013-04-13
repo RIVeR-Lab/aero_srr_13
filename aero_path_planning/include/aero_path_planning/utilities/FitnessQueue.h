@@ -11,6 +11,7 @@
 //********************** SYSTEM DEPENDANCIES **********************//
 #include<queue>
 #include<boost/shared_ptr.hpp>
+#include<algorithm>
 #ifdef _OPENMP
 # include <omp.h>
 #endif
@@ -85,30 +86,46 @@ private:
 		 * @param [in] b pointer to the second value to compare
 		 * @return (a->first < b->first)
 		 */
-		bool operator() (const DataPairPtr_t& a, const DataPairPtr_t& b) const;
+		bool operator() (const DataPairPtr_t& a, const DataPairPtr_t& b) const
+		{
+			return a->first<b->first;
+		}
 
 	};
 
 
-	typedef std::priority_queue<DataPairPtr_t, std::vector<DataPairPtr_t>, comparitor > PriorityQueue_t;
+	typedef std::vector<DataPairPtr_t> PriorityQueue_t;
 
-	PriorityQueue_t  queue_; ///The backing priority queue used to hold the data in the FitnessQueue
+	PriorityQueue_t  queue_; ///The backing heap used to hold the data in the FitnessQueue
 	mutable MutexType lock_;  ///The mutex used to lock the queue. Needs to be mutable to allow Top to be const, which it is in terms of queue data
-
+	comparitor       comp_;
 public:
-	FitnessQueue();
+
+	typedef typename PriorityQueue_t::iterator       iterator;
+	typedef typename PriorityQueue_t::const_iterator const_iterator;
+
+	FitnessQueue()
+	{
+		std::make_heap(this->queue_.begin(), this->queue_.end(), comp_);
+	}
 
 	/**
 	 * @author Adam Panzica
 	 * @return True if the queue is empty, else false
 	 */
-	bool empty() const;
+	bool empty() const
+	{
+		return this->queue_.empty();
+	}
 
 	/**
 	 * @author Adam Panzica
 	 * @return The number of elements in the queue
 	 */
-	unsigned int size() const;
+	unsigned int size() const
+	{
+		return this->queue_.size();
+	}
 
 	/**
 	 * @author Adam Panzica
@@ -116,74 +133,59 @@ public:
 	 * @param [in] fitness The fitness value of the data being placed on the queue
 	 * @param [in] data    The data value being pushed onto the queue
 	 */
-	void push (const Fitness& fitness, const Data& data);
+	void push (const Fitness& fitness, const Data& data)
+	{
+		ScopedLock lck(this->lock_); // locks the mutex
+		DataPairPtr_t item(new DataPair_t(fitness, data));
+		this->queue_.push_back(item);
+		std::push_heap(this->queue_.begin(), this->queue_.end(), comp_);
+		// automatically releases the lock when lck goes out of scope.
+	}
 
 	/**
 	 * @author Adam Panzica
 	 * @brief  Returns the Data on the top of the queue
 	 * @return Returns the Data on the top of the queue. Does not remove it from the queue
 	 */
-	const Data& top() const;
+	const Data& top() const
+	{
+		ScopedLock lck(this->lock_); // locks the mutex
+		return this->queue_.front()->second;
+		// automatically releases the lock when lck goes out of scope.
+	}
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Removes the item on the top of the queue. Calls its destructor
 	 */
-	void pop();
+	void pop()
+	{
+		ScopedLock lck(this->lock_);//locks the mutex
+		std::pop_heap(this->queue_.begin(), this->queue_.end(), comp_);
+		this->queue_.pop_back();
+		// automatically releases the lock when lck goes out of scope.
+	}
+
+	iterator begin()
+	{
+		return this->queue_.begin();
+	}
+
+	iterator end()
+	{
+		return this->queue_.end();
+	}
+
+	const_iterator c_begin() const
+	{
+		return this->queue_.begin();
+	}
+	const_iterator c_end() const
+	{
+		return this->queue_.end();
+	}
 
 };
-
-
-//************************ IMPLEMENTATION (TEMPLATED, MUST GO IN HEADER) ****************************//
-template<class Fitness, class Data>
-FitnessQueue<Fitness, Data>::FitnessQueue():
-	queue_(comparitor())
-{
-}
-
-template<class Fitness, class Data>
-bool FitnessQueue<Fitness, Data>::comparitor::operator ()(const FitnessQueue::DataPairPtr_t& a, const FitnessQueue::DataPairPtr_t& b) const
-{
-	return a->first<b->first;
-}
-
-template<class Fitness, class Data>
-bool FitnessQueue<Fitness, Data>::empty() const
-{
-	return this->queue_.empty();
-}
-
-template<class Fitness, class Data>
-unsigned int FitnessQueue<Fitness, Data>::size() const
-{
-	return this->queue_.size();
-}
-
-template<class Fitness, class Data>
-void FitnessQueue<Fitness, Data>::push (const Fitness& fitness, const Data& data)
-{
-	ScopedLock lck(this->lock_); // locks the mutex
-	DataPairPtr_t item(new DataPair_t(fitness, data));
-	this->queue_.push(item);
-	// automatically releases the lock when lck goes out of scope.
-}
-
-template<class Fitness, class Data>
-const Data& FitnessQueue<Fitness, Data>::top() const
-{
-	ScopedLock lck(this->lock_); // locks the mutex
-	return this->queue_.top()->second;
-	// automatically releases the lock when lck goes out of scope.
-}
-
-template<class Fitness, class Data>
-void FitnessQueue<Fitness, Data>::pop()
-{
-	ScopedLock lck(this->lock_);//locks the mutex
-	this->queue_.pop();
-	// automatically releases the lock when lck goes out of scope.
-}
-
 
 
 };

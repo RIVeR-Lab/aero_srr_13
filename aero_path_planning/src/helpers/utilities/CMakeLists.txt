@@ -1,0 +1,1 @@
+rosbuild_add_library(AeroUtilities AeroPathPlanningUtilities.cpp)
