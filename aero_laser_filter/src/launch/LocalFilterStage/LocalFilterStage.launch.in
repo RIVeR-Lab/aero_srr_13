@@ -1,0 +1,11 @@
+<!-- @AUTO_GENERATION_WARNING@ -->
+<launch>
+	<arg name="node_manager" default="aero_laser_filter_pipeline"/>
+	<arg name="input_topic"  default=@POINTCLOUD_VAL@/>
+	<arg name="output_topic" default=@LOCAL_TOPIC_VAL@/>
+	
+	<node pkg="nodelet" type="nodelet" name="LocalFilterStage" args="load aero_laser_filter/LocalFilterStage $(arg node_manager)" output="screen">
+		<param name="input_topic"  value="$(arg input_topic)"/>
+		<param name="output_topic" value="$(arg output_topic)"/>
+	</node>
+</launch>

@@ -14,4 +14,16 @@
 		<arg name="output_topic" value="/aero/laser_filter_pipeline/point_cloud_raw" />
 	</include>
 	
+	<include file="$(find aero_laser_filter)/launch/LocalFilterStage.launch">
+		<arg name="node_manager" value="$(arg node_manager)"/>
+		<arg name="input_topic"  value="/aero/laser_filter_pipeline/point_cloud_raw" />
+		<arg name="output_topic" value="$(arg local_topic)" />
+	</include>
+	
+	<include file="$(find aero_laser_filter)/launch/GlobalFilterStage.launch">
+		<arg name="node_manager" value="$(arg node_manager)"/>
+		<arg name="input_topic"  value="/aero/laser_filter_pipeline/point_cloud_raw" />
+		<arg name="output_topic" value="$(arg global_topic)" />
+	</include>
+	
 </launch>

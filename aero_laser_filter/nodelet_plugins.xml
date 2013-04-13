@@ -5,3 +5,19 @@
   </description>
   </class>
 </library>
+
+<library path="lib/libLocalFilterStage">
+  <class name="aero_laser_filter/LocalFilterStage" type="aero_laser_filter::LocalFilterStage" base_class_type="nodelet::Nodelet">
+  <description>
+  	Nodelet responsable for doing the post-processing for the output to the local frame
+  </description>
+  </class>
+</library>
+
+<library path="lib/libGlobalFilterStage">
+  <class name="aero_laser_filter/GlobalFilterStage" type="aero_laser_filter::GlobalFilterStage" base_class_type="nodelet::Nodelet">
+  <description>
+  	Nodelet responsable for doing the post-processing for the output to the global frame
+  </description>
+  </class>
+</library>
