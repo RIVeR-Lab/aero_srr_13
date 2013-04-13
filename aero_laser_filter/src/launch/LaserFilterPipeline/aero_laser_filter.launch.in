@@ -1,0 +1,17 @@
+
+<!-- @AUTO_GENERATION_WARNING@ -->
+<launch>
+	<arg name="node_manager" default=@NODE_MANAGER_VAL@/>
+	<arg name="input_topic"  default=@INPUT_TOPIC_VAL@/>
+	<arg name="local_topic"  default=@LOCAL_TOPIC_VAL@/>
+	<arg name="global_topic" default=@GLOBAL_TOPIC_VAL@/>
+	
+	<node pkg="nodelet" type="nodelet" name="$(arg node_manager)"  args="manager" output="screen"/>
+	
+	<include file="$(find aero_laser_filter)/launch/ConversionStage.launch">
+		<arg name="node_manager" value="$(arg node_manager)"/>
+		<arg name="input_topic"  value="$(arg input_topic)" />
+		<arg name="output_topic" value=@POINTCLOUD_VAL@ />
+	</include>
+	
+</launch>

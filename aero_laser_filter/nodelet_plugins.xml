@@ -1,0 +1,7 @@
+<library path="lib/libConversionStage">
+  <class name="aero_laser_filter/ConversionStage" type="aero_laser_filter::ConversionStage" base_class_type="nodelet::Nodelet">
+  <description>
+  	Nodelet responsable for converting between laser scans and point clouds. Front end to the aero_laser_filter pipeline 
+  </description>
+  </class>
+</library>
