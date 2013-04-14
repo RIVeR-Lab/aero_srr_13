@@ -12,15 +12,16 @@
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <nodelet/nodelet.h>
 #include <ros/ros.h>
+#include <pcl/filters/crop_box.h>
+#include <tf/transform_listener.h>
 //************ LOCAL DEPENDANCIES ****************//
-
+#include <aero_laser_filter/utilities/AeroLaserFilterUtilities.h>
 //***********    NAMESPACES     ****************//
 
 namespace aero_laser_filter
 {
 
 namespace sm = sensor_msgs;
-
 
 class LocalFilterStage: public nodelet::Nodelet
 {
@@ -33,13 +34,28 @@ private:
 
 	void cloudCB(const sm::PointCloud2ConstPtr& message);
 
+	void cropCloud(const PointCloudPtr_t& in, PointCloudPtr_t& out);
+
+	void transformCloud(const PointCloudPtr_t& in, PointCloudPtr_t& out);
+
+	void filterCloud(const PointCloudPtr_t& in, PointCloudPtr_t& out);
+
 	ros::NodeHandle nh_;
 	ros::NodeHandle p_nh_;
 	ros::Publisher  point_pub_;
 	ros::Subscriber point_sub_;
 
+	tf::TransformListener *transformer_;
+
+	pcl::CropBox<Point_t> crop_box_;
+	Point_t crop_bottom_left_;
+	Point_t crop_top_right_;
+
+	int robot_size_;
+
 	std::string input_topic_;
 	std::string output_topic_;
+	std::string output_frame_;
 };
 
 } /* namespace aero_laser_filter */
