@@ -3,9 +3,11 @@
 	<arg name="node_manager" default="aero_laser_filter_pipeline"/>
 	<arg name="input_topic"  default=@POINTCLOUD_VAL@/>
 	<arg name="output_topic" default=@GLOBAL_TOPIC_VAL@/>
+	<arg name="output_frame" default=@GLOBAL_FRAME_VAL@/>
 	
 	<node pkg="nodelet" type="nodelet" name="GlobalFilterStage" args="load aero_laser_filter/GlobalFilterStage $(arg node_manager)" output="screen">
 		<param name="input_topic"  value="$(arg input_topic)"/>
 		<param name="output_topic" value="$(arg output_topic)"/>
+		<param name="output_frame" value="$(arg output_frame)"/>
 	</node>
 </launch>

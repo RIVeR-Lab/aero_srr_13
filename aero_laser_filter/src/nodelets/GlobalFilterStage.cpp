@@ -59,8 +59,8 @@ namespace aero_laser_filter {
 		this->crop_bottom_left_.y = temp_y;
 		this->crop_bottom_left_.z = temp_z;
 
-		temp_x = 10;
-		temp_y = 10;
+		temp_x = 30;
+		temp_y = 30;
 		temp_z = 0;
 		this->p_nh_.getParam(crop_ns+toprgt_ns+x, temp_x);
 		this->p_nh_.getParam(crop_ns+toprgt_ns+y, temp_y);

@@ -4,7 +4,9 @@
 	<arg name="node_manager" default="aero_laser_filter_pipeline"/>
 	<arg name="input_topic"  default="/scan"/>
 	<arg name="local_topic"  default="/aero/local_point_cloud"/>
+	<arg name="local_frame"  default="/robot"/>
 	<arg name="global_topic" default="/aero/global_point_cloud"/>
+	<arg name="global_frame" default="/world"/>
 	
 	<node pkg="nodelet" type="nodelet" name="$(arg node_manager)"  args="manager" output="screen"/>
 	
@@ -18,12 +20,14 @@
 		<arg name="node_manager" value="$(arg node_manager)"/>
 		<arg name="input_topic"  value="/aero/laser_filter_pipeline/point_cloud_raw" />
 		<arg name="output_topic" value="$(arg local_topic)" />
+		<arg name="output_frame" value="$(arg local_frame)" />
 	</include>
 	
 	<include file="$(find aero_laser_filter)/launch/GlobalFilterStage.launch">
 		<arg name="node_manager" value="$(arg node_manager)"/>
 		<arg name="input_topic"  value="/aero/laser_filter_pipeline/point_cloud_raw" />
 		<arg name="output_topic" value="$(arg global_topic)" />
+		<arg name="output_frame" value="$(arg global_frame)" />
 	</include>
 	
 </launch>

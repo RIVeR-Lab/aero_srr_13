@@ -4,7 +4,9 @@
 	<arg name="node_manager" default=@NODE_MANAGER_VAL@/>
 	<arg name="input_topic"  default=@INPUT_TOPIC_VAL@/>
 	<arg name="local_topic"  default=@LOCAL_TOPIC_VAL@/>
+	<arg name="local_frame"  default=@LOCAL_FRAME_VAL@/>
 	<arg name="global_topic" default=@GLOBAL_TOPIC_VAL@/>
+	<arg name="global_frame" default=@GLOBAL_FRAME_VAL@/>
 	
 	<node pkg="nodelet" type="nodelet" name="$(arg node_manager)"  args="manager" output="screen"/>
 	
@@ -18,12 +20,14 @@
 		<arg name="node_manager" value="$(arg node_manager)"/>
 		<arg name="input_topic"  value=@POINTCLOUD_VAL@ />
 		<arg name="output_topic" value="$(arg local_topic)" />
+		<arg name="output_frame" value="$(arg local_frame)" />
 	</include>
 	
 	<include file="$(find aero_laser_filter)/launch/GlobalFilterStage.launch">
 		<arg name="node_manager" value="$(arg node_manager)"/>
 		<arg name="input_topic"  value=@POINTCLOUD_VAL@ />
 		<arg name="output_topic" value="$(arg global_topic)" />
+		<arg name="output_frame" value="$(arg global_frame)" />
 	</include>
 	
 </launch>
