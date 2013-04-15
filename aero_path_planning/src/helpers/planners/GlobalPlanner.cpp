@@ -313,7 +313,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 
 	OccupancyGridCloud copyCloud;
 	//Transform the coordinates of the local grid to the global frame
-	pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
+	pcl_ros::transformPointCloud(this->global_frame_, *local_grid.getGrid(), copyCloud, this->transformer_);
 	//Copy the data in the global frame at the transformed local-coordinates into the local grid
 #pragma omp parallel for
 	for(int i=0; i<(int)copyCloud.size(); i++)
@@ -326,7 +326,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 			copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
 
 			//Copy the PointTrait data from the global frame to the local frame
-			local_grid.setPointTrait(local_grid.getGrid().at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
+			local_grid.setPointTrait(local_grid.getGrid()->at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
 		}
 		catch(std::runtime_error& e)
 		{

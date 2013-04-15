@@ -25,7 +25,9 @@ class OccupancyGrid;
 ///Typedef to allow for convenient sharing of a OccupancyGrid via pointer
 typedef boost::shared_ptr<OccupancyGrid> OccupancyGridPtr;
 
-typedef pcl::PointCloud<Point> OccupancyGridCloud;
+typedef PointCloud         OccupancyGridCloud;
+typedef PointCloudPtr      OccupancyGridCloudPtr;
+typedef PointCloudConstPtr OccupancyGridCloudConstPtr;
 
 //*********************** CLASS DEFINITIONS ************************************//
 
@@ -213,7 +215,7 @@ public:
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
 	 * @return	A reference to the PointCloud<aero_path_planning::PointXYZWithTrait> which backs this occupancy grid
 	 */
-	const OccupancyGridCloud& getGrid() const;
+	OccupancyGridCloudConstPtr getGrid() const;
 
 	/**
 	 * @author	Adam Panzica

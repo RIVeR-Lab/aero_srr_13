@@ -282,9 +282,10 @@ void OccupancyGrid::setGoalPoint(aero_path_planning::Point point) throw(Occupanc
 	}
 				}
 
-const OccupancyGridCloud& OccupancyGrid::getGrid() const
+OccupancyGridCloudConstPtr OccupancyGrid::getGrid() const
 {
-	return this->occ_grid_;
+	OccupancyGridCloudConstPtr cloud(&this->occ_grid_);
+	return cloud;
 }
 
 bool OccupancyGrid::generateMessage(sensor_msgs::PointCloud2Ptr message) const
