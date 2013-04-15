@@ -131,6 +131,15 @@ private:
 	 */
 	void lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_cloud, aero_path_planning::PointCloud& result_cloud) const;
 
+	/**
+	 * @author Adam Panzica
+	 * @brief  The collision function to use for determining valid locations
+	 * @param [in] point The point to check for collision
+	 * @param [in] map   The map to check against for collision
+	 * @return True if in collision, else false
+	 */
+	bool checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const;
+
 	State       state_;
 
 	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
@@ -161,8 +170,9 @@ private:
 
 	nav_msgs::Odometry    last_odom_;   ///The odometry data received by the planner
 
-	aero_path_planning::CarrotPathFinder* path_planner_;  ///The current global planner strategy
-	aero_path_planning::OccupancyGridPtr  global_map_;    ///The global OccupancyGrid
+	CarrotPathFinder::collision_func_ cf_;            ///The collision function
+	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy
+	OccupancyGridPtr                  global_map_;    ///The global OccupancyGrid
 	std::queue<Point>                     carrot_path_;   ///The current set of points on the global path
 	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in grid units_
 

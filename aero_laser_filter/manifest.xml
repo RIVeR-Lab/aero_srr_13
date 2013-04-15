@@ -1,23 +1,25 @@
 <package>
-  <description brief="aero_laser_filter">
+	<description brief="aero_laser_filter">
 
-    Package containg filters for processing LIDAR data for the AERO platform
+		Package containg filters for processing LIDAR data for the AERO platform
 
-  </description>
-  <author>WPI-RIVERLAB</author>
-  <license>BSD</license>
-  <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/polly_laser</url>
-  <depend package="roscpp"/>
-  <depend package="tf"/>
-  <depend package="hokuyo_node"/>
-  <depend package="laser_geometry"/>
-  <depend package="pcl"/>
-  <depend package="pcl_ros"/>
- <export>
-    <cpp cflags="`pkg-config --cflags eigen3` -I${prefix}/include `rosboost-cfg --cflags`" 
-         lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lplanning_models"/>
-  </export>
+	</description>
+	<author>WPI-RIVERLAB</author>
+	<license>BSD</license>
+	<review status="unreviewed" notes="" />
+	<url>http://ros.org/wiki/polly_laser</url>
+	<depend package="roscpp" />
+	<depend package="tf" />
+	<depend package="laser_geometry" />
+	<depend package="pcl" />
+	<depend package="pcl_ros" />
+	<depend package="nodelet" />
+	<export>
+		<cpp
+			cflags="`pkg-config --cflags eigen3` -I${prefix}/include `rosboost-cfg --cflags`"
+			lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lplanning_models" />
+			<nodelet plugin="${prefix}/nodelet_plugins.xml" />
+	</export>
 
 </package>
 

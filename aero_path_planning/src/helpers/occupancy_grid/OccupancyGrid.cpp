@@ -33,7 +33,7 @@ OccupancyGrid::OccupancyGrid(const OccupancyGrid& grid):
 	this->x_dim_	= grid.x_dim_;
 	this->y_dim_	= grid.y_dim_;
 	this->z_dim_	= grid.z_dim_;
-	this->res_	= grid.res_;
+	this->res_	    = grid.res_;
 	this->has_goal_ = grid.has_goal_;
 	this->goal_     = grid.goal_;
 };
@@ -126,6 +126,7 @@ OccupancyGrid::OccupancyGrid(const aero_path_planning::OccupancyGridMsg& message
 
 	//extract grid data
 	pcl::fromROSMsg<pcl::PointXYZRGBA>(message.grid_data, this->occ_grid_);
+	this->occ_grid_.header.frame_id = message.header.frame_id;
 }
 
 void OccupancyGrid::intializeDim(int x_dim, int y_dim, int z_dim)
@@ -182,14 +183,21 @@ PointTrait OccupancyGrid::getPointTrait(int x, int y, int z)const throw(Occupanc
 	return getPointTrait(workingPoint);
 }
 
-PointTrait OccupancyGrid::getPointTrait(Point point)const throw(OccupancyGridAccessException)
+PointTrait OccupancyGrid::getPointTrait(const Point& point)const throw(OccupancyGridAccessException)
 {
-	point.getVector4fMap()+=this->origin_.getVector4fMap();
-	if(boundsCheck(point)){
-		try{
-			return static_cast<aero_path_planning::PointTrait>(getPoint(point).rgba);
-		}catch(std::exception& e){
-			throw *(new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e));
+	Point corrected_point(point);
+	corrected_point.getVector4fMap()+=this->origin_.getVector4fMap();
+	if(boundsCheck(corrected_point))
+	{
+		try
+		{
+			return static_cast<aero_path_planning::PointTrait>(getPoint(corrected_point).rgba);
+		}
+		catch(std::exception& e)
+		{
+			std::string message("Internal Point Cloud Problem!");
+			OccupancyGridAccessException e1(message , e);
+			throw e1;
 		}
 	}
 	return aero_path_planning::UNKNOWN;
@@ -205,25 +213,27 @@ bool OccupancyGrid::setPointTrait(int x, int y, int z, PointTrait trait)throw(Oc
 	return setPointTrait(working_point, trait);
 }
 
-bool OccupancyGrid::setPointTrait(Point point, PointTrait trait)throw(OccupancyGridAccessException)
+bool OccupancyGrid::setPointTrait(const Point& point, PointTrait trait)throw(OccupancyGridAccessException)
 {
-	point.getVector4fMap()+=this->origin_.getVector4fMap();
-	if(boundsCheck(point))
+	Point corrected_point(point);
+	corrected_point.getVector4fMap()+=this->origin_.getVector4fMap();
+	if(boundsCheck(corrected_point))
 	{
 		try
 		{
-			aero_path_planning::Point& setPoint = getPoint(point);
-			setPoint.rgba = trait;
+			this->getPoint(corrected_point).rgba = trait;
 			if(trait==aero_path_planning::GOAL)
 			{
-				this->goal_ = setPoint;
+				this->goal_     = this->getPoint(corrected_point);
 				this->has_goal_ = true;
 			}
 			return true;
 		}
 		catch(std::exception& e)
 		{
-			throw *(new OccupancyGridAccessException(*(new std::string("Internal Point Cloud Problem!")), e));
+			std::string message("Internal Point Cloud Problem!");
+			OccupancyGridAccessException e1(message, e);
+			throw e1;
 		}
 	}
 	return false;
@@ -506,7 +516,7 @@ Point& OccupancyGrid::getPoint(int x, int y, int z)
 }
 
 
-bool OccupancyGrid::boundsCheck(Point& point)const throw(OccupancyGridAccessException)
+bool OccupancyGrid::boundsCheck(const Point& point)const throw(OccupancyGridAccessException)
 				{
 	bool failure = false;
 	const std::string prefex("Invalid Point Requested: ");
@@ -534,20 +544,6 @@ bool OccupancyGrid::boundsCheck(Point& point)const throw(OccupancyGridAccessExce
 		throw exception;
 	}
 	return true;
-				}
-
-void OccupancyGrid::setPoint(Point& copy_point, bool origin_corrected)
-{
-	Point& grid_point = getPoint(copy_point, origin_corrected);
-	grid_point.x = copy_point.x;
-	grid_point.y = copy_point.y;
-	grid_point.z = copy_point.z;
-	grid_point.rgba = copy_point.rgba;
-	if(grid_point.rgba == aero_path_planning::GOAL)
-	{
-		this->goal_		= grid_point;
-		this->has_goal_	= true;
-	}
 }
 
 void OccupancyGrid::setPoint(const Point& copy_point, bool origin_corrected)

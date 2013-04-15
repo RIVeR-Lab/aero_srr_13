@@ -13,9 +13,9 @@
 	
 	<!-- declare args to be passed in for controlling the huristics used by the tentacle selector -->
 	<arg name="aero/goal_weight"	default="0.0" />
-	<arg name="aero/traversed_weight"	default="0.0" />
-	<arg name="aero/difficult_weight"	default="0.0" />
-	<arg name="aero/unknown_weight"	default="0.0" />
+	<arg name="aero/traversed_weight"	default="0.1" />
+	<arg name="aero/difficult_weight"	default="0.1" />
+	<arg name="aero/unknown_weight"	default="0.1" />
 	
 	
 	<!-- Test Enable Argument -->
