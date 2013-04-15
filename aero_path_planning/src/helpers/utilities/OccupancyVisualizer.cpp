@@ -17,14 +17,19 @@ namespace sm = sensor_msgs;
 namespace aero_path_planning
 {
 
-OccupancyVisualizer::OccupancyVisualizer()
+OccupancyVisualizer::OccupancyVisualizer():
+		obstacle_pub(NULL),
+		unknown_pub(NULL),
+		free_pub(NULL),
+		difficult_pub(NULL),
+		goal_pub(NULL)
 {
 	this->filter_.setFilterFieldName("rgba");
 }
 
 void OccupancyVisualizer::visualizeGridTrait(const OccupancyGrid& grid, const PointTrait& trait, PointCloud& out)
 {
-	PointCloudConstPtr gridptr(grid.getGrid());
+	PointCloudConstPtr gridptr(new PointCloud(grid.getGrid()));
 	this->filter_.setInputCloud(gridptr);
 	this->filter_.setFilterLimits(trait, trait);
 	this->filter_.filter(out);
@@ -39,7 +44,7 @@ void OccupancyVisualizer::setVisualizationPublishers(ros::Publisher* obstacle_pu
 	this->goal_pub      = goal_pub;
 }
 
-bool OccupancyVisualizer::visualizeGrid(const OccupancyGrid& grid)
+bool OccupancyVisualizer::visualizeGrid(const OccupancyGridPtr grid)
 {
 	bool success = (this->obstacle_pub!=NULL)&&(this->unknown_pub!=NULL)&&(this->free_pub!=NULL)&&(this->difficult_pub!=NULL)&&(this->goal_pub!=NULL);
 	if(success)
@@ -56,24 +61,29 @@ bool OccupancyVisualizer::visualizeGrid(const OccupancyGrid& grid)
 		PointCloud goal_cloud;
 
 
-		this->visualizeGridTrait(grid, OBSTACLE, obsctacle_cloud);
+		this->visualizeGridTrait(*grid, OBSTACLE, obsctacle_cloud);
 		pcl::toROSMsg(obsctacle_cloud, *obsctacle_cloud_msg);
+		obsctacle_cloud_msg->header.frame_id = grid->getFrameId();
 		this->obstacle_pub->publish(obsctacle_cloud_msg);
 
-		this->visualizeGridTrait(grid, UNKNOWN, unkown_cloud);
+		this->visualizeGridTrait(*grid, UNKNOWN, unkown_cloud);
 		pcl::toROSMsg(unkown_cloud, *unkown_cloud_msg);
+		unkown_cloud_msg->header.frame_id = grid->getFrameId();
 		this->unknown_pub->publish(unkown_cloud_msg);
 
-		this->visualizeGridTrait(grid, FREE_LOW_COST, free_cloud);
+		this->visualizeGridTrait(*grid, FREE_LOW_COST, free_cloud);
 		pcl::toROSMsg(free_cloud, *free_cloud_msg);
+		free_cloud_msg->header.frame_id = grid->getFrameId();
 		this->free_pub->publish(free_cloud_msg);
 
-		this->visualizeGridTrait(grid, FREE_HIGH_COST, difficult_cloud);
+		this->visualizeGridTrait(*grid, FREE_HIGH_COST, difficult_cloud);
 		pcl::toROSMsg(difficult_cloud, *difficult_cloud_msg);
+		difficult_cloud_msg->header.frame_id = grid->getFrameId();
 		this->difficult_pub->publish(difficult_cloud_msg);
 
-		this->visualizeGridTrait(grid, GOAL, goal_cloud);
+		this->visualizeGridTrait(*grid, GOAL, goal_cloud);
 		pcl::toROSMsg(goal_cloud, *goal_cloud_msg);
+		goal_cloud_msg->header.frame_id = grid->getFrameId();
 		this->goal_pub->publish(goal_cloud_msg);
 	}
 

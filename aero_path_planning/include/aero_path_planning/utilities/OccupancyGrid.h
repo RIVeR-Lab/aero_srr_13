@@ -215,7 +215,7 @@ public:
 	 * @brief	Gets the whole PointCloud which backs this occupancy grid
 	 * @return	A reference to the PointCloud<aero_path_planning::PointXYZWithTrait> which backs this occupancy grid
 	 */
-	OccupancyGridCloudConstPtr getGrid() const;
+	const OccupancyGridCloud& getGrid() const;
 
 	/**
 	 * @author	Adam Panzica

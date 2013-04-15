@@ -47,7 +47,7 @@ public:
 	 * @param [in] grid The gird to visualize
 	 * @return True if it was succesfully visualized (all publishers were valid), else false
 	 */
-	bool visualizeGrid(const OccupancyGrid& grid);
+	bool visualizeGrid(const OccupancyGridPtr grid);
 
 private:
 	pcl::PassThrough<Point> filter_; ///Passthrough filter to filter with

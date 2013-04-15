@@ -32,7 +32,7 @@ public:
 
 	void occCB(const OccupancyGridMsgConstPtr& message)
 	{
-		OccupancyGrid grid(*message);
+		OccupancyGridPtr grid(new OccupancyGrid(*message));
 		this->visualizer_.visualizeGrid(grid);
 	}
 private:

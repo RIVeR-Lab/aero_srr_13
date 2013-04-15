@@ -303,7 +303,7 @@ void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
 
 void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 {
-	ROS_INFO_STREAM("I'm Chunking the Global Map!");
+	//ROS_INFO_STREAM("I'm Chunking the Global Map!");
 	Point origin;
 	origin.x = this->local_x_ori_;
 	origin.y = this->local_y_ori_;
@@ -313,7 +313,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 
 	OccupancyGridCloud copyCloud;
 	//Transform the coordinates of the local grid to the global frame
-	pcl_ros::transformPointCloud(this->global_frame_, *local_grid.getGrid(), copyCloud, this->transformer_);
+	pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
 	//Copy the data in the global frame at the transformed local-coordinates into the local grid
 #pragma omp parallel for
 	for(int i=0; i<(int)copyCloud.size(); i++)
@@ -326,7 +326,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 			copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
 
 			//Copy the PointTrait data from the global frame to the local frame
-			local_grid.setPointTrait(local_grid.getGrid()->at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
+			local_grid.setPointTrait(local_grid.getGrid().at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
 		}
 		catch(std::runtime_error& e)
 		{
@@ -338,14 +338,14 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 
 
 	//Send the new local grid to the local planner
-	OccupancyGridMsg occ_grid_msg;
-	local_grid.generateMessage(occ_grid_msg);
+	OccupancyGridMsgPtr occ_grid_msg(new OccupancyGridMsg());
+	local_grid.generateMessage(*occ_grid_msg);
 	this->local_occ_pub_.publish(occ_grid_msg);
 }
 
 void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
 {
-	ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
+	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped goal_point_m;
@@ -377,7 +377,7 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
-	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
+	//ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
 	this->carrot_path_ = std::queue<Point>();
 	Point start_point;
 	start_point.x = 0;
