@@ -28,10 +28,36 @@ public:
 	 * @param [in]  trait The PointTrait type to visualize
 	 * @param [out] out   PointCloud to store the resultant visualization to
 	 */
-	void visualizeGrid(const OccupancyGrid& grid, const PointTrait& trait, PointCloud& out);
+	void visualizeGridTrait(const OccupancyGrid& grid, const PointTrait& trait, PointCloud& out);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Sets the publishers to use to publish visualization data
+	 * @param [in] obstacle_pub  Publisher to output obstacle data to
+	 * @param [in] unknown_pub   Publisher to output unkown data to
+	 * @param [in] free_pub      Publisher to ouput free data to
+	 * @param [in] difficult_pub Publisher to output difficult terrain data to
+	 * @param [in] unkown_pub    Publisher to output unkown data to
+	 */
+	void setVisualizationPublishers(ros::Publisher* obstacle_pub, ros::Publisher* unknown_pub, ros::Publisher* free_pub, ros::Publisher* difficult_pub, ros::Publisher* unkown_pub);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Visualizes an entier occupancy grid
+	 * @param [in] grid The gird to visualize
+	 * @return True if it was succesfully visualized (all publishers were valid), else false
+	 */
+	bool visualizeGrid(const OccupancyGrid& grid);
 
 private:
-	pcl::PassThrough<Point> filter_; //Passthrough filter to filter with
+	pcl::PassThrough<Point> filter_; ///Passthrough filter to filter with
+
+	ros::Publisher* obstacle_pub;
+	ros::Publisher* unknown_pub;
+	ros::Publisher* free_pub;
+	ros::Publisher* difficult_pub;
+	ros::Publisher* goal_pub;
+
 };
 
 } /* namespace aero_path_planning */
