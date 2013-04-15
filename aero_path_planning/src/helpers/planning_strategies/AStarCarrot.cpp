@@ -52,9 +52,9 @@ double astar_utilities::pt_cost(const aero_path_planning::Point& this_point, con
 }
 
 AStarNode::AStarNode():
-				g_(0),
-				h_(0),
-				f_(std::numeric_limits<double>::infinity())
+						g_(0),
+						h_(0),
+						f_(std::numeric_limits<double>::infinity())
 {
 
 }
@@ -72,9 +72,9 @@ AStarNode::AStarNode(const AStarNodePtr& copy)
 //********************* ASTARNODE IMPLEMENTATION *********************//
 
 AStarNode::AStarNode(const Point& location, const Point& goal, const AStarNodePtr parent, cost_func cost, huristic_func huristic):
-				location_(location),
-				parent_(parent),
-				h_(huristic(location, goal))
+						location_(location),
+						parent_(parent),
+						h_(huristic(location, goal))
 {
 	if(parent != AStarNodePtr())
 	{
@@ -141,23 +141,23 @@ bool       AStarNode::operator> (AStarNode const & rhs) const
 	return this->getF() < rhs.getF();
 }
 bool       AStarNode::operator<= (AStarNode const & rhs) const
-		{
+				{
 	return this->getF() >= rhs.getF();
-		}
+				}
 bool       AStarNode::operator>= (AStarNode const & rhs) const
-		{
+				{
 	return this->getF() <= rhs.getF();
-		}
+				}
 bool       AStarNode::operator==(AStarNode const & rhs) const
-		{
+				{
 	return this->getF() == rhs.getF();
-		}
+				}
 
 //********************* ASTARPLANNER *********************//
 AStarCarrot::AStarCarrot():
-				has_delta_(false),
-				has_map_(false),
-				has_coll_(false)
+						has_delta_(false),
+						has_map_(false),
+						has_coll_(false)
 {
 	this->setUpNeighborPoints();
 }
@@ -326,14 +326,14 @@ bool AStarCarrot::openSetContains(const NodePtr_t& node, const aero_path_plannin
 	typedef aero_path_planning::FitnessQueue<Node_t, NodePtr_t>::const_iterator citr_t;
 	bool contains = false;
 
-//	ROS_INFO_STREAM("I'm checking the open set for "<<node);
+	//	ROS_INFO_STREAM("I'm checking the open set for "<<node);
 
 	for(citr_t itr = open_set.c_begin(); itr < open_set.c_end(); itr++)
 	{
-//		ROS_INFO_STREAM("Comparing "<<(*itr)->second);
+		//		ROS_INFO_STREAM("Comparing "<<(*itr)->second);
 		if((*itr)->second->sameLocation(*node))
 		{
-//			ROS_INFO_STREAM(node<<" was in the open set!");
+			//			ROS_INFO_STREAM(node<<" was in the open set!");
 			contains = true;
 			break;
 		}
@@ -377,7 +377,10 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		bool os_empty  = false;
 		while(!success&&!timeout_c&&!os_empty)
 		{
-			//ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
+			if(closed_set.size()%50 == 0)
+			{
+				ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
+			}
 			os_empty  = open_set.empty();
 			timeout_c = (current_time-start_time)>timeout;
 			//Get the next node to expand
@@ -433,8 +436,8 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 				//ROS_INFO_STREAM(current_node<<" was already in the closed set");
 			}
 
-//			std::string pause;
-	//		std::cin>>pause;
+			//			std::string pause;
+			//		std::cin>>pause;
 
 		}
 		//If we timed out, say so

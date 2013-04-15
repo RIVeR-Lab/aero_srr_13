@@ -109,8 +109,6 @@ void My_Filter::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan){
     for(int i=0; i<scale_cloud->size(); i++)
     {
       pcl::PointXYZ& point = scale_cloud->at(i);
-      point.x = point.x;
-      point.y = point.y;
       point.z = std::floor(point.z);
     }
     

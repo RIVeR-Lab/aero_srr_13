@@ -26,6 +26,8 @@ typedef boost::shared_ptr<Point> PointPtr;
 ///Typedef to allow for convenient sharing of a PointCloud<pcl::PointXYZRGBA> > via pointer
 typedef boost::shared_ptr<pcl::PointCloud<Point> > PointCloudPtr;
 
+typedef boost::shared_ptr<const pcl::PointCloud<Point> > PointCloudConstPtr;
+
 }; /* aero_path_planning */
 
 

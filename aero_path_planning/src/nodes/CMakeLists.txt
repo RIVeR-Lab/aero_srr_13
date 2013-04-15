@@ -16,3 +16,7 @@ target_link_libraries(oryx_global_planner GlobalPlanner)
 #Build the Aero global planner node
 rosbuild_add_executable(aero_global_planner aero_global_planner.cpp)
 target_link_libraries(aero_global_planner GlobalPlanner)
+
+#Build the occupancy visualizer node
+rosbuild_add_executable(occupancy_visualizer_node occupancy_visualizer_node.cpp)
+target_link_libraries(occupancy_visualizer_node OccupancyGrid OccupancyVisualizer)

@@ -1,0 +1,24 @@
+/**
+ * @file   AeroLaserFilter.h
+ *
+ * @date   Apr 13, 2013
+ * @author parallels
+ * @brief  \TODO
+ */
+
+#ifndef AEROLASERFILTERPARAMS_H_
+#define AEROLASERFILTERPARAMS_H_
+
+//*********** SYSTEM DEPENDANCIES ****************//
+//************ LOCAL DEPENDANCIES ****************//
+
+//***********    NAMESPACES     ****************//
+
+
+#define @NODE_MANAGER_CDF@  "@NODE_MANAGER_ARG@"
+#define @INPUT_TOPIC_CDF@   "@INPUT_TOPIC_ARG@"
+#define @LOCAL_TOPIC_CDF@   "@LOCAL_TOPIC_ARG@"
+#define @GLOBAL_TOPIC_CDF@  "@GLOBAL_TOPIC_ARG@"
+#define @POINTCLOUD_CDF@    "@POINTCLOUD_ARG@"
+
+#endif /* AEROLASERFILTERPARAMS_H_ */
