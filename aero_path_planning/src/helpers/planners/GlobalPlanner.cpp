@@ -22,12 +22,12 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-												state_(MANUAL),
-												path_planner_(&path_planner),
-												path_threshold_(1.0),
-												nh_(nh),
-												p_nh_(p_nh),
-												transformer_(nh)
+														state_(MANUAL),
+														path_planner_(&path_planner),
+														path_threshold_(1.0),
+														nh_(nh),
+														p_nh_(p_nh),
+														transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -63,13 +63,13 @@ void GlobalPlanner::loadOccupancyParam()
 	std::string p_x_dim(L_OCC_XDIM);
 	this->local_x_size_ = 200;
 	std::stringstream x_dim_msg;
-	x_dim_msg<<this->local_x_size_<<"m";
+	x_dim_msg<<this->local_x_size_<<"*0.05m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim(L_OCC_YDIM);
 	this->local_y_size_ = 200;
 	std::stringstream y_dim_msg;
-	y_dim_msg<<this->local_y_size_<<"m";
+	y_dim_msg<<this->local_y_size_<<"*0.05m";
 
 	//z dimension of occupancy grid
 	std::string p_z_dim(L_OCC_ZDIM);
@@ -79,7 +79,7 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//resolution occupancy grid
 	std::string p_res(L_OCC_RES);
-	this->local_res_ = .01;
+	this->local_res_ = .05;
 	std::stringstream p_res_msg;
 	p_res_msg<<this->local_res_<<"m";
 
@@ -109,25 +109,25 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//x dimension of global occupancy grid
 	std::string pg_x_dim(G_OCC_XDIM);
-	this->global_x_size_ = 5000;
+	this->global_x_size_ = 1000;
 	std::stringstream gx_dim_msg;
-	gx_dim_msg<<this->global_x_size_<<"m";
+	gx_dim_msg<<this->global_x_size_<<"*0.05m";
 
 	//y dimension of global occupancy grid
 	std::string pg_y_dim(G_OCC_YDIM);
-	this->global_y_size_ = 5000;
+	this->global_y_size_ = 1000;
 	std::stringstream gy_dim_msg;
-	gy_dim_msg<<this->global_y_size_<<"m";
+	gy_dim_msg<<this->global_y_size_<<"*0.05m";
 
 	//z dimension of global occupancy grid
 	std::string pg_z_dim(G_OCC_ZDIM);
 	this->global_z_size_ = 0;
 	std::stringstream gz_dim_msg;
-	gz_dim_msg<<this->global_z_size_<<"m";
+	gz_dim_msg<<this->global_z_size_<<"*0.05m";
 
 	//resolution global occupancy grid
 	std::string pg_res(G_OCC_RES);
-	this->global_res_ = .01;
+	this->global_res_ = .05;
 	std::stringstream pg_res_msg;
 	pg_res_msg<<this->global_res_<<"m";
 
@@ -216,9 +216,9 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 	origin.x = 0;
 	origin.y = this->local_y_size_/2;
 	origin.z = 0;
-	OccupancyGrid local_map(this->local_x_size_, this->local_y_size_, .01, origin, aero_path_planning::UNKNOWN);
+	OccupancyGrid local_map(this->local_x_size_, this->local_y_size_, this->local_res_, origin, aero_path_planning::UNKNOWN);
 	pcl::fromROSMsg(*message, scan_cloud);
-	aero_path_planning::PointConverter converter(.1);
+	aero_path_planning::PointConverter converter(this->local_res_);
 
 #pragma omp parallel for
 	for(int i=0; i<(int)scan_cloud.size(); i++)
@@ -237,23 +237,16 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 		}
 	}
 
-	aero_path_planning::OccupancyGridMsg message_out;
-	local_map.generateMessage(message_out);
+	OccupancyGridMsgPtr message_out(new OccupancyGridMsg());
+	local_map.generateMessage(*message_out);
 	this->local_occ_pub_.publish(message_out);
 
 }
 
 bool GlobalPlanner::lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const
 {
-	bool success = this->transformer_.canTransform(this->global_frame_, this->lidar_frame_, ros::Time::now());
-	if(success)
-	{
-		return pcl_ros::transformPointCloud(this->global_frame_, scan_cloud, result_cloud, this->transformer_);
-	}
-	else
-	{
-		return success;
-	}
+	this->transformer_.waitForTransform(this->global_frame_, scan_cloud.header.frame_id, scan_cloud.header.stamp, ros::Duration(this->local_update_rate_/2.0));
+	return pcl_ros::transformPointCloud(this->global_frame_, scan_cloud, result_cloud, this->transformer_);
 }
 
 void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_cloud, aero_path_planning::PointCloud& result_cloud) const
@@ -261,6 +254,7 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
 	pcl::fromROSMsg(scan_cloud, copy_cloud);
 
+#pragma omp paralell for
 	for(int i=0; i<(int)copy_cloud.size(); i++)
 	{
 		aero_path_planning::Point copy_point;
@@ -313,6 +307,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 
 	OccupancyGridCloud copyCloud;
 	//Transform the coordinates of the local grid to the global frame
+	this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time::now(), ros::Duration(this->local_update_rate_/4.0));
 	pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
 	//Copy the data in the global frame at the transformed local-coordinates into the local grid
 #pragma omp parallel for
@@ -377,7 +372,7 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
-	//ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
+	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
 	this->carrot_path_ = std::queue<Point>();
 	Point start_point;
 	start_point.x = 0;

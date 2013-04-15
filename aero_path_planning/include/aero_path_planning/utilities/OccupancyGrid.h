@@ -151,7 +151,7 @@ public:
 	 * @return The PointTrait of the point at the given coordinates
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	aero_path_planning::PointTrait getPointTrait(aero_path_planning::Point point) const throw(OccupancyGridAccessException);
+	aero_path_planning::PointTrait getPointTrait(const aero_path_planning::Point& point) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica
@@ -173,7 +173,7 @@ public:
 	 * @return True if successful, else false
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(aero_path_planning::Point point, aero_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
+	bool setPointTrait(const aero_path_planning::Point& point, aero_path_planning::PointTrait trait) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author Adam Panzica
@@ -318,7 +318,6 @@ public:
 	 * @param copy_point The point to copy into the grid
 	 * @param origin_corrected True if the x/y/z coordinates in copy_ponit have been offset by the grid origin (aka all positive values)
 	 */
-	void setPoint(aero_path_planning::Point& copy_point, bool origin_corrected = true);
 	void setPoint(const aero_path_planning::Point& copy_point, bool origin_corrected = true);
 
 	/**
@@ -338,10 +337,10 @@ private:
 	/**
 	 * @author	Adam Panzica
 	 * @brief	Checks to make sure a set of coordinates are on the occupancy grid
-	 * @param point Coordinates of the point to check
+	 * @param [in] point Coordinates of the point to check
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool boundsCheck(aero_path_planning::Point& point) const throw(OccupancyGridAccessException);
+	bool boundsCheck(const aero_path_planning::Point& point) const throw(OccupancyGridAccessException);
 
 	/**
 	 * @author	Adam Panzica

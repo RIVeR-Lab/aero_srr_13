@@ -73,23 +73,23 @@ void LocalPlanner::loadParam()
 	std::string p_x_dim(L_OCC_XDIM);
 	this->x_dim_ = 200;
 	std::stringstream x_dim_msg;
-	x_dim_msg<<this->x_dim_<<"m";
+	x_dim_msg<<this->x_dim_<<"0.05m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim(L_OCC_YDIM);
 	this->y_dim_ = 200;
 	std::stringstream y_dim_msg;
-	y_dim_msg<<this->y_dim_<<"m";
+	y_dim_msg<<this->y_dim_<<"0.05m";
 
 	//z dimension of occupancy grid
 	std::string p_z_dim(L_OCC_ZDIM);
 	this->z_dim_ = 0;
 	std::stringstream z_dim_msg;
-	z_dim_msg<<this->z_dim_<<"m";
+	z_dim_msg<<this->z_dim_<<"0.05m";
 
 	//resolution occupancy grid
 	std::string p_res(L_OCC_RES);
-	this->res_ = .01;
+	this->res_ = .05;
 	std::stringstream p_res_msg;
 	p_res_msg<<this->res_<<"m";
 
