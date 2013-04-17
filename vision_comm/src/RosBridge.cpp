@@ -12,7 +12,7 @@ RosBridge::RosBridge(string topic_in, string topic_out):it_(nh_)
 {
 	file_=topic_in;
 	pub_ = it_.advertise(topic_out.c_str(), 1);
-	subImg_ = it_.subscribe(topic_in.c_str(), 100, &RosBridge::imageCb, this);
+	subImg_ = it_.subscribeCamera(topic_in.c_str(), 1, &RosBridge::imageCb, this);
 	cout<<"Subscribing to: "<<topic_in.c_str()<<endl;
 	cout<<"Publishing to: "<<topic_out.c_str()<<endl;
 	frame_=new Mat();
@@ -21,7 +21,7 @@ RosBridge::RosBridge(string topic_in, string topic_out):it_(nh_)
 RosBridge::RosBridge(string topic_in, Mat *img):it_(nh_)
 {
 	file_ = topic_in;
-	subImg_ = it_.subscribe(topic_in.c_str(), 100, &RosBridge::imageCb, this);
+	subImg_ = it_.subscribeCamera(topic_in.c_str(), 100, &RosBridge::imageCb, this);
 	cout<<"Subscribing to: "<<topic_in.c_str()<<endl;
 	frame_=new Mat();
 	newimg_=false;
@@ -33,7 +33,7 @@ RosBridge::RosBridge(Mat *img,string topic_out):it_(nh_)
 	cout<<"Publishing to: "<<topic_out.c_str()<<endl;
 	frame_=img;
 }
-void RosBridge::imageCb(const sensor_msgs::ImageConstPtr& msg)
+void RosBridge::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
     cv_bridge::CvImagePtr cv_ptr;
     try
@@ -46,6 +46,10 @@ void RosBridge::imageCb(const sensor_msgs::ImageConstPtr& msg)
       return;
     }
    *frame_=cv_ptr->image;
+   intrinsic_=(cv::Mat_<float>(3,3)<<cam_info->K[0],cam_info->K[1],cam_info->K[2],\
+                                    cam_info->K[3],cam_info->K[4],cam_info->K[5],\
+				    cam_info->K[6],cam_info->K[7],cam_info->K[8]);
+   frame_id_=cv_ptr->header.frame_id;
 
    newimg_=true;
  }

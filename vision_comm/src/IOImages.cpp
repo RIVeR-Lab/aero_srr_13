@@ -19,6 +19,7 @@ void IOImages::startTime()
 {
 	gettimeofday(&clock_,NULL);
 }
+
 double IOImages::endTime()
 {
 	timeval endtime;
