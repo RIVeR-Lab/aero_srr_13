@@ -61,6 +61,7 @@ private:
 	std::string pc_topic_;		///topic name of the ROS topic to receive new occupancy grid data over
 	std::string state_topic_;   ///Topic name of the ROS topic to receive new AeroState messages over
 	std::string man_topic_;     ///Topic name of the ROS topic to receive Joy messages over
+	std::string lidar_topic_;   ///Topic name of the ROS topic to receive LIDAR data over
 
 	ros::NodeHandle nh_;	    ///Node handle for publishing/subscribing to topics
 	ros::NodeHandle p_nh_;      ///Nodes handle to load private params
@@ -68,6 +69,7 @@ private:
 	ros::Subscriber state_sub_; ///Subscriber to the ROS topic to receive AeroState messages
 	ros::Subscriber joy_sub_;   ///Subscriber to the ROS topic to receive Joy messages
 	ros::Subscriber	stop_sub_;	///Subscriber to the ROS topic to receive the software stop message
+	ros::Subscriber lidar_sub_; ///Subscriber to the ROS topic to receive local LIDAR data over
 	ros::Publisher	vel_pub_;	///Publisher for Twist messages to a platform that takes them
 	ros::Publisher  tent_pub_;  ///Publisher for visualizing selected tentacles
 	ros::Timer      vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
@@ -120,6 +122,13 @@ private:
 	 * @param message The current state of the robot
 	 */
 	void stateCB(const aero_srr_msgs::AeroStateConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief callback for handlining local LIDAR data
+	 * @param message
+	 */
+	void lidarCB(const sensor_msgs::PointCloud2ConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
