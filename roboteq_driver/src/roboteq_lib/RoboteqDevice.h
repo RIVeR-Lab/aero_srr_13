@@ -1,14 +1,14 @@
 #ifndef __RoboteqDevice_H_
 #define __RoboteqDevice_H_
 
-#include "serial_driver_base/serial_port.h"
+#include "device_driver_base/serial_port.h"
 
 using namespace std;
 
 class RoboteqDevice
 {
 private:
-  serial_driver::DriverSerialPort serial_port;
+  device_driver::DriverSerialPort serial_port;
 protected:
 	int Write(string str);
 	int ReadAll(string &str);

@@ -174,16 +174,18 @@ void GlobalPlanner::registerTopics()
 	//Comunication Parameters
 	std::string local_planner_topic(OCCUPANCY_TOPIC);
 	std::string odometry_topic(ODOMETRY_TOPIC);
+	std::string lidar_topic(LIDAR_GLOBAL_TOPIC);
 	std::string command_topic("/global_planning/commands");
 
 
-	this->global_laser_topic_    = "aero/global/laser";
+	this->global_laser_topic_    = lidar_topic;
 	this->local_occupancy_topic_ = local_planner_topic;
 	this->odom_topic_            = odometry_topic;
 
 	//Get Private Parameters
 	if(!this->p_nh_.getParam(local_planner_topic,this->local_occupancy_topic_))	PARAM_WARN(local_planner_topic,	local_planner_topic);
 	if(!this->p_nh_.getParam(odometry_topic,	 this->odom_topic_))		    PARAM_WARN(odometry_topic,		odometry_topic);
+	if(!this->p_nh_.getParam(lidar_topic,	     this->global_laser_topic_))    PARAM_WARN(lidar_topic,		    lidar_topic);
 
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);

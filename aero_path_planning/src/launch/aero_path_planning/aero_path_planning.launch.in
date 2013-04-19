@@ -8,8 +8,14 @@
 	
 	<!-- declare args to be passed in for topics for receiving new PC data -->
 	<arg name="@OCCUPANCY_TOPIC_ARG@"	 default=@OCCUPANCY_TOPIC_VAL@ />
-
+	
+	<!-- declare args to be passed in for topics for receiving new odometry data -->
 	<arg name="@ODOMETRY_TOPIC_ARG@"     default=@ODOMETRY_TOPIC_VAL@ />
+	
+	<!-- declare args to be passed in for topics for receiving new lidar data -->
+	<arg name="@LIDAR_LOCAL_TOPIC_ARG@"     default=@LIDAR_LOCAL_TOPIC_VAL@ />
+	<arg name="@LIDAR_GLOBAL_TOPIC_ARG@"    default=@LIDAR_GLOBAL_TOPIC_VAL@ />
+	
 	
 	<!-- visualization argument -->
 	<arg name="visualization"            default="1"/>
@@ -71,12 +77,14 @@
 		<arg name="@VELOCITY_CMD_TOPIC_ARG@" value="$(arg @VELOCITY_CMD_TOPIC_ARG@)" />
 		<arg name="@OCCUPANCY_TOPIC_ARG@"	 value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
 		<arg name="@PLATFORM_ARG@"			 value="$(arg @PLATFORM_ARG@)"  />
-		<arg name="@ODOMETRY_TOPIC_ARG@"     value="$(arg @ODOMETRY_TOPIC_ARG@"/>
+		<arg name="@ODOMETRY_TOPIC_ARG@"     value="$(arg @ODOMETRY_TOPIC_ARG@)"/>
+		<arg name="@LIDAR_LOCAL_TOPIC_ARG@"  value="$(arg @LIDAR_LOCAL_TOPIC_ARG@)"/>
 	</include>
 
 	<include file="$(find aero_path_planning)/launch/aero_global_planner.launch">
 		<arg name="@OCCUPANCY_TOPIC_ARG@"	 value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
 		<arg name="@ODOMETRY_TOPIC_ARG@"     value="$(arg @ODOMETRY_TOPIC_ARG@)"/>
+		<arg name="@LIDAR_GLOBAL_TOPIC_ARG@" value="$(arg @LIDAR_GLOBAL_TOPIC_ARG@)"/>
 	</include>
 	
 	<group if="$(arg visualization)">

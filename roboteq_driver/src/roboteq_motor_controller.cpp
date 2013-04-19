@@ -1,7 +1,8 @@
 #include "roboteq_driver/roboteq_motor_controller.h"
+#include "device_driver_base/driver_util.h"
 #include <stdio.h>
 
-using namespace serial_driver;
+using namespace device_driver;
 
 namespace roboteq_driver{
 
@@ -26,16 +27,16 @@ void RoboteqMotorController::open(std::string port){
 	int status = device_.Connect(port);
 	if(status != RQ_SUCCESS){
 		if(status==RQ_UNRECOGNIZED_DEVICE){
-			throw Exception("Error connecting to device. The device is not recognized.");
+			DRIVER_EXCEPT(Exception, "Error connecting to device. The device is not recognized.");
 		}
 		else if(status==RQ_UNRECOGNIZED_VERSION){
-			throw Exception("Error connecting to device. Invalid device version.");
+			DRIVER_EXCEPT(Exception, "Error connecting to device. Invalid device version.");
 		}
 		else if(status==RQ_ERR_OPEN_PORT){
-			throw Exception("Error connecting to device. Error occurred while trying to open the communication port.");
+			DRIVER_EXCEPT(Exception, "Error connecting to device. Error occurred while trying to open the communication port.");
 		}
 		else{
-			throw Exception("Error connecting to device.");
+			DRIVER_EXCEPT(Exception, "Error connecting to device.");
 		}
 	}
 	//Wait 10 ms before sending another command to device
@@ -75,84 +76,84 @@ void RoboteqMotorController::setCommand(int commandItem, int index, int value){
 	int status = device_.SetCommand(commandItem, index, value);
 	if(status!=RQ_SUCCESS){
 		if(status==RQ_ERR_NOT_CONNECTED)
-			throw Exception("The device is not connected (call open)");
+			DRIVER_EXCEPT(Exception, "The device is not connected (call open)");
 		else if(status==RQ_ERR_TRANSMIT_FAILED)
-			throw Exception("Error occurred while transmitting data to device.");
+			DRIVER_EXCEPT(Exception, "Error occurred while transmitting data to device.");
 		else if(status==RQ_ERR_SERIAL_IO)
-			throw Exception("Error occurred to serial communication.");
+			DRIVER_EXCEPT(Exception, "Error occurred to serial communication.");
 		else if(status==RQ_ERR_SERIAL_RECEIVE)
-			throw Exception("Error occurred while transmitting data from device.");
+			DRIVER_EXCEPT(Exception, "Error occurred while transmitting data from device.");
 		else if(status==RQ_INVALID_RESPONSE)
-			throw Exception("Invalid response to the issued command.");
+			DRIVER_EXCEPT(Exception, "Invalid response to the issued command.");
 		else if(status==RQ_INVALID_COMMAND_ITEM)
-			throw Exception("Invalid command item");
+			DRIVER_EXCEPT(Exception, "Invalid command item");
 		else if(status==RQ_INDEX_OUT_RANGE)
-			throw Exception("The item index is out of range.");
+			DRIVER_EXCEPT(Exception, "The item index is out of range.");
 		else
-			throw Exception("Failed to set device command.");
+			DRIVER_EXCEPT(Exception, "Failed to set device command.");
 	}
 }
 void RoboteqMotorController::setConfig(int configItem, int index, int value){
 	int status = device_.SetConfig(configItem, index, value);
 	if(status!=RQ_SUCCESS){
 		if(status==RQ_ERR_NOT_CONNECTED)
-			throw Exception("The device is not connected (call open)");
+			DRIVER_EXCEPT(Exception, "The device is not connected (call open)");
 		else if(status==RQ_ERR_TRANSMIT_FAILED)
-			throw Exception("Error occurred while transmitting data to device.");
+			DRIVER_EXCEPT(Exception, "Error occurred while transmitting data to device.");
 		else if(status==RQ_ERR_SERIAL_IO)
-			throw Exception("Error occurred to serial communication.");
+			DRIVER_EXCEPT(Exception, "Error occurred to serial communication.");
 		else if(status==RQ_ERR_SERIAL_RECEIVE)
-			throw Exception("Error occurred while transmitting data from device.");
+			DRIVER_EXCEPT(Exception, "Error occurred while transmitting data from device.");
 		else if(status==RQ_INVALID_RESPONSE)
-			throw Exception("Invalid response to the issued command.");
+			DRIVER_EXCEPT(Exception, "Invalid response to the issued command.");
 		else if(status==RQ_INVALID_COMMAND_ITEM)
-			throw Exception("Invalid configuration item");
+			DRIVER_EXCEPT(Exception, "Invalid configuration item");
 		else if(status==RQ_INDEX_OUT_RANGE)
-			throw Exception("The item index is out of range.");
+			DRIVER_EXCEPT(Exception, "The item index is out of range.");
 		else
-			throw Exception("Failed to set device configuration.");
+			DRIVER_EXCEPT(Exception, "Failed to set device configuration.");
 	}
 }
 void RoboteqMotorController::setConfig(int configItem, int value){
 	int status = device_.SetConfig(configItem, value);
 	if(status!=RQ_SUCCESS){
 		if(status==RQ_ERR_NOT_CONNECTED)
-			throw Exception("The device is not connected (call open)");
+			DRIVER_EXCEPT(Exception, "The device is not connected (call open)");
 		else if(status==RQ_ERR_TRANSMIT_FAILED)
-			throw Exception("Error occurred while transmitting data to device.");
+			DRIVER_EXCEPT(Exception, "Error occurred while transmitting data to device.");
 		else if(status==RQ_ERR_SERIAL_IO)
-			throw Exception("Error occurred to serial communication.");
+			DRIVER_EXCEPT(Exception, "Error occurred to serial communication.");
 		else if(status==RQ_ERR_SERIAL_RECEIVE)
-			throw Exception("Error occurred while transmitting data from device.");
+			DRIVER_EXCEPT(Exception, "Error occurred while transmitting data from device.");
 		else if(status==RQ_INVALID_RESPONSE)
-			throw Exception("Invalid response to the issued command.");
+			DRIVER_EXCEPT(Exception, "Invalid response to the issued command.");
 		else if(status==RQ_INVALID_COMMAND_ITEM)
-			throw Exception("Invalid configuration item");
+			DRIVER_EXCEPT(Exception, "Invalid configuration item");
 		else if(status==RQ_INDEX_OUT_RANGE)
-			throw Exception("The item index is out of range.");
+			DRIVER_EXCEPT(Exception, "The item index is out of range.");
 		else
-			throw Exception("Failed to set device configuration.");
+			DRIVER_EXCEPT(Exception, "Failed to set device configuration.");
 	}
 }
 void RoboteqMotorController::getValue(int operatingItem, int index, int& value){
 	int status = device_.GetValue(operatingItem, index, value);
 	if(status!=RQ_SUCCESS){
 		if(status==RQ_ERR_NOT_CONNECTED)
-			throw Exception("The device is not connected (call open)");
+			DRIVER_EXCEPT(Exception, "The device is not connected (call open)");
 		else if(status==RQ_ERR_TRANSMIT_FAILED)
-			throw Exception("Error occurred while transmitting data to device.");
+			DRIVER_EXCEPT(Exception, "Error occurred while transmitting data to device.");
 		else if(status==RQ_ERR_SERIAL_IO)
-			throw Exception("Error occurred to serial communication.");
+			DRIVER_EXCEPT(Exception, "Error occurred to serial communication.");
 		else if(status==RQ_ERR_SERIAL_RECEIVE)
-			throw Exception("Error occurred while transmitting data from device.");
+			DRIVER_EXCEPT(Exception, "Error occurred while transmitting data from device.");
 		else if(status==RQ_INVALID_RESPONSE)
-			throw Exception("Invalid response to the issued command.");
+			DRIVER_EXCEPT(Exception, "Invalid response to the issued command.");
 		else if(status==RQ_INVALID_COMMAND_ITEM)
-			throw Exception("Invalid operating item");
+			DRIVER_EXCEPT(Exception, "Invalid operating item");
 		else if(status==RQ_INDEX_OUT_RANGE)
-			throw Exception("The item index is out of range.");
+			DRIVER_EXCEPT(Exception, "The item index is out of range.");
 		else
-			throw Exception("Failed to get operating item value.");
+			DRIVER_EXCEPT(Exception, "Failed to get operating item value.");
 	}
 }
 
@@ -190,7 +191,7 @@ void RoboteqMotorController::setMotorMode(uint8_t chan, MotorMode new_mode){
     }
   }
   else
-    throw Exception("Invalid motor channel");
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
 void RoboteqMotorController::setRPM(uint8_t chan, double speed){
   setMotorMode(chan, MOTOR_MODE_RPM);
@@ -199,7 +200,7 @@ void RoboteqMotorController::setRPM(uint8_t chan, double speed){
   else if(chan==2)
     setCommand(_GO, 2, GO_COMMAND_BOUND*limit(speed, -maxRPM2_, maxRPM2_)/maxRPM2_);
   else
-    throw Exception("Invalid motor channel");
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
 void RoboteqMotorController::setPower(uint8_t chan, double power){
   setMotorMode(chan, MOTOR_MODE_POWER);
@@ -208,7 +209,7 @@ void RoboteqMotorController::setPower(uint8_t chan, double power){
   else if(chan==2)
     setCommand(_GO, 2, GO_COMMAND_BOUND*limit(power, -1, 1));
   else
-    throw Exception("Invalid motor channel");
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
 
 /*
@@ -226,7 +227,7 @@ void RoboteqMotorController::getTemp(uint8_t chan, double& value){
   else if(chan==2)
     getValue(_AI, 4, an);
   else
-    throw Exception("Invalid motor channel");
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
   value = an*TEMP_SCALE+TEMP_OFFSET;
 }
 void RoboteqMotorController::getPosition(uint8_t chan, int32_t& value){
@@ -244,7 +245,7 @@ void RoboteqMotorController::getVelocity(uint8_t chan, double& value){
     value = raw_value*maxRPM1_/GO_COMMAND_BOUND;
   }
   else
-    throw Exception("Invalid motor channel");
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
 
 }

@@ -1,0 +1,7 @@
+<launch>
+  <node name="beacondetector" pkg="beacon_detect" type="beacondetect" output="screen">
+      <param name="cam_topic" type="str" value="/image_raw" />
+      <param name="tag_frame" type="str" value="beacon" />
+      <param name="tag_size" value=" 0.166" />	
+  </node>
+</launch>

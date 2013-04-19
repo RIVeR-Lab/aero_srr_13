@@ -42,30 +42,62 @@ void draw_detection(cv::Mat& image, const AprilTags::TagDetection& detection) {
               cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0,0,255));
 }
 
-
-
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "roscamera");
+	ros::NodeHandle nh;
+	ros::NodeHandle pnh("~");
+
 	Mat *frame,gray;
 	double fps;
 
-
-	if(argc!=3)
+	string base_frame;
+	string tag_frame;
+	string topic;
+	char frameid[40];
+	if(!pnh.getParam("cam_topic", topic))
 	{
-		cout<<"Useage rosrun detect <input_topic> <camera_frame>"<<endl;
+		ROS_ERROR("cam_topic not set");
 		return -1;
 	}
 
-	RosBridge roscamera(argv[1],frame);
+	RosBridge roscamera(topic.c_str(),frame);
 	AprilTags::TagDetector tag_detector(AprilTags::tagCodes36h11);
 	static tf::TransformBroadcaster br;
+	//initialize the camera
+	double tag_size = 0.166; // real side length in meters of square black frame
+
+	if(!pnh.getParam("tag_size", tag_size))
+	{
+		ROS_ERROR("tag_size not set, will use 0.166");
+		tag_size = 0.166;
+	}
+	if(!pnh.getParam("tag_frame", tag_frame))
+	{
+		ROS_ERROR("tag_size not set, will use Tag_");
+		tag_frame = "Tag_";
+	}
+
+	double fx = 620.036171; // camera focal length
+	double fy = 620.688638;
+	double px = 317.387991; // camera principal point
+	double py = 242.043315;
 
 	ros::Rate loop(10);
 	while(ros::ok())
 	{
 		roscamera.startTime();
 		frame=roscamera.getNextFrame();
+		Mat K=roscamera.intrinsic();
+		if(!K.empty())
+		{
+
+			fx=double(K.at<float>(0,0));
+			fy=double(K.at<float>(1,1));
+			px=double(K.at<float>(0,2));
+			py=double(K.at<float>(1,2));
+		}
+		base_frame=roscamera.frame_id();
 		if(frame!=NULL)
 		{
 			cv::cvtColor(*frame, gray, CV_BGR2GRAY);
@@ -80,11 +112,7 @@ int main(int argc, char **argv)
 			      draw_detection(*frame, detections[i]);
 
 			      // recovering the relative pose requires camera calibration;
-			      const double tag_size = 0.166; // real side length in meters of square black frame
-			      const double fx = 620.036171; // camera focal length
-			      const double fy = 620.688638;
-			      const double px = 317.387991; // camera principal point
-			      const double py = 242.043315;
+
 			      Eigen::Matrix4d T = detections[i].getRelativeTransform(tag_size, fx, fy, px, py);
 
 			      tf::Transform transform;
@@ -92,9 +120,9 @@ int main(int argc, char **argv)
 			      Eigen::Matrix3d rot = T.block(0,0,3,3);
 			      Eigen::Quaternion<double> final = Eigen::Quaternion<double>(rot);
 			      transform.setRotation( tf::Quaternion(final.x(), final.y(), final.z(),final.w()) );
-			      char frameid[20];
-			      sprintf(frameid,"Tag_%d",detections[i].id );
-			      br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), argv[2], frameid));
+			      cout<<rot<<endl;
+			      sprintf(frameid,"%s%d",tag_frame.c_str(),detections[i].id );
+			      br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), base_frame.c_str(), frameid));
 
 			}
 			roscamera.showImage(window_name);

@@ -34,6 +34,10 @@ public:
 	void addText(std::string txt);
 	void showImage(std::string wname);
 	void writeImage(std::string fname);
+	cv::Mat intrinsic()
+        {
+		return(intrinsic_);
+	}
 	virtual ~IOImages();
 };
 

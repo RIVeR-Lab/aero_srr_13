@@ -2,8 +2,10 @@
 	<!-- ********************ARGUMENTS******************** -->
         <!-- declare args to be passed in for platform -->
         <arg name="aero/platform"      		default="0" />
-	<!-- declare args to be passed in for actionlib topics -->
+	
 	<arg name="aero/velocity_command_topic"	default="aero/velocity_command_topic" />
+	<arg name="local_lidar_topic"           default="aero/lidar/local" />
+	<arg name="global_lidar_topic"          default="aero/lidar/global" />
 	
 
 	<!-- ********************INCLUDES******************** -->
@@ -12,5 +14,7 @@
 	<include file="$(find aero_path_planning)/launch/aero_path_planning.launch">
 		<arg name="aero/platform"               value="$(arg aero/platform)" />
 		<arg name="aero/velocity_command_topic"	value="$(arg aero/velocity_command_topic)" />
+		<arg name="aero/lidar/local"     		value="$(arg local_lidar_topic)" />
+	    <arg name="aero/lidar/global"           value="$(arg global_lidar_topic)" />
 	</include>
 </launch>
