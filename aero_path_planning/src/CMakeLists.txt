@@ -9,6 +9,7 @@ set(G_NS global)
 set(T_NS tentacles)
 set(S_NS speed_set)
 set(SP_NS supervisor)
+set(LD_NS lidar)
 
 #Parameter for the topic for exchanging OccupancyGrids between the global and local planner
 set(OCCUPANCY_TOPIC_ARG ${R_NS}/occupancy_topic)
@@ -148,6 +149,16 @@ set(T_EXPFACT_VAL "\"1.15\"")
 set(T_NUMBER_ARG "${R_NS}/${T_NS}/number")
 set(T_NUMBER_CDF T_NUMBER)
 set(T_NUMBER_VAL "\"81\"")
+
+
+#Parameters for recciving lidar data
+set(LIDAR_LOCAL_TOPIC_ARG ${R_NS}/${LD_NS}/${L_NS})
+set(LIDAR_LOCAL_TOPIC_CDF LIDAR_LOCAL_TOPIC)
+set(LIDAR_LOCAL_TOPIC_VAL "\"${R_NS}/${LD_NS}/${L_NS}\"")
+
+set(LIDAR_GLOBAL_TOPIC_ARG ${R_NS}/${LD_NS}/${G_NS})
+set(LIDAR_GLOBAL_TOPIC_CDF LIDAR_GLOBAL_TOPIC)
+set(LIDAR_GLOBAL_TOPIC_VAL "\"${R_NS}/${LD_NS}/${G_NS}\"")
 
 #Build the parameter header
 configure_file (

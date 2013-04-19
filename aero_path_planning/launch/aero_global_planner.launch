@@ -7,6 +7,9 @@
 
 	<arg name="aero/odometry"     default="aero/odometry" />
 	
+	<!-- declare args to be passed in for topics for receiving new lidar data -->
+	<arg name="aero/lidar/global"    default="aero/lidar/global" />
+	
 	
 	<!-- Test Enable Argument -->
 	<arg name="controller_test"			default="false"/>
@@ -14,8 +17,9 @@
 	
 	<!-- ********************NODES******************** -->
 	<node name="oryx_global_planner" pkg="aero_path_planning" type="oryx_global_planner" output="screen">
-		<param name="aero/occupancy_topic"	type="str"		value="$(arg aero/occupancy_topic)" />
-		<param name="aero/odometry"  type="str"      value="$(arg aero/odometry)"/>
+		<param name="aero/occupancy_topic"	   type="str"   value="$(arg aero/occupancy_topic)" />
+		<param name="aero/odometry"     type="str"   value="$(arg aero/odometry)"/>
+		<param name="aero/lidar/global" type="str"   value="$(arg aero/lidar/global)"/>
 	</node>
 	
 </launch>

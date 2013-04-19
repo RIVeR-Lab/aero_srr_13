@@ -1,6 +1,19 @@
 <launch>
-  <!-- Bring up anything related to the LIDAR here -->
-  <include file="$(find aero_laser_filter)/launch/aero_laser_filter.launch">
-  </include>
+  	<arg name="node_manager" default="aero_laser_filter_pipeline"/>
+	<arg name="input_topic"  default="/scan"/>
+	<arg name="local_topic"  default="/aero/local_point_cloud"/>
+	<arg name="local_frame"  default="/robot"/>
+	<arg name="global_topic" default="/aero/global_point_cloud"/>
+	<arg name="global_frame" default="/world"/>
+	
+ 	<!-- Bring up anything related to the LIDAR here -->
+ 	<include file="$(find aero_laser_filter)/launch/aero_laser_filter.launch">
+  		<arg name="node_manager" value="$(arg node_manager)"/>
+		<arg name="input_topic"  value="$(arg input_topic)"/>
+		<arg name="local_topic"  value="$(arg local_topic)"/>
+		<arg name="local_frame"  value="$(arg local_frame)"/>
+		<arg name="global_topic" value="$(arg global_topic)"/>
+		<arg name="global_frame" value="$(arg global_frame)"/>
+ 	</include>
   
 </launch>

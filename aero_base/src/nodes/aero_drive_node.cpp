@@ -20,6 +20,7 @@ static ros::Publisher odom_pub;
 static roboteq_driver::RoboteqManagerClient* motor_controller;
 double rotations_per_meter = 1.0;
 double base_width = 0.6;
+std::string odom_frame("/odom");
 
 /**
  * The function that actually commands the robot to drive
@@ -51,7 +52,7 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   odom_msg.twist.covariance.assign(-1);
   odom_msg.twist.covariance[0] = 1;
   odom_msg.twist.covariance[35] = 1;
-  odom_msg.child_frame_id = "/odom";
+  odom_msg.child_frame_id = odom_frame;
   odom_msg.twist.twist.linear.x = (u1 + u2)/2;
   odom_msg.twist.twist.angular.z = (u2 - u1)/(base_width/2);
   odom_pub.publish(odom_msg);
@@ -81,6 +82,9 @@ int main(int argc, char **argv) {
 	std::string odom_topic = "odom";
 	if(!ros::param::get("~odom_topic", odom_topic))
 	  ROS_WARN_STREAM("Parameter <~odom_topic> not set. Using default value '"<<odom_topic<<"'");
+
+	if(!ros::param::get("~odom_frame", odom_frame))
+	  ROS_WARN_STREAM("Parameter <~odom_frame> not set. Using default value '"<<odom_frame<<"'");
 
 
 	motor_controller = new roboteq_driver::RoboteqManagerClient(nh, roboteq_manager_cmd_topic);
