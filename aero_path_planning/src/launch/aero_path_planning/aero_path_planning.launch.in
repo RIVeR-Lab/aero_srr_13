@@ -11,6 +11,9 @@
 
 	<arg name="@ODOMETRY_TOPIC_ARG@"     default=@ODOMETRY_TOPIC_VAL@ />
 	
+	<!-- visualization argument -->
+	<arg name="visualization"            default="1"/>
+	
 	<!-- declare occupancy grid arguments -->
 	<arg name="@L_OCC_UPDTRT_ARG@"	    default=@L_OCC_UPDTRT_VAL@/>
 	<arg name="@L_OCC_XDIM_ARG@"	    default=@L_OCC_XDIM_VAL@/>
@@ -75,4 +78,24 @@
 		<arg name="@OCCUPANCY_TOPIC_ARG@"	 value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
 		<arg name="@ODOMETRY_TOPIC_ARG@"     value="$(arg @ODOMETRY_TOPIC_ARG@)"/>
 	</include>
+	
+	<group if="$(arg visualization)">
+ 			<node name="local_occupancy_visualization" pkg="aero_path_planning" type="occupancy_visualizer_node" output="screen">
+ 				<remap from="occupancy"      to="$(arg @OCCUPANCY_TOPIC_ARG@)"/>
+ 				<remap from="obstacle_data"  to="local/obstacle_data"/>
+ 				<remap from="unknown_data"   to="local/unknown_data"/>
+ 				<remap from="free_data"      to="local/free_data"/>
+ 				<remap from="difficult_data" to="local/difficult_data"/>
+ 				<remap from="goal_data"      to="local/goal_data"/>
+ 			</node>
+ 			
+ 			<node name="global_occupancy_visualization" pkg="aero_path_planning" type="occupancy_visualizer_node" output="screen">
+ 				<!--remap from="occupancy"      to="$(arg @OCCUPANCY_TOPIC_ARG@)"/-->
+ 				<remap from="obstacle_data"  to="global/obstacle_data"/>
+ 				<remap from="unknown_data"   to="global/unknown_data"/>
+ 				<remap from="free_data"      to="global/free_data"/>
+ 				<remap from="difficult_data" to="global/difficult_data"/>
+ 				<remap from="goal_data"      to="global/goal_data"/>
+ 			</node>
+	</group>
 </launch>

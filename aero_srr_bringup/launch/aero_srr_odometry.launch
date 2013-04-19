@@ -1,0 +1,21 @@
+<!-- Bring up anything needed for calculating odometry here -->
+<launch>
+  <!-- Input Arguments -->
+  <arg name="imu_topic"    default="aero/imu" />
+  <arg name="odom_topic"   default="aero/odom" />
+  <arg name="output_topic" default="aero/odom_combined" />
+  
+  <!-- Bring Up Robot Pose Ekf -->
+  <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="aero_base_pose_ekf">
+    <param name="output_frame"   value="/odom_combined"/>
+    <param name="freq"           value="100.0"/>
+    <param name="sensor_timeout" value="1.0"/>  
+    <param name="odom_used"      value="true"/>
+    <param name="imu_used"       value="true"/>
+    <param name="vo_used"        value="false"/>
+
+    <remap from="odom"     to="$(arg odom_topic)" />
+    <remap from="imu_data" to="$(arg imu_topic)" />
+  </node>
+  
+</launch>

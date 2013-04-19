@@ -80,9 +80,9 @@ bool NKFilter::initFilter(const ColumnVector& initial_pose_estimate, const Symme
 {
 	if(initial_pose_estimate.size()==constants::STATE_SIZE()&&initial_covar_estimate.size1()==constants::STATE_SIZE())
 	{
-		this->posterior_  = new BFL::Gaussian(initial_pose_estimate, initial_covar_estimate);
+		this->posterior_   = new BFL::Gaussian(initial_pose_estimate, initial_covar_estimate);
 
-		this->filter_ = new BFL::ExtendedKalmanFilter(posterior_);
+		this->filter_      = new BFL::ExtendedKalmanFilter(posterior_);
 		this->filter_init_ = true;
 		return true;
 	}
@@ -105,7 +105,8 @@ bool NKFilter::initSensor(int sensor_index, ColumnVector& measurement_noise, nav
 		ColumnVector    i_state(constants::STATE_SIZE());
 		SymmetricMatrix i_covar(constants::STATE_SIZE());
 		this->odomToStateVectorAndCovar(initial_measurement, i_state, i_covar);
-		Matrix H(constants::STATE_SIZE(), constants::STATE_SIZE(), 0);
+		Matrix H(constants::STATE_SIZE(), constants::STATE_SIZE());
+		H = 0;
 		for (int i = 1; i<=constants::STATE_SIZE(); ++i) {
 			if(i_covar(i,i) > 0)
 			{
@@ -287,7 +288,7 @@ void NKFilter::flushBuffer()
 		//If there was a measurement, copy it to the old measurement buffer and reset its space in the current measurement buffer
 		if(measurement.second.first)
 		{
-			this->measurement_buffer_last_[measurement.first].second = measurement.second;
+			this->measurement_buffer_last_[measurement.first].second = measurement.second.second;
 			measurement.second.first = false;
 		}
 					}

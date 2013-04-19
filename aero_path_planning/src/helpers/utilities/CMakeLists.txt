@@ -1,0 +1,3 @@
+rosbuild_add_library(AeroUtilities AeroPathPlanningUtilities.cpp)
+rosbuild_add_library(OccupancyVisualizer OccupancyVisualizer.cpp)
+target_link_libraries(OccupancyVisualizer OccupancyGrid)

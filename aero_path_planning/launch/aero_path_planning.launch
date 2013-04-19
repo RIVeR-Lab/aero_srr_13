@@ -11,6 +11,9 @@
 
 	<arg name="aero/odometry"     default="aero/odometry" />
 	
+	<!-- visualization argument -->
+	<arg name="visualization"            default="1"/>
+	
 	<!-- declare occupancy grid arguments -->
 	<arg name="aero/occupancy/local/update_rate"	    default="0.2"/>
 	<arg name="aero/occupancy/local/x_dim"	    default="200"/>
@@ -19,19 +22,19 @@
 	<arg name="aero/occupancy/local/x_org"	    default="0"/>
 	<arg name="aero/occupancy/local/y_org"	    default="100"/>
 	<arg name="aero/occupancy/local/z_org"	    default="0"/>
-	<arg name="aero/occupancy/local/res"	        default="0.1"/>
+	<arg name="aero/occupancy/local/res"	        default="0.05"/>
 	<arg name="aero/occupancy/global/update_rate"	    default="0.2"/>
-	<arg name="aero/occupancy/global/x_dim"	    default="5000"/>
-	<arg name="aero/occupancy/global/y_dim"	    default="5000"/>
+	<arg name="aero/occupancy/global/x_dim"	    default="1000"/>
+	<arg name="aero/occupancy/global/y_dim"	    default="1000"/>
 	<arg name="aero/occupancy/global/z_dim"	    default="0"/>
 	<arg name="aero/occupancy/global/x_org"	    default="0"/>
 	<arg name="aero/occupancy/global/y_org"	    default="0"/>
 	<arg name="aero/occupancy/global/z_org"	    default="0"/>
-	<arg name="aero/occupancy/global/res"	        default="0.1"/>
+	<arg name="aero/occupancy/global/res"	        default="0.05"/>
 	
 	<!-- declare speed set arguments -->
 	<arg name="speed_set/number"	    default="15"/>
-	<arg name="speed_set/min_speed"	default="0.01"/>
+	<arg name="speed_set/min_speed"	default="0.2"/>
 	<arg name="speed_set/max_speed"	default="1.5"/>
 	
 	<!-- declare tentacle arguments -->
@@ -75,4 +78,24 @@
 		<arg name="aero/occupancy_topic"	 value="$(arg aero/occupancy_topic)" />
 		<arg name="aero/odometry"     value="$(arg aero/odometry)"/>
 	</include>
+	
+	<group if="$(arg visualization)">
+ 			<node name="local_occupancy_visualization" pkg="aero_path_planning" type="occupancy_visualizer_node" output="screen">
+ 				<remap from="occupancy"      to="$(arg aero/occupancy_topic)"/>
+ 				<remap from="obstacle_data"  to="local/obstacle_data"/>
+ 				<remap from="unknown_data"   to="local/unknown_data"/>
+ 				<remap from="free_data"      to="local/free_data"/>
+ 				<remap from="difficult_data" to="local/difficult_data"/>
+ 				<remap from="goal_data"      to="local/goal_data"/>
+ 			</node>
+ 			
+ 			<node name="global_occupancy_visualization" pkg="aero_path_planning" type="occupancy_visualizer_node" output="screen">
+ 				<!--remap from="occupancy"      to="$(arg aero/occupancy_topic)"/-->
+ 				<remap from="obstacle_data"  to="global/obstacle_data"/>
+ 				<remap from="unknown_data"   to="global/unknown_data"/>
+ 				<remap from="free_data"      to="global/free_data"/>
+ 				<remap from="difficult_data" to="global/difficult_data"/>
+ 				<remap from="goal_data"      to="global/goal_data"/>
+ 			</node>
+	</group>
 </launch>

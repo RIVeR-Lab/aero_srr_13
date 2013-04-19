@@ -12,7 +12,7 @@
 #include<gtest/gtest.h>
 #include<queue>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/RRTCarrot.h>
+#include<aero_path_planning/planning_strategies/RRTCarrot.h>
 //**********************NAMESPACES*****************************//
 using namespace aero_path_planning;
 
