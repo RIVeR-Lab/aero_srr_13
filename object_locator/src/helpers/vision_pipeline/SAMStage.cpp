@@ -66,8 +66,9 @@ void SAMStage::loadParams() {
 void SAMStage::registerTopics() {
 	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,
 			2, &SAMStage::recieveImageCb, this);
-	this->tf_point_pub_ = this->getNodeHandle().advertise<
+	this->ObjLocationPub_ = this->getNodeHandle().advertise<
 			aero_srr_msgs::ObjectLocationMsg>(this->output_topic_, 2);
+
 }
 
 void SAMStage::recieveImageCb(

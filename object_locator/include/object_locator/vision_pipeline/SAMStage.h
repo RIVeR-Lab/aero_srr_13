@@ -62,7 +62,6 @@ namespace object_locator
 		//********Topic Specific***********************************//
 		std::string input_topic_, output_topic_;
 		ros::Subscriber sync_image_sub_;
-		ros::Publisher tf_point_pub_;
 		ros::Publisher ObjLocationPub_;
 
 
