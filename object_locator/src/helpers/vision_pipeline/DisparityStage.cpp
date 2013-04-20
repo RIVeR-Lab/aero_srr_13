@@ -143,9 +143,9 @@ void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_img
 	cv_bridge::CvImage carrier;
 	carrier.image = disparity;
 	sensor_msgs::Image disparity_image;
-	disparity_image.encoding = "mono8";
 	carrier.toImageMsg(disparity_image);
 	msg.disparity_image = disparity_image;
+	msg.disparity_image.encoding  = enc::MONO8;
 	msg.images          = raw_imgs;
 
 }
