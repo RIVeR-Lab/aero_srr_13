@@ -69,7 +69,7 @@ void DisparityStage::loadParams()
 	std::string specRange("specRange");
 	specRange_ = 31  ;  //5 //1;
 	this->getPrivateNodeHandle().getParam(specRange,specRange_);
-
+	cv::namedWindow(WINDOWDisp_);
 }
 
 void DisparityStage::registerTopics()
@@ -136,7 +136,7 @@ void DisparityStage::computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRi
 			disp12MaxDiff_, preFilterCap_, uniqueness_, specSize_, specRange_, true);
 	stereoSGBM(rectLeft, rectRight, preDisp );
 	normalize( preDisp, disparity, 0, 256, CV_MINMAX );
-	cv::imshow("disparity", disparity);
+	cv::imshow(WINDOWDisp_, disparity);
 	cv::waitKey(3);
 
 }

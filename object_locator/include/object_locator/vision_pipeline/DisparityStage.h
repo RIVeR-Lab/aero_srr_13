@@ -78,7 +78,7 @@ namespace object_locator
 
 		DRServerPtr dr_server_;
 
-		std::string input_topic_, output_topic_;
+		std::string input_topic_, output_topic_,WINDOWDisp_;
 		int minDisp_;
 		int numDisp_;
 		int SADSize_;
