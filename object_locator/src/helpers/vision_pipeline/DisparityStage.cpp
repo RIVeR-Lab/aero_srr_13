@@ -71,7 +71,6 @@ void DisparityStage::loadParams()
 	std::string specRange("specRange");
 	specRange_ = 31  ;  //5 //1;
 	this->getPrivateNodeHandle().getParam(specRange,specRange_);
-	cv::namedWindow(WINDOWDisp_);
 }
 
 void DisparityStage::registerTopics()
