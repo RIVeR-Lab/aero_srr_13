@@ -19,8 +19,10 @@ using namespace object_locator;
 
 void DisparityStage::onInit()
 {
+	NODELET_INFO_STREAM("Initializing Disparity Stage");
 	loadParams();
 	registerTopics();
+	NODELET_INFO_STREAM("Disparity Stage Initialized");
 }
 
 void DisparityStage::loadParams()
@@ -136,8 +138,6 @@ void DisparityStage::computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRi
 			disp12MaxDiff_, preFilterCap_, uniqueness_, specSize_, specRange_, true);
 	stereoSGBM(rectLeft, rectRight, preDisp );
 	normalize( preDisp, disparity, 0, 256, CV_MINMAX );
-	cv::imshow(WINDOWDisp_, disparity);
-	cv::waitKey(3);
 
 }
 

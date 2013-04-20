@@ -17,8 +17,10 @@ using namespace object_locator;
 
 void SAMStage::onInit()
 {
+	NODELET_INFO_STREAM("Initializing SAM Stage");
 	loadParams();
 	registerTopics();
+	NODELET_INFO_STREAM("SAM Stage Initialized");
 }
 
 void SAMStage::loadParams() {
@@ -70,7 +72,10 @@ void SAMStage::loadParams() {
 	this->getPrivateNodeHandle().getParam(thresh_det, thresh_det_);
 
 	this->sherlock_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
-	cv::namedWindow(WINDOWLeft);
+	WINDOWLeft_ = "Left camera image";
+	WINDOWDisp_ = "Disparity image";
+	cv::namedWindow(WINDOWLeft_);
+	cv::namedWindow(WINDOWDisp_);
 }
 
 void SAMStage::registerTopics() {
@@ -179,7 +184,7 @@ void SAMStage::fetchAndRetrieve(const sensor_msgs::Image& msg) {
 //
 //
 //	}
-	cv::imshow(WINDOWLeft, img->image);
+	cv::imshow(WINDOWLeft_, img->image);
 	cv::waitKey(3);
 }
 
@@ -192,6 +197,8 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
+	cv::imshow(WINDOWDisp_, disp->image);
+	cv::waitKey(3);
 	this->stereo_model_.fromCameraInfo(msg->images.left_info, msg->images.right_info);
 	for (int i = 0; i < (int) detection_list_.size(); i++) {
 		//		cout << endl;
