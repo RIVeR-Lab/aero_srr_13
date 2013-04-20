@@ -100,7 +100,16 @@ void DisparityStage::recieveImageCb(const object_locator::SyncImageMsgConstPtr& 
 
 void DisparityStage::computeRectifiedImage(const sensor_msgs::Image& msg, const sensor_msgs::CameraInfo& cam_info, Mat_t& rectified_img)const
 {
-	cv_bridge::CvImagePtr img_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
+	cv_bridge::CvImagePtr img_ptr;
+	try
+	{
+		img_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
+	}
+	catch (cv_bridge::Exception& e)
+	{
+		ROS_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
 	sensor_msgs::CameraInfo info(cam_info);
 	Mat_t K(3,3,CV_64F, info.K.elems);
 	Mat_t R(3,3,CV_64F, info.R.elems);
