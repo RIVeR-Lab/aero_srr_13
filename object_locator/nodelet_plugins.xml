@@ -21,3 +21,11 @@
   </description>
   </class>
 </library>
+
+<library path="lib/libBOOMStage">
+  <class name="object_locator/BOOMStage" type="object_locator::BOOMStage" base_class_type="nodelet::Nodelet">
+  <description>
+	This nodelet processes the median,normalize, and blob detect filter for the boom cameras.
+  </description>
+  </class>
+</library>

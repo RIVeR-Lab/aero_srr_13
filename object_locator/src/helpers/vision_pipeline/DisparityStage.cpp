@@ -25,7 +25,7 @@ void DisparityStage::onInit()
 
 void DisparityStage::loadParams()
 {
-	this->input_topic_="disparity_stage/stereo_pair";
+	this->input_topic_="/stereo_camera/stereo_sync";
 	this->output_topic_="disparity_stage/disparity";
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,this->output_topic_);
