@@ -136,6 +136,9 @@ void DisparityStage::computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRi
 			disp12MaxDiff_, preFilterCap_, uniqueness_, specSize_, specRange_, true);
 	stereoSGBM(rectLeft, rectRight, preDisp );
 	normalize( preDisp, disparity, 0, 256, CV_MINMAX );
+	cv::imshow("disparity", disparity);
+	cv::waitKey(3);
+
 }
 
 void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_imgs, Mat_t& disparity, object_locator::SyncImagesAndDisparity& msg)const
