@@ -190,7 +190,7 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 		ROS_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
-
+	this->stereo_model_.fromCameraInfo(msg->images.left_info, msg->images.right_info);
 	for (int i = 0; i < (int) detection_list_.size(); i++) {
 		//		cout << endl;
 		//		cout << "In detection #"<< i+1 << "/"<< detection_list_WHA.size() <<endl;
