@@ -31,7 +31,7 @@ void BOOMStage::loadParams()
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,this->output_topic_);
 	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
-	ROS_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
+	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
 }
 
 void BOOMStage::registerTopics()
@@ -55,7 +55,7 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 	try {
 		img = cv_bridge::toCvCopy(msg, enc::BGR8);
 	} catch (cv_bridge::Exception& e) {
-		ROS_ERROR("cv_bridge exception: %s", e.what());
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
 	double R,G,B,sumRGB, nR,nG,nB, browness,whiteness;
@@ -101,7 +101,7 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 
 void BOOMStage::blobIdentify(Mat_t& img)
 {
-	ROS_INFO_STREAM("IN BLOB IDENTIFY");
+	NODELET_INFO_STREAM("IN BLOB IDENTIFY");
 	Mat_t med, src_gray,normImg;
 	int thresh = 100;
 	int max_thresh = 255;

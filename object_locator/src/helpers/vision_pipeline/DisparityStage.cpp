@@ -107,7 +107,7 @@ void DisparityStage::computeRectifiedImage(const sensor_msgs::Image& msg, const 
 	}
 	catch (cv_bridge::Exception& e)
 	{
-		ROS_ERROR("cv_bridge exception: %s", e.what());
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
 	sensor_msgs::CameraInfo info(cam_info);
@@ -161,7 +161,7 @@ void DisparityStage::drCB(Config_t &config, uint32_t level)
 	}
 	else
 	{
-		ROS_WARN_STREAM("Cannot set P1 ("<<config.p1<<") greater than P2 ("<<config.p2<<")");
+		NODELET_WARN_STREAM("Cannot set P1 ("<<config.p1<<") greater than P2 ("<<config.p2<<")");
 	}
 
 	if(config.sad_size%2!=0)
@@ -170,7 +170,7 @@ void DisparityStage::drCB(Config_t &config, uint32_t level)
 	}
 	else
 	{
-		ROS_WARN_STREAM("SADsize must be an odd number, got "<<config.sad_size);
+		NODELET_WARN_STREAM("SADsize must be an odd number, got "<<config.sad_size);
 	}
 
 	this->fullDp_        = config.full_dp;
@@ -182,7 +182,7 @@ void DisparityStage::drCB(Config_t &config, uint32_t level)
 	}
 	else
 	{
-		ROS_WARN_STREAM("Number of Disparities must be divisible by 16, got "<<config.num_disp);
+		NODELET_WARN_STREAM("Number of Disparities must be divisible by 16, got "<<config.num_disp);
 	}
 
 	this->preFilterCap_  = config.pre_filter_cap;
