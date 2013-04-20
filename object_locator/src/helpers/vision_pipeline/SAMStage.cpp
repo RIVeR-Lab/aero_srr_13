@@ -184,7 +184,7 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 		const object_locator::SyncImagesAndDisparityConstPtr& msg) {
 	cv_bridge::CvImagePtr disp;
 	try {
-		disp = cv_bridge::toCvCopy(msg->disparity_image, enc::BGR8);
+		disp = cv_bridge::toCvCopy(msg->disparity_image, enc::MONO8);
 	} catch (cv_bridge::Exception& e) {
 		ROS_ERROR("cv_bridge exception: %s", e.what());
 		return;
