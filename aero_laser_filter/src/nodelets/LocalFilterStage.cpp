@@ -35,7 +35,7 @@ namespace aero_laser_filter
 	{
 		this->input_topic_ = "input_topic";
 		this->output_topic_= "output_topic";
-		this->output_frame_= "/robot";
+		this->output_frame_= "laser";
 		std::string crop_ns("crop");
 		std::string btmlft_ns("bottom_left");
 		std::string toprgt_ns("top_right");
