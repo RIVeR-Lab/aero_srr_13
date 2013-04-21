@@ -44,7 +44,7 @@ void AeroBase::loadParams()
 	this->right_cam_= "right_camera";
 	this->nh_.getParam(TF_RCAM_NAME, this->right_cam_);
 
-	this->lidar_    = "lidar";
+	this->lidar_    = "laser";
 	this->nh_.getParam(TF_LCAM_NAME, this->lidar_);
 
 	this->arm_base_ = "arm_base";
@@ -74,7 +74,7 @@ void AeroBase::buildTransforms()
 	this->to_boom_base_.setRotation(tf::Quaternion(0,0,0,1));
 
 	//build the lidar base transform
-	this->to_lidar_.setOrigin(tf::Vector3(1.0,1.0,0.0));
+	this->to_lidar_.setOrigin(tf::Vector3(1.0,0.0,0.0));
 	this->to_lidar_.setRotation(tf::Quaternion(0,0,0,1));
 
 	//build the right camera transform
