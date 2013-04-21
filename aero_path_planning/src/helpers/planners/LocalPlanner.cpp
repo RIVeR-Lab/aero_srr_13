@@ -17,9 +17,9 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																										nh_(nh),
-																										p_nh_(p_nh),
-																										occupancy_buffer_(2)
+																												nh_(nh),
+																												p_nh_(p_nh),
+																												occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -374,25 +374,29 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 		if(!this->occupancy_buffer_.empty())
 		{
 			this->working_grid_= this->occupancy_buffer_.front();
+			this->occupancy_buffer_.pop_front();
 		}
 		//Build a working grid to apply the LIDAR patch to
 		OccupancyGrid working_grid(this->working_grid_);
-		//If we have a LIDAR patch, apply it
-		if(this->lidar_patch_!= PointCloudPtr())
+		//If we actually have a working grid, plan on it
+		if(working_grid.size()>0)
 		{
-			working_grid.setPointTrait(*this->lidar_patch_);
+			//If we have a LIDAR patch, apply it
+			if(this->lidar_patch_!= PointCloudPtr())
+			{
+				working_grid.setPointTrait(*this->lidar_patch_);
+			}
+
+			int speedset_idx = 0;
+			int tentacle_idx = 0;
+
+			//select the best tentacle
+			this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
+			//Update the current radius and velocity
+			this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
+			this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
+			visualizeTentacle(speedset_idx, tentacle_idx);
 		}
-
-		int speedset_idx = 0;
-		int tentacle_idx = 0;
-
-		//select the best tentacle
-		this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
-		//Update the current radius and velocity
-		this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
-		this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
-		visualizeTentacle(speedset_idx, tentacle_idx);
-		this->occupancy_buffer_.pop_front();
 
 	}
 	else
