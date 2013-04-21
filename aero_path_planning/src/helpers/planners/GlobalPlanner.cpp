@@ -256,7 +256,7 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
 	pcl::fromROSMsg(scan_cloud, copy_cloud);
 
-#pragma omp paralell for
+#pragma omp parallel for
 	for(int i=0; i<(int)copy_cloud.size(); i++)
 	{
 		aero_path_planning::Point copy_point;

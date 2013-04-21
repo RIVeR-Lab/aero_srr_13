@@ -80,6 +80,8 @@ private:
 
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
+	OccupancyGrid working_grid_;                                ///The last new occupancy grid recieved
+	PointCloudPtr lidar_patch_;                                 ///The last patch of LIDAR data recieved
 
 	/**
 	 * @author	Adam Panzica
