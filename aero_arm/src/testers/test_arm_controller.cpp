@@ -26,35 +26,30 @@ tf::TransformListener *listenerptr;
 float x_pos = 0;
 float y_pos = 0;
 float z_pos = 0;
+float rx_pos = 0;
+float ry_pos = 0;
+float rz_pos = 0;
 
-
-
-void TimerCallback(const ros::TimerEvent&)
-{
+void TimerCallback(const ros::TimerEvent&) {
 	aero_srr_msgs::ObjectLocationMsg test_msg;
 
-			test_msg.pose.pose.position.x = x_pos;
-			test_msg.pose.pose.position.y = y_pos;
-			test_msg.pose.pose.position.z = z_pos;
+	test_msg.pose.pose.position.x = x_pos;
+	test_msg.pose.pose.position.y = y_pos;
+	test_msg.pose.pose.position.z = z_pos;
 
-			tf::Quaternion q;
+	tf::Quaternion q;
 
-			q.setRPY(0,0,0);
+	q.setRPY(rx_pos, ry_pos, rz_pos);
 
-			tf::quaternionTFToMsg(q,test_msg.pose.pose.orientation);
-			test_msg.header.frame_id = "/arm_base";
-			test_msg.pose.header.frame_id = test_msg.header.frame_id;
-			test_msg.header.stamp = ros::Time::now();
-				test_msg.pose.header.stamp = ros::Time::now();
-			pub.publish(test_msg);
-
-
-
-
+	tf::quaternionTFToMsg(q, test_msg.pose.pose.orientation);
+	test_msg.header.frame_id = "/arm_base";
+	test_msg.pose.header.frame_id = test_msg.header.frame_id;
+	test_msg.header.stamp = ros::Time::now();
+	test_msg.pose.header.stamp = ros::Time::now();
+	pub.publish(test_msg);
 
 }
-void TimerCallback2(const ros::TimerEvent&)
-{
+void TimerCallback2(const ros::TimerEvent&) {
 
 	geometry_msgs::PoseStamped end_effector_pose;
 	geometry_msgs::PoseStamped arm_pose;
@@ -63,41 +58,39 @@ void TimerCallback2(const ros::TimerEvent&)
 	end_effector_pose.pose.position.x = 0;
 	end_effector_pose.pose.position.y = 0;
 	end_effector_pose.pose.position.z = 0;
-				q.setRPY(0,0,0);
+	q.setRPY(0, 0, 0);
 
-				tf::quaternionTFToMsg(q,end_effector_pose.pose.orientation);
+	tf::quaternionTFToMsg(q, end_effector_pose.pose.orientation);
 	end_effector_pose.header.frame_id = "/jaco_end_effector";
 
 	end_effector_pose.header.stamp = ros::Time::now();
 
-
-	listenerptr->waitForTransform("/arm_base", end_effector_pose.header.frame_id, end_effector_pose.header.stamp, ros::Duration(0.5) );
+	listenerptr->waitForTransform("/arm_base", end_effector_pose.header.frame_id, end_effector_pose.header.stamp, ros::Duration(0.5));
 
 	listenerptr->transformPose("/arm_base", end_effector_pose, arm_pose);
 
-		ROS_INFO("X = %f",arm_pose.pose.position.x);
-		ROS_INFO("Y = %f", arm_pose.pose.position.y);
-		ROS_INFO("Z = %f", arm_pose.pose.position.z);
+	ROS_INFO("X = %f", arm_pose.pose.position.x);
+	ROS_INFO("Y = %f", arm_pose.pose.position.y);
+	ROS_INFO("Z = %f", arm_pose.pose.position.z);
 
-		listenerptr->waitForTransform("/jaco_api_origin", end_effector_pose.header.frame_id, end_effector_pose.header.stamp, ros::Duration(0.5) );
+	listenerptr->waitForTransform("/jaco_api_origin", end_effector_pose.header.frame_id, end_effector_pose.header.stamp, ros::Duration(0.5));
 
-		listenerptr->transformPose("/jaco_api_origin", end_effector_pose, arm_pose);
+	listenerptr->transformPose("/jaco_api_origin", end_effector_pose, arm_pose);
 
-			ROS_INFO("API X = %f",arm_pose.pose.position.x);
-			ROS_INFO("API Y = %f", arm_pose.pose.position.y);
-			ROS_INFO("API Z = %f", arm_pose.pose.position.z);
-
+	ROS_INFO("API X = %f", arm_pose.pose.position.x);
+	ROS_INFO("API Y = %f", arm_pose.pose.position.y);
+	ROS_INFO("API Z = %f", arm_pose.pose.position.z);
 
 }
 
 void callback(aero_arm::TestVelocityConfig &config, uint32_t level) {
 
-
-
-	 x_pos = config.X_Position;
-	 y_pos = config.Y_Position;
-	 z_pos = config.Z_Position;
-
+	x_pos = config.X_Position;
+	y_pos = config.Y_Position;
+	z_pos = config.Z_Position;
+	rx_pos = config.rX_Position;
+	ry_pos = config.rY_Position;
+	rz_pos = config.rZ_Position;
 
 }
 int main(int argc, char **argv) {
@@ -109,20 +102,19 @@ int main(int argc, char **argv) {
 
 	std::string ObjectPose("ObjectPose"); ///String containing the topic name for cartesian commands
 
-	 pub = nh.advertise<aero_srr_msgs::ObjectLocationMsg>(ObjectPose,
-			2);
-	 tf::TransformListener listener;
-	 listenerptr = &listener;
+	pub = nh.advertise<aero_srr_msgs::ObjectLocationMsg>(ObjectPose, 2);
+	tf::TransformListener listener;
+	listenerptr = &listener;
 
-	ros::Timer timer = nh.createTimer(ros::Duration(0.1),TimerCallback);
+	ros::Timer timer = nh.createTimer(ros::Duration(0.1), TimerCallback);
 
 	//ros::Timer timer2 = nh.createTimer(ros::Duration(1.0),TimerCallback2);
 
-	  dynamic_reconfigure::Server<aero_arm::TestVelocityConfig> server;
-	  dynamic_reconfigure::Server<aero_arm::TestVelocityConfig>::CallbackType f;
+	dynamic_reconfigure::Server<aero_arm::TestVelocityConfig> server;
+	dynamic_reconfigure::Server<aero_arm::TestVelocityConfig>::CallbackType f;
 
-	  f = boost::bind(&callback, _1, _2);
-	  server.setCallback(f);
+	f = boost::bind(&callback, _1, _2);
+	server.setCallback(f);
 	ros::spin();
 }
 
