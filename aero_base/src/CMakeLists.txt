@@ -10,7 +10,7 @@ set(T_ARM arm_base)
 set(T_LFC left_camera)
 set(T_RTC right_camera)
 set(T_BOM boom)
-set(T_LDR lidar)
+set(T_LDR laser)
 
 
 #Parameter for the topic for exchanging OccupancyGrids between the global and local planner
