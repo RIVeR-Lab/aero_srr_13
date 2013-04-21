@@ -101,8 +101,16 @@ namespace aero_laser_filter
 
 	void LocalFilterStage::transformCloud(const PointCloudPtr_t& in, PointCloudPtr_t& out)
 	{
+		try
+		{
 		this->transformer_->waitForTransform(this->output_frame_, in->header.frame_id, in->header.stamp, ros::Duration(1.0));
 		pcl_ros::transformPointCloud(this->output_frame_, *in, *out, *this->transformer_);
+		}
+		catch(std::exception& e)
+		{
+			NODELET_ERROR_STREAM_THROTTLE(5, "Problem Transforming PointCloud in GlobalFilter: "<<e.what());
+			*out = *in;
+		}
 	}
 
 	void LocalFilterStage::filterCloud(const PointCloudPtr_t& in, PointCloudPtr_t& out)
