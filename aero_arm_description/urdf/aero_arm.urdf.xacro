@@ -1,19 +1,25 @@
-<robot name="AERO_arm" >
-  <link
-    name="base_link">
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<xacro:macro name="aero_arm" params="parent *origin prefix">
+   <joint name="arm_fixture" type="fixed">
+      <insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${prefix}_base_link"/>
+    </joint> 
+
+  <link name="${prefix}_base_link">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0" />
+        value="0.001" />
       <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        ixx="0.001"
+        ixy="0.001"
+        ixz="0.001"
+        iyy="0.001"
+        iyz="0.001"
+        izz="0.001" />
     </inertial>
     <visual>
       <origin
@@ -21,7 +27,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/base_link.STL" />
+          filename="package://aero_arm/meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -35,33 +41,34 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/base_link.STL" />
+          filename="package://aero_arm/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
   <link
-    name="Link1">
+    name="${prefix}_Link1">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0" />
-      <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        value="0.001" />
+   <inertia
+        ixx="0.001"
+        ixy="0.001"
+        ixz="0.001"
+        iyy="0.001"
+        iyz="0.001"
+        izz="0.001" />
     </inertial>
+
     <visual>
       <origin
         xyz="0 0 0"
         rpy="1.57 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/Link1.STL" />
+          filename="package://aero_arm/meshes/Link1.STL" />
       </geometry>
       <material
         name="">
@@ -75,38 +82,38 @@
         rpy="1.57 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/Link1.STL" />
+          filename="package://aero_arm/meshes/Link1.STL" />
       </geometry>
     </collision>
   </link>
   <joint
-    name="Joint1"
+    name="${prefix}_Joint1"
     type="continuous">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="${prefix}_base_link" />
     <child
-      link="Link1" />
+      link="${prefix}_Link1" />
     <axis
       xyz="0 0 -1" />
   </joint>
   <link
-    name="Link2">
+    name="${prefix}_Link2">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0" />
-      <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        value="0.001" />
+    <inertia
+        ixx="0.001"
+        ixy="0.001"
+        ixz="0.001"
+        iyy="0.001"
+        iyz="0.001"
+        izz="0.001" />
     </inertial>
     <visual>
       <origin
@@ -114,7 +121,7 @@
         rpy="3.14 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/Link2.STL" />
+          filename="package://aero_arm/meshes/Link2.STL" />
       </geometry>
       <material
         name="">
@@ -128,12 +135,12 @@
         rpy="3.14 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/Link2.STL" />
+          filename="package://aero_arm/meshes/Link2.STL" />
       </geometry>
     </collision>
   </link>
   <joint
-    name="Joint2"
+    name="${prefix}_Joint2"
     type="continuous">
    <!-- <origin
       xyz="0 0 0.11875"
@@ -142,14 +149,14 @@
       xyz="0 0 0.12"
       rpy="0.0 -1.5708 0" />
     <parent
-      link="Link1" />
+      link="${prefix}_Link1" />
     <child
-      link="Link2" />
+      link="${prefix}_Link2" />
     <axis
       xyz="0 0 -1" />
   </joint>
   <link
-    name="Link3">
+    name="${prefix}_Link3">
     <inertial>
 <!--
       <origin
@@ -160,22 +167,23 @@
         xyz="0.00 0 0"
         rpy="0.00 0 0" />
       <mass
-        value="0" />
-      <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        value="0.001" />
+  <inertia
+        ixx="0.001"
+        ixy="0.001"
+        ixz="0.001"
+        iyy="0.001"
+        iyz="0.001"
+        izz="0.001" />
     </inertial>
+
     <visual>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/Link4_origin.STL" scale="0.001 0.001 0.001"/>
+          filename="package://aero_arm/meshes/Link4_origin.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material
         name="">
@@ -189,12 +197,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/Link4_origin.STL" scale="0.001 0.001 0.001"/>
+          filename="package://aero_arm/meshes/Link4_origin.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
   <joint
-    name="Joint3"
+    name="${prefix}_Joint3"
     type="continuous">
 <!--
     <origin
@@ -205,27 +213,27 @@
       xyz="0.41 0 0"
       rpy="-3.1416 0 -0.28747" />
     <parent
-      link="Link2" />
+      link="${prefix}_Link2" />
     <child
-      link="Link3" />
+      link="${prefix}_Link3" />
     <axis
       xyz="0 0 -1" />
   </joint>
   <link
-    name="Link4">
+    name="${prefix}_Link4">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0" />
-      <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        value="0.001" />
+ <inertia
+        ixx="0.001"
+        ixy="0.001"
+        ixz="0.001"
+        iyy="0.001"
+        iyz="0.001"
+        izz="0.001" />
     </inertial>
     <visual>
       <origin
@@ -233,7 +241,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/origin_fixed.STL" scale="0.001 0.001 0.001"/>
+          filename="package://aero_arm/meshes/origin_fixed.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material
         name="">
@@ -247,12 +255,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/origin_fixed.STL" scale="0.001 0.001 0.001"/>
+          filename="package://aero_arm/meshes/origin_fixed.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
   <joint
-    name="Joint4"
+    name="${prefix}_Joint4"
     type="continuous">
 <!--
     <origin
@@ -264,27 +272,27 @@
       rpy="0 -1.5708 0.0"/>
 
     <parent
-      link="Link3" />
+      link="${prefix}_Link3" />
     <child
-      link="Link4" />
+      link="${prefix}_Link4" />
     <axis
       xyz="0 0 1" />
   </joint>
   <link
-    name="Link5">
+    name="${prefix}_Link5">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0" />
-      <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        value="0.001" />
+ <inertia
+        ixx="0.001"
+        ixy="0.001"
+        ixz="0.001"
+        iyy="0.001"
+        iyz="0.001"
+        izz="0.001" />
     </inertial>
     <visual>
       <origin
@@ -292,7 +300,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/origin_fixed.STL" scale="0.001 0.001 0.001"/>
+          filename="package://aero_arm/meshes/origin_fixed.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material
         name="">
@@ -306,12 +314,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/origin_fixed.STL" scale="0.001 0.001 0.001"/>
+          filename="package://aero_arm/meshes/origin_fixed.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
   <joint
-    name="Joint5"
+    name="${prefix}_Joint5"
     type="continuous">
 <!--
     <origin
@@ -323,27 +331,27 @@
       rpy="0.12154 -0.95472 -0.65131" />
 
     <parent
-      link="Link4" />
+      link="${prefix}_Link4" />
     <child
-      link="Link5" />
+      link="${prefix}_Link5" />
     <axis
       xyz="0 0 1" />
   </joint>
   <link
-    name="Gripper">
+    name="${prefix}_Gripper">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0" />
-      <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        value="0.001" />
+ <inertia
+        ixx="0.001"
+        ixy="0.001"
+        ixz="0.001"
+        iyy="0.001"
+        iyz="0.001"
+        izz="0.001" />
     </inertial>
     <visual>
       <origin
@@ -351,7 +359,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/Gripper_origin.STL" scale="0.001 0.001 0.001"/>
+          filename="package://aero_arm/meshes/Gripper_origin.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material
         name="">
@@ -365,12 +373,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://AERO_arm/meshes/Gripper_origin.STL" scale="0.001 0.001 0.001" />
+          filename="package://aero_arm/meshes/Gripper_origin.STL" scale="0.001 0.001 0.001" />
       </geometry>
     </collision>
   </link>
   <joint
-    name="Joint6"
+    name="${prefix}_Joint6"
     type="continuous">
 <!--
     <origin
@@ -382,10 +390,11 @@
       xyz="0.027925 -0.019554 -0.065738"
       rpy="0.48869  2.1800 0" />
     <parent
-      link="Link5" />
+      link="${prefix}_Link5" />
     <child
-      link="Gripper" />
+      link="${prefix}_Gripper" />
     <axis
       xyz="0 0 1" />
   </joint>
+</xacro:macro>
 </robot>

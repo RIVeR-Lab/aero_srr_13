@@ -1,6 +1,0 @@
-<package>
-  <description brief="AERO_arm">AERO_arm</description>
-  <depend package="gazebo" />
-  <author>me</author>
-  <license>BSD</license>
-</package>

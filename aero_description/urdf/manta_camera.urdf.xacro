@@ -4,7 +4,7 @@
       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
       xmlns:xacro="http://ros.org/wiki/xacro">
   
-  <include filename="$(find AERO_description)/urdf/manta_camera.gazebo.xacro" />
+  <include filename="$(find aero_description)/urdf/manta_camera.gazebo.xacro" />
 
   <xacro:macro name="manta_cam_v0" params="frame_name parent *origin camera_name">
     <joint name="${frame_name}_frame_joint" type="fixed">
@@ -16,7 +16,7 @@
       <visual>
         <origin xyz="0.0 0.0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://AERO_description/meshes/Manta-Camera-Lense.STL" />
+          <mesh filename="package://aero_description/meshes/Manta-Camera-Lense.STL" />
         </geometry>
       </visual>
 
@@ -30,7 +30,7 @@
      <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://AERO_description/meshes/Manta-Camera-Lense.STL" />
+        <mesh filename="package://aero_description/meshes/Manta-Camera-Lense.STL" />
       </geometry>             
     </collision>
 

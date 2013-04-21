@@ -42,16 +42,16 @@ Husky A200
 	xmlns:rendering="http://playerstage.sourceforge.net/gazebo/xmlschema/#rendering"
     xmlns:renderable="http://playerstage.sourceforge.net/gazebo/xmlschema/#renderable"
     xmlns:physics="http://playerstage.sourceforge.net/gazebo/xmlschema/#physics"
-	xmlns:xacro="http://ros.org/wiki/xacro" name="AERO">
+	xmlns:xacro="http://ros.org/wiki/xacro" name="aero">
        
 	<!-- Included URDF/XACRO Files -->
     <include filename="$(find husky_description)/urdf/materials.urdf.xacro" />
     <include filename="$(find husky_description)/urdf/wheel.urdf.xacro" />
     <include filename="$(find husky_description)/urdf/parts.urdf.xacro" />
-    <include filename="$(find AERO_description)/urdf/manta_camera.urdf.xacro" />
-    <include filename="$(find AERO_description)/urdf/sick_laser.urdf.xacro" />
+    <include filename="$(find aero_description)/urdf/manta_camera.urdf.xacro" />
+    <include filename="$(find aero_description)/urdf/sick_laser.urdf.xacro" />
    
-    <include filename="$(find AERO_arm)/robots/AERO_arm.urdf.xacro" />
+    <include filename="$(find aero_arm_description)/urdf/aero_arm.urdf.xacro" />
     
 	<!-- PROPERTY LIST -->
     <!--All units in m-kg-s-radians unit system -->
@@ -221,8 +221,8 @@ Husky A200
         <material>Gazebo/White</material>
     </gazebo>
    <!-- Kinova Arm -->
-   <xacro:AERO_arm parent="base_link_top_plate_part" prefix="arm">
+   <xacro:aero_arm parent="base_link_top_plate_part" prefix="arm">
 	<origin xyz="0.20 -0.12 0.38" rpy="0 0 0" />
-   </xacro:AERO_arm> 
+   </xacro:aero_arm> 
         
 </robot>

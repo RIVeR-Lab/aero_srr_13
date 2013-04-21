@@ -2,7 +2,7 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b AERO_arm 
+\b aero_arm_description
 
 <!-- 
 Provide an overview of your package.
