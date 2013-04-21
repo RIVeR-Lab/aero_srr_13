@@ -16,7 +16,7 @@
 
     <remap from="odom"     to="$(arg odom_topic)" />
     <remap from="imu_data" to="$(arg imu_topic)" />
-    <remap from="odom_combined" to=$(arg output_topic)"/>
+    <remap from="odom_combined" to="$(arg output_topic)"/>
   </node>
   
 </launch>
