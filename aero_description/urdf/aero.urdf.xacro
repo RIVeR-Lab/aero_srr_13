@@ -50,9 +50,17 @@ Husky A200
     <include filename="$(find husky_description)/urdf/parts.urdf.xacro" />
     <include filename="$(find aero_description)/urdf/manta_camera.urdf.xacro" />
     <include filename="$(find aero_description)/urdf/sick_laser.urdf.xacro" />
+
+
+    <xacro:macro name="static_transform" params="name parent xyz rpy">
+      <link name="${name}"/>
+      <joint name="joint_${name}" type="fixed">
+	<parent link="${parent}"/>
+	<child link="${name}"/>
+	<origin xyz="${xyz}" rpy="${rpy}" />
+      </joint>
+    </xacro:macro>
    
-    <include filename="$(find aero_arm_description)/urdf/aero_arm.urdf.xacro" />
-    
 	<!-- PROPERTY LIST -->
     <!--All units in m-kg-s-radians unit system -->
     <property name="M_PI" value="3.1415926535897931" />
@@ -220,9 +228,9 @@ Husky A200
    <gazebo reference="lms151_laser_link">
         <material>Gazebo/White</material>
     </gazebo>
-   <!-- Kinova Arm -->
-   <xacro:aero_arm parent="base_link_top_plate_part" prefix="arm">
-	<origin xyz="0.20 -0.12 0.38" rpy="0 0 0" />
-   </xacro:aero_arm> 
+
+
+
+    <xacro:static_transform parent="base_link_top_plate_part" name="arm_base" xyz="0.20 -0.12 0.38" rpy="0 0 0"/>
         
 </robot>
