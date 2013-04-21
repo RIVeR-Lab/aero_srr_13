@@ -45,7 +45,7 @@ void AeroBase::loadParams()
 	this->nh_.getParam(TF_RCAM_NAME, this->right_cam_);
 
 	this->lidar_    = "laser";
-	this->nh_.getParam(TF_LCAM_NAME, this->lidar_);
+	this->nh_.getParam(TF_LIDAR_NAME, this->lidar_);
 
 	this->arm_base_ = "arm_base";
 	this->nh_.getParam(TF_ARM_NAME, this->arm_base_);
