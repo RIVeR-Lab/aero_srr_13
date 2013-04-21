@@ -75,7 +75,10 @@ void AeroBase::buildTransforms()
 
 	//build the lidar base transform
 	this->to_lidar_.setOrigin(tf::Vector3(1.0,0.0,0.0));
-	this->to_lidar_.setRotation(tf::Quaternion(0,0,0,1));
+	tf::Quaternion lidarQ;
+	lidarQ.setRPY(3.1415962, 0, 0);
+	lidarQ.normalize();
+	this->to_lidar_.setRotation(lidarQ);
 
 	//build the right camera transform
 	this->to_right_lower_camera_.setOrigin(tf::Vector3(0.0,1.0,1.0));
