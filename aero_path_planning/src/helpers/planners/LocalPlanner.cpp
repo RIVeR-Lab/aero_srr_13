@@ -526,7 +526,7 @@ void LocalPlanner::visualizeTentacle(int speed_set, int tentacle)
 		converter.convertToEng(point, point);
 	}
 	pcl::toROSMsg(cloud , message);
-	message.header.frame_id = "/laser";
+	message.header.frame_id = "/robot";
 	message.header.stamp    = ros::Time::now();
 	this->tent_pub_.publish(message);
 }
