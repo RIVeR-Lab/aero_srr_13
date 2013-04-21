@@ -17,7 +17,7 @@
 		<arg name="global_frame" value="$(arg global_frame)"/>
  	</include>
 
-	<node package="LSM1xx" type="LMS100" name="LMS100" output="screen">
+	<node pkg="LMS1xx" type="LMS100" name="LMS100" output="screen">
 		<param name="host" value="192.168.0.1"/>
 		<param name="frame_id" value="$(arg laser_frame)"/>
 	</node>
