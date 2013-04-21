@@ -12,10 +12,10 @@
 #include<aero_srr_msgs/Command.h>
 
 //*********************LOCAL DEPENDENCIES**********************//
-#include<aero_path_planning/OryxPathPlanning.h>
+#include<aero_path_planning/utilities/AeroPathPlanning.h>
 #include"OryxPathPlannerConfig.h"
-#include<aero_path_planning/GlobalPlanner.h>
-#include<aero_path_planning/RRTCarrot.h>
+#include<aero_path_planning/planners/GlobalPlanner.h>
+#include<aero_path_planning/planning_strategies/AStarCarrot.h>
 
 
 using namespace aero_path_planning;
@@ -202,8 +202,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;
 	ros::NodeHandle p_nh("~");
 
-	ROS_INFO("Global Planner Configuration Parameters Set...");
-	aero_path_planning::RRTCarrot path(1);
+	aero_path_planning::AStarCarrot path;
 	aero_path_planning::GlobalPlanner planner(nh, p_nh, path);
 	ros::spin();
 }

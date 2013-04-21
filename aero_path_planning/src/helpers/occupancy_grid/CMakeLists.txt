@@ -1,0 +1,2 @@
+rosbuild_add_library(OccupancyGrid OccupancyGrid.cpp)
+target_link_libraries(OccupancyGrid AeroUtilities)

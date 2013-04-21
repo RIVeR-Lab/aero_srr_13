@@ -1,0 +1,23 @@
+<launch>
+  <arg name="pose_topic" default="/camera_boom_pose" />
+  <arg name="pose_control_service" default="/camera_boom_control" />
+
+  <!-- Launch Motor Controller Driver -->
+  <node pkg="hd_driver" type="hd_manager" name="aero_camera_boom_hd_manager">
+    <param name="feedback_rate" value="5" />
+    <param name="reference_frame" value="/boom" />
+    <param name="port" value="/dev/ttyUSB0" />
+    <param name="control_service" value="hd_camera_boom_control" />
+    <param name="info_topic" value="hd_camera_boom_feedback" />
+    <param name="pause_topic" value="/pause" />
+  </node>
+  <!-- Launch Camera Boom Controller -->
+  <node pkg="aero_base" type="aero_camera_boom_node" name="aero_camera_boom_node">
+    <param name="ticks_per_radian" value="300000" />
+    <param name="target_frame" value="/camera_boom_rot" />
+    <param name="hd_control_service" value="hd_camera_boom_control" />
+    <param name="pose_control_service" value="$(arg pose_control_service)" />
+    <param name="hd_feedback_topic" value="hd_camera_boom_feedback" />
+    <param name="pose_topic" value="$(arg pose_topic)" />
+  </node>
+</launch>

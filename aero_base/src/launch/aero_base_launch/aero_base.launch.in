@@ -1,40 +1,63 @@
 <launch>
+  <arg name="imu_topic" default="/imu" />
 
-	<!-- Load Parameters onto the server -->
-	<group ns="@R_NS@">
-		<group ns="@T_NS@">
-			<group ns="@T_IMU@">
-				<param name="frame" value="@T_IMU@"/>
-				
-			</group>
-			
-			<group ns="@T_ARM@">
-				<param name="frame" value="@T_ARM@"/>
-				
-			</group>
-			
-			<group ns="@T_LFC@">
-				<param name="frame" value="@T_LFC@"/>
-				
-			</group>
-			
-			<group ns="@T_RTC@">
-				<param name="frame" value="@T_RTC@"/>
-				
-			</group>
-			
-			<group ns="@T_BOM@">
-				<param name="frame" value="@T_BOM@"/>
-				
-			</group>
-			
-			<group ns="@T_LDR@">
-				<param name="frame" value="@T_LDR@"/>
-				
-			</group>
-		</group>
-	</group>
-	
-	<node name="aero_base_node" pkg="aero_base" type="aero_base_node" />
+  //Drive Base
+  <arg name="odom_topic" default="/odom" />
+  <arg name="velocity_command_topic" default="/cmd_vel" />
+
+  //Camera Boom
+  <arg name="camera_boom_pose_topic" default="/camera_boom_pose" />
+  <arg name="camera_boom_control_service" default="/camer_boom_control" />
+
+
+  <!-- Load Parameters onto the server -->
+  <group ns="@R_NS@">
+    <group ns="@T_NS@">
+      <group ns="@T_IMU@">
+	<param name="frame" value="@T_IMU@"/>
+      </group>
+      
+      <group ns="@T_ARM@">
+	<param name="frame" value="@T_ARM@"/>
+      </group>
+      
+      <group ns="@T_LFC@">
+	<param name="frame" value="@T_LFC@"/>
+      </group>
+      
+      <group ns="@T_RTC@">
+	<param name="frame" value="@T_RTC@"/>
+      </group>
+      
+      <group ns="@T_BOM@">
+	<param name="frame" value="@T_BOM@"/>
+      </group>
+      
+      <group ns="@T_LDR@">
+	<param name="frame" value="@T_LDR@"/>
+      </group>
+    </group>
+  </group>
+  
+  <node name="aero_base_node" pkg="aero_base" type="aero_base_node" />
+
+  <!-- Launch IMU Driver -->
+  <node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
+    <param name="device_id" value="kvh-1750" />
+    <param name="imu_topic" value="$(arg imu_topic)" />
+  </node>
+
+  <!-- Launch Driver Controller and Drive motor driver -->
+  <include file="$(find aero_base)/launch/aero_drive_node.launch">
+    <arg name="odom_topic" value="$(arg odom_topic)" />
+    <arg name="odom_frame" value="/odom" />
+    <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
+  </include>
+
+  <!-- Launch Camera Boom Controller and motor driver -->
+  <include file="$(find aero_base)/launch/aero_camera_boom_node.launch">
+    <arg name="pose_topic" value="$(arg camera_boom_pose_topic)" />
+    <arg name="pose_control_service" value="$(arg camera_boom_control_service)" />
+  </include>
 
 </launch>

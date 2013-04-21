@@ -12,7 +12,7 @@
 #include<gtest/gtest.h>
 #include<boost/foreach.hpp>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/CarrotPathFinder.h>
+#include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
 //**********************NAMESPACES*****************************//
 using namespace aero_path_planning;
 
