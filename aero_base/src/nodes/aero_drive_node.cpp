@@ -20,7 +20,8 @@ static ros::Publisher odom_pub;
 static roboteq_driver::RoboteqManagerClient* motor_controller;
 double rotations_per_meter = 1.0;
 double base_width = 0.6;
-std::string odom_frame("/odom");
+std::string pose_frame("/odom");
+std::string twist_frame("/base_footprint");
 
 /**
  * The function that actually commands the robot to drive
@@ -48,11 +49,12 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   double u2 = right.velocity/(rotations_per_meter*60);
 
   nav_msgs::Odometry odom_msg;
+  odom_msg.header.frame_id = pose_frame;
   odom_msg.pose.covariance.assign(-1);
+  odom_msg.child_frame_id = twist_frame;
   odom_msg.twist.covariance.assign(-1);
   odom_msg.twist.covariance[0] = 1;
   odom_msg.twist.covariance[35] = 1;
-  odom_msg.child_frame_id = odom_frame;
   odom_msg.twist.twist.linear.x = (u1 + u2)/2;
   odom_msg.twist.twist.angular.z = (u2 - u1)/(base_width/2);
   odom_pub.publish(odom_msg);
@@ -83,8 +85,10 @@ int main(int argc, char **argv) {
 	if(!ros::param::get("~odom_topic", odom_topic))
 	  ROS_WARN_STREAM("Parameter <~odom_topic> not set. Using default value '"<<odom_topic<<"'");
 
-	if(!ros::param::get("~odom_frame", odom_frame))
-	  ROS_WARN_STREAM("Parameter <~odom_frame> not set. Using default value '"<<odom_frame<<"'");
+	if(!ros::param::get("~pose_frame", pose_frame))
+	  ROS_WARN_STREAM("Parameter <~pose_frame> not set. Using default value '"<<pose_frame<<"'");
+	if(!ros::param::get("~twist_frame", twist_frame))
+	  ROS_WARN_STREAM("Parameter <~twist_frame> not set. Using default value '"<<twist_frame<<"'");
 
 
 	motor_controller = new roboteq_driver::RoboteqManagerClient(nh, roboteq_manager_cmd_topic);
