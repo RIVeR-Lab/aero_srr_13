@@ -22,6 +22,20 @@ PIDController::PIDController(float p, float i, float d, double error) {
 	old_err_counter++;
 	old_err_position++;
 }
+void PIDController::SetP(float p) {
+	this->kp = p;
+}
+void PIDController::SetI(float i) {
+	this->ki = i;
+}
+void PIDController::SetD(float d) {
+	this->kd = d;
+}
+void PIDController::SetPID(float p,float i,float d) {
+	this->kp = p;
+	this->ki = i;
+	this->kd = d;
+}
 
 double PIDController::PIDUpdate(double error) {
 	double output = 0;

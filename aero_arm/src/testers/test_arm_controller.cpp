@@ -16,18 +16,26 @@
 
 //License File
 #include <aero_arm/arm_controller.h>
+#include <dynamic_reconfigure/server.h>
+#include <aero_arm/TestVelocityConfig.h>
 
 using namespace std;
 ros::Publisher pub;
 tf::TransformListener *listenerptr;
 
+float x_pos = 0;
+float y_pos = 0;
+float z_pos = 0;
+
+
+
 void TimerCallback(const ros::TimerEvent&)
 {
 	aero_srr_msgs::ObjectLocationMsg test_msg;
 
-			test_msg.pose.pose.position.x = 0.45;
-			test_msg.pose.pose.position.y = 0.2;
-			test_msg.pose.pose.position.z = 0.1;
+			test_msg.pose.pose.position.x = x_pos;
+			test_msg.pose.pose.position.y = y_pos;
+			test_msg.pose.pose.position.z = z_pos;
 
 			tf::Quaternion q;
 
@@ -81,6 +89,17 @@ void TimerCallback2(const ros::TimerEvent&)
 
 
 }
+
+void callback(aero_arm::TestVelocityConfig &config, uint32_t level) {
+
+
+
+	 x_pos = config.X_Position;
+	 y_pos = config.Y_Position;
+	 z_pos = config.Z_Position;
+
+
+}
 int main(int argc, char **argv) {
 
 	/* Set up ROS */
@@ -88,17 +107,22 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string Object("Object"); ///String containing the topic name for cartesian commands
+	std::string ObjectPose("ObjectPose"); ///String containing the topic name for cartesian commands
 
-	 pub = nh.advertise<aero_srr_msgs::ObjectLocationMsg>(Object,
+	 pub = nh.advertise<aero_srr_msgs::ObjectLocationMsg>(ObjectPose,
 			2);
 	 tf::TransformListener listener;
 	 listenerptr = &listener;
 
-	ros::Timer timer = nh.createTimer(ros::Duration(10.0),TimerCallback);
+	ros::Timer timer = nh.createTimer(ros::Duration(0.1),TimerCallback);
 
-	ros::Timer timer2 = nh.createTimer(ros::Duration(1.0),TimerCallback2);
+	//ros::Timer timer2 = nh.createTimer(ros::Duration(1.0),TimerCallback2);
 
+	  dynamic_reconfigure::Server<aero_arm::TestVelocityConfig> server;
+	  dynamic_reconfigure::Server<aero_arm::TestVelocityConfig>::CallbackType f;
+
+	  f = boost::bind(&callback, _1, _2);
+	  server.setCallback(f);
 	ros::spin();
 }
 

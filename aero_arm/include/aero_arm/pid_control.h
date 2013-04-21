@@ -21,9 +21,14 @@ class PIDController
 {
 public:
 	PIDController(float p, float i, float d, double error);
-	~PIDController();
 
 	double PIDUpdate(double error);
+
+	void SetP(float p);
+	void SetI(float i);
+	void SetD(float d);
+	void SetPID(float p,float i,float d);
+
 private:
 	double Proportional(double error);
 	double Integral(double error);

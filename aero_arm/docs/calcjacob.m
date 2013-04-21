@@ -21,20 +21,55 @@ J7 = [1 0 0 0; 0 1 0 0; 0 0 1 -0.1850; 0 0 0 1];
 
 
 
-Trans = J1*J2*J3*J3_Offset*J4*J5*J6*J7;
+T07 = J1*J2*J3*J3_Offset*J4*J5*J6*J7;
 
-V = [A1 A2 A3 A4 A5 A6];
 
-jacob = jacobian(Trans);
 
-num_jacob = subs(jacob, A1, 30*pi/180);
-num_jacob=subs(num_jacob, A2, 15*pi/180);
-num_jacob=subs(num_jacob, A3, 10*pi/180);
-num_jacob=subs(num_jacob, A4, 4*pi/180);
-num_jacob=subs(num_jacob, A5, 20*pi/180);
-num_jacob=subs(num_jacob, A6, 30*pi/180);
 
-num_jacob
+
+T01 = J1;
+T02 = T01 * J2;
+T03 = T02 * J3;
+T04 = T03 * J4*J3_Offset;
+T05 = T04 * J5;
+T06 = T05 * J6;
+
+FX = T07(1,4);
+FY = T07(2,4);
+FZ = T07(3,4);
+
+
+R1 = T01(1:3,3);
+R2 = T02(1:3,3);
+R3 = T03(1:3,3);
+R4 = T04(1:3,3);
+R5 = T05(1:3,3);
+R6 = T06(1:3,3);
+
+Jacobian = [diff(FX,A1) diff(FX,A2) diff(FX,A3) diff(FX,A4) diff(FX,A5) diff(FX,A6);
+    diff(FY,A1) diff(FY,A2) diff(FY,A3) diff(FY,A4) diff(FY,A5) diff(FY,A6);
+    diff(FZ,A1) diff(FZ,A2) diff(FZ,A3) diff(FZ,A4) diff(FZ,A5) diff(FZ,A6);
+    R1          R2          R3          R4          R5          R6         ];
+
+Jacobian_inv = inv(Jacobian);
+
+i1=Jacobian_inv(1,1)
+i2 = Jacobian_inv(1,2)
+i3 = Jacobian_inv(1,3)
+i4 = Jacobian_inv(1,4)
+i5 = Jacobian_inv(1,5)
+i6 = Jacobian_inv(1,6)
+
+
+
+%num_jacob = subs(Jacobian, A1, 30*pi/180);
+%num_jacob=subs(num_jacob, A2, 15*pi/180);
+%num_jacob=subs(num_jacob, A3, 10*pi/180);
+%num_jacob=subs(num_jacob, A4, 4*pi/180);
+%num_jacob=subs(num_jacob, A5, 20*pi/180);
+%num_jacob=subs(num_jacob, A6, 30*pi/180);
+
+%num_jacob
 %inv(jacob)
 
 end

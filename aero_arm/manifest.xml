@@ -13,7 +13,9 @@
   <depend package="geometry_msgs"/>
     <depend package="aero_srr_msgs"/>
       <depend package="jaco_driver"/>
-  
+	<rosdep name="eigen" />
+        <depend package="dynamic_reconfigure"/>
+      
 </package>
 
 
