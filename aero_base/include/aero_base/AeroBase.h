@@ -13,6 +13,7 @@
 #include <ros/ros.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
+#include <nav_msgs/Odometry.h>
 //************ LOCAL DEPENDANCIES ****************//
 
 //***********    NAMESPACES     ****************//
@@ -36,6 +37,8 @@ private:
 	 * @param event Timer event with skew info
 	 */
 	void updateCB(const ros::TimerEvent& event);
+
+	void odomCB(const nav_msgs::OdometryConstPtr& message);
 
 	ros::NodeHandle nh_;
 	ros::NodeHandle p_nh_;
@@ -71,6 +74,13 @@ private:
 	std::string lidar_;
 	tf::TransformBroadcaster to_lidar_bc_;
 	tf::Transform            to_lidar_;
+
+	//Odom to world transform
+	std::string world_;
+	std::string odom_;
+	std::string odom_topic_;
+	tf::TransformBroadcaster to_world_bc_;
+	ros::Subscriber          odom_sub_;
 };
 
 };

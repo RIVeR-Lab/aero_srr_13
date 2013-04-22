@@ -4,6 +4,8 @@
   //Drive Base
   <arg name="odom_topic" default="/odom" />
   <arg name="velocity_command_topic" default="/cmd_vel" />
+  <arg name="drive_pose_frame" default="/odom" />
+  <arg name="drive_twist_frame" default="/base_footprint" />
 
   //Camera Boom
   <arg name="camera_boom_pose_topic" default="/camera_boom_pose" />
@@ -50,7 +52,8 @@
   <!-- Launch Driver Controller and Drive motor driver -->
   <include file="$(find aero_base)/launch/aero_drive_node.launch">
     <arg name="odom_topic" value="$(arg odom_topic)" />
-    <arg name="odom_frame" value="/odom" />
+    <arg name="pose_frame" value="$(arg drive_pose_frame)" />
+    <arg name="twist_frame" value="$(arg drive_twist_frame)" />
     <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
   </include>
 

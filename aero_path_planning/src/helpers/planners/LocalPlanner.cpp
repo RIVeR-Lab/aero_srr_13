@@ -17,9 +17,9 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																								nh_(nh),
-																								p_nh_(p_nh),
-																								occupancy_buffer_(2)
+																												nh_(nh),
+																												p_nh_(p_nh),
+																												occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -370,10 +370,23 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
 	if(should_plan_)
 	{
-		//Grab the next occupancy grid to process
+		//Grab the next occupancy grid to process if we've recieved new data from global planner
 		if(!this->occupancy_buffer_.empty())
 		{
-			OccupancyGrid	working_grid= this->occupancy_buffer_.front();
+			this->working_grid_= this->occupancy_buffer_.front();
+			this->occupancy_buffer_.pop_front();
+		}
+		//Build a working grid to apply the LIDAR patch to
+		OccupancyGrid working_grid(this->working_grid_);
+		//If we actually have a working grid, plan on it
+		if(working_grid.size()>0)
+		{
+			//If we have a LIDAR patch, apply it
+			if(this->lidar_patch_!= PointCloudPtr())
+			{
+				working_grid.setPointTrait(*this->lidar_patch_);
+			}
+
 			int speedset_idx = 0;
 			int tentacle_idx = 0;
 
@@ -383,8 +396,8 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
 			this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
 			visualizeTentacle(speedset_idx, tentacle_idx);
-			this->occupancy_buffer_.pop_front();
 		}
+
 	}
 	else
 	{
@@ -469,7 +482,22 @@ void LocalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 
 void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
+	PointCloudPtr lidar_patch(new PointCloud());
+	pcl::PointCloud<pcl::PointXYZ> raw_cloud;
+	pcl::fromROSMsg(*message, raw_cloud);
 
+#pragma omp parallel for
+	for(int i=0; i<(int)raw_cloud.size(); i++)
+	{
+		Point point;
+		point.x = raw_cloud.at(i).x;
+		point.y = raw_cloud.at(i).y;
+		point.z = raw_cloud.at(i).z;
+		point.rgba = OBSTACLE;
+		lidar_patch->push_back(point);
+	}
+
+	this->lidar_patch_ = lidar_patch;
 }
 
 
@@ -510,7 +538,7 @@ void LocalPlanner::twist(double x_dot, double omega)
 		omega = omega/std::abs(omega)*0.1;
 	}
 	message.linear.x  = x_dot;
-	message.angular.z = omega;
+	message.angular.z = -omega;
 	this->vel_pub_.publish(message);
 }
 
@@ -526,7 +554,7 @@ void LocalPlanner::visualizeTentacle(int speed_set, int tentacle)
 		converter.convertToEng(point, point);
 	}
 	pcl::toROSMsg(cloud , message);
-	message.header.frame_id = "/laser";
+	message.header.frame_id = "/robot";
 	message.header.stamp    = ros::Time::now();
 	this->tent_pub_.publish(message);
 }
