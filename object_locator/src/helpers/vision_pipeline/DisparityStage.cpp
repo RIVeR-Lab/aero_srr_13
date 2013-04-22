@@ -133,17 +133,13 @@ void DisparityStage::computeRectifiedImage(const sensor_msgs::Image& msg, const 
 void DisparityStage::computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRight, Mat_t& disparity)const
 {
 	Mat_t preDisp(disparity);
-	cv::imshow("Recitifed image", preDisp);
-	cv::waitKey(3);
+	NODELET_INFO_STREAM("preDisp(disparity) size : ("<<preDisp.cols<< ","<<preDisp.rows<<") ");
 	cv::StereoSGBM stereoSGBM(minDisp_, numDisp_, SADSize_, P1_, P2_,
 			disp12MaxDiff_, preFilterCap_, uniqueness_, specSize_, specRange_, true);
 	stereoSGBM(rectLeft, rectRight, preDisp );
-	cv::imshow("Pre-Norm", preDisp);
-	cv::waitKey(3);
+	NODELET_INFO_STREAM("preDisp SGBM size : ("<<preDisp.cols<< ","<<preDisp.rows<<") ");
 	normalize( preDisp, disparity, 0, 256, CV_MINMAX );
-	cv::imshow("PostNorm", disparity);
-	cv::waitKey(3);
-
+	NODELET_INFO_STREAM("disparity SGBM size : ("<<disparity.cols<< ","<<disparity.rows<<") ");
 }
 
 void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_imgs, Mat_t& disparity, object_locator::SyncImagesAndDisparity& msg)const
