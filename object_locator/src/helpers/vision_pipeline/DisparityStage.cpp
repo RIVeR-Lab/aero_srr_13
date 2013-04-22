@@ -137,11 +137,8 @@ void DisparityStage::computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRi
 	cv::StereoSGBM stereoSGBM(minDisp_, numDisp_, SADSize_, P1_, P2_,
 			disp12MaxDiff_, preFilterCap_, uniqueness_, specSize_, specRange_, true);
 	stereoSGBM(rectLeft, rectRight, preDisp );
-	imshow("prenorm", preDisp);
-	cv::waitKey(3);
+
 	normalize( preDisp, disparity, 0, 256, CV_MINMAX );
-	imshow("postNorm", disparity);
-	cv::waitKey(3);
 
 }
 
