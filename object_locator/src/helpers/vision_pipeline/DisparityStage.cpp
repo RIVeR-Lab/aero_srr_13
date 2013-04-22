@@ -89,7 +89,7 @@ void DisparityStage::recieveImageCb(const object_locator::SyncImageMsgConstPtr& 
 	int img_width = msg->left_image.width;
 	Mat_t left_rect(img_height, img_width,CV_8U);
 	Mat_t right_rect(img_height, img_width,CV_8U);
-	Mat_t disparity(img_height,img_width, CV_16S);
+	Mat_t disparity(img_height,img_width, CV_16UC1);
 	computeRectifiedImage(msg->left_image, msg->left_info,left_rect);
 	computeRectifiedImage(msg->right_image, msg->right_info,right_rect);
 	computeDisparity(left_rect, right_rect,disparity);
@@ -149,7 +149,7 @@ void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_img
 	sensor_msgs::Image disparity_image;
 	carrier.toImageMsg(disparity_image);
 	msg.disparity_image = disparity_image;
-	msg.disparity_image.encoding  = enc::MONO8;
+	msg.disparity_image.encoding  = enc::MONO16;
 	msg.images          = raw_imgs;
 
 }
