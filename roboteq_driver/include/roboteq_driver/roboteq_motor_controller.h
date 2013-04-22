@@ -26,6 +26,8 @@ class RoboteqMotorController{
   const static MotorMode MOTOR_MODE_POSITION_TRACKING = 4;
   const static MotorMode MOTOR_MODE_TORQUE = 5;
 
+  const static int32_t counts_per_pulse = 4;
+
   /**
    * The max bound of the go command
    */

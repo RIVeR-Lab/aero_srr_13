@@ -18,7 +18,7 @@
 
 
 static ros::Publisher odom_pub;
-ros::Publisher joint_pub;
+static ros::Publisher joint_pub;
 static roboteq_driver::RoboteqManagerClient* motor_controller;
 double rotations_per_meter = 1.0;
 double actual_rotations_per_meter = 1.0;
@@ -48,10 +48,10 @@ void twistCallback(const geometry_msgs::Twist::ConstPtr& msg) {
 void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& msg) {
   roboteq_driver::RoboteqMotorInfo left = msg->motors[0];
   roboteq_driver::RoboteqMotorInfo right = msg->motors[1];
-  double t1 = -left.position/rotations_per_meter*actual_rotations_per_meter;
-  double t2 = right.position/rotations_per_meter*actual_rotations_per_meter;
-  double w1 = -left.velocity/rotations_per_meter*actual_rotations_per_meter/60;
-  double w2 = right.velocity/rotations_per_meter*actual_rotations_per_meter/60;
+  double t1 = -left.position/rotations_per_meter*actual_rotations_per_meter*M_PI*2;
+  double t2 = right.position/rotations_per_meter*actual_rotations_per_meter*M_PI*2;
+  double w1 = -left.velocity/rotations_per_meter*actual_rotations_per_meter/60*M_PI*2;
+  double w2 = right.velocity/rotations_per_meter*actual_rotations_per_meter/60*M_PI*2;
   double u1 = -left.velocity/(rotations_per_meter*60);
   double u2 = right.velocity/(rotations_per_meter*60);
 
