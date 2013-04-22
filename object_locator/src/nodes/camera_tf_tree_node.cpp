@@ -20,7 +20,7 @@ public:
 	void broadcastTimer(const ros::TimerEvent& event)
 	{
 		tf::Transform camera, armbase;
-		camera.setOrigin(tf::Vector3(.21, 0, .26));
+		camera.setOrigin(tf::Vector3(1.8161, 0, 0.6858));
 		tf::Quaternion cam_q;
 		cam_q.setEuler(3.14159/2.0+.4,0, -3.14159/2.0);
 		camera.setRotation(cam_q);
