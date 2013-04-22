@@ -12,9 +12,9 @@
       <axis xyz="0 1 0" />
       <insert_block name="origin" />
       <parent link="${parent}"/>
-      <child link="${name}_link"/>
+      <child link="${name}"/>
     </joint>
-    <link name="${name}_link" type="laser">
+    <link name="${name}" type="laser">
       <inertial>
         <mass value="0.001" />
         <origin xyz="0 0 0" rpy="0 0 0" />
