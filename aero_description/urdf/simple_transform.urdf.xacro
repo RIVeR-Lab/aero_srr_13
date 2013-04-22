@@ -13,13 +13,24 @@
       </joint>
     </xacro:macro>
 
-    <xacro:macro name="pan_transform" params="name parent xyz rpy">
+    <xacro:macro name="continuouspan_transform" params="name parent xyz rpy">
       <link name="${name}"/>
       <joint name="${name}_joint" type="continuous">
 	<parent link="${parent}"/>
 	<child link="${name}"/>
 	<origin xyz="${xyz}" rpy="${rpy}" />
 	<axis xyz="0 0 1"/>
+      </joint>
+    </xacro:macro>
+
+    <xacro:macro name="revolute_pan_transform" params="name parent xyz rpy lower_limit upper_limit">
+      <link name="${name}"/>
+      <joint name="${name}_joint" type="revolute">
+	<parent link="${parent}"/>
+	<child link="${name}"/>
+	<origin xyz="${xyz}" rpy="${rpy}" />
+	<axis xyz="0 0 1"/>
+	<limit lower="${lower_limit}" upper="${upper_limit}" effort="1000" velocity="6"/>
       </joint>
     </xacro:macro>
   
