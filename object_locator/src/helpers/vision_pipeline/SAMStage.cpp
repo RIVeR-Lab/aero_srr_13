@@ -256,10 +256,10 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 			break;
 
 		}
-		std::cout << "I Got A Detection: " << std::endl << "X:"
+		NODELET_INFO_STREAM("I Got A Detection: " << std::endl << "X:"
 				<< detection_.getX() << ", Y: " << detection_.getY() << ", Z: "
 				<< detection_.getZ() << ", " << confidence << ", of type: "
-				<< typeString << std::endl;
+				<< typeString);
 
 	}
 }
