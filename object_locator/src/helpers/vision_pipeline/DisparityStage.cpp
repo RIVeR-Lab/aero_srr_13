@@ -127,17 +127,22 @@ void DisparityStage::computeRectifiedImage(const sensor_msgs::Image& msg, const 
 	Mat_t img_gray;
 	cv::cvtColor(img_ptr->image, img_gray, CV_BGR2GRAY);
 	remap(img_gray,rectified_img, mx, my, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-	cv::imshow("Recitifed image", rectified_img);
-	cv::waitKey(3);
+
 }
 
 void DisparityStage::computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRight, Mat_t& disparity)const
 {
 	Mat_t preDisp(disparity);
+	cv::imshow("Recitifed image", preDisp);
+	cv::waitKey(3);
 	cv::StereoSGBM stereoSGBM(minDisp_, numDisp_, SADSize_, P1_, P2_,
 			disp12MaxDiff_, preFilterCap_, uniqueness_, specSize_, specRange_, true);
 	stereoSGBM(rectLeft, rectRight, preDisp );
+	cv::imshow("Pre-Norm", preDisp);
+	cv::waitKey(3);
 	normalize( preDisp, disparity, 0, 256, CV_MINMAX );
+	cv::imshow("PostNorm", disparity);
+	cv::waitKey(3);
 
 }
 
