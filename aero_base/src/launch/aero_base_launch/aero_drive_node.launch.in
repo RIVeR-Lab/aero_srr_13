@@ -6,7 +6,7 @@
 
   <!-- Launch Motor Controller Driver -->
   <node pkg="roboteq_driver" type="roboteq_manager" name="aero_drive_roboteq_manager">
-    <param name="max_rpm" value="500" />
+    <param name="max_rpm" value="1000" />
     <param name="ppr" value="5000" />
     <param name="feedback_rate" value="10" />
     <param name="control_rate" value="10" />
@@ -17,7 +17,7 @@
   </node>
   <!-- Launch Driver Controller -->
   <node pkg="aero_base" type="aero_drive_node" name="aero_drive_node">
-    <param name="rotations_per_meter" value="8" />
+    <param name="rotations_per_meter" value="15" />
     <param name="actual_rotations_per_meter" value="1.0" />
     <param name="base_width" value="0.6" />
     <param name="roboteq_manager_cmd_topic" value="drive_cmd" />

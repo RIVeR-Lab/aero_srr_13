@@ -56,8 +56,8 @@ void RoboteqMotorController::open(std::string port){
 	setConfig(_AMOD, 4, 1);
 
 	//set motors max rpm
-	//setConfig(_MXRPM, 1, maxRPM1_);
-	//setConfig(_MXRPM, 2, maxRPM2_);
+	setConfig(_MXRPM, 1, maxRPM1_);
+	setConfig(_MXRPM, 2, maxRPM2_);
 
 
 	//Initialize to initial values
