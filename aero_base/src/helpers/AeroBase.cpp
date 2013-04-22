@@ -50,12 +50,26 @@ void AeroBase::loadParams()
 	this->arm_base_ = "arm_base";
 	this->nh_.getParam(TF_ARM_NAME, this->arm_base_);
 
+
+	this->odom_ = "odom";
+	this->world_= "world";
+	this->p_nh_.getParam(this->odom_, this->odom_);
+	this->p_nh_.getParam(this->world_, this->world_);
+	this->odom_ = "robot"
+
+	tf::Transform initWorldTf;
+	initWorldTf.setOrigin(tf::Vector3(1.0, 0.0, 0.0));
+	initWorldTf.setRotation(tf::Quaternion(0,0,0,1));
+	this->to_world_bc_.sendTransform(tf::StampedTransform(initWorldTf, ros::Time::now(), this->odom_, this->world_));
+
 }
 
 void AeroBase::registerTimers()
 {
 	ROS_INFO("Registering Timers...");
 	this->update_timer_ = this->nh_.createTimer(ros::Duration(1.0/10.0), &AeroBase::updateCB, this);
+
+	this->odom_sub_ = this->nh_.subscribe(odom_topic_, 2, &AeroBase::odomCB, this);
 }
 
 void AeroBase::buildTransforms()
@@ -97,4 +111,16 @@ void AeroBase::updateCB(const ros::TimerEvent& event)
 	this->to_lidar_bc_.sendTransform(tf::StampedTransform(this->to_lidar_, ros::Time::now(), this->robot_, this->lidar_));
 	this->to_left_lower_camera_bc_.sendTransform(tf::StampedTransform(this->to_left_lower_camera_, ros::Time::now(), this->robot_, this->left_cam_));
 	this->to_right_lower_camera_bc_.sendTransform(tf::StampedTransform(this->to_right_lower_camera_, ros::Time::now(), this->robot_, this->right_cam_));
+}
+
+void AeroBase::odomCB(const nav_msgs::OdometryConstPtr& message)
+{
+	tf::Transform odomTF;
+	tf::Point pose;
+	tf::Quaternion orientation;
+	tf::pointMsgToTF(message->pose.pose.position, pose);
+	tf::quaternionMsgToTF(message->pose.pose.orientation, orientation);
+	odomTF.setOrigin(pose);
+	odomTF.setRotation(orientation);
+	this->to_world_bc_.sendTransform(tf::StampedTransform(odomTF, message->header.stamp, this->odom_, this->world_));
 }
