@@ -4,8 +4,10 @@
       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
       xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <xacro:macro name="static_transform" params="name parent xyz rpy">
-      <link name="${name}"/>
+    <xacro:macro name="static_transform" params="name parent xyz rpy *visual">
+      <link name="${name}">
+	<xacro:insert_block name="visual" />
+      </link>
       <joint name="${name}_joint" type="fixed">
 	<parent link="${parent}"/>
 	<child link="${name}"/>
@@ -13,8 +15,10 @@
       </joint>
     </xacro:macro>
 
-    <xacro:macro name="continuouspan_transform" params="name parent xyz rpy">
-      <link name="${name}"/>
+    <xacro:macro name="continuouspan_transform" params="name parent xyz rpy *visual">
+      <link name="${name}">
+	<xacro:insert_block name="visual" />
+      </link>
       <joint name="${name}_joint" type="continuous">
 	<parent link="${parent}"/>
 	<child link="${name}"/>
@@ -23,8 +27,10 @@
       </joint>
     </xacro:macro>
 
-    <xacro:macro name="revolute_pan_transform" params="name parent xyz rpy lower_limit upper_limit">
-      <link name="${name}"/>
+    <xacro:macro name="revolute_pan_transform" params="name parent xyz rpy lower_limit upper_limit *visual">
+      <link name="${name}">
+	<xacro:insert_block name="visual" />
+      </link>
       <joint name="${name}_joint" type="revolute">
 	<parent link="${parent}"/>
 	<child link="${name}"/>

@@ -46,8 +46,8 @@ Husky A200
        
   <!-- Included URDF/XACRO Files -->
   <include filename="$(find husky_description)/urdf/materials.urdf.xacro" />
-  <include filename="$(find husky_description)/urdf/wheel.urdf.xacro" />
-  <include filename="$(find husky_description)/urdf/parts.urdf.xacro" />
+  <include filename="$(find aero_description)/urdf/wheel.urdf.xacro" />
+  <include filename="$(find aero_description)/urdf/parts.urdf.xacro" />
 
   <!-- PROPERTY LIST -->
   <!--All units in m-kg-s-radians unit system -->
@@ -119,9 +119,13 @@ Husky A200
       </inertial>
       
       <visual>
-	<origin xyz="0 0 ${base_z_origin_offset}" rpy="0 0 0" />
+<!--	<origin xyz="0 0 ${base_z_origin_offset}" rpy="0 0 0" />
 	<geometry>
 	  <mesh filename="package://husky_description/Media/models/base_link.stl" />
+	</geometry>-->
+	<origin xyz="0 0 ${wheel_x_size/2 - base_z_origin_to_wheel_origin - 0.02}" rpy="0 0 0 " />
+	<geometry>
+	  <box size = "${base_x_size+0.02} ${base_y_size} ${base_z_size + 0.02}"/> <!--making it slightly bigger in x and z direction-->
 	</geometry>
 	<material name="Black" />
       </visual>
