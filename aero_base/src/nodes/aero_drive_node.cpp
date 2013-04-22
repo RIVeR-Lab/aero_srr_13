@@ -50,8 +50,8 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   roboteq_driver::RoboteqMotorInfo right = msg->motors[1];
   double t1 = -left.position/rotations_per_meter*actual_rotations_per_meter;
   double t2 = right.position/rotations_per_meter*actual_rotations_per_meter;
-  double w1 = -left.velocity/rotations_per_meter*actual_rotations_per_meter;
-  double w2 = right.velocity/rotations_per_meter*actual_rotations_per_meter;
+  double w1 = -left.velocity/rotations_per_meter*actual_rotations_per_meter/60;
+  double w2 = right.velocity/rotations_per_meter*actual_rotations_per_meter/60;
   double u1 = -left.velocity/(rotations_per_meter*60);
   double u2 = right.velocity/(rotations_per_meter*60);
 
