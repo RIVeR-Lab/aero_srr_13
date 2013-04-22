@@ -27,7 +27,7 @@ public:
 		broadcastCam.sendTransform(tf::StampedTransform(camera, ros::Time::now(),  "/world", "/stereo_bottom/center"));
 
 
-		armbase.setOrigin(tf::Vector3(0, 0, .2));
+		armbase.setOrigin(tf::Vector3(0, 0, .1229));
 		armbase.setRotation(tf::Quaternion(0, 0, 0));
 		broadcastArm.sendTransform(tf::StampedTransform(armbase, ros::Time::now(),  "/world", "/arm_base"));
 	}

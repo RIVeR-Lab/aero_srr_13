@@ -184,8 +184,8 @@ void SAMStage::fetchAndRetrieve(const sensor_msgs::Image& msg) {
 //
 //
 //	}
-	cv::imshow(WINDOWLeft_, img->image);
-	cv::waitKey(3);
+//	cv::imshow(WINDOWLeft_, img->image);
+//	cv::waitKey(3);
 }
 
 void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
@@ -197,8 +197,8 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
-	cv::imshow(WINDOWDisp_, disp->image);
-	cv::waitKey(3);
+//	cv::imshow(WINDOWDisp_, disp->image);
+//	cv::waitKey(3);
 	this->stereo_model_.fromCameraInfo(msg->images.left_info, msg->images.right_info);
 	for (int i = 0; i < (int) detection_list_.size(); i++) {
 		//		cout << endl;

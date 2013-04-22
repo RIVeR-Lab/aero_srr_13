@@ -127,7 +127,8 @@ void DisparityStage::computeRectifiedImage(const sensor_msgs::Image& msg, const 
 	Mat_t img_gray;
 	cv::cvtColor(img_ptr->image, img_gray, CV_BGR2GRAY);
 	remap(img_gray,rectified_img, mx, my, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-
+	cv::imshow("Recitifed image", rectified_img);
+	cv::waitKey(3);
 }
 
 void DisparityStage::computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRight, Mat_t& disparity)const
