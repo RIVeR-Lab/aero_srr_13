@@ -29,11 +29,11 @@ int main(int argc, char **argv){
 	for(double time = 0; time<runTime; time+=0.1){
 	  controller.setRPM(1, leftSpeed);
 	  controller.setRPM(2, rightSpeed);
-	  int32_t left, right;
+	  double left, right;
 	  double leftf, rightf;
 	  controller.getPosition(1, left);
 	  controller.getPosition(2, right);
-	  printf("Pos: %i, %i\n", left, right);
+	  printf("Pos: %f, %f\n", left, right);
 	  controller.getCurrent(1, leftf);
 	  controller.getCurrent(2, rightf);
 	  printf("Current: %f, %f\n", leftf, rightf);

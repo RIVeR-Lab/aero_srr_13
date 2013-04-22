@@ -230,19 +230,30 @@ void RoboteqMotorController::getTemp(uint8_t chan, double& value){
     DRIVER_EXCEPT(Exception, "Invalid motor channel");
   value = an*TEMP_SCALE+TEMP_OFFSET;
 }
-void RoboteqMotorController::getPosition(uint8_t chan, int32_t& value){
-  getValue(_C, chan, value);
+void RoboteqMotorController::getPosition(uint8_t chan, double& value){
+  if(chan==1){
+    int32_t raw_value;
+    getValue(_C, chan, raw_value);
+    value = raw_value/ppr1_;
+  }
+  else if(chan==2){
+    int32_t raw_value;
+    getValue(_C, chan, raw_value);
+    value = raw_value/ppr2_;
+  }
+  else
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
 void RoboteqMotorController::getVelocity(uint8_t chan, double& value){
   if(chan==1){
     int32_t raw_value;
     getValue(_S, chan, raw_value);
-    value = raw_value*maxRPM1_/GO_COMMAND_BOUND;
+    value = raw_value;//*maxRPM1_/GO_COMMAND_BOUND;
   }
   else if(chan==2){
     int32_t raw_value;
     getValue(_S, chan, raw_value);
-    value = raw_value*maxRPM1_/GO_COMMAND_BOUND;
+    value = raw_value;//*maxRPM1_/GO_COMMAND_BOUND;
   }
   else
     DRIVER_EXCEPT(Exception, "Invalid motor channel");
