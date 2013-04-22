@@ -149,7 +149,7 @@ void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_img
 	sensor_msgs::Image disparity_image;
 	carrier.toImageMsg(disparity_image);
 	msg.disparity_image = disparity_image;
-	msg.disparity_image.encoding  = enc::MONO16;
+	msg.disparity_image.encoding  = enc::TYPE_16SC1;
 	msg.images          = raw_imgs;
 
 }
