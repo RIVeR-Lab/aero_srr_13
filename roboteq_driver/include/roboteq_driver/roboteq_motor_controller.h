@@ -108,7 +108,7 @@ class RoboteqMotorController{
   /**
    * get the absolute position of each motor
    */
-  void getPosition(uint8_t chan, int32_t& value);
+  void getPosition(uint8_t chan, double& value);
   /**
    * get the velocity of each motor
    */
