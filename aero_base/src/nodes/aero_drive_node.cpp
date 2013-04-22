@@ -10,6 +10,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
+#include <sensor_msgs/JointState.h>
 #include "roboteq_driver/roboteq_manager_lib.h"
 #include "roboteq_driver/RoboteqGroupInfo.h"
 //************ LOCAL DEPENDANCIES ****************//
@@ -17,8 +18,10 @@
 
 
 static ros::Publisher odom_pub;
+ros::Publisher joint_pub;
 static roboteq_driver::RoboteqManagerClient* motor_controller;
 double rotations_per_meter = 1.0;
+double actual_rotations_per_meter = 1.0;
 double base_width = 0.6;
 std::string odom_frame("/odom");
 
@@ -44,6 +47,10 @@ void twistCallback(const geometry_msgs::Twist::ConstPtr& msg) {
 void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& msg) {
   roboteq_driver::RoboteqMotorInfo left = msg->motors[0];
   roboteq_driver::RoboteqMotorInfo right = msg->motors[1];
+  double t1 = -left.position/rotations_per_meter*actual_rotations_per_meter;
+  double t2 = right.position/rotations_per_meter*actual_rotations_per_meter;
+  double w1 = -left.velocity/rotations_per_meter*actual_rotations_per_meter;
+  double w2 = right.velocity/rotations_per_meter*actual_rotations_per_meter;
   double u1 = -left.velocity/(rotations_per_meter*60);
   double u2 = right.velocity/(rotations_per_meter*60);
 
@@ -57,6 +64,27 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   odom_msg.twist.twist.angular.z = (u2 - u1)/(base_width/2);
   odom_pub.publish(odom_msg);
 
+  sensor_msgs::JointState joint_state;
+  joint_state.header.stamp = ros::Time::now();
+  joint_state.name.resize(4);
+  joint_state.position.resize(4);
+  joint_state.velocity.resize(4);
+
+  joint_state.name[0] ="joint_front_left_wheel";
+  joint_state.position[0] = t1;
+  joint_state.velocity[0] = w1;
+  joint_state.name[1] ="joint_back_left_wheel";
+  joint_state.position[1] = t1;
+  joint_state.velocity[1] = w1;
+
+  joint_state.name[2] ="joint_front_right_wheel";
+  joint_state.position[2] = t2;
+  joint_state.velocity[2] = w2;
+  joint_state.name[3] ="joint_back_right_wheel";
+  joint_state.position[3] = t2;
+  joint_state.velocity[3] = w2;
+
+  joint_pub.publish(joint_state);
 }
 
 int main(int argc, char **argv) {
@@ -65,6 +93,8 @@ int main(int argc, char **argv) {
 
 	if(!ros::param::get("~rotations_per_meter", rotations_per_meter))
 	  ROS_WARN_STREAM("Parameter <~rotations_per_meter> not set. Using default value '"<<rotations_per_meter<<"'");
+	if(!ros::param::get("~actual_rotations_per_meter", actual_rotations_per_meter))
+	  ROS_WARN_STREAM("Parameter <~actual_rotations_per_meter> not set. Using default value '"<<actual_rotations_per_meter<<"'");
 	if(!ros::param::get("~base_width", base_width))
 	  ROS_WARN_STREAM("Parameter <~base_width> not set. Using default value '"<<base_width<<"'");
 
@@ -92,6 +122,7 @@ int main(int argc, char **argv) {
 	ros::Subscriber twist_sub = nh.subscribe(twist_topic, 1000, twistCallback);
 	ros::Subscriber feedback_sub = nh.subscribe(roboteq_manager_feedback_topic, 1000, roboteqFeedbackCallback);
 	odom_pub = nh.advertise<nav_msgs::Odometry>(odom_topic, 1000);
+	joint_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
 
 	ros::spin();
 }

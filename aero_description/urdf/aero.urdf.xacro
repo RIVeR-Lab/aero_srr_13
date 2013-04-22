@@ -25,29 +25,40 @@
 
   <!-- Cameras -->
   <xacro:stereo_camera_pair parent="base_link_front_bumper_part" prefix="lower_stereo" xyz="0.07 0 0.02" rpy="0 0.2 0" camera_offset="0.08"/>
-  <xacro:stereo_camera_pair parent="camera_boom" prefix="upper_stereo" xyz="0.02 0 0.02" rpy="0 0.2 0" camera_offset="0.08"/>
+  <xacro:stereo_camera_pair parent="boom" prefix="upper_stereo" xyz="0.02 0 0.02" rpy="0 0.2 0" camera_offset="0.08"/>
 
-  <xacro:revolute_pan_transform parent="base_link_top_plate_part" name="camera_boom" xyz="0 0 0.9" rpy="0 0 0" lower_limit="-2" upper_limit="2">
+  <xacro:revolute_pan_transform parent="base_link_top_plate_part" name="boom" xyz="0 0 0.9" rpy="0 0 0" lower_limit="-2" upper_limit="2">
     <visual>
       <origin xyz="0.0 0.0 -0.45" rpy="0 0 0" />
       <geometry>
-	<cylinder length="0.9" radius="0.01" />
+	<cylinder length="0.9" radius="0.02" />
       </geometry>
       <material name="DarkGray" />
     </visual>
   </xacro:revolute_pan_transform>
 
   <!-- Laser -->
-  <xacro:sick_laser_v0 name="laser" parent="base_link_front_bumper_part" ros_topic="laser" update_rate="25" >
+  <xacro:sick_laser_v0 name="lidar" parent="base_link_front_bumper_part" ros_topic="laser" update_rate="25" >
     <origin xyz="0.03 0 0.05" rpy="0 0 0" />
   </xacro:sick_laser_v0> 
-  <gazebo reference="laser">
+  <gazebo reference="lidar">
     <material>Gazebo/White</material>
   </gazebo>
 
 
   <!-- Arm -->
   <xacro:static_transform parent="base_link_front_bumper_part" name="arm_base" xyz="-0.04 0 -0.03" rpy="0 0 0">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+	<box size="0.01 0.01 0.01" />
+      </geometry>
+      <material name="Blue" />
+    </visual>
+  </xacro:static_transform>
+
+  <!-- IMU -->
+  <xacro:static_transform parent="base_link" name="imu" xyz="0.06 0 0" rpy="0 0 0">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>

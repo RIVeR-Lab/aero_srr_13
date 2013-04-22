@@ -39,7 +39,7 @@
     </group>
   </group>
   
-  <node name="aero_base_node" pkg="aero_base" type="aero_base_node" />
+  <include file="$(find aero_description)/launch/aero.launch"/>
 
   <!-- Launch IMU Driver -->
   <node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
