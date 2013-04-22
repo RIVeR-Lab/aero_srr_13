@@ -55,7 +55,7 @@ void AeroBase::loadParams()
 	this->world_= "world";
 	this->p_nh_.getParam(this->odom_, this->odom_);
 	this->p_nh_.getParam(this->world_, this->world_);
-	this->odom_ = "robot"
+	this->odom_ = "robot";
 
 	tf::Transform initWorldTf;
 	initWorldTf.setOrigin(tf::Vector3(1.0, 0.0, 0.0));
