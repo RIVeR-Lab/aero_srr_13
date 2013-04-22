@@ -224,9 +224,8 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 			world_point_.header.frame_id = "/world";
 			world_point_.header.stamp = tZero;
 			//			cout << "Transforming camera to world" <<endl;
-
-			optimus_prime_.transformPoint("/world", camera_point_,
-					world_point_);
+			optimus_prime_.waitForTransform("/world", camera_point_.header.frame_id, ros::Time(0), ros::Duration(1.0));
+			optimus_prime_.transformPoint("/world", camera_point_, world_point_);
 			//			cout << "Adding TFT to msg" <<endl;
 			tf::pointMsgToTF(world_point_.point, detection);
 			sherlock_->addDetection(detection, detection_list_.at(i)->second);
