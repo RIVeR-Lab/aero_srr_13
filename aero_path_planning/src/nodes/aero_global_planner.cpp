@@ -14,6 +14,7 @@
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
 #include<aero_path_planning/planners/GlobalPlanner.h>
 #include<aero_path_planning/utilities/OccupancyGrid.h>
+#include<aero_path_planning/planning_strategies/AStarCarrot.h>
 //**********************NAMESPACES*****************************//
 
 using namespace aero_path_planning;
@@ -38,8 +39,8 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "areo_global_planner");
 	ros::NodeHandle nh;
 	ros::NodeHandle p_nh("~");
-	RRTCarrot path_planner(1);
-	path_planner.seedSampler(ros::Time::now().toNSec());
+	AStarCarrot path_planner;
+	//path_planner.seedSampler(ros::Time::now().toNSec());
 	CarrotPathFinder::collision_func_ cf = boost::bind(&collisionCheck, _1, _2);
 	path_planner.setCollision(cf);
 
@@ -74,6 +75,15 @@ int main(int argc, char **argv) {
 	start.x = 54;
 	end.x   = 54;
 	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 70;
+	end.x   = 30;
+	end.y   = 30;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+	start.x = 71;
+	end.x   = 31;
+	end.y   = 30;
+	castLine(start, end, aero_path_planning::OBSTACLE, obstacle);
+
 	BOOST_FOREACH(Point point, obstacle)
 	{
 		testGrid.setPointTrait(point, aero_path_planning::OBSTACLE);

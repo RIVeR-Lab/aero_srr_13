@@ -9,6 +9,7 @@ set(G_NS global)
 set(T_NS tentacles)
 set(S_NS speed_set)
 set(SP_NS supervisor)
+set(LD_NS lidar)
 
 #Parameter for the topic for exchanging OccupancyGrids between the global and local planner
 set(OCCUPANCY_TOPIC_ARG ${R_NS}/occupancy_topic)
@@ -47,20 +48,20 @@ set(GOAL_WEIGHT_VAL "\"0.0\"")
 
 set(TRAV_WEIGHT_ARG ${R_NS}/traversed_weight)
 set(TRAV_WEIGHT_CDF TRAV_WEIGHT)
-set(TRAV_WEIGHT_VAL "\"0.0\"")
+set(TRAV_WEIGHT_VAL "\"0.1\"")
 
 set(DIFF_WEIGHT_ARG ${R_NS}/difficult_weight)
 set(DIFF_WEIGHT_CDF DIFF_WEIGHT)
-set(DIFF_WEIGHT_VAL "\"0.0\"")
+set(DIFF_WEIGHT_VAL "\"0.1\"")
 
 set(UNKN_WEIGHT_ARG ${R_NS}/unknown_weight)
 set(UNKN_WEIGHT_CDF UNKN_WEIGHT)
-set(UNKN_WEIGHT_VAL "\"0.0\"")
+set(UNKN_WEIGHT_VAL "\"0.1\"")
 
 #Parameters for speed_sets on param server
 set(S_MIN_SPEED_ARG ${S_NS}/min_speed)
 set(S_MIN_SPEED_CDF S_MIN_SPEED)
-set(S_MIN_SPEED_VAL "\"0.01\"")
+set(S_MIN_SPEED_VAL "\"0.2\"")
 
 set(S_MAX_SPEED_ARG ${S_NS}/max_speed)
 set(S_MAX_SPEED_CDF S_MAX_SPEED)
@@ -101,7 +102,7 @@ set(L_OCC_ZORG_VAL "\"0\"")
 
 set(L_OCC_RES_ARG "${R_NS}/${O_NS}/${L_NS}/res")
 set(L_OCC_RES_CDF L_OCC_RES)
-set(L_OCC_RES_VAL "\"0.1\"")
+set(L_OCC_RES_VAL "\"0.05\"")
 
 #Parameters for global occupancy grid information
 set(G_OCC_UPDTRT_ARG "${R_NS}/${O_NS}/${G_NS}/update_rate")
@@ -110,11 +111,11 @@ set(G_OCC_UPDTRT_VAL "\"0.2\"")
 
 set(G_OCC_XDIM_ARG "${R_NS}/${O_NS}/${G_NS}/x_dim")
 set(G_OCC_XDIM_CDF G_OCC_XDIM)
-set(G_OCC_XDIM_VAL "\"5000\"")
+set(G_OCC_XDIM_VAL "\"1000\"")
 
 set(G_OCC_YDIM_ARG "${R_NS}/${O_NS}/${G_NS}/y_dim")
 set(G_OCC_YDIM_CDF G_OCC_YDIM)
-set(G_OCC_YDIM_VAL "\"5000\"")
+set(G_OCC_YDIM_VAL "\"1000\"")
 
 set(G_OCC_ZDIM_ARG "${R_NS}/${O_NS}/${G_NS}/z_dim")
 set(G_OCC_ZDIM_CDF G_OCC_ZDIM)
@@ -134,7 +135,7 @@ set(G_OCC_ZORG_VAL "\"0\"")
 
 set(G_OCC_RES_ARG "${R_NS}/${O_NS}/${G_NS}/res")
 set(G_OCC_RES_CDF G_OCC_RES)
-set(G_OCC_RES_VAL "\"0.1\"")
+set(G_OCC_RES_VAL "\"0.05\"")
 
 #Parameters for tentacle generation
 set(T_MINLNTH_ARG "${R_NS}/${T_NS}/min_length")
@@ -148,6 +149,16 @@ set(T_EXPFACT_VAL "\"1.15\"")
 set(T_NUMBER_ARG "${R_NS}/${T_NS}/number")
 set(T_NUMBER_CDF T_NUMBER)
 set(T_NUMBER_VAL "\"81\"")
+
+
+#Parameters for recciving lidar data
+set(LIDAR_LOCAL_TOPIC_ARG ${R_NS}/${LD_NS}/${L_NS})
+set(LIDAR_LOCAL_TOPIC_CDF LIDAR_LOCAL_TOPIC)
+set(LIDAR_LOCAL_TOPIC_VAL "\"${R_NS}/${LD_NS}/${L_NS}\"")
+
+set(LIDAR_GLOBAL_TOPIC_ARG ${R_NS}/${LD_NS}/${G_NS})
+set(LIDAR_GLOBAL_TOPIC_CDF LIDAR_GLOBAL_TOPIC)
+set(LIDAR_GLOBAL_TOPIC_VAL "\"${R_NS}/${LD_NS}/${G_NS}\"")
 
 #Build the parameter header
 configure_file (

@@ -11,6 +11,9 @@
 
 	<arg name="@ODOMETRY_TOPIC_ARG@"     default=@ODOMETRY_TOPIC_VAL@ />
 	
+	<!-- declare args to be passed in for topics for receiving new lidar data -->
+	<arg name="@LIDAR_LOCAL_TOPIC_ARG@"     default=@LIDAR_LOCAL_TOPIC_VAL@ />
+	
 	<!-- declare args to be passed in for controlling the huristics used by the tentacle selector -->
 	<arg name="@GOAL_WEIGHT_ARG@"	default=@GOAL_WEIGHT_VAL@ />
 	<arg name="@TRAV_WEIGHT_ARG@"	default=@TRAV_WEIGHT_VAL@ />
@@ -26,7 +29,8 @@
 	<node name="aero_local_planner" pkg="aero_path_planning" type="aero_local_planner" output="screen">
 		<param name="@VELOCITY_CMD_TOPIC_ARG@"		type="str"		value="$(arg @VELOCITY_CMD_TOPIC_ARG@)" />
 		<param name="@OCCUPANCY_TOPIC_ARG@"			type="str"		value="$(arg @OCCUPANCY_TOPIC_ARG@)" />
-		<param name="@ODOMETRY_TOPIC_ARG@"          type="str"      value="$(arg @ODOMETRY_TOPIC_ARG@"/>
+		<param name="@ODOMETRY_TOPIC_ARG@"          type="str"      value="$(arg @ODOMETRY_TOPIC_ARG@)"/>
+		<param name="@LIDAR_LOCAL_TOPIC_ARG@"       type="str"      value="$(arg @LIDAR_LOCAL_TOPIC_ARG@)"/>
 		<param name="@GOAL_WEIGHT_ARG@"				type="double"	value="$(arg @GOAL_WEIGHT_ARG@)" />
 		<param name="@TRAV_WEIGHT_ARG@"				type="double"	value="$(arg @TRAV_WEIGHT_ARG@)" />
 		<param name="@DIFF_WEIGHT_ARG@"				type="double"	value="$(arg @DIFF_WEIGHT_ARG@)" />
