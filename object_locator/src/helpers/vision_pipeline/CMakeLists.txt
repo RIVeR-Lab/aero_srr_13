@@ -2,7 +2,7 @@
 rosbuild_add_library(SAMStage SAMStage.cpp)
 rosbuild_add_library(SyncStage SyncStage.cpp)
 rosbuild_add_library(BOOMStage BOOMStage.cpp)
-#target_link_libraries(SAMStage Detman)
+target_link_libraries(SAMStage Detman)
 #target_link_libraries(DisparityStage ${OpenCV_LIBS})
 target_link_libraries(SAMStage ${OpenCV_LIBS})
 target_link_libraries(SyncStage ${OpenCV_LIBS})
