@@ -19,18 +19,7 @@
 
 using namespace aero_arm;
 
-
-
-
-
-
 Velocity_Controller::Velocity_Controller(ros::NodeHandle nh, std::string DesiredPosition, std::string JointVelocity, std::string JointAngles, std::string CurrentPosition) {
-
-
-
-
-
-
 
 	this->desired_position_sub = nh.subscribe(DesiredPosition, 1, &Velocity_Controller::DesiredPositionMSG, this);
 	this->current_position_sub = nh.subscribe(CurrentPosition, 1, &Velocity_Controller::CurrentPositionMSG, this);
@@ -41,22 +30,18 @@ Velocity_Controller::Velocity_Controller(ros::NodeHandle nh, std::string Desired
 
 	//UpdateError();
 
-	PID_X = new pid::PIDController(1.0, 1.0, 1.0, pos_err.x_err);
-	PID_Y = new pid::PIDController(1.0, 1.0, 1.0, pos_err.y_err);
-	PID_Z = new pid::PIDController(1.0, 1.0, 1.0, pos_err.z_err);
-	PID_Roll = new pid::PIDController(1.0, 1.0, 1.0, pos_err.roll_err);
-	PID_Pitch = new pid::PIDController(1.0, 1.0, 1.0, pos_err.pitch_err);
-	PID_Yaw = new pid::PIDController(1.0, 1.0, 1.0, pos_err.yaw_err);
+	PID_X = new pid::PIDController(3, 0, 0.5, pos_err.x_err);
+	PID_Y = new pid::PIDController(3, 0, 0.5, pos_err.y_err);
+	PID_Z = new pid::PIDController(3, 0, 0.5, pos_err.z_err);
+	PID_Roll = new pid::PIDController(3, 0, 0.5, pos_err.roll_err);
+	PID_Pitch = new pid::PIDController(3, 0, 0.5, pos_err.pitch_err);
+	PID_Yaw = new pid::PIDController(3, 0, 0.5, pos_err.yaw_err);
 
-	gain =2;
-	PID_X->SetPID(3,0,0.5);
-	PID_Y->SetPID(3,0,0.5);
-	PID_Z->SetPID(3,0,0.5);
+	linear_gain = 2;
+	rotational_gain = 1;
 
-
-
-	  f = boost::bind(&Velocity_Controller::callback,this, _1, _2);
-	  server.setCallback(f);
+	f = boost::bind(&Velocity_Controller::callback, this, _1, _2);
+	server.setCallback(f);
 }
 
 Velocity_Controller::~Velocity_Controller() {
@@ -69,52 +54,30 @@ Velocity_Controller::~Velocity_Controller() {
 
 }
 
-
 void Velocity_Controller::callback(aero_arm::AeroArmVelocityConfig &config, uint32_t level) {
 
-
-
-	ROS_INFO("Reconfigure Request: %f %f %f",
-            config.linear_P,config.linear_I,config.linear_D);
-	PID_X->SetPID(config.linear_P,config.linear_I,config.linear_D);
-	PID_Y->SetPID(config.linear_P,config.linear_I,config.linear_D);
-	PID_Z->SetPID(config.linear_P,config.linear_I,config.linear_D);
-	gain = config.gain;
-
+//	ROS_INFO("Reconfigure Request: %f %f %f", config.linear_P, config.linear_I, config.linear_D);
+//	PID_Roll->SetPID(config.linear_P, config.linear_I, config.linear_D);
+//	PID_Pitch->SetPID(config.linear_P, config.linear_I, config.linear_D);
+//	PID_Yaw->SetPID(config.linear_P, config.linear_I, config.linear_D);
+//	rotational_gain = config.gain;
 
 }
 
-void Velocity_Controller::CurrentPositionMSG(const geometry_msgs::PoseStampedConstPtr& current_pose)
-{
+void Velocity_Controller::CurrentPositionMSG(const geometry_msgs::PoseStampedConstPtr& current_pose) {
 	geometry_msgs::PoseStamped current_pose_api;
-
-	ROS_INFO("Current1");
-	ROS_INFO("X_V = %f",current_pose->pose.position.x);
-	ROS_INFO("Y_V = %f",current_pose->pose.position.y);
-	ROS_INFO("Z_V = %f",current_pose->pose.position.z);
 
 	tf_listener.waitForTransform("/jaco_api_origin", current_pose->header.frame_id, current_pose->header.stamp, ros::Duration(1.0));
 
 	tf_listener.transformPose("/jaco_api_origin", *current_pose, current_pose_api);
-	ROS_INFO("Current2");
-
-	ROS_INFO("X_V = %f",current_pose_api.pose.position.x);
-	ROS_INFO("Y_V = %f",current_pose_api.pose.position.y);
-	ROS_INFO("Z_V = %f",current_pose_api.pose.position.z);
 
 	tf::Stamped<tf::Pose> Current_StampPose;
 
-		tf::poseStampedMsgToTF(current_pose_api, Current_StampPose);
-
+	tf::poseStampedMsgToTF(current_pose_api, Current_StampPose);
 
 	current_pos.x = Current_StampPose.getOrigin().getX();
 	current_pos.y = Current_StampPose.getOrigin().getY();
 	current_pos.z = Current_StampPose.getOrigin().getZ();
-
-	ROS_INFO("Current3");
-	ROS_INFO("X_V = %f",current_pos.x);
-	ROS_INFO("Y_V = %f",current_pos.y);
-	ROS_INFO("Z_V = %f",current_pos.z);
 
 	tf::Matrix3x3 current_rotation(Current_StampPose.getRotation());
 
@@ -125,10 +88,8 @@ void Velocity_Controller::CurrentPositionMSG(const geometry_msgs::PoseStampedCon
 void Velocity_Controller::DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose) {
 	geometry_msgs::PoseStamped desired_pose_msg;
 
-
-
-	tf_listener.waitForTransform("jaco_api_origin", object_pose->header.frame_id, object_pose->header.stamp, ros::Duration(0.1));
-	tf_listener.transformPose("jaco_api_origin", *object_pose, desired_pose_msg);
+	tf_listener.waitForTransform("/jaco_api_origin", object_pose->header.frame_id, object_pose->header.stamp, ros::Duration(0.1));
+	tf_listener.transformPose("/jaco_api_origin", *object_pose, desired_pose_msg);
 
 	tf::Stamped<tf::Pose> desired_StampPose;
 
@@ -138,23 +99,26 @@ void Velocity_Controller::DesiredPositionMSG(const geometry_msgs::PoseStampedCon
 	desired_pos.y = desired_StampPose.getOrigin().getY();
 	desired_pos.z = desired_StampPose.getOrigin().getZ();
 
-	ROS_INFO("Desired");
-	ROS_INFO("X_V = %f",desired_pos.x);
-	ROS_INFO("Y_V = %f",desired_pos.y);
-	ROS_INFO("Z_V = %f",desired_pos.z);
+
 
 	tf::Matrix3x3 desired_rotation(desired_StampPose.getRotation());
 
 	desired_rotation.getRPY(desired_pos.roll, desired_pos.pitch, desired_pos.yaw);
-
+	ROS_INFO("Desired");
+	ROS_INFO("X_Desired = %f", desired_pos.x);
+	ROS_INFO("Y_Desired = %f", desired_pos.y);
+	ROS_INFO("Z_Desired = %f", desired_pos.z);
+	ROS_INFO("RX_Desired = %f", desired_pos.roll);
+	ROS_INFO("RY_Desired = %f", desired_pos.pitch);
+	ROS_INFO("RZ_Desired = %f", desired_pos.y);
 }
 
 void Velocity_Controller::UpdateCurrentPose(void) {
 	tf::Stamped<tf::Pose> end_effector_pose;
 	end_effector_pose.setOrigin(tf::Vector3(0, 0, 0));
-	end_effector_pose.setRotation(tf::Quaternion(0, 0, 0,1));
-	end_effector_pose.frame_id_="/jaco_end_effector";
-	end_effector_pose.stamp_=ros::Time::now();
+	end_effector_pose.setRotation(tf::Quaternion(0, 0, 0, 1));
+	end_effector_pose.frame_id_ = "/jaco_end_effector";
+	end_effector_pose.stamp_ = ros::Time::now();
 
 	tf_listener.waitForTransform("/jaco_api_origin", end_effector_pose.frame_id_, end_effector_pose.stamp_, ros::Duration(1.0));
 
@@ -166,7 +130,6 @@ void Velocity_Controller::UpdateCurrentPose(void) {
 	current_pos.y = current_StampPose.getOrigin().getY();
 	current_pos.z = current_StampPose.getOrigin().getZ();
 
-
 	tf::Matrix3x3 current_rotation(current_StampPose.getRotation());
 
 	current_rotation.getRPY(current_pos.roll, current_pos.pitch, current_pos.yaw);
@@ -175,98 +138,80 @@ void Velocity_Controller::UpdateCurrentPose(void) {
 
 void Velocity_Controller::UpdateError(void) {
 
-
-	pos_err.x_err = desired_pos.x-current_pos.x;
-	pos_err.y_err =  desired_pos.y-current_pos.y ;
+	pos_err.x_err = desired_pos.x - current_pos.x;
+	pos_err.y_err = desired_pos.y - current_pos.y;
 	pos_err.z_err = desired_pos.z - current_pos.z;
 	pos_err.roll_err = desired_pos.roll - current_pos.roll;
 	pos_err.pitch_err = desired_pos.pitch - current_pos.pitch;
 	pos_err.yaw_err = desired_pos.yaw - current_pos.yaw;
 
-	ROS_INFO("X_CUR = %f, X_DES = %f, X_ERR_ = %f",current_pos.x, desired_pos.x,pos_err.x_err);
-	ROS_INFO("Y_CUR = %f, Y_DES = %f, Y_ERR_ = %f",current_pos.y, desired_pos.y,pos_err.y_err);
-	ROS_INFO("Z_CUR = %f, Z_DES = %f, Z_ERR_ = %f",current_pos.z, desired_pos.z,pos_err.z_err);
+	ROS_INFO("X_CUR = %f, X_DES = %f, X_ERR_ = %f", current_pos.x, desired_pos.x, pos_err.x_err);
+	ROS_INFO("Y_CUR = %f, Y_DES = %f, Y_ERR_ = %f", current_pos.y, desired_pos.y, pos_err.y_err);
+	ROS_INFO("Z_CUR = %f, Z_DES = %f, Z_ERR_ = %f", current_pos.z, desired_pos.z, pos_err.z_err);
+	ROS_INFO("rX_CUR = %f, rX_DES = %f, rX_ERR_ = %f", current_pos.roll, desired_pos.roll, pos_err.roll_err);
+	ROS_INFO("rY_CUR = %f, rY_DES = %f, rY_ERR_ = %f", current_pos.pitch, desired_pos.pitch, pos_err.pitch_err);
+	ROS_INFO("rZ_CUR = %f, rZ_DES = %f, rZ_ERR_ = %f", current_pos.yaw, desired_pos.yaw, pos_err.yaw_err);
+
 	UpdatePID();
 }
-void Velocity_Controller::UpdatePID(void)
-{
-Eigen::VectorXf cartisian_velocity(6);
+void Velocity_Controller::UpdatePID(void) {
+	Eigen::VectorXf cartisian_velocity(6);
 
 	cartisian_velocity(0) = PID_X->PIDUpdate(pos_err.x_err);
-	cartisian_velocity(0)*= gain;
+	cartisian_velocity(0) *= linear_gain;
 
-	if(cartisian_velocity(0) > 0.037)
-	{
+	if (cartisian_velocity(0) > 0.037) {
 		cartisian_velocity(0) = 0.037;
-	}
-	else if(cartisian_velocity(0) < -0.037)
-	{
+	} else if (cartisian_velocity(0) < -0.037) {
 		cartisian_velocity(0) = -0.037;
 	}
 	cartisian_velocity(1) = PID_Y->PIDUpdate(pos_err.y_err);
-	cartisian_velocity(1)*= gain;
+	cartisian_velocity(1) *= linear_gain;
 
-	if(cartisian_velocity(1) > 0.037)
-	{
+	if (cartisian_velocity(1) > 0.037) {
 		cartisian_velocity(1) = 0.037;
-	}
-	else if(cartisian_velocity(1) < -0.037)
-	{
+	} else if (cartisian_velocity(1) < -0.037) {
 		cartisian_velocity(1) = -0.037;
 	}
 	cartisian_velocity(2) = PID_Z->PIDUpdate(pos_err.z_err);
-	cartisian_velocity(2)*= gain;
+	cartisian_velocity(2) *= linear_gain;
 
-	if(cartisian_velocity(2) > 0.037)
-	{
+	if (cartisian_velocity(2) > 0.037) {
 		cartisian_velocity(2) = 0.037;
-	}
-	else if(cartisian_velocity(2) < -0.037)
-	{
+	} else if (cartisian_velocity(2) < -0.037) {
 		cartisian_velocity(2) = -0.037;
 	}
 	cartisian_velocity(3) = PID_Roll->PIDUpdate(pos_err.roll_err);
-	cartisian_velocity(3)*= gain;
+	cartisian_velocity(3) *= rotational_gain;
 
-	if(cartisian_velocity(3) > 0.037)
-	{
-		cartisian_velocity(3) = 0.037;
-	}
-	else if(cartisian_velocity(3) < -0.037)
-	{
-		cartisian_velocity(3) = -0.037;
+	if (cartisian_velocity(3) > 0.15) {
+		cartisian_velocity(3) = 0.15;
+	} else if (cartisian_velocity(3) < -0.15) {
+		cartisian_velocity(3) = -0.15;
 	}
 	cartisian_velocity(4) = PID_Pitch->PIDUpdate(pos_err.pitch_err);
-	cartisian_velocity(4)*= gain;
+	cartisian_velocity(4) *= rotational_gain;
 
-	if(cartisian_velocity(4) > 0.037)
-	{
-		cartisian_velocity(4) = 0.037;
-	}
-	else if(cartisian_velocity(4) < -0.037)
-	{
-		cartisian_velocity(4) = -0.037;
+	if (cartisian_velocity(4) > 0.15) {
+		cartisian_velocity(4) = 0.15;
+	} else if (cartisian_velocity(4) < -0.15) {
+		cartisian_velocity(4) = -0.15;
 	}
 	cartisian_velocity(5) = PID_Yaw->PIDUpdate(pos_err.yaw_err);
-	cartisian_velocity(5)*= gain;
+	cartisian_velocity(5) *= rotational_gain;
 
-	if(cartisian_velocity(5) > 0.037)
-	{
-		cartisian_velocity(5) = 0.037;
-	}
-	else if(cartisian_velocity(5) < -0.037)
-	{
-		cartisian_velocity(5) = -0.037;
+	if (cartisian_velocity(5) > 0.15) {
+		cartisian_velocity(5) = 0.15;
+	} else if (cartisian_velocity(5) < -0.15) {
+		cartisian_velocity(5) = -0.15;
 	}
 
-
-
-	ROS_INFO("X_V = %f",cartisian_velocity(0));
-	ROS_INFO("Y_V = %f",cartisian_velocity(1));
-	ROS_INFO("Z_V = %f",cartisian_velocity(2));
-	//ROS_INFO("Roll_V = %f",cartisian_velocity(3));
-	//ROS_INFO("Pitch_V = %f",cartisian_velocity(4));
-	//ROS_INFO("Yaw_V = %f",cartisian_velocity(5));
+	ROS_INFO("X_V = %f", cartisian_velocity(0));
+	ROS_INFO("Y_V = %f", cartisian_velocity(1));
+	ROS_INFO("Z_V = %f", cartisian_velocity(2));
+	ROS_INFO("Roll_V = %f", cartisian_velocity(3));
+	ROS_INFO("Pitch_V = %f", cartisian_velocity(4));
+	ROS_INFO("Yaw_V = %f", cartisian_velocity(5));
 
 	geometry_msgs::TwistStamped cartesian_velocity_msg;
 	cartesian_velocity_msg.header.frame_id = "/arm_base";
@@ -274,16 +219,16 @@ Eigen::VectorXf cartisian_velocity(6);
 	cartesian_velocity_msg.twist.linear.x = cartisian_velocity(0);
 	cartesian_velocity_msg.twist.linear.y = cartisian_velocity(1);
 	cartesian_velocity_msg.twist.linear.z = cartisian_velocity(2);
-	//cartesian_velocity_msg.twist.angular.x = 0;//cartisian_velocity(3);
-	//cartesian_velocity_msg.twist.angular.y = 0;//cartisian_velocity(4);
-	//cartesian_velocity_msg.twist.angular.z = 0;//cartisian_velocity(5);
+	cartesian_velocity_msg.twist.angular.x = cartisian_velocity(3);
+	cartesian_velocity_msg.twist.angular.y = cartisian_velocity(4);
+	cartesian_velocity_msg.twist.angular.z = cartisian_velocity(5);
 
 //	cartesian_velocity_msg.Velocity_X = 100;//cartisian_velocity(0);
 //	cartesian_velocity_msg.twist.linear.y = 0;//cartisian_velocity(1);
 	//cartesian_velocity_msg.twist.linear.z = 0;//cartisian_velocity(2);
-	cartesian_velocity_msg.twist.angular.x = 0;//cartisian_velocity(3);
-	cartesian_velocity_msg.twist.angular.y = 0;//cartisian_velocity(4);
-	cartesian_velocity_msg.twist.angular.z = 0;//cartisian_velocity(5);
+	//cartesian_velocity_msg.twist.angular.x = 0;//cartisian_velocity(3);
+	//cartesian_velocity_msg.twist.angular.y = 0;//cartisian_velocity(4);
+	//cartesian_velocity_msg.twist.angular.z = 0;//cartisian_velocity(5);
 
 	joint_velocity_pub.publish(cartesian_velocity_msg);
 }
@@ -570,7 +515,6 @@ int main(int argc, char **argv) {
 	std::string JointAngles("JointAngles"); ///String containing the topic name for JointAngles
 	std::string CurrentPosition("ToolPosition"); ///String containing the topic name for CurrentPosition
 
-
 	if (argc < 1) {
 		ROS_INFO( "Usage: arm_velocity_control desired_position_topic joint_velocity_topic joint_angles_topic");
 		return 1;
@@ -583,7 +527,7 @@ int main(int argc, char **argv) {
 		if (!param_nh.getParam(JointAngles, JointAngles))
 			ROS_WARN( "Parameter <%s> Not Set. Using Default Joint Angles Topic <%s>!", JointAngles.c_str(), JointAngles.c_str());
 		if (!param_nh.getParam(CurrentPosition, CurrentPosition))
-				ROS_WARN( "Parameter <%s> Not Set. Using Default Current Position Topic <%s>!", CurrentPosition.c_str(), CurrentPosition.c_str());
+			ROS_WARN( "Parameter <%s> Not Set. Using Default Current Position Topic <%s>!", CurrentPosition.c_str(), CurrentPosition.c_str());
 	}
 
 //Print out received topics
@@ -592,11 +536,10 @@ int main(int argc, char **argv) {
 	ROS_DEBUG("Got Joint Angles Topic Name: <%s>", JointAngles.c_str());
 	ROS_DEBUG("Got Current Position Topic Name: <%s>", CurrentPosition.c_str());
 
-
 	ROS_INFO("Starting Up Arm Velocity Controller...");
 
 //create the arm object
-	Velocity_Controller arm_velocity(nh, DesiredPosition, JointVelocity, JointAngles,CurrentPosition);
+	Velocity_Controller arm_velocity(nh, DesiredPosition, JointVelocity, JointAngles, CurrentPosition);
 
 	ros::spin();
 }

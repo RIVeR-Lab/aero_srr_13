@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<root xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+      xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+      xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+      xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:macro name="static_transform" params="name parent xyz rpy *visual">
+      <link name="${name}">
+	<xacro:insert_block name="visual" />
+      </link>
+      <joint name="${name}_joint" type="fixed">
+	<parent link="${parent}"/>
+	<child link="${name}"/>
+	<origin xyz="${xyz}" rpy="${rpy}" />
+      </joint>
+    </xacro:macro>
+
+    <xacro:macro name="continuouspan_transform" params="name parent xyz rpy *visual">
+      <link name="${name}">
+	<xacro:insert_block name="visual" />
+      </link>
+      <joint name="${name}_joint" type="continuous">
+	<parent link="${parent}"/>
+	<child link="${name}"/>
+	<origin xyz="${xyz}" rpy="${rpy}" />
+	<axis xyz="0 0 1"/>
+      </joint>
+    </xacro:macro>
+
+    <xacro:macro name="revolute_pan_transform" params="name parent xyz rpy lower_limit upper_limit *visual">
+      <link name="${name}">
+	<xacro:insert_block name="visual" />
+      </link>
+      <joint name="${name}_joint" type="revolute">
+	<parent link="${parent}"/>
+	<child link="${name}"/>
+	<origin xyz="${xyz}" rpy="${rpy}" />
+	<axis xyz="0 0 1"/>
+	<limit lower="${lower_limit}" upper="${upper_limit}" effort="1000" velocity="6"/>
+      </joint>
+    </xacro:macro>
+  
+</root>

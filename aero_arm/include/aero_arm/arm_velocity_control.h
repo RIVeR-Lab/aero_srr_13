@@ -85,8 +85,8 @@ private:
 	pid::PIDController *PID_Pitch;
 	pid::PIDController *PID_Yaw;
 
-	float gain;
-
+	float linear_gain;
+	float rotational_gain;
 };
 
 }
