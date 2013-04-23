@@ -234,12 +234,12 @@ void RoboteqMotorController::getPosition(uint8_t chan, double& value){
   if(chan==1){
     int32_t raw_value;
     getValue(_C, chan, raw_value);
-    value = raw_value/ppr1_;
+    value = raw_value/ppr1_/counts_per_pulse;
   }
   else if(chan==2){
     int32_t raw_value;
     getValue(_C, chan, raw_value);
-    value = raw_value/ppr2_;
+    value = raw_value/ppr2_/counts_per_pulse;
   }
   else
     DRIVER_EXCEPT(Exception, "Invalid motor channel");

@@ -9,6 +9,7 @@
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <sensor_msgs/JointState.h>
 #include <nav_msgs/Odometry.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
@@ -20,6 +21,7 @@
 
 
 static ros::Publisher pose_pub;
+static ros::Publisher joint_pub;
 static ros::ServiceClient hd_control_srv;
 static ros::ServiceServer pose_control_srv;
 
@@ -45,6 +47,14 @@ void hdFeedbackCallback(const hd_driver::HDMotorInfo::ConstPtr& msg) {
   transform.setOrigin( tf::Vector3(0, 0, 0) );
   transform.setRotation( tf::createQuaternionFromRPY(0, 0, msg->position/ticks_per_radian) );
   tf_broadcaster.sendTransform(tf::StampedTransform(transform, msg->header.stamp, msg->header.frame_id, target_frame));
+
+  sensor_msgs::JointState joint_state;
+  joint_state.header.stamp = msg->header.stamp;
+  joint_state.name.resize(1);
+  joint_state.position.resize(1);
+  joint_state.name[0] ="boom_joint";
+  joint_state.position[0] = msg->position/ticks_per_radian;
+  joint_pub.publish(joint_state);
 }
 
 int main(int argc, char **argv) {
@@ -78,6 +88,7 @@ int main(int argc, char **argv) {
 
   ros::Subscriber feedback_sub = nh.subscribe(hd_feedback_topic, 1000, hdFeedbackCallback);
   pose_pub = nh.advertise<geometry_msgs::Pose>(pose_topic, 1000);
+  joint_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
 
   hd_control_srv = nh.serviceClient<hd_driver::SetPosition>(hd_control_service);
   pose_control_srv = nh.advertiseService(pose_control_service, poseControlCallback);
