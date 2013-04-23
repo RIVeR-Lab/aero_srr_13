@@ -285,7 +285,7 @@ void SAMStage::onInit()
 
 void SAMStage::loadParams() {
 	this->input_topic_  = "disparity_stage/disparity";
-	this->output_topic_ = "sam_stage/detection_xyz";
+	this->output_topic_ = "ObjectPose";
 	NODELET_INFO_STREAM("Topics Strings Set");
 	this->getPrivateNodeHandle().getParam(this->input_topic_,
 			this->input_topic_);
