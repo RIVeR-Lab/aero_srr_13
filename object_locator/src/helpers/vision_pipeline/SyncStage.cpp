@@ -39,7 +39,7 @@ void SyncStage::registerTopics()
 	this->image_left_  = it_->subscribeCamera(this->left_input_topic_,2,&SyncStage::leftImageCb,this);
 	this->image_right_ = it_->subscribeCamera(this->right_input_topic_,2,&SyncStage::rightImageCb,this);
 	this->disparity_ = it_->subscribe(this->disparity_input_topic_,2,&SyncStage::disparityImageCb,this);
-	this->sync_image_pub_ = this->getNodeHandle().advertise<object_locator::SyncImageMsg>(this->output_topic_,2);
+	this->sync_image_pub_ = this->getNodeHandle().advertise<object_locator::SyncImagesAndDisparity>(this->output_topic_,2);
 }
 
 void SyncStage::leftImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
