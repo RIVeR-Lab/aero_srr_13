@@ -12,6 +12,7 @@
 #include <nodelet/nodelet.h>
 #include <cv_bridge/cv_bridge.h>
 #include <object_locator/SyncImageMsg.h>
+#include <object_locator/SyncImagesAndDisparity.h>
 #include <object_locator/typedefinitions.h>
 #include <image_transport/image_transport.h>
 
