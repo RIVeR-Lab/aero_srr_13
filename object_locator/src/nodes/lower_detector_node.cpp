@@ -2,6 +2,11 @@
 #include <opencv2/gpu/gpu.hpp>
 #include <opencv2/gpu/gpumat.hpp>
 #include "ObjectLocatorParams.h"
+#include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/synchronizer.h>
+#include <boost/thread.hpp>
+#include <boost/format.hpp>
+#include <image_transport/subscriber_filter.h>
 //#include <opencv2/gpu/stream_accessor.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
@@ -31,6 +36,8 @@ ImageConverter::ImageConverter()
 	image_pub_ = it_.advertise("/out", 1);
 	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_raw", 1, &ImageConverter::imageCbRight, this);
+//	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
+
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 
@@ -200,8 +207,8 @@ void ImageConverter::computeDisparity()
 
 #endif
 
-	Mat_t disp(  heightL, widthL, CV_16S );
-	Mat_t vdisp( heightL, widthL, CV_8UC1 );
+	Mat_t disp(  heightL, widthL, CV_32FC1 );
+	Mat_t vdisp( heightL, widthL, CV_32FC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
 	int minDisp = 0;      //0         //-128-32;
 	int numDisp = 224;       //80        //256+80;
@@ -233,7 +240,7 @@ void ImageConverter::computeDisparity()
 	//	 cv::filterSpeckles(disp, 200, 24, 13);
 	normalize( disp, vdisp, 0, 256, CV_MINMAX );
 
-	Mat_t vdisp1;
+	Mat_t vdisp1(  heightL, widthL, CV_32FC1 );;
 #ifdef CUDA_ENABLED
 	gpu::resize(disp, vdisp1,size);
 #else
