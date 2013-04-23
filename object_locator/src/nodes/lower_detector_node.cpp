@@ -284,7 +284,7 @@ void ImageConverter::computeDisparity()
 			optimus_prime.waitForTransform("/world", camera_point.header.frame_id, ros::Time(0), ros::Duration(1.0));
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
-			tf::pointMsgToTF(camera_point.point,detection);
+			tf::pointMsgToTF(world_point.point,detection);
 			sherlock.addDetection(detection, detection_list_.at(i)->second);
 //			cout << "Added detection to manager" <<endl;
 		}
