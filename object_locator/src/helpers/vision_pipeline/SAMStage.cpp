@@ -484,6 +484,7 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 //	}
 	Mat_t dmat;
 	dmat = disp->image;
+	normalize( dmat, dmat, 0, 256, CV_MINMAX );
 	cv::imshow("disparity", dmat);
 //	cv::imshow(WINDOWDisp_, disp->image);
 	cv::waitKey(3);
@@ -494,12 +495,11 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 		cv::Point2d obj_centroid(detection_list_.at(i)->first.first,
 				detection_list_.at(i)->first.second);
 		cv::Point3d obj_3d;
-		NODELET_INFO_STREAM("right before " );
+
 		if (obj_centroid.x < disp->image.cols
 				&& obj_centroid.y < disp->image.rows) {
 			int disp_val = dmat.at<uchar>(obj_centroid.y,
 					obj_centroid.x);
-			NODELET_INFO_STREAM("in " );
 			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
 			this->stereo_model_.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
