@@ -18,6 +18,7 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
 #include <image_geometry/stereo_camera_model.h>
+#include <stereo_msgs/DisparityImage.h>
 
 namespace object_locator
 {
@@ -50,7 +51,7 @@ namespace object_locator
 		 * 		  on a list of found detections, it pushes out the one with most confidence after a tolerance is reached.
 		 * @param [in] disparity image of type CV_16S
 		 */
-		virtual void calculate3DPoint(const sensor_msgs::Image& disparity, const object_locator::SyncImagesAndDisparityConstPtr& msg);
+		virtual void calculate3DPoint(const object_locator::SyncImagesAndDisparityConstPtr& msg);
 
 		/**
 		 * @author Samir Zutshi
@@ -86,6 +87,9 @@ namespace object_locator
 		tf::Point detection_;
 		//***sherlock Parameters*****/
 		double thresh_dist_, growth_rate_, shrink_rate_, thresh_det_;
+
+
+		cv::Mat_<cv::Vec3b> disparity_color_;
 
 	};
 }

@@ -59,7 +59,7 @@ void SyncStage::imageCb(const object_locator::SyncImageMsgConstPtr& msg)
 
 void SyncStage::disparityImageCb(const stereo_msgs::DisparityImageConstPtr& msg)
 {
-	disparity_image_     = msg->image;
+	disparity_image_     = *msg;
 //	disparity_image_.encoding
 	gotDisparity_ = true;
 	gotImages();
@@ -69,12 +69,13 @@ void SyncStage::gotImages()
 {
 	if(gotLeft_ && gotDisparity_)
 	{
-		object_locator::SyncImagesAndDisparityPtr msg(new object_locator::SyncImagesAndDisparity);
-		generateSyncMsg(*msg);
+		object_locator::SyncImagesAndDisparity msg;
+		generateSyncMsg(msg);
 		this->sync_image_pub_.publish(msg);
 		gotLeft_ = false;
 		gotDisparity_ = false;
 	}
+
 }
 
 void SyncStage::generateSyncMsg(object_locator::SyncImagesAndDisparity& msg)
@@ -84,5 +85,6 @@ void SyncStage::generateSyncMsg(object_locator::SyncImagesAndDisparity& msg)
 //	msg.images.left_info   = left_info_;
 //	msg.images.right_image = right_image_;
 //	msg.images.right_info  = right_info_;
-	msg.disparity_image    = disparity_image_;
+	msg.disparity_image  = disparity_image_;
+
 }

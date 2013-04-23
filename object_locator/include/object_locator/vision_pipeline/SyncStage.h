@@ -16,6 +16,7 @@
 #include <object_locator/typedefinitions.h>
 #include <image_transport/image_transport.h>
 #include <stereo_msgs/DisparityImage.h>
+#include <message_filters/subscriber.h>
 
 namespace object_locator
 {
@@ -43,7 +44,7 @@ namespace object_locator
 //		sensor_msgs::Image left_image_;
 //		sensor_msgs::Image right_image_;
 		object_locator::SyncImageMsg raw_images_;
-		sensor_msgs::Image disparity_image_;
+		stereo_msgs::DisparityImage disparity_image_;
 //		sensor_msgs::CameraInfo left_info_;
 //		sensor_msgs::CameraInfo right_info_;
 		bool gotLeft_;
