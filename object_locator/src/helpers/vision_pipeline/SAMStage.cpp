@@ -482,9 +482,9 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 //		 }
 //	}
 
-//	cv::imshow("disparity", disparity_color_);
+	cv::imshow("disparity", dmat);
 //	cv::imshow(WINDOWDisp_, disp->image);
-//	cv::waitKey(3);
+	cv::waitKey(3);
 	this->stereo_model_.fromCameraInfo(msg->images.left_info, msg->images.right_info);
 	for (int i = 0; i < (int) detection_list_.size(); i++) {
 		//		cout << endl;
