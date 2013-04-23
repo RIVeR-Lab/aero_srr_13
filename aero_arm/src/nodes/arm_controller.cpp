@@ -20,16 +20,15 @@
 using namespace aero_arm;
 
 Arm_Controller::Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,
-		std::string ArmPose) {
+		std::string ArmPose, std::string SetFingerPosition) {
 
 	this->sub_object_position = nh.subscribe(ObjectPose, 1,
 			&Arm_Controller::ObjectPosition, this);
 	this->pub_arm_position = nh.advertise<geometry_msgs::PoseStamped>(ArmPose,
 			2);
 
-	this->pub_arm_position_raw = nh.advertise<geometry_msgs::PoseStamped>("Raw",
-			2);
-	this->pub_arm_position_trans = nh.advertise<geometry_msgs::PoseStamped>("Trans",
+
+	this->pub_set_finger_position = nh.advertise<jaco_driver::finger_position>(SetFingerPosition,
 				2);
 
 }
@@ -40,50 +39,92 @@ void Arm_Controller::ObjectPosition(
 	tf::Quaternion grasp_quaternion;
 
 	geometry_msgs::PoseStamped arm_pose;
+jaco_driver::finger_position fingers;
 
 
-	ROS_INFO("Raw MSG");
-	ROS_INFO("X = %f", object->pose.pose.position.x);
-	ROS_INFO("Y = %f", object->pose.pose.position.y);
-	ROS_INFO("Z = %f", object->pose.pose.position.z);
-
-	ROS_INFO("RX = %f", object->pose.pose.orientation.x);
-	ROS_INFO("RY = %f", object->pose.pose.orientation.y);
-	ROS_INFO("RZ = %f", object->pose.pose.orientation.z);
-	ROS_INFO("RW = %f", object->pose.pose.orientation.w);
-
-
-	listener.waitForTransform("arm_base", object->pose.header.frame_id, object->pose.header.stamp, ros::Duration(1.0) );
+listener.waitForTransform("arm_base", object->pose.header.frame_id, object->pose.header.stamp, ros::Duration(1.0) );
 	listener.transformPose("arm_base", object->pose, arm_pose);
-	pub_arm_position_trans.publish(arm_pose);
 
 
-	ROS_INFO("Transformed MSG");
-	ROS_INFO("X = %f", arm_pose.pose.position.x);
-	ROS_INFO("Y = %f", arm_pose.pose.position.y);
-	ROS_INFO("Z = %f", arm_pose.pose.position.z);
+	grasp_rpy.setEulerYPR(1.5, -0.7, -1.6);
+	grasp_rpy.getRotation(grasp_quaternion);
+	ROS_INFO("here");
 
-	ROS_INFO("RX = %f", arm_pose.pose.orientation.x);
-	ROS_INFO("RY = %f", arm_pose.pose.orientation.y);
-	ROS_INFO("RZ = %f", arm_pose.pose.orientation.z);
-	ROS_INFO("RW = %f", arm_pose.pose.orientation.w);
-//	grasp_rpy.setEulerYPR(0, 0, 3.14);
-	//grasp_rpy.getRotation(grasp_quaternion);
 
-	//tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
-	//arm_pose.pose.position.z += 0.1;
+	float y_temp  = arm_pose.pose.position.y;
+	tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
+	arm_pose.pose.position.z = 0.2;
+	arm_pose.pose.position.y -= 0.15;
+	//arm_pose.pose.position.x= 0.4;
 
-	ROS_INFO("Grasp MSG");
-	ROS_INFO("X = %f", arm_pose.pose.position.x);
-	ROS_INFO("Y = %f", arm_pose.pose.position.y);
-	ROS_INFO("Z = %f", arm_pose.pose.position.z);
-
-	ROS_INFO("RX = %f", arm_pose.pose.orientation.x);
-	ROS_INFO("RY = %f", arm_pose.pose.orientation.y);
-	ROS_INFO("RZ = %f", arm_pose.pose.orientation.z);
-	ROS_INFO("RW = %f", arm_pose.pose.orientation.w);
+ROS_INFO("Got Point");
+for(int x = 0; x<20; x++)
+{
+	arm_pose.header.stamp = ros::Time().now();
 
 	pub_arm_position.publish(arm_pose);
+	ros::Duration(0.5).sleep();
+
+}
+	arm_pose.pose.position.z = -0.08;
+
+
+	ROS_INFO("dropping");
+	for(int x = 0; x<30; x++)
+	{
+	arm_pose.header.stamp = ros::Time().now();
+	pub_arm_position.publish(arm_pose);
+	ros::Duration(0.5).sleep();
+
+	}
+	ros::Duration(2).sleep();
+
+	ROS_INFO("fingers");
+
+	fingers.Finger_1 = 0;
+	fingers.Finger_2 = 0;
+	fingers.Finger_3 = 0;
+	pub_set_finger_position.publish(fingers);
+
+	ros::Duration(5).sleep();
+
+
+	ROS_INFO("move");
+
+	arm_pose.pose.position.y = y_temp;
+
+	for(int x = 0; x<20; x++)
+	{
+	arm_pose.header.stamp = ros::Time().now();
+
+	pub_arm_position.publish(arm_pose);
+	ros::Duration(0.5).sleep();
+	}
+
+	ros::Duration(2).sleep();
+
+	ROS_INFO("grab");
+
+	fingers.Finger_1 = 54;
+	fingers.Finger_2 = 54;
+	fingers.Finger_3 = 54;
+
+	pub_set_finger_position.publish(fingers);
+
+	ros::Duration(5).sleep();
+	ROS_INFO("raise");
+
+	arm_pose.pose.position.z = 0.2;
+
+	for(int x = 0; x<20; x++)
+	{
+	arm_pose.header.stamp = ros::Time().now();
+
+	pub_arm_position.publish(arm_pose);
+
+	ros::Duration(0.5).sleep();
+	}
+
 }
 
 int main(int argc, char **argv) {
@@ -95,10 +136,12 @@ int main(int argc, char **argv) {
 
 	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for arm position
 	std::string ObjectPose("ObjectPose"); ///String containing the topic name for object position
+	std::string SetFingerPosition("SetFingerPosition"); ///String containing the topic name for SetFingerPosition
+
 
 	if (argc < 1) {
 		ROS_INFO(
-				"Usage: aero_arm_controller object_position_topic arm_position_topic");
+				"Usage: aero_arm_controller object_position_topic arm_position_topic set_finger_position_topic");
 		return 1;
 	} else {
 		//Grab the topic parameters, print warnings if using default values
@@ -108,16 +151,20 @@ int main(int argc, char **argv) {
 		if (!param_nh.getParam(DesiredPosition, DesiredPosition))
 			ROS_WARN(
 					"Parameter <%s> Not Set. Using Default Arm Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
+		if (!param_nh.getParam(SetFingerPosition, SetFingerPosition))
+					ROS_WARN(
+							"Parameter <%s> Not Set. Using Default Set Finger Position Topic <%s>!", SetFingerPosition.c_str(), SetFingerPosition.c_str());
 	}
 
 //Print out received topics
 	ROS_DEBUG("Got Object Position Topic Name: <%s>", ObjectPose.c_str());
 	ROS_DEBUG("Got Arm Position Topic Name: <%s>", DesiredPosition.c_str());
+	ROS_DEBUG("Got Set Finger Position Topic Name: <%s>", SetFingerPosition.c_str());
 
 	ROS_INFO("Starting Up Arm Controller...");
 
 //create the arm object
-	Arm_Controller arm(nh, ObjectPose, DesiredPosition);
+	Arm_Controller arm(nh, ObjectPose, DesiredPosition,SetFingerPosition);
 
 	ros::spin();
 }
