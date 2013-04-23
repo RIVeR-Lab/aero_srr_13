@@ -78,7 +78,7 @@ namespace object_locator
 		image_geometry::StereoCameraModel stereo_model_;
 
 		//********Detection list and Manager Specific Variables***//
-		object_locator::DetectionManager sherlock_;
+		object_locator::DetectionManager* sherlock_;
 		typedef std::pair<int, int> PixPoint_t;
 		typedef std::pair<PixPoint_t, object_type> Detection_t;
 		typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
