@@ -56,11 +56,11 @@ Velocity_Controller::~Velocity_Controller() {
 
 void Velocity_Controller::callback(aero_arm::AeroArmVelocityConfig &config, uint32_t level) {
 
-	ROS_INFO("Reconfigure Request: %f %f %f", config.linear_P, config.linear_I, config.linear_D);
-	PID_Roll->SetPID(config.linear_P, config.linear_I, config.linear_D);
-	PID_Pitch->SetPID(config.linear_P, config.linear_I, config.linear_D);
-	PID_Yaw->SetPID(config.linear_P, config.linear_I, config.linear_D);
-	rotational_gain = config.gain;
+//	ROS_INFO("Reconfigure Request: %f %f %f", config.linear_P, config.linear_I, config.linear_D);
+//	PID_Roll->SetPID(config.linear_P, config.linear_I, config.linear_D);
+//	PID_Pitch->SetPID(config.linear_P, config.linear_I, config.linear_D);
+//	PID_Yaw->SetPID(config.linear_P, config.linear_I, config.linear_D);
+//	rotational_gain = config.gain;
 
 }
 
@@ -88,8 +88,8 @@ void Velocity_Controller::CurrentPositionMSG(const geometry_msgs::PoseStampedCon
 void Velocity_Controller::DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose) {
 	geometry_msgs::PoseStamped desired_pose_msg;
 
-	tf_listener.waitForTransform("jaco_api_origin", object_pose->header.frame_id, object_pose->header.stamp, ros::Duration(0.1));
-	tf_listener.transformPose("jaco_api_origin", *object_pose, desired_pose_msg);
+	tf_listener.waitForTransform("/jaco_api_origin", object_pose->header.frame_id, object_pose->header.stamp, ros::Duration(0.1));
+	tf_listener.transformPose("/jaco_api_origin", *object_pose, desired_pose_msg);
 
 	tf::Stamped<tf::Pose> desired_StampPose;
 
@@ -99,18 +99,18 @@ void Velocity_Controller::DesiredPositionMSG(const geometry_msgs::PoseStampedCon
 	desired_pos.y = desired_StampPose.getOrigin().getY();
 	desired_pos.z = desired_StampPose.getOrigin().getZ();
 
-	ROS_INFO("Desired");
-	ROS_INFO("X_V = %f", desired_pos.x);
-	ROS_INFO("Y_V = %f", desired_pos.y);
-	ROS_INFO("Z_V = %f", desired_pos.z);
-	ROS_INFO("RX_V = %f", desired_pos.roll);
-	ROS_INFO("RY_V = %f", desired_pos.pitch);
-	ROS_INFO("RZ_V = %f", desired_pos.y);
+
 
 	tf::Matrix3x3 desired_rotation(desired_StampPose.getRotation());
 
 	desired_rotation.getRPY(desired_pos.roll, desired_pos.pitch, desired_pos.yaw);
-
+	ROS_INFO("Desired");
+	ROS_INFO("X_Desired = %f", desired_pos.x);
+	ROS_INFO("Y_Desired = %f", desired_pos.y);
+	ROS_INFO("Z_Desired = %f", desired_pos.z);
+	ROS_INFO("RX_Desired = %f", desired_pos.roll);
+	ROS_INFO("RY_Desired = %f", desired_pos.pitch);
+	ROS_INFO("RZ_Desired = %f", desired_pos.y);
 }
 
 void Velocity_Controller::UpdateCurrentPose(void) {

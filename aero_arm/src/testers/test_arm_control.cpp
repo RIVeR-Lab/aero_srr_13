@@ -96,7 +96,7 @@ void callback(aero_arm::TestVelocityConfig &config, uint32_t level) {
 int main(int argc, char **argv) {
 
 	/* Set up ROS */
-	ros::init(argc, argv, "test_arm_controller");
+	ros::init(argc, argv, "test_arm_control");
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
