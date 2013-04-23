@@ -14,8 +14,10 @@
 #include <ros/ros.h>
 #include <pcl/filters/crop_box.h>
 #include <tf/transform_listener.h>
+#include <dynamic_reconfigure/server.h>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_laser_filter/utilities/AeroLaserFilterUtilities.h>
+#include <aero_laser_filter/LocalStageConfig.h>
 //***********    NAMESPACES     ****************//
 
 namespace aero_laser_filter
@@ -40,10 +42,16 @@ private:
 
 	void filterCloud(const PointCloudPtr_t& in, PointCloudPtr_t& out);
 
+	void drCB(const aero_laser_filter::LocalStageConfig& config, uint32_t level);
+
+
+
 	ros::NodeHandle nh_;
 	ros::NodeHandle p_nh_;
 	ros::Publisher  point_pub_;
 	ros::Subscriber point_sub_;
+
+	dynamic_reconfigure::Server<LocalStageConfig>* dr_server_;
 
 	tf::TransformListener *transformer_;
 
@@ -51,7 +59,8 @@ private:
 	Point_t crop_bottom_left_;
 	Point_t crop_top_right_;
 
-	int robot_size_;
+	double robot_size_;
+	double inflation_res_;
 
 	std::string input_topic_;
 	std::string output_topic_;
