@@ -278,6 +278,7 @@ void SAMStage::onInit()
 {
 	NODELET_INFO_STREAM("Initializing SAM Stage");
 	loadParams();
+	NODELET_INFO_STREAM("Parameters Loaded, registering topics...");
 	registerTopics();
 	NODELET_INFO_STREAM("SAM Stage Initialized");
 }
@@ -341,6 +342,7 @@ void SAMStage::loadParams() {
 void SAMStage::registerTopics() {
 	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,
 			2, &SAMStage::recieveImageCb, this);
+	NODELET_INFO_STREAM("registering publisher");
 	this->ObjLocationPub_ = this->getNodeHandle().advertise<
 			aero_srr_msgs::ObjectLocationMsg>(this->output_topic_, 2);
 
