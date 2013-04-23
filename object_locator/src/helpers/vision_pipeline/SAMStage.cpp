@@ -469,7 +469,7 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 	assert(msg->disparity_image.image.encoding == enc::TYPE_32FC1);
 //	const cv::Mat_<float> dmat(msg->disparity_image.image.height, msg->disparity_image.image.width,
 //			(float*)&msg->disparity_image.image.data[0], msg->disparity_image.image.step);
-	const cv::Mat_<float> dmat(disp);
+
 //	disparity_color_.create(msg->disparity_image.image.height, msg->disparity_image.image.width);
 //
 //	for (int row = 0; row < disparity_color_.rows; ++row) {
@@ -482,7 +482,8 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 //			 disparity_color_(row, col)[0] = colormap[3*index + 2];
 //		 }
 //	}
-
+	Mat_t dmat;
+	dmat = disp->image;
 	cv::imshow("disparity", dmat);
 //	cv::imshow(WINDOWDisp_, disp->image);
 	cv::waitKey(3);
