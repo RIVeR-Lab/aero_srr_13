@@ -11,6 +11,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <pcl/ros/conversions.h>
 #include <pcl_ros/transforms.h>
+#include <boost/bind.hpp>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_laser_filter/nodelets/GlobalFilterStage.h>
 //***********    NAMESPACES     ****************//
@@ -25,6 +26,8 @@ namespace aero_laser_filter {
 		this->nh_          = this->getNodeHandle();
 		this->p_nh_        = this->getPrivateNodeHandle();
 		this->transformer_ = new tf::TransformListener(this->nh_);
+		this->dr_server_   = new dynamic_reconfigure::Server<GlobalStageConfig>(this->p_nh_);
+		this->dr_server_->setCallback(boost::bind(&GlobalFilterStage::drCB, this, _1, _2));
 
 		this->loadParams();
 		this->registerTopics();
@@ -117,6 +120,14 @@ namespace aero_laser_filter {
 	{
 		//for now no filtering, just pass through
 		*out = *in;
+	}
+
+	void GlobalFilterStage::drCB(const GlobalStageConfig& config, uint32_t level)
+	{
+		this->crop_bottom_left_.x = config.crop_min_x;
+		this->crop_bottom_left_.y = config.crop_min_y;
+		this->crop_top_right_.x   = config.crop_max_x;
+		this->crop_top_right_.y   = config.crop_max_y;
 	}
 
 } /* namespace aero_laser_filter */

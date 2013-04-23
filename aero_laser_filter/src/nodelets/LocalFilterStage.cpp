@@ -11,6 +11,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <pcl/ros/conversions.h>
 #include <pcl_ros/transforms.h>
+#include <boost/bind.hpp>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_laser_filter/nodelets/LocalFilterStage.h>
 //***********    NAMESPACES     ****************//
@@ -26,6 +27,8 @@ namespace aero_laser_filter
 		this->nh_          = this->getNodeHandle();
 		this->p_nh_        = this->getPrivateNodeHandle();
 		this->transformer_ = new tf::TransformListener(this->nh_);
+		this->dr_server_   = new dynamic_reconfigure::Server<LocalStageConfig>(this->p_nh_);
+		this->dr_server_->setCallback(boost::bind(&LocalFilterStage::drCB, this, _1, _2));
 
 		this->loadParams();
 		this->registerTopics();
@@ -67,7 +70,10 @@ namespace aero_laser_filter
 		this->crop_top_right_.y = temp_y;
 		this->crop_top_right_.z = temp_z;
 
+		this->robot_size_    = 1;
+		this->inflation_res_ = 0.1;
 		this->p_nh_.getParam("robot_size", this->robot_size_);
+		this->p_nh_.getParam("inflation_res", this->inflation_res_);
 	}
 
 	void LocalFilterStage::registerTopics()
@@ -103,8 +109,8 @@ namespace aero_laser_filter
 	{
 		try
 		{
-		this->transformer_->waitForTransform(this->output_frame_, in->header.frame_id, in->header.stamp, ros::Duration(1.0));
-		pcl_ros::transformPointCloud(this->output_frame_, *in, *out, *this->transformer_);
+			this->transformer_->waitForTransform(this->output_frame_, in->header.frame_id, in->header.stamp, ros::Duration(1.0));
+			pcl_ros::transformPointCloud(this->output_frame_, *in, *out, *this->transformer_);
 		}
 		catch(std::exception& e)
 		{
@@ -121,17 +127,28 @@ namespace aero_laser_filter
 		for(int i=0; i<size; i++)
 		{
 			//For now, we're just going to do a really simple box inflation
-			for(int x=0; x<this->robot_size_; x++)
+			for(int x=0; x<this->robot_size_; x+=this->inflation_res_)
 			{
-				for(int y=0; y<this->robot_size_; y++)
+				for(int y=0; y<this->robot_size_; y+=this->inflation_res_)
 				{
 					Point_t inflation_point(in->at(i));
-					inflation_point.x+= x-robot_size_/2;
-					inflation_point.y+= y-robot_size_/2;
+					inflation_point.x+= x-robot_size_/2.0;
+					inflation_point.y+= y-robot_size_/2.0;
 					out->push_back(inflation_point);
 				}
 			}
 		}
+	}
+
+	void LocalFilterStage::drCB(const LocalStageConfig& config, uint32_t level)
+	{
+		this->crop_bottom_left_.x = config.crop_min_x;
+		this->crop_bottom_left_.y = config.crop_min_y;
+		this->crop_top_right_.x   = config.crop_max_x;
+		this->crop_top_right_.y   = config.crop_max_y;
+		this->robot_size_         = config.inflation_size;
+		this->inflation_res_      = config.inflation_resolution;
+
 	}
 
 } /* namespace aero_laser_filter */

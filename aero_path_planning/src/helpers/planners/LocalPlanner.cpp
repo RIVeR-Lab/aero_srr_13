@@ -23,6 +23,8 @@ LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
+	this->dr_server_.setCallback(boost::bind(&LocalPlanner::drCB, this, _1, _2));
+
 	this->current_rad_ = 0;
 	this->current_vel_ = 0;
 
@@ -506,7 +508,7 @@ void LocalPlanner::sendVelCom(double velocity, double radius)
 	switch (this->platform_)
 	{
 	case 0:
-		ROS_ERROR("Platform Oryx is no longer supported");
+		ROS_ERROR_THROTTLE(1,"Sending Velocity To Platform Oryx is no longer supported");
 		break;
 	case 1:
 		twist(velocity, velocity/(radius/10.0));
@@ -514,6 +516,14 @@ void LocalPlanner::sendVelCom(double velocity, double radius)
 	default:
 		break;
 	}
+}
+
+void LocalPlanner::drCB(const LocalPlannerConfig& config, uint32_t levels)
+{
+	this->goal_weight_ = config.goal_weight;
+	this->unkn_weight_ = config.unkown_weight;
+	this->diff_weight_ = config.difficult_weight;
+	this->trav_weight_ = config.traversed_weight;
 }
 
 
