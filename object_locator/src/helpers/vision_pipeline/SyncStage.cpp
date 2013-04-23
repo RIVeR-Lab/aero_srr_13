@@ -38,7 +38,7 @@ void SyncStage::registerTopics()
 {
 	this->raw_image_sub_  = this->getNodeHandle().subscribe(this->left_input_topic_,2,&SyncStage::imageCb,this);
 //	this->image_right_ = it_->subscribeCamera(this->right_input_topic_,2,&SyncStage::rightImageCb,this);
-	this->disparity_ = it_->subscribe(this->disparity_input_topic_,2,&SyncStage::disparityImageCb,this);
+	this->disparity_ = this->getNodeHandle().subscribe(this->disparity_input_topic_,2,&SyncStage::disparityImageCb,this);
 	this->sync_image_pub_ = this->getNodeHandle().advertise<object_locator::SyncImagesAndDisparity>(this->output_topic_,2);
 }
 
@@ -57,9 +57,10 @@ void SyncStage::imageCb(const object_locator::SyncImageMsgConstPtr& msg)
 //	gotImages();
 //}
 
-void SyncStage::disparityImageCb(const sensor_msgs::ImageConstPtr& msg)
+void SyncStage::disparityImageCb(const stereo_msgs::DisparityImageConstPtr& msg)
 {
-	disparity_image_ = *msg;
+	disparity_image_     = msg->image;
+//	disparity_image_.encoding
 	gotDisparity_ = true;
 	gotImages();
 }
