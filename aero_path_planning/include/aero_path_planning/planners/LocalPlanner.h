@@ -15,10 +15,12 @@
 #include<boost/circular_buffer.hpp>
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
+#include <dynamic_reconfigure/server.h>
 //********************** LOCAL  DEPENDANCIES **********************//
 #include <aero_path_planning/utilities/AeroPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
 #include <aero_srr_msgs/AeroState.h>
+#include <aero_path_planning/LocalPlannerConfig.h>
 
 namespace aero_path_planning
 {
@@ -74,6 +76,8 @@ private:
 	ros::Publisher  tent_pub_;  ///Publisher for visualizing selected tentacles
 	ros::Timer      vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
 	ros::Timer      plan_timer_;///Timer that will attempt to select a new tentacle at a constant rate
+
+	dynamic_reconfigure::Server<LocalPlannerConfig> dr_server_; ///Dynamic reconfigure server
 
 	aero_path_planning::Point	origin_;	///The origin to use for the occupancy grids
 	TentacleGeneratorPtr tentacles_;	///Pointer to the tentacle generator which contains the tentacles to use for planning
@@ -131,6 +135,14 @@ private:
 	 * @param message
 	 */
 	void lidarCB(const sensor_msgs::PointCloud2ConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Dnyamic reconfigure callback
+	 * @param config
+	 * @param levels
+	 */
+	void drCB(const aero_path_planning::LocalPlannerConfig& config, uint32_t levels);
 
 	/**
 	 * @author Adam Panzica
