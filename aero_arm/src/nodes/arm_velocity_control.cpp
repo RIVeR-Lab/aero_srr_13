@@ -28,6 +28,8 @@ Velocity_Controller::Velocity_Controller(ros::NodeHandle nh, std::string Desired
 
 	this->joint_angles_sub = nh.subscribe(JointAngles, 1, &Velocity_Controller::JointAnglesMSG, this);
 
+	last_position_time = ros::Time().now();
+	running = false;
 	//UpdateError();
 
 	PID_X = new pid::PIDController(3, 0, 0.5, pos_err.x_err);
@@ -104,13 +106,17 @@ void Velocity_Controller::DesiredPositionMSG(const geometry_msgs::PoseStampedCon
 	tf::Matrix3x3 desired_rotation(desired_StampPose.getRotation());
 
 	desired_rotation.getRPY(desired_pos.roll, desired_pos.pitch, desired_pos.yaw);
-	ROS_INFO("Desired");
-	ROS_INFO("X_Desired = %f", desired_pos.x);
-	ROS_INFO("Y_Desired = %f", desired_pos.y);
-	ROS_INFO("Z_Desired = %f", desired_pos.z);
-	ROS_INFO("RX_Desired = %f", desired_pos.roll);
-	ROS_INFO("RY_Desired = %f", desired_pos.pitch);
-	ROS_INFO("RZ_Desired = %f", desired_pos.y);
+//	ROS_INFO("Desired");
+//	ROS_INFO("X_Desired = %f", desired_pos.x);
+//	ROS_INFO("Y_Desired = %f", desired_pos.y);
+//	ROS_INFO("Z_Desired = %f", desired_pos.z);
+//	ROS_INFO("RX_Desired = %f", desired_pos.roll);
+//	ROS_INFO("RY_Desired = %f", desired_pos.pitch);
+//	ROS_INFO("RZ_Desired = %f", desired_pos.y);
+
+	running = true;
+	last_position_time = ros::Time().now();
+
 }
 
 void Velocity_Controller::UpdateCurrentPose(void) {
@@ -144,15 +150,23 @@ void Velocity_Controller::UpdateError(void) {
 	pos_err.roll_err = desired_pos.roll - current_pos.roll;
 	pos_err.pitch_err = desired_pos.pitch - current_pos.pitch;
 	pos_err.yaw_err = desired_pos.yaw - current_pos.yaw;
+//
+//	ROS_INFO("X_CUR = %f, X_DES = %f, X_ERR_ = %f", current_pos.x, desired_pos.x, pos_err.x_err);
+//	ROS_INFO("Y_CUR = %f, Y_DES = %f, Y_ERR_ = %f", current_pos.y, desired_pos.y, pos_err.y_err);
+//	ROS_INFO("Z_CUR = %f, Z_DES = %f, Z_ERR_ = %f", current_pos.z, desired_pos.z, pos_err.z_err);
+//	ROS_INFO("rX_CUR = %f, rX_DES = %f, rX_ERR_ = %f", current_pos.roll, desired_pos.roll, pos_err.roll_err);
+//	ROS_INFO("rY_CUR = %f, rY_DES = %f, rY_ERR_ = %f", current_pos.pitch, desired_pos.pitch, pos_err.pitch_err);
+//	ROS_INFO("rZ_CUR = %f, rZ_DES = %f, rZ_ERR_ = %f", current_pos.yaw, desired_pos.yaw, pos_err.yaw_err);
 
-	ROS_INFO("X_CUR = %f, X_DES = %f, X_ERR_ = %f", current_pos.x, desired_pos.x, pos_err.x_err);
-	ROS_INFO("Y_CUR = %f, Y_DES = %f, Y_ERR_ = %f", current_pos.y, desired_pos.y, pos_err.y_err);
-	ROS_INFO("Z_CUR = %f, Z_DES = %f, Z_ERR_ = %f", current_pos.z, desired_pos.z, pos_err.z_err);
-	ROS_INFO("rX_CUR = %f, rX_DES = %f, rX_ERR_ = %f", current_pos.roll, desired_pos.roll, pos_err.roll_err);
-	ROS_INFO("rY_CUR = %f, rY_DES = %f, rY_ERR_ = %f", current_pos.pitch, desired_pos.pitch, pos_err.pitch_err);
-	ROS_INFO("rZ_CUR = %f, rZ_DES = %f, rZ_ERR_ = %f", current_pos.yaw, desired_pos.yaw, pos_err.yaw_err);
-
+if(running == true)
+{
 	UpdatePID();
+}
+
+if(running == true && (ros::Time().now().toSec()-last_position_time.toSec() > 1))
+		{
+	running = false;
+		}
 }
 void Velocity_Controller::UpdatePID(void) {
 	Eigen::VectorXf cartisian_velocity(6);
@@ -206,12 +220,12 @@ void Velocity_Controller::UpdatePID(void) {
 		cartisian_velocity(5) = -0.15;
 	}
 
-	ROS_INFO("X_V = %f", cartisian_velocity(0));
-	ROS_INFO("Y_V = %f", cartisian_velocity(1));
-	ROS_INFO("Z_V = %f", cartisian_velocity(2));
-	ROS_INFO("Roll_V = %f", cartisian_velocity(3));
-	ROS_INFO("Pitch_V = %f", cartisian_velocity(4));
-	ROS_INFO("Yaw_V = %f", cartisian_velocity(5));
+//	ROS_INFO("X_V = %f", cartisian_velocity(0));
+//	ROS_INFO("Y_V = %f", cartisian_velocity(1));
+//	ROS_INFO("Z_V = %f", cartisian_velocity(2));
+//	ROS_INFO("Roll_V = %f", cartisian_velocity(3));
+//	ROS_INFO("Pitch_V = %f", cartisian_velocity(4));
+//	ROS_INFO("Yaw_V = %f", cartisian_velocity(5));
 
 	geometry_msgs::TwistStamped cartesian_velocity_msg;
 	cartesian_velocity_msg.header.frame_id = "/arm_base";
@@ -230,7 +244,9 @@ void Velocity_Controller::UpdatePID(void) {
 	//cartesian_velocity_msg.twist.angular.y = 0;//cartisian_velocity(4);
 	//cartesian_velocity_msg.twist.angular.z = 0;//cartisian_velocity(5);
 
+
 	joint_velocity_pub.publish(cartesian_velocity_msg);
+
 }
 void Velocity_Controller::JointAnglesMSG(const jaco_driver::joint_anglesConstPtr& joint_angles) {
 //	UpdateError();

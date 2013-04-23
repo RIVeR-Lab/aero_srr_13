@@ -22,6 +22,7 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 #include <time.h>
+#include <jaco_driver/finger_position.h>
 
 
 
@@ -29,15 +30,15 @@ namespace aero_arm {
 
 class Arm_Controller {
 public:
-	Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,std::string ArmPose);
+	Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,std::string ArmPose, std::string SetFingerPosition);
 	void ObjectPosition(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
 
 private:
 	ros::NodeHandle nh_;
 	ros::Subscriber sub_object_position;
 	ros::Publisher pub_arm_position;
-	ros::Publisher pub_arm_position_raw;
-	ros::Publisher pub_arm_position_trans;
+
+	ros::Publisher pub_set_finger_position;
 
 	tf::TransformListener listener;
 

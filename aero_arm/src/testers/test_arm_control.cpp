@@ -23,7 +23,7 @@ using namespace std;
 ros::Publisher pub;
 tf::TransformListener *listenerptr;
 
-float x_pos = 0;
+float x_pos = 0.4;
 float y_pos = 0;
 float z_pos = 0;
 float rx_pos = 0;

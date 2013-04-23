@@ -85,6 +85,9 @@ private:
 	pid::PIDController *PID_Pitch;
 	pid::PIDController *PID_Yaw;
 
+	ros::Time last_position_time;
+
+	bool running;
 	float linear_gain;
 	float rotational_gain;
 };
