@@ -23,12 +23,14 @@ void SyncStage::onInit()
 
 void SyncStage::loadParams()
 {
-	this->left_input_topic_  ="/stereo_top/left/image_raw";
-	this->right_input_topic_ ="/stereo_top/right/image_raw";
-	this->output_topic_="disparity_stage/stereo_pair";
+	this->left_input_topic_  ="/stereo_camera/left/image_raw";
+	this->right_input_topic_ ="/stereo_camera/right/image_raw";
+	this->disparity_input_topic_ ="/stereo_camera/disparity";
+	this->output_topic_="disparity_stage/disparity";
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
-	gotLeft = false;
-	gotRight = false;
+	gotLeft_ = false;
+	gotRight_ = false;
+	gotDisparity_ = false;
 
 }
 
@@ -36,6 +38,7 @@ void SyncStage::registerTopics()
 {
 	this->image_left_  = it_->subscribeCamera(this->left_input_topic_,2,&SyncStage::leftImageCb,this);
 	this->image_right_ = it_->subscribeCamera(this->right_input_topic_,2,&SyncStage::rightImageCb,this);
+	this->disparity_ = it_->subscribe(this->disparity_input_topic_,2,&SyncStage::disparityImageCb,this);
 	this->sync_image_pub_ = this->getNodeHandle().advertise<object_locator::SyncImageMsg>(this->output_topic_,2);
 }
 
@@ -43,7 +46,7 @@ void SyncStage::leftImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_
 {
 	left_image_ = *msg;
 	left_info_  = *cam_info;
-	gotLeft = true;
+	gotLeft_ = true;
 	gotImages();
 }
 
@@ -51,26 +54,35 @@ void SyncStage::rightImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor
 {
 	right_image_ = *msg;
 	right_info_  = *cam_info;
-	gotRight = true;
+	gotRight_ = true;
+	gotImages();
+}
+
+void SyncStage::disparityImageCb(const sensor_msgs::ImageConstPtr& msg)
+{
+	disparity_image_ = *msg;
+	gotDisparity_ = true;
 	gotImages();
 }
 
 void SyncStage::gotImages()
 {
-	if(gotLeft && gotRight)
+	if(gotLeft_ && gotRight_ && gotDisparity_)
 	{
-		object_locator::SyncImageMsgPtr msg(new object_locator::SyncImageMsg);
+		object_locator::SyncImagesAndDisparityPtr msg(new object_locator::SyncImagesAndDisparity);
 		generateSyncMsg(*msg);
 		this->sync_image_pub_.publish(msg);
-		gotLeft = false;
-		gotRight = false;
+		gotLeft_ = false;
+		gotRight_ = false;
+		gotDisparity_ = false;
 	}
 }
 
-void SyncStage::generateSyncMsg(object_locator::SyncImageMsg& msg)
+void SyncStage::generateSyncMsg(object_locator::SyncImagesAndDisparity& msg)
 {
-	msg.left_image  = left_image_;
-	msg.left_info   = left_info_;
-	msg.right_image = right_image_;
-	msg.right_info  = right_info_;
+	msg.images.left_image  = left_image_;
+	msg.images.left_info   = left_info_;
+	msg.images.right_image = right_image_;
+	msg.images.right_info  = right_info_;
+	msg.disparity_image    = disparity_image_;
 }
