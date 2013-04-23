@@ -286,11 +286,12 @@ void SAMStage::onInit()
 void SAMStage::loadParams() {
 	this->input_topic_  = "disparity_stage/disparity";
 	this->output_topic_ = "sam_stage/detection_xyz";
+	NODELET_INFO_STREAM("Topics Strings Set");
 	this->getPrivateNodeHandle().getParam(this->input_topic_,
 			this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,
 			this->output_topic_);
-
+	NODELET_INFO_STREAM("Topics Set");
 	std::string cascade_path_WHA("cascade_path_WHA");
 	cascade_path_WHA_ =
 			"/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
@@ -304,7 +305,7 @@ void SAMStage::loadParams() {
 
 	cascade_path_WHASUN_ =
 			"/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
-
+	NODELET_INFO_STREAM("cascade paths set");
 	if (!cascade_WHA_.load(cascade_path_WHA_)) {
 		NODELET_ERROR_STREAM("--(!)Error loading "<< cascade_path_WHA);
 	}
@@ -315,6 +316,7 @@ void SAMStage::loadParams() {
 	if (!cascade_WHASUN_.load(cascade_path_WHASUN_)) {
 		NODELET_ERROR_STREAM("--(!)Error loading " << cascade_path_WHASUN_);
 	}
+	NODELET_INFO_STREAM("cascades loaded");
 	std::string thresh_dist("thresh_dist");
 	thresh_dist_ = .5;
 	this->getPrivateNodeHandle().getParam(thresh_dist, thresh_dist_);
@@ -330,12 +332,13 @@ void SAMStage::loadParams() {
 	std::string thresh_det("thresh_det");
 	thresh_det_ = .5;
 	this->getPrivateNodeHandle().getParam(thresh_det, thresh_det_);
-
+	NODELET_INFO_STREAM("Det man vals set");
 	this->sherlock_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
 	WINDOWLeft_ = "Left camera image";
 	WINDOWDisp_ = "Disparity image";
 	cv::namedWindow(WINDOWLeft_);
-	cv::namedWindow(WINDOWDisp_);
+//	cv::namedWindow(WINDOWDisp_);
+	NODELET_INFO_STREAM("CV windows set.");
 
 }
 
