@@ -335,7 +335,7 @@ void SAMStage::loadParams() {
 	NODELET_INFO_STREAM("Det man vals set");
 	this->sherlock_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
 	WINDOWLeft_ = "Left camera image";
-	WINDOWDisp_ = "Disparity image";
+//	WINDOWDisp_ = "Disparity image";
 	cv::namedWindow(WINDOWLeft_);
 //	cv::namedWindow(WINDOWDisp_);
 	NODELET_INFO_STREAM("CV windows set.");
