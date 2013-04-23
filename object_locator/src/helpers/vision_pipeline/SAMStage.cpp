@@ -467,8 +467,9 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 	float multiplier = 255.0f / (max_disparity - min_disparity);
 
 	assert(msg->disparity_image.image.encoding == enc::TYPE_32FC1);
-	const cv::Mat_<float> dmat(msg->disparity_image.image.height, msg->disparity_image.image.width,
-			(float*)&msg->disparity_image.image.data[0], msg->disparity_image.image.step);
+//	const cv::Mat_<float> dmat(msg->disparity_image.image.height, msg->disparity_image.image.width,
+//			(float*)&msg->disparity_image.image.data[0], msg->disparity_image.image.step);
+	const cv::Mat_<float> dmat(disp);
 //	disparity_color_.create(msg->disparity_image.image.height, msg->disparity_image.image.width);
 //
 //	for (int row = 0; row < disparity_color_.rows; ++row) {
