@@ -449,8 +449,8 @@ void SAMStage::fetchAndRetrieve(const sensor_msgs::Image& msg) {
 //
 //
 //	}
-//	cv::imshow(WINDOWLeft_, img->image);
-//	cv::waitKey(3);
+	cv::imshow(WINDOWLeft_, img->image);
+	cv::waitKey(3);
 }
 
 void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityConstPtr& msg) {
