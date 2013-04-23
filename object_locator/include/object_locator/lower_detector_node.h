@@ -23,6 +23,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <math.h>
 #include <queue>
+#include <message_filters/subscriber.h>
 
 
 
@@ -55,6 +56,7 @@ private:
 	image_transport::ImageTransport it_;
 	image_transport::CameraSubscriber image_left_;
 	image_transport::CameraSubscriber image_right_;
+	ros::Subscriber disp_image_sub_;
 	image_transport::Publisher image_pub_;
 
 

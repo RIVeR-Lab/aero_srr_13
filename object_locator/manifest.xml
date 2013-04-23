@@ -19,6 +19,7 @@
 	<depend package="aero_srr_msgs" />
 	<depend package="nodelet" />
 	<depend package="dynamic_reconfigure"/>
+	<depend package="stereo_msgs"/>
 	<export>
 		<nodelet plugin="${prefix}/nodelet_plugins.xml" />
 		
