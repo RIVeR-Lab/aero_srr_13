@@ -484,7 +484,12 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 //	}
 	Mat_t dmat;
 	dmat = disp->image;
-	normalize( dmat, dmat, 0, 256, CV_MINMAX );
+	Mat_t preDisp(dmat);
+	cv::Size ksize;
+	ksize.width = 10;
+	ksize.height = 10;
+	cv::boxFilter(preDisp, dmat, 1, ksize);
+//	normalize( preDisp, dmat, 0, 256, CV_MINMAX );
 	cv::imshow("disparity", dmat);
 //	cv::imshow(WINDOWDisp_, disp->image);
 	cv::waitKey(3);
