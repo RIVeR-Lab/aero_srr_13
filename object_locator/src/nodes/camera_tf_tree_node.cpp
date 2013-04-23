@@ -22,7 +22,8 @@ public:
 		tf::Transform camera, armbase;
 		camera.setOrigin(tf::Vector3(1.8161, 0, 0.6858));
 		tf::Quaternion cam_q;
-		cam_q.setEuler(3.14159/2.0+.4,0, -3.14159/2.0);
+		cam_q.setEuler((-3.14159/2.0)+(-3.14159/6),0, 3*(-3.14159/2.0));
+//		cam_q.setEuler(0.0,0.0,0.0);
 		camera.setRotation(cam_q);
 		broadcastCam.sendTransform(tf::StampedTransform(camera, ros::Time::now(),  "/world", "/stereo_bottom/center"));
 
