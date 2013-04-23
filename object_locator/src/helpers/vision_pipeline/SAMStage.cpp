@@ -273,6 +273,7 @@ using namespace object_locator;
 //	    255, 0, 0,
 //	  };
 
+
 void SAMStage::onInit()
 {
 	NODELET_INFO_STREAM("Initializing SAM Stage");
@@ -333,7 +334,7 @@ void SAMStage::loadParams() {
 	this->getPrivateNodeHandle().getParam(thresh_det, thresh_det_);
 	NODELET_INFO_STREAM("Det man vals set");
 	this->sherlock_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
-	NODELET_INFO_STREAM("Det man Init done");
+	NODELET_INFO_STREAM("Det man Initialized!");
 	WINDOWLeft_ = "Left camera image";
 //	WINDOWDisp_ = "Disparity image";
 	cv::namedWindow(WINDOWLeft_);
