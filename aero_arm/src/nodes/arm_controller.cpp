@@ -50,7 +50,7 @@ listener.waitForTransform("arm_base", object->pose.header.frame_id, object->pose
 	grasp_rpy.getRotation(grasp_quaternion);
 	ROS_INFO("here");
 
-	//arm_pose.pose.position.y -= 0.1;
+	arm_pose.pose.position.y -= 0.1;
 	float y_temp  = arm_pose.pose.position.y;
 	tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
 	arm_pose.pose.position.z = 0.2;
