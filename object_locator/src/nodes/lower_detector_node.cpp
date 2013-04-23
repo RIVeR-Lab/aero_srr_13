@@ -34,8 +34,8 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_  = it_.subscribeCamera("/stereo_camera_raw/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_camera_raw/right/image_raw", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/stereo_top/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/stereo_top/right/image_raw", 1, &ImageConverter::imageCbRight, this);
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
