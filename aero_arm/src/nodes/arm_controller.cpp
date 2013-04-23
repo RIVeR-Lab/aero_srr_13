@@ -71,7 +71,7 @@ void Arm_Controller::ObjectPosition(
 	grasp_rpy.getRotation(grasp_quaternion);
 
 	tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
-	arm_pose.pose.position.z += 0.1;
+	//arm_pose.pose.position.z += 0.1;
 
 	ROS_INFO("Grasp MSG");
 	ROS_INFO("X = %f", arm_pose.pose.position.x);
@@ -89,11 +89,11 @@ void Arm_Controller::ObjectPosition(
 int main(int argc, char **argv) {
 
 	/* Set up ROS */
-	ros::init(argc, argv, "aero_arm_controller");
+	ros::init(argc, argv, "arm_controller");
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string ArmPose("ArmPose"); ///String containing the topic name for arm position
+	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for arm position
 	std::string ObjectPose("ObjectPose"); ///String containing the topic name for object position
 
 	if (argc < 1) {
@@ -105,19 +105,19 @@ int main(int argc, char **argv) {
 		if (!param_nh.getParam(ObjectPose, ObjectPose))
 			ROS_WARN(
 					"Parameter <%s> Not Set. Using Default Object Position Topic <%s>!", ObjectPose.c_str(), ObjectPose.c_str());
-		if (!param_nh.getParam(ArmPose, ArmPose))
+		if (!param_nh.getParam(DesiredPosition, DesiredPosition))
 			ROS_WARN(
-					"Parameter <%s> Not Set. Using Default Arm Position Topic <%s>!", ArmPose.c_str(), ArmPose.c_str());
+					"Parameter <%s> Not Set. Using Default Arm Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
 	}
 
 //Print out received topics
 	ROS_DEBUG("Got Object Position Topic Name: <%s>", ObjectPose.c_str());
-	ROS_DEBUG("Got Arm Position Topic Name: <%s>", ArmPose.c_str());
+	ROS_DEBUG("Got Arm Position Topic Name: <%s>", DesiredPosition.c_str());
 
 	ROS_INFO("Starting Up Arm Controller...");
 
 //create the arm object
-	Arm_Controller arm(nh, ObjectPose, ArmPose);
+	Arm_Controller arm(nh, ObjectPose, DesiredPosition);
 
 	ros::spin();
 }
