@@ -93,7 +93,7 @@ namespace aero_laser_filter
 
 		this->cropCloud(processed_cloud, processed_cloud);
 		NODELET_INFO_STREAM("Local: Croped Point Cloud");
-		//this->filterCloud(cropped_cloud, processed_cloud);
+		this->filterCloud(cropped_cloud, processed_cloud);
 		NODELET_INFO_STREAM("Local: Filtered Point Cloud");
 		this->transformCloud(processed_cloud, processed_cloud);
 		NODELET_INFO_STREAM("Local: Transformed Point Cloud");
