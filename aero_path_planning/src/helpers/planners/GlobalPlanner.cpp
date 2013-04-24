@@ -153,6 +153,10 @@ void GlobalPlanner::loadOccupancyParam()
 	std::string local_frame = "local_frame";
 	this->local_frame_      = "/base_footprint";
 
+	//The frame_id for the world occupancy grid
+	std::string global_frame = "global_frame";
+	this->global_frame_      = "/world";
+
 	//Get Public Parameters
 	if(!this->nh_.getParam(p_up_rate,	this->local_update_rate_))	PARAM_WARN(p_up_rate,	up_rate_msg.str());
 	if(!this->nh_.getParam(pg_up_rate,	this->global_update_rate_))	PARAM_WARN(pg_up_rate,	gup_rate_msg.str());
@@ -315,7 +319,6 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	try
 	{
 		//Transform the coordinates of the local grid to the global frame
-		ROS_WARN_STREAM("I'm trying to transform the local grid from: "<<local_grid.getFrameId()<<" to "<<this->global_frame_);
 		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time::now(), ros::Duration(this->local_update_rate_/4.0));
 		pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
 
