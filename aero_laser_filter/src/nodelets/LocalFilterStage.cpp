@@ -91,9 +91,9 @@ namespace aero_laser_filter
 		pcl::fromROSMsg(*message, *cropped_cloud);
 		NODELET_INFO_STREAM("Local: Extracted Raw Point Cloud from Message");
 
-		this->cropCloud(cropped_cloud, cropped_cloud);
+		this->cropCloud(processed_cloud, processed_cloud);
 		NODELET_INFO_STREAM("Local: Croped Point Cloud");
-		this->filterCloud(cropped_cloud, processed_cloud);
+		//this->filterCloud(cropped_cloud, processed_cloud);
 		NODELET_INFO_STREAM("Local: Filtered Point Cloud");
 		this->transformCloud(processed_cloud, processed_cloud);
 		NODELET_INFO_STREAM("Local: Transformed Point Cloud");
