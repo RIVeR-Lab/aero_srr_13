@@ -372,9 +372,11 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
 	if(should_plan_)
 	{
+		RROS_INFO_STREAM("Local Planner: Planning...");
 		//Grab the next occupancy grid to process if we've recieved new data from global planner
 		if(!this->occupancy_buffer_.empty())
 		{
+			ROS_INFO_STREAM("Local Planner: Have New Occupancy data from global planner...");
 			this->working_grid_= this->occupancy_buffer_.front();
 			this->occupancy_buffer_.pop_front();
 		}
@@ -383,21 +385,26 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 		//If we actually have a working grid, plan on it
 		if(working_grid.size()>0)
 		{
+			ROS_INFO_STREAM("Local Planner: Have A Working Grid...");
 			//If we have a LIDAR patch, apply it
 			if(this->lidar_patch_!= PointCloudPtr())
 			{
+				ROS_INFO_STREAM("Local Planner: Applying LIDAR patch...");
 				working_grid.setPointTrait(*this->lidar_patch_);
+				ROS_INFO_STREAM("Local Planner: Patch Applied....");
 			}
 
 			int speedset_idx = 0;
 			int tentacle_idx = 0;
 
 			//select the best tentacle
+			ROS_INFO_STREAM("Local Planner: Selecting Tentacle...");
 			this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
 			//Update the current radius and velocity
 			this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
 			this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
 			visualizeTentacle(speedset_idx, tentacle_idx);
+			ROS_INFO_STREAM("Local Planner: Tentacle Selected!");
 		}
 
 	}
@@ -484,6 +491,7 @@ void LocalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 
 void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
+	ROS_INFO_STREAM("Local Planner: Got new LIDAR data!");
 	PointCloudPtr lidar_patch(new PointCloud());
 	pcl::PointCloud<pcl::PointXYZ> raw_cloud;
 	pcl::fromROSMsg(*message, raw_cloud);
@@ -500,6 +508,7 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 	}
 
 	this->lidar_patch_ = lidar_patch;
+	ROS_INFO_STREAM("Local Planner: LIDAR Patch Saved!");
 }
 
 
