@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<robot 
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:gazebo="http://playerstage.sourceforge.net/gazebo/xmlschema/#gz"
+    xmlns:model="http://playerstage.sourceforge.net/gazebo/xmlschema/#model"
+	xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+	xmlns:body="http://playerstage.sourceforge.net/gazebo/xmlschema/#body"
+    xmlns:geom="http://playerstage.sourceforge.net/gazebo/xmlschema/#geom"
+    xmlns:joint="http://playerstage.sourceforge.net/gazebo/xmlschema/#joint"
+	xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+	xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+	xmlns:rendering="http://playerstage.sourceforge.net/gazebo/xmlschema/#rendering"
+    xmlns:renderable="http://playerstage.sourceforge.net/gazebo/xmlschema/#renderable"
+    xmlns:physics="http://playerstage.sourceforge.net/gazebo/xmlschema/#physics"
+	xmlns:xacro="http://ros.org/wiki/xacro" name="aero">
+       
+  <!-- Included URDF/XACRO Files -->
+  <include filename="$(find aero_description)/urdf/husky.urdf.xacro" />
+  <include filename="$(find aero_description)/urdf/stereo_camera_pair.urdf.xacro" />
+  <include filename="$(find aero_description)/urdf/sick_laser.urdf.xacro" />
+  <include filename="$(find aero_description)/urdf/simple_transform.urdf.xacro" />
+
+
+  <xacro:husky/>  
+
+  <!-- Cameras -->
+  <xacro:stereo_camera_pair parent="base_link_front_bumper_part" prefix="lower_stereo" xyz="0.07 0 0.02" rpy="0 0.2 0" camera_offset="0.08"/>
+  <xacro:stereo_camera_pair parent="camera_boom" prefix="upper_stereo" xyz="0.02 0 0.02" rpy="0 0.2 0" camera_offset="0.08"/>
+
+  <xacro:revolute_pan_transform parent="base_link_top_plate_part" name="camera_boom" xyz="0 0 0.9" rpy="0 0 0" lower_limit="-2" upper_limit="2">
+    <visual>
+      <origin xyz="0.0 0.0 -0.45" rpy="0 0 0" />
+      <geometry>
+	<cylinder length="0.9" radius="0.01" />
+      </geometry>
+      <material name="DarkGray" />
+    </visual>
+  </xacro:revolute_pan_transform>
+
+  <!-- Laser -->
+  <xacro:sick_laser_v0 name="laser" parent="base_link_front_bumper_part" ros_topic="laser" update_rate="25" >
+    <origin xyz="0.03 0 0.05" rpy="0 0 0" />
+  </xacro:sick_laser_v0> 
+  <gazebo reference="laser">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+
+  <!-- Arm -->
+  <xacro:static_transform parent="base_link_front_bumper_part" name="arm_base" xyz="-0.04 0 -0.03" rpy="0 0 0">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+	<box size="0.01 0.01 0.01" />
+      </geometry>
+      <material name="Blue" />
+    </visual>
+  </xacro:static_transform>
+  
+</robot>
