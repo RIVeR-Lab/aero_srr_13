@@ -98,7 +98,7 @@
  			</node>
  			
  			<node name="global_occupancy_visualization" pkg="aero_path_planning" type="occupancy_visualizer_node" output="screen">
- 				<!--remap from="occupancy"      to="$(arg aero/occupancy_topic)"/-->
+ 				<remap from="occupancy"      to="aero/global/vizualization"/>
  				<remap from="obstacle_data"  to="global/obstacle_data"/>
  				<remap from="unknown_data"   to="global/unknown_data"/>
  				<remap from="free_data"      to="global/free_data"/>

@@ -109,13 +109,13 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//x dimension of global occupancy grid
 	std::string pg_x_dim(G_OCC_XDIM);
-	this->global_x_size_ = 1000;
+	this->global_x_size_ = 5000;
 	std::stringstream gx_dim_msg;
 	gx_dim_msg<<this->global_x_size_<<"*0.05m";
 
 	//y dimension of global occupancy grid
 	std::string pg_y_dim(G_OCC_YDIM);
-	this->global_y_size_ = 1000;
+	this->global_y_size_ = 5000;
 	std::stringstream gy_dim_msg;
 	gy_dim_msg<<this->global_y_size_<<"*0.05m";
 
@@ -133,13 +133,13 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//x coord of the global origin of the occupancy grids
 	std::string pg_x_ori(G_OCC_XORG);
-	this->global_x_ori_ = 0;
+	this->global_x_ori_ = this->global_x_size_/2.0;
 	std::stringstream pg_x_ori_msg;
 	pg_x_ori_msg<<this->global_x_ori_<<"m";
 
 	//y coord of the global origin of the occupancy grids
 	std::string pg_y_ori(G_OCC_YORG);
-	this->global_y_ori_ = 0;
+	this->global_y_ori_ = this->global_y_size_/2.0;
 	std::stringstream pg_y_ori_msg;
 	pg_y_ori_msg<<this->global_y_ori_<<"m";
 
@@ -415,7 +415,7 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 	}
 
 	OccupancyGridMsgPtr viz_message(new OccupancyGridMsg());
-	this->global_map_->generateMessage(viz_message);
+	this->global_map_->generateMessage(*viz_message);
 	this->map_viz_pub_.publish(viz_message);
 }
 
