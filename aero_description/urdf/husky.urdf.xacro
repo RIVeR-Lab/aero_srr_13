@@ -149,35 +149,19 @@ Husky A200
     <husky_wheel fb="front" lr="right" parent="base_link" translateX="1" translateY="-1" flipY="-1"/>
 
     <!-- DECORATIONS -->
-    <!-- Top Plate -->
     <husky_part parent="base_link" name="top_plate" mesh="top_plate" 
 		colour="Yellow"
-		translateX="0.0" translateY="0.0" translateZ="0.005" 
+		translateX="0.0" translateY="0.0" translateZ="0.2276" 
 		rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
     <gazebo reference="base_link_top_plate_part">
       <material>Gazebo/Yellow</material>
     </gazebo>
-    <!-- User Rail -->
-    <husky_part parent="base_link" name="user_rail" mesh="user_rail"
+
+    <husky_part parent="base_link" name="front_mount" mesh="front_mount" 
 		colour="DarkGray"
-		translateX="0.272" translateY="0.0" translateZ="0.245" 
+		translateX="0.417068" translateY="0.0" translateZ="0.091" 
 		rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
-    <gazebo reference="base_link_user_rail_part">
-      <material>Gazebo/Grey</material>
-    </gazebo>
-    <!-- Bumpers -->
-    <husky_part parent="base_link" name="front_bumper" mesh="bumper" 
-		colour="DarkGray"
-		translateX="0.490" translateY="0.0" translateZ="0.091" 
-		rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
-    <gazebo reference="base_link_front_bumper_part">
-      <material>Gazebo/FlatBlack</material>
-    </gazebo>
-    <husky_part parent="base_link" name="rear_bumper" mesh="bumper"
-		colour="DarkGray"
-		translateX="-0.48" translateY="0.0" translateZ="0.091" 
-		rotateX="0.0" rotateY="0.0" rotateZ="3.14"/>
-    <gazebo reference="base_link_rear_bumper_part">
+    <gazebo reference="base_link_front_mount_part">
       <material>Gazebo/FlatBlack</material>
     </gazebo>
 
