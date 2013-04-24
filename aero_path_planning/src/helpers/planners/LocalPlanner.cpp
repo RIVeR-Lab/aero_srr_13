@@ -387,11 +387,6 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			//If we have a LIDAR patch, apply it
 			if(this->lidar_patch_!= PointCloudPtr())
 			{
-#pragma omp parallel for
-				for(int i = 0; i<this->lidar_patch_->size(); i++)
-				{
-					working_grid.getConverter().convertToGrid(this->lidar_patch_->at(i), this->lidar_patch_->at(i));
-				}
 				working_grid.setPointTrait(*this->lidar_patch_);
 			}
 
@@ -495,6 +490,7 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 	PointCloudPtr lidar_patch(new PointCloud());
 	pcl::PointCloud<pcl::PointXYZ> raw_cloud;
 	pcl::fromROSMsg(*message, raw_cloud);
+	PointConverter converter(this->res_);
 
 //#pragma omp parallel for
 	for(int i=0; i<(int)raw_cloud.size(); i++)
@@ -504,8 +500,8 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 		point.y = raw_cloud.at(i).y;
 		point.z = raw_cloud.at(i).z;
 		point.rgba = OBSTACLE;
+		converter.convertToGrid(point, point);
 		lidar_patch->push_back(point);
-		ROS_INFO_STREAM("I put point <"<<point.x<<","<<point.y<<","<<point.z<<"> onto the local lidar patch");
 	}
 
 	this->lidar_patch_ = lidar_patch;
