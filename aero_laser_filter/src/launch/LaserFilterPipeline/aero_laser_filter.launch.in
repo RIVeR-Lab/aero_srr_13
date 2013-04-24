@@ -23,11 +23,13 @@
 		<arg name="output_frame" value="$(arg local_frame)" />
 	</include>
 	
+	<!--
 	<include file="$(find aero_laser_filter)/launch/GlobalFilterStage.launch">
 		<arg name="node_manager" value="$(arg node_manager)"/>
 		<arg name="input_topic"  value=@POINTCLOUD_VAL@ />
 		<arg name="output_topic" value="$(arg global_topic)" />
 		<arg name="output_frame" value="$(arg global_frame)" />
 	</include>
+	-->
 	
 </launch>

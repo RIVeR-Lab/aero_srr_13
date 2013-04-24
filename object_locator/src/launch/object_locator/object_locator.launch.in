@@ -1,0 +1,24 @@
+<launch>
+
+	<!-- ********************ARGUMENTS******************** -->
+	<!-- declare args for camera communication -->
+	<arg name="@BOTTOM_LEFT_IMAGE_TOPIC_ARG@"			 default=@BOTTOM_LEFT_IMAGE_TOPIC_VAL@/>
+	<arg name="@BOTTOM_LEFT_INFO_TOPIC_ARG@"			 default=@BOTTOM_LEFT_INFO_TOPIC_VAL@/>
+	
+	<arg name="@BOTTOM_RIGHT_IMAGE_TOPIC_ARG@"			 default=@BOTTOM_RIGHT_IMAGE_TOPIC_VAL@/>
+	<arg name="@BOTTOM_RIGHT_INFO_TOPIC_ARG@"			 default=@BOTTOM_RIGHT_INFO_TOPIC_VAL@/>
+	
+
+	<!-- ********************INCLUDES******************** -->
+	<!-- Include Sub-Launch Files -->
+<!--	<include file="$(find object_locator)/launch/lower_detector_node.launch">
+     	<arg name="@BOTTOM_LEFT_IMAGE_TOPIC_ARG@"		value="$(arg @BOTTOM_LEFT_IMAGE_TOPIC_ARG@)" />
+		<arg name="@BOTTOM_LEFT_INFO_TOPIC_ARG@"		value="$(arg @BOTTOM_LEFT_INFO_TOPIC_ARG@)" />
+		
+		<arg name="@BOTTOM_RIGHT_IMAGE_TOPIC_ARG@"		value="$(arg @BOTTOM_RIGHT_IMAGE_TOPIC_ARG@)" />
+		<arg name="@BOTTOM_RIGHT_INFO_TOPIC_ARG@"		value="$(arg @BOTTOM_RIGHT_INFO_TOPIC_ARG@)" />
+	</include>
+-->
+	<include file="$(find object_locator)/launch/camera_tf_tree_node.launch"/>
+	<include file="$(find object_locator)/launch/vision_pipeline.launch"/>
+</launch>

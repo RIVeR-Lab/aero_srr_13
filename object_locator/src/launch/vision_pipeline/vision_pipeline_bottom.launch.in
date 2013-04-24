@@ -1,0 +1,15 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="vision_pipeline_bottom"  args="manager" output="screen"/>
+
+  <node pkg="nodelet" type="nodelet" name="SyncStage" args="load object_locator/SyncStage vision_pipeline_bottom" output="screen">
+  </node>
+<!--
+  <node pkg="nodelet" type="nodelet" name="DisparityStage" args="load object_locator/DisparityStage vision_pipeline_bottom" output="screen">
+  </node>
+   --> 
+  <node pkg="nodelet" type="nodelet" name="SAMStage" args="load object_locator/SAMStage vision_pipeline_bottom" output="screen">
+  </node>
+  
+
+       
+</launch>

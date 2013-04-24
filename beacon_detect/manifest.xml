@@ -1,0 +1,20 @@
+<package>
+  <description brief="beacon_detect">
+
+     beacon_detect
+
+  </description>
+  <author>bpwiselybabu</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/beacon_detect</url>
+  <depend package="roscpp"/>
+  <depend package="opencv2"/>
+  <depend package="apriltags"/>
+  <depend package="vision_comm"/>
+  <depend package="tf"/>
+
+
+</package>
+
+

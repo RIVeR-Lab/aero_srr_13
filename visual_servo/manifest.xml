@@ -1,0 +1,18 @@
+<package>
+  <description brief="visual_servo">
+
+    visual_servo
+  </description>
+  <author>mdedonato</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aero_base</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="tf"/>
+  <depend package="geometry_msgs"/>
+    <depend package="aero_srr_msgs"/>
+  
+</package>
+
+

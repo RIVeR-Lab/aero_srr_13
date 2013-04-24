@@ -1,0 +1,25 @@
+<package>
+  <description brief="vision_comm">
+
+     vision_comm
+
+  </description>
+  <author>bpwiselybabu</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/vision_comm</url>
+  
+  <depend package="roscpp"/>
+  <depend package="cv_bridge"/>
+  <depend package="image_transport" />
+  <depend package="image_geometry" />
+  <depend package ="sensor_msgs"/>
+  <depend package="tf"/>
+  <depend package="prosilica_camera"/>
+
+   <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lvision_comm" />
+  </export>
+</package>
+
+
