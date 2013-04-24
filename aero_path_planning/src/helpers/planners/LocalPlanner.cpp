@@ -237,6 +237,7 @@ void LocalPlanner::regTopic()
 	this->lidar_sub_ = this->nh_.subscribe(this->lidar_topic_, 2, &LocalPlanner::lidarCB, this);
 	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
 	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
+	this->occ_viz_pub_ = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/local/occupancy_viz",2);
 
 	std::string software_stop_topic("aero/software_stop");
 
@@ -388,6 +389,8 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			{
 				working_grid.setPointTrait(*this->lidar_patch_);
 			}
+
+			this->visualizeOcc(working_grid);
 
 			int speedset_idx = 0;
 			int tentacle_idx = 0;
@@ -567,6 +570,13 @@ void LocalPlanner::visualizeTentacle(int speed_set, int tentacle)
 	message.header.frame_id = "/base_footprint";
 	message.header.stamp    = ros::Time::now();
 	this->tent_pub_.publish(message);
+}
+
+void LocalPlanner::visualizeOcc(const OccupancyGrid& grid)
+{
+	sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
+	pcl::toROSMsg(grid.getGrid(), *message);
+	this->occ_viz_pub_.publish(message);
 }
 
 

@@ -74,6 +74,7 @@ private:
 	ros::Subscriber lidar_sub_; ///Subscriber to the ROS topic to receive local LIDAR data over
 	ros::Publisher	vel_pub_;	///Publisher for Twist messages to a platform that takes them
 	ros::Publisher  tent_pub_;  ///Publisher for visualizing selected tentacles
+	ros::Publisher  occ_viz_pub_;///Publisher for visualizing the local occupancy grid
 	ros::Timer      vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
 	ros::Timer      plan_timer_;///Timer that will attempt to select a new tentacle at a constant rate
 
@@ -162,6 +163,7 @@ private:
 
 
 	void visualizeTentacle(int speed_set, int tentacle);
+	void visualizeOcc(const OccupancyGrid& grid);
 
 	/**
 	 * @author Adam Panzica
