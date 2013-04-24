@@ -315,6 +315,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	try
 	{
 		//Transform the coordinates of the local grid to the global frame
+		ROS_WARN_STREAM("I'm trying to transform the local grid from: "<<local_grid.getFrameId()<<" to "<<this->global_frame_);
 		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time::now(), ros::Duration(this->local_update_rate_/4.0));
 		pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
 
