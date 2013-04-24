@@ -387,6 +387,11 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			//If we have a LIDAR patch, apply it
 			if(this->lidar_patch_!= PointCloudPtr())
 			{
+#pragma omp parallel for
+				for(int i = 0; i<this->lidar_patch_->size(); i++)
+				{
+					working_grid.getConverter().convertToGrid(this->lidar_patch_->at(i), this->lidar_patch_->at(i));
+				}
 				working_grid.setPointTrait(*this->lidar_patch_);
 			}
 
