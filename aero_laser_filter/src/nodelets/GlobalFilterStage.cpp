@@ -71,6 +71,8 @@ namespace aero_laser_filter {
 		this->crop_top_right_.x = temp_x;
 		this->crop_top_right_.y = temp_y;
 		this->crop_top_right_.z = temp_z;
+
+		NODELET_INFO_STREAM("LocalFilterStage loaded with input_topic:"<<this->input_topic_<<", output_topic:"<<this->output_topic_<<", output_frame:"<<this->output_frame_);
 	}
 
 	void GlobalFilterStage::registerTopics()

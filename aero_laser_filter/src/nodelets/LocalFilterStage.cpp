@@ -74,6 +74,8 @@ namespace aero_laser_filter
 		this->inflation_res_ = 0.1;
 		this->p_nh_.getParam("robot_size", this->robot_size_);
 		this->p_nh_.getParam("inflation_res", this->inflation_res_);
+
+		NODELET_INFO_STREAM("LocalFilterStage loaded with input_topic:"<<this->input_topic_<<", output_topic:"<<this->output_topic_<<", output_frame:"<<this->output_frame_);
 	}
 
 	void LocalFilterStage::registerTopics()
@@ -91,9 +93,9 @@ namespace aero_laser_filter
 		pcl::fromROSMsg(*message, *cropped_cloud);
 		//NODELET_INFO_STREAM("Local: Extracted Raw Point Cloud from Message");
 
-		this->cropCloud(processed_cloud, processed_cloud);
+		this->cropCloud(cropped_cloud, processed_cloud);
 		//NODELET_INFO_STREAM("Local: Croped Point Cloud");
-		this->filterCloud(cropped_cloud, processed_cloud);
+		//this->filterCloud(processed_cloud, processed_cloud);
 		//NODELET_INFO_STREAM("Local: Filtered Point Cloud");
 		this->transformCloud(processed_cloud, processed_cloud);
 		//NODELET_INFO_STREAM("Local: Transformed Point Cloud");
@@ -130,7 +132,7 @@ namespace aero_laser_filter
 	{
 		//Need to store this first incase in=out
 		int size = in->size();
-		NODELET_INFO_STREAM("Local: Filtering Cloud... Size: "<<size);
+		//NODELET_INFO_STREAM("Local: Filtering Cloud... Size: "<<size);
 //#pragma omp parallel for
 		for(int i=0; i<size; i++)
 		{

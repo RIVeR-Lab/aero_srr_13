@@ -7,6 +7,7 @@
   <arg name="laser_scan_topic"            value="/scan"/>
   <arg name="local_lidar_topic"           value="aero/lidar/local"/>
   <arg name="global_lidar_topic"          value="aero/lidar/global"/>
+  <arg name="robot_frame"                 value="base_footprint"/>
 	
   <include file="$(find aero_srr_bringup)/launch/srr_bringup.launch">
     <arg name="aero/platform"      		    value="1" />
@@ -25,6 +26,7 @@
 		<arg name="input_topic"  value="$(arg laser_scan_topic)"/>
 		<arg name="local_topic"  value="$(arg local_lidar_topic)"/>
 		<arg name="global_topic" value="$(arg global_lidar_topic)"/>
+		<arg name="local_frame"  value="$(arg robot_frame)"/>
   </include>  
   
   <include file="$(find aero_srr_bringup)/launch/aero_srr_odometry.launch">

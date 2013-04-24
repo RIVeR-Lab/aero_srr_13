@@ -47,8 +47,8 @@
   </xacro:revolute_pan_transform>
 
   <!-- Laser -->
-  <xacro:sick_laser_v0 name="lidar" parent="base_link_front_mount_part" ros_topic="laser" update_rate="25" >
-    <origin xyz="0.053086 0 -0.057912" rpy="0 0 0" />
+  <xacro:sick_laser_v0 name="laser" parent="base_link_front_mount_part" ros_topic="laser" update_rate="25" >
+    <origin xyz="0.053086 0 -0.057912" rpy="${M_PI} 0 0" />
   </xacro:sick_laser_v0> 
   <gazebo reference="lidar">
     <material>Gazebo/White</material>
