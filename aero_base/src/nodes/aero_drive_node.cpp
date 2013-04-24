@@ -13,6 +13,7 @@
 #include <sensor_msgs/JointState.h>
 #include "roboteq_driver/roboteq_manager_lib.h"
 #include "roboteq_driver/RoboteqGroupInfo.h"
+#include <tf/tf.h>
 //************ LOCAL DEPENDANCIES ****************//
 //***********    NAMESPACES     ****************//
 
@@ -45,6 +46,39 @@ void twistCallback(const geometry_msgs::Twist::ConstPtr& msg) {
 }
 
 
+double x = 0;
+double y = 0;
+double t = 0;//theta
+double last_u = 0;
+double last_w = 0;
+ros::Time last_time;
+
+void integrateVelocity(double u, double w, const ros::Time& time){
+  double dt = (time-last_time).toSec();
+  double dx, dy;
+  
+  if(w!=0){
+    double a = w*dt;//angle rotated
+    double r = u/w;//radius of arc driven
+  
+    dx = r*sin(t+a) - r*sin(t);
+    dy = r*cos(t+a) - r*cos(t);
+  }
+  else{//w==0
+    double d = u*dt;
+    dx = d*cos(t);
+    dy = d*sin(t);
+  }
+
+  x += dx;
+  y += dy;
+
+  t += last_w*dt;
+  last_time = time;
+  last_u = u;
+  last_w = w;
+}
+
 void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& msg) {
   roboteq_driver::RoboteqMotorInfo left = msg->motors[0];
   roboteq_driver::RoboteqMotorInfo right = msg->motors[1];
@@ -55,15 +89,26 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   double u1 = -left.velocity/(rotations_per_meter*60);
   double u2 = right.velocity/(rotations_per_meter*60);
 
+  double u = (u1 + u2)/2;
+  double w = (u2 - u1)/(base_width/2);
+  integrateVelocity(u, w, msg->header.stamp);
+
   nav_msgs::Odometry odom_msg;
   odom_msg.header.frame_id = pose_frame;
   odom_msg.pose.covariance.assign(-1);
+  odom_msg.pose.pose.position.x = x;
+  odom_msg.pose.pose.position.y = y;
+  odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromYaw(t);
+  odom_msg.twist.covariance[0] = 0.1;
+  odom_msg.twist.covariance[7] = 0.1;
+  odom_msg.twist.covariance[35] = 0.1;
+
   odom_msg.child_frame_id = twist_frame;
   odom_msg.twist.covariance.assign(-1);
   odom_msg.twist.covariance[0] = 1;
   odom_msg.twist.covariance[35] = 1;
-  odom_msg.twist.twist.linear.x = (u1 + u2)/2;
-  odom_msg.twist.twist.angular.z = (u2 - u1)/(base_width/2);
+  odom_msg.twist.twist.linear.x = u;
+  odom_msg.twist.twist.angular.z = w;
   odom_pub.publish(odom_msg);
 
   sensor_msgs::JointState joint_state;
