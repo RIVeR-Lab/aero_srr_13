@@ -129,6 +129,7 @@ namespace aero_laser_filter
 	{
 		//Need to store this first incase in=out
 		int size = in->size();
+		NODELET_INFO_STREAM("Local: Filtering Cloud... Size: "<<size);
 #pragma omp parallel for
 		for(int i=0; i<size; i++)
 		{
@@ -137,6 +138,7 @@ namespace aero_laser_filter
 			{
 				for(int y=0; y<this->robot_size_; y+=this->inflation_res_)
 				{
+					NODELET_INFO_STREAM("Local: Inflating Point... Index: "<<i<<", x: "<<x<<", y: "<<y);
 					Point_t inflation_point(in->at(i));
 					inflation_point.x+= x-robot_size_/2.0;
 					inflation_point.y+= y-robot_size_/2.0;
