@@ -319,8 +319,8 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	try
 	{
 		//Transform the coordinates of the local grid to the global frame
-		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time::now(), ros::Duration(this->local_update_rate_/4.0));
-		pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
+		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time(0), ros::Duration(this->local_update_rate_/4.0));
+		pcl_ros::transformPointCloud(this->global_frame_, ros::Time(0), local_grid.getGrid(), local_grid.getFrameId(), copyCloud, this->transformer_);
 
 		//Copy the data in the global frame at the transformed local-coordinates into the local grid
 #pragma omp parallel for
