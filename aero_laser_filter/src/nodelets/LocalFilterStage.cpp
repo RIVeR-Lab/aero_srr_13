@@ -135,9 +135,9 @@ namespace aero_laser_filter
 		for(int i=0; i<size; i++)
 		{
 			//For now, we're just going to do a really simple box inflation
-			for(int x=0; x<this->robot_size_; x+=this->inflation_res_)
+			for(double x=0; x<this->robot_size_; x+=this->inflation_res_)
 			{
-				for(int y=0; y<this->robot_size_; y+=this->inflation_res_)
+				for(double y=0; y<this->robot_size_; y+=this->inflation_res_)
 				{
 					NODELET_INFO_STREAM("Local: Inflating Point... Index: "<<i<<", x: "<<x<<", y: "<<y);
 					Point_t inflation_point(in->at(i));
