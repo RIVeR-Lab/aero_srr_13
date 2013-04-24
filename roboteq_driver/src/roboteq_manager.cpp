@@ -76,7 +76,6 @@ void feedbackTimerCallback(const ros::TimerEvent& e){
     roboteq_driver::RoboteqMotorInfo chan1Feedback;
     roboteq_driver::RoboteqMotorInfo chan2Feedback;
     {
-      ROS_INFO("FEEDBACK");
       boost::lock_guard<boost::mutex> lock(controller_mutex);
       feedback.header.stamp = ros::Time::now();
 

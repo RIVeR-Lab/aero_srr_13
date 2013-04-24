@@ -62,7 +62,7 @@ void integrateVelocity(double u, double w, const ros::Time& time){
     double r = u/w;//radius of arc driven
   
     dx = r*sin(t+a) - r*sin(t);
-    dy = r*cos(t+a) - r*cos(t);
+    dy = -r*cos(t+a) + r*cos(t);
   }
   else{//w==0
     double d = u*dt;
@@ -95,17 +95,25 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
 
   nav_msgs::Odometry odom_msg;
   odom_msg.header.frame_id = pose_frame;
-  odom_msg.pose.covariance.assign(-1);
+  odom_msg.header.stamp = msg->header.stamp;
+  odom_msg.pose.covariance.assign(0);
   odom_msg.pose.pose.position.x = x;
   odom_msg.pose.pose.position.y = y;
   odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromYaw(t);
-  odom_msg.twist.covariance[0] = 0.1;
-  odom_msg.twist.covariance[7] = 0.1;
-  odom_msg.twist.covariance[35] = 0.1;
+  odom_msg.pose.covariance[0] = 0.1;
+  odom_msg.pose.covariance[7] = 0.1;
+  odom_msg.pose.covariance[14] = 1.0e-9;
+  odom_msg.pose.covariance[21] = 1.0e-9;
+  odom_msg.pose.covariance[28] = 1.0e-9;
+  odom_msg.pose.covariance[35] = 0.1;
 
   odom_msg.child_frame_id = twist_frame;
-  odom_msg.twist.covariance.assign(-1);
+  odom_msg.twist.covariance.assign(0);
   odom_msg.twist.covariance[0] = 1;
+  odom_msg.pose.covariance[7] = 1.0e-9;
+  odom_msg.pose.covariance[14] = 1.0e-9;
+  odom_msg.pose.covariance[21] = 1.0e-9;
+  odom_msg.pose.covariance[28] = 1.0e-9;
   odom_msg.twist.covariance[35] = 1;
   odom_msg.twist.twist.linear.x = u;
   odom_msg.twist.twist.angular.z = w;
