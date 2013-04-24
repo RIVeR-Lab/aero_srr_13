@@ -543,7 +543,7 @@ bool OccupancyGrid::boundsCheck(const Point& point)const throw(OccupancyGridAcce
 		OccupancyGridAccessException exception(message_out);
 		throw exception;
 	}
-	return true;
+	return !failure;
 }
 
 void OccupancyGrid::setPoint(const Point& copy_point, bool origin_corrected)
@@ -589,5 +589,22 @@ const Point& OccupancyGrid::getOriginPoint() const
 const std::string& OccupancyGrid::getFrameId() const
 {
 	return this->occ_grid_.header.frame_id;
+}
+
+bool OccupancyGrid::isValidPoint(const Point& point, bool origin_corrected = false) const
+{
+	Point corrected_point(point);
+	if(!origin_corrected)
+	{
+		corrected_point.getVector4fMap()+=this->origin_.getVector4fMap();
+	}
+	try
+	{
+		return this->boundsCheck(corrected_point);
+	}
+	catch(std::exception& e)
+	{
+		return false;
+	}
 }
 

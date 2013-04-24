@@ -268,6 +268,15 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief checks to see if a point is on the occupancy grid
+	 * @param [in] point The point to check
+	 * @param [in] origin_corrected Optional parameter specifying if the point is origin corrected or not
+	 * @return True if the point is on the grid, else false
+	 */
+	bool isValidPoint(const Point& point, bool origin_corrected = false) const;
+
+	/**
+	 * @author Adam Panzica
 	 * @return Gets the tf frame_id that this grid is relative to
 	 */
 	const std::string& getFrameId() const;

@@ -219,6 +219,13 @@ private:
 	 */
 	void setSafeMode(bool safe);
 
+	/**
+	 * @author Adam Panzica
+	 * @brief Checks to see if a point is in bounds
+	 * @param [in] point The point to check
+	 */
+	void boundsCheck(const Point& point) const;
+
 };
 
 };

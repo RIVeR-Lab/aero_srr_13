@@ -17,9 +17,9 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																												nh_(nh),
-																												p_nh_(p_nh),
-																												occupancy_buffer_(2)
+																														nh_(nh),
+																														p_nh_(p_nh),
+																														occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -492,7 +492,7 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 	pcl::fromROSMsg(*message, raw_cloud);
 	PointConverter converter(this->res_);
 
-//#pragma omp parallel for
+	//#pragma omp parallel for
 	for(int i=0; i<(int)raw_cloud.size(); i++)
 	{
 		Point point;
@@ -501,7 +501,11 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 		point.z = raw_cloud.at(i).z;
 		point.rgba = OBSTACLE;
 		converter.convertToGrid(point, point);
-		lidar_patch->push_back(point);
+		if(this->boundsCheck(point))
+		{
+			lidar_patch->push_back(point);
+			ROS_INFO_STREAM("I put point <"<<point.x<<","<<point.y<<","<<point.z<<"> onto the local lidar patch");
+		}
 	}
 
 	this->lidar_patch_ = lidar_patch;
@@ -603,4 +607,13 @@ void LocalPlanner::setSafeMode(bool safe)
 	std::string mode(safe?("Safe"):("Free"));
 	ROS_INFO_STREAM("Local Planner Set to "<<mode<<" Mode!");
 	this->should_plan_ = !safe;
+}
+
+void LocalPlanner::boundsCheck(const Point& point) const
+{
+	Point corrected_point(point);
+	corrected_point.getVector4fMap()+=this->origin_;
+	bool inx = (corrected_point <= this->x_dim_)&&(corrected_point.x>=0);
+	bool iny = (corrected_point <= this->y_dim_)&&(corrected_point.y>=0);
+	bool inz = (corrected_point <= this->z_dim_)&&(corrected_point.z>=0);
 }
