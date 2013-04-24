@@ -21,7 +21,7 @@
 	<arg name="visualization"            default="1"/>
 	
 	<!-- declare occupancy grid arguments -->
-	<arg name="aero/occupancy/local/update_rate"	    default="0.2"/>
+	<arg name="aero/occupancy/local/update_rate"	    default="0.10"/>
 	<arg name="aero/occupancy/local/x_dim"	    default="200"/>
 	<arg name="aero/occupancy/local/y_dim"	    default="200"/>
 	<arg name="aero/occupancy/local/z_dim"	    default="0"/>

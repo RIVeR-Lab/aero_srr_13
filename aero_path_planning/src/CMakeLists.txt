@@ -74,7 +74,7 @@ set(S_NUMBER_VAL "\"15\"")
 #Parameters for local occupancy grid information
 set(L_OCC_UPDTRT_ARG "${R_NS}/${O_NS}/${L_NS}/update_rate")
 set(L_OCC_UPDTRT_CDF L_OCC_UPDTRT)
-set(L_OCC_UPDTRT_VAL "\"0.2\"")
+set(L_OCC_UPDTRT_VAL "\"0.10\"")
 
 set(L_OCC_XDIM_ARG "${R_NS}/${O_NS}/${L_NS}/x_dim")
 set(L_OCC_XDIM_CDF L_OCC_XDIM)

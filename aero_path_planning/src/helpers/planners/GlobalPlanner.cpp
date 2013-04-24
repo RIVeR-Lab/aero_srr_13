@@ -55,7 +55,7 @@ void GlobalPlanner::loadOccupancyParam()
 	//*****************Configuration Parameters*******************//
 	//Update rate to generate local occupancy grid
 	std::string p_up_rate(L_OCC_UPDTRT);
-	this->local_update_rate_ = 1.0/40.0;
+	this->local_update_rate_ = 1.0/20.0;
 	std::stringstream up_rate_msg;
 	up_rate_msg<<this->local_update_rate_<<"s";
 
@@ -319,8 +319,9 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	try
 	{
 		//Transform the coordinates of the local grid to the global frame
-		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time(0), ros::Duration(this->local_update_rate_/4.0));
-		pcl_ros::transformPointCloud(this->global_frame_, ros::Time(0), local_grid.getGrid(), local_grid.getFrameId(), copyCloud, this->transformer_);
+	  ros::Time transform_time = ros::Time::now();
+	  this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), transform_time, ros::Duration(this->local_update_rate_));
+		pcl_ros::transformPointCloud(this->global_frame_, transform_time, local_grid.getGrid(), local_grid.getFrameId(), copyCloud, this->transformer_);
 
 		//Copy the data in the global frame at the transformed local-coordinates into the local grid
 #pragma omp parallel for
@@ -367,7 +368,16 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 		goal_point_m.point.x = this->carrot_path_.front().z;
 		goal_point_m.header.frame_id = this->global_frame_;
 		goal_point_m.header.stamp    = ros::Time::now();
-		this->transformer_.transformPoint(grid.getFrameId(), goal_point_m, goal_point_m);
+		try
+		{
+
+	  		this->transformer_.waitForTransform(grid.getFrameId(), goal_point_m.header.frame_id, goal_point_m.header.stamp, ros::Duration(this->local_update_rate_));
+			this->transformer_.transformPoint(grid.getFrameId(), goal_point_m, goal_point_m);
+		}
+		catch(std::exception& e)
+		{
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
 		Point goal_point;
 		goal_point.x = goal_point_m.point.x;
 		goal_point.y = goal_point_m.point.y;
