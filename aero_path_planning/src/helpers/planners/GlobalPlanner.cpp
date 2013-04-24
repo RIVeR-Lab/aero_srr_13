@@ -149,6 +149,10 @@ void GlobalPlanner::loadOccupancyParam()
 	std::stringstream pg_z_ori_msg;
 	pg_z_ori_msg<<this->global_z_ori_<<"m";
 
+	//The frame_id for the local occupancy grid
+	std::string local_frame = "local_frame";
+	this->local_frame_      = "/base_footprint";
+
 	//Get Public Parameters
 	if(!this->nh_.getParam(p_up_rate,	this->local_update_rate_))	PARAM_WARN(p_up_rate,	up_rate_msg.str());
 	if(!this->nh_.getParam(pg_up_rate,	this->global_update_rate_))	PARAM_WARN(pg_up_rate,	gup_rate_msg.str());
