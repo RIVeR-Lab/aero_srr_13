@@ -505,10 +505,11 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 				&& obj_centroid.y < disp->image.rows) {
 			int disp_val = dmat.at<uchar>(obj_centroid.y,
 					obj_centroid.x);
+			NODELET_INFO_STREAM("Disp val at ("<<obj_centroid.x<<","<<obj_centroid.y<<")  = "<<disp_val);
 			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
 			this->stereo_model_.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
-			//			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
+						NODELET_INFO_STREAM("Disp: "<< disp_val << std::endl << "X: "<< obj_3d.x << std::endl << "Y: " << obj_3d.y << std::endl << "Z: " << obj_3d.z);
 			tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
 			//			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point_.point);
