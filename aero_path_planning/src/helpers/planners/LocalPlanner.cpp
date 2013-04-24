@@ -496,7 +496,7 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 	pcl::PointCloud<pcl::PointXYZ> raw_cloud;
 	pcl::fromROSMsg(*message, raw_cloud);
 
-#pragma omp parallel for
+//#pragma omp parallel for
 	for(int i=0; i<(int)raw_cloud.size(); i++)
 	{
 		Point point;
