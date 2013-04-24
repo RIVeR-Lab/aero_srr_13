@@ -84,23 +84,23 @@ namespace aero_laser_filter
 
 	void LocalFilterStage::cloudCB(const sm::PointCloud2ConstPtr& message)
 	{
-		NODELET_INFO_STREAM("Local: Got New Point Cloud Message");
+		//NODELET_INFO_STREAM("Local: Got New Point Cloud Message");
 		sm::PointCloud2Ptr output_cloud(new sm::PointCloud2());
 		PointCloudPtr_t cropped_cloud(new PointCloud_t());
 		PointCloudPtr_t processed_cloud(new PointCloud_t());
 		pcl::fromROSMsg(*message, *cropped_cloud);
-		NODELET_INFO_STREAM("Local: Extracted Raw Point Cloud from Message");
+		//NODELET_INFO_STREAM("Local: Extracted Raw Point Cloud from Message");
 
 		this->cropCloud(processed_cloud, processed_cloud);
-		NODELET_INFO_STREAM("Local: Croped Point Cloud");
+		//NODELET_INFO_STREAM("Local: Croped Point Cloud");
 		this->filterCloud(cropped_cloud, processed_cloud);
-		NODELET_INFO_STREAM("Local: Filtered Point Cloud");
+		//NODELET_INFO_STREAM("Local: Filtered Point Cloud");
 		this->transformCloud(processed_cloud, processed_cloud);
-		NODELET_INFO_STREAM("Local: Transformed Point Cloud");
+		//NODELET_INFO_STREAM("Local: Transformed Point Cloud");
 
 		pcl::toROSMsg(*processed_cloud, *output_cloud);
 		this->point_pub_.publish(output_cloud);
-		NODELET_INFO_STREAM("Local: Published Point Cloud");
+		//NODELET_INFO_STREAM("Local: Published Point Cloud");
 
 	}
 

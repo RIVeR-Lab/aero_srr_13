@@ -42,11 +42,11 @@ void ConversionStage::registerTopics()
 
 void ConversionStage::scanCB(const sm::LaserScanConstPtr& message)
 {
-	NODELET_INFO_STREAM("Got a new Laser scan!");
+	//NODELET_INFO_STREAM("Got a new Laser scan!");
 	sm::PointCloud2Ptr cloud_message(new sm::PointCloud2());
 	this->projector_.projectLaser(*message, *cloud_message);
 	this->point_pub_.publish(cloud_message);
-	NODELET_INFO_STREAM("Laser Scan Converted to PointCloud");
+	//NODELET_INFO_STREAM("Laser Scan Converted to PointCloud");
 }
 
 } /* namespace aero_laser_filter */
