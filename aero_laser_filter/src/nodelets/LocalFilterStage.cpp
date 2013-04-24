@@ -131,7 +131,7 @@ namespace aero_laser_filter
 		//Need to store this first incase in=out
 		int size = in->size();
 		NODELET_INFO_STREAM("Local: Filtering Cloud... Size: "<<size);
-#pragma omp parallel for
+//#pragma omp parallel for
 		for(int i=0; i<size; i++)
 		{
 			//For now, we're just going to do a really simple box inflation
