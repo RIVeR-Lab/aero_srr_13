@@ -222,13 +222,8 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
 	//ROS_INFO("Got a new Laser Scan!");
 	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
-	Point origin;
-	origin.x = 0;
-	origin.y = this->local_y_size_/2;
-	origin.z = 0;
-	OccupancyGrid local_map(this->local_x_size_, this->local_y_size_, this->local_res_, origin, aero_path_planning::UNKNOWN);
 	pcl::fromROSMsg(*message, scan_cloud);
-	aero_path_planning::PointConverter converter(this->local_res_);
+	const PointConverter& converter = this->global_map_->getConverter();
 
 #pragma omp parallel for
 	for(int i=0; i<(int)scan_cloud.size(); i++)
@@ -238,19 +233,15 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 		opoint.y = scan_cloud.at(i).y;
 		opoint.z = 0;
 		converter.convertToGrid(opoint, opoint);
-
-		Point on_grid;
-		on_grid.getVector4fMap() = opoint.getVector4fMap()+origin.getVector4fMap();
-		if(on_grid.x>=0&&on_grid.x<this->local_x_size_&&on_grid.y>0&&on_grid.y<this->local_y_size_)
+		try
 		{
-			local_map.setPointTrait(opoint, aero_path_planning::OBSTACLE);
+			this->global_map_->setPointTrait(opoint, aero_path_planning::OBSTACLE);
+		}
+		catch(std::exception& e)
+		{
+			//do nothing, just means we got data past the edge of the global map
 		}
 	}
-
-	OccupancyGridMsgPtr message_out(new OccupancyGridMsg());
-	local_map.generateMessage(*message_out);
-	this->local_occ_pub_.publish(message_out);
-
 }
 
 bool GlobalPlanner::lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const
