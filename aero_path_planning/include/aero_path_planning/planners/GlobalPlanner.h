@@ -108,6 +108,12 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Sends the global map out for vizualization
+	 */
+	void visualizeMap() const;
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Copies the next goal on the carrot path into an OccupancyGrid if there is one
 	 * @param [out] grid The OccupancyGrid to copy the point into
 	 * Uses the frame_id parameter of the passed OccupancyGrid to termine the transform for the goal point.
@@ -181,6 +187,7 @@ private:
 	tf::TransformListener transformer_;   ///Hook into the tf system
 	ros::Subscriber       joy_sub_;       ///Subscriber for joy messages
 	ros::Publisher        local_occ_pub_; ///Publisher to send OccupancyGrids to the local planner
+	ros::Publisher        map_viz_pub_;   ///Publisher to vizualizing the global map
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
 	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state
