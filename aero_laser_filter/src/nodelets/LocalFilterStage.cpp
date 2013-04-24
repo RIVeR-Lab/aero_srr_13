@@ -139,7 +139,7 @@ namespace aero_laser_filter
 			{
 				for(double y=0; y<this->robot_size_; y+=this->inflation_res_)
 				{
-					NODELET_INFO_STREAM("Local: Inflating Point... Index: "<<i<<", x: "<<x<<", y: "<<y);
+					//NODELET_INFO_STREAM("Local: Inflating Point... Index: "<<i<<", x: "<<x<<", y: "<<y);
 					Point_t inflation_point(in->at(i));
 					inflation_point.x+= x-robot_size_/2.0;
 					inflation_point.y+= y-robot_size_/2.0;
