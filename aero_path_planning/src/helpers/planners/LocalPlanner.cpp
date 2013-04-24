@@ -500,6 +500,7 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 		point.z = raw_cloud.at(i).z;
 		point.rgba = OBSTACLE;
 		lidar_patch->push_back(point);
+		ROS_INFO_STREAM("I put point <"<<point.x<<","<<point.y<<","<<point.z<<"> onto the local lidar patch");
 	}
 
 	this->lidar_patch_ = lidar_patch;
