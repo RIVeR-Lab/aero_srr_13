@@ -372,7 +372,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
 	if(should_plan_)
 	{
-		RROS_INFO_STREAM("Local Planner: Planning...");
+		ROS_INFO_STREAM("Local Planner: Planning...");
 		//Grab the next occupancy grid to process if we've recieved new data from global planner
 		if(!this->occupancy_buffer_.empty())
 		{
