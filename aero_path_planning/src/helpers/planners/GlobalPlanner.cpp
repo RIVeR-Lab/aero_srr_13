@@ -22,12 +22,12 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-														state_(MANUAL),
-														path_planner_(&path_planner),
-														path_threshold_(1.0),
-														nh_(nh),
-														p_nh_(p_nh),
-														transformer_(nh)
+																state_(MANUAL),
+																path_planner_(&path_planner),
+																path_threshold_(1.0),
+																nh_(nh),
+																p_nh_(p_nh),
+																transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -312,36 +312,44 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	OccupancyGrid local_grid(this->local_x_size_, this->local_y_size_, this->local_z_size_, this->local_res_, origin, aero_path_planning::UNKNOWN, this->local_frame_);
 
 	OccupancyGridCloud copyCloud;
-	//Transform the coordinates of the local grid to the global frame
-	this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time::now(), ros::Duration(this->local_update_rate_/4.0));
-	pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
-	//Copy the data in the global frame at the transformed local-coordinates into the local grid
-#pragma omp parallel for
-	for(int i=0; i<(int)copyCloud.size(); i++)
+	try
 	{
-		try
-		{
-			//Get rid of any rounding issues
-			copyCloud.at(i).x = std::floor(copyCloud.at(i).x);
-			copyCloud.at(i).y = std::floor(copyCloud.at(i).y);
-			copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
+		//Transform the coordinates of the local grid to the global frame
+		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time::now(), ros::Duration(this->local_update_rate_/4.0));
+		pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
 
-			//Copy the PointTrait data from the global frame to the local frame
-			local_grid.setPointTrait(local_grid.getGrid().at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
-		}
-		catch(std::runtime_error& e)
+		//Copy the data in the global frame at the transformed local-coordinates into the local grid
+#pragma omp parallel for
+		for(int i=0; i<(int)copyCloud.size(); i++)
 		{
-			//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
+			try
+			{
+				//Get rid of any rounding issues
+				copyCloud.at(i).x = std::floor(copyCloud.at(i).x);
+				copyCloud.at(i).y = std::floor(copyCloud.at(i).y);
+				copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
+
+				//Copy the PointTrait data from the global frame to the local frame
+				local_grid.setPointTrait(local_grid.getGrid().at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
+			}
+			catch(std::runtime_error& e)
+			{
+				//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
+			}
 		}
+		//Copy the current goal point to the occupancy grid
+		this->copyNextGoalToGrid(local_grid);
+
+
+		//Send the new local grid to the local planner
+		OccupancyGridMsgPtr occ_grid_msg(new OccupancyGridMsg());
+		local_grid.generateMessage(*occ_grid_msg);
+		this->local_occ_pub_.publish(occ_grid_msg);
 	}
-	//Copy the current goal point to the occupancy grid
-	this->copyNextGoalToGrid(local_grid);
-
-
-	//Send the new local grid to the local planner
-	OccupancyGridMsgPtr occ_grid_msg(new OccupancyGridMsg());
-	local_grid.generateMessage(*occ_grid_msg);
-	this->local_occ_pub_.publish(occ_grid_msg);
+	catch (std::exception& e)
+	{
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
 }
 
 void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
