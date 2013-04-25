@@ -484,15 +484,13 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 //	}
 	Mat_t dmat;
 	dmat = disp->image;
-	Mat_t preDisp(dmat);
+//	Mat_t preDisp(dmat);
 	cv::Size ksize;
 	ksize.width = 10;
 	ksize.height = 10;
 //	cv::boxFilter(preDisp, dmat, 1, ksize);
 //	normalize( preDisp, dmat, 0, 256, CV_MINMAX );
-	cv::imshow("disparity", dmat);
-//	cv::imshow(WINDOWDisp_, disp->image);
-	cv::waitKey(3);
+
 	this->stereo_model_.fromCameraInfo(msg->images.left_info, msg->images.right_info);
 	for (int i = 0; i < (int) detection_list_.size(); i++) {
 		//		cout << endl;
@@ -506,7 +504,7 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 			int disp_val = dmat.at<uchar>(obj_centroid.y,
 					obj_centroid.x);
 			NODELET_INFO_STREAM("Disp val at ("<<obj_centroid.x<<","<<obj_centroid.y<<")  = "<<disp_val);
-			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
+						cv::ellipse( disp->image, obj_centroid, cv::Size( 50, 50), 0, 0, 360, 128, 2, 8, 0 );
 			this->stereo_model_.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
 						NODELET_INFO_STREAM("Disp: "<< disp_val << std::endl << "X: "<< obj_3d.x << std::endl << "Y: " << obj_3d.y << std::endl << "Z: " << obj_3d.z);
@@ -528,7 +526,9 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 		}
 
 	}
-
+	cv::imshow("disparity", dmat);
+//	cv::imshow(WINDOWDisp_, disp->image);
+	cv::waitKey(3);
 //	cout << "Clearing list" <<endl;
 	detection_list_.clear();
 //	cout << "Shrinking Det/ection manager list" <<endl;
