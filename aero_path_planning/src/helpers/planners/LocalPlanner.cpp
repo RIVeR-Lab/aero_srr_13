@@ -604,6 +604,16 @@ void LocalPlanner::visualizeOcc(const OccupancyGrid& grid)
 			obst_cloud.push_back(cloud.at(i));
 		}
 	}
+	try
+	{
+		Point goal(grid.getGoalPoint());
+		converter.convertToEng(goal, goal);
+		obst_cloud.push_back(goal);
+	}
+	catch(bool& e)
+	{
+		//do nothing, means there was no goal
+	}
 	sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
 	pcl::toROSMsg(obst_cloud, *message);
 	message->header.frame_id = grid.getFrameId();

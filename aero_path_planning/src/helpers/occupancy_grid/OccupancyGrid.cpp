@@ -276,21 +276,19 @@ const Point& OccupancyGrid::getGoalPoint() const throw (bool)
 }
 
 void OccupancyGrid::setGoalPoint(aero_path_planning::Point point) throw(OccupancyGridAccessException)
-				{
+{
 	point.rgba = aero_path_planning::GOAL;
 	try
 	{
 		setPoint(point, false);
-		this->goal_ = point;
-		this->has_goal_ = true;
 	}
 	catch(std::exception& e)
 	{
-		std::string message("Unable to Place Goal Point On Grid");
-		OccupancyGridAccessException error(message, e);
-		throw error;
+		//Do nothing. It just means the goal point wasn't actually reachable on the local map, but it will still work
 	}
-				}
+	this->goal_ = point;
+	this->has_goal_ = true;
+}
 
 const OccupancyGridCloud& OccupancyGrid::getGrid() const
 {

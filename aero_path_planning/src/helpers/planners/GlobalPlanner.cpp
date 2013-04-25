@@ -356,8 +356,8 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped goal_point_m;
-		goal_point_m.point.x = 0;
-		goal_point_m.point.y = 10.0/0.05;
+		goal_point_m.point.x = 10.0/.05;
+		goal_point_m.point.y = 0;
 		goal_point_m.point.z = 0;
 		goal_point_m.header.frame_id = this->global_frame_;
 		goal_point_m.header.stamp    = grid.getGrid().header.stamp;
