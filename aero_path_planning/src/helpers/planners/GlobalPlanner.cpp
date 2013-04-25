@@ -361,12 +361,14 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 		goal_point_m.point.z = 0;
 		goal_point_m.header.frame_id = this->global_frame_;
 		goal_point_m.header.stamp    = grid.getGrid().header.stamp;
-		ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<">");
+		ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<"> in "<<goal_point_m.header.frame_id);
 		try
 		{
 
 	  		this->transformer_.waitForTransform(grid.getFrameId(), goal_point_m.header.frame_id, goal_point_m.header.stamp, ros::Duration(this->local_update_rate_));
 			this->transformer_.transformPoint(grid.getFrameId(), goal_point_m, goal_point_m);
+
+			ROS_INFO_STREAM("Transformed to "<<grid.getFrameId());
 		}
 		catch(std::exception& e)
 		{

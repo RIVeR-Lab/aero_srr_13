@@ -44,7 +44,7 @@ set(PLATFORM_VAL "\"0\"")
 #Parameters for defining tentacle selection huristics
 set(GOAL_WEIGHT_ARG ${R_NS}/goal_weight)
 set(GOAL_WEIGHT_CDF GOAL_WEIGHT)
-set(GOAL_WEIGHT_VAL "\"0.25\"")
+set(GOAL_WEIGHT_VAL "\"3.0\"")
 
 set(TRAV_WEIGHT_ARG ${R_NS}/traversed_weight)
 set(TRAV_WEIGHT_CDF TRAV_WEIGHT)
@@ -52,7 +52,7 @@ set(TRAV_WEIGHT_VAL "\"0.1\"")
 
 set(DIFF_WEIGHT_ARG ${R_NS}/difficult_weight)
 set(DIFF_WEIGHT_CDF DIFF_WEIGHT)
-set(DIFF_WEIGHT_VAL "\"0.1\"")
+set(DIFF_WEIGHT_VAL "\"0.25\"")
 
 set(UNKN_WEIGHT_ARG ${R_NS}/unknown_weight)
 set(UNKN_WEIGHT_CDF UNKN_WEIGHT)
