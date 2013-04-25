@@ -124,7 +124,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_image = *msg;
 	left_info  = *cam_info;
 	gotLeft = true;
-	detectAndDisplay(left_image,mat_left,WINDOWLeft);
+//	detectAndDisplay(left_image,mat_left,WINDOWLeft);
 //		saveImage(left_image, mat_left,0);
 
 }
@@ -140,10 +140,15 @@ void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const s
 
 void ImageConverter::computeDisparity()
 {
-	processImage(left_image, mat_left, WINDOWLeft);
-	processImage(right_image, mat_right, WINDOWRight);
-
-	this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
+//	processImage(left_image, mat_left, WINDOWLeft);
+//	processImage(right_image, mat_right, WINDOWRight);
+	Mat_t leftRect, img1_rect;
+	Mat_t rightRect, img2_rect;
+	leftRect  =  imread("/home/srr/ObjectDetectionData/Left.jpg", CV_LOAD_IMAGE_COLOR);
+	rightRect = imread("/home/srr/ObjectDetectionData/Right.jpg", CV_LOAD_IMAGE_COLOR);
+	cvtColor(leftRect,img1_rect, CV_BGR2GRAY);
+	cvtColor(rightRect,img2_rect, CV_BGR2GRAY);
+/**this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 	//	  cv::StereoVar stereo;
 	//	  stereo.maxDisp = 1.5;
 	//	  stereo.minDisp = .3;
@@ -192,7 +197,7 @@ void ImageConverter::computeDisparity()
 	Mat_t Rds_img;
 	//	resize(mat_left->image,Lds_img,size);
 	//	resize(mat_right->image,Rds_img,size);
-
+**/
 #ifdef CUDA_ENABLED
 	gpu::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
 	gpu::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
@@ -200,25 +205,28 @@ void ImageConverter::computeDisparity()
 	gpu::remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 
 #else
+	/**
 	cv::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
 	cv::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
 	remap(left_gray,img1_rect, mx1, my1, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 	remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-
+ **/
 #endif
-
-	Mat_t disp(  heightL, widthL, CV_32FC1 );
-	Mat_t vdisp( heightL, widthL, CV_32FC1 );
+	int heightL = img1_rect.rows;
+	int widthL = img1_rect.cols;
+	Mat_t disp(  heightL, widthL, CV_16S );
+//	Mat_t vdisp( heightL, widthL, CV_32FC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
+
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 224;       //80        //256+80;
+	int numDisp = 64;       //80        //256+80;
 	int SADSize = 9;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  1	; // 1;
 	int preFilterCap =   31; //  2;
-	int uniqueness = 10;
-	int specSize =   900; //50 //20;   //reduces noise
+	int uniqueness = 6;
+	int specSize =   100; //50 //20;   //reduces noise
 	int specRange = 31  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
@@ -227,24 +235,27 @@ void ImageConverter::computeDisparity()
 	gpuBM(img1_rect, img2_rect, disp);
 
 #else
-	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, true);
+	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
 	stereoSGBM(img1_rect, img2_rect, disp);
 	//cv::StereoBM stereoBM(StereoBM::BASIC_PRESET,numDisp, SADSize);
 	//	stereoBM(img1_rect, img2_rect, disp);
-
+	std::stringstream s,d;
+		s << "/home/srr/ObjectDetectionData/Disparity1.png";
+		cv::imwrite(s.str(), disp);
 #endif
 	//    cv::erode(disp, disp, NULL, 2);
 	//    cv::dilate(disp, disp, NULL, 2);
 
-	//    cvConvertScale(disp, dispn, 1.0/16);
+	    disp.convertTo(dispn, -1,1.0/16);
 	//	 cv::filterSpeckles(disp, 200, 24, 13);
-	normalize( disp, vdisp, 0, 256, CV_MINMAX );
+/**	normalize( disp, vdisp, 0, 256, CV_MINMAX );
+**/
+//    Mat_t vdisp1(  heightL, widthL, CV_32FC1 );;
 
-	Mat_t vdisp1(  heightL, widthL, CV_32FC1 );;
 #ifdef CUDA_ENABLED
 	gpu::resize(disp, vdisp1,size);
 #else
-	cv::resize(disp, vdisp1,size);
+//	cv::resize(disp, vdisp1,size);
 #endif
 
 	//	cv::imshow(WINDOWLeft, img1_rect);
@@ -264,10 +275,10 @@ void ImageConverter::computeDisparity()
 
 //		std::cout << "Checking disparity at  " << obj_centroid.x <<","<< obj_centroid.y << std::endl;
 //		std::cout << "Range (rows,cols): " << vdisp1.rows <<","<< vdisp1.cols << std::endl;
-		if(obj_centroid.x < vdisp1.cols && obj_centroid.y < vdisp1.rows)
+		if(obj_centroid.x < disp.cols && obj_centroid.y < disp.rows)
 		{
 //			cout << "Getting Disparity" <<endl;
-			int disp_val = vdisp1.at<uchar>(obj_centroid.y,obj_centroid.x);
+			int disp_val = disp.at<uchar>(obj_centroid.y,obj_centroid.x);
 //			cout << "Recieved Disparity of "<< disp_val <<endl;
 			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
 			this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,obj_3d);
@@ -329,7 +340,11 @@ void ImageConverter::computeDisparity()
 	}
 //	Mat_t cmapped;
 //	cmapped = gray2bgr(vdisp1);
-	cv::imshow(WINDOWDisparity, vdisp1 );
+	cv::imshow(WINDOWLeft, img1_rect );
+	cv::waitKey(3);
+	cv::imshow(WINDOWRight, img2_rect );
+		cv::waitKey(3);
+	cv::imshow(WINDOWDisparity, disp );
 	cv::waitKey(3);
 
 }
@@ -365,12 +380,13 @@ void ImageConverter::buildMsg(const tf::Point& point, geometry_msgs::PoseStamped
 
 void ImageConverter::computeDisparityCb(const ros::TimerEvent& event)
 {
-	if (gotLeft && gotRight)
-	{
-		computeDisparity();
-		gotLeft = false;
-		gotRight = false;
-	}
+//	if (gotLeft && gotRight)
+//	{
+//		computeDisparity();
+//		gotLeft = false;
+//		gotRight = false;
+//	}
+	computeDisparity();
 }
 void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW)
 {

@@ -503,7 +503,7 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 				&& obj_centroid.y < disp->image.rows) {
 			int disp_val = dmat.at<uchar>(obj_centroid.y,
 					obj_centroid.x);
-			NODELET_INFO_STREAM("Disp val at ("<<obj_centroid.x<<","<<obj_centroid.y<<")  = "<<disp_val);
+//			NODELET_INFO_STREAM("Disp val at ("<<obj_centroid.x<<","<<obj_centroid.y<<")  = "<<disp_val);
 						cv::ellipse( disp->image, obj_centroid, cv::Size( 50, 50), 0, 0, 360, 128, 2, 8, 0 );
 			this->stereo_model_.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);

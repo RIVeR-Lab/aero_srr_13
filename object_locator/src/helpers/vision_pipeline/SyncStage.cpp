@@ -47,6 +47,25 @@ void SyncStage::imageCb(const object_locator::SyncImageMsgConstPtr& msg)
 	raw_images_ = *msg;
 	gotLeft_ = true;
 	gotImages();
+	cv_bridge::CvImagePtr left,right;
+	try {
+		left = cv_bridge::toCvCopy(msg->left_image, enc::BGR8);
+	} catch (cv_bridge::Exception& e) {
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+	try {
+		right = cv_bridge::toCvCopy(msg->right_image, enc::BGR8);
+	} catch (cv_bridge::Exception& e) {
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+
+	std::stringstream s,d;
+	s << "/home/srr/ObjectDetectionData/Left.jpg";
+	d << "/home/srr/ObjectDetectionData/Right.jpg";
+	cv::imwrite(s.str(), left->image);
+	cv::imwrite(s.str(), right->image);
 }
 //
 //void SyncStage::rightImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
