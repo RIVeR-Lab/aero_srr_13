@@ -17,9 +17,9 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																														nh_(nh),
-																														p_nh_(p_nh),
-																														occupancy_buffer_(2)
+																																nh_(nh),
+																																p_nh_(p_nh),
+																																occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -238,6 +238,7 @@ void LocalPlanner::regTopic()
 	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
 	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
 	this->occ_viz_pub_ = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/local/occupancy_viz",2);
+	this->goal_sub_  = this->nh_.subscribe("/aero/global/goal", 2, &LocalPlanner::goalCB, this);
 
 	std::string software_stop_topic("aero/software_stop");
 
@@ -252,6 +253,12 @@ void LocalPlanner::regTimers()
 }
 
 LocalPlanner::~LocalPlanner(){};
+
+
+void LocalPlanner::goalCB(const geometry_msgs::PoseStampedConstPtr& message)
+{
+	this->global_goal_ = message;
+}
 
 bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx)
 {
@@ -399,6 +406,10 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				}
 			}
 
+			//Apply a goal if we have one:
+			this->applyGoal(working_grid);
+
+			//Visualize the grid
 			this->visualizeOcc(working_grid);
 
 			int speedset_idx = 0;
@@ -417,6 +428,30 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 	{
 		this->set_vel_ = 0;
 		this->set_rad_ = 0;
+	}
+}
+
+void LocalPlanner::applyGoal(OccupancyGrid& grid) const
+{
+	geometry_msgs::PoseStamped local_goal;
+	if(this->global_goal_!=geometry_msgs::PoseStampedConstPtr())
+	{
+		try
+		{
+			this->transformer_.waitForTransform(grid.getFrameId(), this->global_goal_->header.frame_id, grid.getGrid().header.stamp, ros::Duration(1.0));
+			this->transformer_.transformPose(grid.getFrameId(), grid.getGrid().header.stamp, *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
+			Point goal_point;
+			goal_point.x = local_goal.pose.position.x;
+			goal_point.y = local_goal.pose.position.x;
+			goal_point.z = 0;
+			ROS_INFO_STREAM("Applying Goal Point <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
+			grid.setGoalPoint(goal_point);
+
+		}
+		catch(std::exception& e)
+		{
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
 	}
 }
 

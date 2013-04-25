@@ -23,12 +23,12 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-																state_(MANUAL),
-																path_planner_(&path_planner),
-																path_threshold_(1.0),
-																nh_(nh),
-																p_nh_(p_nh),
-																transformer_(nh)
+																		state_(MANUAL),
+																		path_planner_(&path_planner),
+																		path_threshold_(1.0),
+																		nh_(nh),
+																		p_nh_(p_nh),
+																		transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -200,7 +200,7 @@ void GlobalPlanner::registerTopics()
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
 	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
 	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2);
-	this->goal_pub_  = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2);
+	this->goal_pub_      = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2, true);
 }
 
 void GlobalPlanner::registerTimers()
@@ -224,7 +224,7 @@ void GlobalPlanner::buildGlobalMap()
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
 	//ROS_INFO("Got a new Laser Scan!");
-/*	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
+	/*	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
 	pcl::fromROSMsg(*message, scan_cloud);
 	const PointConverter& converter = this->global_map_->getConverter();
 
@@ -245,7 +245,7 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 			//do nothing, just means we got data past the edge of the global map
 		}
 	}
-*/
+	 */
 }
 
 bool GlobalPlanner::lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const
@@ -314,8 +314,8 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	try
 	{
 		//Transform the coordinates of the local grid to the global frame
-	  ros::Time transform_time = ros::Time::now();
-	  this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), transform_time, ros::Duration(this->local_update_rate_));
+		ros::Time transform_time = ros::Time::now();
+		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), transform_time, ros::Duration(this->local_update_rate_));
 		pcl_ros::transformPointCloud(this->global_frame_, transform_time, local_grid.getGrid(), local_grid.getFrameId(), copyCloud, this->transformer_);
 
 		//Copy the data in the global frame at the transformed local-coordinates into the local grid
@@ -355,52 +355,17 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
 {
 	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
-	if(!this->carrot_path_.empty())
-	{
-		geometry_msgs::PointStamped goal_point_m;
-		goal_point_m.point.x = 10;
-		goal_point_m.point.y = 0;
-		goal_point_m.point.z = 0;
-		goal_point_m.header.frame_id = this->global_frame_;
-		goal_point_m.header.stamp    = grid.getGrid().header.stamp;
-		geometry_msgs::PoseStamped goal_pose;
-		goal_pose.header = goal_point_m.header;
-		goal_pose.pose.position = goal_point_m.point;
-		this->goal_pub_.publish(goal_pose);
-		ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<"> in "<<goal_point_m.header.frame_id);
-		try
-		{
+	geometry_msgs::PointStamped goal_point_m;
+	goal_point_m.point.x = 10;
+	goal_point_m.point.y = 0;
+	goal_point_m.point.z = 0;
+	goal_point_m.header.frame_id = this->global_frame_;
+	goal_point_m.header.stamp    = grid.getGrid().header.stamp;
+	geometry_msgs::PoseStamped goal_pose;
+	goal_pose.header = goal_point_m.header;
+	goal_pose.pose.position = goal_point_m.point;
+	this->goal_pub_.publish(goal_pose);
 
-	  		this->transformer_.waitForTransform(grid.getFrameId(), goal_point_m.header.frame_id, goal_point_m.header.stamp, ros::Duration(this->local_update_rate_));
-			this->transformer_.transformPoint(grid.getFrameId(), goal_point_m, goal_point_m);
-
-			ROS_INFO_STREAM("Transformed to "<<grid.getFrameId());
-		}
-		catch(std::exception& e)
-		{
-			ROS_ERROR_STREAM_THROTTLE(1, e.what());
-		}
-		ROS_INFO_STREAM("The transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<">");
-		Point goal_point;
-		goal_point.x = goal_point_m.point.x;
-		goal_point.y = goal_point_m.point.y;
-		goal_point.z = goal_point_m.point.z;
-
-		try
-		{
-			grid.getConverter().convertToGrid(goal_point, goal_point);
-			ROS_INFO_STREAM("I set the local goal to <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
-			grid.setGoalPoint(goal_point);
-		}
-		catch(std::runtime_error& e)
-		{
-			ROS_ERROR_STREAM("Error Copying Next Carrot Path Point to Local Grid!:"<<e.what());
-		}
-	}
-	else
-	{
-		ROS_WARN("I don't have a path to follow currently!");
-	}
 }
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
