@@ -416,14 +416,15 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			double dist;
 			try
 			{
-				dist = pcl::distances::l2(working_grid.getGoalPoint().getVector4fMap(), working_grid.getOriginPoint().getVector4fMap());
+				dist = working_grid.getGoalPoint().getVector3fMap().norm();
+				ROS_INFO_STREAM_THROTTLE(0.25, "Distance to Local Goal: "<<dist);
 			}
 			catch(bool)
 			{
 				//means there was no goal, so we can never be at it
 				dist = std::numeric_limits<double>::infinity();
 			}
-			if(dist>=3.0)
+			if(dist>=(0.25/this->res_))
 			{
 				int speedset_idx = 0;
 				int tentacle_idx = 0;
