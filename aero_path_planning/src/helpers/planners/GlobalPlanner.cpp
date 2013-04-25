@@ -363,7 +363,8 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 	goal_point_m.header.stamp    = grid.getGrid().header.stamp;
 	geometry_msgs::PoseStamped goal_pose;
 	goal_pose.header = goal_point_m.header;
-	goal_pose.pose.position = goal_point_m.point;
+	goal_pose.pose.position    = goal_point_m.point;
+	goal_pose.pose.orientation.w = 1;
 	this->goal_pub_.publish(goal_pose);
 
 }

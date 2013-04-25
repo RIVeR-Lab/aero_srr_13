@@ -422,6 +422,11 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
 			visualizeTentacle(speedset_idx, tentacle_idx);
 		}
+		else
+		{
+			this->set_vel_ = 0;
+			this->set_rad_ = 0;
+		}
 
 	}
 	else
@@ -438,12 +443,14 @@ void LocalPlanner::applyGoal(OccupancyGrid& grid) const
 	{
 		try
 		{
+			PointConverter converter(this->res_);
 			this->transformer_.waitForTransform(grid.getFrameId(), this->global_goal_->header.frame_id, grid.getGrid().header.stamp, ros::Duration(1.0));
 			this->transformer_.transformPose(grid.getFrameId(), grid.getGrid().header.stamp, *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
 			Point goal_point;
 			goal_point.x = local_goal.pose.position.x;
-			goal_point.y = local_goal.pose.position.x;
+			goal_point.y = local_goal.pose.position.y;
 			goal_point.z = 0;
+			converter.convertToGrid(goal_point, goal_point);
 			ROS_INFO_STREAM("Applying Goal Point <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
 			grid.setGoalPoint(goal_point);
 
