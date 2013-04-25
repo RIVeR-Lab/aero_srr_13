@@ -17,9 +17,9 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																																nh_(nh),
-																																p_nh_(p_nh),
-																																occupancy_buffer_(2)
+																																		nh_(nh),
+																																		p_nh_(p_nh),
+																																		occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -412,15 +412,33 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			//Visualize the grid
 			this->visualizeOcc(working_grid);
 
-			int speedset_idx = 0;
-			int tentacle_idx = 0;
-
-			//select the best tentacle
-			this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
-			//Update the current radius and velocity
-			this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
-			this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
-			visualizeTentacle(speedset_idx, tentacle_idx);
+			//Check to see if we're at the goal
+			double dist;
+			try
+			{
+				dist = pcl::distances::l2(working_grid.getGoalPoint().getVector4fMap(), working_grid.getOriginPoint().getVector4fMap());
+			}
+			catch(bool)
+			{
+				//means there was no goal, so we can never be at it
+				dist = std::numeric_limits<double>::infinity();
+			}
+			if(dist>=3.0)
+			{
+				int speedset_idx = 0;
+				int tentacle_idx = 0;
+				//select the best tentacle
+				this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
+				//Update the current radius and velocity
+				this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
+				this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
+				visualizeTentacle(speedset_idx, tentacle_idx);
+			}
+			else
+			{
+				this->set_rad_ = 0;
+				this->set_vel_ = 0;
+			}
 		}
 		else
 		{
