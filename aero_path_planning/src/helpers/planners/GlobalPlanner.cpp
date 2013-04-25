@@ -12,6 +12,7 @@
 #include<boost/foreach.hpp>
 #include<pcl_ros/transforms.h>
 #include<geometry_msgs/PoseStamped.h>
+#include<geometry_msgs/PointStamped.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/planners/GlobalPlanner.h>
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
@@ -22,12 +23,12 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-														state_(MANUAL),
-														path_planner_(&path_planner),
-														path_threshold_(1.0),
-														nh_(nh),
-														p_nh_(p_nh),
-														transformer_(nh)
+																state_(MANUAL),
+																path_planner_(&path_planner),
+																path_threshold_(1.0),
+																nh_(nh),
+																p_nh_(p_nh),
+																transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -55,7 +56,7 @@ void GlobalPlanner::loadOccupancyParam()
 	//*****************Configuration Parameters*******************//
 	//Update rate to generate local occupancy grid
 	std::string p_up_rate(L_OCC_UPDTRT);
-	this->local_update_rate_ = 1.0/40.0;
+	this->local_update_rate_ = 1.0/20.0;
 	std::stringstream up_rate_msg;
 	up_rate_msg<<this->local_update_rate_<<"s";
 
@@ -109,13 +110,13 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//x dimension of global occupancy grid
 	std::string pg_x_dim(G_OCC_XDIM);
-	this->global_x_size_ = 1000;
+	this->global_x_size_ = 5000;
 	std::stringstream gx_dim_msg;
 	gx_dim_msg<<this->global_x_size_<<"*0.05m";
 
 	//y dimension of global occupancy grid
 	std::string pg_y_dim(G_OCC_YDIM);
-	this->global_y_size_ = 1000;
+	this->global_y_size_ = 5000;
 	std::stringstream gy_dim_msg;
 	gy_dim_msg<<this->global_y_size_<<"*0.05m";
 
@@ -133,13 +134,13 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//x coord of the global origin of the occupancy grids
 	std::string pg_x_ori(G_OCC_XORG);
-	this->global_x_ori_ = 0;
+	this->global_x_ori_ = this->global_x_size_/2.0;
 	std::stringstream pg_x_ori_msg;
 	pg_x_ori_msg<<this->global_x_ori_<<"m";
 
 	//y coord of the global origin of the occupancy grids
 	std::string pg_y_ori(G_OCC_YORG);
-	this->global_y_ori_ = 0;
+	this->global_y_ori_ = this->global_y_size_/2.0;
 	std::stringstream pg_y_ori_msg;
 	pg_y_ori_msg<<this->global_y_ori_<<"m";
 
@@ -148,6 +149,14 @@ void GlobalPlanner::loadOccupancyParam()
 	this->global_z_ori_ = 0;
 	std::stringstream pg_z_ori_msg;
 	pg_z_ori_msg<<this->global_z_ori_<<"m";
+
+	//The frame_id for the local occupancy grid
+	std::string local_frame = "local_frame";
+	this->local_frame_      = "/base_footprint";
+
+	//The frame_id for the world occupancy grid
+	std::string global_frame = "global_frame";
+	this->global_frame_      = "/world";
 
 	//Get Public Parameters
 	if(!this->nh_.getParam(p_up_rate,	this->local_update_rate_))	PARAM_WARN(p_up_rate,	up_rate_msg.str());
@@ -190,6 +199,8 @@ void GlobalPlanner::registerTopics()
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
 	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
+	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2);
+	this->goal_pub_  = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2);
 }
 
 void GlobalPlanner::registerTimers()
@@ -213,14 +224,9 @@ void GlobalPlanner::buildGlobalMap()
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
 	//ROS_INFO("Got a new Laser Scan!");
-	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
-	Point origin;
-	origin.x = 0;
-	origin.y = this->local_y_size_/2;
-	origin.z = 0;
-	OccupancyGrid local_map(this->local_x_size_, this->local_y_size_, this->local_res_, origin, aero_path_planning::UNKNOWN);
+/*	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
 	pcl::fromROSMsg(*message, scan_cloud);
-	aero_path_planning::PointConverter converter(this->local_res_);
+	const PointConverter& converter = this->global_map_->getConverter();
 
 #pragma omp parallel for
 	for(int i=0; i<(int)scan_cloud.size(); i++)
@@ -230,19 +236,16 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 		opoint.y = scan_cloud.at(i).y;
 		opoint.z = 0;
 		converter.convertToGrid(opoint, opoint);
-
-		Point on_grid;
-		on_grid.getVector4fMap() = opoint.getVector4fMap()+origin.getVector4fMap();
-		if(on_grid.x>=0&&on_grid.x<this->local_x_size_&&on_grid.y>0&&on_grid.y<this->local_y_size_)
+		try
 		{
-			local_map.setPointTrait(opoint, aero_path_planning::OBSTACLE);
+			this->global_map_->setPointTrait(opoint, aero_path_planning::OBSTACLE);
+		}
+		catch(std::exception& e)
+		{
+			//do nothing, just means we got data past the edge of the global map
 		}
 	}
-
-	OccupancyGridMsgPtr message_out(new OccupancyGridMsg());
-	local_map.generateMessage(*message_out);
-	this->local_occ_pub_.publish(message_out);
-
+*/
 }
 
 bool GlobalPlanner::lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const
@@ -256,7 +259,7 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
 	pcl::fromROSMsg(scan_cloud, copy_cloud);
 
-#pragma omp paralell for
+#pragma omp parallel for
 	for(int i=0; i<(int)copy_cloud.size(); i++)
 	{
 		aero_path_planning::Point copy_point;
@@ -308,36 +311,45 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	OccupancyGrid local_grid(this->local_x_size_, this->local_y_size_, this->local_z_size_, this->local_res_, origin, aero_path_planning::UNKNOWN, this->local_frame_);
 
 	OccupancyGridCloud copyCloud;
-	//Transform the coordinates of the local grid to the global frame
-	this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), ros::Time::now(), ros::Duration(this->local_update_rate_/4.0));
-	pcl_ros::transformPointCloud(this->global_frame_, local_grid.getGrid(), copyCloud, this->transformer_);
-	//Copy the data in the global frame at the transformed local-coordinates into the local grid
-#pragma omp parallel for
-	for(int i=0; i<(int)copyCloud.size(); i++)
+	try
 	{
-		try
-		{
-			//Get rid of any rounding issues
-			copyCloud.at(i).x = std::floor(copyCloud.at(i).x);
-			copyCloud.at(i).y = std::floor(copyCloud.at(i).y);
-			copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
+		//Transform the coordinates of the local grid to the global frame
+	  ros::Time transform_time = ros::Time::now();
+	  this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), transform_time, ros::Duration(this->local_update_rate_));
+		pcl_ros::transformPointCloud(this->global_frame_, transform_time, local_grid.getGrid(), local_grid.getFrameId(), copyCloud, this->transformer_);
 
-			//Copy the PointTrait data from the global frame to the local frame
-			local_grid.setPointTrait(local_grid.getGrid().at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
-		}
-		catch(std::runtime_error& e)
+		//Copy the data in the global frame at the transformed local-coordinates into the local grid
+#pragma omp parallel for
+		for(int i=0; i<(int)copyCloud.size(); i++)
 		{
-			//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
+			try
+			{
+				//Get rid of any rounding issues
+				copyCloud.at(i).x = std::floor(copyCloud.at(i).x);
+				copyCloud.at(i).y = std::floor(copyCloud.at(i).y);
+				copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
+
+				//Copy the PointTrait data from the global frame to the local frame
+				local_grid.setPointTrait(local_grid.getGrid().at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
+			}
+			catch(std::runtime_error& e)
+			{
+				//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
+			}
 		}
+		//Copy the current goal point to the occupancy grid
+		this->copyNextGoalToGrid(local_grid);
+
+
+		//Send the new local grid to the local planner
+		OccupancyGridMsgPtr occ_grid_msg(new OccupancyGridMsg());
+		local_grid.generateMessage(*occ_grid_msg);
+		this->local_occ_pub_.publish(occ_grid_msg);
 	}
-	//Copy the current goal point to the occupancy grid
-	this->copyNextGoalToGrid(local_grid);
-
-
-	//Send the new local grid to the local planner
-	OccupancyGridMsgPtr occ_grid_msg(new OccupancyGridMsg());
-	local_grid.generateMessage(*occ_grid_msg);
-	this->local_occ_pub_.publish(occ_grid_msg);
+	catch (std::exception& e)
+	{
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
 }
 
 void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
@@ -346,12 +358,29 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped goal_point_m;
-		goal_point_m.point.x = this->carrot_path_.front().x;
-		goal_point_m.point.x = this->carrot_path_.front().y;
-		goal_point_m.point.x = this->carrot_path_.front().z;
+		goal_point_m.point.x = 10;
+		goal_point_m.point.y = 0;
+		goal_point_m.point.z = 0;
 		goal_point_m.header.frame_id = this->global_frame_;
-		goal_point_m.header.stamp    = ros::Time::now();
-		this->transformer_.transformPoint(grid.getFrameId(), goal_point_m, goal_point_m);
+		goal_point_m.header.stamp    = grid.getGrid().header.stamp;
+		geometry_msgs::PoseStamped goal_pose;
+		goal_pose.header = goal_point_m.header;
+		goal_pose.pose.position = goal_point_m.point;
+		this->goal_pub_.publish(goal_pose);
+		ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<"> in "<<goal_point_m.header.frame_id);
+		try
+		{
+
+	  		this->transformer_.waitForTransform(grid.getFrameId(), goal_point_m.header.frame_id, goal_point_m.header.stamp, ros::Duration(this->local_update_rate_));
+			this->transformer_.transformPoint(grid.getFrameId(), goal_point_m, goal_point_m);
+
+			ROS_INFO_STREAM("Transformed to "<<grid.getFrameId());
+		}
+		catch(std::exception& e)
+		{
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
+		ROS_INFO_STREAM("The transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<">");
 		Point goal_point;
 		goal_point.x = goal_point_m.point.x;
 		goal_point.y = goal_point_m.point.y;
@@ -359,6 +388,8 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 
 		try
 		{
+			grid.getConverter().convertToGrid(goal_point, goal_point);
+			ROS_INFO_STREAM("I set the local goal to <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
 			grid.setGoalPoint(goal_point);
 		}
 		catch(std::runtime_error& e)
@@ -395,6 +426,10 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 	{
 		ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
 	}
+
+	OccupancyGridMsgPtr viz_message(new OccupancyGridMsg());
+	this->global_map_->generateMessage(*viz_message);
+	this->map_viz_pub_.publish(viz_message);
 }
 
 bool GlobalPlanner::checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const
@@ -412,4 +447,9 @@ bool GlobalPlanner::checkCollision(const aero_path_planning::Point& point, const
 		collision = true;
 	}
 	return collision;
+}
+
+void GlobalPlanner::visualizeMap() const
+{
+
 }

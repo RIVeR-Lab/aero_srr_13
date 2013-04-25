@@ -14,6 +14,7 @@
 	<depend package="pcl" />
 	<depend package="pcl_ros" />
 	<depend package="nodelet" />
+	<depend package="dynamic_reconfigure"/>
 	<export>
 		<cpp
 			cflags="`pkg-config --cflags eigen3` -I${prefix}/include `rosboost-cfg --cflags`"

@@ -276,21 +276,19 @@ const Point& OccupancyGrid::getGoalPoint() const throw (bool)
 }
 
 void OccupancyGrid::setGoalPoint(aero_path_planning::Point point) throw(OccupancyGridAccessException)
-				{
+{
 	point.rgba = aero_path_planning::GOAL;
 	try
 	{
 		setPoint(point, false);
-		this->goal_ = point;
-		this->has_goal_ = true;
 	}
 	catch(std::exception& e)
 	{
-		std::string message("Unable to Place Goal Point On Grid");
-		OccupancyGridAccessException error(message, e);
-		throw error;
+		//Do nothing. It just means the goal point wasn't actually reachable on the local map, but it will still work
 	}
-				}
+	this->goal_ = point;
+	this->has_goal_ = true;
+}
 
 const OccupancyGridCloud& OccupancyGrid::getGrid() const
 {
@@ -543,7 +541,7 @@ bool OccupancyGrid::boundsCheck(const Point& point)const throw(OccupancyGridAcce
 		OccupancyGridAccessException exception(message_out);
 		throw exception;
 	}
-	return true;
+	return !failure;
 }
 
 void OccupancyGrid::setPoint(const Point& copy_point, bool origin_corrected)
@@ -589,5 +587,22 @@ const Point& OccupancyGrid::getOriginPoint() const
 const std::string& OccupancyGrid::getFrameId() const
 {
 	return this->occ_grid_.header.frame_id;
+}
+
+bool OccupancyGrid::isValidPoint(const Point& point, bool origin_corrected) const
+{
+	Point corrected_point(point);
+	if(!origin_corrected)
+	{
+		corrected_point.getVector4fMap()+=this->origin_.getVector4fMap();
+	}
+	try
+	{
+		return this->boundsCheck(corrected_point);
+	}
+	catch(std::exception& e)
+	{
+		return false;
+	}
 }
 

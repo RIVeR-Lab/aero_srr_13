@@ -15,10 +15,12 @@
 #include<boost/circular_buffer.hpp>
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
+#include <dynamic_reconfigure/server.h>
 //********************** LOCAL  DEPENDANCIES **********************//
 #include <aero_path_planning/utilities/AeroPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
 #include <aero_srr_msgs/AeroState.h>
+#include <aero_path_planning/LocalPlannerConfig.h>
 
 namespace aero_path_planning
 {
@@ -72,14 +74,19 @@ private:
 	ros::Subscriber lidar_sub_; ///Subscriber to the ROS topic to receive local LIDAR data over
 	ros::Publisher	vel_pub_;	///Publisher for Twist messages to a platform that takes them
 	ros::Publisher  tent_pub_;  ///Publisher for visualizing selected tentacles
+	ros::Publisher  occ_viz_pub_;///Publisher for visualizing the local occupancy grid
 	ros::Timer      vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
 	ros::Timer      plan_timer_;///Timer that will attempt to select a new tentacle at a constant rate
+
+	dynamic_reconfigure::Server<LocalPlannerConfig> dr_server_; ///Dynamic reconfigure server
 
 	aero_path_planning::Point	origin_;	///The origin to use for the occupancy grids
 	TentacleGeneratorPtr tentacles_;	///Pointer to the tentacle generator which contains the tentacles to use for planning
 
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
+	OccupancyGrid working_grid_;                                ///The last new occupancy grid recieved
+	PointCloudPtr lidar_patch_;                                 ///The last patch of LIDAR data recieved
 
 	/**
 	 * @author	Adam Panzica
@@ -132,6 +139,14 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Dnyamic reconfigure callback
+	 * @param config
+	 * @param levels
+	 */
+	void drCB(const aero_path_planning::LocalPlannerConfig& config, uint32_t levels);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Performs platform specific sending of velocity commands
 	 * @param velocity The linear velocity in +x to follow
 	 * @param radius The radius of curvature to follow
@@ -148,6 +163,7 @@ private:
 
 
 	void visualizeTentacle(int speed_set, int tentacle);
+	void visualizeOcc(const OccupancyGrid& grid);
 
 	/**
 	 * @author Adam Panzica
@@ -202,6 +218,14 @@ private:
 	 * @param [in] stop True to set safe mode, false to release it
 	 */
 	void setSafeMode(bool safe);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Checks to see if a point is in bounds
+	 * @param [in] point The point to check
+	 * @return True if in-bounds on the local grid, else false
+	 */
+	bool boundsCheck(const Point& point) const;
 
 };
 

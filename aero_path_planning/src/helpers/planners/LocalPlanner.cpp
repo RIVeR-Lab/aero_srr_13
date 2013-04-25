@@ -17,11 +17,13 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																								nh_(nh),
-																								p_nh_(p_nh),
-																								occupancy_buffer_(2)
+																														nh_(nh),
+																														p_nh_(p_nh),
+																														occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
+
+	this->dr_server_.setCallback(boost::bind(&LocalPlanner::drCB, this, _1, _2));
 
 	this->current_rad_ = 0;
 	this->current_vel_ = 0;
@@ -235,6 +237,7 @@ void LocalPlanner::regTopic()
 	this->lidar_sub_ = this->nh_.subscribe(this->lidar_topic_, 2, &LocalPlanner::lidarCB, this);
 	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
 	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
+	this->occ_viz_pub_ = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/local/occupancy_viz",2);
 
 	std::string software_stop_topic("aero/software_stop");
 
@@ -370,10 +373,34 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
 	if(should_plan_)
 	{
-		//Grab the next occupancy grid to process
+		//Grab the next occupancy grid to process if we've recieved new data from global planner
 		if(!this->occupancy_buffer_.empty())
 		{
-			OccupancyGrid	working_grid= this->occupancy_buffer_.front();
+			this->working_grid_= this->occupancy_buffer_.front();
+			this->occupancy_buffer_.pop_front();
+		}
+		//Build a working grid to apply the LIDAR patch to
+		OccupancyGrid working_grid(this->working_grid_);
+		//If we actually have a working grid, plan on it
+		if(working_grid.size()>0)
+		{
+			//If we have a LIDAR patch, apply it
+			if(this->lidar_patch_!= PointCloudPtr())
+			{
+				try
+				{
+					//ROS_INFO_STREAM("I'm apllying the LIDAR pach...");
+					bool success = working_grid.setPointTrait(*this->lidar_patch_);
+					//ROS_INFO_STREAM("Patch Applied"<<success<<"!");
+				}
+				catch(std::exception& e)
+				{
+					ROS_ERROR_STREAM_THROTTLE(1, e.what());
+				}
+			}
+
+			this->visualizeOcc(working_grid);
+
 			int speedset_idx = 0;
 			int tentacle_idx = 0;
 
@@ -383,8 +410,8 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
 			this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
 			visualizeTentacle(speedset_idx, tentacle_idx);
-			this->occupancy_buffer_.pop_front();
 		}
+
 	}
 	else
 	{
@@ -469,7 +496,27 @@ void LocalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 
 void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
+	PointCloudPtr lidar_patch(new PointCloud());
+	pcl::PointCloud<pcl::PointXYZ> raw_cloud;
+	pcl::fromROSMsg(*message, raw_cloud);
+	PointConverter converter(this->res_);
 
+	//#pragma omp parallel for
+	for(int i=0; i<(int)raw_cloud.size(); i++)
+	{
+		Point point;
+		point.x = raw_cloud.at(i).x;
+		point.y = raw_cloud.at(i).y;
+		point.z = 0;
+		point.rgba = OBSTACLE;
+		converter.convertToGrid(point, point);
+		if(this->boundsCheck(point))
+		{
+			lidar_patch->push_back(point);
+		}
+	}
+
+	this->lidar_patch_ = lidar_patch;
 }
 
 
@@ -478,7 +525,7 @@ void LocalPlanner::sendVelCom(double velocity, double radius)
 	switch (this->platform_)
 	{
 	case 0:
-		ROS_ERROR("Platform Oryx is no longer supported");
+		ROS_ERROR_THROTTLE(1,"Sending Velocity To Platform Oryx is no longer supported");
 		break;
 	case 1:
 		twist(velocity, velocity/(radius/10.0));
@@ -486,6 +533,14 @@ void LocalPlanner::sendVelCom(double velocity, double radius)
 	default:
 		break;
 	}
+}
+
+void LocalPlanner::drCB(const LocalPlannerConfig& config, uint32_t levels)
+{
+	this->goal_weight_ = config.goal_weight;
+	this->unkn_weight_ = config.unkown_weight;
+	this->diff_weight_ = config.difficult_weight;
+	this->trav_weight_ = config.traversed_weight;
 }
 
 
@@ -510,7 +565,7 @@ void LocalPlanner::twist(double x_dot, double omega)
 		omega = omega/std::abs(omega)*0.1;
 	}
 	message.linear.x  = x_dot;
-	message.angular.z = omega;
+	message.angular.z = -omega;
 	this->vel_pub_.publish(message);
 }
 
@@ -526,9 +581,44 @@ void LocalPlanner::visualizeTentacle(int speed_set, int tentacle)
 		converter.convertToEng(point, point);
 	}
 	pcl::toROSMsg(cloud , message);
-	message.header.frame_id = "/laser";
+	message.header.frame_id = "/base_footprint";
 	message.header.stamp    = ros::Time::now();
 	this->tent_pub_.publish(message);
+}
+
+void LocalPlanner::visualizeOcc(const OccupancyGrid& grid)
+{
+	PointConverter converter(this->res_);
+	OccupancyGridCloud cloud(grid.getGrid());
+#pragma omp parallel for
+	for(int i=0; i<(int)cloud.size(); i++)
+	{
+		Point& point = cloud.at(i);
+		converter.convertToEng(point, point);
+	}
+	OccupancyGridCloud obst_cloud;
+	for(int i=0; i<(int)cloud.size(); i++)
+	{
+		if(cloud.at(i).rgba==OBSTACLE)
+		{
+			obst_cloud.push_back(cloud.at(i));
+		}
+	}
+	try
+	{
+		Point goal(grid.getGoalPoint());
+		converter.convertToEng(goal, goal);
+		obst_cloud.push_back(goal);
+	}
+	catch(bool& e)
+	{
+		//do nothing, means there was no goal
+	}
+	sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
+	pcl::toROSMsg(obst_cloud, *message);
+	message->header.frame_id = grid.getFrameId();
+	message->header.stamp    = ros::Time::now();
+	this->occ_viz_pub_.publish(message);
 }
 
 
@@ -553,4 +643,14 @@ void LocalPlanner::setSafeMode(bool safe)
 	std::string mode(safe?("Safe"):("Free"));
 	ROS_INFO_STREAM("Local Planner Set to "<<mode<<" Mode!");
 	this->should_plan_ = !safe;
+}
+
+bool LocalPlanner::boundsCheck(const Point& point) const
+{
+	Point corrected_point(point);
+	corrected_point.getVector4fMap()+=this->origin_.getVector4fMap();
+	bool inx = (corrected_point.x <= this->x_dim_)&&(corrected_point.x>=0);
+	bool iny = (corrected_point.y <= this->y_dim_)&&(corrected_point.y>=0);
+	bool inz = (corrected_point.z <= this->z_dim_)&&(corrected_point.z>=0);
+	return inx&&iny&&inz;
 }

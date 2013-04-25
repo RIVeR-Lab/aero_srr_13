@@ -56,8 +56,8 @@ void RoboteqMotorController::open(std::string port){
 	setConfig(_AMOD, 4, 1);
 
 	//set motors max rpm
-	//setConfig(_MXRPM, 1, maxRPM1_);
-	//setConfig(_MXRPM, 2, maxRPM2_);
+	setConfig(_MXRPM, 1, maxRPM1_);
+	setConfig(_MXRPM, 2, maxRPM2_);
 
 
 	//Initialize to initial values
@@ -230,19 +230,30 @@ void RoboteqMotorController::getTemp(uint8_t chan, double& value){
     DRIVER_EXCEPT(Exception, "Invalid motor channel");
   value = an*TEMP_SCALE+TEMP_OFFSET;
 }
-void RoboteqMotorController::getPosition(uint8_t chan, int32_t& value){
-  getValue(_C, chan, value);
+void RoboteqMotorController::getPosition(uint8_t chan, double& value){
+  if(chan==1){
+    int32_t raw_value;
+    getValue(_C, chan, raw_value);
+    value = ((double)raw_value)/ppr1_/counts_per_pulse;
+  }
+  else if(chan==2){
+    int32_t raw_value;
+    getValue(_C, chan, raw_value);
+    value = ((double)raw_value)/ppr2_/counts_per_pulse;
+  }
+  else
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
 void RoboteqMotorController::getVelocity(uint8_t chan, double& value){
   if(chan==1){
     int32_t raw_value;
     getValue(_S, chan, raw_value);
-    value = raw_value*maxRPM1_/GO_COMMAND_BOUND;
+    value = raw_value;//*maxRPM1_/GO_COMMAND_BOUND;
   }
   else if(chan==2){
     int32_t raw_value;
     getValue(_S, chan, raw_value);
-    value = raw_value*maxRPM1_/GO_COMMAND_BOUND;
+    value = raw_value;//*maxRPM1_/GO_COMMAND_BOUND;
   }
   else
     DRIVER_EXCEPT(Exception, "Invalid motor channel");

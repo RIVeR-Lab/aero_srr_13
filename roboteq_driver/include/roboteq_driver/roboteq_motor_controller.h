@@ -26,6 +26,8 @@ class RoboteqMotorController{
   const static MotorMode MOTOR_MODE_POSITION_TRACKING = 4;
   const static MotorMode MOTOR_MODE_TORQUE = 5;
 
+  const static int32_t counts_per_pulse = 4;
+
   /**
    * The max bound of the go command
    */
@@ -108,7 +110,7 @@ class RoboteqMotorController{
   /**
    * get the absolute position of each motor
    */
-  void getPosition(uint8_t chan, int32_t& value);
+  void getPosition(uint8_t chan, double& value);
   /**
    * get the velocity of each motor
    */

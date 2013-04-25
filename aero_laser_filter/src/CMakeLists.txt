@@ -39,7 +39,7 @@ set(GLOBAL_TOPIC_VAL "\"/${R_NS}/global_point_cloud\"")
 #Parameter for the output frame for the local filter
 set(LOCAL_FRAME_ARG "local_point_frame")
 set(LOCAL_FRAME_CDF LOCAL_FRAME)
-set(LOCAL_FRAME_VAL "\"/robot\"")
+set(LOCAL_FRAME_VAL "\"/base_footprint\"")
 
 #Parameter for the output frame for the global filter
 set(GLOBAL_FRAME_ARG "global_point_frame")

@@ -2,9 +2,10 @@
   	<arg name="node_manager" default="aero_laser_filter_pipeline"/>
 	<arg name="input_topic"  default="/scan"/>
 	<arg name="local_topic"  default="/aero/local_point_cloud"/>
-	<arg name="local_frame"  default="/robot"/>
+	<arg name="local_frame"  default="base_footprint"/>
 	<arg name="global_topic" default="/aero/global_point_cloud"/>
 	<arg name="global_frame" default="/world"/>
+	<arg name="laser_frame"  default="laser"/>
 	
  	<!-- Bring up anything related to the LIDAR here -->
  	<include file="$(find aero_laser_filter)/launch/aero_laser_filter.launch">
@@ -15,5 +16,10 @@
 		<arg name="global_topic" value="$(arg global_topic)"/>
 		<arg name="global_frame" value="$(arg global_frame)"/>
  	</include>
+
+	<node pkg="LMS1xx" type="LMS100" name="LMS100" output="screen">
+		<param name="host" value="192.168.0.1"/>
+		<param name="frame_id" value="$(arg laser_frame)"/>
+	</node>
   
 </launch>

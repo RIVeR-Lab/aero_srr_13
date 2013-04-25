@@ -19,6 +19,7 @@
   <depend package="pcl_ros"/>
   <depend package="aero_srr_msgs"/>
   <depend package="sensor_msgs"/>
+  <depend package="dynamic_reconfigure"/>
 
 </package>
 
