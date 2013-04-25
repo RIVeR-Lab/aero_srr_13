@@ -222,7 +222,7 @@ void GlobalPlanner::buildGlobalMap()
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
 	//ROS_INFO("Got a new Laser Scan!");
-	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
+/*	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
 	pcl::fromROSMsg(*message, scan_cloud);
 	const PointConverter& converter = this->global_map_->getConverter();
 
@@ -243,6 +243,7 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 			//do nothing, just means we got data past the edge of the global map
 		}
 	}
+*/
 }
 
 bool GlobalPlanner::lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const

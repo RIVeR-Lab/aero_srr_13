@@ -223,8 +223,9 @@ private:
 	 * @author Adam Panzica
 	 * @brief Checks to see if a point is in bounds
 	 * @param [in] point The point to check
+	 * @return True if in-bounds on the local grid, else false
 	 */
-	void boundsCheck(const Point& point) const;
+	bool boundsCheck(const Point& point) const;
 
 };
 

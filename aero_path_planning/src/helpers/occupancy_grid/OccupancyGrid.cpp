@@ -591,7 +591,7 @@ const std::string& OccupancyGrid::getFrameId() const
 	return this->occ_grid_.header.frame_id;
 }
 
-bool OccupancyGrid::isValidPoint(const Point& point, bool origin_corrected = false) const
+bool OccupancyGrid::isValidPoint(const Point& point, bool origin_corrected) const
 {
 	Point corrected_point(point);
 	if(!origin_corrected)

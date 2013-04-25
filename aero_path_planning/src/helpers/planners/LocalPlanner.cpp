@@ -387,7 +387,16 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			//If we have a LIDAR patch, apply it
 			if(this->lidar_patch_!= PointCloudPtr())
 			{
-				working_grid.setPointTrait(*this->lidar_patch_);
+				try
+				{
+					//ROS_INFO_STREAM("I'm apllying the LIDAR pach...");
+					bool success = working_grid.setPointTrait(*this->lidar_patch_);
+					//ROS_INFO_STREAM("Patch Applied"<<success<<"!");
+				}
+				catch(std::exception& e)
+				{
+					ROS_ERROR_STREAM_THROTTLE(1, e.what());
+				}
 			}
 
 			this->visualizeOcc(working_grid);
@@ -498,13 +507,12 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 		Point point;
 		point.x = raw_cloud.at(i).x;
 		point.y = raw_cloud.at(i).y;
-		point.z = raw_cloud.at(i).z;
+		point.z = 0;
 		point.rgba = OBSTACLE;
 		converter.convertToGrid(point, point);
 		if(this->boundsCheck(point))
 		{
 			lidar_patch->push_back(point);
-			ROS_INFO_STREAM("I put point <"<<point.x<<","<<point.y<<","<<point.z<<"> onto the local lidar patch");
 		}
 	}
 
@@ -580,8 +588,26 @@ void LocalPlanner::visualizeTentacle(int speed_set, int tentacle)
 
 void LocalPlanner::visualizeOcc(const OccupancyGrid& grid)
 {
+	PointConverter converter(this->res_);
+	OccupancyGridCloud cloud(grid.getGrid());
+#pragma omp parallel for
+	for(int i=0; i<(int)cloud.size(); i++)
+	{
+		Point& point = cloud.at(i);
+		converter.convertToEng(point, point);
+	}
+	OccupancyGridCloud obst_cloud;
+	for(int i=0; i<(int)cloud.size(); i++)
+	{
+		if(cloud.at(i).rgba==OBSTACLE)
+		{
+			obst_cloud.push_back(cloud.at(i));
+		}
+	}
 	sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
-	pcl::toROSMsg(grid.getGrid(), *message);
+	pcl::toROSMsg(obst_cloud, *message);
+	message->header.frame_id = grid.getFrameId();
+	message->header.stamp    = ros::Time::now();
 	this->occ_viz_pub_.publish(message);
 }
 
@@ -609,11 +635,12 @@ void LocalPlanner::setSafeMode(bool safe)
 	this->should_plan_ = !safe;
 }
 
-void LocalPlanner::boundsCheck(const Point& point) const
+bool LocalPlanner::boundsCheck(const Point& point) const
 {
 	Point corrected_point(point);
-	corrected_point.getVector4fMap()+=this->origin_;
-	bool inx = (corrected_point <= this->x_dim_)&&(corrected_point.x>=0);
-	bool iny = (corrected_point <= this->y_dim_)&&(corrected_point.y>=0);
-	bool inz = (corrected_point <= this->z_dim_)&&(corrected_point.z>=0);
+	corrected_point.getVector4fMap()+=this->origin_.getVector4fMap();
+	bool inx = (corrected_point.x <= this->x_dim_)&&(corrected_point.x>=0);
+	bool iny = (corrected_point.y <= this->y_dim_)&&(corrected_point.y>=0);
+	bool inz = (corrected_point.z <= this->z_dim_)&&(corrected_point.z>=0);
+	return inx&&iny&&inz;
 }
