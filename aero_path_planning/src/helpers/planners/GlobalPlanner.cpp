@@ -200,7 +200,7 @@ void GlobalPlanner::registerTopics()
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
 	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
 	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2);
-	this->goal_pub_  = this->nh_.advertise<geometry_msgs::PointStamped>("/aero/global/goal", 2);
+	this->goal_pub_  = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2);
 }
 
 void GlobalPlanner::registerTimers()
@@ -358,12 +358,15 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped goal_point_m;
-		goal_point_m.point.x = 10.0/.05;
+		goal_point_m.point.x = 10;
 		goal_point_m.point.y = 0;
 		goal_point_m.point.z = 0;
 		goal_point_m.header.frame_id = this->global_frame_;
 		goal_point_m.header.stamp    = grid.getGrid().header.stamp;
-		this->goal_pub_.publish(goal_point_m);
+		geometry_msgs::PoseStamped goal_pose;
+		goal_pose.header = goal_point_m.header;
+		goal_pose.pose.position = goal_point_m.point;
+		this->goal_pub_.publish(goal_pose);
 		ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<"> in "<<goal_point_m.header.frame_id);
 		try
 		{
@@ -379,13 +382,14 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 		}
 		ROS_INFO_STREAM("The transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<">");
 		Point goal_point;
-		goal_point.x = (int)goal_point_m.point.x;
-		goal_point.y = (int)goal_point_m.point.y;
-		goal_point.z = (int)goal_point_m.point.z;
-		ROS_INFO_STREAM("I set the local goal to <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
+		goal_point.x = goal_point_m.point.x;
+		goal_point.y = goal_point_m.point.y;
+		goal_point.z = goal_point_m.point.z;
 
 		try
 		{
+			grid.getConverter().convertToGrid(goal_point, goal_point);
+			ROS_INFO_STREAM("I set the local goal to <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
 			grid.setGoalPoint(goal_point);
 		}
 		catch(std::runtime_error& e)
