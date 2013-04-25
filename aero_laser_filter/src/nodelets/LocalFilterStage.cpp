@@ -70,8 +70,8 @@ namespace aero_laser_filter
 		this->crop_top_right_.y = temp_y;
 		this->crop_top_right_.z = temp_z;
 
-		this->robot_size_    = 1;
-		this->inflation_res_ = 0.1;
+		this->robot_size_    = .5;
+		this->inflation_res_ = 0.05;
 		this->p_nh_.getParam("robot_size", this->robot_size_);
 		this->p_nh_.getParam("inflation_res", this->inflation_res_);
 
@@ -95,7 +95,7 @@ namespace aero_laser_filter
 
 		this->cropCloud(cropped_cloud, processed_cloud);
 		//NODELET_INFO_STREAM("Local: Croped Point Cloud");
-		//this->filterCloud(processed_cloud, processed_cloud);
+		this->filterCloud(processed_cloud, processed_cloud);
 		//NODELET_INFO_STREAM("Local: Filtered Point Cloud");
 		this->transformCloud(processed_cloud, processed_cloud);
 		//NODELET_INFO_STREAM("Local: Transformed Point Cloud");

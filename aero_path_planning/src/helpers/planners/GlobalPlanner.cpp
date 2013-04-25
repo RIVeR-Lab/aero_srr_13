@@ -356,11 +356,12 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped goal_point_m;
-		goal_point_m.point.x = this->carrot_path_.front().x;
-		goal_point_m.point.x = this->carrot_path_.front().y;
-		goal_point_m.point.x = this->carrot_path_.front().z;
+		goal_point_m.point.x = 0;
+		goal_point_m.point.y = 10.0/0.05;
+		goal_point_m.point.z = 0;
 		goal_point_m.header.frame_id = this->global_frame_;
-		goal_point_m.header.stamp    = ros::Time::now();
+		goal_point_m.header.stamp    = grid.getGrid().header.stamp;
+		ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<">");
 		try
 		{
 
@@ -371,10 +372,12 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 		{
 			ROS_ERROR_STREAM_THROTTLE(1, e.what());
 		}
+		ROS_INFO_STREAM("The transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<">");
 		Point goal_point;
-		goal_point.x = goal_point_m.point.x;
-		goal_point.y = goal_point_m.point.y;
-		goal_point.z = goal_point_m.point.z;
+		goal_point.x = (int)goal_point_m.point.x;
+		goal_point.y = (int)goal_point_m.point.y;
+		goal_point.z = (int)goal_point_m.point.z;
+		ROS_INFO_STREAM("I set the local goal to <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
 
 		try
 		{
