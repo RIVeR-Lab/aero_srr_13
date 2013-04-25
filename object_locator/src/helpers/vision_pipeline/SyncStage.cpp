@@ -37,7 +37,7 @@ void SyncStage::loadParams()
 
 void SyncStage::registerTopics()
 {
-	this->raw_image_sub_  = this->getNodeHandle().subscribe(this->left_input_topic_,2,&SyncStage::imageCb,this);
+	this->raw_image_sub_  = this->getNodeHandle().subscribe(this->sync_input_topic_,2,&SyncStage::imageCb,this);
 	this->image_left_ = it_->subscribeCamera(this->left_input_topic_,2,&SyncStage::leftImageCb,this);
 	this->image_right_ = it_->subscribeCamera(this->right_input_topic_,2,&SyncStage::rightImageCb,this);
 	this->disparity_ = this->getNodeHandle().subscribe(this->disparity_input_topic_,2,&SyncStage::disparityImageCb,this);
@@ -54,7 +54,7 @@ void SyncStage::imageCb(const object_locator::SyncImageMsgConstPtr& msg)
 
 }
 //
-void SyncStage::leftImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
+void SyncStage::leftImageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
 	left_image_ = *msg;
 	left_info_  = *cam_info;
@@ -62,7 +62,7 @@ void SyncStage::leftImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_
 	gotImages();
 }
 
-void SyncStage::rightImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
+void SyncStage::rightImageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
 	right_image_ = *msg;
 	right_info_  = *cam_info;

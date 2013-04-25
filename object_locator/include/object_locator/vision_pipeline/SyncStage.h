@@ -40,6 +40,8 @@ namespace object_locator
 		image_transport::CameraSubscriber image_right_;
 		ros::Subscriber raw_image_sub_;
 		ros::Subscriber disparity_;
+		ros::Subscriber left_rect_sub_;
+		ros::Subscriber right_rect_sub_;
 		ros::Publisher sync_image_pub_;
 		sensor_msgs::Image left_image_;
 		sensor_msgs::Image right_image_;
