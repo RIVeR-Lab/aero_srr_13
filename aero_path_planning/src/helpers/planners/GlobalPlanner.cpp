@@ -12,6 +12,7 @@
 #include<boost/foreach.hpp>
 #include<pcl_ros/transforms.h>
 #include<geometry_msgs/PoseStamped.h>
+#include<geometry_msgs/PointStamped.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/planners/GlobalPlanner.h>
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
@@ -199,6 +200,7 @@ void GlobalPlanner::registerTopics()
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
 	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
 	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2);
+	this->goal_pub_  = this->nh_.advertise<geometry_msgs::PointStamped>("/aero/global/goal", 2);
 }
 
 void GlobalPlanner::registerTimers()
@@ -361,6 +363,7 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 		goal_point_m.point.z = 0;
 		goal_point_m.header.frame_id = this->global_frame_;
 		goal_point_m.header.stamp    = grid.getGrid().header.stamp;
+		this->goal_pub_.publish(goal_point_m);
 		ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<"> in "<<goal_point_m.header.frame_id);
 		try
 		{

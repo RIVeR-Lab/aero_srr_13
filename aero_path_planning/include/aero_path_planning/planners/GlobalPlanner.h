@@ -187,6 +187,7 @@ private:
 	tf::TransformListener transformer_;   ///Hook into the tf system
 	ros::Subscriber       joy_sub_;       ///Subscriber for joy messages
 	ros::Publisher        local_occ_pub_; ///Publisher to send OccupancyGrids to the local planner
+	ros::Publisher        goal_pub_;      ///Publisher to visualize the global goal
 	ros::Publisher        map_viz_pub_;   ///Publisher to vizualizing the global map
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
 	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
