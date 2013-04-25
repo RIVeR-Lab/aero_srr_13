@@ -24,8 +24,8 @@ void SyncStage::onInit()
 void SyncStage::loadParams()
 {
 	this->sync_input_topic_  ="/stereo_camera/stereo_sync";
-	this->left_input_topic_  ="/stereo_camera/left/image_rect_color";
-	this->right_input_topic_ ="/stereo_camera/right/image_rect_color";
+	this->left_input_topic_  ="/stereo_camera/left/image_rect";
+	this->right_input_topic_ ="/stereo_camera/right/image_rect";
 	this->disparity_input_topic_ ="/stereo_camera/disparity";
 	this->output_topic_="disparity_stage/disparity";
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
