@@ -44,6 +44,7 @@ rosbuild_add_executable(test_arm_control src/testers/test_arm_control.cpp )
 #Nodes
 rosbuild_add_executable(arm_controller src/nodes/arm_controller.cpp )
 rosbuild_add_executable(arm_velocity_control src/nodes/arm_velocity_control.cpp )
+rosbuild_add_executable(test src/nodes/test.cpp )
 
 target_link_libraries(arm_velocity_control pidcontrol)
 
