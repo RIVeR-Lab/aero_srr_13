@@ -30,7 +30,7 @@ void SyncStage::loadParams()
 	this->output_topic_="disparity_stage/disparity";
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
 	gotLeft_ = false;
-//	gotRight_ = false;
+	gotRight_ = false;
 	gotDisparity_ = false;
 
 }
