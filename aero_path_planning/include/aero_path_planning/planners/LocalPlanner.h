@@ -23,6 +23,7 @@
 #include <aero_path_planning/OccupancyGridMsg.h>
 #include <aero_srr_msgs/AeroState.h>
 #include <aero_path_planning/LocalPlannerConfig.h>
+#include <aero_path_planning/utilities/TentacleRateLimiter.h>
 
 namespace aero_path_planning
 {
@@ -45,6 +46,7 @@ public:
 private:
 
 	int		platform_;		    ///flat marking what platform we're running on
+	int     rate_limit_;		///Rate-change limit on tentacle selection
 	bool	should_plan_;	    ///Flag for signaling if the local planner should be running
 	bool    tentacle_mode_;     ///Flag for signalling if the local planner should be running in tetacle mode
 
@@ -87,6 +89,7 @@ private:
 
 	aero_path_planning::Point	origin_;	///The origin to use for the occupancy grids
 	TentacleGeneratorPtr tentacles_;	///Pointer to the tentacle generator which contains the tentacles to use for planning
+	TentacleRateLimiter*  limiter_;      ///Limiter for clamping the rate-change between tentacle selections
 
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data

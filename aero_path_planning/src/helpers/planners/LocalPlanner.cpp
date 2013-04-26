@@ -227,6 +227,13 @@ void LocalPlanner::loadParam()
 	this->origin_.y = y_ori;
 	this->origin_.z = z_ori;
 	this->tentacles_ = TentacleGeneratorPtr(new TentacleGenerator(min_tent, min_speed,max_speed,num_speed_set, num_tent, exp_fact, this->res_, this->x_dim_, this->y_dim_));
+
+	std::string p_rate_limit("rate_limit");
+	this->rate_limit_ = 5;
+	std::stringstream rate_limit;
+	rate_limit<<this->rate_limit_<<" tentacles";
+	if(!p_nh_.getParam(p_rate_limit,	this->rate_limit_))    PARAM_WARN(p_rate_limit, rate_limit.str());
+	this->limiter_   = new TentacleRateLimiter(num_tent, this->rate_limit_);
 }
 
 void LocalPlanner::regTopic()
@@ -252,7 +259,10 @@ void LocalPlanner::regTimers()
 	this->plan_timer_= nh_.createTimer(ros::Duration(1.0/20.0), &LocalPlanner::planningCB, this);
 }
 
-LocalPlanner::~LocalPlanner(){};
+LocalPlanner::~LocalPlanner()
+{
+	delete this->limiter_;
+};
 
 
 void LocalPlanner::goalCB(const geometry_msgs::PoseStampedConstPtr& message)
@@ -430,6 +440,8 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				int tentacle_idx = 0;
 				//select the best tentacle
 				this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
+				//Limit rate of tentacle change
+				tentacle_idx   = this->limiter_->nextTentacle(tentacle_idx);
 				//Update the current radius and velocity
 				this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
 				this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
@@ -602,6 +614,15 @@ void LocalPlanner::drCB(const LocalPlannerConfig& config, uint32_t levels)
 	this->unkn_weight_ = config.unkown_weight;
 	this->diff_weight_ = config.difficult_weight;
 	this->trav_weight_ = config.traversed_weight;
+	if(config.rate_limit>0)
+	{
+		this->limiter_->disableLimit(false);
+		this->rate_limit_  = config.rate_limit;
+	}
+	else
+	{
+		this->limiter_->disableLimit(true);
+	}
 }
 
 
