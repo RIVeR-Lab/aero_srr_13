@@ -19,7 +19,8 @@ using namespace aero_path_planning;
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
 																																		nh_(nh),
 																																		p_nh_(p_nh),
-																																		occupancy_buffer_(2)
+																																		occupancy_buffer_(2),
+limiter_(NULL)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -230,9 +231,6 @@ void LocalPlanner::loadParam()
 
 	std::string p_rate_limit("rate_limit");
 	this->rate_limit_ = 5;
-	std::stringstream rate_limit;
-	rate_limit<<this->rate_limit_<<" tentacles";
-	if(!p_nh_.getParam(p_rate_limit,	this->rate_limit_))    PARAM_WARN(p_rate_limit, rate_limit.str());
 	this->limiter_   = new TentacleRateLimiter(num_tent, this->rate_limit_);
 }
 
@@ -614,14 +612,17 @@ void LocalPlanner::drCB(const LocalPlannerConfig& config, uint32_t levels)
 	this->unkn_weight_ = config.unkown_weight;
 	this->diff_weight_ = config.difficult_weight;
 	this->trav_weight_ = config.traversed_weight;
-	if(config.rate_limit>0)
+	if(this->limiter_!=NULL)
 	{
-		this->limiter_->disableLimit(false);
-		this->rate_limit_  = config.rate_limit;
-	}
-	else
-	{
-		this->limiter_->disableLimit(true);
+		if(config.rate_limit>0)
+		{
+			this->limiter_->disableLimit(false);
+			this->rate_limit_  = config.rate_limit;
+		}
+		else
+		{
+			this->limiter_->disableLimit(true);
+		}
 	}
 }
 

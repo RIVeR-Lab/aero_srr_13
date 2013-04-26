@@ -36,14 +36,11 @@ int TentacleRateLimiter::getRateLimit() const
 
 int TentacleRateLimiter::nextTentacle(int raw_index)
 {
-	std::cout<<"Rate Limiting "<<raw_index<<"...";
 	int next_tentacle = raw_index;
 	if(this->enabled_)
 	{
-		std::cout<<"Enabled...";
 		if(this->last_tentacle_!=-1)
 		{
-			std::cout<<"Last Tentacle "<<this->last_tentacle_<<"...";
 			int difference = 0;
 			//If the last tentacle and the raw tentacle are on the same side, we can just add the difference, rate-limited. If rate-limited we are essentially on the same side do the same
 			if(this->sameSide(raw_index))
@@ -69,7 +66,7 @@ int TentacleRateLimiter::nextTentacle(int raw_index)
 					post_switch_offset = this->num_tent_ - raw_index;
 					pre_switch_offset  = this->origin_ - this->last_tentacle_;
 					difference         = post_switch_offset + pre_switch_offset;
-					std::cout<<"Left->Right cross with poso: "<<post_switch_offset<<", prso: "<<pre_switch_offset<<", diff: "<<difference;
+
 					//If pre_switch_offset is over rate_limit, we don't need to calculate the switch
 					if(pre_switch_offset>this->rate_limit_)
 					{
@@ -122,7 +119,6 @@ int TentacleRateLimiter::nextTentacle(int raw_index)
 	}
 	//Store what the last selected tentacle was
 	this->last_tentacle_ = next_tentacle;
-	std::cout<<std::endl;
 	return next_tentacle;
 }
 
