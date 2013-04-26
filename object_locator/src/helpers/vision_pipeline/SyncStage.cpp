@@ -80,26 +80,27 @@ void SyncStage::disparityImageCb(const stereo_msgs::DisparityImageConstPtr& msg)
 
 void SyncStage::gotImages()
 {
-	cv_bridge::CvImagePtr left,right;
-	try {
-		left = cv_bridge::toCvCopy(left_image_, enc::BGR8);
-	} catch (cv_bridge::Exception& e) {
-		NODELET_ERROR("cv_bridge exception: %s", e.what());
-		return;
-	}
-	try {
-		right = cv_bridge::toCvCopy(right_image_, enc::BGR8);
-	} catch (cv_bridge::Exception& e) {
-		NODELET_ERROR("cv_bridge exception: %s", e.what());
-		return;
-	}
-	std::stringstream s,d;
-	s << "/home/srr/ObjectDetectionData/Left.jpg";
-	d << "/home/srr/ObjectDetectionData/Right.jpg";
-	cv::imwrite(s.str(), left->image);
-	cv::imwrite(d.str(), right->image);
-	if(gotLeft_ && gotDisparity_)
+
+	if(gotLeft_ && gotDisparity_ && (left_image_.header.stamp == right_image_.header.stamp))
 	{
+		cv_bridge::CvImagePtr left,right;
+		try {
+			left = cv_bridge::toCvCopy(left_image_, enc::MONO8);
+		} catch (cv_bridge::Exception& e) {
+			NODELET_ERROR("cv_bridge exception: %s", e.what());
+			return;
+		}
+		try {
+			right = cv_bridge::toCvCopy(right_image_, enc::MONO8);
+		} catch (cv_bridge::Exception& e) {
+			NODELET_ERROR("cv_bridge exception: %s", e.what());
+			return;
+		}
+		std::stringstream s,d;
+		s << "/home/srr/ObjectDetectionData/Left.jpg";
+		d << "/home/srr/ObjectDetectionData/Right.jpg";
+		cv::imwrite(s.str(), left->image);
+		cv::imwrite(d.str(), right->image);
 		object_locator::SyncImagesAndDisparity msg;
 		generateSyncMsg(msg);
 		this->sync_image_pub_.publish(msg);

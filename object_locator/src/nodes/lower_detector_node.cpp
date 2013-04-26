@@ -148,6 +148,7 @@ void ImageConverter::computeDisparity()
 	rightRect = imread("/home/srr/ObjectDetectionData/Right.jpg", CV_LOAD_IMAGE_COLOR);
 	cvtColor(leftRect,img1_rect, CV_BGR2GRAY);
 	cvtColor(rightRect,img2_rect, CV_BGR2GRAY);
+//	this->stereo_model.updateQ();
 /**this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 	//	  cv::StereoVar stereo;
 	//	  stereo.maxDisp = 1.5;
@@ -219,14 +220,14 @@ void ImageConverter::computeDisparity()
 	Mat_t dispn( heightL, widthL, CV_32F );
 
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 176;       //80        //256+80;
+	int numDisp = 128;       //80        //256+80;
 	int SADSize = 9;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
-	int disp12MaxDiff =  1	; // 1;
+	int disp12MaxDiff =  -1	; // 1;
 	int preFilterCap =   31; //  2;
 	int uniqueness = 10;
-	int specSize =   500; //50 //20;   //reduces noise
+	int specSize =   950; //50 //20;   //reduces noise
 	int specRange = 31  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
@@ -338,13 +339,14 @@ void ImageConverter::computeDisparity()
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
 	}
-//	Mat_t cmapped;
+	Mat_t cmapped;
 //	cmapped = gray2bgr(vdisp1);
+	disp.convertTo(cmapped,CV_8U);
 	cv::imshow(WINDOWLeft, img1_rect );
 	cv::waitKey(3);
 	cv::imshow(WINDOWRight, img2_rect );
 		cv::waitKey(3);
-	cv::imshow(WINDOWDisparity, disp );
+	cv::imshow(WINDOWDisparity, cmapped );
 	cv::waitKey(3);
 
 }
