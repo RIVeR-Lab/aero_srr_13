@@ -81,7 +81,7 @@ void SyncStage::disparityImageCb(const stereo_msgs::DisparityImageConstPtr& msg)
 void SyncStage::gotImages()
 {
 
-	if(gotLeft_ && gotDisparity_ && (left_image_.header.stamp == right_image_.header.stamp))
+	if(gotLeft_ && gotRight_ && (left_image_.header.stamp == right_image_.header.stamp))
 	{
 		cv_bridge::CvImagePtr left,right;
 		try {
