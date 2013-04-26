@@ -80,18 +80,18 @@ void SyncStage::disparityImageCb(const stereo_msgs::DisparityImageConstPtr& msg)
 
 void SyncStage::gotImages()
 {
-	NODELET_INFO_STREAM("gotimages");
+//	NODELET_INFO_STREAM("gotimages");
 	if(gotLeft_ && gotRight_ && (left_image_.header.stamp == right_image_.header.stamp))
 	{
 		cv_bridge::CvImagePtr left,right;
 		try {
-			left = cv_bridge::toCvCopy(left_image_, enc::BGR8);
+			left = cv_bridge::toCvCopy(left_image_, enc::MONO8);
 		} catch (cv_bridge::Exception& e) {
 			NODELET_ERROR("cv_bridge exception: %s", e.what());
 			return;
 		}
 		try {
-			right = cv_bridge::toCvCopy(right_image_, enc::BGR8);
+			right = cv_bridge::toCvCopy(right_image_, enc::MONO8);
 		} catch (cv_bridge::Exception& e) {
 			NODELET_ERROR("cv_bridge exception: %s", e.what());
 			return;
