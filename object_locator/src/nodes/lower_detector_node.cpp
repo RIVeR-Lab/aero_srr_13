@@ -220,8 +220,8 @@ void ImageConverter::computeDisparity()
 	Mat_t dispn( heightL, widthL, CV_32F );
 
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 128;       //80        //256+80;
-	int SADSize = 9;				//10
+	int numDisp = 64;       //80        //256+80;
+	int SADSize = 5;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  -1	; // 1;
