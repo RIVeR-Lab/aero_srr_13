@@ -144,8 +144,8 @@ void ImageConverter::computeDisparity()
 //	processImage(right_image, mat_right, WINDOWRight);
 	Mat_t leftRect, img1_rect;
 	Mat_t rightRect, img2_rect;
-	leftRect  =  imread("/home/srr/ObjectDetectionData/Left.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-	rightRect = imread("/home/srr/ObjectDetectionData/Right.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+	leftRect  =  imread("/home/srr/ObjectDetectionData/Tskuba/Left.jpg", CV_LOAD_IMAGE_COLOR);
+	rightRect = imread("/home/srr/ObjectDetectionData/Tskuba/Right.jpg", CV_LOAD_IMAGE_COLOR);
 	cvtColor(leftRect,img1_rect, CV_BGR2GRAY);
 	cvtColor(rightRect,img2_rect, CV_BGR2GRAY);
 //	this->stereo_model.updateQ();
