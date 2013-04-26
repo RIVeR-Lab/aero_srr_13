@@ -105,8 +105,14 @@ void SyncStage::gotImages()
 		generateSyncMsg(msg);
 		this->sync_image_pub_.publish(msg);
 		gotLeft_ = false;
+		gotRight_ = false;
 		gotDisparity_ = false;
 	}
+	else
+	{
+		NODELET_ERROR("Not Synced");
+	}
+
 
 }
 
