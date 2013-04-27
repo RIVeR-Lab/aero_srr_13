@@ -345,8 +345,6 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 				//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
 			}
 		}
-		//Copy the current goal point to the occupancy grid
-		this->copyNextGoalToGrid(local_grid);
 
 
 		//Send the new local grid to the local planner
