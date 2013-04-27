@@ -231,7 +231,7 @@ void LocalPlanner::loadParam()
 
 	std::string p_rate_limit("rate_limit");
 	this->rate_limit_ = 5;
-	this->limiter_   = new TentacleRateLimiter(num_tent, this->rate_limit_);
+	this->limiter_   = new TentacleRateLimiter(num_tent-1, this->rate_limit_);
 }
 
 void LocalPlanner::regTopic()
@@ -425,12 +425,14 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			try
 			{
 				dist = working_grid.getGoalPoint().getVector3fMap().norm();
+				ROS_INFO_STREAM("Distance to Goal:"<<dist<<", goal <"<<working_grid.getGoalPoint().x<<","<<working_grid.getGoalPoint().y<<">");
 			}
 			catch(bool)
 			{
 				//means there was no goal, so we can never be at it
 				dist = std::numeric_limits<double>::infinity();
 			}
+			
 			if(dist>=(0.25/this->res_))
 			{
 				int speedset_idx = 0;
