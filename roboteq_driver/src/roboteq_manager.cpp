@@ -8,6 +8,7 @@
 #include <boost/thread/locks.hpp>
 #include <boost/foreach.hpp>
 #include "device_driver_base/driver_util.h"
+#include "device_driver_base/device_driver.h"
 
 static boost::mutex controller_mutex;
 roboteq_driver::RoboteqMotorController* controller;

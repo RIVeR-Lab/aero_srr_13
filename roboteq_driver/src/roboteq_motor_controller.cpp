@@ -6,6 +6,8 @@ using namespace device_driver;
 
 namespace roboteq_driver{
 
+#define MISSING_VALUE -1024
+
 RoboteqMotorController::RoboteqMotorController(double maxRPM1,
 					       double maxRPM2,
 					       int ppr1,
@@ -62,8 +64,11 @@ void RoboteqMotorController::open(std::string port){
 
 	//Initialize to initial values
 	motor_mode1_ = motor_mode2_ = MOTOR_MODE_UNDEFINED;//make sure to reset local values
-	setMotorMode(1, MOTOR_MODE_POWER);
-	setMotorMode(2, MOTOR_MODE_POWER);
+	setMotorMode(1, MOTOR_MODE_RPM);
+	setMotorMode(2, MOTOR_MODE_RPM);
+	
+	saveToEEPROM();
+
 	setPower(1, 0);
 	setPower(2, 0);
 }
@@ -93,6 +98,10 @@ void RoboteqMotorController::setCommand(int commandItem, int index, int value){
 			DRIVER_EXCEPT(Exception, "Failed to set device command.");
 	}
 }
+void RoboteqMotorController::setCommand(int commandItem){
+  setCommand(commandItem, MISSING_VALUE, MISSING_VALUE);
+}
+
 void RoboteqMotorController::setConfig(int configItem, int index, int value){
 	int status = device_.SetConfig(configItem, index, value);
 	if(status!=RQ_SUCCESS){
@@ -164,6 +173,9 @@ void RoboteqMotorController::getValue(int operatingItem, int index, int& value){
  */
 void RoboteqMotorController::setSerialWatchdog(int time){
 	setConfig(_RWD, time);
+}
+  void RoboteqMotorController::saveToEEPROM(){
+  setCommand(_EES);
 }
 
 
