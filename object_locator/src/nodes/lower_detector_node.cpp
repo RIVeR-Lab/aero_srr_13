@@ -37,8 +37,8 @@ ImageConverter::ImageConverter()
 //	image_left_  = it_.subscribeCamera("/stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
 //	image_right_ = it_.subscribeCamera("/stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
-	left_rect_sub_ = nh_.subscribe("/stereo/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
-	right_rect_sub_ = nh_.subscribe("/stereo/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
+	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
+	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
 
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
