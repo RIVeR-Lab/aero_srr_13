@@ -406,13 +406,16 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 
 void GlobalPlanner::carrotToPath(nav_msgs::Path& path) const
 {
+	Point path_point;
+	const PointConverter& converter = this->global_map_->getConverter();
 	BOOST_FOREACH(std::deque<Point>::value_type point, this->carrot_path_)
 	{
+		converter.convertToEng(point, path_point);
 		geometry_msgs::PoseStamped path_pose;
 		path_pose.header             = path.header;
-		path_pose.pose.position.x    = point.x;
-		path_pose.pose.position.y    = point.y;
-		path_pose.pose.position.z    = point.z;
+		path_pose.pose.position.x    = path_point.x;
+		path_pose.pose.position.y    = path_point.y;
+		path_pose.pose.position.z    = path_point.z;
 		path_pose.pose.orientation.w = 1;
 		path.poses.push_back(path_pose);
 	}
