@@ -173,7 +173,7 @@ public:
 	virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map);
 	virtual bool setCollision(collision_func_& collision_checker);
 	virtual bool allowsPartialPath();
-	virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::queue<aero_path_planning::Point>& result_path);
+	virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::deque<aero_path_planning::Point>& result_path);
 	virtual bool getPlanningType(std::string& type) const;
 
 	AStarCarrot& operator=(AStarCarrot const &copy);
@@ -203,7 +203,7 @@ private:
 
 	bool calcNeighbors(const Point& point, std::vector<Point>& neighbors) const;
 
-	void buildSolutionPath(const Node_t& goal_node, std::queue<Point>& path) const;
+	void buildSolutionPath(const Node_t& goal_node, std::deque<Point>& path) const;
 
 	bool canSearch() const;
 

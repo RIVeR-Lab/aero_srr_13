@@ -15,6 +15,7 @@
 #include<tf/transform_listener.h>
 #include<sensor_msgs/PointCloud2.h>
 #include<nav_msgs/Odometry.h>
+#include<nav_msgs/Path.h>
 
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/utilities/AeroPathPlanning.h>
@@ -146,6 +147,13 @@ private:
 	 */
 	bool checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const;
 
+	/**
+	 * @author Adam Panzica
+	 * @brief  converts a carrot path to a series of poses
+	 * @param [out] path The path to fill
+	 */
+	void carrotToPath(nav_msgs::Path& path) const;
+
 	State       state_;
 
 	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
@@ -179,7 +187,7 @@ private:
 	CarrotPathFinder::collision_func_ cf_;            ///The collision function
 	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy
 	OccupancyGridPtr                  global_map_;    ///The global OccupancyGrid
-	std::queue<Point>                     carrot_path_;   ///The current set of points on the global path
+	std::deque<Point>                     carrot_path_;   ///The current set of points on the global path
 	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in grid units_
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
@@ -188,7 +196,8 @@ private:
 	ros::Subscriber       joy_sub_;       ///Subscriber for joy messages
 	ros::Publisher        local_occ_pub_; ///Publisher to send OccupancyGrids to the local planner
 	ros::Publisher        goal_pub_;      ///Publisher to visualize the global goal
-	ros::Publisher        map_viz_pub_;   ///Publisher to vizualizing the global map
+	ros::Publisher        map_viz_pub_;   ///Publisher to visualizing the global map
+	ros::Publisher        path_pub_;      ///Publisher to visualize the global path
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
 	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state

@@ -17,9 +17,10 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																														nh_(nh),
-																														p_nh_(p_nh),
-																														occupancy_buffer_(2)
+																																		nh_(nh),
+																																		p_nh_(p_nh),
+																																		occupancy_buffer_(2),
+limiter_(NULL)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -227,6 +228,10 @@ void LocalPlanner::loadParam()
 	this->origin_.y = y_ori;
 	this->origin_.z = z_ori;
 	this->tentacles_ = TentacleGeneratorPtr(new TentacleGenerator(min_tent, min_speed,max_speed,num_speed_set, num_tent, exp_fact, this->res_, this->x_dim_, this->y_dim_));
+
+	std::string p_rate_limit("rate_limit");
+	this->rate_limit_ = 5;
+	this->limiter_   = new TentacleRateLimiter(num_tent, this->rate_limit_);
 }
 
 void LocalPlanner::regTopic()
@@ -238,6 +243,7 @@ void LocalPlanner::regTopic()
 	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
 	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
 	this->occ_viz_pub_ = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/local/occupancy_viz",2);
+	this->goal_sub_  = this->nh_.subscribe("/aero/global/goal", 2, &LocalPlanner::goalCB, this);
 
 	std::string software_stop_topic("aero/software_stop");
 
@@ -251,7 +257,16 @@ void LocalPlanner::regTimers()
 	this->plan_timer_= nh_.createTimer(ros::Duration(1.0/20.0), &LocalPlanner::planningCB, this);
 }
 
-LocalPlanner::~LocalPlanner(){};
+LocalPlanner::~LocalPlanner()
+{
+	delete this->limiter_;
+};
+
+
+void LocalPlanner::goalCB(const geometry_msgs::PoseStampedConstPtr& message)
+{
+	this->global_goal_ = message;
+}
 
 bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx)
 {
@@ -399,17 +414,47 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				}
 			}
 
+			//Apply a goal if we have one:
+			this->applyGoal(working_grid);
+
+			//Visualize the grid
 			this->visualizeOcc(working_grid);
 
-			int speedset_idx = 0;
-			int tentacle_idx = 0;
-
-			//select the best tentacle
-			this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
-			//Update the current radius and velocity
-			this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
-			this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
-			visualizeTentacle(speedset_idx, tentacle_idx);
+			//Check to see if we're at the goal
+			double dist;
+			try
+			{
+				dist = working_grid.getGoalPoint().getVector3fMap().norm();
+				ROS_INFO_STREAM_THROTTLE(0.25, "Distance to Local Goal: "<<dist);
+			}
+			catch(bool)
+			{
+				//means there was no goal, so we can never be at it
+				dist = std::numeric_limits<double>::infinity();
+			}
+			if(dist>=(0.25/this->res_))
+			{
+				int speedset_idx = 0;
+				int tentacle_idx = 0;
+				//select the best tentacle
+				this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
+				//Limit rate of tentacle change
+				tentacle_idx   = this->limiter_->nextTentacle(tentacle_idx);
+				//Update the current radius and velocity
+				this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
+				this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
+				visualizeTentacle(speedset_idx, tentacle_idx);
+			}
+			else
+			{
+				this->set_rad_ = 0;
+				this->set_vel_ = 0;
+			}
+		}
+		else
+		{
+			this->set_vel_ = 0;
+			this->set_rad_ = 0;
 		}
 
 	}
@@ -417,6 +462,32 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 	{
 		this->set_vel_ = 0;
 		this->set_rad_ = 0;
+	}
+}
+
+void LocalPlanner::applyGoal(OccupancyGrid& grid) const
+{
+	geometry_msgs::PoseStamped local_goal;
+	if(this->global_goal_!=geometry_msgs::PoseStampedConstPtr())
+	{
+		try
+		{
+			PointConverter converter(this->res_);
+			this->transformer_.waitForTransform(grid.getFrameId(), this->global_goal_->header.frame_id, grid.getGrid().header.stamp, ros::Duration(1.0));
+			this->transformer_.transformPose(grid.getFrameId(), grid.getGrid().header.stamp, *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
+			Point goal_point;
+			goal_point.x = local_goal.pose.position.x;
+			goal_point.y = local_goal.pose.position.y;
+			goal_point.z = 0;
+			converter.convertToGrid(goal_point, goal_point);
+			ROS_INFO_STREAM("Applying Goal Point <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
+			grid.setGoalPoint(goal_point);
+
+		}
+		catch(std::exception& e)
+		{
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
 	}
 }
 
@@ -541,6 +612,18 @@ void LocalPlanner::drCB(const LocalPlannerConfig& config, uint32_t levels)
 	this->unkn_weight_ = config.unkown_weight;
 	this->diff_weight_ = config.difficult_weight;
 	this->trav_weight_ = config.traversed_weight;
+	if(this->limiter_!=NULL)
+	{
+		if(config.rate_limit>0)
+		{
+			this->limiter_->disableLimit(false);
+			this->rate_limit_  = config.rate_limit;
+		}
+		else
+		{
+			this->limiter_->disableLimit(true);
+		}
+	}
 }
 
 

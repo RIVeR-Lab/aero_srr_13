@@ -16,11 +16,14 @@
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
 #include <dynamic_reconfigure/server.h>
+#include <tf/transform_listener.h>
+#include <geometry_msgs/PoseStamped.h>
 //********************** LOCAL  DEPENDANCIES **********************//
 #include <aero_path_planning/utilities/AeroPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
 #include <aero_srr_msgs/AeroState.h>
 #include <aero_path_planning/LocalPlannerConfig.h>
+#include <aero_path_planning/utilities/TentacleRateLimiter.h>
 
 namespace aero_path_planning
 {
@@ -43,6 +46,7 @@ public:
 private:
 
 	int		platform_;		    ///flat marking what platform we're running on
+	int     rate_limit_;		///Rate-change limit on tentacle selection
 	bool	should_plan_;	    ///Flag for signaling if the local planner should be running
 	bool    tentacle_mode_;     ///Flag for signalling if the local planner should be running in tetacle mode
 
@@ -67,6 +71,7 @@ private:
 
 	ros::NodeHandle nh_;	    ///Node handle for publishing/subscribing to topics
 	ros::NodeHandle p_nh_;      ///Nodes handle to load private params
+	ros::Subscriber goal_sub_;  ///Subscrier to the current global goal
 	ros::Subscriber pc_sub_;    ///Subscriber to the ROS topic to receive new occupancy grid data over
 	ros::Subscriber state_sub_; ///Subscriber to the ROS topic to receive AeroState messages
 	ros::Subscriber joy_sub_;   ///Subscriber to the ROS topic to receive Joy messages
@@ -78,15 +83,26 @@ private:
 	ros::Timer      vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
 	ros::Timer      plan_timer_;///Timer that will attempt to select a new tentacle at a constant rate
 
+	tf::TransformListener transformer_; ///TF access
+
 	dynamic_reconfigure::Server<LocalPlannerConfig> dr_server_; ///Dynamic reconfigure server
 
 	aero_path_planning::Point	origin_;	///The origin to use for the occupancy grids
 	TentacleGeneratorPtr tentacles_;	///Pointer to the tentacle generator which contains the tentacles to use for planning
+	TentacleRateLimiter*  limiter_;      ///Limiter for clamping the rate-change between tentacle selections
 
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
 	OccupancyGrid working_grid_;                                ///The last new occupancy grid recieved
 	PointCloudPtr lidar_patch_;                                 ///The last patch of LIDAR data recieved
+	geometry_msgs::PoseStampedConstPtr global_goal_;			///The most reciently recieved global goal
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Callback for recieving a new goal
+	 * @param message
+	 */
+	void goalCB(const geometry_msgs::PoseStampedConstPtr& message);
 
 	/**
 	 * @author	Adam Panzica
@@ -226,6 +242,13 @@ private:
 	 * @return True if in-bounds on the local grid, else false
 	 */
 	bool boundsCheck(const Point& point) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Applies a global goal to the local frame
+	 * @param in] grid The gird to apply the goal to
+	 */
+	void applyGoal(OccupancyGrid& grid) const;
 
 };
 
