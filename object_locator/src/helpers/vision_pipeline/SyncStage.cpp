@@ -24,8 +24,8 @@ void SyncStage::onInit()
 void SyncStage::loadParams()
 {
 	this->sync_input_topic_  ="/stereo_camera/stereo_sync";
-	this->left_input_topic_  ="/stereo_camera/left/image_rect";
-	this->right_input_topic_ ="/stereo_camera/right/image_rect";
+	this->left_input_topic_  ="/stereo/left/image_raw";
+	this->right_input_topic_ ="/stereo/right/image_raw";
 	this->disparity_input_topic_ ="/stereo_camera/disparity";
 	this->output_topic_="disparity_stage/disparity";
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
@@ -73,7 +73,7 @@ void SyncStage::rightImageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 void SyncStage::disparityImageCb(const stereo_msgs::DisparityImageConstPtr& msg)
 {
 	disparity_image_     = *msg;
-//	disparity_image_.encoding
+	NODELET_INFO_STREAM("encoding = " << disparity_image_.image.encoding);
 	gotDisparity_ = true;
 	gotImages();
 }
@@ -81,7 +81,7 @@ void SyncStage::disparityImageCb(const stereo_msgs::DisparityImageConstPtr& msg)
 void SyncStage::gotImages()
 {
 //	NODELET_INFO_STREAM("gotimages");
-	if(gotLeft_ && gotRight_ && (left_image_.header.stamp == right_image_.header.stamp))
+	if(gotLeft_ && gotRight_ && gotDisparity_ )
 	{
 		cv_bridge::CvImagePtr left,right;
 		try {
