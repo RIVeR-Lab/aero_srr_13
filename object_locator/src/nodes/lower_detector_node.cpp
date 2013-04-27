@@ -34,8 +34,8 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
 //	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
@@ -152,8 +152,8 @@ void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const s
 
 void ImageConverter::computeDisparity()
 {
-//	processImage(left_image, mat_left, WINDOWLeft);
-//	processImage(right_image, mat_right, WINDOWRight);
+	processImage(left_image, mat_left, WINDOWLeft);
+	processImage(right_image, mat_right, WINDOWRight);
 //	ROS_INFO_STREAM("Finished acquiring images");
 	Mat_t leftRect, img1_rect;
 	Mat_t rightRect,img2_rect;
@@ -403,7 +403,7 @@ void ImageConverter::buildMsg(const tf::Point& point, geometry_msgs::PoseStamped
 
 void ImageConverter::computeDisparityCb(const ros::TimerEvent& event)
 {
-	if (gotLeft && gotRight)
+	if (gotLeft && gotRight && (left_image.encoding ==right_image.encoding))
 	{
 		computeDisparity();
 		gotLeft = false;
