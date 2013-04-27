@@ -296,23 +296,23 @@ bool AStarCarrot::calcNeighbors(const Point& point, std::vector<Point>& neightbo
 	return true;
 }
 
-void AStarCarrot::buildSolutionPath(const Node_t& goal_node, std::queue<Point>& path) const
+void AStarCarrot::buildSolutionPath(const Node_t& goal_node, std::deque<Point>& path) const
 {
-	std::vector<Point> temp_path;
-	temp_path.push_back(goal_node.getLocation());
+
+	path.push_front(goal_node.getLocation());
 	NodePtr_t path_node(goal_node.getParent());
 
 	while(path_node->getParent() != NodePtr_t())
 	{
-		temp_path.push_back(path_node->getLocation());
+		path.push_front(path_node->getLocation());
 		path_node = path_node->getParent();
 	}
-	temp_path.push_back(path_node->getLocation());
+	path.push_front(path_node->getLocation());
 
-	for(int i=temp_path.size()-1; i>0; i--)
-	{
-		path.push(temp_path.at(i));
-	}
+//	for(int i=temp_path.size()-1; i>0; i--)
+//	{
+//		path.push_back(temp_path.at(i));
+//	}
 
 }
 
@@ -342,7 +342,7 @@ bool AStarCarrot::openSetContains(const NodePtr_t& node, const aero_path_plannin
 	return contains;
 }
 
-bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros::Duration& timeout, std::queue<Point>& result_path)
+bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros::Duration& timeout, std::deque<Point>& result_path)
 {
 	bool success    = false;
 

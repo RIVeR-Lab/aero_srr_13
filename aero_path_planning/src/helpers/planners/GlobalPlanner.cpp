@@ -199,8 +199,9 @@ void GlobalPlanner::registerTopics()
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
 	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
-	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2);
+	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2, true);
 	this->goal_pub_      = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2, true);
+	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
 }
 
 void GlobalPlanner::registerTimers()
@@ -295,7 +296,7 @@ void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
 		double dist = pcl::distances::l2(current_point.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
 		if(std::abs(dist)<this->path_threshold_)
 		{
-			this->carrot_path_.pop();
+			this->carrot_path_.pop_front();
 		}
 	}
 }
@@ -372,7 +373,7 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
-	this->carrot_path_ = std::queue<Point>();
+	this->carrot_path_ = std::deque<Point>();
 	Point start_point;
 	start_point.x = 0;
 	start_point.y = 0;
@@ -387,6 +388,11 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 		this->path_planner_->setCarrotDelta(10);
 		this->path_planner_->setSearchMap(*this->global_map_);
 		this->path_planner_->search(start_point, goal_point, this->plan_timerout_, this->carrot_path_);
+		nav_msgs::PathPtr path(new nav_msgs::Path());
+		path->header.frame_id = this->global_frame_;
+		path->header.stamp    = ros::Time::now();
+		this->carrotToPath(*path);
+		this->path_pub_.publish(path);
 	}
 	else
 	{
@@ -396,6 +402,20 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 	OccupancyGridMsgPtr viz_message(new OccupancyGridMsg());
 	this->global_map_->generateMessage(*viz_message);
 	this->map_viz_pub_.publish(viz_message);
+}
+
+void GlobalPlanner::carrotToPath(nav_msgs::Path& path) const
+{
+	BOOST_FOREACH(std::deque<Point>::value_type point, this->carrot_path_)
+	{
+		geometry_msgs::PoseStamped path_pose;
+		path_pose.header             = path.header;
+		path_pose.pose.position.x    = point.x;
+		path_pose.pose.position.y    = point.y;
+		path_pose.pose.position.z    = point.z;
+		path_pose.pose.orientation.w = 1;
+		path.poses.push_back(path_pose);
+	}
 }
 
 bool GlobalPlanner::checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const
