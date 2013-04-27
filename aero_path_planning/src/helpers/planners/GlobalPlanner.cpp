@@ -300,8 +300,8 @@ void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPt
 		current_point.y = trans_point_m.point.y;
 		current_point.z = 0;
 		this->global_map_->getConverter().convertToEng(current_point, this->current_point_);
-
 		double dist = pcl::distances::l2(this->current_point_.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
+		ROS_INFO_STREAM_THROTTLE(1, "At position <"<<this->current_point_.x<<","<<this->current_point_.y<<">, Goal Position <"<<carrot_path_.front().x<<","<<carrot_path_.front().y<<">, dist="<<dist);
 		if(std::abs(dist)<this->path_threshold_)
 		{
 			this->carrot_path_.pop_front();

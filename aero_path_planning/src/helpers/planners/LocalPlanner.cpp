@@ -425,7 +425,6 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			try
 			{
 				dist = working_grid.getGoalPoint().getVector3fMap().norm();
-				ROS_INFO_STREAM_THROTTLE(0.25, "Distance to Local Goal: "<<dist);
 			}
 			catch(bool)
 			{
@@ -480,7 +479,7 @@ void LocalPlanner::applyGoal(OccupancyGrid& grid) const
 			goal_point.y = local_goal.pose.position.y;
 			goal_point.z = 0;
 			converter.convertToGrid(goal_point, goal_point);
-			ROS_INFO_STREAM("Applying Goal Point <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
+
 			grid.setGoalPoint(goal_point);
 
 		}
