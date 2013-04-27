@@ -363,9 +363,11 @@ void GlobalPlanner::updateGoal() const
 	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
 	if(!this->carrot_path_.empty())
 	{
+		Point goal_point;
+		this->global_map_->getConverter().convertToEng(this->carrot_path_.front(), goal_point);
 		geometry_msgs::PointStamped goal_point_m;
-		goal_point_m.point.x = this->carrot_path_.front().x;
-		goal_point_m.point.y = this->carrot_path_.front().y;
+		goal_point_m.point.x = goal_point.x;
+		goal_point_m.point.y = goal_point.y;
 		goal_point_m.point.z = 0;
 		goal_point_m.header.frame_id = this->global_frame_;
 		goal_point_m.header.stamp    = ros::Time::now();
