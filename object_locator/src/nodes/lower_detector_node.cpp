@@ -34,8 +34,8 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_  = it_.subscribeCamera("/stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
 //	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
@@ -329,7 +329,7 @@ void ImageConverter::computeDisparity()
 	detection_list_.clear();
 //	cout << "Shrinking Det/ection manager list" <<endl;
 	sherlock.shrink();
-//	cout << "Finished shrinking list" <<endl;
+//	cout << "Finished shrinking list" <<endl;96
 	double confidence;
 	object_type type;
 	if(sherlock.getDetection(detection, type, confidence))
