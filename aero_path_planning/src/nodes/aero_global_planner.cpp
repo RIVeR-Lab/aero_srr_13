@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 	goal_point.x  = 90;
 	goal_point.y  = 0;
 	goal_point.z  = 0;
-	std::deque<Point> path;
+	std::queue<Point> path;
 	ros::Duration timeout(1);
 
 	while(ros::ok())
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
 		while(path.size()!=0)
 		{
 			path_cloud.push_back(path.front());
-			path.pop_front();
+			path.pop();
 		}
 
 		BOOST_FOREACH(Point point, path_cloud)

@@ -11,7 +11,6 @@
 #include <list>
 #include <iostream>
 #include <boost/unordered_map.hpp>
-#include <pcl/registration/distances.h>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/planning_strategies/AStarCarrot.h>
 //***********    NAMESPACES     ****************//
@@ -297,28 +296,23 @@ bool AStarCarrot::calcNeighbors(const Point& point, std::vector<Point>& neightbo
 	return true;
 }
 
-void AStarCarrot::buildSolutionPath(const Node_t& goal_node, std::deque<Point>& path) const
+void AStarCarrot::buildSolutionPath(const Node_t& goal_node, std::queue<Point>& path) const
 {
-
-	path.push_front(goal_node.getLocation());
+	std::vector<Point> temp_path;
+	temp_path.push_back(goal_node.getLocation());
 	NodePtr_t path_node(goal_node.getParent());
-	Point lastPoint = goal_node.getLocation();
 
 	while(path_node->getParent() != NodePtr_t())
 	{
-		if(pcl::distances::l2(path_node->getLocation().getVector4fMap(), lastPoint.getVector4fMap())>this->delta_)
-		{
-			path.push_front(path_node->getLocation());
-			lastPoint = path_node->getLocation();
-		}
+		temp_path.push_back(path_node->getLocation());
 		path_node = path_node->getParent();
 	}
-	path.push_front(path_node->getLocation());
+	temp_path.push_back(path_node->getLocation());
 
-//	for(int i=temp_path.size()-1; i>0; i--)
-//	{
-//		path.push_back(temp_path.at(i));
-//	}
+	for(int i=temp_path.size()-1; i>0; i--)
+	{
+		path.push(temp_path.at(i));
+	}
 
 }
 
@@ -348,7 +342,7 @@ bool AStarCarrot::openSetContains(const NodePtr_t& node, const aero_path_plannin
 	return contains;
 }
 
-bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros::Duration& timeout, std::deque<Point>& result_path)
+bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros::Duration& timeout, std::queue<Point>& result_path)
 {
 	bool success    = false;
 
@@ -383,7 +377,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		bool os_empty  = false;
 		while(!success&&!timeout_c&&!os_empty)
 		{
-			if(closed_set.size()%10000 == 0)
+			if(closed_set.size()%50 == 0)
 			{
 				ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
 			}

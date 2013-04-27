@@ -70,7 +70,7 @@ namespace aero_laser_filter
 		this->crop_top_right_.y = temp_y;
 		this->crop_top_right_.z = temp_z;
 
-		this->robot_size_    = 1.0;
+		this->robot_size_    = .5;
 		this->inflation_res_ = 0.05;
 		this->p_nh_.getParam("robot_size", this->robot_size_);
 		this->p_nh_.getParam("inflation_res", this->inflation_res_);

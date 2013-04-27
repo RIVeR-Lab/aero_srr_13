@@ -8,7 +8,7 @@
 
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <gtest/gtest.h>
-#include<deque>
+#include<queue>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/planning_strategies/AStarCarrot.h>
 //***********    NAMESPACES     ****************//
@@ -22,11 +22,11 @@ namespace asu = aero_path_planning::astar_utilities;
 namespace app = aero_path_planning;
 
 template<class T>
-void clear_deque(std::deque<T>& deque)
+void clear_queue(std::queue<T>& queue)
 {
-	while(!deque.empty())
+	while(!queue.empty())
 	{
-		deque.pop_front();
+		queue.pop();
 	}
 }
 
@@ -193,7 +193,7 @@ TEST_F(AStarCarrotTestFixture, testAStarCarrot)
 	std::string frame_id("/robot");
 	app::OccupancyGrid test_map(50, 50, .1, zero_point_, app::FREE_LOW_COST, frame_id);
 	app::AStarCarrot test_planner;
-	std::deque<app::Point> result_path;
+	std::queue<app::Point> result_path;
 	ros::Duration timeout(10);
 
 	EXPECT_FALSE(test_planner.search(zero_point_, goal_point_, timeout , result_path));
@@ -204,7 +204,7 @@ TEST_F(AStarCarrotTestFixture, testAStarCarrot)
 	EXPECT_TRUE(test_planner.setSearchMap(test_map));
 
 	//Search an empty map. Should create a straight path from start to goal
-	clear_deque<app::Point>(result_path);
+	clear_queue<app::Point>(result_path);
 	EXPECT_TRUE(test_planner.search(zero_point_, goal_point_, timeout , result_path));
 	EXPECT_TRUE(result_path.size()>0);
 	EXPECT_EQ(zero_point_.getVector4fMap(), result_path.front().getVector4fMap())<<PRINT_EXPECT_POINT(zero_point_, result_path.front());

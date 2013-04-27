@@ -6,7 +6,6 @@
 	<arg name="aero/velocity_command_topic"	default="aero/velocity_command_topic" />
 	<arg name="local_lidar_topic"           default="aero/lidar/local" />
 	<arg name="global_lidar_topic"          default="aero/lidar/global" />
-	<arg name="odometry_topic"		default="aero/odom"/>
 	
 
 	<!-- ********************INCLUDES******************** -->
@@ -16,7 +15,6 @@
 		<arg name="aero/platform"               value="$(arg aero/platform)" />
 		<arg name="aero/velocity_command_topic"	value="$(arg aero/velocity_command_topic)" />
 		<arg name="aero/lidar/local"     		value="$(arg local_lidar_topic)" />
-	    	<arg name="aero/lidar/global"           value="$(arg global_lidar_topic)" />
-		<arg name="aero/odometry"               value="$(arg odometry_topic)"/>
+	    <arg name="aero/lidar/global"           value="$(arg global_lidar_topic)" />
 	</include>
 </launch>
