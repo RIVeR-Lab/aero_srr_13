@@ -295,9 +295,11 @@ void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPt
 
 		//Check the distance between the current robot location and the next path goal point.
 		//If within threshold, pop the path goal point
-		this->current_point_.x = trans_point_m.point.x;
-		this->current_point_.y = trans_point_m.point.y;
-		this->current_point_.z = 0;
+		Point current_point;
+		current_point.x = trans_point_m.point.x;
+		current_point.y = trans_point_m.point.y;
+		current_point.z = 0;
+		this->global_map_->getConverter().convertToEng(current_point, this->current_point_);
 
 		double dist = pcl::distances::l2(this->current_point_.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
 		if(std::abs(dist)<this->path_threshold_)

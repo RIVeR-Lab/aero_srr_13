@@ -383,7 +383,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		bool os_empty  = false;
 		while(!success&&!timeout_c&&!os_empty)
 		{
-			if(closed_set.size()%50 == 0)
+			if(closed_set.size()%10000 == 0)
 			{
 				ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
 			}
