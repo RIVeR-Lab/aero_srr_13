@@ -124,6 +124,7 @@ void ImageConverter::rectLeftCb(const sensor_msgs::ImageConstPtr& msg)
 {
 	left_image = *msg;
 	gotLeft = true;
+	detectAndDisplay(left_image,mat_left,WINDOWLeft);
 }
 
 void ImageConverter::rectRightCb(const sensor_msgs::ImageConstPtr& msg)
@@ -136,7 +137,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_image = *msg;
 	left_info  = *cam_info;
 	gotLeft = true;
-//	detectAndDisplay(left_image,mat_left,WINDOWLeft);
+	detectAndDisplay(left_image,mat_left,WINDOWLeft);
 //		saveImage(left_image, mat_left,0);
 
 }
@@ -152,8 +153,8 @@ void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const s
 
 void ImageConverter::computeDisparity()
 {
-//	processImage(left_image, mat_left, WINDOWLeft);
-//	processImage(right_image, mat_right, WINDOWRight);
+	processImage(left_image, mat_left, WINDOWLeft);
+	processImage(right_image, mat_right, WINDOWRight);
 //	ROS_INFO_STREAM("Finished acquiring images");
 	Mat_t leftRect, img1_rect;
 	Mat_t rightRect,img2_rect;
@@ -164,8 +165,8 @@ void ImageConverter::computeDisparity()
 	cvtColor(mat_left->image,img1_rect, CV_BGR2GRAY);
 	cvtColor(mat_right->image,img2_rect, CV_BGR2GRAY);
 //	this->stereo_model.updateQ();
-/**this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
-	//	  cv::StereoVar stereo;
+this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
+/**	//	  cv::StereoVar stereo;
 	//	  stereo.maxDisp = 1.5;
 	//	  stereo.minDisp = .3;
 	//	  stereo(this->mat_left->image, this->mat_right->image, this->disparity);
@@ -235,7 +236,7 @@ void ImageConverter::computeDisparity()
 	Mat_t dispn( heightL, widthL, CV_32F );
 
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 96;       //80        //256+80;
+	int numDisp = 192;       //80        //256+80;
 	int SADSize = 9;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
@@ -318,7 +319,7 @@ void ImageConverter::computeDisparity()
 			optimus_prime.waitForTransform("/world", camera_point.header.frame_id, ros::Time(0), ros::Duration(1.0));
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
-			tf::pointMsgToTF(world_point.point,detection);
+			tf::pointMsgToTF(camera_point.point,detection);
 			sherlock.addDetection(detection, detection_list_.at(i)->second);
 //			cout << "Added detection to manager" <<endl;
 		}
@@ -364,10 +365,10 @@ void ImageConverter::computeDisparity()
 
 //	cmapped = gray2bgr(vdisp1);
 
-	cv::imshow(WINDOWLeft, img1_rect );
-	cv::waitKey(3);
-	cv::imshow(WINDOWRight, img2_rect );
-		cv::waitKey(3);
+//	cv::imshow(WINDOWLeft, img1_rect );
+//	cv::waitKey(3);
+//	cv::imshow(WINDOWRight, img2_rect );
+//		cv::waitKey(3);
 
 
 }
