@@ -330,7 +330,7 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 	detection_list_.clear();
 //	cout << "Shrinking Det/ection manager list" <<endl;
 	sherlock.shrink();
-//	cout << "Finished shrinking list" <<endl;
+//	cout << "Finished shrinking list" <<endl;96
 	double confidence;
 	object_type type;
 	if(sherlock.getDetection(detection, type, confidence))
@@ -404,7 +404,7 @@ void ImageConverter::buildMsg(const tf::Point& point, geometry_msgs::PoseStamped
 
 void ImageConverter::computeDisparityCb(const ros::TimerEvent& event)
 {
-	if (gotLeft && gotRight)
+	if (gotLeft && gotRight && (left_image.encoding ==right_image.encoding))
 	{
 		computeDisparity();
 		gotLeft = false;
