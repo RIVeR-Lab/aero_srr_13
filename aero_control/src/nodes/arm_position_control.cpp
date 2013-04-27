@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : arm_velocity_control.cpp
+// Name        : arm_position_control.cpp
 // Author      : 
 // Version     :
 // Copyright   : Your copyright notice
@@ -7,7 +7,7 @@
 //============================================================================
 
 /**
- * @file arm_velocity_control.cpp
+ * @file arm_position_control.cpp
  *
  * @date   Feb 20, 2013
  * @author parallels
@@ -15,18 +15,18 @@
  */
 
 //License File
-#include <aero_control/arm_velocity_control.h>
+#include <aero_control/arm_position_control.h>
 
 using namespace aero_control;
 
-Velocity_Controller::Velocity_Controller(ros::NodeHandle nh, std::string DesiredPosition, std::string JointVelocity, std::string JointAngles, std::string CurrentPosition) {
+ArmPositionController::ArmPositionController(ros::NodeHandle nh, std::string DesiredPosition, std::string JointVelocity, std::string JointAngles, std::string CurrentPosition) {
 
-	this->desired_position_sub = nh.subscribe(DesiredPosition, 1, &Velocity_Controller::DesiredPositionMSG, this);
-	this->current_position_sub = nh.subscribe(CurrentPosition, 1, &Velocity_Controller::CurrentPositionMSG, this);
+	this->desired_position_sub = nh.subscribe(DesiredPosition, 1, &ArmPositionController::DesiredPositionMSG, this);
+	this->current_position_sub = nh.subscribe(CurrentPosition, 1, &ArmPositionController::CurrentPositionMSG, this);
 
 	this->joint_velocity_pub = nh.advertise<geometry_msgs::TwistStamped>(JointVelocity, 2);
 
-	this->joint_angles_sub = nh.subscribe(JointAngles, 1, &Velocity_Controller::JointAnglesMSG, this);
+	this->joint_angles_sub = nh.subscribe(JointAngles, 1, &ArmPositionController::JointAnglesMSG, this);
 
 	last_position_time = ros::Time().now();
 	running = false;
@@ -42,11 +42,10 @@ Velocity_Controller::Velocity_Controller(ros::NodeHandle nh, std::string Desired
 	linear_gain = 2;
 	rotational_gain = 1;
 
-	f = boost::bind(&Velocity_Controller::callback, this, _1, _2);
-	server.setCallback(f);
+
 }
 
-Velocity_Controller::~Velocity_Controller() {
+ArmPositionController::~ArmPositionController() {
 	delete PID_X;
 	delete PID_Y;
 	delete PID_Z;
@@ -56,17 +55,9 @@ Velocity_Controller::~Velocity_Controller() {
 
 }
 
-void Velocity_Controller::callback(aero_control::AeroArmVelocityConfig &config, uint32_t level) {
 
-//	ROS_INFO("Reconfigure Request: %f %f %f", config.linear_P, config.linear_I, config.linear_D);
-//	PID_Roll->SetPID(config.linear_P, config.linear_I, config.linear_D);
-//	PID_Pitch->SetPID(config.linear_P, config.linear_I, config.linear_D);
-//	PID_Yaw->SetPID(config.linear_P, config.linear_I, config.linear_D);
-//	rotational_gain = config.gain;
 
-}
-
-void Velocity_Controller::CurrentPositionMSG(const geometry_msgs::PoseStampedConstPtr& current_pose) {
+void ArmPositionController::CurrentPositionMSG(const geometry_msgs::PoseStampedConstPtr& current_pose) {
 	geometry_msgs::PoseStamped current_pose_api;
 
 	tf_listener.waitForTransform("/jaco_api_origin", current_pose->header.frame_id, current_pose->header.stamp, ros::Duration(1.0));
@@ -87,7 +78,7 @@ void Velocity_Controller::CurrentPositionMSG(const geometry_msgs::PoseStampedCon
 	UpdateError();
 
 }
-void Velocity_Controller::DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose) {
+void ArmPositionController::DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose) {
 	geometry_msgs::PoseStamped desired_pose_msg;
 
 	tf_listener.waitForTransform("/jaco_api_origin", object_pose->header.frame_id, object_pose->header.stamp, ros::Duration(0.1));
@@ -119,7 +110,7 @@ void Velocity_Controller::DesiredPositionMSG(const geometry_msgs::PoseStampedCon
 
 }
 
-void Velocity_Controller::UpdateCurrentPose(void) {
+void ArmPositionController::UpdateCurrentPose(void) {
 	tf::Stamped<tf::Pose> end_effector_pose;
 	end_effector_pose.setOrigin(tf::Vector3(0, 0, 0));
 	end_effector_pose.setRotation(tf::Quaternion(0, 0, 0, 1));
@@ -138,11 +129,11 @@ void Velocity_Controller::UpdateCurrentPose(void) {
 
 	tf::Matrix3x3 current_rotation(current_StampPose.getRotation());
 
-	current_rotation.getRPY(current_pos.roll, current_pos.pitch, current_pos.yaw);
+	current_rotation.getRPY(this->current_pos.roll, current_pos.pitch, current_pos.yaw);
 
 }
 
-void Velocity_Controller::UpdateError(void) {
+void ArmPositionController::UpdateError(void) {
 
 	pos_err.x_err = desired_pos.x - current_pos.x;
 	pos_err.y_err = desired_pos.y - current_pos.y;
@@ -168,7 +159,7 @@ if(running == true && (ros::Time().now().toSec()-last_position_time.toSec() > 1)
 	running = false;
 		}
 }
-void Velocity_Controller::UpdatePID(void) {
+void ArmPositionController::UpdatePID(void) {
 	Eigen::VectorXf cartisian_velocity(6);
 
 	cartisian_velocity(0) = PID_X->PIDUpdate(pos_err.x_err);
@@ -248,7 +239,7 @@ void Velocity_Controller::UpdatePID(void) {
 	joint_velocity_pub.publish(cartesian_velocity_msg);
 
 }
-void Velocity_Controller::JointAnglesMSG(const jaco_driver::joint_anglesConstPtr& joint_angles) {
+void ArmPositionController::JointAnglesMSG(const jaco_driver::joint_anglesConstPtr& joint_angles) {
 //	UpdateError();
 //
 //
@@ -522,7 +513,7 @@ void Velocity_Controller::JointAnglesMSG(const jaco_driver::joint_anglesConstPtr
 int main(int argc, char **argv) {
 
 	/* Set up ROS */
-	ros::init(argc, argv, "arm_velocity_control");
+	ros::init(argc, argv, "arm_position_control");
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
@@ -532,7 +523,7 @@ int main(int argc, char **argv) {
 	std::string CurrentPosition("ToolPosition"); ///String containing the topic name for CurrentPosition
 
 	if (argc < 1) {
-		ROS_INFO( "Usage: arm_velocity_control desired_position_topic joint_velocity_topic joint_angles_topic");
+		ROS_INFO( "Usage: arm_position_control desired_position_topic joint_velocity_topic joint_angles_topic");
 		return 1;
 	} else {
 		//Grab the topic parameters, print warnings if using default values
@@ -555,7 +546,7 @@ int main(int argc, char **argv) {
 	ROS_INFO("Starting Up Arm Velocity Controller...");
 
 //create the arm object
-	Velocity_Controller arm_velocity(nh, DesiredPosition, JointVelocity, JointAngles, CurrentPosition);
+	ArmPositionController arm_position(nh, DesiredPosition, JointVelocity, JointAngles, CurrentPosition);
 
 	ros::spin();
 }

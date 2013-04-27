@@ -28,9 +28,9 @@
 
 namespace aero_control {
 
-class Arm_Controller {
+class ArmController {
 public:
-	Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,std::string ArmPose, std::string SetFingerPosition);
+	ArmController(ros::NodeHandle nh, std::string ObjectPose,std::string ArmPose, std::string SetFingerPosition);
 	void ObjectPosition(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
 
 private:

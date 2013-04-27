@@ -19,11 +19,11 @@
 
 using namespace aero_control;
 
-Arm_Controller::Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,
+ArmController::ArmController(ros::NodeHandle nh, std::string ObjectPose,
 		std::string ArmPose, std::string SetFingerPosition) {
 
 	this->sub_object_position = nh.subscribe(ObjectPose, 1,
-			&Arm_Controller::ObjectPosition, this);
+			&ArmController::ObjectPosition, this);
 	this->pub_arm_position = nh.advertise<geometry_msgs::PoseStamped>(ArmPose,
 			2);
 
@@ -33,7 +33,7 @@ Arm_Controller::Arm_Controller(ros::NodeHandle nh, std::string ObjectPose,
 
 }
 
-void Arm_Controller::ObjectPosition(
+void ArmController::ObjectPosition(
 		const aero_srr_msgs::ObjectLocationMsgConstPtr& object) {
 	tf::Matrix3x3 grasp_rpy;
 	tf::Quaternion grasp_quaternion;
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
 	ROS_INFO("Starting Up Arm Controller...");
 
 //create the arm object
-	Arm_Controller arm(nh, ObjectPose, DesiredPosition,SetFingerPosition);
+	ArmController arm(nh, ObjectPose, DesiredPosition,SetFingerPosition);
 
 	ros::spin();
 }

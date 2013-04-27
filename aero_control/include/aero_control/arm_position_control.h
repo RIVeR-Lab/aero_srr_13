@@ -1,12 +1,12 @@
 /*
- * arm_controller.h
+ * arm_position_control.h
  *
  *  Created on: Feb 26, 2013
  *      Author: mdedonato
  */
 
-#ifndef ARM_VELOCITY_CONTROL_H_
-#define ARM_VELOCITY_CONTROL_H_
+#ifndef ARM_POSITION_CONTROL_H_
+#define ARM_POSITION_CONTROL_H_
 
 
 
@@ -27,35 +27,35 @@
 #include <jaco_driver/joint_angles.h>
 #include <Eigen/Dense>
 
-#include <dynamic_reconfigure/server.h>
-#include <aero_control/AeroArmVelocityConfig.h>
 
 
 namespace aero_control {
-typedef struct {
-	double x_err;
-	double y_err;
-	double z_err;
-	double roll_err;
-	double pitch_err;
-	double yaw_err;
-}position_error;
 
-typedef struct {
-	double x;
-	double y;
-	double z;
-	double roll;
-	double pitch;
-	double yaw;
-}position;
 
-class Velocity_Controller {
+class ArmPositionController {
 public:
-	Velocity_Controller(ros::NodeHandle nh, std::string DesiredPosition,std::string JointVelocity, std::string JointAngles, std::string CurrentPosition);
-	~Velocity_Controller();
+	ArmPositionController(ros::NodeHandle nh, std::string DesiredPosition,std::string JointVelocity, std::string JointAngles, std::string CurrentPosition);
+	~ArmPositionController();
 private:
-	void callback(aero_control::AeroArmVelocityConfig &config, uint32_t level);
+
+	typedef struct {
+		double x_err;
+		double y_err;
+		double z_err;
+		double roll_err;
+		double pitch_err;
+		double yaw_err;
+	}arm_position_error;
+
+	typedef struct {
+		double x;
+		double y;
+		double z;
+		double roll;
+		double pitch;
+		double yaw;
+	}arm_position;
+
 		void CurrentPositionMSG(const geometry_msgs::PoseStampedConstPtr& current_pose);
 		void DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose);
 	void JointAnglesMSG(const jaco_driver::joint_anglesConstPtr& joint_angles);
@@ -71,12 +71,11 @@ private:
 
 	tf::TransformListener tf_listener;
 
-	  dynamic_reconfigure::Server<aero_control::AeroArmVelocityConfig> server;
-	  dynamic_reconfigure::Server<aero_control::AeroArmVelocityConfig>::CallbackType f;
 
-	position desired_pos;
-	position current_pos;
-	position_error pos_err;
+
+	arm_position desired_pos;
+	arm_position current_pos;
+	arm_position_error pos_err;
 
 	pid::PIDController *PID_X;
 	pid::PIDController *PID_Y;
@@ -94,4 +93,4 @@ private:
 
 }
 
-#endif /* ARM_VELOCITY_CONTROL_H_ */
+#endif /* ARM_POSITION_CONTROL_H_ */
