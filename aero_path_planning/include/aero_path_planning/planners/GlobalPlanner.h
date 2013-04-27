@@ -115,11 +115,9 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Copies the next goal on the carrot path into an OccupancyGrid if there is one
-	 * @param [out] grid The OccupancyGrid to copy the point into
-	 * Uses the frame_id parameter of the passed OccupancyGrid to termine the transform for the goal point.
+	 * @brief  Publishes the next goal on the carrot path
 	 */
-	void copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const;
+	void updateGoal() const;
 
 	/**
 	 * @author Adam Panzica

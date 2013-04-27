@@ -23,12 +23,12 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-																		state_(MANUAL),
-																		path_planner_(&path_planner),
-																		path_threshold_(1.0),
-																		nh_(nh),
-																		p_nh_(p_nh),
-																		transformer_(nh)
+																				state_(MANUAL),
+																				path_planner_(&path_planner),
+																				path_threshold_(1.0),
+																				nh_(nh),
+																				p_nh_(p_nh),
+																				transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -303,6 +303,7 @@ void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPt
 		if(std::abs(dist)<this->path_threshold_)
 		{
 			this->carrot_path_.pop_front();
+			this->updateGoal();
 		}
 	}
 }
@@ -359,20 +360,23 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	}
 }
 
-void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
+void GlobalPlanner::updateGoal() const
 {
 	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
-	geometry_msgs::PointStamped goal_point_m;
-	goal_point_m.point.x = 10;
-	goal_point_m.point.y = 0;
-	goal_point_m.point.z = 0;
-	goal_point_m.header.frame_id = this->global_frame_;
-	goal_point_m.header.stamp    = grid.getGrid().header.stamp;
-	geometry_msgs::PoseStamped goal_pose;
-	goal_pose.header = goal_point_m.header;
-	goal_pose.pose.position    = goal_point_m.point;
-	goal_pose.pose.orientation.w = 1;
-	this->goal_pub_.publish(goal_pose);
+	if(!this->carrot_path_.empty())
+	{
+		geometry_msgs::PointStamped goal_point_m;
+		goal_point_m.point.x = this->carrot_path_.front().x;
+		goal_point_m.point.y = this->carrot_path_.front().y;
+		goal_point_m.point.z = 0;
+		goal_point_m.header.frame_id = this->global_frame_;
+		goal_point_m.header.stamp    = ros::Time::now();
+		geometry_msgs::PoseStamped goal_pose;
+		goal_pose.header = goal_point_m.header;
+		goal_pose.pose.position    = goal_point_m.point;
+		goal_pose.pose.orientation.w = 1;
+		this->goal_pub_.publish(goal_pose);
+	}
 
 }
 
@@ -395,6 +399,7 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 		path->header.stamp    = ros::Time::now();
 		this->carrotToPath(*path);
 		this->path_pub_.publish(path);
+		this->updateGoal();
 	}
 	else
 	{
