@@ -389,9 +389,10 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 	if(this->path_planner_!=NULL)
 	{
 		this->path_planner_->setCollision(this->cf_);
-		this->path_planner_->setCarrotDelta(1.0/this->global_res_);
+		this->path_planner_->setCarrotDelta(5.0/this->global_res_);
 		this->path_planner_->setSearchMap(*this->global_map_);
 		this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, this->carrot_path_);
+		this->carrot_path_.pop_front();
 		nav_msgs::PathPtr path(new nav_msgs::Path());
 		path->header.frame_id = this->global_frame_;
 		path->header.stamp    = ros::Time::now();
