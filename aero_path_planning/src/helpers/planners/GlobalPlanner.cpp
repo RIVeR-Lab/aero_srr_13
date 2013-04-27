@@ -23,12 +23,12 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-																				state_(MANUAL),
-																				path_planner_(&path_planner),
-																				path_threshold_(1.0),
-																				nh_(nh),
-																				p_nh_(p_nh),
-																				transformer_(nh)
+																						state_(MANUAL),
+																						path_planner_(&path_planner),
+																						path_threshold_(1.0),
+																						nh_(nh),
+																						p_nh_(p_nh),
+																						transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -36,6 +36,28 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_pa
 	this->registerTopics();
 	this->registerTimers();
 	this->buildGlobalMap();
+	ROS_INFO_STREAM("Building Test Mission Goals...");
+	geometry_msgs::Pose pose1;
+	pose1.position.x = 10;
+	pose1.position.y = 0;
+	pose1.orientation.w = 1;
+	this->mission_goals_.push_back(pose1);
+	geometry_msgs::Pose pose2;
+	pose2.position.x = 10;
+	pose2.position.y = 10;
+	pose2.orientation.w = 1;
+	this->mission_goals_.push_back(pose2);
+	geometry_msgs::Pose pose3;
+	pose3.position.x = 0;
+	pose3.position.y = 10;
+	pose3.orientation.w = 1;
+	this->mission_goals_.push_back(pose3);
+	geometry_msgs::Pose pose4;
+	pose4.position.x = 0;
+	pose4.position.y = 0;
+	pose4.orientation.w = 1;
+	this->mission_goals_.push_back(pose4);
+	ROS_INFO_STREAM("Test Mission Goals Built");
 
 	this->cf_ = boost::bind(&GlobalPlanner::checkCollision, this, _1, _2);
 	this->planCB(ros::TimerEvent());
@@ -308,6 +330,14 @@ void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPt
 			this->updateGoal();
 		}
 	}
+	else
+	{
+		ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
+		if(!this->mission_goals_.empty())
+		{
+			this->mission_goals_.pop_front();
+		}
+	}
 }
 
 void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
@@ -386,27 +416,35 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
 	this->carrot_path_ = std::deque<Point>();
-	Point goal_point;
-	goal_point.x  = 100;
-	goal_point.y  = 100;
-	goal_point.z  = 0;
-	if(this->path_planner_!=NULL)
+	if(!this->mission_goals_.empty())
 	{
-		this->path_planner_->setCollision(this->cf_);
-		this->path_planner_->setCarrotDelta(5.0/this->global_res_);
-		this->path_planner_->setSearchMap(*this->global_map_);
-		this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, this->carrot_path_);
-		this->carrot_path_.pop_front();
-		nav_msgs::PathPtr path(new nav_msgs::Path());
-		path->header.frame_id = this->global_frame_;
-		path->header.stamp    = ros::Time::now();
-		this->carrotToPath(*path);
-		this->path_pub_.publish(path);
-		this->updateGoal();
+		Point goal_point;
+		goal_point.x = this->mission_goals_.front().position.x;
+		goal_point.y = this->mission_goals_.front().position.y;
+		goal_point.z = 0;
+		this->global_map_->getConverter().convertToGrid(goal_point, goal_point);
+		if(this->path_planner_!=NULL)
+		{
+			this->path_planner_->setCollision(this->cf_);
+			this->path_planner_->setCarrotDelta(5.0/this->global_res_);
+			this->path_planner_->setSearchMap(*this->global_map_);
+			this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, this->carrot_path_);
+			this->carrot_path_.pop_front();
+			nav_msgs::PathPtr path(new nav_msgs::Path());
+			path->header.frame_id = this->global_frame_;
+			path->header.stamp    = ros::Time::now();
+			this->carrotToPath(*path);
+			this->path_pub_.publish(path);
+			this->updateGoal();
+		}
+		else
+		{
+			ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
+		}
 	}
 	else
 	{
-		ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
+		ROS_WARN("No Mission Goals!");
 	}
 
 	OccupancyGridMsgPtr viz_message(new OccupancyGridMsg());

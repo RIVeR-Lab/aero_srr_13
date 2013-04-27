@@ -187,6 +187,7 @@ private:
 	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy
 	OccupancyGridPtr                  global_map_;    ///The global OccupancyGrid
 	std::deque<Point>                     carrot_path_;   ///The current set of points on the global path
+	std::deque<geometry_msgs::Pose>       mission_goals_; ///The chain of mission-goal points to fallow
 	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in grid units_
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
