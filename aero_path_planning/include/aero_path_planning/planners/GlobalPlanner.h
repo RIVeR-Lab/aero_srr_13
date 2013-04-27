@@ -16,7 +16,7 @@
 #include<sensor_msgs/PointCloud2.h>
 #include<nav_msgs/Odometry.h>
 #include<nav_msgs/Path.h>
-
+#include<geometry_msgs/PoseWithCovarianceStamped.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/utilities/AeroPathPlanning.h>
 #include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
@@ -98,7 +98,7 @@ private:
 	 *
 	 * This callback handles advancing the CarrotPath
 	 */
-	void odomCB(const nav_msgs::OdometryConstPtr& message);
+	void odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
@@ -183,6 +183,7 @@ private:
 	double      global_update_rate_;    ///Update frequency for planning on the global path
 
 	nav_msgs::Odometry    last_odom_;   ///The odometry data received by the planner
+	Point				  current_point_;///The last recieved location of the robot
 
 	CarrotPathFinder::collision_func_ cf_;            ///The collision function
 	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy

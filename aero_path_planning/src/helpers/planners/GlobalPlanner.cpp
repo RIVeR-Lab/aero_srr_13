@@ -272,10 +272,9 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 	}
 }
 
-void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
+void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPtr& message)
 {
 	ROS_INFO_STREAM("I Got New Odometry Data!");
-	this->last_odom_ = *message;
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped trans_point_m;
@@ -284,16 +283,23 @@ void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
 		odom_point_m.point  = message->pose.pose.position;
 
 		//Shift the robot location from the odometry frame to the global one
-		this->transformer_.transformPoint(this->global_frame_, odom_point_m, trans_point_m);
+		try
+		{
+			this->transformer_.waitForTransform(this->global_frame_, odom_point_m.header.frame_id, odom_point_m.header.stamp, ros::Duration(0.1));
+			this->transformer_.transformPoint(this->global_frame_, odom_point_m, trans_point_m);
+		}
+		catch(std::exception& e)
+		{
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
 
 		//Check the distance between the current robot location and the next path goal point.
 		//If within threshold, pop the path goal point
-		Point current_point;
-		current_point.x = trans_point_m.point.x;
-		current_point.y = trans_point_m.point.y;
-		current_point.z = trans_point_m.point.z;
+		this->current_point_.x = trans_point_m.point.x;
+		this->current_point_.y = trans_point_m.point.y;
+		this->current_point_.z = 0;
 
-		double dist = pcl::distances::l2(current_point.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
+		double dist = pcl::distances::l2(this->current_point_.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
 		if(std::abs(dist)<this->path_threshold_)
 		{
 			this->carrot_path_.pop_front();
@@ -374,10 +380,6 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
 	this->carrot_path_ = std::deque<Point>();
-	Point start_point;
-	start_point.x = 0;
-	start_point.y = 0;
-	start_point.z = 0;
 	Point goal_point;
 	goal_point.x  = 100;
 	goal_point.y  = 100;
@@ -385,9 +387,9 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 	if(this->path_planner_!=NULL)
 	{
 		this->path_planner_->setCollision(this->cf_);
-		this->path_planner_->setCarrotDelta(10);
+		this->path_planner_->setCarrotDelta(1.0/this->global_res_);
 		this->path_planner_->setSearchMap(*this->global_map_);
-		this->path_planner_->search(start_point, goal_point, this->plan_timerout_, this->carrot_path_);
+		this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, this->carrot_path_);
 		nav_msgs::PathPtr path(new nav_msgs::Path());
 		path->header.frame_id = this->global_frame_;
 		path->header.stamp    = ros::Time::now();
