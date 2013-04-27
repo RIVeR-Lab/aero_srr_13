@@ -336,6 +336,7 @@ void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPt
 		if(!this->mission_goals_.empty())
 		{
 			this->mission_goals_.pop_front();
+			this->planCB(ros::TimerEvent());
 		}
 	}
 }
