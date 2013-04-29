@@ -31,8 +31,8 @@ namespace object_locator
 		virtual void imageCb(const object_locator::SyncImageMsgConstPtr& msg);
 		virtual void leftImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
 		virtual void rightImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
-		virtual void disparityImageCb(const stereo_msgs::DisparityImageConstPtr& msg);
-		virtual void generateSyncMsg(object_locator::SyncImagesAndDisparity& msg);
+		virtual void disparityImageCb(const sensor_msgs::ImageConstPtr& msg);
+		virtual void generateSyncMsg(object_locator::SyncImageMsg& msg);
 		virtual void gotImages();
 		std::string left_input_topic_, right_input_topic_,output_topic_, disparity_input_topic_, sync_input_topic_;
 		image_transport::ImageTransport* it_;
@@ -46,7 +46,7 @@ namespace object_locator
 		sensor_msgs::Image left_image_;
 		sensor_msgs::Image right_image_;
 		object_locator::SyncImageMsg raw_images_;
-		stereo_msgs::DisparityImage disparity_image_;
+		sensor_msgs::Image disparity_image_;
 		sensor_msgs::CameraInfo left_info_;
 		sensor_msgs::CameraInfo right_info_;
 		bool gotLeft_;
