@@ -58,7 +58,7 @@ void SyncStage::leftImageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_m
 {
 	left_image_ = *msg;
 	left_info_  = *cam_info;
-	gotRight_ = true;
+	gotLeft_ = true;
 	gotImages();
 }
 
@@ -106,7 +106,7 @@ void SyncStage::gotImages()
 		this->sync_image_pub_.publish(msg);
 		gotLeft_ = false;
 		gotRight_ = false;
-		gotDisparity_ = false;
+//		gotDisparity_ = false;
 	}
 	else
 	{
