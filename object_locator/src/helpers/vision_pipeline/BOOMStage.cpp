@@ -30,8 +30,8 @@ void BOOMStage::loadParams()
 	this->output_topic_="boom_stage/direction";
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,this->output_topic_);
-	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
-	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
+//	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
+//	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
 }
 
 void BOOMStage::registerTopics()
@@ -51,13 +51,14 @@ void BOOMStage::boomImageCb(const object_locator::SyncImageMsgConstPtr& msg)
 void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 {
 	cv_bridge::CvImagePtr img;
-	Mat_t src = load_;
+//	Mat_t src = load_;
 	try {
 		img = cv_bridge::toCvCopy(msg, enc::BGR8);
 	} catch (cv_bridge::Exception& e) {
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
+	Mat_t src = img->image;
 	double R,G,B,sumRGB, nR,nG,nB, browness,whiteness;
 	Vec3b RGB,nRGB,ZeroV, Black;
 	nRGB[0] = 0;
