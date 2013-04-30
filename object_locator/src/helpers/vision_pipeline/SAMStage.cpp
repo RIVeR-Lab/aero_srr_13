@@ -190,8 +190,8 @@ void SAMStage::fetchAndRetrieve(const sensor_msgs::Image& msg) {
 //
 //
 //	}
-	cv::imshow(WINDOWLeft_, img->image);
-	cv::waitKey(3);
+//	cv::imshow(WINDOWLeft_, img->image);
+//	cv::waitKey(3);
 }
 
 void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityConstPtr& msg) {
@@ -206,8 +206,8 @@ void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityCons
 	Mat_t dmat(disp->image.rows, disp->image.cols,CV_8U);
 	dmat = disp->image;
 //	Mat_t preDisp(dmat);
-	cv::imshow(WINDOWDisparity_, dmat);
-	cv::waitKey(3);
+//	cv::imshow(WINDOWDisparity_, dmat);
+//	cv::waitKey(3);
 	cv::Size ksize;
 	ksize.width = 10;
 	ksize.height = 10;

@@ -162,8 +162,14 @@ void ImageConverter::computeDisparity()
 //	rightRect  = imread("/home/srr/ObjectDetectionData/Tskuba/ARight.jpg", CV_LOAD_IMAGE_COLOR);
 //	Mat_t img1_rect(leftRect.rows,leftRect.cols,CV_8U);
 //	Mat_t img2_rect(leftRect.rows,leftRect.cols,CV_8U);
+#ifdef CUDA_ENABLED
+	gpu::cvtColor(mat_left->image,img1_rect, CV_BGR2GRAY);
+	gpu::cvtColor(mat_right->image,img2_rect, CV_BGR2GRAY);
+
+#else
 	cvtColor(mat_left->image,img1_rect, CV_BGR2GRAY);
 	cvtColor(mat_right->image,img2_rect, CV_BGR2GRAY);
+#endif
 //	this->stereo_model.updateQ();
 this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 /**	//	  cv::StereoVar stereo;
@@ -216,11 +222,12 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 	//	resize(mat_right->image,Rds_img,size);
 **/
 #ifdef CUDA_ENABLED
-	gpu::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
-	gpu::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
-	gpu::remap(left_gray,img1_rect, mx1, my1, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-	gpu::remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-
+	/*
+	 * gpu::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
+	*gpu::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
+	*gpu::remap(left_gray,img1_rect, mx1, my1, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+	*gpu::remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+*/
 #else
 	/**
 	cv::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);

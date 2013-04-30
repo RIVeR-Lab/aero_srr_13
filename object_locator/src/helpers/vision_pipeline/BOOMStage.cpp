@@ -26,7 +26,7 @@ void BOOMStage::onInit()
 
 void BOOMStage::loadParams()
 {
-	this->input_topic_="boom/sync_stage/stereo_pair";
+	this->input_topic_="sync_stage/stereo_pair";
 	this->output_topic_="boom_stage/direction";
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,this->output_topic_);
