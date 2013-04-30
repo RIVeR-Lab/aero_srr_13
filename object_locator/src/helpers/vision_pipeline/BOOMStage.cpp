@@ -65,6 +65,7 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 	Mat_t src = img->image;
 	double R,G,B,sumRGB, nR,nG,nB, browness,whiteness;
 	Vec3b RGB,nRGB,ZeroV, Black;
+	Mat_t norma = img->image;
 	nRGB[0] = 0;
 	nRGB[1] = 0;
 	nRGB[2] = 0;
@@ -94,14 +95,15 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 			whiteness = sumRGB/756;
 			if((nG > .38) || ((std::abs(browness - 1) < .2) && (whiteness < .9)))
 			{
-			    normImage.at<cv::Vec3b>(x,y) = ZeroV;
+			    norma.at<cv::Vec3b>(x,y) = ZeroV;
 			}
 			else
 			{
-				normImage.at<cv::Vec3b>(x,y) = Black;
+				norma.at<cv::Vec3b>(x,y) = Black;
 			}
 		}
 	}
+	normImage = norma;
 }
 
 void BOOMStage::blobIdentify(Mat_t& img)

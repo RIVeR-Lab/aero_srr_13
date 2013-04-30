@@ -19,6 +19,10 @@
 #include <geometry_msgs/PointStamped.h>
 #include <image_geometry/stereo_camera_model.h>
 #include <image_transport/image_transport.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 namespace object_locator
 {
