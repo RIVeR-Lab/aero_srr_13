@@ -26,25 +26,27 @@ void BOOMStage::onInit()
 
 void BOOMStage::loadParams()
 {
-	this->input_topic_="sync_stage/stereo_pair";
+	this->input_topic_="stereo_camera/left/image_raw";
 	this->output_topic_="boom_stage/direction";
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,this->output_topic_);
+	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
 //	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
 //	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
 }
 
 void BOOMStage::registerTopics()
 {
-	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
+	this->image_left_ = it_->subscribeCamera(this->input_topic_,2,&BOOMStage::boomImageCb,this);
+//	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
 	//this->disp_image_pub_ = this->getNodeHandle().advertise<object_locator::SyncImageMsg>(this->output_topic_,2);
 }
 
-void BOOMStage::boomImageCb(const object_locator::SyncImageMsgConstPtr& msg)
+void BOOMStage::boomImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info)
 {
 	NODELET_INFO_STREAM("In Boom Image CB");
 	Mat_t normImage;
-	grassRemove(msg->left_image, normImage);
+	grassRemove(*msg, normImage);
 	blobIdentify(normImage);
 
 }
