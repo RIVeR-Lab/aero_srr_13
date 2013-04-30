@@ -42,6 +42,7 @@ void BOOMStage::registerTopics()
 
 void BOOMStage::boomImageCb(const object_locator::SyncImageMsgConstPtr& msg)
 {
+	NODELET_INFO_STREAM("In Boom Image CB");
 	Mat_t normImage;
 	grassRemove(msg->left_image, normImage);
 	blobIdentify(normImage);
@@ -50,6 +51,7 @@ void BOOMStage::boomImageCb(const object_locator::SyncImageMsgConstPtr& msg)
 
 void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 {
+	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
 	try {
@@ -155,9 +157,9 @@ void BOOMStage::blobIdentify(Mat_t& img)
 	   /// Show in a window
 	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
 	   imshow( "Contours", drawing );
-		std::stringstream s;
-		s << "/home/srr/ObjectDetectionData/blob/0.png";
-		cv::imwrite(s.str(), drawing);
+//		std::stringstream s;
+//		s << "/home/srr/ObjectDetectionData/blob/0.png";
+//		cv::imwrite(s.str(), drawing);
 }
 
 void BOOMStage::generateMsg()
