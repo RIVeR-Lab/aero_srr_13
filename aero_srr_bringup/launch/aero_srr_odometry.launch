@@ -19,7 +19,8 @@
     <remap from="imu_data" to="$(arg imu_topic)" />
   </node>
   
-  <!-- publish a transform from world to odom -->
+  <!-- publish a transform from world to odom 
   <node pkg="tf" type="static_transform_publisher" name="world_odom_broadcaster" args="0 0 0 0 0 0 /world /odom 20" />
+-->
   
 </launch>
