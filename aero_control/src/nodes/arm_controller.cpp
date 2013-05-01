@@ -55,7 +55,7 @@ listener.waitForTransform("arm_base", object->pose.header.frame_id, object->pose
 	tf::quaternionTFToMsg(grasp_quaternion,arm_pose.pose.orientation);
 	arm_pose.pose.position.z = 0.2;
 	arm_pose.pose.position.y -= 0.15;
-	arm_pose.pose.position.x= 0.4;
+	//arm_pose.pose.position.x= 0.4;
 
 ROS_INFO("Got Point");
 for(int x = 0; x<20; x++)
