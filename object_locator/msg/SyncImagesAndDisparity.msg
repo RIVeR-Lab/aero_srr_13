@@ -2,4 +2,4 @@
 object_locator/SyncImageMsg images
 
 #This is an 8 bit grayscale image that contains computed dispairty information
-stereo_msgs/DisparityImage disparity_image
+sensor_msgs/Image disparity_image

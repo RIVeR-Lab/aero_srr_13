@@ -34,9 +34,11 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_raw", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
+//	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
+//	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
 
 	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
@@ -69,7 +71,7 @@ ImageConverter::~ImageConverter()
 
 void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW)
 {
-
+	ROS_INFO_STREAM("encoding = " << msg.encoding);
 	try
 	{
 		cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
@@ -81,7 +83,7 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 	}
 //
 
-	Mat_t img(cv_ptr->image);
+//	Mat_t img(cv_ptr->image);
 	//	std::cout << "displaying image"<<std::endl;
 	//	    cv::imshow(WINDOW, img);
 
@@ -94,7 +96,7 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvIm
 	//		    	 detectAndDisplay( img);
 	//	  	  	  	  test(img, WINDOW);
 	//		    	 tune(img,WINDOW);
-	image_pub_.publish(cv_ptr->toImageMsg());
+//	image_pub_.publish(cv_ptr->toImageMsg());
 }
 void ImageConverter::saveImage(const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, int O)
 {
@@ -118,13 +120,24 @@ void ImageConverter::saveImage(const sensor_msgs::Image& msg, cv_bridge::CvImage
 	   if(O == 0){if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctrLeft++;}}
 	   else{if( (char)c == 'd' ) { cv::imwrite(d.str(), img); ctrRight++;}}
 }
+void ImageConverter::rectLeftCb(const sensor_msgs::ImageConstPtr& msg)
+{
+	left_image = *msg;
+	gotLeft = true;
+	detectAndDisplay(left_image,mat_left,WINDOWLeft);
+}
 
+void ImageConverter::rectRightCb(const sensor_msgs::ImageConstPtr& msg)
+{
+	right_image = *msg;
+	gotRight = true;
+}
 void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
 	left_image = *msg;
 	left_info  = *cam_info;
 	gotLeft = true;
-//	detectAndDisplay(left_image,mat_left,WINDOWLeft);
+	detectAndDisplay(left_image,mat_left,WINDOWLeft);
 //		saveImage(left_image, mat_left,0);
 
 }
@@ -140,17 +153,26 @@ void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const s
 
 void ImageConverter::computeDisparity()
 {
-//	processImage(left_image, mat_left, WINDOWLeft);
-//	processImage(right_image, mat_right, WINDOWRight);
+	processImage(left_image, mat_left, WINDOWLeft);
+	processImage(right_image, mat_right, WINDOWRight);
+//	ROS_INFO_STREAM("Finished acquiring images");
 	Mat_t leftRect, img1_rect;
-	Mat_t rightRect, img2_rect;
-	leftRect  =  imread("/home/srr/ObjectDetectionData/Tskuba/Left.jpg", CV_LOAD_IMAGE_COLOR);
-	rightRect = imread("/home/srr/ObjectDetectionData/Tskuba/Right.jpg", CV_LOAD_IMAGE_COLOR);
-	cvtColor(leftRect,img1_rect, CV_BGR2GRAY);
-	cvtColor(rightRect,img2_rect, CV_BGR2GRAY);
+	Mat_t rightRect,img2_rect;
+//	leftRect  =  imread("/home/srr/ObjectDetectionData/Tskuba/ALeft.jpg", CV_LOAD_IMAGE_COLOR);
+//	rightRect  = imread("/home/srr/ObjectDetectionData/Tskuba/ARight.jpg", CV_LOAD_IMAGE_COLOR);
+//	Mat_t img1_rect(leftRect.rows,leftRect.cols,CV_8U);
+//	Mat_t img2_rect(leftRect.rows,leftRect.cols,CV_8U);
+#ifdef CUDA_ENABLED
+	gpu::cvtColor(mat_left->image,img1_rect, CV_BGR2GRAY);
+	gpu::cvtColor(mat_right->image,img2_rect, CV_BGR2GRAY);
+
+#else
+	cvtColor(mat_left->image,img1_rect, CV_BGR2GRAY);
+	cvtColor(mat_right->image,img2_rect, CV_BGR2GRAY);
+#endif
 //	this->stereo_model.updateQ();
-/**this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
-	//	  cv::StereoVar stereo;
+this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
+/**	//	  cv::StereoVar stereo;
 	//	  stereo.maxDisp = 1.5;
 	//	  stereo.minDisp = .3;
 	//	  stereo(this->mat_left->image, this->mat_right->image, this->disparity);
@@ -200,11 +222,12 @@ void ImageConverter::computeDisparity()
 	//	resize(mat_right->image,Rds_img,size);
 **/
 #ifdef CUDA_ENABLED
-	gpu::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
-	gpu::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
-	gpu::remap(left_gray,img1_rect, mx1, my1, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-	gpu::remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-
+	/*
+	 * gpu::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
+	*gpu::cvtColor(mat_right->image, right_gray, CV_BGR2GRAY);
+	*gpu::remap(left_gray,img1_rect, mx1, my1, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+	*gpu::remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+*/
 #else
 	/**
 	cv::cvtColor(mat_left->image, left_gray, CV_BGR2GRAY);
@@ -220,15 +243,15 @@ void ImageConverter::computeDisparity()
 	Mat_t dispn( heightL, widthL, CV_32F );
 
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 64;       //80        //256+80;
-	int SADSize = 5;				//10
+	int numDisp = 192;       //80        //256+80;
+	int SADSize = 9;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  -1	; // 1;
 	int preFilterCap =   31; //  2;
-	int uniqueness = 10;
-	int specSize =   950; //50 //20;   //reduces noise
-	int specRange = 31  ;  //5 //1;
+	int uniqueness = 5;
+	int specSize =   100; //50 //20;   //reduces noise
+	int specRange = 20  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
 
@@ -236,18 +259,25 @@ void ImageConverter::computeDisparity()
 	gpuBM(img1_rect, img2_rect, disp);
 
 #else
+//	cv::StereoSGBM stereoSGBM(minDisp,numDisp, SADSize);
 	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
 	stereoSGBM(img1_rect, img2_rect, disp);
-	//cv::StereoBM stereoBM(StereoBM::BASIC_PRESET,numDisp, SADSize);
-	//	stereoBM(img1_rect, img2_rect, disp);
+
+//	cv::StereoBM stereoBM(StereoBM::BASIC_PRESET,numDisp, SADSize);
+//		stereoBM(img1_rect, img2_rect, disp);
 	std::stringstream s,d;
 		s << "/home/srr/ObjectDetectionData/Disparity1.png";
-		cv::imwrite(s.str(), disp);
+		cv::imwrite(s.str(), dispn);
+	    disp.convertTo(dispn, -1,1.0/16);
+		Mat_t cmapped;
+		dispn.convertTo(cmapped,CV_8U);
+		cv::imshow(WINDOWDisparity, cmapped );
+		cv::waitKey(3);
 #endif
 	//    cv::erode(disp, disp, NULL, 2);
 	//    cv::dilate(disp, disp, NULL, 2);
 
-	    disp.convertTo(dispn, -1,1.0/16);
+
 	//	 cv::filterSpeckles(disp, 200, 24, 13);
 /**	normalize( disp, vdisp, 0, 256, CV_MINMAX );
 **/
@@ -279,7 +309,7 @@ void ImageConverter::computeDisparity()
 		if(obj_centroid.x < disp.cols && obj_centroid.y < disp.rows)
 		{
 //			cout << "Getting Disparity" <<endl;
-			int disp_val = disp.at<uchar>(obj_centroid.y,obj_centroid.x);
+			float disp_val = dispn.at<uchar>(obj_centroid.y,obj_centroid.x);
 //			cout << "Recieved Disparity of "<< disp_val <<endl;
 			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
 			this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,obj_3d);
@@ -296,7 +326,7 @@ void ImageConverter::computeDisparity()
 			optimus_prime.waitForTransform("/world", camera_point.header.frame_id, ros::Time(0), ros::Duration(1.0));
 			optimus_prime.transformPoint("/world",camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
-			tf::pointMsgToTF(world_point.point,detection);
+			tf::pointMsgToTF(camera_point.point,detection);
 			sherlock.addDetection(detection, detection_list_.at(i)->second);
 //			cout << "Added detection to manager" <<endl;
 		}
@@ -307,7 +337,7 @@ void ImageConverter::computeDisparity()
 	detection_list_.clear();
 //	cout << "Shrinking Det/ection manager list" <<endl;
 	sherlock.shrink();
-//	cout << "Finished shrinking list" <<endl;
+//	cout << "Finished shrinking list" <<endl;96
 	double confidence;
 	object_type type;
 	if(sherlock.getDetection(detection, type, confidence))
@@ -339,15 +369,14 @@ void ImageConverter::computeDisparity()
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
 	}
-	Mat_t cmapped;
+
 //	cmapped = gray2bgr(vdisp1);
-	disp.convertTo(cmapped,CV_8U);
-	cv::imshow(WINDOWLeft, img1_rect );
-	cv::waitKey(3);
-	cv::imshow(WINDOWRight, img2_rect );
-		cv::waitKey(3);
-	cv::imshow(WINDOWDisparity, cmapped );
-	cv::waitKey(3);
+
+//	cv::imshow(WINDOWLeft, img1_rect );
+//	cv::waitKey(3);
+//	cv::imshow(WINDOWRight, img2_rect );
+//		cv::waitKey(3);
+
 
 }
 Mat_t ImageConverter::gray2bgr(Mat_t img)
@@ -382,13 +411,13 @@ void ImageConverter::buildMsg(const tf::Point& point, geometry_msgs::PoseStamped
 
 void ImageConverter::computeDisparityCb(const ros::TimerEvent& event)
 {
-//	if (gotLeft && gotRight)
-//	{
-//		computeDisparity();
-//		gotLeft = false;
-//		gotRight = false;
-//	}
-	computeDisparity();
+	if (gotLeft && gotRight && (left_image.encoding ==right_image.encoding))
+	{
+		computeDisparity();
+		gotLeft = false;
+		gotRight = false;
+	}
+//	computeDisparity();
 }
 void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW)
 {
