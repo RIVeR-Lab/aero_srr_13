@@ -8,8 +8,8 @@
   <node pkg="roboteq_driver" type="roboteq_manager" name="aero_drive_roboteq_manager">
     <param name="max_rpm" value="1800" />
     <param name="ppr" value="5000" />
-    <param name="feedback_rate" value="10" />
-    <param name="control_rate" value="10" />
+    <param name="feedback_rate" value="20" />
+    <param name="control_rate" value="20" />
     <param name="port" value="/dev/ttyACM0" />
     <param name="control_topic" value="drive_cmd" />
     <param name="info_topic" value="aero_drive_feedback" />
