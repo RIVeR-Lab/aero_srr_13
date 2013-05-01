@@ -118,6 +118,7 @@ void BOOMStage::blobIdentify(Mat_t& img)
 	vector<Vec4i> hierarchy;
 
 	 medianBlur(img,med, 11);
+normImg = med;
 	 cvtColor(normImg, src_gray, CV_BGR2GRAY);
 
 	 /// Detect edges using Threshold
@@ -161,6 +162,7 @@ void BOOMStage::blobIdentify(Mat_t& img)
 	   /// Show in a window
 	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
 	   imshow( "Contours", drawing );
+	   cv::waitKey(3);
 //		std::stringstream s;
 //		s << "/home/srr/ObjectDetectionData/blob/0.png";
 //		cv::imwrite(s.str(), drawing);
