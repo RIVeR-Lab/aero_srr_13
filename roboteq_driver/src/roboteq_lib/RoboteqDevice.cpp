@@ -82,7 +82,7 @@ int RoboteqDevice::IssueCommand(string commandType, string command, string args,
       break;
   }
 
-  int num_read = serial_port.read_until(buf, BUFFER_SIZE, '\r', waitms);//read in result
+  int num_read = serial_port.read_until(buf, BUFFER_SIZE, '\r', 10);//read in result
 
   response = buf;
 
@@ -157,16 +157,13 @@ int RoboteqDevice::SetCommand(int commandItem, int index, int value)
 	{
 		if(value != MISSING_VALUE)
 			sprintf(args, "%i", value);
-		else
-		  args[0] = '\0';//make args an empty string
-
 		index = 0;
 	}
 
 	if(index < 0)
 		return RQ_INDEX_OUT_RANGE;
 
-	int status = IssueCommand("!", command, args, 20, response, true);
+	int status = IssueCommand("!", command, args, 10, response, true);
 	if(status != RQ_SUCCESS)
 		return status;
 	if(response != "+")

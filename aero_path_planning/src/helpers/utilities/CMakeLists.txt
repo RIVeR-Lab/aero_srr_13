@@ -1,4 +1,3 @@
 rosbuild_add_library(AeroUtilities AeroPathPlanningUtilities.cpp)
 rosbuild_add_library(OccupancyVisualizer OccupancyVisualizer.cpp)
-rosbuild_add_library(TentacleRateLimiter TentacleRateLimiter.cpp)
 target_link_libraries(OccupancyVisualizer OccupancyGrid)

@@ -15,8 +15,7 @@
 #include<tf/transform_listener.h>
 #include<sensor_msgs/PointCloud2.h>
 #include<nav_msgs/Odometry.h>
-#include<nav_msgs/Path.h>
-#include<geometry_msgs/PoseWithCovarianceStamped.h>
+
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/utilities/AeroPathPlanning.h>
 #include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
@@ -98,7 +97,7 @@ private:
 	 *
 	 * This callback handles advancing the CarrotPath
 	 */
-	void odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPtr& message);
+	void odomCB(const nav_msgs::OdometryConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
@@ -115,9 +114,11 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Publishes the next goal on the carrot path
+	 * @brief  Copies the next goal on the carrot path into an OccupancyGrid if there is one
+	 * @param [out] grid The OccupancyGrid to copy the point into
+	 * Uses the frame_id parameter of the passed OccupancyGrid to termine the transform for the goal point.
 	 */
-	void updateGoal() const;
+	void copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const;
 
 	/**
 	 * @author Adam Panzica
@@ -144,13 +145,6 @@ private:
 	 * @return True if in collision, else false
 	 */
 	bool checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const;
-
-	/**
-	 * @author Adam Panzica
-	 * @brief  converts a carrot path to a series of poses
-	 * @param [out] path The path to fill
-	 */
-	void carrotToPath(nav_msgs::Path& path) const;
 
 	State       state_;
 
@@ -181,13 +175,11 @@ private:
 	double      global_update_rate_;    ///Update frequency for planning on the global path
 
 	nav_msgs::Odometry    last_odom_;   ///The odometry data received by the planner
-	Point				  current_point_;///The last recieved location of the robot
 
 	CarrotPathFinder::collision_func_ cf_;            ///The collision function
 	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy
 	OccupancyGridPtr                  global_map_;    ///The global OccupancyGrid
-	std::deque<Point>                     carrot_path_;   ///The current set of points on the global path
-	std::deque<geometry_msgs::Pose>       mission_goals_; ///The chain of mission-goal points to fallow
+	std::queue<Point>                     carrot_path_;   ///The current set of points on the global path
 	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in grid units_
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
@@ -196,8 +188,7 @@ private:
 	ros::Subscriber       joy_sub_;       ///Subscriber for joy messages
 	ros::Publisher        local_occ_pub_; ///Publisher to send OccupancyGrids to the local planner
 	ros::Publisher        goal_pub_;      ///Publisher to visualize the global goal
-	ros::Publisher        map_viz_pub_;   ///Publisher to visualizing the global map
-	ros::Publisher        path_pub_;      ///Publisher to visualize the global path
+	ros::Publisher        map_viz_pub_;   ///Publisher to vizualizing the global map
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
 	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state

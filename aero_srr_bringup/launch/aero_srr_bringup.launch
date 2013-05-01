@@ -14,7 +14,6 @@
     <arg name="aero/velocity_command_topic"	value="$(arg velocity_command_topic)" />
     <arg name="local_lidar_topic"           value="$(arg local_lidar_topic)"/>
     <arg name="global_lidar_topic"          value="$(arg global_lidar_topic)"/>
-    <arg name="odometry_topic" value="$(arg odom_topic)"/>
   </include>
 
   <include file="$(find aero_base)/launch/aero_base.launch">
@@ -24,10 +23,10 @@
   </include> 
   
   <include file="$(find aero_srr_bringup)/launch/aero_srr_laser.launch">
-		<arg name="input_topic"    value="$(arg laser_scan_topic)"/>
-		<arg name="local_topic"    value="$(arg local_lidar_topic)"/>
-		<arg name="global_topic"   value="$(arg global_lidar_topic)"/>
-		<arg name="local_frame"    value="$(arg robot_frame)"/>
+		<arg name="input_topic"  value="$(arg laser_scan_topic)"/>
+		<arg name="local_topic"  value="$(arg local_lidar_topic)"/>
+		<arg name="global_topic" value="$(arg global_lidar_topic)"/>
+		<arg name="local_frame"  value="$(arg robot_frame)"/>
   </include>  
   
   <include file="$(find aero_srr_bringup)/launch/aero_srr_odometry.launch">

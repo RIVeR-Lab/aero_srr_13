@@ -375,7 +375,7 @@ bool RRTCarrot::allowsPartialPath()
 	return true;
 }
 
-bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::deque<aero_path_planning::Point>& result_path)
+bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::queue<aero_path_planning::Point>& result_path)
 {
 	if(this->initialized_)
 	{
@@ -487,7 +487,7 @@ bool RRTCarrot::search(const aero_path_planning::Point& start_point, const aero_
 		{
 			//ROS_INFO_STREAM("Adding Node At ("<<next_node_on_path->location_.x<<","<<next_node_on_path->location_.y<<")");
 			next_node_on_path->location_.rgba = aero_path_planning::GOAL;
-			result_path.push_back(next_node_on_path->location_);
+			result_path.push(next_node_on_path->location_);
 			next_node_on_path = next_node_on_path->parent_;
 		}
 		//Built the path or terminated early, we're done
