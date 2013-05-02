@@ -69,10 +69,9 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Callback for handling state updates
-	 * @param event
+	 * @brief  updates the state of the robot
 	 */
-	void stateUptdCb(const ros::TimerEvent& event);
+	void stateUptd() const;
 
 	State state_;
 

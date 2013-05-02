@@ -41,12 +41,7 @@ void Supervisor::loadParams()
 void Supervisor::registerTopics()
 {
 	this->ctrlmd_sub_     = this->nh_.subscribe(this->ctrlmd_topic_, 2, &Supervisor::setCtrlMdCB, this);
-	this->aero_state_pub_ = this->nh_.advertise<aero_srr_msgs::AeroState>(this->aero_state_topic_, 2);
-}
-
-void Supervisor::registerTimers()
-{
-	this->state_update_timer_ = this->nh_.createTimer(ros::Duration(1.0/100.0), &Supervisor::stateUptdCb, this);
+	this->aero_state_pub_ = this->nh_.advertise<aero_srr_msgs::AeroState>(this->aero_state_topic_, 2, true);
 }
 
 void Supervisor::setCtrlMdCB(const aero_srr_supervisor::SetControlModeConstPtr& message)
@@ -60,12 +55,12 @@ void Supervisor::setCtrlMdCB(const aero_srr_supervisor::SetControlModeConstPtr& 
 	case mode_t::AUTONIMOUS:
 		this->state_ = SEARCHING;
 		break;
-	default:
 		break;
 	}
+	this->stateUptd();
 }
 
-void Supervisor::stateUptdCb(const ros::TimerEvent& event)
+void Supervisor::stateUptd() const
 {
 	typedef aero_srr_msgs::AeroState state_t;
 	aero_srr_msgs::AeroState message;
