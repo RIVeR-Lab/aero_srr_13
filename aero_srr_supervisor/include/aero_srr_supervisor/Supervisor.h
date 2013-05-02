@@ -28,24 +28,6 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Enum over the states that Supervisor can be in
-	 */
-	enum State
-	{
-		ERROR,    //!< ERROR The robot has encountered an error
-		STARTUP,  //!< STARTUP The robot is currently in its startup sequence
-		MANUAL,   //!< MANUAL The robot is currently in manual control mode
-		SEARCHING,//!< SEARCHING The robot is currently exploring the map
-		NAVOBJ,   //!< NAVOBJ The robot is currently navigating to an object
-		COLLECT,  //!< COLLECT The robot is currently collecting an object of interest
-		HOME,     //!< HOME The robot is currently returning to the home platform
-		PAUSE,    //!< PAUSE The robot is currently paused
-		SHUTDOWN, //!< SHUTDOWN The robot is currently in its shutdown sequence
-		SAFESTOP  //!< SAFESTOP The robot is currently in a safe-stop configuration
-	};
-
-	/**
-	 * @author Adam Panzica
 	 * @brief  Initialization function, Loads parameters from the ROS param server
 	 */
 	void loadParams();

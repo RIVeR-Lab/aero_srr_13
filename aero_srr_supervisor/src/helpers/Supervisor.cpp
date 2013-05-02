@@ -44,6 +44,11 @@ void Supervisor::registerTopics()
 	this->aero_state_pub_ = this->nh_.advertise<aero_srr_msgs::AeroState>(this->aero_state_topic_, 2, true);
 }
 
+void Supervisor::registerTimers()
+{
+
+}
+
 void Supervisor::setCtrlMdCB(const aero_srr_supervisor::SetControlModeConstPtr& message)
 {
 	typedef aero_srr_supervisor::SetControlMode mode_t;
