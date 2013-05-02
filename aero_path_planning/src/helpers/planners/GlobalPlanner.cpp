@@ -22,7 +22,7 @@
 
 using namespace aero_path_planning;
 
-GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
+GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::CarrotPathFinder& path_planner):
 																state_(MANUAL),
 																path_planner_(&path_planner),
 																path_threshold_(1.0),
@@ -217,8 +217,8 @@ void GlobalPlanner::buildGlobalMap()
 	origin.x = this->global_x_ori_;
 	origin.y = this->global_y_ori_;
 	origin.z = this->global_z_ori_;
-	origin.rgba = aero_path_planning::UNKNOWN;
-	this->global_map_ = OccupancyGridPtr(new OccupancyGrid(this->global_x_size_, this->global_y_size_, this->global_z_size_, this->global_res_, origin, aero_path_planning::UNKNOWN, this->global_frame_));
+	origin.rgba = app::UNKNOWN;
+	this->global_map_ = OccupancyGridPtr(new OccupancyGrid(this->global_x_size_, this->global_y_size_, this->global_z_size_, this->global_res_, origin, app::UNKNOWN, this->global_frame_));
 }
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
@@ -248,13 +248,13 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 */
 }
 
-bool GlobalPlanner::lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const
+bool GlobalPlanner::lidarToGlobal(const sm::PointCloud2& scan_cloud, sm::PointCloud2& result_cloud) const
 {
 	this->transformer_.waitForTransform(this->global_frame_, scan_cloud.header.frame_id, scan_cloud.header.stamp, ros::Duration(this->local_update_rate_/2.0));
 	return pcl_ros::transformPointCloud(this->global_frame_, scan_cloud, result_cloud, this->transformer_);
 }
 
-void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_cloud, aero_path_planning::PointCloud& result_cloud) const
+void GlobalPlanner::lidarMsgToOccGridPatch(const sm::PointCloud2& scan_cloud, app::PointCloud& result_cloud) const
 {
 	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
 	pcl::fromROSMsg(scan_cloud, copy_cloud);
@@ -271,7 +271,19 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 	}
 }
 
-void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
+void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
+{
+	if(message->header.frame_id.compare(this->global_frame_))
+	{
+		this->global_map_->setPointTrait(*message);
+	}
+	else
+	{
+		ROS_ERROR_STREAM_THROTTLE(1,"Cannot copy SLAM in OccupancyGrid, got fram_id:"<<message->header.frame_id<<", need: "<<this->global_frame_);
+	}
+}
+
+void GlobalPlanner::odomCB(const nm::OdometryConstPtr& message)
 {
 	ROS_INFO_STREAM("I Got New Odometry Data!");
 	this->last_odom_ = *message;
@@ -352,7 +364,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	}
 }
 
-void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
+void GlobalPlanner::copyNextGoalToGrid(app::OccupancyGrid& grid) const
 {
 	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
 	if(!this->carrot_path_.empty())
@@ -434,12 +446,12 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 	this->map_viz_pub_.publish(viz_message);
 }
 
-bool GlobalPlanner::checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const
+bool GlobalPlanner::checkCollision(const app::Point& point, const app::OccupancyGrid& map) const
 {
 	bool collision = false;
 	try
 	{
-		if(map.getPointTrait(point)==aero_path_planning::OBSTACLE)
+		if(map.getPointTrait(point)==app::OBSTACLE)
 		{
 			collision = true;
 		}

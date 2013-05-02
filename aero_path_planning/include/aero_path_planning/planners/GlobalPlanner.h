@@ -15,11 +15,16 @@
 #include<tf/transform_listener.h>
 #include<sensor_msgs/PointCloud2.h>
 #include<nav_msgs/Odometry.h>
+#include<nav_msgs/OccupancyGrid.h>
 
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/utilities/AeroPathPlanning.h>
 #include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
 //**********************NAMESPACES*****************************//
+
+namespace sm  = sensor_msgs;
+namespace nm  = nav_msgs;
+namespace app = aero_path_planning;
 
 namespace aero_path_planning
 {
@@ -41,7 +46,7 @@ public:
 	} State;
 
 public:
-	GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner_);
+	GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::CarrotPathFinder& path_planner_);
 	virtual ~GlobalPlanner();
 
 private:
@@ -88,7 +93,14 @@ private:
 	 * @brief  Callback for processing LIDAR scans
 	 * @param message
 	 */
-	void laserCB(const sensor_msgs::PointCloud2ConstPtr& message);
+	void laserCB(const sm::PointCloud2ConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Callback for handling updates from SLAM
+	 * @param message
+	 */
+	void slamCB(const nm::OccupancyGridConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
@@ -97,7 +109,7 @@ private:
 	 *
 	 * This callback handles advancing the CarrotPath
 	 */
-	void odomCB(const nav_msgs::OdometryConstPtr& message);
+	void odomCB(const nm::OdometryConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
@@ -118,7 +130,7 @@ private:
 	 * @param [out] grid The OccupancyGrid to copy the point into
 	 * Uses the frame_id parameter of the passed OccupancyGrid to termine the transform for the goal point.
 	 */
-	void copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const;
+	void copyNextGoalToGrid(app::OccupancyGrid& grid) const;
 
 	/**
 	 * @author Adam Panzica
@@ -127,7 +139,7 @@ private:
 	 * @param  [out] result_cloud The resulting converted cloud
 	 * @return True if frame can be converted, else false
 	 */
-	bool lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const;
+	bool lidarToGlobal(const sm::PointCloud2& scan_cloud, sm::PointCloud2& result_cloud) const;
 
 	/**
 	 * @author Adam Panzica
@@ -135,7 +147,7 @@ private:
 	 * @param  [in]  scan_cloud   The point cloud message to convert
 	 * @param  [out] result_cloud The aero_path_planning::PointCloud to store the resulting patch in
 	 */
-	void lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_cloud, aero_path_planning::PointCloud& result_cloud) const;
+	void lidarMsgToOccGridPatch(const sm::PointCloud2& scan_cloud, app::PointCloud& result_cloud) const;
 
 	/**
 	 * @author Adam Panzica
@@ -144,7 +156,7 @@ private:
 	 * @param [in] map   The map to check against for collision
 	 * @return True if in collision, else false
 	 */
-	bool checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const;
+	bool checkCollision(const app::Point& point, const app::OccupancyGrid& map) const;
 
 	State       state_;
 
