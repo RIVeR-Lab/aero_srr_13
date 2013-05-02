@@ -271,12 +271,16 @@ bool OccupancyGrid::setPointTrait(const nm::OccupancyGrid& points, bool clipping
 		{
 	bool success = true;
 	bool bound   = false;
+	double scale = this->res_/points.info.resolution;
+
+	//Create a point converter to go from occupancy_grid scale to local scale
+	app::PointConverter converter(scale);
 
 	//Check for clipping
 	if(!clipping)
 	{
-		bool xbound  = points.info.width  < this->x_dim_;
-		bool ybound  = points.info.height < this->y_dim_;
+		bool xbound  = double(points.info.width)*scale  < this->x_dim_;
+		bool ybound  = double(points.info.height)*scale < this->y_dim_;
 		bound = xbound&&ybound;
 	}
 	else
@@ -290,6 +294,7 @@ bool OccupancyGrid::setPointTrait(const nm::OccupancyGrid& points, bool clipping
 		Point origin_patch;
 		origin_patch.x = points.info.origin.position.x;
 		origin_patch.y = points.info.origin.position.y;
+		converter.convertToGrid(origin_patch, origin_patch);
 		//Calculate the offset in origins between the grids, if there is one
 		origin_offset.getVector4fMap() = this->origin_.getVector4fMap() - origin_patch.getVector4fMap();
 
@@ -299,19 +304,21 @@ bool OccupancyGrid::setPointTrait(const nm::OccupancyGrid& points, bool clipping
 			for(int y = 0; y<points.info.width; y++)
 			{
 				int point_idx = this->calcIndex(x, y, 0);
-				Point patch_point;
+				app::Point patch_point;
 				patch_point.x = x;
 				patch_point.y = y;
-				patch_point.rgba = app::OBSTACLE;
+				converter.convertToGrid(patch_point, patch_point);
 				patch_point.getVector4fMap() += origin_offset.getVector4fMap();
+				app::PointTrait trait = app::UNKNOWN;
 				if(points.data.at(point_idx) > 80)
 				{
-					this->setPointTrait(patch_point, app::OBSTACLE);
+					trait = app::OBSTACLE;
 				}
 				else if(points.data.at(point_idx)>0)
 				{
-					this->setPointTrait(patch_point, app::FREE_LOW_COST);
+					trait = app::FREE_LOW_COST;
 				}
+				this->setPointTrait(patch_point, trait);
 			}
 		}
 	}
