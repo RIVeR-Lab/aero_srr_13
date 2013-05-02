@@ -13,7 +13,7 @@
 #include<tf/transform_datatypes.h>
 
 //*********************** LOCAL DEPENDENCIES ************************************//
-#include"AeroPathPlanningUtilities.h"
+#include <aero_path_planning/utilities/AeroPathPlanningUtilities.h>
 
 
 namespace aero_path_planning
