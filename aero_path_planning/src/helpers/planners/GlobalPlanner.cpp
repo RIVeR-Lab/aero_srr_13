@@ -406,7 +406,7 @@ void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
-	this->carrot_path_ = std::queue<Point>();
+	std::queue<Point> new_path;
 	Point start_point;
 	start_point.x = 0;
 	start_point.y = 0;
@@ -420,12 +420,14 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 		this->path_planner_->setCollision(this->cf_);
 		this->path_planner_->setCarrotDelta(10);
 		this->path_planner_->setSearchMap(*this->global_map_);
-		this->path_planner_->search(start_point, goal_point, this->plan_timerout_, this->carrot_path_);
+		this->path_planner_->search(start_point, goal_point, this->plan_timerout_, new_path);
 	}
 	else
 	{
 		ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
 	}
+
+	this->carrot_path_ = new_path;
 
 	OccupancyGridMsgPtr viz_message(new OccupancyGridMsg());
 	this->global_map_->generateMessage(*viz_message);
