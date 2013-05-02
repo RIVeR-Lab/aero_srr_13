@@ -201,6 +201,7 @@ void GlobalPlanner::registerTopics()
 	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
 	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2);
 	this->goal_pub_  = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2);
+	this->slam_sub_      = this->nh_.subscribe("/aero/global/slam_map", 1, &GlobalPlanner::slamCB, this);
 }
 
 void GlobalPlanner::registerTimers()

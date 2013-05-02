@@ -204,6 +204,7 @@ private:
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
 	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state
+	ros::Subscriber       slam_sub_;      ///Subscriber to nav_msgs::OccupancyGrid messages from SLAM
 	ros::Timer            chunck_timer_;  ///Timer to chunk global map into local map
 	ros::Timer            plan_timer_;    ///Timer to plan on the global map
 	ros::Duration         plan_timerout_; ///Timeout to produce global plans
