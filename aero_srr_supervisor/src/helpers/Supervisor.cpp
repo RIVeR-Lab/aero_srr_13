@@ -25,6 +25,7 @@ Supervisor::Supervisor(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	this->loadParams();
 	this->registerTopics();
 	this->registerTimers();
+	this->buildStateTable();
 	ROS_INFO_STREAM("Aero SRR Supervisor Running!");
 }
 
@@ -46,6 +47,58 @@ void Supervisor::registerTopics()
 
 void Supervisor::registerTimers()
 {
+
+}
+
+void Supervisor::buildStateTable()
+{
+	this->state_table_.addStateStringRepresentation(as::COLLECT, "COLLECT");
+	this->state_table_.addStateStringRepresentation(as::ERROR, "ERROR");
+	this->state_table_.addStateStringRepresentation(as::HOME, "HOME");
+	this->state_table_.addStateStringRepresentation(as::MANUAL, "MANUAL");
+	this->state_table_.addStateStringRepresentation(as::NAVOBJ, "NAVOBJ");
+	this->state_table_.addStateStringRepresentation(as::PAUSE, "PAUSE");
+	this->state_table_.addStateStringRepresentation(as::SAFESTOP, "SAFESTOP");
+	this->state_table_.addStateStringRepresentation(as::SEARCHING, "SEARCHING");
+	this->state_table_.addStateStringRepresentation(as::SHUTDOWN, "SHUTDOWN");
+	this->state_table_.addStateStringRepresentation(as::STARTUP, "STARTUP");
+
+	this->state_table_.addTranstion(as::PAUSE, as::COLLECT, true);
+	this->state_table_.addTranstion(as::PAUSE, as::ERROR, false);
+	this->state_table_.addTranstion(as::PAUSE, as::HOME, true);
+	this->state_table_.addTranstion(as::PAUSE, as::MANUAL, true);
+	this->state_table_.addTranstion(as::PAUSE, as::NAVOBJ, true);
+	this->state_table_.addTranstion(as::PAUSE, as::SAFESTOP, false);
+	this->state_table_.addTranstion(as::PAUSE, as::SEARCHING, true);
+	this->state_table_.addTranstion(as::PAUSE, as::SHUTDOWN, false);
+
+	this->state_table_.addTranstion(as::STARTUP, as::MANUAL);
+	this->state_table_.addTranstion(as::STARTUP, as::SEARCHING);
+	this->state_table_.addTranstion(as::STARTUP, as::SAFESTOP);
+	this->state_table_.addTranstion(as::STARTUP, as::ERROR);
+
+
+	this->state_table_.addTranstion(as::HOME, as::SAFESTOP);
+	this->state_table_.addTranstion(as::HOME, as::ERROR);
+	this->state_table_.addTranstion(as::HOME, as::MANUAL, true);
+
+	this->state_table_.addTranstion(as::NAVOBJ, as::SEARCHING, true);
+	this->state_table_.addTranstion(as::NAVOBJ, as::MANUAL, true);
+	this->state_table_.addTranstion(as::NAVOBJ, as::COLLECT, true);
+	this->state_table_.addTranstion(as::NAVOBJ, as::SAFESTOP);
+
+	this->state_table_.addTranstion(as::SEARCHING, as::MANUAL, true);
+	this->state_table_.addTranstion(as::SEARCHING, as::ERROR);
+	this->state_table_.addTranstion(as::SEARCHING, as::SAFESTOP);
+
+	this->state_table_.addTranstion(as::COLLECT, as::MANUAL, true);
+	this->state_table_.addTranstion(as::COLLECT, as::SEARCHING);
+	this->state_table_.addTranstion(as::COLLECT, as::SAFESTOP, true);
+	this->state_table_.addTranstion(as::COLLECT, as::ERROR);
+
+	this->state_table_.addTranstion(as::SAFESTOP, as::SHUTDOWN);
+
+	this->state_table_.addTranstion(as::ERROR, as::SAFESTOP, true);
 
 }
 

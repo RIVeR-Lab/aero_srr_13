@@ -15,6 +15,7 @@
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_srr_supervisor/SupervisorUtilities.h>
 #include <aero_srr_supervisor/SetControlMode.h>
+#include <aero_srr_supervisor/StateTable.h>
 //***********    NAMESPACES     ****************//
 namespace aero_srr_supervisor
 {
@@ -44,6 +45,12 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief builds the state transition table
+	 */
+	void buildStateTable();
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Callback for processing SetControlMode messages
 	 * @param message
 	 */
@@ -69,6 +76,8 @@ private:
 	ros::Timer      state_update_timer_;
 
 	tf::TransformListener transformer_;
+
+	StateTable  state_table_;
 };
 
 };
