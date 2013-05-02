@@ -43,3 +43,7 @@ aero_srr_msgs/src/aero_srr_msgs
 roboteq_driver/src/roboteq_driver
 hd_driver/src/hd_driver
 aero_base/src/aero_base
+object_locator/src/object_locator
+object_locator/launch
+object_locator/docs
+object_locator/cfg/cpp
