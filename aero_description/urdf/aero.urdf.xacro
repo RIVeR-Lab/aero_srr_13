@@ -67,7 +67,7 @@
   </xacro:static_transform>
 
   <!-- IMU -->
-  <xacro:static_transform parent="base_link" name="imu" xyz="0 0 0" rpy="0 0 0">
+  <xacro:static_transform parent="base_link" name="imu" xyz="0 0 0" rpy="0 ${-M_PI/2} ${-3*M_PI/4}">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
