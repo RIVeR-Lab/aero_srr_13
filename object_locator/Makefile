@@ -553,6 +553,19 @@ BOOMStage/fast:
 .PHONY : BOOMStage/fast
 
 #=============================================================================
+# Target rules for targets named DisparityStage
+
+# Build rule for target.
+DisparityStage: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DisparityStage
+.PHONY : DisparityStage
+
+# fast build rule for target.
+DisparityStage/fast:
+	$(MAKE) -f src/helpers/vision_pipeline/CMakeFiles/DisparityStage.dir/build.make src/helpers/vision_pipeline/CMakeFiles/DisparityStage.dir/build
+.PHONY : DisparityStage/fast
+
+#=============================================================================
 # Target rules for targets named SAMStage
 
 # Build rule for target.
@@ -622,6 +635,7 @@ help:
 	@echo "... objDet"
 	@echo "... Detman"
 	@echo "... BOOMStage"
+	@echo "... DisparityStage"
 	@echo "... SAMStage"
 	@echo "... SyncStage"
 .PHONY : help

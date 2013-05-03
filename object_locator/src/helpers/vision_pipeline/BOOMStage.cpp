@@ -26,40 +26,46 @@ void BOOMStage::onInit()
 
 void BOOMStage::loadParams()
 {
-	this->input_topic_="boom/sync_stage/stereo_pair";
+	this->input_topic_="stereo_camera/left/image_raw";
 	this->output_topic_="boom_stage/direction";
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,this->output_topic_);
-	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
-	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
+	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
+//	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
+//	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
 }
 
 void BOOMStage::registerTopics()
 {
-	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
+	this->image_left_ = it_->subscribeCamera(this->input_topic_,2,&BOOMStage::boomImageCb,this);
+//	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
 	//this->disp_image_pub_ = this->getNodeHandle().advertise<object_locator::SyncImageMsg>(this->output_topic_,2);
 }
 
-void BOOMStage::boomImageCb(const object_locator::SyncImageMsgConstPtr& msg)
+void BOOMStage::boomImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info)
 {
+	NODELET_INFO_STREAM("In Boom Image CB");
 	Mat_t normImage;
-	grassRemove(msg->left_image, normImage);
+	grassRemove(*msg, normImage);
 	blobIdentify(normImage);
 
 }
 
 void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 {
+	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
 	cv_bridge::CvImagePtr img;
-	Mat_t src = load_;
+//	Mat_t src = load_;
 	try {
 		img = cv_bridge::toCvCopy(msg, enc::BGR8);
 	} catch (cv_bridge::Exception& e) {
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
+	Mat_t src = img->image;
 	double R,G,B,sumRGB, nR,nG,nB, browness,whiteness;
 	Vec3b RGB,nRGB,ZeroV, Black;
+	Mat_t norma = img->image;
 	nRGB[0] = 0;
 	nRGB[1] = 0;
 	nRGB[2] = 0;
@@ -89,14 +95,15 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 			whiteness = sumRGB/756;
 			if((nG > .38) || ((std::abs(browness - 1) < .2) && (whiteness < .9)))
 			{
-			    normImage.at<cv::Vec3b>(x,y) = ZeroV;
+			    norma.at<cv::Vec3b>(x,y) = ZeroV;
 			}
 			else
 			{
-				normImage.at<cv::Vec3b>(x,y) = Black;
+				norma.at<cv::Vec3b>(x,y) = Black;
 			}
 		}
 	}
+	normImage = norma;
 }
 
 void BOOMStage::blobIdentify(Mat_t& img)
@@ -111,6 +118,7 @@ void BOOMStage::blobIdentify(Mat_t& img)
 	vector<Vec4i> hierarchy;
 
 	 medianBlur(img,med, 11);
+normImg = med;
 	 cvtColor(normImg, src_gray, CV_BGR2GRAY);
 
 	 /// Detect edges using Threshold
@@ -154,9 +162,10 @@ void BOOMStage::blobIdentify(Mat_t& img)
 	   /// Show in a window
 	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
 	   imshow( "Contours", drawing );
-		std::stringstream s;
-		s << "/home/srr/ObjectDetectionData/blob/0.png";
-		cv::imwrite(s.str(), drawing);
+	   cv::waitKey(3);
+//		std::stringstream s;
+//		s << "/home/srr/ObjectDetectionData/blob/0.png";
+//		cv::imwrite(s.str(), drawing);
 }
 
 void BOOMStage::generateMsg()

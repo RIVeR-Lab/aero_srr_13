@@ -18,6 +18,11 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
 #include <image_geometry/stereo_camera_model.h>
+#include <image_transport/image_transport.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 namespace object_locator
 {
@@ -28,7 +33,7 @@ namespace object_locator
 	protected:
 		void loadParams();
 		void registerTopics();
-		virtual void boomImageCb(const object_locator::SyncImageMsgConstPtr& msg);
+		virtual void boomImageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info);
 		/**
 		 * @author Samir Zutshi
 		 * @brief Median filters, normalizes, and bandpass filters grass in the image
@@ -45,6 +50,9 @@ namespace object_locator
 		virtual void generateMsg();
 
 		ros::Subscriber sync_image_sub_;
+		image_transport::ImageTransport* it_;
+		image_transport::CameraSubscriber image_left_;
+
 
 		std::string input_topic_, output_topic_;
 		Mat_t load_;

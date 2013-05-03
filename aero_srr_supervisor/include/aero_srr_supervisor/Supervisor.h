@@ -15,6 +15,7 @@
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_srr_supervisor/SupervisorUtilities.h>
 #include <aero_srr_supervisor/SetControlMode.h>
+#include <aero_srr_supervisor/StateTable.h>
 //***********    NAMESPACES     ****************//
 namespace aero_srr_supervisor
 {
@@ -25,24 +26,6 @@ public:
 	Supervisor(ros::NodeHandle& nh, ros::NodeHandle& p_nh);
 
 private:
-
-	/**
-	 * @author Adam Panzica
-	 * @brief  Enum over the states that Supervisor can be in
-	 */
-	enum State
-	{
-		ERROR,    //!< ERROR The robot has encountered an error
-		STARTUP,  //!< STARTUP The robot is currently in its startup sequence
-		MANUAL,   //!< MANUAL The robot is currently in manual control mode
-		SEARCHING,//!< SEARCHING The robot is currently exploring the map
-		NAVOBJ,   //!< NAVOBJ The robot is currently navigating to an object
-		COLLECT,  //!< COLLECT The robot is currently collecting an object of interest
-		HOME,     //!< HOME The robot is currently returning to the home platform
-		PAUSE,    //!< PAUSE The robot is currently paused
-		SHUTDOWN, //!< SHUTDOWN The robot is currently in its shutdown sequence
-		SAFESTOP  //!< SAFESTOP The robot is currently in a safe-stop configuration
-	};
 
 	/**
 	 * @author Adam Panzica
@@ -62,6 +45,12 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief builds the state transition table
+	 */
+	void buildStateTable();
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Callback for processing SetControlMode messages
 	 * @param message
 	 */
@@ -69,10 +58,9 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Callback for handling state updates
-	 * @param event
+	 * @brief  updates the state of the robot
 	 */
-	void stateUptdCb(const ros::TimerEvent& event);
+	void stateUptd() const;
 
 	State state_;
 
@@ -88,6 +76,8 @@ private:
 	ros::Timer      state_update_timer_;
 
 	tf::TransformListener transformer_;
+
+	StateTable  state_table_;
 };
 
 };

@@ -56,7 +56,7 @@
 
 
   <!-- Arm -->
-  <xacro:static_transform parent="base_link_top_plate_part" name="arm_base" xyz="0.325374 0 0.085852" rpy="0 0 0">
+  <xacro:static_transform parent="base_link_top_plate_part" name="arm_base" xyz="0.325374 0 0.085852" rpy="0 0 ${-M_PI/2}">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
