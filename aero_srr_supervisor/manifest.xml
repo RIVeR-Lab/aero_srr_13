@@ -14,7 +14,6 @@
   <depend package="nav_msgs"/>
   <depend package="tf"/>
   <depend package="aero_srr_msgs"/>
-  <depend package="aero_path_planning"/>
 
 </package>
 

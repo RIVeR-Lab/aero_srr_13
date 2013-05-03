@@ -10,10 +10,11 @@
 
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/bind.hpp>
+#include<deque>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
 #include<aero_path_planning/planners/GlobalPlanner.h>
-#include<aero_path_planning/utilities/OccupancyGrid.h>
+#include<aero_path_planning/occupancy_grid/OccupancyGrid.h>
 #include<aero_path_planning/planning_strategies/AStarCarrot.h>
 //**********************NAMESPACES*****************************//
 

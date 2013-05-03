@@ -13,6 +13,7 @@
   <depend package="apriltags"/>
   <depend package="vision_comm"/>
   <depend package="tf"/>
+  <depend package="aero_srr_msgs"/>
 
 
 </package>
