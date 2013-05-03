@@ -14,7 +14,7 @@
 
 //****************SYSTEM DEPENDANCIES**************************//
 #include<boost/function.hpp>
-#include<queue>
+#include<deque>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/occupancy_grid/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
@@ -85,7 +85,7 @@ namespace aero_path_planning
 		 * and support should be checked by calling the allowsPartialPath() method
 		 *
 		 */
-		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::queue<aero_path_planning::Point>& result_path) = 0;
+		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::deque<aero_path_planning::Point>& result_path) = 0;
 
 		/**
 		 * @author Adam Panzica
