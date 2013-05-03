@@ -6,7 +6,7 @@
  */
 
 //************************************************ INCLUDES ***************************************//
-#include <aero_path_planning/utilities/Tentacles.h>
+#include <aero_path_planning/tentacles/Tentacles.h>
 #include"OryxPathPlannerConfig.h"
 
 //************************************************ MACROS ***************************************//

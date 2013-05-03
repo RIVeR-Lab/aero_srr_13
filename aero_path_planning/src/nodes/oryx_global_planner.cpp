@@ -204,5 +204,6 @@ int main(int argc, char **argv)
 
 	aero_path_planning::AStarCarrot path;
 	aero_path_planning::GlobalPlanner planner(nh, p_nh, path);
-	ros::spin();
+	ros::MultiThreadedSpinner spinner(2);
+	spinner.spin();
 }
