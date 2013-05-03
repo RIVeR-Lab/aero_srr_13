@@ -46,17 +46,17 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::Ca
 	pose2.position.x = 10;
 	pose2.position.y = 10;
 	pose2.orientation.w = 1;
-	this->mission_goals_.push_back(pose2);
+	//this->mission_goals_.push_back(pose2);
 	geometry_msgs::Pose pose3;
 	pose3.position.x = 0;
 	pose3.position.y = 10;
 	pose3.orientation.w = 1;
-	this->mission_goals_.push_back(pose3);
+	//this->mission_goals_.push_back(pose3);
 	geometry_msgs::Pose pose4;
 	pose4.position.x = 0;
 	pose4.position.y = 0;
 	pose4.orientation.w = 1;
-	this->mission_goals_.push_back(pose4);
+	//this->mission_goals_.push_back(pose4);
 	ROS_INFO_STREAM("Test Mission Goals Built");
 
 	this->cf_ = boost::bind(&GlobalPlanner::checkCollision, this, _1, _2);

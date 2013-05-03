@@ -135,7 +135,7 @@ void LocalPlanner::loadParam()
 	std::stringstream p_exp_fact_msg;
 	p_exp_fact_msg<<exp_fact;
 
-	//number of tentacles per speed set
+	//number of speed sets
 	std::string p_num_speed_set(S_NUMBER);
 	int num_speed_set = 15;
 	std::stringstream p_numSpeedSet_msg;
@@ -143,19 +143,19 @@ void LocalPlanner::loadParam()
 
 	//Max Speed
 	std::string p_max_speed(S_MAX_SPEED);
-	double max_speed = 1;
+	double max_speed = 1.5;
 	std::stringstream p_max_speed_msg;
 	p_max_speed_msg<<max_speed<<"m/s";
 
 	//Min Speed
 	std::string p_min_speed(S_MIN_SPEED);
-	double min_speed = 1;
+	double min_speed = .75;
 	std::stringstream p_min_speed_msg;
 	p_min_speed_msg<<min_speed<<"m/s";
 
 	//Goal Weight
 	std::string p_goal_weight(GOAL_WEIGHT);
-	double goal_weight = 2;
+	double goal_weight = 1.0;
 	std::stringstream p_goal_weight_msg;
 	p_goal_weight_msg<<goal_weight;
 
