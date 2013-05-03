@@ -41,6 +41,8 @@ rosbuild_add_library(pidcontrol src/pid_control.cpp)
 
 #Testers
 rosbuild_add_executable(test_arm_control src/testers/test_arm_control.cpp )
+rosbuild_add_executable(test_base_servo src/testers/test_base_servo.cpp )
+
 #Nodes
 rosbuild_add_executable(arm_controller src/nodes/arm_controller.cpp )
 rosbuild_add_executable(arm_position_control src/nodes/arm_position_control.cpp )
