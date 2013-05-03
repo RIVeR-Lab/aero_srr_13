@@ -10,7 +10,7 @@
 
 //****************SYSTEM DEPENDANCIES**************************//
 #include<gtest/gtest.h>
-#include<deque>
+#include<queue>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
 //**********************NAMESPACES*****************************//
@@ -483,7 +483,7 @@ TEST_F(RRTCarrotTestFixture, testSearch)
 	goal_point.x = this->x_size_-this->origin_.x;
 	goal_point.x = this->y_size_-this->origin_.x;
 	goal_point.z = 0;
-	std::deque<Point> path;
+	std::queue<Point> path;
 	ros::Duration timeout(1);
 	//Perform a search
 	ASSERT_TRUE(this->search(this->origin_, goal_point, timeout, path));

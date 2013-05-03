@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="rosbag" type="record" name="aero_bag" 
+	args="-o ~/TEST_DATA_QUAD_ /tf /aero_base_pose_ekf/odom /map /laser /aero/base/cmd_vel /aero/global/goal /aero/global/path /aero/lidar/global /aero/lidar/local /aero/odom_base /aero/tentacle_visualization /joint_states /map_metadata /rosout /rosout_agg /slam_gmapping/entropy /stereo_camera/left/image_raw /stereo_camera/left/camera_info /stereo_camera/right/image_raw /stereo_camera/right/camera_info"/>
+	
+  
+</launch>

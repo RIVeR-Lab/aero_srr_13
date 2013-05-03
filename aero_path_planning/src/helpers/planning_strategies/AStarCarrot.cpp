@@ -11,6 +11,7 @@
 #include <list>
 #include <iostream>
 #include <boost/unordered_map.hpp>
+#include <pcl/registration/distances.h>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/planning_strategies/AStarCarrot.h>
 //***********    NAMESPACES     ****************//
@@ -301,10 +302,15 @@ void AStarCarrot::buildSolutionPath(const Node_t& goal_node, std::deque<Point>& 
 
 	path.push_front(goal_node.getLocation());
 	NodePtr_t path_node(goal_node.getParent());
+	Point lastPoint = goal_node.getLocation();
 
 	while(path_node->getParent() != NodePtr_t())
 	{
-		path.push_front(path_node->getLocation());
+		if(pcl::distances::l2(path_node->getLocation().getVector4fMap(), lastPoint.getVector4fMap())>this->delta_)
+		{
+			path.push_front(path_node->getLocation());
+			lastPoint = path_node->getLocation();
+		}
 		path_node = path_node->getParent();
 	}
 	path.push_front(path_node->getLocation());
@@ -377,7 +383,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		bool os_empty  = false;
 		while(!success&&!timeout_c&&!os_empty)
 		{
-			if(closed_set.size()%50 == 0)
+			if(closed_set.size()%10000 == 0)
 			{
 				ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
 			}
