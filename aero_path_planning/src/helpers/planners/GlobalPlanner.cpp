@@ -286,7 +286,7 @@ void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 
 void GlobalPlanner::odomCB(const nm::OdometryConstPtr& message)
 {
-	ROS_INFO_STREAM("I Got New Odometry Data!");
+	//ROS_INFO_STREAM("I Got New Odometry Data!");
 	this->last_odom_ = *message;
 	if(!this->carrot_path_.empty())
 	{
@@ -380,20 +380,20 @@ void GlobalPlanner::copyNextGoalToGrid(app::OccupancyGrid& grid) const
 		goal_pose.header = goal_point_m.header;
 		goal_pose.pose.position = goal_point_m.point;
 		this->goal_pub_.publish(goal_pose);
-		ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<"> in "<<goal_point_m.header.frame_id);
+		//ROS_INFO_STREAM("The pre-transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<"> in "<<goal_point_m.header.frame_id);
 		try
 		{
 
 	  		this->transformer_.waitForTransform(grid.getFrameId(), goal_point_m.header.frame_id, goal_point_m.header.stamp, ros::Duration(this->local_update_rate_));
 			this->transformer_.transformPoint(grid.getFrameId(), goal_point_m, goal_point_m);
 
-			ROS_INFO_STREAM("Transformed to "<<grid.getFrameId());
+			//ROS_INFO_STREAM("Transformed to "<<grid.getFrameId());
 		}
 		catch(std::exception& e)
 		{
 			ROS_ERROR_STREAM_THROTTLE(1, e.what());
 		}
-		ROS_INFO_STREAM("The transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<">");
+		//ROS_INFO_STREAM("The transformed point was <"<<goal_point_m.point.x<<","<<goal_point_m.point.y<<","<<goal_point_m.point.z<<">");
 		Point goal_point;
 		goal_point.x = goal_point_m.point.x;
 		goal_point.y = goal_point_m.point.y;
@@ -402,7 +402,7 @@ void GlobalPlanner::copyNextGoalToGrid(app::OccupancyGrid& grid) const
 		try
 		{
 			grid.getConverter().convertToGrid(goal_point, goal_point);
-			ROS_INFO_STREAM("I set the local goal to <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
+			//ROS_INFO_STREAM("I set the local goal to <"<<goal_point.x<<","<<goal_point.y<<","<<goal_point.z<<">");
 			grid.setGoalPoint(goal_point);
 		}
 		catch(std::runtime_error& e)
