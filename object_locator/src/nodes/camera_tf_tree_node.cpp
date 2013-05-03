@@ -20,15 +20,15 @@ public:
 	void broadcastTimer(const ros::TimerEvent& event)
 	{
 		tf::Transform camera, armbase;
-		camera.setOrigin(tf::Vector3(1.8161, 0, 0.6858));
+		camera.setOrigin(tf::Vector3(-0.0254 , .2095, .2032));
 		tf::Quaternion cam_q;
-		cam_q.setEuler((-3.14159/2.0)+(-3.14159/6),0, 3*(-3.14159/2.0));
+		cam_q.setEuler((3.14159/2.0)+(39*(3.14159/180)),0, 3*(3.14159/2.0));
 //		cam_q.setEuler(0.0,0.0,0.0);
 		camera.setRotation(cam_q);
 		broadcastCam.sendTransform(tf::StampedTransform(camera, ros::Time::now(),  "/world", "/stereo_bottom/center"));
 
 
-		armbase.setOrigin(tf::Vector3(0, 0, .1229));
+		armbase.setOrigin(tf::Vector3(0, 0, 0));
 		armbase.setRotation(tf::Quaternion(0, 0, 0));
 		broadcastArm.sendTransform(tf::StampedTransform(armbase, ros::Time::now(),  "/world", "/arm_base"));
 	}
