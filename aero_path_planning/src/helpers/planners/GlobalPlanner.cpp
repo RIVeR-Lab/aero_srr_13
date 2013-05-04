@@ -296,7 +296,7 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sm::PointCloud2& scan_cloud, ap
 
 void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPtr& message)
 {
-	ROS_INFO_STREAM("I Got New Odometry Data!");
+	//ROS_INFO_STREAM("I Got New Odometry Data!");
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped trans_point_m;
@@ -323,8 +323,8 @@ void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPt
 		current_point.z = 0;
 		this->global_map_->getConverter().convertToGrid(current_point, this->current_point_);
 		double dist = pcl::distances::l2(this->current_point_.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
-		ROS_INFO_STREAM_THROTTLE(1, "At position <"<<this->current_point_.x<<","<<this->current_point_.y<<">, Goal Position <"<<carrot_path_.front().x<<","<<carrot_path_.front().y<<">, dist="<<dist);
-		if(dist<2/this->global_res_)
+		ROS_INFO_STREAM_THROTTLE(10, "At position <"<<this->current_point_.x<<","<<this->current_point_.y<<">, Goal Position <"<<carrot_path_.front().x<<","<<carrot_path_.front().y<<">, dist="<<dist);
+		if(dist<2.0/this->global_res_)
 		{
 			this->carrot_path_.pop_front();
 			this->updateGoal();
