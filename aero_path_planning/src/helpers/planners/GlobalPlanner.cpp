@@ -221,9 +221,10 @@ void GlobalPlanner::registerTopics()
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
 	this->odom_sub_      = this->nh_.subscribe("aero_base_pose_ekf/odom",  2, &GlobalPlanner::odomCB,  this);
-	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2, true);
+	//this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2, true);
 	this->goal_pub_      = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2, true);
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
+	this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
 }
 
 void GlobalPlanner::registerTimers()
@@ -389,6 +390,12 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	{
 		ROS_ERROR_STREAM_THROTTLE(1, e.what());
 	}
+}
+
+void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
+{
+	ROS_INFO_STREAM("Recieved new SLAM map information!");
+	this->global_map_->setPointTrait(*message);
 }
 
 void GlobalPlanner::updateGoal() const
