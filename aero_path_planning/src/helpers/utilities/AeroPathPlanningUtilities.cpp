@@ -293,3 +293,18 @@ void aero_path_planning::castArc(const int& radius, const double& sweep_angle, c
 	}
 }
 
+
+void aero_path_planning::pointToPose(const aero_path_planning::Point& point, geometry_msgs::Pose& pose)
+{
+	pose.position.x = point.x;
+	pose.position.y = point.y;
+	pose.position.z = point.z;
+}
+
+
+void aero_path_planning::poseToPoint(const geometry_msgs::Pose& pose, aero_path_planning::Point& point)
+{
+	point.x = pose.position.x;
+	point.y = pose.position.y;
+	point.z = pose.position.z;
+}

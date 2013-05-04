@@ -20,6 +20,7 @@
 #include <pcl/registration/distances.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/foreach.hpp>
+#include <geometry_msgs/Pose.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include <aero_path_planning/utilities/TypeDefinitions.h>
 #include <aero_path_planning/utilities/PointConverter.hpp>
@@ -295,7 +296,24 @@ void castArc(const int& radius, const double& sweep_angle, const int& rgba, cons
 //	}
 //};
 
+/**
+ * @author Adam Panzica
+ * @brief Converts a Point to a Pose message
+ * @param [in]  point The point to convert to pose
+ * @param [out] pose  The pose to fill
+ */
+void pointToPose(const aero_path_planning::Point& point, geometry_msgs::Pose& pose);
+
+/**
+ * @author Adam Panzica
+ * @brief Converts a Pose message into a Point
+ * @param [in]  pose  The pose to convert
+ * @param [out] point The point to fill
+ */
+void poseToPoint(const geometry_msgs::Pose& pose, aero_path_planning::Point& point);
+
 } /* aero_path_planning */;
+
 
 
 #endif /* ORYXPATHPLANNINGUTILITIES_H_ */
