@@ -52,11 +52,6 @@ public:
 	 * @param from	 Reference to the point to convert to engineering units
 	 * @param to Reference to a point to place the converted data into
 	 */
-	inline void convertToEng(Point& from, Point& to) const
-	{
-			to.getVector4fMap() = cm_*from.getVector4fMap();
-			to.rgba = from.rgba;
-	}
 	inline void convertToEng(const Point& from, Point& to) const
 	{
 		to.getVector4fMap() = cm_*from.getVector4fMap();
@@ -65,18 +60,16 @@ public:
 
 	/**
 	 * @author	Adam Panzica
-	 * @brief	Converts from an integer representation coordinate system to a floating point one
+	 * @brief	Converts from an floatin point representation to an integer coordinate system
 	 * @param from	 Reference to the point to convert to grid units
 	 * @param to Reference to a point to place the converted data into
 	 */
-	inline void convertToGrid(Point& from, Point& to) const
-	{
-			to.getVector4fMap() = cm_.inverse()*from.getVector4fMap();
-			to.rgba = from.rgba;
-	}
 	inline void convertToGrid(const Point& from, Point& to) const
 	{
 		to.getVector4fMap() = cm_.inverse()*from.getVector4fMap();
+		to.x = (int)to.x;
+		to.y = (int)to.y;
+		to.z = (int)to.z;
 		to.rgba = from.rgba;
 	}
 

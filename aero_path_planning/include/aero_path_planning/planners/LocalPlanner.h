@@ -15,10 +15,15 @@
 #include<boost/circular_buffer.hpp>
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
+#include <dynamic_reconfigure/server.h>
+#include <tf/transform_listener.h>
+#include <geometry_msgs/PoseStamped.h>
 //********************** LOCAL  DEPENDANCIES **********************//
 #include <aero_path_planning/utilities/AeroPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
 #include <aero_srr_msgs/AeroState.h>
+#include <aero_path_planning/LocalPlannerConfig.h>
+#include <aero_path_planning/utilities/TentacleRateLimiter.h>
 
 namespace aero_path_planning
 {
@@ -41,6 +46,7 @@ public:
 private:
 
 	int		platform_;		    ///flat marking what platform we're running on
+	int     rate_limit_;		///Rate-change limit on tentacle selection
 	bool	should_plan_;	    ///Flag for signaling if the local planner should be running
 	bool    tentacle_mode_;     ///Flag for signalling if the local planner should be running in tetacle mode
 
@@ -65,6 +71,7 @@ private:
 
 	ros::NodeHandle nh_;	    ///Node handle for publishing/subscribing to topics
 	ros::NodeHandle p_nh_;      ///Nodes handle to load private params
+	ros::Subscriber goal_sub_;  ///Subscrier to the current global goal
 	ros::Subscriber pc_sub_;    ///Subscriber to the ROS topic to receive new occupancy grid data over
 	ros::Subscriber state_sub_; ///Subscriber to the ROS topic to receive AeroState messages
 	ros::Subscriber joy_sub_;   ///Subscriber to the ROS topic to receive Joy messages
@@ -72,14 +79,32 @@ private:
 	ros::Subscriber lidar_sub_; ///Subscriber to the ROS topic to receive local LIDAR data over
 	ros::Publisher	vel_pub_;	///Publisher for Twist messages to a platform that takes them
 	ros::Publisher  tent_pub_;  ///Publisher for visualizing selected tentacles
+	ros::Publisher  occ_viz_pub_;///Publisher for visualizing the local occupancy grid
 	ros::Timer      vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
 	ros::Timer      plan_timer_;///Timer that will attempt to select a new tentacle at a constant rate
+	ros::Duration   plan_period_;///Period between planning callbacks
+	ros::Duration   vel_period_; ///Period between velocity callbacks
+
+	tf::TransformListener transformer_; ///TF access
+
+	dynamic_reconfigure::Server<LocalPlannerConfig> dr_server_; ///Dynamic reconfigure server
 
 	aero_path_planning::Point	origin_;	///The origin to use for the occupancy grids
 	TentacleGeneratorPtr tentacles_;	///Pointer to the tentacle generator which contains the tentacles to use for planning
+	TentacleRateLimiter*  limiter_;      ///Limiter for clamping the rate-change between tentacle selections
 
 
 	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
+	OccupancyGrid working_grid_;                                ///The last new occupancy grid recieved
+	PointCloudPtr lidar_patch_;                                 ///The last patch of LIDAR data recieved
+	geometry_msgs::PoseStampedConstPtr global_goal_;			///The most reciently recieved global goal
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Callback for recieving a new goal
+	 * @param message
+	 */
+	void goalCB(const geometry_msgs::PoseStampedConstPtr& message);
 
 	/**
 	 * @author	Adam Panzica
@@ -132,6 +157,14 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Dnyamic reconfigure callback
+	 * @param config
+	 * @param levels
+	 */
+	void drCB(const aero_path_planning::LocalPlannerConfig& config, uint32_t levels);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Performs platform specific sending of velocity commands
 	 * @param velocity The linear velocity in +x to follow
 	 * @param radius The radius of curvature to follow
@@ -148,6 +181,7 @@ private:
 
 
 	void visualizeTentacle(int speed_set, int tentacle);
+	void visualizeOcc(const OccupancyGrid& grid);
 
 	/**
 	 * @author Adam Panzica
@@ -202,6 +236,21 @@ private:
 	 * @param [in] stop True to set safe mode, false to release it
 	 */
 	void setSafeMode(bool safe);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Checks to see if a point is in bounds
+	 * @param [in] point The point to check
+	 * @return True if in-bounds on the local grid, else false
+	 */
+	bool boundsCheck(const Point& point) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Applies a global goal to the local frame
+	 * @param in] grid The gird to apply the goal to
+	 */
+	void applyGoal(OccupancyGrid& grid) const;
 
 };
 

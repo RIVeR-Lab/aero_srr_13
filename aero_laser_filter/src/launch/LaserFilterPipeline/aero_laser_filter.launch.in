@@ -29,5 +29,6 @@
 		<arg name="output_topic" value="$(arg global_topic)" />
 		<arg name="output_frame" value="$(arg global_frame)" />
 	</include>
+
 	
 </launch>

@@ -13,3 +13,19 @@
   </description>
   </class>
 </library>
+
+<library path="lib/libSyncStage">
+  <class name="object_locator/SyncStage" type="object_locator::SyncStage" base_class_type="nodelet::Nodelet">
+  <description>
+	This nodelet creates a synced stereo pair to process.
+  </description>
+  </class>
+</library>
+
+<library path="lib/libBOOMStage">
+  <class name="object_locator/BOOMStage" type="object_locator::BOOMStage" base_class_type="nodelet::Nodelet">
+  <description>
+	This nodelet processes the median,normalize, and blob detect filter for the boom cameras.
+  </description>
+  </class>
+</library>

@@ -50,7 +50,7 @@ namespace object_locator
 		 * @brief Given two rectified images, a disparity map is produced
 		 * @param [in] rectLeft of type CV_8U
 		 * @param [in] rectRight of type CV_8U
-		 * @param [out] disparity of type CV_16S
+		 * @param [out] disparity of type CV_16UC1
 		 */
 		virtual void computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRight, Mat_t& disparity)const;
 

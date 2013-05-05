@@ -7,10 +7,10 @@ set(R_NS aero)
 set(T_NS transform)
 set(T_IMU imu)
 set(T_ARM arm_base)
-set(T_LFC left_camera)
-set(T_RTC right_camera)
+set(T_LFC lower_stereo/left_camera_frame)
+set(T_RTC lower_stereo/right_camera_frame)
 set(T_BOM boom)
-set(T_LDR lidar)
+set(T_LDR laser)
 
 
 #Parameter for the topic for exchanging OccupancyGrids between the global and local planner

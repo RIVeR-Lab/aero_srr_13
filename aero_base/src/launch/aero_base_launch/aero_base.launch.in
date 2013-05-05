@@ -4,6 +4,8 @@
   //Drive Base
   <arg name="odom_topic" default="/odom" />
   <arg name="velocity_command_topic" default="/cmd_vel" />
+  <arg name="drive_pose_frame" default="/odom" />
+  <arg name="drive_twist_frame" default="/base_footprint" />
 
   //Camera Boom
   <arg name="camera_boom_pose_topic" default="/camera_boom_pose" />
@@ -39,18 +41,20 @@
     </group>
   </group>
   
-  <node name="aero_base_node" pkg="aero_base" type="aero_base_node" />
+  <include file="$(find aero_description)/launch/aero.launch"/>
 
   <!-- Launch IMU Driver -->
   <node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
     <param name="device_id" value="kvh-1750" />
+    <param name="device_address" value="/dev/ttyUSB0" />
     <param name="imu_topic" value="$(arg imu_topic)" />
   </node>
 
   <!-- Launch Driver Controller and Drive motor driver -->
   <include file="$(find aero_base)/launch/aero_drive_node.launch">
     <arg name="odom_topic" value="$(arg odom_topic)" />
-    <arg name="odom_frame" value="/odom" />
+    <arg name="pose_frame" value="$(arg drive_pose_frame)" />
+    <arg name="twist_frame" value="$(arg drive_twist_frame)" />
     <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
   </include>
 

@@ -8,7 +8,7 @@
 #include<sensor_msgs/PointCloud2.h>
 #include<aero_srr_msgs/SoftwareStop.h>
 #include<aero_path_planning/OccupancyGridMsg.h>
-#include<aero_path_planning/utilities/OccupancyGrid.h>
+#include<aero_path_planning/occupancy_grid/OccupancyGrid.h>
 
 ///Macro for printing out warning messages if default parameters are used
 #define PARAM_WARN(param,value) ROS_WARN(warn_message.c_str(), param.c_str(), value.c_str())
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 		for(aero_path_planning::PointCloud::iterator line_itr = line_cloud.begin(); line_itr<line_cloud.end(); line_itr++)
 		{
 			PRINT_POINT("Line Point", (*line_itr));
-			grid.setPointTrait(*line_itr, (aero_path_planning::PointTrait)line_itr->rgba);
+			grid.setPointTrait(*line_itr);
 		}
 
 		ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());

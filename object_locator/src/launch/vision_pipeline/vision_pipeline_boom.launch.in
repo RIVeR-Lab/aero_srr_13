@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="vision_pipeline_boom"  args="manager" output="screen"/>
+  
+    <node pkg="nodelet" type="nodelet" name="BOOMStage" args="load object_locator/BOOMStage vision_pipeline_boom" output="screen">
+  </node>
+  
+</launch>

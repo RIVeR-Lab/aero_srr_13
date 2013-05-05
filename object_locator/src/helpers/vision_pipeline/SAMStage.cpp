@@ -14,21 +14,24 @@ PLUGINLIB_DECLARE_CLASS(object_locator, SAMStage, object_locator::SAMStage,
 namespace enc = sensor_msgs::image_encodings;
 using namespace object_locator;
 
-
 void SAMStage::onInit()
 {
+	NODELET_INFO_STREAM("Initializing SAM Stage");
 	loadParams();
+	NODELET_INFO_STREAM("Parameters Loaded, registering topics...");
 	registerTopics();
+	NODELET_INFO_STREAM("SAM Stage Initialized");
 }
 
 void SAMStage::loadParams() {
 	this->input_topic_  = "disparity_stage/disparity";
-	this->output_topic_ = "sam_stage/detection_xyz";
+	this->output_topic_ = "ObjectPose";
+	NODELET_INFO_STREAM("Topics Strings Set");
 	this->getPrivateNodeHandle().getParam(this->input_topic_,
 			this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,
 			this->output_topic_);
-
+	NODELET_INFO_STREAM("Topics Set");
 	std::string cascade_path_WHA("cascade_path_WHA");
 	cascade_path_WHA_ =
 			"/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
@@ -42,7 +45,18 @@ void SAMStage::loadParams() {
 
 	cascade_path_WHASUN_ =
 			"/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
+	NODELET_INFO_STREAM("cascade paths set");
+	if (!cascade_WHA_.load(cascade_path_WHA_)) {
+		NODELET_ERROR_STREAM("--(!)Error loading "<< cascade_path_WHA);
+	}
 
+	if (!cascade_PINK_.load(cascade_path_PINK_)) {
+		NODELET_ERROR_STREAM("--(!)Error loading " << cascade_path_PINK_);
+	}
+	if (!cascade_WHASUN_.load(cascade_path_WHASUN_)) {
+		NODELET_ERROR_STREAM("--(!)Error loading " << cascade_path_WHASUN_);
+	}
+	NODELET_INFO_STREAM("cascades loaded");
 	std::string thresh_dist("thresh_dist");
 	thresh_dist_ = .5;
 	this->getPrivateNodeHandle().getParam(thresh_dist, thresh_dist_);
@@ -58,23 +72,31 @@ void SAMStage::loadParams() {
 	std::string thresh_det("thresh_det");
 	thresh_det_ = .5;
 	this->getPrivateNodeHandle().getParam(thresh_det, thresh_det_);
-
+	NODELET_INFO_STREAM("Det man vals set");
 	this->sherlock_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
+	NODELET_INFO_STREAM("Det man Initialized!");
+	WINDOWLeft_ = "Left camera image";
+//	WINDOWDisp_ = "Disparity image";
+//	cv::namedWindow(WINDOWLeft_);
+//	cv::namedWindow(WINDOWDisp_);
+	NODELET_INFO_STREAM("CV windows set.");
 
 }
 
 void SAMStage::registerTopics() {
 	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,
 			2, &SAMStage::recieveImageCb, this);
-	this->tf_point_pub_ = this->getNodeHandle().advertise<
+	NODELET_INFO_STREAM("registering publisher");
+	this->ObjLocationPub_ = this->getNodeHandle().advertise<
 			aero_srr_msgs::ObjectLocationMsg>(this->output_topic_, 2);
+
 }
 
 void SAMStage::recieveImageCb(
 		const object_locator::SyncImagesAndDisparityConstPtr& msg) {
 	aero_srr_msgs::ObjectLocationMsgPtr ptMsg(new aero_srr_msgs::ObjectLocationMsg);
 	fetchAndRetrieve(msg->images.left_image);
-	calculate3DPoint(msg->disparity_image, msg);
+	calculate3DPoint(msg);
 	generateTFMessage(*ptMsg);
 	ObjLocationPub_.publish(ptMsg);
 
@@ -89,19 +111,10 @@ void SAMStage::fetchAndRetrieve(const sensor_msgs::Image& msg) {
 	try {
 		img = cv_bridge::toCvCopy(msg, enc::BGR8);
 	} catch (cv_bridge::Exception& e) {
-		ROS_ERROR("cv_bridge exception: %s", e.what());
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
-	if (!cascade_WHA_.load(cascade_path_WHA_)) {
-		printf("--(!)Error loading\n");
-	}
 
-	if (!cascade_PINK_.load(cascade_path_PINK_)) {
-		printf("--(!)Error loading\n");
-	}
-	if (!cascade_WHASUN_.load(cascade_path_WHASUN_)) {
-		printf("--(!)Error loading\n");
-	}
 	cv::GaussianBlur(img->image, img->image, cv::Size(9, 9), 2, 2);
 	cv::cvtColor(img->image, frame_gray, CV_BGR2GRAY);
 	cv::equalizeHist(frame_gray, frame_gray);
@@ -152,44 +165,56 @@ void SAMStage::fetchAndRetrieve(const sensor_msgs::Image& msg) {
 		detection_list_.push_back(newDetection);
 
 	}
-	for (size_t j = 0; j < SUN_faces.size(); j++) {
-//		cout << "Entered circle drawing loop" << endl;
-
-		Mat_t faceROI = frame_gray(SUN_faces[j]);
-
-		//-- In each face, detect eyes
-
-		//-- Draw the face
-		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
-				SUN_faces[j].y + SUN_faces[j].height / 2);
-		cv::ellipse(img->image, center,
-				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
-				360, cv::Scalar(0, 0, 255), 2, 8, 0);
-
-		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-
-		DetectionPtr_t newDetection(new Detection_t());
-		newDetection->first.first = center.x;
-		newDetection->first.second = center.y;
-		newDetection->second = WHA;
-		detection_list_.push_back(newDetection);
-
-		cv::imshow("Left_Camera", img->image);
-		cv::waitKey(3);
-
-	}
+//	for (size_t j = 0; j < SUN_faces.size(); j++) {
+////		cout << "Entered circle drawing loop" << endl;
+//
+//		Mat_t faceROI = frame_gray(SUN_faces[j]);
+//
+//		//-- In each face, detect eyes
+//
+//		//-- Draw the face
+//		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
+//				SUN_faces[j].y + SUN_faces[j].height / 2);
+//		cv::ellipse(img->image, center,
+//				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
+//				360, cv::Scalar(0, 0, 255), 2, 8, 0);
+//
+//		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+//
+//		DetectionPtr_t newDetection(new Detection_t());
+//		newDetection->first.first = center.x;
+//		newDetection->first.second = center.y;
+//		newDetection->second = WHA;
+//		detection_list_.push_back(newDetection);
+//
+//
+//
+//	}
+//	cv::imshow(WINDOWLeft_, img->image);
+//	cv::waitKey(3);
 }
 
-void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
-		const object_locator::SyncImagesAndDisparityConstPtr& msg) {
+void SAMStage::calculate3DPoint(const object_locator::SyncImagesAndDisparityConstPtr& msg) {
 	cv_bridge::CvImagePtr disp;
 	try {
-		disp = cv_bridge::toCvCopy(msg->disparity_image, enc::BGR8);
+		disp = cv_bridge::toCvCopy(msg->disparity_image, msg->disparity_image.encoding);
 	} catch (cv_bridge::Exception& e) {
-		ROS_ERROR("cv_bridge exception: %s", e.what());
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
 
+	Mat_t dmat(disp->image.rows, disp->image.cols,CV_8U);
+	dmat = disp->image;
+//	Mat_t preDisp(dmat);
+//	cv::imshow(WINDOWDisparity_, dmat);
+//	cv::waitKey(3);
+	cv::Size ksize;
+	ksize.width = 10;
+	ksize.height = 10;
+//	cv::boxFilter(preDisp, dmat, 1, ksize);
+//	normalize( preDisp, dmat, 0, 256, CV_MINMAX );
+
+	this->stereo_model_.fromCameraInfo(msg->images.left_info, msg->images.right_info);
 	for (int i = 0; i < (int) detection_list_.size(); i++) {
 		//		cout << endl;
 		//		cout << "In detection #"<< i+1 << "/"<< detection_list_WHA.size() <<endl;
@@ -201,10 +226,11 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 				&& obj_centroid.y < disp->image.rows) {
 			int disp_val = disp->image.at<uchar>(obj_centroid.y,
 					obj_centroid.x);
-			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
+//			NODELET_INFO_STREAM("Disp val at ("<<obj_centroid.x<<","<<obj_centroid.y<<")  = "<<disp_val);
+//						cv::ellipse( disp->image, obj_centroid, cv::Size( 50, 50), 0, 0, 360, 128, 2, 8, 0 );
 			this->stereo_model_.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
-			//			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
+						NODELET_INFO_STREAM("Disp: "<< disp_val << std::endl << "X: "<< obj_3d.x << std::endl << "Y: " << obj_3d.y << std::endl << "Z: " << obj_3d.z);
 			tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
 			//			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point_.point);
@@ -214,9 +240,8 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 			world_point_.header.frame_id = "/world";
 			world_point_.header.stamp = tZero;
 			//			cout << "Transforming camera to world" <<endl;
-
-			optimus_prime_.transformPoint("/world", camera_point_,
-					world_point_);
+			optimus_prime_.waitForTransform("/world", camera_point_.header.frame_id, ros::Time(0), ros::Duration(1.0));
+			optimus_prime_.transformPoint("/world", camera_point_, world_point_);
 			//			cout << "Adding TFT to msg" <<endl;
 			tf::pointMsgToTF(world_point_.point, detection);
 			sherlock_->addDetection(detection, detection_list_.at(i)->second);
@@ -224,7 +249,9 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 		}
 
 	}
-
+//	cv::imshow("disparity", dmat);
+//	cv::imshow(WINDOWDisp_, disp->image);
+//	cv::waitKey(3);
 //	cout << "Clearing list" <<endl;
 	detection_list_.clear();
 //	cout << "Shrinking Det/ection manager list" <<endl;
@@ -246,10 +273,10 @@ void SAMStage::calculate3DPoint(const sensor_msgs::Image& disparity,
 			break;
 
 		}
-		std::cout << "I Got A Detection: " << std::endl << "X:"
+		NODELET_INFO_STREAM("I Got A Detection: " << std::endl << "X:"
 				<< detection_.getX() << ", Y: " << detection_.getY() << ", Z: "
 				<< detection_.getZ() << ", " << confidence << ", of type: "
-				<< typeString << std::endl;
+				<< typeString);
 
 	}
 }

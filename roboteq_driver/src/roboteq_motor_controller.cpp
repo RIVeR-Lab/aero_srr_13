@@ -6,6 +6,8 @@ using namespace device_driver;
 
 namespace roboteq_driver{
 
+#define MISSING_VALUE -1024
+
 RoboteqMotorController::RoboteqMotorController(double maxRPM1,
 					       double maxRPM2,
 					       int ppr1,
@@ -56,14 +58,17 @@ void RoboteqMotorController::open(std::string port){
 	setConfig(_AMOD, 4, 1);
 
 	//set motors max rpm
-	//setConfig(_MXRPM, 1, maxRPM1_);
-	//setConfig(_MXRPM, 2, maxRPM2_);
+	setConfig(_MXRPM, 1, maxRPM1_);
+	setConfig(_MXRPM, 2, maxRPM2_);
 
 
 	//Initialize to initial values
 	motor_mode1_ = motor_mode2_ = MOTOR_MODE_UNDEFINED;//make sure to reset local values
-	setMotorMode(1, MOTOR_MODE_POWER);
-	setMotorMode(2, MOTOR_MODE_POWER);
+	setMotorMode(1, MOTOR_MODE_RPM);
+	setMotorMode(2, MOTOR_MODE_RPM);
+	
+	saveToEEPROM();
+	
 	setPower(1, 0);
 	setPower(2, 0);
 }
@@ -93,6 +98,11 @@ void RoboteqMotorController::setCommand(int commandItem, int index, int value){
 			DRIVER_EXCEPT(Exception, "Failed to set device command.");
 	}
 }
+
+void RoboteqMotorController::setCommand(int commandItem){
+  setCommand(commandItem, MISSING_VALUE, MISSING_VALUE);
+}
+
 void RoboteqMotorController::setConfig(int configItem, int index, int value){
 	int status = device_.SetConfig(configItem, index, value);
 	if(status!=RQ_SUCCESS){
@@ -166,6 +176,10 @@ void RoboteqMotorController::setSerialWatchdog(int time){
 	setConfig(_RWD, time);
 }
 
+void RoboteqMotorController::saveToEEPROM(){
+  setCommand(_EES);
+}
+
 
 static inline double limit(double val, double min, double max){
   if(val<min)
@@ -230,19 +244,30 @@ void RoboteqMotorController::getTemp(uint8_t chan, double& value){
     DRIVER_EXCEPT(Exception, "Invalid motor channel");
   value = an*TEMP_SCALE+TEMP_OFFSET;
 }
-void RoboteqMotorController::getPosition(uint8_t chan, int32_t& value){
-  getValue(_C, chan, value);
+void RoboteqMotorController::getPosition(uint8_t chan, double& value){
+  if(chan==1){
+    int32_t raw_value;
+    getValue(_C, chan, raw_value);
+    value = ((double)raw_value)/ppr1_/counts_per_pulse;
+  }
+  else if(chan==2){
+    int32_t raw_value;
+    getValue(_C, chan, raw_value);
+    value = ((double)raw_value)/ppr2_/counts_per_pulse;
+  }
+  else
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
 void RoboteqMotorController::getVelocity(uint8_t chan, double& value){
   if(chan==1){
     int32_t raw_value;
     getValue(_S, chan, raw_value);
-    value = raw_value*maxRPM1_/GO_COMMAND_BOUND;
+    value = raw_value;//*maxRPM1_/GO_COMMAND_BOUND;
   }
   else if(chan==2){
     int32_t raw_value;
     getValue(_S, chan, raw_value);
-    value = raw_value*maxRPM1_/GO_COMMAND_BOUND;
+    value = raw_value;//*maxRPM1_/GO_COMMAND_BOUND;
   }
   else
     DRIVER_EXCEPT(Exception, "Invalid motor channel");

@@ -11,6 +11,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <pcl/ros/conversions.h>
 #include <pcl_ros/transforms.h>
+#include <boost/bind.hpp>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_laser_filter/nodelets/GlobalFilterStage.h>
 //***********    NAMESPACES     ****************//
@@ -25,6 +26,8 @@ namespace aero_laser_filter {
 		this->nh_          = this->getNodeHandle();
 		this->p_nh_        = this->getPrivateNodeHandle();
 		this->transformer_ = new tf::TransformListener(this->nh_);
+		this->dr_server_   = new dynamic_reconfigure::Server<GlobalStageConfig>(this->p_nh_);
+		this->dr_server_->setCallback(boost::bind(&GlobalFilterStage::drCB, this, _1, _2));
 
 		this->loadParams();
 		this->registerTopics();
@@ -50,7 +53,7 @@ namespace aero_laser_filter {
 		this->p_nh_.getParam("output_frame", this->output_frame_);
 
 		double temp_x = 0;
-		double temp_y = 0;
+		double temp_y = -15.0;
 		double temp_z = 0;
 		this->p_nh_.getParam(crop_ns+btmlft_ns+x, temp_x);
 		this->p_nh_.getParam(crop_ns+btmlft_ns+y, temp_y);
@@ -60,7 +63,7 @@ namespace aero_laser_filter {
 		this->crop_bottom_left_.z = temp_z;
 
 		temp_x = 30;
-		temp_y = 30;
+		temp_y = 15.0;
 		temp_z = 0;
 		this->p_nh_.getParam(crop_ns+toprgt_ns+x, temp_x);
 		this->p_nh_.getParam(crop_ns+toprgt_ns+y, temp_y);
@@ -68,6 +71,8 @@ namespace aero_laser_filter {
 		this->crop_top_right_.x = temp_x;
 		this->crop_top_right_.y = temp_y;
 		this->crop_top_right_.z = temp_z;
+
+		NODELET_INFO_STREAM("LocalFilterStage loaded with input_topic:"<<this->input_topic_<<", output_topic:"<<this->output_topic_<<", output_frame:"<<this->output_frame_);
 	}
 
 	void GlobalFilterStage::registerTopics()
@@ -78,16 +83,21 @@ namespace aero_laser_filter {
 
 	void GlobalFilterStage::cloudCB(const sm::PointCloud2ConstPtr& message)
 	{
+		//NODELET_INFO_STREAM("Global: Got New Global Laser Data");
 		sm::PointCloud2Ptr output_cloud(new sm::PointCloud2());
 		PointCloudPtr_t processed_cloud(new PointCloud_t());
 		pcl::fromROSMsg(*message, *processed_cloud);
-
+		//NODELET_INFO_STREAM("Global: Extracted Raw Point Cloud from Message");
 		this->cropCloud(processed_cloud, processed_cloud);
+		//NODELET_INFO_STREAM("Global: Croped Point Cloud");
 		this->filterCloud(processed_cloud, processed_cloud);
+		//NODELET_INFO_STREAM("Global: Filtered Point Cloud");
 		this->transformCloud(processed_cloud, processed_cloud);
+		//NODELET_INFO_STREAM("Global: Transformed Point Cloud");
 
 		pcl::toROSMsg(*processed_cloud, *output_cloud);
 		this->point_pub_.publish(output_cloud);
+		//NODELET_INFO_STREAM("Global: Published Point Cloud");
 
 	}
 
@@ -101,14 +111,30 @@ namespace aero_laser_filter {
 
 	void GlobalFilterStage::transformCloud(const PointCloudPtr_t& in, PointCloudPtr_t& out)
 	{
-		this->transformer_->waitForTransform(this->output_frame_, in->header.frame_id, in->header.stamp, ros::Duration(1.0));
-		pcl_ros::transformPointCloud(this->output_frame_, *in, *out, *this->transformer_);
+		try
+		{
+			this->transformer_->waitForTransform(this->output_frame_, in->header.frame_id, in->header.stamp, ros::Duration(1.0));
+			pcl_ros::transformPointCloud(this->output_frame_, *in, *out, *this->transformer_);
+		}
+		catch(std::exception& e)
+		{
+			NODELET_ERROR_STREAM_THROTTLE(5, "Problem Transforming PointCloud in GlobalFilter: "<<e.what());
+			*out = *in;
+		}
 	}
 
 	void GlobalFilterStage::filterCloud(const PointCloudPtr_t& in, PointCloudPtr_t& out)
 	{
 		//for now no filtering, just pass through
-		out = in;
+		*out = *in;
+	}
+
+	void GlobalFilterStage::drCB(const GlobalStageConfig& config, uint32_t level)
+	{
+		this->crop_bottom_left_.x = config.crop_min_x;
+		this->crop_bottom_left_.y = config.crop_min_y;
+		this->crop_top_right_.x   = config.crop_max_x;
+		this->crop_top_right_.y   = config.crop_max_y;
 	}
 
 } /* namespace aero_laser_filter */

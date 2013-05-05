@@ -23,6 +23,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <math.h>
 #include <queue>
+#include <message_filters/subscriber.h>
 
 
 
@@ -44,6 +45,8 @@ public:
 	void detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW);
 	void buildMsg(const tf::Point& point, geometry_msgs::PoseStamped& msg) const;
 	void saveImage(const sensor_msgs::Image& msg,cv_bridge::CvImagePtr& cv_ptr, int O);
+	void rectRightCb(const sensor_msgs::ImageConstPtr& msg);
+	void rectLeftCb(const sensor_msgs::ImageConstPtr& msg);
 	Mat_t gray2bgr(Mat_t img);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
@@ -55,6 +58,9 @@ private:
 	image_transport::ImageTransport it_;
 	image_transport::CameraSubscriber image_left_;
 	image_transport::CameraSubscriber image_right_;
+	ros::Subscriber disp_image_sub_;
+	ros::Subscriber left_rect_sub_;
+	ros::Subscriber right_rect_sub_;
 	image_transport::Publisher image_pub_;
 
 

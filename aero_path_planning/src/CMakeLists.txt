@@ -44,7 +44,7 @@ set(PLATFORM_VAL "\"0\"")
 #Parameters for defining tentacle selection huristics
 set(GOAL_WEIGHT_ARG ${R_NS}/goal_weight)
 set(GOAL_WEIGHT_CDF GOAL_WEIGHT)
-set(GOAL_WEIGHT_VAL "\"0.0\"")
+set(GOAL_WEIGHT_VAL "\"3.0\"")
 
 set(TRAV_WEIGHT_ARG ${R_NS}/traversed_weight)
 set(TRAV_WEIGHT_CDF TRAV_WEIGHT)
@@ -52,7 +52,7 @@ set(TRAV_WEIGHT_VAL "\"0.1\"")
 
 set(DIFF_WEIGHT_ARG ${R_NS}/difficult_weight)
 set(DIFF_WEIGHT_CDF DIFF_WEIGHT)
-set(DIFF_WEIGHT_VAL "\"0.1\"")
+set(DIFF_WEIGHT_VAL "\"0.25\"")
 
 set(UNKN_WEIGHT_ARG ${R_NS}/unknown_weight)
 set(UNKN_WEIGHT_CDF UNKN_WEIGHT)
@@ -74,7 +74,7 @@ set(S_NUMBER_VAL "\"15\"")
 #Parameters for local occupancy grid information
 set(L_OCC_UPDTRT_ARG "${R_NS}/${O_NS}/${L_NS}/update_rate")
 set(L_OCC_UPDTRT_CDF L_OCC_UPDTRT)
-set(L_OCC_UPDTRT_VAL "\"0.2\"")
+set(L_OCC_UPDTRT_VAL "\"0.10\"")
 
 set(L_OCC_XDIM_ARG "${R_NS}/${O_NS}/${L_NS}/x_dim")
 set(L_OCC_XDIM_CDF L_OCC_XDIM)
