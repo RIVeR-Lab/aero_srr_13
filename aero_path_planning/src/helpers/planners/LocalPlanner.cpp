@@ -386,6 +386,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 
 void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
+	ROS_INFO_STREAM("The Last Planning Callback Took:"<<event.profile.last_duration<<"s");
 	if(event.current_real-event.last_real>(event.current_expected-event.last_expected)*1.25)
 	{
 		ROS_WARN_STREAM_THROTTLE(1, "Large Skew on Local Planner Planning Callback: expected update period="<<event.current_expected-event.last_expected<<"s, actual update period="<<event.current_real-event.last_real<<"s");
@@ -405,6 +406,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 		//If we actually have a working grid, plan on it
 		if(working_grid.size()>0)
 		{
+			ROS_INFO_STREAM("I Have  Working Grid to Local Plan On!");
 			//If we have a LIDAR patch, apply it
 			if(this->lidar_patch_!= PointCloudPtr())
 			{
@@ -431,7 +433,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			try
 			{
 				dist = working_grid.getGoalPoint().getVector3fMap().norm();
-				ROS_INFO_STREAM("Distance to Goal:"<<dist<<", goal <"<<working_grid.getGoalPoint().x<<","<<working_grid.getGoalPoint().y<<">");
+				ROS_INFO_STREAM_THROTTLE(1, "Distance to Local Goal:"<<dist<<", goal <"<<working_grid.getGoalPoint().x<<","<<working_grid.getGoalPoint().y<<">");
 			}
 			catch(bool)
 			{
@@ -460,6 +462,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 		}
 		else
 		{
+			ROS_INFO_STREAM("I Have  No Working Grid To Plan On!");
 			this->set_vel_ = 0;
 			this->set_rad_ = 0;
 		}
