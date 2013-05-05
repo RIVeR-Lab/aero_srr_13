@@ -43,3 +43,13 @@ aero_srr_msgs/src/aero_srr_msgs
 roboteq_driver/src/roboteq_driver
 hd_driver/src/hd_driver
 aero_base/src/aero_base
+aero_laser_filter/cfg/cpp
+aero_laser_filter/docs
+aero_laser_filter/src/aero_laser_filter
+aero_path_planning/cfg/cpp
+aero_path_planning/docs
+object_locator/cfg/cpp
+object_locator/docs
+object_locator/src/object_locator
+roboteq_driver/cfg/cpp
+roboteq_driver/docs
