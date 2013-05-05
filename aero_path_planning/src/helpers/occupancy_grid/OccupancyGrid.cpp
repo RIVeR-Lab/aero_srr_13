@@ -233,9 +233,9 @@ bool OccupancyGrid::setPointTrait(const Point& point)throw(OccupancyGridAccessEx
 }
 
 bool OccupancyGrid::setPointTrait(const app::PointCloud& points) throw(OccupancyGridAccessException)
-				{
+{
 	bool sucess = true;
-#pragma omp parallel for
+//#pragma omp parallel for
 	for (int i = 0; i < (int)points.size(); i++)
 	{
 		try
@@ -257,7 +257,7 @@ bool OccupancyGrid::setPointTrait(const app::PointCloud& points) throw(Occupancy
 		OccupancyGridAccessException e(message);
 		throw e;
 	}
-				}
+}
 
 bool OccupancyGrid::setPointTrait(const nm::OccupancyGrid& points, bool clipping, bool scaling) throw(OccupancyGridAccessException)
 				{
