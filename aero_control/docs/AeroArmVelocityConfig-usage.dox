@@ -1,0 +1,10 @@
+\subsubsection usage Usage
+\verbatim
+<node name="AeroArmVelocity" pkg="aero_control" type="AeroArmVelocity">
+  <param name="linear_P" type="double" value="0.0" />
+  <param name="linear_I" type="double" value="0.0" />
+  <param name="linear_D" type="double" value="0.0" />
+  <param name="gain" type="double" value="1.0" />
+</node>
+\endverbatim
+
