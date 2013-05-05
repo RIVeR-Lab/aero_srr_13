@@ -24,7 +24,7 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, std::string Desired
 
 	this->desired_position_sub = nh.subscribe(DesiredPosition, 1,
 			&BaseServoController::DesiredPositionMSG, this);
-this->workspace_postion_pub= nh.advertise<geometry_msgs::PointStamped>(WorkspacePosition,1,true);
+this->workspace_postion_pub= nh.advertise<geometry_msgs::PoseStamped>(WorkspacePosition,1,true);
 	this->base_velocity_pub = nh.advertise<geometry_msgs::Twist>(BaseVelocity, 2);
 
 	this->error_update_timer = nh.createTimer(ros::Duration(0.1),
