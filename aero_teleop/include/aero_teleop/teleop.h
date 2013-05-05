@@ -16,7 +16,7 @@
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/Joy.h>
 #include <string.h>
-
+#include <stdlib.h>
 
 
 namespace aero_teleop {
@@ -26,7 +26,7 @@ namespace aero_teleop {
 class Teleop {
 public:
 	Teleop(ros::NodeHandle nh, std::string Joystick,
-			std::string BaseVelocity,std::string _deadman_button,std::string _turn_scale,std::string _drive_scale);
+			std::string BaseVelocity,int _deadman_button,double _turn_scale,double _drive_scale);
 private:
 	void JoystickMSG(	const sensor_msgs::JoyConstPtr& joystick) ;
 	void SendVelTimerCallback(const ros::TimerEvent&);

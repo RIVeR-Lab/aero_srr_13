@@ -20,10 +20,10 @@
 using namespace aero_teleop;
 
 Teleop::Teleop(ros::NodeHandle nh, std::string Joystick, std::string BaseVelocity,
-		std::string _deadman_button, std::string _turn_scale, std::string _drive_scale) {
+		int _deadman_button, double _turn_scale, double _drive_scale) {
 	this->deadman_button = _deadman_button;
-	this->turn_scale = _turn_scale;
-	this->drive_scale = _drive_scale;
+	this->turn_scale = (double) _turn_scale;
+	this->drive_scale = (double) _drive_scale;
 
 	base_velocity.linear.x = 0;
 	base_velocity.linear.y = 0;
@@ -38,20 +38,16 @@ Teleop::Teleop(ros::NodeHandle nh, std::string Joystick, std::string BaseVelocit
 
 	this->base_velocity_pub = nh.advertise<geometry_msgs::Twist>(BaseVelocity, 2, true);
 
-
-
 	this->send_vel_timer = nh.createTimer(ros::Duration(0.05), &Teleop::SendVelTimerCallback, this);
 
-	this->supervisor_cmd_timer = nh.createTimer(ros::Duration(1), &Teleop::SupervisorTimerCallback, this);
+	this->supervisor_cmd_timer = nh.createTimer(ros::Duration(1), &Teleop::SupervisorTimerCallback,
+			this);
 
 }
 
 void Teleop::SupervisorTimerCallback(const ros::TimerEvent&) {
 
-
-
 }
-
 
 void Teleop::SendVelTimerCallback(const ros::TimerEvent&) {
 	if ((ros::Time().now().toSec() - last_joy_time.toSec()) > 0.2) {
@@ -77,7 +73,6 @@ int main(int argc, char **argv) {
 
 	std::string Joystick("joy"); ///String containing the topic name for Joystick
 	std::string BaseVelocity("BaseVelocity"); ///String containing the topic name for BaseVelocity
-	std::string BaseVelocity("BaseVelocity"); ///String containing the topic name for BaseVelocity
 
 	const std::string DeadmanButton("~deadman_button"); ///String containing the topic name for DeadmanButton
 	int deadman_button;
@@ -92,36 +87,35 @@ int main(int argc, char **argv) {
 		return 1;
 	} else {
 		//Grab the topic parameters, print warnings if using default values
-		if (!param_nh.getParam(Joystick, Joystick))
+		if (!param_nh.getParam(Joystick, Joystick)) {
 			ROS_WARN(
-					"Parameter <Joystick> Not Set. Using Default Joystick Topic <%s>!", Joystick.c_str(), Joystick.c_str());
-		if (!param_nh.getParam(BaseVelocity, BaseVelocity))
+					"Parameter <Joystick> Not Set. Using Default Joystick Topic <%s>!", Joystick.c_str());
+		}
+		if (!param_nh.getParam(BaseVelocity, BaseVelocity)) {
 			ROS_WARN(
 					"Parameter <%s> Not Set. Using Default Base Velocity Topic <%s>!", BaseVelocity.c_str(), BaseVelocity.c_str());
-		if (!param_nh.param(DeadmanButton, deadman_button, 0))
-			ROS_WARN(
-					"Parameter <%s> Not Set. Using Default Deadman Button <%d>!", DeadmanButton.c_str(), deadman_button);
-		if (!param_nh.param(TurnScale, turn_scale, 1.0))
-			ROS_WARN(
-					"Parameter <%s> Not Set. Using Default Turn Scale <%f>!", TurnScale.c_str(), turn_scale);
-		if (!param_nh.param(DriveScale, turn_scale, 1.0))
-			ROS_WARN(
-					"Parameter <%s> Not Set. Using Default Drive Scale <%f>!", DriveScale.c_str(), drive_scale);
+		}
+		param_nh.param(DeadmanButton, deadman_button, 0);
+
+		param_nh.param(TurnScale, turn_scale, 1.0);
+
+		param_nh.param(DriveScale, drive_scale, 1.0);
 
 	}
 
-//Print out received topics
-	ROS_DEBUG("Joystick Topic Name: <%s>", Joystick.c_str());
-	ROS_DEBUG("Base Velocity Topic Name: <%s>", BaseVelocity.c_str());
-	ROS_DEBUG("Deadman Button: <%d>", deadman_button);
-	ROS_DEBUG("Turn Scale: <%f>", turn_scale);
-	ROS_DEBUG("Drive Scale: <%f>", drive_scale);
 
-	ROS_INFO("Starting Up Aero Teleop...");
+//Print out received topics
+ROS_DEBUG("Joystick Topic Name: <%s>", Joystick.c_str());
+ROS_DEBUG("Base Velocity Topic Name: <%s>", BaseVelocity.c_str());
+ROS_DEBUG("Deadman Button: <%d>", deadman_button);
+ROS_DEBUG("Turn Scale: <%f>", turn_scale);
+ROS_DEBUG("Drive Scale: <%f>", drive_scale);
+
+ROS_INFO("Starting Up Aero Teleop...");
 
 //create the arm object
-	Teleop teleop(nh, Joystick, BaseVelocity, deadman_button, turn_scale, drive_scale);
+Teleop teleop(nh, Joystick, BaseVelocity, deadman_button, turn_scale, drive_scale);
 
-	ros::spin();
+ros::spin();
 }
 
