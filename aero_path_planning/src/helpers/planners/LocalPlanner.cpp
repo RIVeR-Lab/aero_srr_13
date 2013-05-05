@@ -429,7 +429,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			this->applyGoal(working_grid);
 
 			//Visualize the grid
-			//this->visualizeOcc(working_grid);
+			this->visualizeOcc(working_grid);
 
 			//Check to see if we're at the goal
 			double dist;
