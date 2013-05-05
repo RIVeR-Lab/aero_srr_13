@@ -19,15 +19,18 @@
 
 using namespace aero_control;
 
-BaseServoController::BaseServoController(ros::NodeHandle nh, std::string DesiredPosition,
+BaseServoController::BaseServoController(ros::NodeHandle nh, std::string DesiredPosition,std::string WorkspacePosition,
 		std::string BaseVelocity) {
 
 	this->desired_position_sub = nh.subscribe(DesiredPosition, 1,
 			&BaseServoController::DesiredPositionMSG, this);
-
+this->workspace_postion_pub= nh.advertise<geometry_msgs::PointStamped>(WorkspacePosition,1,true);
 	this->base_velocity_pub = nh.advertise<geometry_msgs::Twist>(BaseVelocity, 2);
+
 	this->error_update_timer = nh.createTimer(ros::Duration(0.1),
 			&BaseServoController::ErrorUpdateTimerCallback, this);
+
+
 	this->error_update_timer.stop();
 	error_update_timer_flag = false;
 	last_position_time = ros::Time().now();
@@ -51,7 +54,7 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, std::string Desired
 
 		workspace_pose.header.stamp = ros::Time::now();
 
-
+		this->workspace_postion_pub.publish(this->workspace_pose);
 	dr_call = boost::bind(&BaseServoController::PIDConfigCallback,this, _1, _2);
 			  dr_server.setCallback(dr_call);
 
@@ -72,6 +75,7 @@ rotational_gain = config.y_gain;
 this->workspace_pose.pose.position.x = 0;
 this->workspace_pose.pose.position.y = 0;
 workspace_pose.header.stamp = ros::Time::now();
+this->workspace_postion_pub.publish(this->workspace_pose);
 
 }
 
@@ -163,6 +167,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle param_nh("~");
 
 	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for goal position
+	std::string WorkspacePosition("WorkspacePosition"); ///String containing the topic name for WorkspacePosition
 	std::string BaseVelocity("cmd_vel"); ///String containing the topic name for BaseVelocity
 
 	if (argc < 1) {
@@ -177,16 +182,19 @@ int main(int argc, char **argv) {
 	if (!param_nh.getParam(BaseVelocity, BaseVelocity))
 			ROS_WARN(
 					"Parameter <%s> Not Set. Using Default Base Velocity Topic <%s>!", BaseVelocity.c_str(), BaseVelocity.c_str());
-	}
 
+	if (!param_nh.getParam(WorkspacePosition, WorkspacePosition))
+				ROS_WARN(
+						"Parameter <%s> Not Set. Using Default Workspace Position Topic <%s>!", WorkspacePosition.c_str(), WorkspacePosition.c_str());
+		}
 //Print out received topics
 	ROS_DEBUG("Got Desired Position Topic Name: <%s>", DesiredPosition.c_str());
 	ROS_DEBUG("Got Base Velocity Topic Name: <%s>", BaseVelocity.c_str());
-
+	ROS_DEBUG("Got Workspace Position Topic Name: <%s>", WorkspacePosition.c_str());
 	ROS_INFO("Starting Up Base Servo Controller...");
 
 //create the arm object
-	BaseServoController base_servo(nh, DesiredPosition, BaseVelocity);
+	BaseServoController base_servo(nh, DesiredPosition, WorkspacePosition, BaseVelocity);
 
 	ros::spin();
 }

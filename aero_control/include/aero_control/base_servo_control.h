@@ -31,7 +31,7 @@ namespace aero_control {
 
 class BaseServoController {
 public:
-	BaseServoController(ros::NodeHandle nh, std::string DesiredPosition,std::string BaseVelocity);
+	BaseServoController(ros::NodeHandle nh, std::string DesiredPosition,std::string WorkspacePosition,std::string BaseVelocity);
 	~BaseServoController();
 private:
 
@@ -62,7 +62,8 @@ private:
 	ros::NodeHandle nh_;
 	ros::Subscriber desired_position_sub;
 	ros::Publisher base_velocity_pub;
-	ros::Publisher base_workspace_position_pub;
+	ros::Publisher workspace_postion_pub;
+
 
 	tf::TransformListener tf_listener;
 
