@@ -236,14 +236,14 @@ void LocalPlanner::loadParam()
 
 void LocalPlanner::regTopic()
 {
-	this->pc_sub_    = this->nh_.subscribe(this->pc_topic_,    2, &LocalPlanner::pcCB,    this);
-	this->state_sub_ = this->nh_.subscribe(this->state_topic_, 2, &LocalPlanner::stateCB, this);
-	this->joy_sub_   = this->nh_.subscribe(this->man_topic_,   2, &LocalPlanner::manTwistCB,   this);
-	this->lidar_sub_ = this->nh_.subscribe(this->lidar_topic_, 2, &LocalPlanner::lidarCB, this);
-	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 2);
-	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 2);
-	this->occ_viz_pub_ = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/local/occupancy_viz",2);
-	this->goal_sub_  = this->nh_.subscribe("/aero/global/goal", 2, &LocalPlanner::goalCB, this);
+	this->pc_sub_    = this->nh_.subscribe(this->pc_topic_,    1, &LocalPlanner::pcCB,    this);
+	this->state_sub_ = this->nh_.subscribe(this->state_topic_, 1, &LocalPlanner::stateCB, this);
+	this->joy_sub_   = this->nh_.subscribe(this->man_topic_,   1, &LocalPlanner::manTwistCB,   this);
+	this->lidar_sub_ = this->nh_.subscribe(this->lidar_topic_, 1, &LocalPlanner::lidarCB, this);
+	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 1);
+	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 1);
+	this->occ_viz_pub_ = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/local/occupancy_viz",1);
+	this->goal_sub_  = this->nh_.subscribe("/aero/global/goal", 1, &LocalPlanner::goalCB, this);
 
 	std::string software_stop_topic("aero/software_stop");
 
