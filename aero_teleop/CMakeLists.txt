@@ -29,27 +29,13 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-#add dynamic reconfigure api
-rosbuild_find_ros_package(dynamic_reconfigure)
-include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
-gencfg()
 
-include_directories(${Eigen_INCLUDE_DIRS})
-rosbuild_add_library(pidcontrol src/pid_control.cpp)
 
 
 
 #Testers
-rosbuild_add_executable(test_arm_control src/testers/test_arm_control.cpp )
-rosbuild_add_executable(test_base_servo src/testers/test_base_servo.cpp )
 
 #Nodes
-rosbuild_add_executable(arm_controller src/nodes/arm_controller.cpp )
-rosbuild_add_executable(arm_position_control src/nodes/arm_position_control.cpp )
-rosbuild_add_executable(base_servo_control src/nodes/base_servo_control.cpp )
-
-
-target_link_libraries(arm_position_control pidcontrol)
-target_link_libraries(base_servo_control pidcontrol)
+rosbuild_add_executable(teleop src/nodes/teleop.cpp )
 
 

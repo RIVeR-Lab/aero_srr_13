@@ -1,0 +1,17 @@
+<package>
+  <description brief="aero_teleop">
+aero_teleop
+  </description>
+  <author>mpdedonato</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aero_teleop</url>
+  <depend package="rospy"/>
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="aero_srr_supervisor"/>
+  
+</package>
+
+
