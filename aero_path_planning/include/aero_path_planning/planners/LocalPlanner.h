@@ -82,6 +82,8 @@ private:
 	ros::Publisher  occ_viz_pub_;///Publisher for visualizing the local occupancy grid
 	ros::Timer      vel_timer_;	///Timer that will send velocity updates to the platform at a constant rate
 	ros::Timer      plan_timer_;///Timer that will attempt to select a new tentacle at a constant rate
+	ros::Duration   plan_period_;///Period between planning callbacks
+	ros::Duration   vel_period_; ///Period between velocity callbacks
 
 	tf::TransformListener transformer_; ///TF access
 

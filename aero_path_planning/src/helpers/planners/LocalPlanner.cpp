@@ -253,8 +253,10 @@ void LocalPlanner::regTopic()
 
 void LocalPlanner::regTimers()
 {
-	this->vel_timer_ = nh_.createTimer(ros::Duration(1.0/20.0), &LocalPlanner::velUpdateCB, this);
-	this->plan_timer_= nh_.createTimer(ros::Duration(1.0/20.0), &LocalPlanner::planningCB, this);
+	this->plan_period_ = ros::Duration(1.0/20.0);
+	this->vel_period_  = this->plan_period_;
+	this->vel_timer_ = nh_.createTimer(this->vel_period_, &LocalPlanner::velUpdateCB, this);
+	this->plan_timer_= nh_.createTimer(this->plan_period_, &LocalPlanner::planningCB, this);
 }
 
 LocalPlanner::~LocalPlanner()
@@ -386,10 +388,9 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 
 void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
-	ROS_INFO_STREAM("The Last Planning Callback Took:"<<event.profile.last_duration<<"s");
-	if(event.current_real-event.last_real>(event.current_expected-event.last_expected)*1.25)
+	if(event.profile.last_duration.toSec()>this->plan_period_.toSec()*1.1)
 	{
-		ROS_WARN_STREAM_THROTTLE(1, "Large Skew on Local Planner Planning Callback: expected update period="<<event.current_expected-event.last_expected<<"s, actual update period="<<event.current_real-event.last_real<<"s");
+		ROS_WARN_STREAM_THROTTLE(1, "Local Planner Callback is taking longer than its timer period to process. Alloted Period="<<this->plan_period_<<"s, Actual Period="<<event.profile.last_duration);
 	}
 
 
@@ -501,9 +502,9 @@ void LocalPlanner::applyGoal(OccupancyGrid& grid) const
 
 void LocalPlanner::velUpdateCB(const ros::TimerEvent& event)
 {
-	if(event.current_real-event.last_real>(event.current_expected-event.last_expected)*1.25)
+	if(event.profile.last_duration.toSec()>this->vel_period_.toSec()*1.1)
 	{
-		ROS_WARN_STREAM_THROTTLE(1, "Large Skew on Local Planner Velocity Update Callback: expected update period="<<event.current_expected-event.last_expected<<"s, actual update period="<<event.current_real-event.last_real<<"s");
+		ROS_WARN_STREAM_THROTTLE(1, "Local Planner Velocity Update is taking longer than its timer period to process. Alloted Period="<<this->vel_period_<<"s, Actual Period="<<event.profile.last_duration);
 	}
 	this->sendVelCom(this->set_vel_, this->set_rad_);
 }
