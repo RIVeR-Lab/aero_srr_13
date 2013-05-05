@@ -39,9 +39,9 @@ void TimerCallback(const ros::TimerEvent&) {
 
 	test_msg_world.header.stamp = ros::Time::now();
 
-	listenerptr->waitForTransform("/workspace", test_msg_world.header.frame_id, test_msg_world.header.stamp, ros::Duration(0.5));
+	listenerptr->waitForTransform("/base_footprint", test_msg_world.header.frame_id, test_msg_world.header.stamp, ros::Duration(0.5));
 
-	listenerptr->transformPose("/workspace", test_msg_world, test_msg);
+	listenerptr->transformPose("/base_footprint", test_msg_world, test_msg);
 
 
 	pub.publish(test_msg);
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 	q.setRPY(rx_pos, ry_pos, rz_pos);
 
 	tf::quaternionTFToMsg(q, test_msg.pose.orientation);
-	test_msg.header.frame_id = "/workspace";
+	test_msg.header.frame_id = "/base_footprint";
 	test_msg.header.stamp = ros::Time::now();
 
 	listenerptr->waitForTransform("/world", test_msg.header.frame_id, test_msg.header.stamp, ros::Duration(0.5));
