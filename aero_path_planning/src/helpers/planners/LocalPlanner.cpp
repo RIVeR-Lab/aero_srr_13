@@ -447,7 +447,9 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				int speedset_idx = 0;
 				int tentacle_idx = 0;
 				//select the best tentacle
+				ros::Time selectStart(ros::Time::now());
 				this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
+				ROS_INFO_STREAM("Tentacle Selection Took "<<selectStart-ros::Time::now()<<" seconds");
 				//Limit rate of tentacle change
 				tentacle_idx   = this->limiter_->nextTentacle(tentacle_idx);
 				//Update the current radius and velocity
