@@ -186,13 +186,13 @@ PointTrait OccupancyGrid::getPointTrait(int x, int y, int z)const throw(Occupanc
 
 PointTrait OccupancyGrid::getPointTrait(const Point& point)const throw(OccupancyGridAccessException)
 				{
-	Point corrected_point(point);
+	app::Point corrected_point(point);
 	corrected_point.getVector4fMap()+=this->origin_.getVector4fMap();
 	if(boundsCheck(corrected_point))
 	{
 		try
 		{
-			return static_cast<app::PointTrait>(getPoint(corrected_point).rgba);
+			return static_cast<app::PointTrait>(this->getPoint(corrected_point).rgba);
 		}
 		catch(std::exception& e)
 		{
@@ -215,16 +215,15 @@ bool OccupancyGrid::setPointTrait(int x, int y, int z, PointTrait trait)throw(Oc
 	return setPointTrait(working_point);
 }
 
-bool OccupancyGrid::setPointTrait(const Point& point)throw(OccupancyGridAccessException)
+bool OccupancyGrid::setPointTrait(Point point)throw(OccupancyGridAccessException)
 {
-	Point corrected_point(point);
-	corrected_point.getVector4fMap()+=this->origin_.getVector4fMap();
-	if(boundsCheck(corrected_point))
+	point.getVector4fMap()+=this->origin_.getVector4fMap();
+	if(boundsCheck(point))
 	{
-		this->getPoint(corrected_point).rgba = point.rgba;
+		this->getPoint(point).rgba = point.rgba;
 		if(point.rgba==app::GOAL)
 		{
-			this->goal_     = this->getPoint(corrected_point);
+			this->goal_     = this->getPoint(point);
 			this->has_goal_ = true;
 		}
 		return true;
@@ -235,7 +234,7 @@ bool OccupancyGrid::setPointTrait(const Point& point)throw(OccupancyGridAccessEx
 bool OccupancyGrid::setPointTrait(const app::PointCloud& points) throw(OccupancyGridAccessException)
 {
 	bool sucess = true;
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < (int)points.size(); i++)
 	{
 		try
@@ -513,47 +512,6 @@ int OccupancyGrid::calcIndex(int x, int y, int z) const
 	return x + (this->y_dim_) * (y + (this->z_dim_) * z);
 }
 
-const Point& OccupancyGrid::getPoint(const app::Point& point, bool origin_corrected) const
-{
-	if(origin_corrected)
-	{
-		return this->occ_grid_.at(calcIndex(point.x, point.y, point.z));
-	}
-	else
-	{
-		return this->occ_grid_.at(calcIndex(point.x+this->origin_.x, point.y+this->origin_.y, point.z+this->origin_.z));
-	}
-}
-
-const Point& OccupancyGrid::getPoint(app::Point& point, bool origin_corrected) const
-{
-	if(origin_corrected)
-	{
-		return this->occ_grid_.at(calcIndex(point.x, point.y, point.z));
-	}
-	else
-	{
-		return this->occ_grid_.at(calcIndex(point.x+this->origin_.x, point.y+this->origin_.y, point.z+this->origin_.z));
-	}
-}
-
-const Point& OccupancyGrid::getPoint(int x, int y, int z) const
-{
-	return this->occ_grid_.at(calcIndex(x, y, z));
-}
-
-Point& OccupancyGrid::getPoint(app::Point& point, bool origin_corrected)
-{
-	if(origin_corrected)
-	{
-		return this->occ_grid_.at(calcIndex(point.x, point.y, point.z));
-	}
-	else
-	{
-		return this->occ_grid_.at(calcIndex(point.x+this->origin_.x, point.y+this->origin_.y, point.z+this->origin_.z));
-	}
-}
-
 Point& OccupancyGrid::getPoint(const app::Point& point, bool origin_corrected)
 {
 	if(origin_corrected)
@@ -566,7 +524,24 @@ Point& OccupancyGrid::getPoint(const app::Point& point, bool origin_corrected)
 	}
 }
 
+const app::Point& OccupancyGrid::getPoint(const app::Point& point, bool origin_corrected) const
+{
+	if(origin_corrected)
+	{
+		return this->occ_grid_.at(calcIndex(point.x, point.y, point.z));
+	}
+	else
+	{
+		return this->occ_grid_.at(calcIndex(point.x+this->origin_.x, point.y+this->origin_.y, point.z+this->origin_.z));
+	}
+}
+
 Point& OccupancyGrid::getPoint(int x, int y, int z)
+{
+	return this->occ_grid_.at(calcIndex(x, y, z));
+}
+
+const app::Point& OccupancyGrid::getPoint(int x, int y, int z) const
 {
 	return this->occ_grid_.at(calcIndex(x, y, z));
 }

@@ -175,7 +175,7 @@ public:
 	 * @return True if successful, else false
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(const app::Point& point) throw(OccupancyGridAccessException);
+	bool setPointTrait(app::Point point) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author Adam Panzica
@@ -381,10 +381,8 @@ private:
 	 * @param z	z-coord
 	 * @return The point at the given coordinate
 	 */
-	Point& getPoint(app::Point& point , bool origin_corrected = true);
-	Point& getPoint(const app::Point& point , bool origin_corrected = true);
-	const Point& getPoint(app::Point& point , bool origin_corrected = true) const;
-	const Point& getPoint(const app::Point& point , bool origin_corrected = true) const;
+	app::Point& getPoint(const app::Point& point , bool origin_corrected = true);
+	const app::Point& getPoint(const app::Point& point, bool origin_corrected = true) const;
 
 	/**
 	 * Gets a point out of the point cloud based on integer coordinates
@@ -394,7 +392,7 @@ private:
 	 * @return The point at the given coordinate
 	 */
 	Point& getPoint(int x, int y, int z);
-	const Point& getPoint(int x, int y, int z) const;
+	const app::Point& getPoint(int x, int y, int z) const;
 
 	/**
 	 * @author Adam Panzica
