@@ -407,7 +407,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 		//If we actually have a working grid, plan on it
 		if(working_grid.size()>0)
 		{
-			ROS_INFO_STREAM("I Have  Working Grid to Local Plan On!");
+			//ROS_INFO_STREAM("I Have  Working Grid to Local Plan On!");
 			//If we have a LIDAR patch, apply it
 			if(this->lidar_patch_!= PointCloudPtr())
 			{
@@ -427,7 +427,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			this->applyGoal(working_grid);
 
 			//Visualize the grid
-			this->visualizeOcc(working_grid);
+			//this->visualizeOcc(working_grid);
 
 			//Check to see if we're at the goal
 			double dist;
@@ -463,7 +463,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 		}
 		else
 		{
-			ROS_INFO_STREAM("I Have  No Working Grid To Plan On!");
+			//ROS_INFO_STREAM("I Have  No Working Grid To Plan On!");
 			this->set_vel_ = 0;
 			this->set_rad_ = 0;
 		}
