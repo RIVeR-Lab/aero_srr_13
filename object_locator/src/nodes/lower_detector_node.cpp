@@ -40,7 +40,7 @@ ImageConverter::ImageConverter()
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
 //	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
 
-	//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
+//		image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 
 	//********ROS Timer for Disparity image cb**************
@@ -50,6 +50,7 @@ ImageConverter::ImageConverter()
 	cascade_path_WHA = "/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
 	cascade_path_PINK = "/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	cascade_path_WHASUN = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
+	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	ctrLeft = 0;
 	ctrRight = 0;
 	cv::namedWindow(WINDOWLeft);
@@ -137,8 +138,8 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_image = *msg;
 	left_info  = *cam_info;
 	gotLeft = true;
-	detectAndDisplay(left_image,mat_left,WINDOWLeft);
-//		saveImage(left_image, mat_left,0);
+//	detectAndDisplay(left_image,mat_left,WINDOWLeft);
+		saveImage(left_image, mat_left,0);
 
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -445,9 +446,13 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 		{
 			printf("--(!)Error loading\n");
 		}
+	if( !cascade_RQT_BALL.load(cascade_path_RQT_BALL))
+		{
+			printf("--(!)Error loading\n");
+		}
 	cv::GaussianBlur( frame, frame, cv::Size(9, 9), 2, 2 );
 
-	std::vector<cv::Rect> WHA_faces, PINK_faces, SUN_faces;
+	std::vector<cv::Rect> WHA_faces, PINK_faces, SUN_faces,RQT_faces;
 	std::vector<std::vector<cv::Rect> > Detections;
 
 	Mat_t frame_gray;
@@ -465,9 +470,12 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 //	cascade.detectMultiScale( frame_gray, faces, 1.1, 30, 0, cv::Size(40, 70), cv::Size(70, 100) ); // works for WHA 007
 	cascade_WHA.detectMultiScale( frame_gray, WHA_faces, 1.1, 5, 0, cv::Size(52,59), cv::Size(85, 90) ); // works for WHAground !&
 	cascade_PINK.detectMultiScale( frame_gray, PINK_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for PINK !&
-	cascade_WHASUN.detectMultiScale( frame_gray, SUN_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for PINK !&
+	cascade_WHASUN.detectMultiScale( frame_gray, SUN_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for WHASUN
+	cascade_RQT_BALL.detectMultiScale( frame_gray, RQT_faces, 1.1, 20, 0, cv::Size(48, 46), cv::Size(96, 92) ); // works for
 
-
+	/*
+	 * WHA - White hook object inside detection loop
+	 */
 	for( size_t i = 0; i < WHA_faces.size(); i++ )
 	{
 //		cout << "Entered circle drawing loop" << endl;
@@ -493,6 +501,9 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 
 
 	}
+	/*
+	 * PINK_BALL - Tennis ball detection loop
+	 */
 	for( size_t j = 0; j < PINK_faces.size(); j++ )
 	{
 //		cout << "Entered circle drawing loop" << endl;
@@ -517,6 +528,9 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 
 
 	}
+	/*
+	 * WHA_SUN - White hook object outdoor detection loop
+	 */
 	for( size_t j = 0; j < SUN_faces.size(); j++ )
 	{
 //		cout << "Entered circle drawing loop" << endl;
@@ -536,6 +550,33 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 		newDetection->first.first  = center.x;
 		newDetection->first.second = center.y;
 		newDetection->second       = WHA;
+		detection_list_.push_back(newDetection);
+
+
+
+	}
+	/*
+	 * RQT_BALL - Raquet ball detection loop
+	 */
+	for( size_t j = 0; j < RQT_faces.size(); j++ )
+	{
+//		cout << "Entered circle drawing loop" << endl;
+
+
+		Mat_t faceROI = frame_gray( RQT_faces[j] );
+
+		//-- In each face, detect eyes
+
+		//-- Draw the face
+		cv::Point center( RQT_faces[j].x + RQT_faces[j].width/2, RQT_faces[j].y + RQT_faces[j].height/2 );
+		cv::ellipse( frame, center, cv::Size( RQT_faces[j].width/2, RQT_faces[j].height/2), 0, 0, 360, cv::Scalar( 255, 0, 255 ), 2, 8, 0 );
+
+		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+
+		DetectionPtr_t newDetection(new Detection_t());
+		newDetection->first.first  = center.x;
+		newDetection->first.second = center.y;
+		newDetection->second       = RQT_BALL;
 		detection_list_.push_back(newDetection);
 
 
