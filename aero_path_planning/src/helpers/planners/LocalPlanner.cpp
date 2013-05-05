@@ -474,7 +474,7 @@ void LocalPlanner::applyGoal(OccupancyGrid& grid) const
 		try
 		{
 			PointConverter converter(this->res_);
-			this->transformer_.waitForTransform(grid.getFrameId(), this->global_goal_->header.frame_id, grid.getGrid().header.stamp, ros::Duration(1.0));
+			this->transformer_.waitForTransform(grid.getFrameId(), this->global_goal_->header.frame_id, grid.getGrid().header.stamp, ros::Duration(1.0/20.0));
 			this->transformer_.transformPose(grid.getFrameId(), grid.getGrid().header.stamp, *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
 			Point goal_point;
 			app::poseToPoint(local_goal.pose, goal_point);
