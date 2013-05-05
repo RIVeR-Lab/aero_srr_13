@@ -221,12 +221,6 @@ bool OccupancyGrid::setPointTrait(Point point)throw(OccupancyGridAccessException
 	if(boundsCheck(point))
 	{
 		this->getPoint(point).rgba = point.rgba;
-		if(point.rgba==app::GOAL)
-		{
-			this->goal_     = this->getPoint(point);
-			this->has_goal_ = true;
-		}
-		return true;
 	}
 	return false;
 }
