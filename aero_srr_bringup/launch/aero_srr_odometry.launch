@@ -12,14 +12,19 @@
     <param name="freq"           value="100.0"/>
     <param name="sensor_timeout" value="1.0"/>  
     <param name="odom_used"      value="true"/>
-    <param name="imu_used"       value="false"/>
+    <param name="imu_used"       value="true"/>
     <param name="vo_used"        value="false"/>
 
     <remap from="odom"     to="$(arg odom_topic)" />
     <remap from="imu_data" to="$(arg imu_topic)" />
   </node>
   
-  <!-- publish a transform from world to odom -->
+  <!-- bring up SLAM -->
+  <include file="$(find aero_slam)/launch/gmapping.launch">
+  
+  </include>
+  <!-- publish a transform from world to odom 
   <node pkg="tf" type="static_transform_publisher" name="world_odom_broadcaster" args="0 0 0 0 0 0 /world /odom 20" />
+-->
   
 </launch>

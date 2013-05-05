@@ -1,0 +1,11 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~X_Position" : \b [double] X_Position min: -1.0, default: 0.2, max: 1.0
+- \b "~Y_Position" : \b [double] Y_Position min: -1.0, default: -0.2, max: 1.0
+- \b "~Z_Position" : \b [double] Z_Position min: -1.0, default: 0.2, max: 1.0
+- \b "~rX_Position" : \b [double] rX_Position min: -4.0, default: 0.0, max: 4.0
+- \b "~rY_Position" : \b [double] rY_Position min: -4.0, default: 0.0, max: 4.0
+- \b "~rZ_Position" : \b [double] rZ_Position min: -4.0, default: 0.0, max: 4.0
+

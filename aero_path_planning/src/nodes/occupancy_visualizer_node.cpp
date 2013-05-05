@@ -10,7 +10,6 @@
 #include <ros/ros.h>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/utilities/OccupancyVisualizer.h>
-#include <aero_path_planning/utilities/OccupancyGrid.h>
 //***********    NAMESPACES     ****************//
 
 using namespace aero_path_planning;

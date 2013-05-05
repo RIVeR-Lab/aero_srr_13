@@ -22,13 +22,13 @@
 
 using namespace aero_path_planning;
 
-GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_path_planning::CarrotPathFinder& path_planner):
-																		state_(MANUAL),
-																		path_planner_(&path_planner),
-																		path_threshold_(1.0),
-																		nh_(nh),
-																		p_nh_(p_nh),
-																		transformer_(nh)
+GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::CarrotPathFinder& path_planner):
+																state_(MANUAL),
+																path_planner_(&path_planner),
+																path_threshold_(1.0),
+																nh_(nh),
+																p_nh_(p_nh),
+																transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -36,6 +36,28 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, aero_pa
 	this->registerTopics();
 	this->registerTimers();
 	this->buildGlobalMap();
+	ROS_INFO_STREAM("Building Test Mission Goals...");
+	geometry_msgs::Pose pose1;
+	pose1.position.x = 10;
+	pose1.position.y = 0;
+	pose1.orientation.w = 1;
+	this->mission_goals_.push_back(pose1);
+	geometry_msgs::Pose pose2;
+	pose2.position.x = 10;
+	pose2.position.y = 10;
+	pose2.orientation.w = 1;
+	this->mission_goals_.push_back(pose2);
+	geometry_msgs::Pose pose3;
+	pose3.position.x = 0;
+	pose3.position.y = 10;
+	pose3.orientation.w = 1;
+	this->mission_goals_.push_back(pose3);
+	geometry_msgs::Pose pose4;
+	pose4.position.x = 0;
+	pose4.position.y = 0;
+	pose4.orientation.w = 1;
+	this->mission_goals_.push_back(pose4);
+	ROS_INFO_STREAM("Test Mission Goals Built");
 
 	this->cf_ = boost::bind(&GlobalPlanner::checkCollision, this, _1, _2);
 	this->planCB(ros::TimerEvent());
@@ -198,7 +220,7 @@ void GlobalPlanner::registerTopics()
 
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
-	this->odom_sub_      = this->nh_.subscribe(this->odom_topic_,  2, &GlobalPlanner::odomCB,  this);
+	this->odom_sub_      = this->nh_.subscribe("aero_base_pose_ekf/odom",  2, &GlobalPlanner::odomCB,  this);
 	this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2, true);
 	this->goal_pub_      = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2, true);
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
@@ -218,14 +240,14 @@ void GlobalPlanner::buildGlobalMap()
 	origin.x = this->global_x_ori_;
 	origin.y = this->global_y_ori_;
 	origin.z = this->global_z_ori_;
-	origin.rgba = aero_path_planning::UNKNOWN;
-	this->global_map_ = OccupancyGridPtr(new OccupancyGrid(this->global_x_size_, this->global_y_size_, this->global_z_size_, this->global_res_, origin, aero_path_planning::UNKNOWN, this->global_frame_));
+	origin.rgba = app::UNKNOWN;
+	this->global_map_ = OccupancyGridPtr(new OccupancyGrid(this->global_x_size_, this->global_y_size_, this->global_z_size_, this->global_res_, origin, app::UNKNOWN, this->global_frame_));
 }
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
 	//ROS_INFO("Got a new Laser Scan!");
-	/*	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
+/*	pcl::PointCloud<pcl::PointXYZ> scan_cloud;
 	pcl::fromROSMsg(*message, scan_cloud);
 	const PointConverter& converter = this->global_map_->getConverter();
 
@@ -246,16 +268,16 @@ void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
 			//do nothing, just means we got data past the edge of the global map
 		}
 	}
-	 */
+*/
 }
 
-bool GlobalPlanner::lidarToGlobal(const sensor_msgs::PointCloud2& scan_cloud, sensor_msgs::PointCloud2& result_cloud) const
+bool GlobalPlanner::lidarToGlobal(const sm::PointCloud2& scan_cloud, sm::PointCloud2& result_cloud) const
 {
 	this->transformer_.waitForTransform(this->global_frame_, scan_cloud.header.frame_id, scan_cloud.header.stamp, ros::Duration(this->local_update_rate_/2.0));
 	return pcl_ros::transformPointCloud(this->global_frame_, scan_cloud, result_cloud, this->transformer_);
 }
 
-void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_cloud, aero_path_planning::PointCloud& result_cloud) const
+void GlobalPlanner::lidarMsgToOccGridPatch(const sm::PointCloud2& scan_cloud, app::PointCloud& result_cloud) const
 {
 	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
 	pcl::fromROSMsg(scan_cloud, copy_cloud);
@@ -272,10 +294,9 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sensor_msgs::PointCloud2& scan_
 	}
 }
 
-void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
+void GlobalPlanner::odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPtr& message)
 {
 	ROS_INFO_STREAM("I Got New Odometry Data!");
-	this->last_odom_ = *message;
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PointStamped trans_point_m;
@@ -284,19 +305,38 @@ void GlobalPlanner::odomCB(const nav_msgs::OdometryConstPtr& message)
 		odom_point_m.point  = message->pose.pose.position;
 
 		//Shift the robot location from the odometry frame to the global one
-		this->transformer_.transformPoint(this->global_frame_, odom_point_m, trans_point_m);
+		try
+		{
+			this->transformer_.waitForTransform(this->global_frame_, odom_point_m.header.frame_id, odom_point_m.header.stamp, ros::Duration(0.1));
+			this->transformer_.transformPoint(this->global_frame_, odom_point_m, trans_point_m);
+		}
+		catch(std::exception& e)
+		{
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
 
 		//Check the distance between the current robot location and the next path goal point.
 		//If within threshold, pop the path goal point
 		Point current_point;
 		current_point.x = trans_point_m.point.x;
 		current_point.y = trans_point_m.point.y;
-		current_point.z = trans_point_m.point.z;
-
-		double dist = pcl::distances::l2(current_point.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
-		if(std::abs(dist)<this->path_threshold_)
+		current_point.z = 0;
+		this->global_map_->getConverter().convertToGrid(current_point, this->current_point_);
+		double dist = pcl::distances::l2(this->current_point_.getVector4fMap(), this->carrot_path_.front().getVector4fMap());
+		ROS_INFO_STREAM_THROTTLE(1, "At position <"<<this->current_point_.x<<","<<this->current_point_.y<<">, Goal Position <"<<carrot_path_.front().x<<","<<carrot_path_.front().y<<">, dist="<<dist);
+		if(dist<2/this->global_res_)
 		{
 			this->carrot_path_.pop_front();
+			this->updateGoal();
+		}
+	}
+	else
+	{
+		ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
+		if(!this->mission_goals_.empty())
+		{
+			this->mission_goals_.pop_front();
+			this->planCB(ros::TimerEvent());
 		}
 	}
 }
@@ -338,8 +378,6 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 				//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
 			}
 		}
-		//Copy the current goal point to the occupancy grid
-		this->copyNextGoalToGrid(local_grid);
 
 
 		//Send the new local grid to the local planner
@@ -353,20 +391,25 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	}
 }
 
-void GlobalPlanner::copyNextGoalToGrid(aero_path_planning::OccupancyGrid& grid) const
+void GlobalPlanner::updateGoal() const
 {
 	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
-	geometry_msgs::PointStamped goal_point_m;
-	goal_point_m.point.x = 10;
-	goal_point_m.point.y = 0;
-	goal_point_m.point.z = 0;
-	goal_point_m.header.frame_id = this->global_frame_;
-	goal_point_m.header.stamp    = grid.getGrid().header.stamp;
-	geometry_msgs::PoseStamped goal_pose;
-	goal_pose.header = goal_point_m.header;
-	goal_pose.pose.position    = goal_point_m.point;
-	goal_pose.pose.orientation.w = 1;
-	this->goal_pub_.publish(goal_pose);
+	if(!this->carrot_path_.empty())
+	{
+		Point goal_point;
+		this->global_map_->getConverter().convertToEng(this->carrot_path_.front(), goal_point);
+		geometry_msgs::PointStamped goal_point_m;
+		goal_point_m.point.x = goal_point.x;
+		goal_point_m.point.y = goal_point.y;
+		goal_point_m.point.z = 0;
+		goal_point_m.header.frame_id = this->global_frame_;
+		goal_point_m.header.stamp    = ros::Time::now();
+		geometry_msgs::PoseStamped goal_pose;
+		goal_pose.header = goal_point_m.header;
+		goal_pose.pose.position    = goal_point_m.point;
+		goal_pose.pose.orientation.w = 1;
+		this->goal_pub_.publish(goal_pose);
+	}
 
 }
 
@@ -374,56 +417,61 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
 	this->carrot_path_ = std::deque<Point>();
-	Point start_point;
-	start_point.x = 0;
-	start_point.y = 0;
-	start_point.z = 0;
-	Point goal_point;
-	goal_point.x  = 100;
-	goal_point.y  = 100;
-	goal_point.z  = 0;
-	if(this->path_planner_!=NULL)
+	if(!this->mission_goals_.empty())
 	{
-		this->path_planner_->setCollision(this->cf_);
-		this->path_planner_->setCarrotDelta(10);
-		this->path_planner_->setSearchMap(*this->global_map_);
-		this->path_planner_->search(start_point, goal_point, this->plan_timerout_, this->carrot_path_);
-		nav_msgs::PathPtr path(new nav_msgs::Path());
-		path->header.frame_id = this->global_frame_;
-		path->header.stamp    = ros::Time::now();
-		this->carrotToPath(*path);
-		this->path_pub_.publish(path);
+		Point goal_point;
+		goal_point.x = this->mission_goals_.front().position.x;
+		goal_point.y = this->mission_goals_.front().position.y;
+		goal_point.z = 0;
+		this->global_map_->getConverter().convertToGrid(goal_point, goal_point);
+		if(this->path_planner_!=NULL)
+		{
+			this->path_planner_->setCollision(this->cf_);
+			this->path_planner_->setCarrotDelta(5.0/this->global_res_);
+			this->path_planner_->setSearchMap(*this->global_map_);
+			this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, this->carrot_path_);
+			this->carrot_path_.pop_front();
+			nav_msgs::PathPtr path(new nav_msgs::Path());
+			path->header.frame_id = this->global_frame_;
+			path->header.stamp    = ros::Time::now();
+			this->carrotToPath(*path);
+			this->path_pub_.publish(path);
+			this->updateGoal();
+		}
+		else
+		{
+			ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
+		}
 	}
 	else
 	{
-		ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
+		ROS_WARN("No Mission Goals!");
 	}
-
-	OccupancyGridMsgPtr viz_message(new OccupancyGridMsg());
-	this->global_map_->generateMessage(*viz_message);
-	this->map_viz_pub_.publish(viz_message);
 }
 
 void GlobalPlanner::carrotToPath(nav_msgs::Path& path) const
 {
+	Point path_point;
+	const PointConverter& converter = this->global_map_->getConverter();
 	BOOST_FOREACH(std::deque<Point>::value_type point, this->carrot_path_)
 	{
+		converter.convertToEng(point, path_point);
 		geometry_msgs::PoseStamped path_pose;
 		path_pose.header             = path.header;
-		path_pose.pose.position.x    = point.x;
-		path_pose.pose.position.y    = point.y;
-		path_pose.pose.position.z    = point.z;
+		path_pose.pose.position.x    = path_point.x;
+		path_pose.pose.position.y    = path_point.y;
+		path_pose.pose.position.z    = path_point.z;
 		path_pose.pose.orientation.w = 1;
 		path.poses.push_back(path_pose);
 	}
 }
 
-bool GlobalPlanner::checkCollision(const aero_path_planning::Point& point, const aero_path_planning::OccupancyGrid& map) const
+bool GlobalPlanner::checkCollision(const app::Point& point, const app::OccupancyGrid& map) const
 {
 	bool collision = false;
 	try
 	{
-		if(map.getPointTrait(point)==aero_path_planning::OBSTACLE)
+		if(map.getPointTrait(point)==app::OBSTACLE)
 		{
 			collision = true;
 		}

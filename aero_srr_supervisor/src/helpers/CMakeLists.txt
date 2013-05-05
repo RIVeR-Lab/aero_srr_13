@@ -1,1 +1,3 @@
-rosbuild_add_library(${PROJECT_NAME}_supervisor Supervisor.cpp)
+rosbuild_add_library(Supervisor Supervisor.cpp)
+rosbuild_add_library(StateTable StateTable.cpp)
+target_link_libraries(Supervisor StateTable)
