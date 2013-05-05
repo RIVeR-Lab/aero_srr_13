@@ -87,6 +87,9 @@ class RoboteqMotorController{
    * Configuration
    */
   void setSerialWatchdog(int time);
+
+  void setRotationInfo(double maxRPM1, double maxRPM2,
+			 int ppr1, int ppr2);
   /**
    * Save the current configuration to persist between restarts
    */
@@ -125,10 +128,10 @@ class RoboteqMotorController{
    */
   void getVelocity(uint8_t chan, double& value);
  private:
-  const double maxRPM1_;
-  const double maxRPM2_;
-  const int ppr1_;
-  const int ppr2_;
+  double maxRPM1_;
+  double maxRPM2_;
+  int ppr1_;
+  int ppr2_;
   RoboteqDevice device_;
   MotorMode motor_mode1_;
   MotorMode motor_mode2_;

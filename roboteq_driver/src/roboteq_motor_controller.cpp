@@ -176,6 +176,19 @@ void RoboteqMotorController::setSerialWatchdog(int time){
 	setConfig(_RWD, time);
 }
 
+void RoboteqMotorController::setRotationInfo(double maxRPM1, double maxRPM2, int ppr1, int ppr2){
+	maxRPM1_ = maxRPM1;
+	maxRPM2_ = maxRPM2;
+	ppr1_ = ppr1;
+	ppr2_ = ppr2;
+	setConfig(_EPPR, 1, ppr1_);
+	setConfig(_EPPR, 2, ppr2_);
+	setConfig(_MXRPM, 1, maxRPM1_);
+	setConfig(_MXRPM, 2, maxRPM2_);
+
+	saveToEEPROM();
+}
+
 void RoboteqMotorController::saveToEEPROM(){
   setCommand(_EES);
 }
