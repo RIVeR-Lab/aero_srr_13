@@ -544,30 +544,30 @@ const app::Point& OccupancyGrid::getPoint(int x, int y, int z) const
 bool OccupancyGrid::boundsCheck(const Point& point)const throw(OccupancyGridAccessException)
 								{
 	bool failure = false;
-	const std::string prefex("Invalid Point Requested: ");
-	const std::string middle(" Is Greater Than Max Value Or Less Than Zero: ");
-	std::stringstream message("");
+//	const std::string prefex("Invalid Point Requested: ");
+//	const std::string middle(" Is Greater Than Max Value Or Less Than Zero: ");
+//	std::stringstream message("");
 	if(point.x>this->x_dim_ || point.x<0)
 	{
-		message<<prefex<<"X value"<<point.x<<middle<<this->x_dim_;
+		//message<<prefex<<"X value"<<point.x<<middle<<this->x_dim_;
 		failure = true;
 	}
 	else if(point.y>this->y_dim_|| point.x<0)
 	{
-		message<<prefex<<"Y value"<<point.y<<middle<<this->y_dim_;
+		//message<<prefex<<"Y value"<<point.y<<middle<<this->y_dim_;
 		failure = true;
 	}
 	else if(point.z>this->z_dim_|| point.x<0)
 	{
-		message<<prefex<<"Z value"<<point.z<<middle<<this->z_dim_;
+		//message<<prefex<<"Z value"<<point.z<<middle<<this->z_dim_;
 		failure = true;
 	}
-	if(failure)
-	{
-		std::string message_out(message.str());
-		OccupancyGridAccessException exception(message_out);
-		throw exception;
-	}
+//	if(failure)
+//	{
+//		std::string message_out(message.str());
+//		OccupancyGridAccessException exception(message_out);
+//		throw exception;
+//	}
 	return !failure;
 								}
 
