@@ -386,6 +386,12 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 
 void LocalPlanner::planningCB(const ros::TimerEvent& event)
 {
+	if(event.current_real-event.last_real>(event.current_expected-event.last_expected)*1.25)
+	{
+		ROS_WARN_STREAM_THROTTLE(1, "Large Skew on Local Planner Planning Callback: expected update period="<<event.current_expected-event.last_expected<<"s, actual update period="<<event.current_real-event.last_real<<"s");
+	}
+
+
 	if(should_plan_)
 	{
 		//Grab the next occupancy grid to process if we've recieved new data from global planner
@@ -492,6 +498,10 @@ void LocalPlanner::applyGoal(OccupancyGrid& grid) const
 
 void LocalPlanner::velUpdateCB(const ros::TimerEvent& event)
 {
+	if(event.current_real-event.last_real>(event.current_expected-event.last_expected)*1.25)
+	{
+		ROS_WARN_STREAM_THROTTLE(1, "Large Skew on Local Planner Velocity Update Callback: expected update period="<<event.current_expected-event.last_expected<<"s, actual update period="<<event.current_real-event.last_real<<"s");
+	}
 	this->sendVelCom(this->set_vel_, this->set_rad_);
 }
 
