@@ -391,9 +391,11 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 				copyCloud.at(i).x = std::floor(copyCloud.at(i).x);
 				copyCloud.at(i).y = std::floor(copyCloud.at(i).y);
 				copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
+				Point copy_point(local_grid.getGrid().at(i));
+				copy_point.rgba = this->global_map_->getPointTrait(copyCloud.at(i));
 
 				//Copy the PointTrait data from the global frame to the local frame
-				local_grid.setPointTrait(local_grid.getGrid().at(i), this->global_map_->getPointTrait(copyCloud.at(i)));
+				local_grid.setPointTrait(copy_point);
 			}
 			catch(std::runtime_error& e)
 			{

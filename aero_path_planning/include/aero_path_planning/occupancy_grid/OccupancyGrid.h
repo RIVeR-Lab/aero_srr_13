@@ -172,11 +172,10 @@ public:
 	 * @author	Adam Panzica
 	 * @brief	Sets the PointTrait of a point on the grid
 	 * @param point	The coordinates of the point on the grid
-	 * @param trait	The PointTrait to set the point to
 	 * @return True if successful, else false
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(const app::Point& point, app::PointTrait trait) throw(OccupancyGridAccessException);
+	bool setPointTrait(const app::Point& point) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author Adam Panzica
