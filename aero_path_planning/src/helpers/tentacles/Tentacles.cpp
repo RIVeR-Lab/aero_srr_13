@@ -230,6 +230,7 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 		//Tentacle is exactly at halfway
 		this->radius_ = std::numeric_limits<double>::infinity();
 	}
+
 	PRINTER("Calculated Tentacle Radius=%f", this->radius_);
 	//Calculate the working length of the tentacle
 	int working_length;
@@ -248,7 +249,7 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 	if(this->radius_ > this->straight_threshold_ || this->radius_ < -this->straight_threshold_)
 	{
 		this->radius_ = std::numeric_limits<double>::infinity();
-		for(double i = 0; i<working_length; i++)
+		for(double i = 0; i<roundToGrid(seedLength+min_length, resolution); i++)
 		{
 			aero_path_planning::Point coord;
 			coord.x=i;
@@ -259,6 +260,11 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 	}
 	else
 	{
+		//Clamp tentacle linear velocity based on a max angular velocity of ~pi/2 rad/s
+		while(std::abs(this->velocity_/this->radius_)>1.5)
+		{
+			this->velocity_-=0.01;
+		}
 		//Convert the radius, which will be in engineering units, into grid coordinates
 		int working_radius = roundToGrid(radius_, resolution);
 		//Calculate the sweep angle for this tentacle
@@ -404,6 +410,7 @@ SpeedSet::SpeedSet(int index, double min_length, double expFact, double seedRad,
 {
 	this->seed_rad_  = seedRad;
 	this->velocity_ = velocity;
+	int origin = numTent/2;
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++)
 	{
