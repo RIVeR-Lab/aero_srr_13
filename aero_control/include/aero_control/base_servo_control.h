@@ -31,7 +31,7 @@ namespace aero_control {
 
 class BaseServoController {
 public:
-	BaseServoController(ros::NodeHandle nh, std::string DesiredPosition,std::string BaseVelocity);
+	BaseServoController(ros::NodeHandle nh, std::string DesiredPosition,std::string BaseWorkspacePosition,std::string BaseVelocity);
 	~BaseServoController();
 private:
 
@@ -44,6 +44,7 @@ private:
 	void PIDConfigCallback(aero_control::BaseServoPIDConfig &config, uint32_t level);
 	void ErrorUpdateTimerCallback(const ros::TimerEvent&);
 	void DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose);
+	void BaseWorkspacePositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose);
 	void UpdatePID(void);
 
 	void UpdateError(void);
@@ -62,6 +63,7 @@ private:
 	ros::NodeHandle nh_;
 	ros::Subscriber desired_position_sub;
 	ros::Publisher base_velocity_pub;
+	ros::Publisher base_workspace_position_pub;
 
 	tf::TransformListener tf_listener;
 
