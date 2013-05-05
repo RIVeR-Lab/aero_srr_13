@@ -32,17 +32,31 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, std::string Desired
 	error_update_timer_flag = false;
 	last_position_time = ros::Time().now();
 
-	PID_X = new pid::PIDController(3, 0, 0.5, pos_err.x_err);
-	PID_Y = new pid::PIDController(3, 0, 0.5, pos_err.y_err);
+	PID_X = new pid::PIDController(0, 0, 0, pos_err.x_err);
+	PID_Y = new pid::PIDController(0, 0, 0, pos_err.y_err);
 
 	linear_gain = 2;
 	rotational_gain = 1;
+
+	dr_call = boost::bind(&BaseServoController::PIDConfigCallback,this, _1, _2);
+			  dr_server.setCallback(dr_call);
+
 }
 
 BaseServoController::~BaseServoController() {
 	delete PID_X;
 	delete PID_Y;
 }
+
+
+void BaseServoController::PIDConfigCallback(aero_control::BaseServoPIDConfig &config, uint32_t level) {
+PID_X->SetPID(config.x_linear_P,config.x_linear_I,config.x_linear_D);
+linear_gain = config.x_gain;
+PID_Y->SetPID(config.y_linear_P,config.y_linear_I,config.y_linear_D);
+rotational_gain = config.y_gain;
+
+}
+
 
 void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
 	UpdateError();

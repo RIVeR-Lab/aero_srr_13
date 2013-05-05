@@ -16,12 +16,13 @@
 
 //License File
 #include <aero_control/base_servo_control.h>
+#include <aero_control/BaseServoPointConfig.h>
 
 using namespace std;
 ros::Publisher pub;
 tf::TransformListener *listenerptr;
 
-float x_pos = 3;
+float x_pos = 0;
 float y_pos = 0;
 float z_pos = 0;
 float rx_pos = 0;
@@ -30,21 +31,26 @@ float rz_pos = 0;
 
 geometry_msgs::PoseStamped test_msg_world;
 
+dynamic_reconfigure::Server<aero_control::BaseServoPointConfig> dr_server;
+	dynamic_reconfigure::Server<aero_control::BaseServoPointConfig>::CallbackType dr_call;
 
 void TimerCallback(const ros::TimerEvent&) {
 	geometry_msgs::PoseStamped test_msg;
 
 	test_msg_world.header.stamp = ros::Time::now();
 
-	listenerptr->waitForTransform("/base_footprint", test_msg_world.header.frame_id, test_msg_world.header.stamp, ros::Duration(0.5));
+	listenerptr->waitForTransform("/workspace", test_msg_world.header.frame_id, test_msg_world.header.stamp, ros::Duration(0.5));
 
-	listenerptr->transformPose("/base_footprint", test_msg_world, test_msg);
+	listenerptr->transformPose("/workspace", test_msg_world, test_msg);
 
 
 	pub.publish(test_msg);
 
 }
+void PointConfigCallback(aero_control::BaseServoPointConfig &config, uint32_t level) {
 
+
+}
 
 int main(int argc, char **argv) {
 
@@ -72,7 +78,7 @@ int main(int argc, char **argv) {
 	q.setRPY(rx_pos, ry_pos, rz_pos);
 
 	tf::quaternionTFToMsg(q, test_msg.pose.orientation);
-	test_msg.header.frame_id = "/base_footprint";
+	test_msg.header.frame_id = "/workspace";
 	test_msg.header.stamp = ros::Time::now();
 
 	listenerptr->waitForTransform("/world", test_msg.header.frame_id, test_msg.header.stamp, ros::Duration(0.5));
@@ -80,7 +86,8 @@ int main(int argc, char **argv) {
 	listenerptr->transformPose("/world", test_msg, test_msg_world);
 
 
-
+	dr_call = boost::bind(&PointConfigCallback, _1, _2);
+		  dr_server.setCallback(dr_call);
 
 	ros::spin();
 }

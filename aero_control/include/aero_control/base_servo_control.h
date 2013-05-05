@@ -20,7 +20,8 @@
 #include <time.h>
 #include <string.h>
 #include <aero_control/pid_control.h>
-
+#include <dynamic_reconfigure/server.h>
+#include <aero_control/BaseServoPIDConfig.h>
 
 
 
@@ -40,7 +41,7 @@ private:
 		double y_err;
 	}base_position_error;
 
-
+	void PIDConfigCallback(aero_control::BaseServoPIDConfig &config, uint32_t level);
 	void ErrorUpdateTimerCallback(const ros::TimerEvent&);
 	void DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose);
 	void UpdatePID(void);
@@ -66,7 +67,8 @@ private:
 
 	geometry_msgs::PoseStamped desired_pose;
 
-
+	dynamic_reconfigure::Server<aero_control::BaseServoPIDConfig> dr_server;
+		dynamic_reconfigure::Server<aero_control::BaseServoPIDConfig>::CallbackType dr_call;
 
 	base_position_error pos_err;
 
