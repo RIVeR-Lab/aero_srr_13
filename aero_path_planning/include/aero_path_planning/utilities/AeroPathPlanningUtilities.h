@@ -21,6 +21,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/foreach.hpp>
 #include <geometry_msgs/Pose.h>
+#include <tf/tf.h>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include <aero_path_planning/utilities/TypeDefinitions.h>
 #include <aero_path_planning/utilities/PointConverter.hpp>
@@ -311,6 +312,22 @@ void pointToPose(const aero_path_planning::Point& point, geometry_msgs::Pose& po
  * @param [out] point The point to fill
  */
 void poseToPoint(const geometry_msgs::Pose& pose, aero_path_planning::Point& point);
+
+/**
+ * @author Adam Panzica
+ * @brief Converts from a tf::Vector to an aero_path_planning::Point
+ * @param [in]  vector Vector to convert
+ * @param [out] point  Point to fill with the data from the vector
+ */
+void vectorToPoint(const tf::Vector3& vector, aero_path_planning::Point& point);
+
+/**
+ * @author Adam Panzica
+ * @brief Converts from an aero_path_planning::Point to a tf::Vector
+ * @param [out]  vector Vector to convert
+ * @param [in] point  Point to fill with the data from the vector
+ */
+void pointToVector(const aero_path_planning::Point& point, tf::Vector3& vector);
 
 } /* aero_path_planning */;
 

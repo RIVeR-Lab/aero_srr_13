@@ -308,3 +308,17 @@ void aero_path_planning::poseToPoint(const geometry_msgs::Pose& pose, aero_path_
 	point.y = pose.position.y;
 	point.z = pose.position.z;
 }
+
+void aero_path_planning::vectorToPoint(const tf::Vector3& vector, aero_path_planning::Point& point)
+{
+	point.x = vector.x();
+	point.y = vector.y();
+	point.z = vector.z();
+}
+
+void aero_path_planning::pointToVector(const aero_path_planning::Point& point, tf::Vector3& vector)
+{
+	vector.setX(point.x);
+	vector.setY(point.y);
+	vector.setZ(point.z);
+}

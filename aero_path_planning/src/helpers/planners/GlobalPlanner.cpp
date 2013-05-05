@@ -223,7 +223,7 @@ void GlobalPlanner::registerTopics()
 	//this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2, true);
 	this->goal_pub_      = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2, true);
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
-	this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
+	//this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
 }
 
 void GlobalPlanner::registerTimers()
@@ -367,10 +367,19 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	OccupancyGridCloud copyCloud;
 	try
 	{
-		//Transform the coordinates of the local grid to the global frame
-		ros::Time transform_time = ros::Time::now();
-		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), transform_time, ros::Duration(this->local_update_rate_));
-		pcl_ros::transformPointCloud(this->global_frame_, transform_time, local_grid.getGrid(), local_grid.getFrameId(), copyCloud, this->transformer_);
+		//Look up the transform from the local grid to the global frame
+		tf::StampedTransform local_to_global;
+		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), local_grid.getGrid().header.stamp, ros::Duration(this->local_update_rate_));
+		this->transformer_.lookupTransform(this->global_frame_, local_grid.getFrameId(), local_grid.getGrid().header.stamp, local_to_global);
+
+		//Adjust the origin to account for the difference between grid-units and meters
+		tf::Vector3 ltg_origin = local_to_global.getOrigin();
+		app::Point ltg_origin_point;
+		app::vectorToPoint(ltg_origin, ltg_origin_point);
+		this->global_map_->getConverter().convertToGrid(ltg_origin_point, ltg_origin_point);
+		app::pointToVector(ltg_origin_point, ltg_origin);
+		local_to_global.setOrigin(ltg_origin);
+		pcl_ros::transformPointCloud(local_grid.getGrid(), copyCloud, local_to_global);
 
 		//Copy the data in the global frame at the transformed local-coordinates into the local grid
 #pragma omp parallel for
