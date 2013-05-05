@@ -10,7 +10,7 @@
 
 //****************SYSTEM DEPENDANCIES**************************//
 #include<gtest/gtest.h>
-#include<queue>
+#include<deque>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
 //**********************NAMESPACES*****************************//
@@ -232,7 +232,8 @@ TEST(CollisionCheckTest, testCollision)
 	obst_point.x = 5;
 	obst_point.y = 5;
 	obst_point.z = 0;
-	coll_grid.setPointTrait(obst_point, aero_path_planning::OBSTACLE);
+	obst_point.rgba = aero_path_planning::OBSTACLE;
+	coll_grid.setPointTrait(obst_point);
 
 	ASSERT_TRUE(collisionCheck(obst_point, coll_grid));
 
@@ -483,7 +484,7 @@ TEST_F(RRTCarrotTestFixture, testSearch)
 	goal_point.x = this->x_size_-this->origin_.x;
 	goal_point.x = this->y_size_-this->origin_.x;
 	goal_point.z = 0;
-	std::queue<Point> path;
+	std::deque<Point> path;
 	ros::Duration timeout(1);
 	//Perform a search
 	ASSERT_TRUE(this->search(this->origin_, goal_point, timeout, path));

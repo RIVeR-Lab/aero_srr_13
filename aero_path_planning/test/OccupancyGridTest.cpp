@@ -11,7 +11,7 @@
 //****************SYSTEM DEPENDANCIES**************************//
 #include<gtest/gtest.h>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/utilities/OccupancyGrid.h>
+#include<aero_path_planning/occupancy_grid/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
 using namespace aero_path_planning;
 
@@ -142,11 +142,15 @@ TEST_F(OccupancyGridTest, testPointTraitSetting)
  	ASSERT_EQ(aero_path_planning::FREE_LOW_COST, test2);
 
  	//Set some points to be obstacles
- 	ASSERT_TRUE(testGrid3D.setPointTrait(pxpy_, aero_path_planning::OBSTACLE));
- 	ASSERT_TRUE(testGrid3D.setPointTrait(pxny_, aero_path_planning::OBSTACLE));
+ 	pxpy_.rgba = aero_path_planning::OBSTACLE;
+ 	pxny_.rgba = aero_path_planning::OBSTACLE;
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(pxpy_));
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(pxny_));
  	//Set some points to be unknown
- 	ASSERT_TRUE(testGrid3D.setPointTrait(nxny_, aero_path_planning::UNKNOWN));
- 	ASSERT_TRUE(testGrid3D.setPointTrait(nxpy_, aero_path_planning::UNKNOWN));
+ 	nxny_.rgba = aero_path_planning::UNKNOWN;
+ 	nxpy_.rgba = aero_path_planning::UNKNOWN;
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(nxny_));
+ 	ASSERT_TRUE(testGrid3D.setPointTrait(nxpy_));
 
  	//Check to see that those point traits were actually set
  	PointTrait test3 = testGrid3D.getPointTrait(pxpy_);

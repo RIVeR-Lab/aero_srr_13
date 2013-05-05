@@ -121,6 +121,13 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Updates the global goal
+	 * @param event
+	 */
+	void goalCB(const ros::TimerEvent& event);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Sends the global map out for vizualization
 	 */
 	void visualizeMap() const;
@@ -164,7 +171,25 @@ private:
 	 */
 	void carrotToPath(nav_msgs::Path& path) const;
 
+	/**
+	 * @author Adam Panzica
+	 * @brief looks up the robot's current location in the world frame
+	 * @param [in] point Point to fill with the robot's location (in meters, not grid coordinates)
+	 * @return true if the transform was sucessful, else false
+	 */
+	bool calcRobotPointWorld(app::Point& point) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Calculates if the next goal point in carrot path has been reached
+	 * @param [in] worldLocation The location of the robot in world coodinates (meters, not gird coordinates)
+	 * @param [in] threshold The threshold to consider the goal reached (meters, not grid coordinates)
+	 * @return True if reached, else false
+	 */
+	bool reachedNextGoal(const app::Point& worldLocation, const double threshold) const;
+
 	State       state_;
+	app::Point  current_point_;
 
 	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
 	std::string local_occupancy_topic_; ///Topic name for communicating with the local planner
@@ -192,9 +217,6 @@ private:
 	double      global_res_;            ///Global occupancy grid resolution
 	double      global_update_rate_;    ///Update frequency for planning on the global path
 
-	nav_msgs::Odometry    last_odom_;   ///The odometry data received by the planner
-	Point				  current_point_;///The last recieved location of the robot
-
 	CarrotPathFinder::collision_func_ cf_;            ///The collision function
 	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy
 	OccupancyGridPtr                  global_map_;    ///The global OccupancyGrid
@@ -216,6 +238,7 @@ private:
 	ros::Subscriber       slam_sub_;      ///Subscriber to nav_msgs::OccupancyGrid messages from SLAM
 	ros::Timer            chunck_timer_;  ///Timer to chunk global map into local map
 	ros::Timer            plan_timer_;    ///Timer to plan on the global map
+	ros::Timer            goal_timer_;    ///Timer to update the goal point
 	ros::Duration         plan_timerout_; ///Timeout to produce global plans
 };
 

@@ -8,7 +8,7 @@
 
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <gtest/gtest.h>
-#include<queue>
+#include<deque>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/planning_strategies/AStarCarrot.h>
 //***********    NAMESPACES     ****************//
@@ -22,11 +22,11 @@ namespace asu = aero_path_planning::astar_utilities;
 namespace app = aero_path_planning;
 
 template<class T>
-void clear_queue(std::queue<T>& queue)
+void clear_queue(std::deque<T>& deque)
 {
-	while(!queue.empty())
+	while(!deque.empty())
 	{
-		queue.pop();
+		deque.pop_front();
 	}
 }
 
@@ -170,7 +170,8 @@ TEST_F(AStarCarrotTestFixture, testCollision)
 	obst_point.x = 5;
 	obst_point.y = 5;
 	obst_point.z = 0;
-	coll_grid.setPointTrait(obst_point, aero_path_planning::OBSTACLE);
+	obst_point.rgba = aero_path_planning::OBSTACLE;
+	coll_grid.setPointTrait(obst_point);
 
 	EXPECT_TRUE(collisionCheck(obst_point, coll_grid));
 
@@ -193,7 +194,7 @@ TEST_F(AStarCarrotTestFixture, testAStarCarrot)
 	std::string frame_id("/robot");
 	app::OccupancyGrid test_map(50, 50, .1, zero_point_, app::FREE_LOW_COST, frame_id);
 	app::AStarCarrot test_planner;
-	std::queue<app::Point> result_path;
+	std::deque<app::Point> result_path;
 	ros::Duration timeout(10);
 
 	EXPECT_FALSE(test_planner.search(zero_point_, goal_point_, timeout , result_path));
