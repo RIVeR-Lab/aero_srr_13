@@ -48,8 +48,26 @@ void TimerCallback(const ros::TimerEvent&) {
 
 }
 void PointConfigCallback(aero_control::BaseServoPointConfig &config, uint32_t level) {
+	x_pos = config.X_Position;
+	y_pos = config.Y_Position;
 
+	geometry_msgs::PoseStamped test_msg;
 
+	test_msg.pose.position.x = x_pos;
+		test_msg.pose.position.y = y_pos;
+		test_msg.pose.position.z = z_pos;
+
+		tf::Quaternion q;
+
+		q.setRPY(rx_pos, ry_pos, rz_pos);
+
+		tf::quaternionTFToMsg(q, test_msg.pose.orientation);
+		test_msg.header.frame_id = "/base_footprint";
+		test_msg.header.stamp = ros::Time::now();
+
+		listenerptr->waitForTransform("/world", test_msg.header.frame_id, test_msg.header.stamp, ros::Duration(0.5));
+
+		listenerptr->transformPose("/world", test_msg, test_msg_world);
 }
 
 int main(int argc, char **argv) {
