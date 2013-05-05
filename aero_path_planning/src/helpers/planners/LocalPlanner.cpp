@@ -414,7 +414,9 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				try
 				{
 					//ROS_INFO_STREAM("I'm apllying the LIDAR pach...");
+					ros::Time lidarStart(ros::Time::now());
 					bool success = working_grid.setPointTrait(*this->lidar_patch_);
+					ROS_INFO_STREAM("Lidar Copying Took "<<ros::Time::now()-lidarStart<<" seconds");
 					//ROS_INFO_STREAM("Patch Applied"<<success<<"!");
 				}
 				catch(std::exception& e)
@@ -449,7 +451,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				//select the best tentacle
 				ros::Time selectStart(ros::Time::now());
 				this->selectTentacle(0, working_grid, speedset_idx, tentacle_idx);
-				ROS_INFO_STREAM("Tentacle Selection Took "<<selectStart-ros::Time::now()<<" seconds");
+				ROS_INFO_STREAM("Tentacle Selection Took "<<ros::Time::now()-selectStart<<" seconds");
 				//Limit rate of tentacle change
 				tentacle_idx   = this->limiter_->nextTentacle(tentacle_idx);
 				//Update the current radius and velocity
