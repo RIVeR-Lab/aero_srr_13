@@ -109,7 +109,7 @@ void BaseServoController::DesiredPositionMSG(
 void BaseServoController::UpdateError(void) {
 	geometry_msgs::PoseStamped desired_error_pose;
 	geometry_msgs::PoseStamped workspace_error_pose;
-
+try{
 	tf_listener.waitForTransform("/base_footprint", this->desired_pose.header.frame_id, this->desired_pose.header.stamp,
 			ros::Duration(0.1));
 	tf_listener.transformPose("/base_footprint", this->desired_pose, desired_error_pose);
@@ -120,12 +120,14 @@ void BaseServoController::UpdateError(void) {
 	tf_listener.waitForTransform("/base_footprint", this->workspace_pose.header.frame_id, this->workspace_pose.header.stamp,
 			ros::Duration(0.1));
 	tf_listener.transformPose("/base_footprint", this->workspace_pose, workspace_error_pose);
-
-
 	pos_err.x_err = desired_error_pose.pose.position.x-workspace_error_pose.pose.position.x;
 	pos_err.y_err = desired_error_pose.pose.position.y-workspace_error_pose.pose.position.y;
 
 		UpdatePID();
+} catch (std::exception& e) {
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
+
 }
 void BaseServoController::UpdatePID(void) {
 
