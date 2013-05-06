@@ -670,7 +670,7 @@ void LocalPlanner::twist(double x_dot, double omega)
 		omega = omega/std::abs(omega)*0.1;
 	}
 	message.linear.x  = x_dot;
-	message.angular.z = -omega;
+	message.angular.z = -omega*2.0;
 	this->vel_pub_.publish(message);
 }
 
