@@ -18,6 +18,7 @@
 #include<nav_msgs/Path.h>
 #include<nav_msgs/OccupancyGrid.h>
 #include<geometry_msgs/PoseWithCovarianceStamped.h>
+#include <aero_srr_msgs/AeroState.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/utilities/AeroPathPlanning.h>
 #include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
@@ -85,9 +86,22 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Sets the global planner to manual mode
+	 * @brief  Sets/unsets to manual mode
+	 * @param [in] enable true for manual, false for autonomous
 	 */
-	void setManual();
+	void setManual(bool enable);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Sets the GlobalPlanner to search mode
+	 */
+	void setSearch();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Sets the GlobalPLanner to navigate to an object of interest
+	 */
+	void setNavObj();
 
 	/**
 	 * @author Adam Panzica
@@ -118,6 +132,13 @@ private:
 	 * @param event
 	 */
 	void chunckCB(const ros::TimerEvent& event);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Callback for handling changes in robot state
+	 * @param message
+	 */
+	void stateCB(const aero_srr_msgs::AeroStateConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
