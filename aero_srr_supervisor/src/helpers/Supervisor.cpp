@@ -113,7 +113,19 @@ bool Supervisor::stateTransitionReqCB(aero_srr_msgs::StateTransitionRequest::Req
 	}
 	else
 	{
-
+		std::string current_state;
+		std::string requested_state;
+		std::string transition_list;
+		this->state_table_.stateToString(request.requested_state.state, requested_state);
+		this->state_table_.stateToString(this->state_.state, current_state);
+		this->buildTransitionList(this->state_, transition_list);
+		response.error_message+="<";
+		response.error_message+=current_state;
+		response.error_message+="><";
+		response.error_message+=requested_state;
+		response.error_message+="><";
+		response.error_message+=transition_list;
+		response.error_message+=">";
 		response.success = false;
 	}
 	return true;
@@ -124,7 +136,6 @@ void Supervisor::stateUptd() const
 	typedef aero_srr_msgs::AeroState state_t;
 	aero_srr_msgs::AeroState message(this->state_);
 	message.header.stamp = ros::Time::now();
-
 	this->aero_state_pub_.publish(message);
 }
 
@@ -132,4 +143,11 @@ void Supervisor::buildTransitionList(state_t state, std::string& list) const
 {
 	std::vector<uint8_t> transition_list;
 	this->state_table_.getTransitionList(state.state, transition_list);
+	BOOST_FOREACH(std::vector<uint8_t>::value_type state, transition_list)
+	{
+		std::string state_string;
+		this->state_table_.stateToString(state, state_string);
+		list+=" ";
+		list+=state_string;
+	}
 }
