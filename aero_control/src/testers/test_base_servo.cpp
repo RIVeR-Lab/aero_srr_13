@@ -37,11 +37,14 @@ void TimerCallback(const ros::TimerEvent&) {
 	geometry_msgs::PoseStamped test_msg;
 
 	test_msg_world.header.stamp = ros::Time::now();
-
-	listenerptr->waitForTransform("/base_footprint", test_msg_world.header.frame_id, test_msg_world.header.stamp, ros::Duration(0.5));
+try{
+	listenerptr->waitForTransform("/base_footprint", test_msg_world.header.frame_id, test_msg_world.header.stamp, ros::Duration(10));
 
 	listenerptr->transformPose("/base_footprint", test_msg_world, test_msg);
-
+}catch (std::exception& e)
+{
+	ROS_ERROR_STREAM_THROTTLE(1,e.what());
+}
 	pub.publish(test_msg);
 
 }
@@ -62,10 +65,14 @@ void PointConfigCallback(aero_control::BaseServoPointConfig &config, uint32_t le
 		tf::quaternionTFToMsg(q, test_msg.pose.orientation);
 		test_msg.header.frame_id = "/base_footprint";
 		test_msg.header.stamp = ros::Time::now();
-
+try{
 		listenerptr->waitForTransform("/world", test_msg.header.frame_id, test_msg.header.stamp, ros::Duration(0.5));
 
 		listenerptr->transformPose("/world", test_msg, test_msg_world);
+}catch (std::exception& e)
+{
+	ROS_ERROR_STREAM_THROTTLE(1,e.what());
+}
 }
 
 int main(int argc, char **argv) {
@@ -96,10 +103,14 @@ int main(int argc, char **argv) {
 	tf::quaternionTFToMsg(q, test_msg.pose.orientation);
 	test_msg.header.frame_id = "/base_footprint";
 	test_msg.header.stamp = ros::Time::now();
-
+try{
 	listenerptr->waitForTransform("/world", test_msg.header.frame_id, test_msg.header.stamp, ros::Duration(0.5));
 
 	listenerptr->transformPose("/world", test_msg, test_msg_world);
+}catch (std::exception& e)
+{
+	ROS_ERROR_STREAM_THROTTLE(1,e.what());
+}
 	dynamic_reconfigure::Server<aero_control::BaseServoPointConfig> dr_server;
 		dynamic_reconfigure::Server<aero_control::BaseServoPointConfig>::CallbackType dr_call;
 	dr_call = boost::bind(&PointConfigCallback, _1, _2);
