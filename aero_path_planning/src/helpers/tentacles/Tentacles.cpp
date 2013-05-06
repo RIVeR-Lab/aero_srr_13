@@ -220,7 +220,7 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 		//Tentacle is to the right of halfway
 		this->radius_ = std::pow(expFact,index)*seedRad;
 	}
-	else if(index>halfway_index)
+	else if(index>(halfway_index))
 	{
 		//Tentacle is to the left of halfway
 		this->radius_ = -std::pow(expFact,index-(halfway_index+1))*seedRad;
@@ -230,18 +230,20 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 		//Tentacle is exactly at halfway
 		this->radius_ = std::numeric_limits<double>::infinity();
 	}
+
 	PRINTER("Calculated Tentacle Radius=%f", this->radius_);
 	//Calculate the working length of the tentacle
 	int working_length;
 
-	if(index<halfway_index)
+	if(index<=halfway_index)
 	{
 		//ROS_INFO("Small Index %d, raw working length is %f",index, seedLength+2*std::sqrt((double)index/(double)halfwayIndex));
-		working_length = roundToGrid(seedLength+min_length*std::sqrt((double)index/(double)halfway_index), resolution);
+		working_length = roundToGrid(seedLength+min_length*std::sqrt(((double)index)/(double)halfway_index), resolution);
 	}
-	else{
+	else
+	{
 		//ROS_INFO("Large Index %d, raw working length is %f",index, seedLength+2*std::sqrt(((double)index-(double)halfwayIndex)/(double)halfwayIndex));
-		working_length = roundToGrid(seedLength+min_length*std::sqrt(((double)index-(double)halfway_index)/(double)halfway_index), resolution);
+		working_length = roundToGrid(seedLength+min_length*std::sqrt(((double)index-(double)(halfway_index+1))/(double)halfway_index), resolution);
 	}
 
 	//Check for special case of an effectively straight line
@@ -259,6 +261,11 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 	}
 	else
 	{
+		//Clamp tentacle linear velocity based on a max angular velocity of ~pi/2 rad/s
+		while(std::abs(this->velocity_/this->radius_)>1.5)
+		{
+			this->velocity_-=0.01;
+		}
 		//Convert the radius, which will be in engineering units, into grid coordinates
 		int working_radius = roundToGrid(radius_, resolution);
 		//Calculate the sweep angle for this tentacle
@@ -404,6 +411,7 @@ SpeedSet::SpeedSet(int index, double min_length, double expFact, double seedRad,
 {
 	this->seed_rad_  = seedRad;
 	this->velocity_ = velocity;
+	int origin = numTent/2;
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++)
 	{

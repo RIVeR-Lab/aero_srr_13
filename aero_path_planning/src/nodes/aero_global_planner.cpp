@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
 	BOOST_FOREACH(Point point, obstacle)
 	{
-		testGrid.setPointTrait(point, aero_path_planning::OBSTACLE);
+		testGrid.setPointTrait(point);
 	}
 
 	path_planner.setCarrotDelta(1);
@@ -97,10 +97,12 @@ int main(int argc, char **argv) {
 	start_point.x = 0;
 	start_point.y = 0;
 	start_point.z = 0;
+	start_point.rgba = aero_path_planning::ROBOT;
 	Point goal_point;
 	goal_point.x  = 90;
 	goal_point.y  = 0;
 	goal_point.z  = 0;
+	goal_point.rgba = aero_path_planning::GOAL;
 	std::deque<Point> path;
 	ros::Duration timeout(1);
 
@@ -119,10 +121,11 @@ int main(int argc, char **argv) {
 		BOOST_FOREACH(Point point, path_cloud)
 		{
 			//ROS_INFO_STREAM("I'm Printing Point ("<<point.x<<","<<point.y<<")");
-			copyGrid.setPointTrait(point, aero_path_planning::TENTACLE);
+			point.rgba = aero_path_planning::TENTACLE;
+			copyGrid.setPointTrait(point);
 		}
-		copyGrid.setPointTrait(goal_point, aero_path_planning::GOAL);
-		copyGrid.setPointTrait(start_point, aero_path_planning::UNKNOWN);
+		copyGrid.setPointTrait(goal_point);
+		copyGrid.setPointTrait(start_point);
 
 		ROS_INFO_STREAM("\n"<<*(copyGrid.toString(0,0)));
 		std::string input;

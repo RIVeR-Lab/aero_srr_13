@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 		for(aero_path_planning::PointCloud::iterator line_itr = line_cloud.begin(); line_itr<line_cloud.end(); line_itr++)
 		{
 			PRINT_POINT("Line Point", (*line_itr));
-			grid.setPointTrait(*line_itr, (aero_path_planning::PointTrait)line_itr->rgba);
+			grid.setPointTrait(*line_itr);
 		}
 
 		ROS_INFO("I'm Sending Occupancy Grid:\n%s", grid.toString(0,0)->c_str());

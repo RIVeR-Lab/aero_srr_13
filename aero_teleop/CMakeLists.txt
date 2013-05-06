@@ -17,33 +17,25 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-rosbuild_genmsg()
+#rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
-# Generate dynamic parameters
-#add dynamic reconfigure api
-rosbuild_find_ros_package(dynamic_reconfigure)
-include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
-gencfg()
-
 #common commands for building c++ executables and libraries
+#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
-
-include_directories(include src/roboteq_lib)
-
-rosbuild_add_library(${PROJECT_NAME}RoboteqLib src/roboteq_lib/RoboteqDevice.cpp src/roboteq_motor_controller.cpp)
+#rosbuild_add_executable(example examples/example.cpp)
+#target_link_libraries(example ${PROJECT_NAME})
 
 
-rosbuild_add_library(roboteq_manager_lib src/roboteq_manager_lib.cpp)
 
-rosbuild_add_executable(roboteq_manager src/roboteq_manager.cpp)
-target_link_libraries(roboteq_manager ${PROJECT_NAME}RoboteqLib)
 
-rosbuild_add_executable(drive_motors src/util/drive_motors.cpp)
-target_link_libraries(drive_motors ${PROJECT_NAME}RoboteqLib)
 
-rosbuild_add_executable(simple_twist_client src/util/simple_twist_client.cpp)
-target_link_libraries(simple_twist_client roboteq_manager_lib)
+#Testers
+
+#Nodes
+rosbuild_add_executable(teleop src/nodes/teleop.cpp )
+
+
