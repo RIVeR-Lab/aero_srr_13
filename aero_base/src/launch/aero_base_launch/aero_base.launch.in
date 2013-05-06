@@ -43,6 +43,8 @@
   
   <include file="$(find aero_description)/launch/aero.launch"/>
 
+  <include file="$(find aero_base)/launch/aero_monitoring.launch"/>
+
   <!-- Launch IMU Driver -->
   <node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
     <param name="device_id" value="kvh-1750" />

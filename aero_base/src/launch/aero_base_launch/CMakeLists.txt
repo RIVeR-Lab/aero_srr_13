@@ -12,3 +12,7 @@ configure_file(
 		"aero_camera_boom_node.launch.in"
 		"${PROJECT_SOURCE_DIR}/launch/aero_camera_boom_node.launch"
 )
+configure_file(
+		"aero_monitoring.launch.in"
+		"${PROJECT_SOURCE_DIR}/launch/aero_monitoring.launch"
+)
