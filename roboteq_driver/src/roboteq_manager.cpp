@@ -83,7 +83,7 @@ private:
 	void openDevice(){
 		ROS_INFO_STREAM("Opending device '"<<port_<<"'");
 		controller.open(port_);
-		controller.setRotationInfo(max_rpm_, max_rpm_, ppr_, ppr_);
+		controller.saveRotationInfo(max_rpm_, max_rpm_, ppr_, ppr_);
 	}
 	void closeDevice(){
 		ROS_INFO_STREAM("Closing device '"<<port_<<"'");

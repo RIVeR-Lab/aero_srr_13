@@ -88,7 +88,7 @@ class RoboteqMotorController{
    */
   void setSerialWatchdog(int time);
 
-  void setRotationInfo(double maxRPM1, double maxRPM2,
+  void saveRotationInfo(double maxRPM1, double maxRPM2,
 			 int ppr1, int ppr2);
   /**
    * Save the current configuration to persist between restarts
