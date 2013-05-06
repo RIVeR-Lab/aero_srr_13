@@ -36,10 +36,10 @@ void TimerCallback(const ros::TimerEvent&) {
 
 	test_msg_world.header.stamp = ros::Time::now();
 	try {
-		listenerptr->waitForTransform("/base_footprint", test_msg_world.header.frame_id,
+		listenerptr->waitForTransform("/world", test_msg_world.header.frame_id,
 				test_msg_world.header.stamp, ros::Duration(10));
 
-		listenerptr->transformPose("/base_footprint", test_msg_world, test_msg);
+		listenerptr->transformPose("/world", test_msg_world, test_msg);
 	} catch (std::exception& e) {
 		ROS_ERROR_STREAM_THROTTLE(1, e.what());
 	}
@@ -61,7 +61,7 @@ void PointConfigCallback(aero_control::BaseServoPointConfig &config, uint32_t le
 	q.setRPY(rx_pos, ry_pos, rz_pos);
 
 	tf::quaternionTFToMsg(q, test_msg.pose.orientation);
-	test_msg.header.frame_id = "/base_footprint";
+	test_msg.header.frame_id = "/world";
 	test_msg.header.stamp = ros::Time::now();
 	try {
 		listenerptr->waitForTransform("/world", test_msg.header.frame_id, test_msg.header.stamp,

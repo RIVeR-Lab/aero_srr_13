@@ -86,6 +86,8 @@ void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
 		error_update_timer.stop();
 		error_update_timer_flag = false;
 	}
+	workspace_pose.header.stamp = ros::Time::now();
+	this->workspace_postion_pub.publish(this->workspace_pose);
 }
 
 void BaseServoController::DesiredPositionMSG(
