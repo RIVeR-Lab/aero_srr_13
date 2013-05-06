@@ -261,10 +261,20 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 	}
 	else
 	{
-		//Clamp tentacle linear velocity based on a max angular velocity of ~pi/2 rad/s
-		while(std::abs(this->velocity_/this->radius_)>1.5)
+		//Clamp tentacle linear velocity based on a max angular velocity of 1.5 rad/s and a min angular velocity of .2 rad/s
+		if(std::abs(this->velocity_/this->radius_)>1.5)
 		{
-			this->velocity_-=0.01;
+			while(std::abs(this->velocity_/this->radius_)>1.5)
+			{
+				this->velocity_-=0.01;
+			}
+		}
+		else
+		{
+			while(std::abs(this->velocity_/this->radius_)<0.2)
+			{
+				this->velocity_+=0.01;
+			}
 		}
 		//Convert the radius, which will be in engineering units, into grid coordinates
 		int working_radius = roundToGrid(radius_, resolution);
