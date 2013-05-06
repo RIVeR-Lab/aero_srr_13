@@ -72,8 +72,8 @@ linear_gain = config.x_gain;
 PID_Y->SetPID(config.y_linear_P,config.y_linear_I,config.y_linear_D);
 rotational_gain = config.y_gain;
 
-this->workspace_pose.pose.position.x = 0;
-this->workspace_pose.pose.position.y = 0;
+this->workspace_pose.pose.position.x = config.Workspace_X_Position;
+this->workspace_pose.pose.position.y = config.Workspace_Y_Position;
 workspace_pose.header.stamp = ros::Time::now();
 this->workspace_postion_pub.publish(this->workspace_pose);
 
