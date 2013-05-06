@@ -616,7 +616,7 @@ void LocalPlanner::sendVelCom(double velocity, double radius)
 		ROS_ERROR_THROTTLE(1,"Sending Velocity To Platform Oryx is no longer supported");
 		break;
 	case 1:
-		twist(velocity, velocity/(radius/10.0));
+		twist(velocity, velocity/radius);
 		break;
 	default:
 		break;
