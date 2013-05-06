@@ -31,8 +31,7 @@ float rz_pos = 0;
 
 geometry_msgs::PoseStamped test_msg_world;
 
-dynamic_reconfigure::Server<aero_control::BaseServoPointConfig> dr_server;
-	dynamic_reconfigure::Server<aero_control::BaseServoPointConfig>::CallbackType dr_call;
+
 
 void TimerCallback(const ros::TimerEvent&) {
 	geometry_msgs::PoseStamped test_msg;
@@ -42,7 +41,6 @@ void TimerCallback(const ros::TimerEvent&) {
 	listenerptr->waitForTransform("/base_footprint", test_msg_world.header.frame_id, test_msg_world.header.stamp, ros::Duration(0.5));
 
 	listenerptr->transformPose("/base_footprint", test_msg_world, test_msg);
-
 
 	pub.publish(test_msg);
 
@@ -102,8 +100,8 @@ int main(int argc, char **argv) {
 	listenerptr->waitForTransform("/world", test_msg.header.frame_id, test_msg.header.stamp, ros::Duration(0.5));
 
 	listenerptr->transformPose("/world", test_msg, test_msg_world);
-
-
+	dynamic_reconfigure::Server<aero_control::BaseServoPointConfig> dr_server;
+		dynamic_reconfigure::Server<aero_control::BaseServoPointConfig>::CallbackType dr_call;
 	dr_call = boost::bind(&PointConfigCallback, _1, _2);
 		  dr_server.setCallback(dr_call);
 
