@@ -90,9 +90,9 @@ void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
 
 void BaseServoController::DesiredPositionMSG(
 		const geometry_msgs::PoseStampedConstPtr& object_pose) {
-
+	try{
 	tf_listener.waitForTransform("/world", object_pose->header.frame_id, object_pose->header.stamp,
-			ros::Duration(0.1));
+			ros::Duration(1.0));
 	tf_listener.transformPose("/world", *object_pose, this->desired_pose);
 
 	last_position_time = ros::Time().now();
@@ -101,6 +101,9 @@ void BaseServoController::DesiredPositionMSG(
 		error_update_timer_flag = true;
 
 	}
+	} catch (std::exception& e) {
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
 }
 
 
