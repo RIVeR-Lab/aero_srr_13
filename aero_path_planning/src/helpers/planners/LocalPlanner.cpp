@@ -295,7 +295,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	for(int s=0; s<(int)sets.size(); s++)
 	{
 		SpeedSet cur_set(sets.at(s));
-#pragma omp parallel for
+//#pragma omp parallel for
 		for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 		{
 			//If we already hit the goal, short circuit since we can't break from OpenMP loops
@@ -364,8 +364,13 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 					}
 				}
 
-
-				double tent_fitness = traverser.lengthTraversed()+length_modifier;
+				double raw_length   = traverser.lengthTraversed();
+				double tent_fitness = 0;
+				//Cuttoff for valid tentacle (to stop a goal inside a wall making the robot drive into it)
+				if(raw_length>.25/this->res_)
+				{
+					tent_fitness = raw_length+length_modifier;
+				}
 				//ROS_INFO("Searched Tentacle %d in set %d with fitness %f",current_set.getIndex(), working_tentacle.getIndex(), tent_fitness);
 				TentacleDataPtr_t tent_details(new TentacleData_t(cur_set.getIndex(), working_tentacle.getIndex()));
 				//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
@@ -616,7 +621,7 @@ void LocalPlanner::sendVelCom(double velocity, double radius)
 		ROS_ERROR_THROTTLE(1,"Sending Velocity To Platform Oryx is no longer supported");
 		break;
 	case 1:
-		twist(velocity, velocity/(radius/10.0));
+		twist(velocity, velocity/radius);
 		break;
 	default:
 		break;
@@ -665,7 +670,7 @@ void LocalPlanner::twist(double x_dot, double omega)
 		omega = omega/std::abs(omega)*0.1;
 	}
 	message.linear.x  = x_dot;
-	message.angular.z = -omega;
+	message.angular.z = -omega*2.0;
 	this->vel_pub_.publish(message);
 }
 
