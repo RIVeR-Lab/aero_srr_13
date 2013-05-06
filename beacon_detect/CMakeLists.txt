@@ -22,10 +22,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-#target_link_libraries(${beacon_detect} another_library)
-#rosbuild_add_boost_directories()
+rosbuild_add_library(bd src/BeaconDetector.cpp )
+rosbuild_add_boost_directories()
 #rosbuild_link_boost(${beacon_detect} thread)
-rosbuild_add_executable(beacondetect src/detect.cpp)
-#target_link_libraries(apriltag ${beacon_detect} )
+rosbuild_add_executable(beacondetect src/beaconNode.cpp)
+target_link_libraries(beacondetect  bd)
 
 
