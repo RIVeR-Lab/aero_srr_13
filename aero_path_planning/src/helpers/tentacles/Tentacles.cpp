@@ -271,7 +271,7 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 		}
 		else
 		{
-			while(std::abs(this->velocity_/this->radius_)<0.2)
+			while(std::abs(this->velocity_/this->radius_)<0.2 && (this->velocity_<velocity*2.0))
 			{
 				this->velocity_+=0.01;
 			}
