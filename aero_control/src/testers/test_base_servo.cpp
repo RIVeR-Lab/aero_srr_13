@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string ObjectLocation("ObjectLocation"); ///String containing the topic name for cartesian commands
+	std::string ObjectLocation("DesiredPosition"); ///String containing the topic name for cartesian commands
 	pub = nh.advertise<geometry_msgs::PoseStamped>(ObjectLocation, 2);
 	tf::TransformListener listener;
 	listenerptr = &listener;
