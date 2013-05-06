@@ -1,5 +1,6 @@
 #build nodes
-#rosbuild_add_executable(aero_path_planning_test src/nodes/orxy_path_planning_test.cpp src/helpers/Tentacles.cpp src/helpers/OccupancyGrid.cpp)
+rosbuild_add_executable(aero_path_planning_test orxy_path_planning_test.cpp)
+target_link_libraries(aero_path_planning_test OccupancyGrid Tentacles)
 
 #Build the Local Planner Node
 rosbuild_add_executable(aero_local_planner aero_local_planner.cpp)

@@ -26,14 +26,14 @@ int main(int argc, char **argv) {
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");
-	double xDim = 20;
+	double xDim = 250;
 	std::string xDim_msg("");
 	xDim_msg+= boost::lexical_cast<double>(xDim);
 	xDim_msg+="m";
 
 	//y dimension of occupancy grid
 	std::string p_y_dim("occupancy/y_dimension");
-	double yDim = 20;
+	double yDim = 250;
 	std::string yDim_msg("");
 	yDim_msg+= boost::lexical_cast<double>(yDim);
 	yDim_msg+="m";
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
 	//resolution occupancy grid
 	std::string p_res("occupancy/grid_resolution");
-	double res = .1;
+	double res = .01;
 	std::string p_res_msg("");
 	p_res_msg+= boost::lexical_cast<double>(res);
 	p_res_msg+="m";
@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
 	//Build The Tentacles
 	int firstSpeedSet=0;
 	int lastSpeedSet=numSpeedSet;
-	TentacleGenerator generator(minSpeed, maxSpeed, 2, numTent, expFact, res, xDim, yDim/2);
+	TentacleGenerator generator(2, minSpeed, maxSpeed, 2, numTent, expFact, res, xDim, yDim/2);
 	ROS_INFO("Tentacles Generated. Printing Speed Sets...");
 	if(!nh.getParam("first_speed_set", firstSpeedSet))ROS_WARN("First Speed Set Not Set! Using Default %d", firstSpeedSet);
 	if(!nh.getParam("last_speed_set", lastSpeedSet))ROS_WARN("Last Speed Set Not Set! Using Default %d", lastSpeedSet);
@@ -220,22 +220,22 @@ int main(int argc, char **argv) {
 //		//ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 
 		//Test arc generator
-		ROS_INFO("Testing arc generation...");
-		PointCloud arcCloud;
-		Point arcCenter;
-		arcCenter.x = 0;
-		arcCenter.y = -55;
-		arcCenter.z = 0;
-		arcCenter.rgba = aero_path_planning::TENTACLE;
-		castArc(48, 2.312500, aero_path_planning::OBSTACLE, arcCenter, arcCloud);
-		ROS_INFO("Arc generated, placing on grid...");
-		for(PointCloud::iterator arc_itr = arcCloud.begin(); arc_itr<arcCloud.end(); arc_itr++){
-			PRINT_POINT("Arc Point", (*arc_itr));
-			testGrid.setPointTrait(*arc_itr, (aero_path_planning::PointTrait_t)arc_itr->rgba);
-		}
-		//PRINT_POINT("Setting a Point on the Grid at Arc Origin", arcCenter);
-		testGrid.setPointTrait(arcCenter, (aero_path_planning::PointTrait_t)arcCenter.rgba);
-		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
+//		ROS_INFO("Testing arc generation...");
+//		PointCloud arcCloud;
+//		Point arcCenter;
+//		arcCenter.x = 0;
+//		arcCenter.y = -55;
+//		arcCenter.z = 0;
+//		arcCenter.rgba = aero_path_planning::TENTACLE;
+//		castArc(48, 2.312500, aero_path_planning::OBSTACLE, arcCenter, arcCloud);
+//		ROS_INFO("Arc generated, placing on grid...");
+//		for(PointCloud::iterator arc_itr = arcCloud.begin(); arc_itr<arcCloud.end(); arc_itr++){
+//			PRINT_POINT("Arc Point", (*arc_itr));
+//			testGrid.setPointTrait(*arc_itr);
+//		}
+//		//PRINT_POINT("Setting a Point on the Grid at Arc Origin", arcCenter);
+//		testGrid.setPointTrait(arcCenter);
+//		ROS_INFO("\n%s", testGrid.toString(2,0).get()->c_str());
 //		//Place a known straight line on the grid
 //		for(double x=0; x<xDim; x+=res){
 //			testGrid.setPointTrait(x, -origin.y, 0.0, aero_path_planning::OBSTACLE);
@@ -262,7 +262,7 @@ int main(int argc, char **argv) {
 				if(std::abs(point.x)<xDim && std::abs(point.y)<yDim){
 					//ROS_INFO("Placing Point <%f,%f,%f,%x>", point.x, point.y, point.z, aero_path_planning::TENTACLE);
 					try{
-						testGrid.setPointTrait(point, aero_path_planning::TENTACLE);
+						testGrid.setPointTrait(point);
 					}catch(std::exception& e){
 
 					}

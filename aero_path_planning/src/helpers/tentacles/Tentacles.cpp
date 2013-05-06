@@ -220,7 +220,7 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 		//Tentacle is to the right of halfway
 		this->radius_ = std::pow(expFact,index)*seedRad;
 	}
-	else if(index>halfway_index)
+	else if(index>(halfway_index))
 	{
 		//Tentacle is to the left of halfway
 		this->radius_ = -std::pow(expFact,index-(halfway_index+1))*seedRad;
@@ -235,21 +235,22 @@ Tentacle::Tentacle(double expFact, double seedRad, double min_length, double see
 	//Calculate the working length of the tentacle
 	int working_length;
 
-	if(index<halfway_index)
+	if(index<=halfway_index)
 	{
 		//ROS_INFO("Small Index %d, raw working length is %f",index, seedLength+2*std::sqrt((double)index/(double)halfwayIndex));
-		working_length = roundToGrid(seedLength+min_length*std::sqrt((double)index/(double)halfway_index), resolution);
+		working_length = roundToGrid(seedLength+min_length*std::sqrt(((double)index)/(double)halfway_index), resolution);
 	}
-	else{
+	else
+	{
 		//ROS_INFO("Large Index %d, raw working length is %f",index, seedLength+2*std::sqrt(((double)index-(double)halfwayIndex)/(double)halfwayIndex));
-		working_length = roundToGrid(seedLength+min_length*std::sqrt(((double)index-(double)halfway_index)/(double)halfway_index), resolution);
+		working_length = roundToGrid(seedLength+min_length*std::sqrt(((double)index-(double)(halfway_index+1))/(double)halfway_index), resolution);
 	}
 
 	//Check for special case of an effectively straight line
 	if(this->radius_ > this->straight_threshold_ || this->radius_ < -this->straight_threshold_)
 	{
 		this->radius_ = std::numeric_limits<double>::infinity();
-		for(double i = 0; i<roundToGrid(seedLength+min_length, resolution); i++)
+		for(double i = 0; i<working_length; i++)
 		{
 			aero_path_planning::Point coord;
 			coord.x=i;
