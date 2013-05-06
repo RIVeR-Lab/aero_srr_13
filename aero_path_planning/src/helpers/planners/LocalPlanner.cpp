@@ -295,7 +295,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	for(int s=0; s<(int)sets.size(); s++)
 	{
 		SpeedSet cur_set(sets.at(s));
-#pragma omp parallel for
+//#pragma omp parallel for
 		for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 		{
 			//If we already hit the goal, short circuit since we can't break from OpenMP loops
