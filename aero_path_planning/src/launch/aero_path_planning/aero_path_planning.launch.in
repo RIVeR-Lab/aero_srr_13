@@ -87,6 +87,7 @@
 		<arg name="@LIDAR_GLOBAL_TOPIC_ARG@" value="$(arg @LIDAR_GLOBAL_TOPIC_ARG@)"/>
 	</include>
 	
+	<!--
 	<group if="$(arg visualization)">
  			<node name="local_occupancy_visualization" pkg="aero_path_planning" type="occupancy_visualizer_node" output="screen">
  				<remap from="occupancy"      to="$(arg @OCCUPANCY_TOPIC_ARG@)"/>
@@ -106,4 +107,5 @@
  				<remap from="goal_data"      to="global/goal_data"/>
  			</node>
 	</group>
+	-->
 </launch>

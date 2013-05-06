@@ -22,13 +22,13 @@
 */msg_gen
 */catkin
 */catkin_generated
-*/cmake_install.cmake
+cmake_install.cmake
 */CATKIN_IGNORE
-*/CMakeFiles
+CMakeFiles
 */devel
 */gtest
 */srv_gen
-
+CMakeCache.txt
 
 #Stuff added by make eclipse-project
 *.project
@@ -43,3 +43,17 @@ aero_srr_msgs/src/aero_srr_msgs
 roboteq_driver/src/roboteq_driver
 hd_driver/src/hd_driver
 aero_base/src/aero_base
+
+aero_laser_filter/cfg/cpp
+aero_laser_filter/docs
+aero_laser_filter/src/aero_laser_filter
+aero_path_planning/cfg/cpp
+aero_path_planning/docs
+roboteq_driver/cfg/cpp
+roboteq_driver/docs
+
+object_locator/src/object_locator
+object_locator/launch
+object_locator/docs
+object_locator/cfg/cpp
+

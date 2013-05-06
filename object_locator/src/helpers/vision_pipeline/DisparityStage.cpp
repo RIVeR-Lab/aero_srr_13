@@ -27,7 +27,7 @@ void DisparityStage::onInit()
 
 void DisparityStage::loadParams()
 {
-	this->input_topic_="/stereo_camera/stereo_sync";
+	this->input_topic_="/sync_stage/rect_pair";
 	this->output_topic_="disparity_stage/disparity";
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,this->output_topic_);
@@ -37,7 +37,7 @@ void DisparityStage::loadParams()
 	this->getPrivateNodeHandle().getParam(minDisp,minDisp_);
 
 	std::string numDisp("num_disp");
-	numDisp_ = 224;       //80        //256+80;
+	numDisp_ = 192;       //80        //256+80;
 	this->getPrivateNodeHandle().getParam(numDisp,numDisp_);
 
 	std::string SADSize("SADSize");
@@ -53,7 +53,7 @@ void DisparityStage::loadParams()
 	this->getPrivateNodeHandle().getParam(P2,P2_);
 
 	std::string disp12MaxDiff("disp12");
-	disp12MaxDiff_ =  1	; // 1;
+	disp12MaxDiff_ =  -1	; // 1;
 	this->getPrivateNodeHandle().getParam(disp12MaxDiff,disp12MaxDiff_);
 
 	std::string preFilterCap("preFilterCap");
@@ -61,15 +61,15 @@ void DisparityStage::loadParams()
 	this->getPrivateNodeHandle().getParam(preFilterCap,preFilterCap_);
 
 	std::string uniqueness("uniqueness");
-	uniqueness_ = 10;
+	uniqueness_ = 5;
 	this->getPrivateNodeHandle().getParam(uniqueness,uniqueness_);
 
 	std::string specSize("specSize");
-	specSize_ =   900; //50 //20;   //reduces noise
+	specSize_ =   100; //50 //20;   //reduces noise
 	this->getPrivateNodeHandle().getParam(specSize,specSize_);
 
 	std::string specRange("specRange");
-	specRange_ = 31  ;  //5 //1;
+	specRange_ = 20  ;  //5 //1;
 	this->getPrivateNodeHandle().getParam(specRange,specRange_);
 }
 
@@ -111,22 +111,23 @@ void DisparityStage::computeRectifiedImage(const sensor_msgs::Image& msg, const 
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
-	sensor_msgs::CameraInfo info(cam_info);
-	Mat_t K(3,3,CV_64F, info.K.elems);
-	Mat_t R(3,3,CV_64F, info.R.elems);
-	Mat_t P(3,4,CV_64F, info.P.elems);
-	Mat_t D(1,5,CV_64F, info.D.data());
-	cv::Size size;
-	size.height = cam_info.height;
-	size.width = cam_info.width;
-
-	Mat_t mx(size.height, size.width, CV_32FC1);
-	Mat_t my(size.height, size.width, CV_32FC1);
-
-	cv::initUndistortRectifyMap(K, D, R, P, size, CV_32FC1, mx, my);
-	Mat_t img_gray;
-	cv::cvtColor(img_ptr->image, img_gray, CV_BGR2GRAY);
-	remap(img_gray,rectified_img, mx, my, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+	rectified_img = img_ptr->image;
+//	sensor_msgs::CameraInfo info(cam_info);
+//	Mat_t K(3,3,CV_64F, info.K.elems);
+//	Mat_t R(3,3,CV_64F, info.R.elems);
+//	Mat_t P(3,4,CV_64F, info.P.elems);
+//	Mat_t D(1,5,CV_64F, info.D.data());
+//	cv::Size size;
+//	size.height = cam_info.height;
+//	size.width = cam_info.width;
+//
+//	Mat_t mx(size.height, size.width, CV_32FC1);
+//	Mat_t my(size.height, size.width, CV_32FC1);
+//
+//	cv::initUndistortRectifyMap(K, D, R, P, size, CV_32FC1, mx, my);
+//	Mat_t img_gray;
+//	cv::cvtColor(img_ptr->image, img_gray, CV_BGR2GRAY);
+//	remap(img_gray,rectified_img, mx, my, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 
 }
 
@@ -137,8 +138,9 @@ void DisparityStage::computeDisparity(const Mat_t& rectLeft, const Mat_t& rectRi
 	cv::StereoSGBM stereoSGBM(minDisp_, numDisp_, SADSize_, P1_, P2_,
 			disp12MaxDiff_, preFilterCap_, uniqueness_, specSize_, specRange_, true);
 	stereoSGBM(rectLeft, rectRight, preDisp );
+	preDisp.convertTo(disparity, -1,1.0/16);
 
-	normalize( preDisp, disparity, 0, 256, CV_MINMAX );
+//	normalize( preDisp, disparity, 0, 256, CV_MINMAX );
 
 }
 
@@ -149,7 +151,7 @@ void DisparityStage::generateDispMsg(const object_locator::SyncImageMsg& raw_img
 	sensor_msgs::Image disparity_image;
 	carrier.toImageMsg(disparity_image);
 	msg.disparity_image = disparity_image;
-	msg.disparity_image.encoding  = enc::MONO8;
+	msg.disparity_image.encoding  = enc::MONO16;
 	msg.images          = raw_imgs;
 
 }

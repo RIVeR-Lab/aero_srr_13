@@ -9,8 +9,8 @@
 #define ORYXPATHPLANNING_H_
 
 #include<aero_path_planning/utilities/AeroPathPlanningUtilities.h>	///General Utility definitions
-#include<aero_path_planning/utilities/Tentacles.h>					///Tentacle class definitions
-#include<aero_path_planning/utilities/OccupancyGrid.h>				///Occupancy Grid definitions
+#include<aero_path_planning/tentacles/Tentacles.h>					///Tentacle class definitions
+#include<aero_path_planning/occupancy_grid/OccupancyGrid.h>				///Occupancy Grid definitions
 #include<aero_path_planning/utilities/TypeDefinitions.h>			///General Type Definitions							///General Configuration Macros
 
 
