@@ -157,6 +157,8 @@ void BaseServoController::UpdatePID(void) {
 
 	base_velocity_msg.angular.z = rotational_vel;
 
+	base_velocity_pub.publish(base_velocity_msg);
+
 }
 
 int main(int argc, char **argv) {
