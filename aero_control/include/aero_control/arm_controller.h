@@ -30,15 +30,16 @@ namespace aero_control {
 
 class ArmController {
 public:
-	ArmController(ros::NodeHandle nh, std::string ObjectPose,std::string ArmPose, std::string SetFingerPosition);
+	ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh);
 	void ObjectPosition(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
 
 private:
 	ros::NodeHandle nh_;
 	ros::Subscriber sub_object_position;
 	ros::Publisher pub_arm_position;
-
 	ros::Publisher pub_set_finger_position;
+	ros::Subscriber aero_state_sub;
+	ros::ServiceClient aero_state_transition_srv_client;
 
 	tf::TransformListener listener;
 

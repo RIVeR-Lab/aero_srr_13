@@ -64,7 +64,7 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 	/* Messages */
 	this->desired_position_sub = nh.subscribe(DesiredPosition, 1,
 			&BaseServoController::DesiredPositionMSG, this);
-	this->aero_state_sub = nh.subscribe(AeroState, 1, &BaseServoController::DesiredPositionMSG,
+	this->aero_state_sub = nh.subscribe(AeroState, 1, &BaseServoController::AeroStateMSG,
 			this);
 	this->workspace_postion_pub = nh.advertise<geometry_msgs::PoseStamped>(WorkspacePosition, 1,
 			true);
