@@ -23,7 +23,8 @@
 #include <tf/transform_listener.h>
 #include <time.h>
 #include <jaco_driver/finger_position.h>
-
+#include <aero_srr_msgs/AeroState.h>
+#include <aero_srr_msgs/StateTransitionRequest.h>
 
 
 namespace aero_control {
