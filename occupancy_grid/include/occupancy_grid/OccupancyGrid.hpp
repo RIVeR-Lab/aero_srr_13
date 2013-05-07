@@ -44,8 +44,6 @@
 //************ LOCAL DEPENDANCIES ****************//
 
 //***********    NAMESPACES     ****************//
-
-namespace ogu = occupancy_grid::utilities;
 namespace nm  = nav_msgs;
 namespace occupancy_grid
 {
@@ -56,92 +54,80 @@ namespace occupancy_grid
 namespace utilities
 {
 /**
- * @author Adam Panzica
- * @brief enum representing the various types the occupancy grid cells can contain
+ * Class for representing the various types the occupancy grid cells can contain
  */
-enum PointTrait
+class CellTrait
 {
-	UNKOWN = -1,        //!< UNKOWN Cell's value is unkown
-	FREE_LOW_COST = 10, //!< FREE_LOW_COST Cell contains open terrain
-	FREE_HIGH_COST= 20, //!< FREE_HIGH_COST Cell contains difficult terrain
-	OBSTACLE      = 30, //!< OBSTACLE Cell contains an obstacle
-	TRAVERSED     = 40, //!< TRAVERSED Cell contains previously traversed terrain
-	GOAL          = 100,//!< GOAL Cell contains a goal point
+public:
+	/**
+	 * @author Adam Panzica
+	 * @brief enum representing the various types the occupancy grid cells can contain
+	 */
+	enum Enum
+	{
+		UNKOWN = -1,        //!< UNKOWN Cell's value is unkown
+		FREE_LOW_COST = 10, //!< FREE_LOW_COST Cell contains open terrain
+		FREE_HIGH_COST= 20, //!< FREE_HIGH_COST Cell contains difficult terrain
+		OBSTACLE      = 30, //!< OBSTACLE Cell contains an obstacle
+		TRAVERSED     = 40, //!< TRAVERSED Cell contains previously traversed terrain
+		GOAL          = 100,//!< GOAL Cell contains a goal point
+	};
+
+	CellTrait(void);
+	CellTrait(Enum value);
+	CellTrait(int value);
+
+
+	/**
+	 * @author Adam Panzica
+	 * @return The Enum representation of the CellTrait
+	 */
+	Enum getEnum(void) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The String representation of the CellTrait
+	 */
+	std::string getString(void) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The integer representation of the CellTrait
+	 */
+	int getValue(void) const;
+
+
+	//Operator overloads
+	//Assignment
+	std::ostream& operator<<(std::ostream& out) const;
+	CellTrait& operator=(const CellTrait& rhs);
+	CellTrait& operator=(const int& rhs);
+	//Equality
+	bool operator==(const CellTrait& rhs) const;
+	bool operator==(const int& rhs) const;
+
+
+
+private:
+	Enum enum_;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Converts an integer value into a CellTrait Enum
+	 * @param [in] value The value to convert
+	 * @return The corrisponding Enum, or UNKOWN if it wasn't a valid conversion
+	 */
+	static Enum enumFromValue(int value);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Converts an Enum into a std::string
+	 * @param [in] value the Enum to convert
+	 * @return A string representation of the enum
+	 */
+	static std::string stringFromEnum(Enum value);
 };
 
-/**
- * @author Adam Panzica
- * @brief Inserts a PointTrait into an ostream in string form
- * @param [in] out the input ostream
- * @param [in] in  the PointTrait to convert
- * @return The resultant ostream
- */
-inline friend std::ostream& operator<<(std::ostream& out, const PointTrait& in)
-{
-	switch(in)
-	{
-	case UNKOWN:
-		out<<"UNKOWN";
-		break;
-	case FREE_LOW_COST:
-		out<<"FREE_LOW_COST";
-		break;
-	case FREE_HIGH_COST:
-		out<<"FREE_HIGH_COST";
-		break;
-	case OBSTACLE:
-		out<<"OBSTACLE";
-		break;
-	case TRAVERSED:
-		out<<"TRAVERSED";
-		break;
-	case GOAL:
-		out<<"GOAL";
-		break;
-	default:
-		out<<"INVALID_"<<in;
-		break;
-	}
-	return out;
-}
-
-/**
- * @author Adam Panzica
- * @brief  Override of the = operator to allow assignment via an int with defined behavior for what happens if the int isn't in the enum
- * @param [out] lhs The PointTrait to assign to
- * @param [in[  rhs The int to assign it with
- * @return Reference to lhs
- *
- * Note that if rhs is not contained in the enum, it will assign UNKOWN as the PointTrait
- */
-PointTrait& operator=(PointTrait& lhs, const int& rhs)
-{
-	switch(rhs)
-	{
-	case UNKOWN:
-		lhs = UNKOWN;
-		break;
-	case FREE_LOW_COST:
-		lhs = FREE_LOW_COST;
-		break;
-	case FREE_HIGH_COST:
-		lhs = FREE_LOW_COST;
-		break;
-	case OBSTACLE:
-		lhs = OBSTACLE;
-		break;
-	case TRAVERSED:
-		lhs = TRAVERSED;
-		break;
-	case GOAL:
-		lhs = GOAL;
-		break;
-	default:
-		lhs = UNKOWN;
-		break;
-	}
-	return lhs;
-}
 
 /**
  * @author Adam Panzica
@@ -179,9 +165,11 @@ inline void normalizeConfidance(const uint8_t values[], int size, uint8_t result
 
 }; /* END UTILITIES */
 
+namespace ogu = occupancy_grid::utilities;
+
 class MultiTraitOccupancyGrid
 {
-	typedef ogu::PointTrait trait_t;
+	typedef ogu::CellTrait::Enum trait_t;
 private:
 	std::vector<nm::OccupancyGrid>     grid_;		   ///The backing map data. Index 0 is always the current max confidence PointTrait, with the remaining indexes defined by the trait map
 	nm::MapMetaData                    map_meta_data_; ///The meta-data defining information about the grid
@@ -189,6 +177,7 @@ private:
 
 
 public:
+	MultiTraitOccupancyGrid();
 	/**
 	 * @author Adam panzica
 	 * @brief Constructs a new grid

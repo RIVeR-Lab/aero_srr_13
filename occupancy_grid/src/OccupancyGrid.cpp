@@ -39,5 +39,119 @@
 
 //***********    NAMESPACES     ****************//
 
+using namespace occupancy_grid;
+using namespace occupancy_grid::utilities;
 
-using occupancy_grid;
+//***************************************** CELLTRAIT *********************************************************//
+
+CellTrait::CellTrait():
+			enum_(UNKOWN)
+{
+
+}
+
+CellTrait::CellTrait(Enum value):
+				enum_(value)
+{
+
+}
+
+CellTrait::CellTrait(int value)
+{
+	this->enum_ = enumFromValue(value);
+}
+
+
+CellTrait::Enum CellTrait::getEnum(void) const
+{
+	return this->enum_;
+}
+
+std::string CellTrait::getString(void) const
+{
+	return stringFromEnum(this->enum_);
+}
+
+int CellTrait::getValue(void) const
+{
+	return this->enum_;
+}
+
+
+std::ostream& CellTrait::operator<<(std::ostream& out) const
+{
+	out<<stringFromEnum(this->enum_);
+	return out;
+}
+
+CellTrait& CellTrait::operator=(const CellTrait& rhs)
+{
+	this->enum_ = rhs.enum_;
+	return *this;
+}
+CellTrait& CellTrait::operator=(const int& rhs)
+{
+	this->enum_ = enumFromValue(rhs);
+	return *this;
+}
+
+bool CellTrait::operator==(const CellTrait& rhs) const
+{
+	return rhs.enum_ == this->enum_;
+}
+bool CellTrait::operator==(const int& rhs) const
+{
+	return this->enum_ == enumFromValue(rhs);
+}
+
+CellTrait::Enum CellTrait::enumFromValue(int value)
+{
+	switch(value)
+	{
+	case FREE_LOW_COST:
+		return FREE_LOW_COST;
+		break;
+	case FREE_HIGH_COST:
+		return FREE_HIGH_COST;
+		break;
+	case OBSTACLE:
+		return OBSTACLE;
+		break;
+	case GOAL:
+		return GOAL;
+		break;
+	case TRAVERSED:
+		return TRAVERSED;
+		break;
+	default:
+		return  UNKOWN;
+		break;
+	}
+	return UNKOWN;
+}
+
+std::string CellTrait::stringFromEnum(Enum value)
+{
+	switch(value)
+	{
+	case FREE_LOW_COST:
+		return "FREE_LOW_COST";
+		break;
+	case FREE_HIGH_COST:
+		return "FREE_HIGH_COST";
+		break;
+	case OBSTACLE:
+		return "OBSTACLE";
+		break;
+	case GOAL:
+		return "GOAL";
+		break;
+	case TRAVERSED:
+		return "TRAVERSED";
+		break;
+	default:
+		return  "UNKOWN";
+		break;
+	}
+	return "UNKOWN";
+}
