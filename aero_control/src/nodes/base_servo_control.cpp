@@ -125,6 +125,14 @@ void BaseServoController::BaseServoStart(void) {
 void BaseServoController::BaseServoStop(void) {
 	this->error_update_timer.stop();
 	error_update_timer_flag = false;
+	geometry_msgs::Twist base_velocity_msg;
+
+	base_velocity_msg.linear.x = 0;
+
+	base_velocity_msg.angular.z = 0;
+
+	base_velocity_pub.publish(base_velocity_msg);
+
 }
 
 void BaseServoController::PIDConfigCallback(aero_control::BaseServoPIDConfig &config,
@@ -185,6 +193,7 @@ void BaseServoController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_stat
 
 	case aero_srr_msgs::AeroState::COLLECT:
 		this->PID_start_time = ros::Time().now();
+		last_position_time = ros::Time().now();
 		this->state_timeout_timer.start();
 		this->active_state = true;
 		break;
