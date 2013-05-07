@@ -64,8 +64,7 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 	/* Messages */
 	this->desired_position_sub = nh.subscribe(DesiredPosition, 1,
 			&BaseServoController::DesiredPositionMSG, this);
-	this->aero_state_sub = nh.subscribe(AeroState, 1, &BaseServoController::AeroStateMSG,
-			this);
+	this->aero_state_sub = nh.subscribe(AeroState, 1, &BaseServoController::AeroStateMSG, this);
 	this->workspace_postion_pub = nh.advertise<geometry_msgs::PoseStamped>(WorkspacePosition, 1,
 			true);
 	this->base_velocity_pub = nh.advertise<geometry_msgs::Twist>(BaseVelocity, 2);
@@ -198,19 +197,25 @@ void BaseServoController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_stat
 		this->active_state = true;
 		break;
 	case aero_srr_msgs::AeroState::SHUTDOWN:
+		if (this->active_state == true) {
+			BaseServoStop();
+		}
 		this->active_state = false;
-		BaseServoStop();
 		ros::shutdown();
 		break;
 	case aero_srr_msgs::AeroState::PAUSE:
+		if (this->active_state == true) {
+			BaseServoStop();
+		}
 		this->active_state = false;
-		BaseServoStop();
 		this->state_timeout_timer.stop();
 		break;
 	case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
 	default:
+		if (this->active_state == true) {
+			BaseServoStop();
+		}
 		this->active_state = false;
-		BaseServoStop();
 		previous_state = aero_state.state;
 		break;
 	}
