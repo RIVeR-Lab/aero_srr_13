@@ -104,8 +104,8 @@ public:
 
 	virtual void reconfigureStopped(roboteq_driver::RoboteqConfig& config){
 		port_ = config.port;
-		max_rpm_ = config.max_rpm;
-		ppr_ = config.ppr;
+		max_rpm_ = (int)config.max_rpm;
+		ppr_ = (int)config.ppr;
 	}
 	virtual void reconfigureOpen(roboteq_driver::RoboteqConfig& config){
 		control_sub->setMaxRate(config.control_rate);

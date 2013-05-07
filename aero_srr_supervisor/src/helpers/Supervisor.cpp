@@ -63,6 +63,7 @@ void Supervisor::buildStateTable()
 	this->state_table_.addStateStringRepresentation(state_t::SEARCH, "SEARCH");
 	this->state_table_.addStateStringRepresentation(state_t::SHUTDOWN, "SHUTDOWN");
 	this->state_table_.addStateStringRepresentation(state_t::STARTUP, "STARTUP");
+	this->state_table_.addStateStringRepresentation(state_t::PICKUP, "PICKUP");
 
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::COLLECT, true);
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::ERROR, false);
@@ -72,6 +73,7 @@ void Supervisor::buildStateTable()
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::SAFESTOP, false);
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::SEARCH, true);
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::SHUTDOWN, false);
+	this->state_table_.addTranstion(state_t::PAUSE, state_t::PICKUP, true);
 
 	this->state_table_.addTranstion(state_t::STARTUP, state_t::MANUAL);
 	this->state_table_.addTranstion(state_t::STARTUP, state_t::SEARCH);
@@ -100,6 +102,12 @@ void Supervisor::buildStateTable()
 	this->state_table_.addTranstion(state_t::SAFESTOP, state_t::SHUTDOWN);
 
 	this->state_table_.addTranstion(state_t::ERROR, state_t::SAFESTOP, true);
+
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::COLLECT, true);
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::NAVOBJ);
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::SEARCH);
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::ERROR);
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::MANUAL);
 
 }
 
