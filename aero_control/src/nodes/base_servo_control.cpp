@@ -35,10 +35,10 @@ this->workspace_postion_pub= nh.advertise<geometry_msgs::PoseStamped>(WorkspaceP
 	error_update_timer_flag = false;
 	last_position_time = ros::Time().now();
 
-	PID_X = new pid::PIDController(0, 0, 0, pos_err.x_err);
-	PID_Y = new pid::PIDController(0, 0, 0, pos_err.y_err);
+	PID_X = new pid::PIDController(1, 0, 0, pos_err.x_err);
+	PID_Y = new pid::PIDController(1, 0, 0, pos_err.y_err);
 
-	linear_gain = 2;
+	linear_gain = 1;
 	rotational_gain = 1;
 
 
