@@ -224,6 +224,7 @@ void GlobalPlanner::registerTopics()
 	this->goal_pub_      = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2, true);
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
 	//this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
+	this->state_sub      = this->nh_.subscribe("/aero/state", 1, &GlobalPlanner::stateCB, this);
 }
 
 void GlobalPlanner::registerTimers()
@@ -421,6 +422,32 @@ void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 	this->global_map_->setPointTrait(*message);
 }
 
+
+void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
+{
+	typedef aero_srr_msgs::AeroState state_t;
+	switch(message->state)
+	{
+	case state_t::ERROR:
+	case state_t::MANUAL:
+	case state_t::PAUSE:
+	case state_t::SAFESTOP:
+	case state_t::SHUTDOWN:
+	case state_t::COLLECT:
+		this->setManual(true);
+		break;
+	case state_t::SEARCH:
+		this->setSearch();
+		break;
+	case state_t::NAVOBJ:
+		this->setNavObj();
+		break;
+	default:
+		ROS_ERROR_STREAM("Received Unkown State: "<<*message);
+		break;
+	}
+}
+
 void GlobalPlanner::updateGoal() const
 {
 	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
@@ -513,3 +540,32 @@ void GlobalPlanner::visualizeMap() const
 {
 
 }
+
+void GlobalPlanner::setManual(bool enable)
+{
+	if(enable)
+	{
+		this->plan_timer_.stop();
+		this->chunck_timer_.stop();
+		this->goal_timer_.stop();
+	}
+	else
+	{
+		this->plan_timer_.start();
+		this->chunck_timer_.start();
+		this->goal_timer_.start();
+	}
+}
+
+void GlobalPlanner::setSearch()
+{
+	//TODO actually implement
+	this->setManual(false);
+}
+
+void GlobalPlanner::setNavObj()
+{
+	//TODO actually implement
+	this->setManual(false);
+}
+
