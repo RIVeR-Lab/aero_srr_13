@@ -19,18 +19,65 @@
 
 using namespace aero_control;
 
-BaseServoController::BaseServoController(ros::NodeHandle nh, std::string DesiredPosition,std::string WorkspacePosition,
-		std::string BaseVelocity) {
+BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
+	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for goal position
+	std::string WorkspacePosition("WorkspacePosition"); ///String containing the topic name for WorkspacePosition
+	std::string BaseVelocity("cmd_vel"); ///String containing the topic name for BaseVelocity
+	std::string AeroState("aero/supervisor/state"); ///String containing the topic name for AeroState
+	std::string AeroStateTransition("aero/supervisor/control_mode"); ///String containing the topic name for AeroStateTransition
+
+	//Grab the topic parameters, print warnings if using default values
+	if (!param_nh.getParam(DesiredPosition, DesiredPosition))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
+	if (!param_nh.getParam(BaseVelocity, BaseVelocity))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Base Velocity Topic <%s>!", BaseVelocity.c_str(), BaseVelocity.c_str());
+
+	if (!param_nh.getParam(WorkspacePosition, WorkspacePosition))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Workspace Position Topic <%s>!", WorkspacePosition.c_str(), WorkspacePosition.c_str());
+
+	if (!param_nh.getParam(AeroState, AeroState))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Aero State Topic <%s>!", AeroState.c_str(), AeroState.c_str());
+
+	if (!param_nh.getParam(AeroStateTransition, AeroStateTransition))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Aero State Transition Topic <%s>!", AeroStateTransition.c_str(), AeroStateTransition.c_str());
+
+//Print out received topics
+	ROS_DEBUG("Using Desired Position Topic Name: <%s>", DesiredPosition.c_str());
+	ROS_DEBUG("Using Base Velocity Topic Name: <%s>", BaseVelocity.c_str());
+	ROS_DEBUG("Using Workspace Position Topic Name: <%s>", WorkspacePosition.c_str());
+	ROS_DEBUG("Using Aero State Topic Name: <%s>", AeroState.c_str());
+	ROS_DEBUG("Using Aero State Transition Topic Name: <%s>", AeroStateTransition.c_str());
+
+	ROS_INFO("Starting Up Base Servo Controller...");
+
+	this->active_state = false;
+	this->previous_state = aero_srr_msgs::AeroState::STARTUP;
+	in_range_time = ros::Time().now();
+	PID_start_time = ros::Time().now();
+
+	/* Messages */
 	this->desired_position_sub = nh.subscribe(DesiredPosition, 1,
 			&BaseServoController::DesiredPositionMSG, this);
-this->workspace_postion_pub= nh.advertise<geometry_msgs::PoseStamped>(WorkspacePosition,1,true);
+	this->aero_state_sub = nh.subscribe(AeroState, 1, &BaseServoController::DesiredPositionMSG,
+			this);
+	this->workspace_postion_pub = nh.advertise<geometry_msgs::PoseStamped>(WorkspacePosition, 1,
+			true);
 	this->base_velocity_pub = nh.advertise<geometry_msgs::Twist>(BaseVelocity, 2);
-
+	/* Services */
+	this->aero_state_transition_srv_client =
+			nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(AeroStateTransition);
+	/* Timers */
 	this->error_update_timer = nh.createTimer(ros::Duration(0.1),
 			&BaseServoController::ErrorUpdateTimerCallback, this);
 
-
+	this->state_timeout_timer = nh.createTimer(ros::Duration(1),
+			&BaseServoController::StateTimeoutTimerCallback, this);
 	this->error_update_timer.stop();
 	error_update_timer_flag = false;
 	last_position_time = ros::Time().now();
@@ -41,7 +88,6 @@ this->workspace_postion_pub= nh.advertise<geometry_msgs::PoseStamped>(WorkspaceP
 	linear_gain = 1;
 	rotational_gain = 1;
 
-
 	this->workspace_pose.pose.position.x = 0;
 	this->workspace_pose.pose.position.y = 0;
 	this->workspace_pose.pose.position.z = 0;
@@ -49,14 +95,14 @@ this->workspace_postion_pub= nh.advertise<geometry_msgs::PoseStamped>(WorkspaceP
 
 	q.setRPY(0, 0, 0);
 
-		tf::quaternionTFToMsg(q, workspace_pose.pose.orientation);
-		workspace_pose.header.frame_id = "/base_footprint";
+	tf::quaternionTFToMsg(q, workspace_pose.pose.orientation);
+	workspace_pose.header.frame_id = "/base_footprint";
 
-		workspace_pose.header.stamp = ros::Time::now();
+	workspace_pose.header.stamp = ros::Time::now();
 
-		this->workspace_postion_pub.publish(this->workspace_pose);
-	dr_call = boost::bind(&BaseServoController::PIDConfigCallback,this, _1, _2);
-			  dr_server.setCallback(dr_call);
+	this->workspace_postion_pub.publish(this->workspace_pose);
+	dr_call = boost::bind(&BaseServoController::PIDConfigCallback, this, _1, _2);
+	dr_server.setCallback(dr_call);
 
 }
 
@@ -65,71 +111,127 @@ BaseServoController::~BaseServoController() {
 	delete PID_Y;
 }
 
+void BaseServoController::BaseServoStart(void) {
+	if (this->active_state == true) {
+		if (error_update_timer_flag == false) {
+			this->error_update_timer.start();
+			this->error_update_timer_flag = true;
+			this->PID_start_time = ros::Time().now();
 
-void BaseServoController::PIDConfigCallback(aero_control::BaseServoPIDConfig &config, uint32_t level) {
-PID_X->SetPID(config.x_linear_P,config.x_linear_I,config.x_linear_D);
-linear_gain = config.x_gain;
-PID_Y->SetPID(config.y_linear_P,config.y_linear_I,config.y_linear_D);
-rotational_gain = config.y_gain;
-
-this->workspace_pose.pose.position.x = config.Workspace_X_Position;
-this->workspace_pose.pose.position.y = config.Workspace_Y_Position;
-workspace_pose.header.stamp = ros::Time::now();
-this->workspace_postion_pub.publish(this->workspace_pose);
-
+		}
+	}
 }
 
+void BaseServoController::BaseServoStop(void) {
+	this->error_update_timer.stop();
+	error_update_timer_flag = false;
+}
 
-void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
-	UpdateError();
-	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 1) {
-		error_update_timer.stop();
-		error_update_timer_flag = false;
-	}
+void BaseServoController::PIDConfigCallback(aero_control::BaseServoPIDConfig &config,
+		uint32_t level) {
+	PID_X->SetPID(config.x_linear_P, config.x_linear_I, config.x_linear_D);
+	linear_gain = config.x_gain;
+	PID_Y->SetPID(config.y_linear_P, config.y_linear_I, config.y_linear_D);
+	rotational_gain = config.y_gain;
+
+	this->workspace_pose.pose.position.x = config.Workspace_X_Position;
+	this->workspace_pose.pose.position.y = config.Workspace_Y_Position;
 	workspace_pose.header.stamp = ros::Time::now();
 	this->workspace_postion_pub.publish(this->workspace_pose);
 }
 
-void BaseServoController::DesiredPositionMSG(
-		const geometry_msgs::PoseStampedConstPtr& object_pose) {
-	try{
-	tf_listener.waitForTransform("/world", object_pose->header.frame_id, object_pose->header.stamp,
-			ros::Duration(1.0));
-	tf_listener.transformPose("/world", *object_pose, this->desired_pose);
+void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
+	UpdateError();
 
-	last_position_time = ros::Time().now();
-	if (error_update_timer_flag == false) {
-		this->error_update_timer.start();
-		error_update_timer_flag = true;
-
+	//if we don't see anything then stop moving
+	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 5) {
+		BaseServoStop();
 	}
-	} catch (std::exception& e) {
-			ROS_ERROR_STREAM_THROTTLE(1, e.what());
-		}
+
+	workspace_pose.header.stamp = ros::Time::now();
+	this->workspace_postion_pub.publish(this->workspace_pose);
 }
 
+void BaseServoController::StateTimeoutTimerCallback(const ros::TimerEvent&) {
+	//if timeout, go back to searching
+	if (ros::Time().now().toSec() - last_position_time.toSec() > 20
+			|| ros::Time().now().toSec() - PID_start_time.toSec() > 120) {
+		aero_srr_msgs::StateTransitionRequest state_transition;
 
+		state_transition.request.requested_state.state = previous_state;
+		state_transition.request.requested_state.header.stamp = ros::Time().now();
+		aero_state_transition_srv_client.call(state_transition);
+	}
 
+}
+
+void BaseServoController::DesiredPositionMSG(
+		const geometry_msgs::PoseStampedConstPtr& object_pose) {
+	try {
+		tf_listener.waitForTransform("/world", object_pose->header.frame_id,
+				object_pose->header.stamp, ros::Duration(1.0));
+		tf_listener.transformPose("/world", *object_pose, this->desired_pose);
+
+		last_position_time = ros::Time().now();
+		BaseServoStart();
+	} catch (std::exception& e) {
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
+}
+
+void BaseServoController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_state) {
+
+	switch (aero_state.state) {
+
+	case aero_srr_msgs::AeroState::COLLECT:
+		this->active_state = true;
+		break;
+	case aero_srr_msgs::AeroState::SHUTDOWN:
+		this->active_state = false;
+		previous_state = aero_state.state;
+		BaseServoStop();
+		ros::shutdown();
+		break;
+	case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
+	default:
+		this->active_state = false;
+		BaseServoStop();
+		previous_state = aero_state.state;
+		break;
+	}
+}
 
 void BaseServoController::UpdateError(void) {
 	geometry_msgs::PoseStamped desired_error_pose;
 	geometry_msgs::PoseStamped workspace_error_pose;
-try{
-	tf_listener.waitForTransform("/base_footprint", this->desired_pose.header.frame_id, this->desired_pose.header.stamp,
-			ros::Duration(0.1));
-	tf_listener.transformPose("/base_footprint", this->desired_pose, desired_error_pose);
+	try {
+		tf_listener.waitForTransform("/base_footprint", this->desired_pose.header.frame_id,
+				this->desired_pose.header.stamp, ros::Duration(0.1));
+		tf_listener.transformPose("/base_footprint", this->desired_pose, desired_error_pose);
 
-	workspace_pose.header.stamp = ros::Time::now();
+		workspace_pose.header.stamp = ros::Time::now();
 
+		tf_listener.waitForTransform("/base_footprint", this->workspace_pose.header.frame_id,
+				this->workspace_pose.header.stamp, ros::Duration(0.1));
+		tf_listener.transformPose("/base_footprint", this->workspace_pose, workspace_error_pose);
+		pos_err.x_err = desired_error_pose.pose.position.x - workspace_error_pose.pose.position.x;
+		pos_err.y_err = desired_error_pose.pose.position.y - workspace_error_pose.pose.position.y;
 
-	tf_listener.waitForTransform("/base_footprint", this->workspace_pose.header.frame_id, this->workspace_pose.header.stamp,
-			ros::Duration(0.1));
-	tf_listener.transformPose("/base_footprint", this->workspace_pose, workspace_error_pose);
-	pos_err.x_err = desired_error_pose.pose.position.x-workspace_error_pose.pose.position.x;
-	pos_err.y_err = desired_error_pose.pose.position.y-workspace_error_pose.pose.position.y;
+		if (pos_err.x_err < ErrorRange() && pos_err.y_err < ErrorRange()) {
+			if (ros::Time().now().toSec() - in_range_time.toSec() > 1) {
+
+				aero_srr_msgs::StateTransitionRequest state_transition;
+
+				state_transition.request.requested_state.state = aero_srr_msgs::AeroState::PICKUP;
+				state_transition.request.requested_state.header.stamp = ros::Time().now();
+				aero_state_transition_srv_client.call(state_transition);
+			}
+		} else {
+			in_range_time = ros::Time().now();
+		}
 
 		UpdatePID();
-} catch (std::exception& e) {
+	} catch (std::exception& e) {
 		ROS_ERROR_STREAM_THROTTLE(1, e.what());
 	}
 
@@ -175,35 +277,8 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for goal position
-	std::string WorkspacePosition("WorkspacePosition"); ///String containing the topic name for WorkspacePosition
-	std::string BaseVelocity("cmd_vel"); ///String containing the topic name for BaseVelocity
-
-	if (argc < 1) {
-		ROS_INFO( "Usage: base_servo_control desired_position_topic base_workspace_position_topic base_velocity_topic ");
-
-		return 1;
-	} else {
-		//Grab the topic parameters, print warnings if using default values
-		if (!param_nh.getParam(DesiredPosition, DesiredPosition))
-			ROS_WARN(
-					"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
-	if (!param_nh.getParam(BaseVelocity, BaseVelocity))
-			ROS_WARN(
-					"Parameter <%s> Not Set. Using Default Base Velocity Topic <%s>!", BaseVelocity.c_str(), BaseVelocity.c_str());
-
-	if (!param_nh.getParam(WorkspacePosition, WorkspacePosition))
-				ROS_WARN(
-						"Parameter <%s> Not Set. Using Default Workspace Position Topic <%s>!", WorkspacePosition.c_str(), WorkspacePosition.c_str());
-		}
-//Print out received topics
-	ROS_DEBUG("Got Desired Position Topic Name: <%s>", DesiredPosition.c_str());
-	ROS_DEBUG("Got Base Velocity Topic Name: <%s>", BaseVelocity.c_str());
-	ROS_DEBUG("Got Workspace Position Topic Name: <%s>", WorkspacePosition.c_str());
-	ROS_INFO("Starting Up Base Servo Controller...");
-
 //create the arm object
-	BaseServoController base_servo(nh, DesiredPosition, WorkspacePosition, BaseVelocity);
+	BaseServoController base_servo(nh, param_nh);
 
 	ros::spin();
 }
