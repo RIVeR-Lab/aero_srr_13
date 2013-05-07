@@ -169,22 +169,23 @@ namespace ogu = occupancy_grid::utilities;
 
 class MultiTraitOccupancyGrid
 {
-	typedef ogu::CellTrait::Enum trait_t;
+	typedef ogu::CellTrait trait_t;
 private:
-	std::vector<nm::OccupancyGrid>     grid_;		   ///The backing map data. Index 0 is always the current max confidence PointTrait, with the remaining indexes defined by the trait map
-	nm::MapMetaData                    map_meta_data_; ///The meta-data defining information about the grid
-	boost::unordered_map<trait_t, int> trait_map_;     ///Mapping between PointTrait type and vector index
-
+	std::vector<nm::OccupancyGrid>           grid_;		   ///The backing map data. Index 0 is always the current max confidence PointTrait, with the remaining indexes defined by the trait map
+	nm::MapMetaData                          map_meta_data_; ///The meta-data defining information about the grid
+	boost::unordered_map<trait_t::Enum, int> trait_map_;     ///Mapping between PointTrait type and vector index
+	std::string                              frame_id_;
 
 public:
 	MultiTraitOccupancyGrid();
 	/**
 	 * @author Adam panzica
 	 * @brief Constructs a new grid
+	 * @brief [in] frame_id The frame that the map is representing
 	 * @param [in] slice_info MapMetaData defining the basic 2D properties of the grid
 	 * @param [in] traits A vector of the traits that a point could be
 	 */
-	MultiTraitOccupancyGrid(const std::vector<trait_t>& traits, const nm::MapMetaData& slice_info);
+	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, const nm::MapMetaData& slice_info);
 
 	/**
 	 * @author Adam Panzica
@@ -209,9 +210,15 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @return The resolution of the grid, in meters/cell
+	 */
+	double getResolution() const;
+
+	/**
+	 * @author Adam Panzica
 	 * @return The origin of the map. Will be in meters
 	 */
-	tf::Pose getOrigin() const;
+	geometry_msgs::Pose getOrigin() const;
 
 	/**
 	 * @author Adam Panzica

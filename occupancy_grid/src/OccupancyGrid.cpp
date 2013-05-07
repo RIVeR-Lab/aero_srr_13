@@ -155,3 +155,53 @@ std::string CellTrait::stringFromEnum(Enum value)
 	}
 	return "UNKOWN";
 }
+
+//***************************** OCCUPANCYGRID **************************************//
+
+
+
+int MultiTraitOccupancyGrid::getXSizeGrid() const
+{
+	return this->map_meta_data_.width;
+}
+
+double MultiTraitOccupancyGrid::getXSizeMeter() const
+{
+	return this->map_meta_data_.width*this->map_meta_data_.resolution;
+}
+
+int MultiTraitOccupancyGrid::getYSizeGrid() const
+{
+	return this->map_meta_data_.height;
+}
+
+double MultiTraitOccupancyGrid::getYSizeMeter() const
+{
+	return this->map_meta_data_.height*this->map_meta_data_.resolution;
+}
+
+double MultiTraitOccupancyGrid::getResolution() const
+{
+	return this->map_meta_data_.resolution;
+}
+
+geometry_msgs::Pose MultiTraitOccupancyGrid::getOrigin() const
+{
+	return this->map_meta_data_.origin;
+}
+
+std::string MultiTraitOccupancyGrid::getFrameID() const
+{
+	return this->frame_id_;
+}
+
+MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(int x, int y) const
+{
+	int index = ogu::calcIndexRowMajor2D(x, y, this->map_meta_data_.width);
+	return this->grid_.at(0).data[index];
+}
+
+MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPoitTrait(double x, double y) const
+{
+	return this->getPointTrait(x/this->map_meta_data_.resolution, y/this->map_meta_data_.resolution);
+}
