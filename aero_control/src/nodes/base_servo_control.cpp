@@ -192,6 +192,11 @@ void BaseServoController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_stat
 		BaseServoStop();
 		ros::shutdown();
 		break;
+	case aero_srr_msgs::AeroState::PAUSE://TODO ADD pause stuff
+		this->active_state = false;
+		BaseServoStop();
+		previous_state = aero_state.state;
+		break;
 	case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
 	default:
 		this->active_state = false;
