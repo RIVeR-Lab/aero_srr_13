@@ -39,6 +39,8 @@
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <iostream>
 #include <nav_msgs/OccupancyGrid.h>
+#include <boost/unordered_map.hpp>
+#include <tf/transform_datatypes.h>
 //************ LOCAL DEPENDANCIES ****************//
 
 //***********    NAMESPACES     ****************//
@@ -177,11 +179,98 @@ inline void normalizeConfidance(const uint8_t values[], int size, uint8_t result
 
 }; /* END UTILITIES */
 
-class MultiDimentionalOccupancyGrid
+class MultiTraitOccupancyGrid
 {
+	typedef ogu::PointTrait trait_t;
 private:
-	std::vector<nm::OccupancyGrid> grid_;		///The backing map data
-	nm::MapMetaData                map_data_;
+	std::vector<nm::OccupancyGrid>     grid_;		   ///The backing map data. Index 0 is always the current max confidence PointTrait, with the remaining indexes defined by the trait map
+	nm::MapMetaData                    map_meta_data_; ///The meta-data defining information about the grid
+	boost::unordered_map<trait_t, int> trait_map_;     ///Mapping between PointTrait type and vector index
+
+
+public:
+	/**
+	 * @author Adam panzica
+	 * @brief Constructs a new grid
+	 * @param [in] slice_info MapMetaData defining the basic 2D properties of the grid
+	 * @param [in] traits A vector of the traits that a point could be
+	 */
+	MultiTraitOccupancyGrid(const std::vector<trait_t>& traits, const nm::MapMetaData& slice_info);
+
+	/**
+	 * @author Adam Panzica
+	 * @return The X size of the grid, in grid units
+	 */
+	int    getXSizeGrid()  const;
+	/**
+	 * @author Adam Panzica
+	 * @return The X size of the grid, in meters
+	 */
+	double getXSizeMeter() const;
+	/**
+	 * @author Adam Panzica
+	 * @return The Y size of the grid, in grid units
+	 */
+	int    getYSizeGrid()  const;
+	/**
+	 * @author Adam Panzica
+	 * @return The Y size of the grid, in meters
+	 */
+	double getYSizeMeter() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The origin of the map. Will be in meters
+	 */
+	tf::Pose getOrigin() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The frame_id that the map is in
+	 */
+	std::string getFrameID() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Gets the trait of a point on the grid
+	 * @param [in] x The x location on the grid, in grid-units
+	 * @param [in] y The y location on the grid, in grid-units
+	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
+	 */
+	trait_t getPointTrait(int x, int y) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Gets the trait of a point on the grid
+	 * @param [in] x The x location on the grid, in meters
+	 * @param [in] y The y location on the grid, in meters
+	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
+	 */
+	trait_t getPoitTrait(double x, double y) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Adds confidence to a point being a particular trait
+	 * @param [in] x The x location on the grid, in grid-units
+	 * @param [in] y The y location on the grid, in grid units
+	 * @param [in] trait The trait to add confidence to
+	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
+	 *
+	 * Adds confidence to the probability that a point contains a given trait. Also removes proportional confidence from the other trait possibilities
+	 */
+	void addPointTrait(int x, int y, trait_t trait, int confidence = 100);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Adds confidence to a point being a particular trait
+	 * @param [in] x The x location on the grid, in meters
+	 * @param [in] y The y location on the grid, in meters
+	 * @param [in] trait The trait to add confidence to
+	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
+	 *
+	 * Adds confidence to the probability that a point contains a given trait. Also removes proportional confidence from the other trait possibilities
+	 */
+	void addPointTrait(double x, double y, trait_t trait, int confidence = 100);
 
 };
 
