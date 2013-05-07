@@ -78,6 +78,7 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 
 	this->state_timeout_timer = nh.createTimer(ros::Duration(1),
 			&BaseServoController::StateTimeoutTimerCallback, this);
+
 	this->error_update_timer.stop();
 	error_update_timer_flag = false;
 	last_position_time = ros::Time().now();
@@ -184,18 +185,19 @@ void BaseServoController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_stat
 	switch (aero_state.state) {
 
 	case aero_srr_msgs::AeroState::COLLECT:
+		this->PID_start_time = ros::Time().now();
+		this->state_timeout_timer.start();
 		this->active_state = true;
 		break;
 	case aero_srr_msgs::AeroState::SHUTDOWN:
 		this->active_state = false;
-		previous_state = aero_state.state;
 		BaseServoStop();
 		ros::shutdown();
 		break;
-	case aero_srr_msgs::AeroState::PAUSE://TODO ADD pause stuff
+	case aero_srr_msgs::AeroState::PAUSE:
 		this->active_state = false;
 		BaseServoStop();
-		previous_state = aero_state.state;
+		this->state_timeout_timer.stop();
 		break;
 	case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
 	default:
