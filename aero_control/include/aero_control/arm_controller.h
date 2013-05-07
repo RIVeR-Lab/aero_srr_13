@@ -31,8 +31,8 @@ namespace aero_control {
 class ArmController {
 public:
 	ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh);
-	void ObjectPosition(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
-
+	void ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
+	void AeroStateMSG(const aero_srr_msgs::AeroState& aero_state);
 private:
 	ros::NodeHandle nh_;
 	ros::Subscriber sub_object_position;
@@ -43,6 +43,8 @@ private:
 
 	tf::TransformListener listener;
 
+	bool active_state;
+	uint8_t previous_state;
 
 };
 

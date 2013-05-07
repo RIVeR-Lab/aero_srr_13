@@ -118,7 +118,6 @@ void BaseServoController::BaseServoStart(void) {
 			this->error_update_timer.start();
 			this->error_update_timer_flag = true;
 			this->PID_start_time = ros::Time().now();
-
 		}
 	}
 }
