@@ -209,7 +209,7 @@ private:
 	 */
 	bool reachedNextGoal(const app::Point& worldLocation, const double threshold) const;
 
-	State       state_;
+	aero_srr_msgs::AeroState       state_;
 	app::Point  current_point_;
 
 	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
@@ -257,6 +257,7 @@ private:
 	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state
 	ros::Subscriber       slam_sub_;      ///Subscriber to nav_msgs::OccupancyGrid messages from SLAM
+	ros::ServiceClient    state_client_;  ///Client to request state transitions
 	ros::Timer            chunck_timer_;  ///Timer to chunk global map into local map
 	ros::Timer            plan_timer_;    ///Timer to plan on the global map
 	ros::Timer            goal_timer_;    ///Timer to update the goal point
