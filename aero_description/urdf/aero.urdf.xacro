@@ -56,7 +56,16 @@
 
 
   <!-- Arm -->
-  <xacro:static_transform parent="base_link_top_plate_part" name="arm_base" xyz="0.325374 0 0.085852" rpy="0 0 ${-M_PI/2}">
+  <xacro:static_transform parent="base_link_top_plate_part" name="arm_mount" xyz="0.325374 0 0.085852" rpy="0 0 0">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+	<box size="0.01 0.01 0.01" />
+      </geometry>
+      <material name="Blue" />
+    </visual>
+  </xacro:static_transform>
+  <xacro:static_transform parent="arm_mount" name="arm_base" xyz="0 0 0" rpy="0 0 ${-M_PI/2}">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -67,7 +76,7 @@
   </xacro:static_transform>
 
   <!-- IMU -->
-  <xacro:static_transform parent="base_link" name="imu" xyz="0 0 0" rpy="0 0 0">
+  <xacro:static_transform parent="base_link" name="imu" xyz="0 0 0" rpy="0 ${-M_PI/2} ${-3*M_PI/4}">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>

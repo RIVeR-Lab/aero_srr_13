@@ -13,7 +13,7 @@
 namespace roboteq_driver{
 
 class RoboteqMotorController{
- private:
+ public:
   /**
    * a set of the supported motor modes
    */
@@ -28,6 +28,7 @@ class RoboteqMotorController{
 
   const static int32_t counts_per_pulse = 4;
 
+ private:
   /**
    * The max bound of the go command
    */
@@ -49,6 +50,10 @@ class RoboteqMotorController{
    * execute a set command
    */
   void setCommand(int commandItem, int index, int value);
+  /**
+   * execute a set command
+   */
+  void setCommand(int commandItem);
   /**
    * execute a set config
    */
@@ -83,9 +88,17 @@ class RoboteqMotorController{
    */
   void setSerialWatchdog(int time);
 
+  void saveRotationInfo(double maxRPM1, double maxRPM2,
+			 int ppr1, int ppr2);
+  /**
+   * Save the current configuration to persist between restarts
+   */
+  void saveToEEPROM();
+
   /*
    * Action
    */
+  void setMotorMode(uint8_t chan, MotorMode new_mode);
   /**
    * set the speed of a motor (in rad/s)
    */
@@ -94,7 +107,6 @@ class RoboteqMotorController{
    * set the power of a motor (-1.0 to 1.0)
    */
   void setPower(uint8_t chan, double power);
-  void setMotorMode(uint8_t chan, MotorMode mode);
 
   /*
    * Sensors
@@ -116,10 +128,10 @@ class RoboteqMotorController{
    */
   void getVelocity(uint8_t chan, double& value);
  private:
-  const double maxRPM1_;
-  const double maxRPM2_;
-  const int ppr1_;
-  const int ppr2_;
+  double maxRPM1_;
+  double maxRPM2_;
+  int ppr1_;
+  int ppr2_;
   RoboteqDevice device_;
   MotorMode motor_mode1_;
   MotorMode motor_mode2_;

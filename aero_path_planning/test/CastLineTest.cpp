@@ -11,7 +11,7 @@
 //****************SYSTEM DEPENDANCIES**************************//
 #include<gtest/gtest.h>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/utilities/OccupancyGrid.h>
+#include<aero_path_planning/occupancy_grid/OccupancyGrid.h>
 //**********************NAMESPACES*****************************//
 
 #define PRINT_EXPECTED_POINT(expect, actual)PRINT_POINT_S("Expected Point", expect)<<", "<<PRINT_POINT_S("Actual Point", actual)
