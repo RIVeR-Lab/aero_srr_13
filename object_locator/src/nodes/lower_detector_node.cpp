@@ -261,10 +261,10 @@ const cv::Mat_<uint8_t> img1_rect(left_image.height, left_image.width,
 
 	int heightL = img1_rect.rows;
 	int widthL = img1_rect.cols;
-	Mat_t disp(  heightL, widthL, CV_16S );
+//	Mat_t disp(  heightL, widthL, CV_16S );
 //	Mat_t vdisp( heightL, widthL, CV_32FC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
-	Mat_t disp_image;
+	Mat_t disp;
 
 	int minDisp = 0;      //0         //-128-32;
 	int numDisp = 208;       //80        //256+80;
