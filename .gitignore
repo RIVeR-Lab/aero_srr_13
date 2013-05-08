@@ -22,13 +22,13 @@
 */msg_gen
 */catkin
 */catkin_generated
-*/cmake_install.cmake
+cmake_install.cmake
 */CATKIN_IGNORE
-*/CMakeFiles
+CMakeFiles
 */devel
 */gtest
 */srv_gen
-
+CMakeCache.txt
 
 #Stuff added by make eclipse-project
 *.project

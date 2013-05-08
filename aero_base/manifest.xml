@@ -17,5 +17,7 @@
   <depend package="roboteq_driver"/>
   <depend package="kvh_driver"/>
   <depend package="hd_driver"/>
+  <depend package="manzanita_mk3_driver"/>
+  <depend package="computer_sensors"/>
 
 </package>
