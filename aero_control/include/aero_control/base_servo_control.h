@@ -47,11 +47,11 @@ private:
 	void UpdateError(void);
 
 	inline double MaxLinearVel(void) {
-		return 1.0;
+		return 0.25;
 	}
 
 	inline double MaxAngularVel(void) {
-		return 1.0;
+		return 0.3;
 	}
 
 	inline double ErrorRange(void) {

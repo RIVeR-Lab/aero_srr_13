@@ -190,7 +190,6 @@ void BaseServoController::DesiredPositionMSG(
 
 		last_position_time = ros::Time().now();
 
-		ROS_INFO_STREAM(desired_pose);
 
 
 		BaseServoStart();
@@ -211,24 +210,27 @@ void BaseServoController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_stat
 		break;
 	case aero_srr_msgs::AeroState::SHUTDOWN:
 		if (this->active_state == true) {
+			this->active_state = false;
+
 			BaseServoStop();
 		}
-		this->active_state = false;
 		ros::shutdown();
 		break;
 	case aero_srr_msgs::AeroState::PAUSE:
 		if (this->active_state == true) {
+			this->active_state = false;
+
 			BaseServoStop();
 		}
-		this->active_state = false;
 		this->state_timeout_timer.stop();
 		break;
 	case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
 	default:
 		if (this->active_state == true) {
+			this->active_state = false;
 			BaseServoStop();
 		}
-		this->active_state = false;
+
 		previous_state = aero_state.state;
 		break;
 	}
