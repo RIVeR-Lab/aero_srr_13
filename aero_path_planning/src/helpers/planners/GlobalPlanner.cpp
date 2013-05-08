@@ -17,31 +17,27 @@
 #include<aero_path_planning/planners/GlobalPlanner.h>
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
 #include<aero_path_planning/OccupancyGridMsg.h>
+#include<aero_srr_msgs/StateTransitionRequest.h>
 //**********************NAMESPACES*****************************//
 
 
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::CarrotPathFinder& path_planner):
-																				state_(MANUAL),
-																				path_planner_(&path_planner),
-																				path_threshold_(1.0),
-																				nh_(nh),
-																				p_nh_(p_nh),
-																				transformer_(nh)
+																						path_planner_(&path_planner),
+																						path_threshold_(1.0),
+																						nh_(nh),
+																						p_nh_(p_nh),
+																						transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
-
+	this->state_.state = aero_srr_msgs::AeroState::MANUAL;
 	this->loadOccupancyParam();
 	this->registerTopics();
 	this->registerTimers();
+	this->setManual(true);
 	this->buildGlobalMap();
 	ROS_INFO_STREAM("Building Test Mission Goals...");
-	geometry_msgs::Pose pose1;
-	pose1.position.x = 10;
-	pose1.position.y = 0;
-	pose1.orientation.w = 1;
-	this->mission_goals_.push_back(pose1);
 	geometry_msgs::Pose pose2;
 	pose2.position.x = 10;
 	pose2.position.y = 10;
@@ -224,7 +220,9 @@ void GlobalPlanner::registerTopics()
 	this->goal_pub_      = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2, true);
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
 	//this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
-	this->state_sub      = this->nh_.subscribe("/aero/state", 1, &GlobalPlanner::stateCB, this);
+	this->state_sub      = this->nh_.subscribe("/aero/supervisor/state", 1, &GlobalPlanner::stateCB, this);
+
+	this->state_client_  = this->nh_.serviceClient<aero_srr_msgs::StateTransitionRequest>("/aero/supervisor/state_transition_request");
 }
 
 void GlobalPlanner::registerTimers()
@@ -349,6 +347,29 @@ void GlobalPlanner::goalCB(const ros::TimerEvent& event)
 			{
 				this->mission_goals_.pop_front();
 			}
+			else
+			{
+				//Hack for video
+				if(this->state_.state == aero_srr_msgs::AeroState::SEARCH)
+				{
+					aero_srr_msgs::StateTransitionRequest request;
+					aero_srr_msgs::AeroState state;
+					state.state = aero_srr_msgs::AeroState::NAVOBJ;
+					request.request.requested_state = state;
+					this->state_client_.call(request);
+					ROS_INFO_STREAM("Requested a Transition to NAVOBJ, got response:"<<request.response.success<<","<<request.response.error_message);
+				}
+				if(this->state_.state != aero_srr_msgs::AeroState::NAVOBJ)
+				{
+					aero_srr_msgs::StateTransitionRequest request;
+					aero_srr_msgs::AeroState state;
+					state.state = aero_srr_msgs::AeroState::COLLECT;
+					request.request.requested_state = state;
+					this->state_client_.call(request);
+					ROS_INFO_STREAM("Requested a Transition to COLLECT, got response:"<<request.response.success<<","<<request.response.error_message);
+				}
+				//End hack
+			}
 		}
 
 		this->global_map_->getConverter().convertToGrid(current_point, this->current_point_);
@@ -426,6 +447,8 @@ void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 {
 	typedef aero_srr_msgs::AeroState state_t;
+	this->state_ = *message;
+	geometry_msgs::Pose pose1;
 	switch(message->state)
 	{
 	case state_t::ERROR:
@@ -434,6 +457,12 @@ void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 	case state_t::SAFESTOP:
 	case state_t::SHUTDOWN:
 	case state_t::COLLECT:
+		//Hack for video
+		pose1.position.x = 0;
+		pose1.position.y = 0;
+		pose1.orientation.w = 1;
+		this->mission_goals_.push_back(pose1);
+		//End hack
 		this->setManual(true);
 		break;
 	case state_t::SEARCH:
@@ -559,6 +588,11 @@ void GlobalPlanner::setManual(bool enable)
 
 void GlobalPlanner::setSearch()
 {
+	geometry_msgs::Pose pose1;
+	pose1.position.x = 5;
+	pose1.position.y = 0;
+	pose1.orientation.w = 1;
+	this->mission_goals_.push_back(pose1);
 	//TODO actually implement
 	this->setManual(false);
 }
