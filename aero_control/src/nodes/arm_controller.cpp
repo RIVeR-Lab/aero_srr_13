@@ -173,7 +173,13 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 		arm_pose.header.frame_id = "/jaco_api";
 		arm_pose.header.stamp = ros::Time().now();
 
-		pub_arm_position.publish(arm_pose);
+				for (int x = 0; x < 20; x++) {
+					arm_pose.header.stamp = ros::Time().now();
+
+					pub_arm_position.publish(arm_pose);
+					ros::Duration(0.5).sleep();
+
+				}
 
 
 		aero_srr_msgs::StateTransitionRequest state_transition;
