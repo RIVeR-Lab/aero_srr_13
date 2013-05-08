@@ -114,14 +114,17 @@ void Supervisor::buildStateTable()
 
 bool Supervisor::stateTransitionReqCB(aero_srr_msgs::StateTransitionRequest::Request& request, aero_srr_msgs::StateTransitionRequest::Response& response)
 {
+	ROS_INFO_STREAM("Got a request to transition from current state:"<<this->state_<<"to new state:"<<request.requested_state);
 	if(this->state_table_.isValidTransition(this->state_.state, request.requested_state.state))
 	{
+		ROS_INFO_STREAM("The request was granted!");
 		this->state_     = request.requested_state;
 		this->stateUptd();
 		response.success = true;
 	}
 	else
 	{
+		ROS_INFO_STREAM("The reqest was denied!");
 		std::string current_state;
 		std::string requested_state;
 		std::string transition_list;
@@ -142,6 +145,7 @@ bool Supervisor::stateTransitionReqCB(aero_srr_msgs::StateTransitionRequest::Req
 
 void Supervisor::stateUptd() const
 {
+	ROS_INFO_STREAM("I'm transitioning to state:"<<this->state_);
 	typedef aero_srr_msgs::AeroState state_t;
 	aero_srr_msgs::AeroState message(this->state_);
 	message.header.stamp = ros::Time::now();

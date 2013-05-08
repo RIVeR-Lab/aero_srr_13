@@ -460,7 +460,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				//Limit rate of tentacle change
 				tentacle_idx   = this->limiter_->nextTentacle(tentacle_idx);
 				//Update the current radius and velocity
-				this->set_rad_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
+				this->set_rad_ = -this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getRad();
 				this->set_vel_ = this->tentacles_->getSpeedSet(speedset_idx).getTentacle(tentacle_idx).getVel();
 				visualizeTentacle(speedset_idx, tentacle_idx);
 			}
@@ -670,7 +670,7 @@ void LocalPlanner::twist(double x_dot, double omega)
 		omega = omega/std::abs(omega)*0.1;
 	}
 	message.linear.x  = x_dot;
-	message.angular.z = -omega*2.0;
+	message.angular.z = omega*2.0;
 	this->vel_pub_.publish(message);
 }
 
@@ -733,6 +733,7 @@ void LocalPlanner::setManualMode()
 	this->setSafeMode(false);
 	this->tentacle_mode_= false;
 	this->plan_timer_.stop();
+	this->vel_timer_.stop();
 }
 
 void LocalPlanner::setTentacleMode()
@@ -741,6 +742,7 @@ void LocalPlanner::setTentacleMode()
 	this->setSafeMode(false);
 	this->tentacle_mode_ = true;
 	this->plan_timer_.start();
+	this->vel_timer_ .start();
 }
 
 void LocalPlanner::setSafeMode(bool safe)
