@@ -7,6 +7,13 @@
 #include <boost/thread.hpp>
 #include <boost/format.hpp>
 #include <image_transport/subscriber_filter.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/ros/conversions.h>
 //#include <opencv2/gpu/stream_accessor.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
@@ -34,15 +41,15 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-//	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-//	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect", 1, &ImageConverter::imageCbRight, this);
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
 //	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
 
-		image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
+//		image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
-
+//	point_cloud_sub_ = nh_.subscribe<sensor_msgs::PointCloud2> ("/lower_stereo/points2", 2, &ImageConverter::pointCloudCb, this);
 	//********ROS Timer for Disparity image cb**************
 	disp_timer = nh_.createTimer(ros::Duration(1/18), &ImageConverter::computeDisparityCb,this);
 
@@ -121,6 +128,9 @@ void ImageConverter::saveImage(const sensor_msgs::Image& msg, cv_bridge::CvImage
 	   if(O == 0){if( (char)c == 's' ) { cv::imwrite(s.str(), img); ctrLeft++;}}
 	   else{if( (char)c == 'd' ) { cv::imwrite(d.str(), img); ctrRight++;}}
 }
+
+
+
 void ImageConverter::rectLeftCb(const sensor_msgs::ImageConstPtr& msg)
 {
 	left_image = *msg;
@@ -154,11 +164,11 @@ void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const s
 
 void ImageConverter::computeDisparity()
 {
-	processImage(left_image, mat_left, WINDOWLeft);
-	processImage(right_image, mat_right, WINDOWRight);
+//	processImage(left_image, mat_left, WINDOWLeft);
+//	processImage(right_image, mat_right, WINDOWRight);
 //	ROS_INFO_STREAM("Finished acquiring images");
-	Mat_t leftRect, img1_rect;
-	Mat_t rightRect,img2_rect;
+//	Mat_t leftRect, img1_rect;
+//	Mat_t rightRect,img2_rect;
 //	leftRect  =  imread("/home/srr/ObjectDetectionData/Tskuba/ALeft.jpg", CV_LOAD_IMAGE_COLOR);
 //	rightRect  = imread("/home/srr/ObjectDetectionData/Tskuba/ARight.jpg", CV_LOAD_IMAGE_COLOR);
 //	Mat_t img1_rect(leftRect.rows,leftRect.cols,CV_8U);
@@ -168,8 +178,8 @@ void ImageConverter::computeDisparity()
 	gpu::cvtColor(mat_right->image,img2_rect, CV_BGR2GRAY);
 
 #else
-	cvtColor(mat_left->image,img1_rect, CV_BGR2GRAY);
-	cvtColor(mat_right->image,img2_rect, CV_BGR2GRAY);
+//	cvtColor(mat_left->image,img1_rect, CV_BGR2GRAY);
+//	cvtColor(mat_right->image,img2_rect, CV_BGR2GRAY);
 #endif
 //	this->stereo_model.updateQ();
 this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
@@ -237,11 +247,22 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 	remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
  **/
 #endif
+const cv::Mat_<uint8_t> img1_rect(left_image.height, left_image.width,
+                                 const_cast<uint8_t*>(&left_image.data[0]),
+                                 left_image.step);
+ const cv::Mat_<uint8_t> img2_rect(right_image.height, right_image.width,
+                                 const_cast<uint8_t*>(&right_image.data[0]),
+                                 right_image.step);
+// cv::Mat_<float> disp_image(disp_msg->image.height, disp_msg->image.width,
+//                            reinterpret_cast<float*>(&disp_msg->image.data[0]),
+//                            disp_msg->image.step);
+
 	int heightL = img1_rect.rows;
 	int widthL = img1_rect.cols;
 	Mat_t disp(  heightL, widthL, CV_16S );
 //	Mat_t vdisp( heightL, widthL, CV_32FC1 );
 	Mat_t dispn( heightL, widthL, CV_32F );
+	Mat_t disp_image;
 
 	int minDisp = 0;      //0         //-128-32;
 	int numDisp = 192;       //80        //256+80;
@@ -261,14 +282,25 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 
 #else
 //	cv::StereoSGBM stereoSGBM(minDisp,numDisp, SADSize);
-	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
-	stereoSGBM(img1_rect, img2_rect, disp);
+//	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
+//	stereoSGBM(img1_rect, img2_rect, disp);
 
-//	cv::StereoBM stereoBM(StereoBM::BASIC_PRESET,numDisp, SADSize);
-//		stereoBM(img1_rect, img2_rect, disp);
-	std::stringstream s,d;
-		s << "/home/srr/ObjectDetectionData/Disparity1.png";
-		cv::imwrite(s.str(), dispn);
+	cv::StereoBM stereoBM;
+	cv::Ptr<CvStereoBMState> params = stereoBM.state;
+	stereoBM.state->SADWindowSize = SADSize;
+	stereoBM.state->preFilterCap = 31;
+	stereoBM.state->minDisparity = minDisp;
+	stereoBM.state->numberOfDisparities = numDisp;
+	stereoBM.state->uniquenessRatio = uniqueness;
+	stereoBM.state->textureThreshold = 10;
+	stereoBM.state->speckleWindowSize = specSize;
+	stereoBM.state->speckleRange = specRange;
+
+		stereoBM(img1_rect, img2_rect, disp, CV_32F);
+
+//	std::stringstream s,d;
+//		s << "/home/srr/ObjectDetectionData/Disparity1.png";
+//		cv::imwrite(s.str(), dispn);
 	    disp.convertTo(dispn, -1,1.0/16);
 	    Point2d center;
 	    center.x = (int)(widthL/2);
@@ -293,13 +325,8 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 #ifdef CUDA_ENABLED
 	gpu::resize(disp, vdisp1,size);
 #else
-//	cv::resize(disp, vdisp1,size);
+
 #endif
-
-	//	cv::imshow(WINDOWLeft, img1_rect);
-	//	cv::imshow(WINDOWRight, img2_rect);
-	Mat_t point_cloud;
-
 
 	cv::Point3d real_xyz;
 	geometry_msgs::PointStamped camera_point, world_point;
