@@ -31,13 +31,18 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::Ca
 																						transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
-	this->state_.state = aero_srr_msgs::AeroState::MANUAL;
+	this->state_.state = aero_srr_msgs::AeroState::SEARCH;
 	this->loadOccupancyParam();
 	this->registerTopics();
 	this->registerTimers();
-	this->setManual(true);
+	//this->setManual(true);
 	this->buildGlobalMap();
 	ROS_INFO_STREAM("Building Test Mission Goals...");
+	geometry_msgs::Pose pose1;
+	pose1.position.x = 5;
+	pose1.position.y = 0;
+	pose1.orientation.w = 1;
+	this->mission_goals_.push_back(pose1);
 	geometry_msgs::Pose pose2;
 	pose2.position.x = 10;
 	pose2.position.y = 10;
@@ -496,7 +501,7 @@ void GlobalPlanner::updateGoal() const
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
-	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
+	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_.state);
 	if(!this->mission_goals_.empty())
 	{
 		Point goal_point;
@@ -574,12 +579,14 @@ void GlobalPlanner::setManual(bool enable)
 {
 	if(enable)
 	{
+		ROS_INFO_STREAM("Global Planner: I'm in Manual Mode!");
 		this->plan_timer_.stop();
 		this->chunck_timer_.stop();
 		this->goal_timer_.stop();
 	}
 	else
 	{
+		ROS_INFO_STREAM("Global Planner: I'm in Autonomous Mode!");
 		this->plan_timer_.start();
 		this->chunck_timer_.start();
 		this->goal_timer_.start();
@@ -588,17 +595,14 @@ void GlobalPlanner::setManual(bool enable)
 
 void GlobalPlanner::setSearch()
 {
-	geometry_msgs::Pose pose1;
-	pose1.position.x = 5;
-	pose1.position.y = 0;
-	pose1.orientation.w = 1;
-	this->mission_goals_.push_back(pose1);
+	ROS_INFO_STREAM("Global Planner: I'm searching!");
 	//TODO actually implement
 	this->setManual(false);
 }
 
 void GlobalPlanner::setNavObj()
 {
+	ROS_INFO_STREAM("Global Planner: I'm Naving to Obj!");
 	//TODO actually implement
 	this->setManual(false);
 }
