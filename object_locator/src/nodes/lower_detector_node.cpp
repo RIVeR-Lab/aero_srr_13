@@ -41,13 +41,10 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-<<<<<<< HEAD
-	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect", 1, &ImageConverter::imageCbRight, this);
-=======
-	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
->>>>>>> 0a954d79d6e0d788cc33b9cf144fd108c7e5849d
+
+	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect", 1, &ImageConverter::imageCbRight, this);
+
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
 //	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
@@ -313,8 +310,8 @@ const cv::Mat_<uint8_t> img1_rect(left_image.height, left_image.width,
 	    center.x = (int)(widthL/2);
 	    center.y = (int)(heightL/2)+200;
  	    Point3d center_obj_3d;
-	    short int pre_disp_center = disp.at<short int>((int)(heightL/2),(int)(widthL/2));
-	this->stereo_model.projectDisparityTo3d(center,(float)pre_disp_center/16.0,center_obj_3d);
+	    float pre_disp_center = disp.at<float>((int)(heightL/2),(int)(widthL/2));
+	this->stereo_model.projectDisparityTo3d(center,pre_disp_center,center_obj_3d);
 	double dispOb = this->stereo_model.getDisparity(1.219);
 	cout << "Object Disparity should be = "<< dispOb;
 cout <<  "Center"<< endl << " X: "<< center_obj_3d.x << endl << "Y: " << center_obj_3d.y << endl << "Z: " << center_obj_3d.z << endl;
@@ -419,7 +416,7 @@ cout <<  "Center"<< endl << " X: "<< center_obj_3d.x << endl << "Y: " << center_
 		ObjLocationPub.publish(msg);
 	}
 	Mat_t cmapped;
-	dispn.convertTo(cmapped,CV_8U);
+	disp.convertTo(cmapped,CV_8U);
 cv::ellipse( cmapped, Point2d(detection.getX(),detection.getY()), cv::Size( 30, 30), 0, 0, 360, 0, 2, 8, 0 );
 	cv::ellipse( cmapped, center, cv::Size( 20, 20), 0, 0, 360, 0, 2, 8, 0 );
 	cv::imshow(WINDOWDisparity, cmapped );
@@ -466,7 +463,7 @@ void ImageConverter::buildMsg(const tf::Point& point, geometry_msgs::PoseStamped
 
 void ImageConverter::computeDisparityCb(const ros::TimerEvent& event)
 {
-	if (gotLeft && gotRight && (left_image.header.stamp ==right_image.header.stamp))
+	if (gotLeft && gotRight )
 	{
 		computeDisparity();
 		gotLeft = false;
