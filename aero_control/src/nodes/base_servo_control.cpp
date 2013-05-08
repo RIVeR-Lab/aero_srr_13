@@ -79,6 +79,8 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 			&BaseServoController::StateTimeoutTimerCallback, this);
 
 	this->error_update_timer.stop();
+	this->state_timeout_timer.stop();
+
 	error_update_timer_flag = false;
 	last_position_time = ros::Time().now();
 
