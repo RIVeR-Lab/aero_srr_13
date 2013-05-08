@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string ObjectLocation("ObjectLocation"); ///String containing the topic name for ObjectLocation
+	std::string ObjectLocation("ObjectPose"); ///String containing the topic name for ObjectLocation
 	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for DesiredPosition
 
 	//Grab the topic parameters, print warnings if using default values
