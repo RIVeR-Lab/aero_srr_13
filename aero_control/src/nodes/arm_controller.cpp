@@ -175,7 +175,7 @@ void ArmController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_state) {
 		this->active_state = true;
 		break;
 	case aero_srr_msgs::AeroState::COLLECT:
-		this->active_state = true;
+		this->active_state = false;
 		break;
 	case aero_srr_msgs::AeroState::SHUTDOWN:
 		this->active_state = false;
