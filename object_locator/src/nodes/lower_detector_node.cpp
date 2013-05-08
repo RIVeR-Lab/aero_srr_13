@@ -20,7 +20,7 @@ namespace enc = sensor_msgs::image_encodings;
 using namespace object_locator;
 using namespace std;
 using namespace cv;
-
+using namespace sensor_msgs;
 
 
 ImageConverter::ImageConverter()
@@ -41,6 +41,7 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
+	pub_points2_ = nh_.advertise<PointCloud2>("points2",1);
 
 	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect", 1, &ImageConverter::imageCbLeft, this);
 	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect", 1, &ImageConverter::imageCbRight, this);
@@ -163,7 +164,12 @@ void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const s
 //	saveImage(right_image, mat_right,1);
 }
 
-
+inline bool isValidPoint(const cv::Vec3f& pt)
+{
+  // Check both for disparities explicitly marked as invalid (where OpenCV maps pt.z to MISSING_Z)
+  // and zero disparities (point mapped to infinity).
+  return pt[2] != image_geometry::StereoCameraModel::MISSING_Z && !std::isinf(pt[2]);
+}
 void ImageConverter::computeDisparity()
 {
 //	processImage(left_image, mat_left, WINDOWLeft);
@@ -301,6 +307,141 @@ const cv::Mat_<uint8_t> img1_rect(left_image.height, left_image.width,
 
 		stereoBM(img1_rect, img2_rect, disp, CV_32F);
 
+
+		cv::Mat_<cv::Vec3f> points_mat_;
+		this->stereo_model.projectDisparityImageTo3d(disp, points_mat_, true);
+		  cv::Mat_<cv::Vec3f> mat = points_mat_;
+
+		  sensor_msgs::PointCloud2Ptr points_msg = boost::make_shared<sensor_msgs::PointCloud2>();
+		    points_msg->header = left_image.header;
+		    points_msg->height = mat.rows;
+		    points_msg->width = mat.cols;
+		    points_msg->fields.resize (4);
+		    points_msg->fields[0].name = "x";
+		    points_msg->fields[0].offset = 0;
+		    points_msg->fields[0].count = 1;
+		    points_msg->fields[0].datatype = sensor_msgs::PointField::FLOAT32;
+		    points_msg->fields[1].name = "y";
+		    points_msg->fields[1].offset = 4;
+		    points_msg->fields[1].count = 1;
+		    points_msg->fields[1].datatype = sensor_msgs::PointField::FLOAT32;
+		    points_msg->fields[2].name = "z";
+		    points_msg->fields[2].offset = 8;
+		    points_msg->fields[2].count = 1;
+		    points_msg->fields[2].datatype = sensor_msgs::PointField::FLOAT32;
+		    points_msg->fields[3].name = "rgb";
+		    points_msg->fields[3].offset = 12;
+		    points_msg->fields[3].count = 1;
+		    points_msg->fields[3].datatype = sensor_msgs::PointField::FLOAT32;
+
+		    //points_msg->is_bigendian = false; ???
+		      static const int STEP = 16;
+		      points_msg->point_step = STEP;
+		      points_msg->row_step = points_msg->point_step * points_msg->width;
+		      points_msg->data.resize (points_msg->row_step * points_msg->height);
+		      points_msg->is_dense = false; // there may be invalid points
+
+		      float bad_point = std::numeric_limits<float>::quiet_NaN ();
+		       int offset = 0;
+		       for (int v = 0; v < mat.rows; ++v)
+		       {
+		         for (int u = 0; u < mat.cols; ++u, offset += STEP)
+		         {
+		           if (isValidPoint(mat(v,u)))
+		           {
+		             // x,y,z,rgba
+		             memcpy (&points_msg->data[offset + 0], &mat(v,u)[0], sizeof (float));
+		             memcpy (&points_msg->data[offset + 4], &mat(v,u)[1], sizeof (float));
+		             memcpy (&points_msg->data[offset + 8], &mat(v,u)[2], sizeof (float));
+		           }
+		           else
+		           {
+		             memcpy (&points_msg->data[offset + 0], &bad_point, sizeof (float));
+		             memcpy (&points_msg->data[offset + 4], &bad_point, sizeof (float));
+		             memcpy (&points_msg->data[offset + 8], &bad_point, sizeof (float));
+		           }
+		         }
+		       }
+		       // Fill in color
+		         namespace enc = sensor_msgs::image_encodings;
+		         const std::string& encoding = left_image.encoding;
+		         offset = 0;
+		         if (encoding == enc::MONO8)
+		         {
+		           const cv::Mat_<uint8_t> color(left_image.height, left_image.width,
+		                                         (uint8_t*)&left_image.data[0],
+		                                         left_image.step);
+		           for (int v = 0; v < mat.rows; ++v)
+		           {
+		             for (int u = 0; u < mat.cols; ++u, offset += STEP)
+		             {
+		               if (isValidPoint(mat(v,u)))
+		               {
+		                 uint8_t g = color(v,u);
+		                 int32_t rgb = (g << 16) | (g << 8) | g;
+		                 memcpy (&points_msg->data[offset + 12], &rgb, sizeof (int32_t));
+		               }
+		               else
+		               {
+		                 memcpy (&points_msg->data[offset + 12], &bad_point, sizeof (float));
+		               }
+		             }
+		           }
+		         }
+		         else if (encoding == enc::RGB8)
+		         {
+		           const cv::Mat_<cv::Vec3b> color(left_image.height, left_image.width,
+		                                           (cv::Vec3b*)&left_image.data[0],
+		                                           left_image.step);
+		           for (int v = 0; v < mat.rows; ++v)
+		           {
+		             for (int u = 0; u < mat.cols; ++u, offset += STEP)
+		             {
+		               if (isValidPoint(mat(v,u)))
+		               {
+		                 const cv::Vec3b& rgb = color(v,u);
+		                 int32_t rgb_packed = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
+		                 memcpy (&points_msg->data[offset + 12], &rgb_packed, sizeof (int32_t));
+		               }
+		               else
+		               {
+		                 memcpy (&points_msg->data[offset + 12], &bad_point, sizeof (float));
+		               }
+		             }
+		           }
+		         }
+		         else if (encoding == enc::BGR8)
+		         {
+		           const cv::Mat_<cv::Vec3b> color(left_image.height, left_image.width,
+		                                           (cv::Vec3b*)&left_image.data[0],
+		                                           left_image.step);
+		           for (int v = 0; v < mat.rows; ++v)
+		           {
+		             for (int u = 0; u < mat.cols; ++u, offset += STEP)
+		             {
+		               if (isValidPoint(mat(v,u)))
+		               {
+		                 const cv::Vec3b& bgr = color(v,u);
+		                 int32_t rgb_packed = (bgr[2] << 16) | (bgr[1] << 8) | bgr[0];
+		                 memcpy (&points_msg->data[offset + 12], &rgb_packed, sizeof (int32_t));
+		               }
+		               else
+		               {
+		                 memcpy (&points_msg->data[offset + 12], &bad_point, sizeof (float));
+		               }
+		             }
+		           }
+		         }
+		         else
+		         {
+		           ROS_WARN_THROTTLE(30, "Could not fill color channel of the point cloud, "
+		                                 "unsupported encoding '%s'", encoding.c_str());
+		         }
+
+		         pub_points2_.publish(points_msg);
+
+
+
 //	std::stringstream s,d;
 //		s << "/home/srr/ObjectDetectionData/Disparity1.png";
 //		cv::imwrite(s.str(), dispn);
@@ -312,7 +453,7 @@ const cv::Mat_<uint8_t> img1_rect(left_image.height, left_image.width,
  	    Point3d center_obj_3d;
 	    float pre_disp_center = disp.at<float>((int)(heightL/2),(int)(widthL/2));
 	this->stereo_model.projectDisparityTo3d(center,pre_disp_center,center_obj_3d);
-	double dispOb = this->stereo_model.getDisparity(1.219);
+	double dispOb = this->stereo_model.getDisparity(1.90515);
 	cout << "Object Disparity should be = "<< dispOb;
 cout <<  "Center"<< endl << " X: "<< center_obj_3d.x << endl << "Y: " << center_obj_3d.y << endl << "Z: " << center_obj_3d.z << endl;
 	    float disp_center = dispn.at<float>((int)(heightL/2),(int)(widthL/2));
@@ -635,11 +776,11 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	}
 //	std::cout << "Finished Searching for Objects"<< std::endl;
 	//-- Show what you got
-//	cv::imshow( WINDOWLeft, frame );
+	cv::imshow( WINDOWLeft, frame );
 
 
 
-//	cv::waitKey(3);
+	cv::waitKey(3);
 
 
 }

@@ -50,6 +50,7 @@ public:
 	void rectRightCb(const sensor_msgs::ImageConstPtr& msg);
 	void rectLeftCb(const sensor_msgs::ImageConstPtr& msg);
 //	void pointCloudCb(const sensor_msgs::PointCloud2ConstPtr& cloud);
+
 	Mat_t gray2bgr(Mat_t img);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
@@ -66,7 +67,7 @@ private:
 	ros::Subscriber right_rect_sub_;
 	ros::Subscriber point_cloud_sub_;
 	image_transport::Publisher image_pub_;
-
+	ros::Publisher pub_points2_;
 
 	sensor_msgs::Image left_image;
 	sensor_msgs::Image right_image;
