@@ -34,8 +34,8 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-//	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-//	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
 //	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
@@ -50,7 +50,7 @@ ImageConverter::ImageConverter()
 	cascade_path_WHA = "/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
 	cascade_path_PINK = "/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	cascade_path_WHASUN = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
-	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeRQTWN/cascade.xml";
+	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	ctrLeft = 0;
 	ctrRight = 0;
 	cv::namedWindow(WINDOWLeft);
@@ -244,7 +244,7 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 	Mat_t dispn( heightL, widthL, CV_32F );
 
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 192;       //80        //256+80;
+	int numDisp = 208;       //80        //256+80;
 	int SADSize = 9;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
@@ -261,21 +261,25 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 
 #else
 //	cv::StereoSGBM stereoSGBM(minDisp,numDisp, SADSize);
-	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
-	stereoSGBM(img1_rect, img2_rect, disp);
+//	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
+//	stereoSGBM(img1_rect, img2_rect, disp);
 
-//	cv::StereoBM stereoBM(StereoBM::BASIC_PRESET,numDisp, SADSize);
-//		stereoBM(img1_rect, img2_rect, disp);
-	std::stringstream s,d;
-		s << "/home/srr/ObjectDetectionData/Disparity1.png";
-		cv::imwrite(s.str(), dispn);
-	    disp.convertTo(dispn, -1,1.0/16);
+	cv::StereoBM stereoBM(StereoBM::BASIC_PRESET,numDisp, SADSize);
+		stereoBM(img1_rect, img2_rect, disp);
+//	std::stringstream s,d;
+//		s << "/home/srr/ObjectDetectionData/Disparity1.png";
+//		cv::imwrite(s.str(), dispn);
+	    disp.convertTo(dispn, CV_32F,1.0/16);
 	    Point2d center;
 	    center.x = (int)(widthL/2);
-	    center.y = (int)(heightL/2);
-
-	    float pre_disp_center = disp.at<float>((int)heightL/2,(int)widthL/2);
-	    float disp_center = dispn.at<float>((int)heightL/2,(int)widthL/2);
+	    center.y = (int)(heightL/2)+200;
+ 	    Point3d center_obj_3d;
+	    short int pre_disp_center = disp.at<short int>((int)(heightL/2),(int)(widthL/2));
+	this->stereo_model.projectDisparityTo3d(center,(float)pre_disp_center/16.0,center_obj_3d);
+	double dispOb = this->stereo_model.getDisparity(1.219);
+	cout << "Object Disparity should be = "<< dispOb;
+cout <<  "Center"<< endl << " X: "<< center_obj_3d.x << endl << "Y: " << center_obj_3d.y << endl << "Z: " << center_obj_3d.z << endl;
+	    float disp_center = dispn.at<float>((int)(heightL/2),(int)(widthL/2));
 	    ROS_INFO_STREAM("Pre 16 Disparity Value at center = " << pre_disp_center);
 	    ROS_INFO_STREAM("Disparity Value at center = " << disp_center);
 
@@ -316,9 +320,11 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 		if(obj_centroid.x < disp.cols && obj_centroid.y < disp.rows)
 		{
 //			cout << "Getting Disparity" <<endl;
-			float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
-			cout << "Disparity Value of detection"<< disp_val <<endl;
-
+	//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
+			short int disp_val = disp.at<short int>(obj_centroid.y,obj_centroid.x);
+//cout << "Pre Disparity Value of detection "<< disp_val <<endl;			
+//cout << "Disparity Value of detection "<< disp_val <<endl;
+			
 			this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,obj_3d);
 //			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
 			tf::Point detection(obj_3d.x,obj_3d.y, obj_3d.z);
@@ -340,11 +346,7 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 
 
 	}
-	Mat_t cmapped;
-	dispn.convertTo(cmapped,CV_8U);
-	cv::ellipse( cmapped, center, cv::Size( 20, 20), 0, 0, 360, 0, 2, 8, 0 );
-	cv::imshow(WINDOWDisparity, cmapped );
-	cv::waitKey(3);
+
 	tf::Point detection;
 //	cout << "Clearing list" <<endl;
 	detection_list_.clear();
@@ -374,7 +376,7 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 								           << ", Z: " << detection.getZ()
 								           <<", "<< confidence<<", of type: "<< typeString << std::endl;
 		aero_srr_msgs::ObjectLocationMsg msg;
-		cv::ellipse( cmapped, Point2d(detection.getX(),detection.getY()), cv::Size( 30, 30), 0, 0, 360, 0, 2, 8, 0 );
+		
 		msg.header.frame_id = camera_point.header.frame_id;
 		msg.header.stamp = ros::Time::now();
 		msg.pose.header.frame_id = camera_point.header.frame_id;
@@ -382,6 +384,12 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
 	}
+	Mat_t cmapped;
+	dispn.convertTo(cmapped,CV_8U);
+cv::ellipse( cmapped, Point2d(detection.getX(),detection.getY()), cv::Size( 30, 30), 0, 0, 360, 0, 2, 8, 0 );
+	cv::ellipse( cmapped, center, cv::Size( 20, 20), 0, 0, 360, 0, 2, 8, 0 );
+	cv::imshow(WINDOWDisparity, cmapped );
+	cv::waitKey(3);
 
 //	cmapped = gray2bgr(vdisp1);
 
