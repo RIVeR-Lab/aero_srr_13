@@ -34,13 +34,13 @@ ImageConverter::ImageConverter()
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>("ObjectPose",2);
 	image_pub_ = it_.advertise("/out", 1);
-	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+//	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+//	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
 //	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
 
-//		image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
+		image_left_ = it_.subscribeCamera("prosilica/image_raw", 1, &ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 
 	//********ROS Timer for Disparity image cb**************
@@ -50,7 +50,7 @@ ImageConverter::ImageConverter()
 	cascade_path_WHA = "/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
 	cascade_path_PINK = "/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	cascade_path_WHASUN = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
-	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
+	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeRQTWN/cascade.xml";
 	ctrLeft = 0;
 	ctrRight = 0;
 	cv::namedWindow(WINDOWLeft);
@@ -72,7 +72,7 @@ ImageConverter::~ImageConverter()
 
 void ImageConverter::processImage(const sensor_msgs::Image& msg, cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW)
 {
-	ROS_INFO_STREAM("encoding = " << msg.encoding);
+//	ROS_INFO_STREAM("encoding = " << msg.encoding);
 	try
 	{
 		cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
@@ -138,8 +138,8 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const se
 	left_image = *msg;
 	left_info  = *cam_info;
 	gotLeft = true;
-//	detectAndDisplay(left_image,mat_left,WINDOWLeft);
-		saveImage(left_image, mat_left,0);
+	detectAndDisplay(left_image,mat_left,WINDOWLeft);
+//		saveImage(left_image, mat_left,0);
 
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -270,10 +270,16 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 		s << "/home/srr/ObjectDetectionData/Disparity1.png";
 		cv::imwrite(s.str(), dispn);
 	    disp.convertTo(dispn, -1,1.0/16);
-		Mat_t cmapped;
-		dispn.convertTo(cmapped,CV_8U);
-		cv::imshow(WINDOWDisparity, cmapped );
-		cv::waitKey(3);
+	    Point2d center;
+	    center.x = (int)(widthL/2);
+	    center.y = (int)(heightL/2);
+
+	    float pre_disp_center = disp.at<float>((int)heightL/2,(int)widthL/2);
+	    float disp_center = dispn.at<float>((int)heightL/2,(int)widthL/2);
+	    ROS_INFO_STREAM("Pre 16 Disparity Value at center = " << pre_disp_center);
+	    ROS_INFO_STREAM("Disparity Value at center = " << disp_center);
+
+
 #endif
 	//    cv::erode(disp, disp, NULL, 2);
 	//    cv::dilate(disp, disp, NULL, 2);
@@ -310,9 +316,9 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 		if(obj_centroid.x < disp.cols && obj_centroid.y < disp.rows)
 		{
 //			cout << "Getting Disparity" <<endl;
-			float disp_val = dispn.at<uchar>(obj_centroid.y,obj_centroid.x);
-//			cout << "Recieved Disparity of "<< disp_val <<endl;
-			//			cv::ellipse( vdisp1, obj_centroid, cv::Size( 50, 114), 0, 0, 360, 0, 2, 8, 0 );
+			float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
+			cout << "Disparity Value of detection"<< disp_val <<endl;
+
 			this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,obj_3d);
 //			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
 			tf::Point detection(obj_3d.x,obj_3d.y, obj_3d.z);
@@ -332,7 +338,13 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 //			cout << "Added detection to manager" <<endl;
 		}
 
+
 	}
+	Mat_t cmapped;
+	dispn.convertTo(cmapped,CV_8U);
+	cv::ellipse( cmapped, center, cv::Size( 20, 20), 0, 0, 360, 0, 2, 8, 0 );
+	cv::imshow(WINDOWDisparity, cmapped );
+	cv::waitKey(3);
 	tf::Point detection;
 //	cout << "Clearing list" <<endl;
 	detection_list_.clear();
@@ -362,7 +374,7 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 								           << ", Z: " << detection.getZ()
 								           <<", "<< confidence<<", of type: "<< typeString << std::endl;
 		aero_srr_msgs::ObjectLocationMsg msg;
-
+		cv::ellipse( cmapped, Point2d(detection.getX(),detection.getY()), cv::Size( 30, 30), 0, 0, 360, 0, 2, 8, 0 );
 		msg.header.frame_id = camera_point.header.frame_id;
 		msg.header.stamp = ros::Time::now();
 		msg.pose.header.frame_id = camera_point.header.frame_id;
@@ -412,7 +424,7 @@ void ImageConverter::buildMsg(const tf::Point& point, geometry_msgs::PoseStamped
 
 void ImageConverter::computeDisparityCb(const ros::TimerEvent& event)
 {
-	if (gotLeft && gotRight && (left_image.encoding ==right_image.encoding))
+	if (gotLeft && gotRight && (left_image.header.stamp ==right_image.header.stamp))
 	{
 		computeDisparity();
 		gotLeft = false;
@@ -471,7 +483,7 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	cascade_WHA.detectMultiScale( frame_gray, WHA_faces, 1.1, 5, 0, cv::Size(52,59), cv::Size(85, 90) ); // works for WHAground !&
 	cascade_PINK.detectMultiScale( frame_gray, PINK_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for PINK !&
 	cascade_WHASUN.detectMultiScale( frame_gray, SUN_faces, 1.1, 20, 0, cv::Size(45, 45), cv::Size(80, 80) ); // works for WHASUN
-	cascade_RQT_BALL.detectMultiScale( frame_gray, RQT_faces, 1.1, 20, 0, cv::Size(48, 46), cv::Size(96, 92) ); // works for
+	cascade_RQT_BALL.detectMultiScale( frame_gray, RQT_faces, 1.1, 15, 0, cv::Size(54, 50), cv::Size(100, 96) ); // works for
 
 	/*
 	 * WHA - White hook object inside detection loop
@@ -584,11 +596,11 @@ void ImageConverter::detectAndDisplay( const sensor_msgs::Image& msg, cv_bridge:
 	}
 //	std::cout << "Finished Searching for Objects"<< std::endl;
 	//-- Show what you got
-	cv::imshow( WINDOWLeft, frame );
+//	cv::imshow( WINDOWLeft, frame );
 
 
 
-	cv::waitKey(3);
+//	cv::waitKey(3);
 
 
 }
