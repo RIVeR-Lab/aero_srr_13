@@ -70,9 +70,10 @@ private:
 	sensor_msgs::CameraInfo right_info;
 	std::string cascade_path_WHA,
 				cascade_path_PINK,
-				cascade_path_WHASUN;
+				cascade_path_WHASUN,
+				cascade_path_RQT_BALL;
 
-	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN;
+	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
