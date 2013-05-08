@@ -23,25 +23,29 @@
 #include <tf/transform_listener.h>
 #include <time.h>
 #include <jaco_driver/finger_position.h>
-
+#include <aero_srr_msgs/AeroState.h>
+#include <aero_srr_msgs/StateTransitionRequest.h>
 
 
 namespace aero_control {
 
 class ArmController {
 public:
-	ArmController(ros::NodeHandle nh, std::string ObjectPose,std::string ArmPose, std::string SetFingerPosition);
-	void ObjectPosition(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
-
+	ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh);
+	void ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
+	void AeroStateMSG(const aero_srr_msgs::AeroState& aero_state);
 private:
 	ros::NodeHandle nh_;
 	ros::Subscriber sub_object_position;
 	ros::Publisher pub_arm_position;
-
 	ros::Publisher pub_set_finger_position;
+	ros::Subscriber aero_state_sub;
+	ros::ServiceClient aero_state_transition_srv_client;
 
 	tf::TransformListener listener;
 
+	bool active_state;
+	uint8_t previous_state;
 
 };
 

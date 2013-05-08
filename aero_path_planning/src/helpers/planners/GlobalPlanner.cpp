@@ -17,28 +17,29 @@
 #include<aero_path_planning/planners/GlobalPlanner.h>
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
 #include<aero_path_planning/OccupancyGridMsg.h>
+#include<aero_srr_msgs/StateTransitionRequest.h>
 //**********************NAMESPACES*****************************//
 
 
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::CarrotPathFinder& path_planner):
-																				state_(MANUAL),
-																				path_planner_(&path_planner),
-																				path_threshold_(1.0),
-																				nh_(nh),
-																				p_nh_(p_nh),
-																				transformer_(nh)
+																						path_planner_(&path_planner),
+																						path_threshold_(1.0),
+																						nh_(nh),
+																						p_nh_(p_nh),
+																						transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
-
+	this->state_.state = aero_srr_msgs::AeroState::SEARCH;
 	this->loadOccupancyParam();
 	this->registerTopics();
 	this->registerTimers();
+	//this->setManual(true);
 	this->buildGlobalMap();
 	ROS_INFO_STREAM("Building Test Mission Goals...");
 	geometry_msgs::Pose pose1;
-	pose1.position.x = 10;
+	pose1.position.x = 5;
 	pose1.position.y = 0;
 	pose1.orientation.w = 1;
 	this->mission_goals_.push_back(pose1);
@@ -224,6 +225,9 @@ void GlobalPlanner::registerTopics()
 	this->goal_pub_      = this->nh_.advertise<geometry_msgs::PoseStamped>("/aero/global/goal", 2, true);
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
 	//this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
+	this->state_sub      = this->nh_.subscribe("/aero/supervisor/state", 1, &GlobalPlanner::stateCB, this);
+
+	this->state_client_  = this->nh_.serviceClient<aero_srr_msgs::StateTransitionRequest>("/aero/supervisor/state_transition_request");
 }
 
 void GlobalPlanner::registerTimers()
@@ -348,6 +352,29 @@ void GlobalPlanner::goalCB(const ros::TimerEvent& event)
 			{
 				this->mission_goals_.pop_front();
 			}
+			else
+			{
+				//Hack for video
+				if(this->state_.state == aero_srr_msgs::AeroState::SEARCH)
+				{
+					aero_srr_msgs::StateTransitionRequest request;
+					aero_srr_msgs::AeroState state;
+					state.state = aero_srr_msgs::AeroState::NAVOBJ;
+					request.request.requested_state = state;
+					this->state_client_.call(request);
+					ROS_INFO_STREAM("Requested a Transition to NAVOBJ, got response:"<<request.response.success<<","<<request.response.error_message);
+				}
+				if(this->state_.state != aero_srr_msgs::AeroState::NAVOBJ)
+				{
+					aero_srr_msgs::StateTransitionRequest request;
+					aero_srr_msgs::AeroState state;
+					state.state = aero_srr_msgs::AeroState::COLLECT;
+					request.request.requested_state = state;
+					this->state_client_.call(request);
+					ROS_INFO_STREAM("Requested a Transition to COLLECT, got response:"<<request.response.success<<","<<request.response.error_message);
+				}
+				//End hack
+			}
 		}
 
 		this->global_map_->getConverter().convertToGrid(current_point, this->current_point_);
@@ -421,6 +448,40 @@ void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 	this->global_map_->setPointTrait(*message);
 }
 
+
+void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
+{
+	typedef aero_srr_msgs::AeroState state_t;
+	this->state_ = *message;
+	geometry_msgs::Pose pose1;
+	switch(message->state)
+	{
+	case state_t::ERROR:
+	case state_t::MANUAL:
+	case state_t::PAUSE:
+	case state_t::SAFESTOP:
+	case state_t::SHUTDOWN:
+	case state_t::COLLECT:
+		//Hack for video
+		pose1.position.x = 0;
+		pose1.position.y = 0;
+		pose1.orientation.w = 1;
+		this->mission_goals_.push_back(pose1);
+		//End hack
+		this->setManual(true);
+		break;
+	case state_t::SEARCH:
+		this->setSearch();
+		break;
+	case state_t::NAVOBJ:
+		this->setNavObj();
+		break;
+	default:
+		ROS_ERROR_STREAM("Received Unkown State: "<<*message);
+		break;
+	}
+}
+
 void GlobalPlanner::updateGoal() const
 {
 	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
@@ -440,7 +501,7 @@ void GlobalPlanner::updateGoal() const
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
-	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
+	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_.state);
 	if(!this->mission_goals_.empty())
 	{
 		Point goal_point;
@@ -451,7 +512,7 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 		{
 			std::deque<Point> temp_path;
 			this->path_planner_->setCollision(this->cf_);
-			this->path_planner_->setCarrotDelta(5.0/this->global_res_);
+			this->path_planner_->setCarrotDelta(10.0/this->global_res_);
 			this->path_planner_->setSearchMap(*this->global_map_);
 			//Need to use a temporary path because carrot_path might be being used by other callbacks in multi-threaded spinner and this will lock it for an extended period
 			this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, temp_path);
@@ -513,3 +574,36 @@ void GlobalPlanner::visualizeMap() const
 {
 
 }
+
+void GlobalPlanner::setManual(bool enable)
+{
+	if(enable)
+	{
+		ROS_INFO_STREAM("Global Planner: I'm in Manual Mode!");
+		this->plan_timer_.stop();
+		this->chunck_timer_.stop();
+		this->goal_timer_.stop();
+	}
+	else
+	{
+		ROS_INFO_STREAM("Global Planner: I'm in Autonomous Mode!");
+		this->plan_timer_.start();
+		this->chunck_timer_.start();
+		this->goal_timer_.start();
+	}
+}
+
+void GlobalPlanner::setSearch()
+{
+	ROS_INFO_STREAM("Global Planner: I'm searching!");
+	//TODO actually implement
+	this->setManual(false);
+}
+
+void GlobalPlanner::setNavObj()
+{
+	ROS_INFO_STREAM("Global Planner: I'm Naving to Obj!");
+	//TODO actually implement
+	this->setManual(false);
+}
+

@@ -6,7 +6,7 @@
  */
 
 /* Headers - ROS*/
-#include <vision_comm/RosBridge.h>
+#include <beacon_detect/RosBridge.h>
 #include <tf/transform_broadcaster.h>
 
 /* Headers April tag */
@@ -122,8 +122,21 @@ int main(int argc, char **argv)
 	/* Start the camera video from the camera topic */
 
 	RosBridge roscamera(topic.c_str(),frame);				//initialize it with the topic and the name of the frame
+	Mat K;
+	int fail=0;
+	ros::Rate timeout(5);
+	while(!K.empty())
+	{
+		ros::spinOnce();
+		K=roscamera.intrinsic();							//The camera instrincis parameters
 
-	Mat K=roscamera.intrinsic();							//The camera instrincis parameters
+		if(fail++>10)
+		{
+			break;
+		}
+		timeout.sleep();
+
+	}
 	if(!K.empty())
 	{
 			fx=double(K.at<float>(0,0));
@@ -151,21 +164,38 @@ int main(int argc, char **argv)
 	ROS_DEBUG("Tag prefix: %s", tag_frame.c_str());
 
 	/* Start Processing */
-	frame=roscamera.getNextFrame();							//get new data
-	ros::Rate loop(10);										//rate of processing, can be changed, mayebe a param??
+	//cout<<"WORKS HERE!"<<endl;
+	//frame=roscamera.getNextFrame();							//get new data
+
+	ros::Rate loop(5);										//rate of processing, can be changed, mayebe a param??
 
 	while(ros::ok())										//loop till ROS dies
 	{
+		frame=roscamera.getNextFrame();
+
+
+
 		//check if you are in HOME state
-		if(!g_active)
-		{
-			ros::spinOnce();
-		}
-		roscamera.startTime();								//to track processing time
+//		if(!g_active)
+//		{
+//			ros::spinOnce();
+//		}
+//		roscamera.startTime();								//to track processing time
+//
 
 		if(frame!=NULL)
 		{
-			cv::cvtColor(*frame, gray, CV_BGR2GRAY);		//convert the color Image to gray image
+			cout<<"recieved a frame"<<endl;
+			Mat ycrcb;
+
+			cvtColor(*frame,ycrcb,CV_BGR2YCrCb);
+	        vector<Mat> channels;
+	        split(ycrcb,channels);
+	        equalizeHist(channels[0], channels[0]);
+	        Mat result;
+	        merge(channels,ycrcb);
+	        cvtColor(ycrcb,result,CV_YCrCb2BGR);
+			cv::cvtColor(result, gray, CV_BGR2GRAY);		//convert the color Image to gray image
 			std::vector<AprilTags::TagDetection> detections = tag_detector.extractTags(gray);	//get tags if detected
 
 			ROS_DEBUG("%d tag detected: \n",detections.size());		//DEBUG information
@@ -189,7 +219,7 @@ int main(int argc, char **argv)
 			      //set up the transform rotation
 			      transform.setRotation( tf::Quaternion(final.x(), final.y(), final.z(),final.w()) );
 
-			      ROS_INFO(frameid,"%s%d",tag_frame.c_str(),detections[i].id );		//debug information
+			      sprintf(frameid,"%s%d",tag_frame.c_str(),detections[i].id );		//debug information
 			      //transmit the tf
 			      br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), base_frame.c_str(), frameid));
 
@@ -198,7 +228,8 @@ int main(int argc, char **argv)
 			fps=roscamera.endTime();											//end the time on the clock for processor
 		}
 		ros::spinOnce();									//process the callbacks
-		loop.sleep();
+		waitKey(20);
+//		loop.sleep();
 	}
 	return 0;
 }

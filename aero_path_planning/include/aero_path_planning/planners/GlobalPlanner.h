@@ -18,6 +18,7 @@
 #include<nav_msgs/Path.h>
 #include<nav_msgs/OccupancyGrid.h>
 #include<geometry_msgs/PoseWithCovarianceStamped.h>
+#include <aero_srr_msgs/AeroState.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/utilities/AeroPathPlanning.h>
 #include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
@@ -85,9 +86,22 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Sets the global planner to manual mode
+	 * @brief  Sets/unsets to manual mode
+	 * @param [in] enable true for manual, false for autonomous
 	 */
-	void setManual();
+	void setManual(bool enable);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Sets the GlobalPlanner to search mode
+	 */
+	void setSearch();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Sets the GlobalPLanner to navigate to an object of interest
+	 */
+	void setNavObj();
 
 	/**
 	 * @author Adam Panzica
@@ -118,6 +132,13 @@ private:
 	 * @param event
 	 */
 	void chunckCB(const ros::TimerEvent& event);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Callback for handling changes in robot state
+	 * @param message
+	 */
+	void stateCB(const aero_srr_msgs::AeroStateConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
@@ -188,7 +209,7 @@ private:
 	 */
 	bool reachedNextGoal(const app::Point& worldLocation, const double threshold) const;
 
-	State       state_;
+	aero_srr_msgs::AeroState       state_;
 	app::Point  current_point_;
 
 	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
@@ -236,6 +257,7 @@ private:
 	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state
 	ros::Subscriber       slam_sub_;      ///Subscriber to nav_msgs::OccupancyGrid messages from SLAM
+	ros::ServiceClient    state_client_;  ///Client to request state transitions
 	ros::Timer            chunck_timer_;  ///Timer to chunk global map into local map
 	ros::Timer            plan_timer_;    ///Timer to plan on the global map
 	ros::Timer            goal_timer_;    ///Timer to update the goal point
