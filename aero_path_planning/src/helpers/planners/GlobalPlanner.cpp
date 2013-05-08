@@ -512,7 +512,7 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 		{
 			std::deque<Point> temp_path;
 			this->path_planner_->setCollision(this->cf_);
-			this->path_planner_->setCarrotDelta(5.0/this->global_res_);
+			this->path_planner_->setCarrotDelta(10.0/this->global_res_);
 			this->path_planner_->setSearchMap(*this->global_map_);
 			//Need to use a temporary path because carrot_path might be being used by other callbacks in multi-threaded spinner and this will lock it for an extended period
 			this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, temp_path);
