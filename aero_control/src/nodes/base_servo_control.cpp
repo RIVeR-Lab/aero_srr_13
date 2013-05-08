@@ -25,7 +25,7 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 	std::string WorkspacePosition("WorkspacePosition"); ///String containing the topic name for WorkspacePosition
 	std::string BaseVelocity("aero/manual_twist_topic"); ///String containing the topic name for BaseVelocity
 	std::string AeroState("aero/supervisor/state"); ///String containing the topic name for AeroState
-	std::string AeroStateTransition("aero/supervisor/control_mode"); ///String containing the topic name for AeroStateTransition
+	std::string AeroStateTransition("aero/supervisor/state_transition_request"); ///String containing the topic name for AeroStateTransition
 
 	//Grab the topic parameters, print warnings if using default values
 	if (!param_nh.getParam(DesiredPosition, DesiredPosition))

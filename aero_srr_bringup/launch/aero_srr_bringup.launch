@@ -40,6 +40,9 @@
     <arg name="output_topic" value="$(arg odom_topic_ekf)" />
   </include>
 
+  <include file="$(find aero_srr_bringup)/launch/aero_srr_supervisor.launch">
+  </include>
+
   <include file="$(find aero_control)/launch/aero_base_servo.launch"/>
   
 </launch>
