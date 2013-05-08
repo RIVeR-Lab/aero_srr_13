@@ -501,7 +501,7 @@ void GlobalPlanner::updateGoal() const
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
-	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
+	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_.state);
 	if(!this->mission_goals_.empty())
 	{
 		Point goal_point;
