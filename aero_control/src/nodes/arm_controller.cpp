@@ -216,6 +216,13 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 						object->pose.header.stamp, ros::Duration(1.0));
 				listener.transformPose("arm_base", object->pose, arm_pose);
 
+
+				arm_pose.pose.orientation.x = 0.717179;
+				arm_pose.pose.orientation.y = 0.02939;
+				arm_pose.pose.orientation.z = 0.11574;
+				arm_pose.pose.orientation.w = -0.6865;
+
+
 		for (int x = 0; x < 20; x++) {
 			arm_pose.header.stamp = ros::Time().now();
 
