@@ -114,16 +114,23 @@ BaseServoController::~BaseServoController() {
 }
 
 void BaseServoController::BaseServoStart(void) {
+
+	ROS_INFO("STARTING LOOP");
 	if (this->active_state == true) {
 		if (error_update_timer_flag == false) {
 			this->error_update_timer.start();
 			this->error_update_timer_flag = true;
 			this->PID_start_time = ros::Time().now();
+			ROS_INFO("STARTING LOOP For Real");
+
 		}
 	}
 }
 
 void BaseServoController::BaseServoStop(void) {
+
+	ROS_INFO("STOPPING LOOP");
+
 	this->error_update_timer.stop();
 	error_update_timer_flag = false;
 	geometry_msgs::Twist base_velocity_msg;
@@ -182,6 +189,10 @@ void BaseServoController::DesiredPositionMSG(
 		tf_listener.transformPose("/world", *object_pose, this->desired_pose);
 
 		last_position_time = ros::Time().now();
+
+		ROS_INFO_STREAM(desired_pose);
+
+
 		BaseServoStart();
 	} catch (std::exception& e) {
 		ROS_ERROR_STREAM_THROTTLE(1, e.what());
@@ -239,8 +250,13 @@ void BaseServoController::UpdateError(void) {
 		pos_err.x_err = desired_error_pose.pose.position.x - workspace_error_pose.pose.position.x;
 		pos_err.y_err = desired_error_pose.pose.position.y - workspace_error_pose.pose.position.y;
 
+		ROS_INFO("X_Err = %f, Y_Err = %f",pos_err.x_err,pos_err.y_err);
+
 		if (pos_err.x_err < ErrorRange() && pos_err.y_err < ErrorRange()) {
+
+			ROS_INFO("In Range");
 			if (ros::Time().now().toSec() - in_range_time.toSec() > 1) {
+				ROS_INFO("Moving on");
 
 				aero_srr_msgs::StateTransitionRequest state_transition;
 
@@ -282,11 +298,17 @@ void BaseServoController::UpdatePID(void) {
 		rotational_vel = -MaxAngularVel();
 	}
 
+
+
 	geometry_msgs::Twist base_velocity_msg;
+
+	ROS_INFO("Forward Vel = %f, Rotational Vel = %f",forward_vel,rotational_vel);
 
 	base_velocity_msg.linear.x = forward_vel;
 
 	base_velocity_msg.angular.z = rotational_vel;
+
+
 
 	base_velocity_pub.publish(base_velocity_msg);
 
