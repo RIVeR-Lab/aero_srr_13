@@ -244,9 +244,9 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 
 			}
 
-			obj_pose.pose.position.x = 0.14648;
+			obj_pose.pose.position.x = 0.25;
 
-			obj_pose.pose.position.y = -0.47118;
+			obj_pose.pose.position.y = -0.41;
 			obj_pose.pose.position.z = 0.2312;
 
 			obj_pose.pose.orientation.x = 0.717179;
