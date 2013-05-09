@@ -72,7 +72,7 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
 void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgConstPtr& object) {
 
-	if (active_state == true) {
+	//if (active_state == true) {
 //		tf::Matrix3x3 grasp_rpy;
 //		tf::Quaternion grasp_quaternion;
 //
@@ -279,7 +279,7 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 		aero_state_transition_srv_client.call(state_transition);
 		this->active_state = false;
 
-	}
+	//}
 }
 
 void ArmController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_state) {
