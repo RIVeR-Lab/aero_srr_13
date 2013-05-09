@@ -42,7 +42,7 @@ void TimerCallback(const ros::TimerEvent&) {
 	q.setRPY(rx_pos, ry_pos, rz_pos);
 
 	tf::quaternionTFToMsg(q, test_msg.pose.pose.orientation);
-	test_msg.header.frame_id = "/arm_base";
+	test_msg.header.frame_id = "/world";
 	test_msg.pose.header.frame_id = test_msg.header.frame_id;
 	test_msg.header.stamp = ros::Time::now();
 	test_msg.pose.header.stamp = ros::Time::now();
