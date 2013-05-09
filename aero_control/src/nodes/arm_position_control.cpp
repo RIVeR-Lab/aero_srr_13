@@ -530,7 +530,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for goal position
+	std::string DesiredPosition("DesiredARMPosition"); ///String containing the topic name for goal position
 	std::string JointVelocity("CartesianVelocity"); ///String containing the topic name for JointVelocity
 	std::string JointAngles("JointAngles"); ///String containing the topic name for JointAngles
 	std::string CurrentPosition("ToolPosition"); ///String containing the topic name for CurrentPosition

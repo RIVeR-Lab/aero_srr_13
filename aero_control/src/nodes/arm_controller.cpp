@@ -21,7 +21,7 @@ using namespace aero_control;
 
 ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
-	std::string ArmPose("DesiredPosition"); ///String containing the topic name for arm position
+	std::string ArmPose("DesiredARMPosition"); ///String containing the topic name for arm position
 	std::string ObjectPose("ObjectPose"); ///String containing the topic name for object position
 	std::string SetFingerPosition("SetFingerPosition"); ///String containing the topic name for SetFingerPosition
 	std::string AeroState("aero/supervisor/state"); ///String containing the topic name for AeroState
@@ -75,11 +75,10 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 
 	if (active_state == true) {
 
-	try {
-		listener.waitForTransform("/arm_base", object->pose.header.frame_id,
-				object->pose.header.stamp, ros::Duration(1.0));
-		listener.transformPose("/arm_base", object->pose, obj_pose);
-
+		try {
+			listener.waitForTransform("/arm_base", object->pose.header.frame_id,
+					object->pose.header.stamp, ros::Duration(1.0));
+			listener.transformPose("/arm_base", object->pose, obj_pose);
 
 //		tf::Matrix3x3 grasp_rpy;
 //		tf::Quaternion grasp_quaternion;
@@ -166,161 +165,161 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 //			ros::Duration(0.5).sleep();
 //		}
 
-	jaco_driver::finger_position fingers;
+			jaco_driver::finger_position fingers;
 
-	geometry_msgs::PoseStamped arm_pose;
+			geometry_msgs::PoseStamped arm_pose;
 
-	arm_pose.pose.position.x = 0.14648;
+			arm_pose.pose.position.x = 0.14648;
 
-	arm_pose.pose.position.y = -0.47118;
-	arm_pose.pose.position.z = 0.2312;
+			arm_pose.pose.position.y = -0.47118;
+			arm_pose.pose.position.z = 0.2312;
 
-	arm_pose.pose.orientation.x = 0.717179;
-	arm_pose.pose.orientation.y = 0.02939;
-	arm_pose.pose.orientation.z = 0.11574;
-	arm_pose.pose.orientation.w = -0.6865;
+			arm_pose.pose.orientation.x = 0.717179;
+			arm_pose.pose.orientation.y = 0.02939;
+			arm_pose.pose.orientation.z = 0.11574;
+			arm_pose.pose.orientation.w = -0.6865;
 
-	arm_pose.header.frame_id = "/jaco_api_origin";
-	arm_pose.header.stamp = ros::Time().now();
-
-	for (int x = 0; x < 20; x++) {
-		arm_pose.header.stamp = ros::Time().now();
-
-		pub_arm_position.publish(arm_pose);
-		ros::Duration(0.5).sleep();
-
-	}
-	ROS_INFO("fingers");
-
-	fingers.Finger_1 = 0;
-	fingers.Finger_2 = 0;
-	fingers.Finger_3 = 0;
-	pub_set_finger_position.publish(fingers);
-
-	ros::Duration(5).sleep();
-	arm_pose.pose.position.x = 0.14648;
-
-	arm_pose.pose.position.y = -0.47118;
-	arm_pose.pose.position.z = -0.1;
-
-	arm_pose.pose.orientation.x = 0.717179;
-	arm_pose.pose.orientation.y = 0.02939;
-	arm_pose.pose.orientation.z = 0.11574;
-	arm_pose.pose.orientation.w = -0.6865;
-
-	arm_pose.header.frame_id = "/jaco_api_origin";
-	arm_pose.header.stamp = ros::Time().now();
-
-	for (int x = 0; x < 20; x++) {
-		arm_pose.header.stamp = ros::Time().now();
-
-		pub_arm_position.publish(arm_pose);
-		ros::Duration(0.5).sleep();
-
-	}
-	obj_pose.header.stamp = ros::Time().now();
-
-	obj_pose.pose.orientation.x = 0.717179;
-	obj_pose.pose.orientation.y = 0.02939;
-	obj_pose.pose.orientation.z = 0.11574;
-	obj_pose.pose.orientation.w = -0.6865;
-for (int x = 0; x < 20; x++) {
+			arm_pose.header.frame_id = "/jaco_api_origin";
 			arm_pose.header.stamp = ros::Time().now();
 
-			pub_arm_position.publish(obj_pose);
-			ros::Duration(0.5).sleep();
+			for (int x = 0; x < 20; x++) {
+				arm_pose.header.stamp = ros::Time().now();
 
-		}
+				pub_arm_position.publish(arm_pose);
+				ros::Duration(0.5).sleep();
 
-		ROS_INFO("fingers");
+			}
+			ROS_INFO("fingers");
 
-fingers.Finger_1 = 54;
-fingers.Finger_2 = 54;
-fingers.Finger_3 = 54;
-pub_set_finger_position.publish(fingers);
+			fingers.Finger_1 = 0;
+			fingers.Finger_2 = 0;
+			fingers.Finger_3 = 0;
+			pub_set_finger_position.publish(fingers);
 
-ros::Duration(5).sleep();
+			ros::Duration(5).sleep();
+			arm_pose.pose.position.x = 0.14648;
 
-obj_pose.pose.position.z = 0.2312;
+			arm_pose.pose.position.y = -0.47118;
+			arm_pose.pose.position.z = -0.1;
 
-for (int x = 0; x < 20; x++) {
-	obj_pose.header.stamp = ros::Time().now();
+			arm_pose.pose.orientation.x = 0.717179;
+			arm_pose.pose.orientation.y = 0.02939;
+			arm_pose.pose.orientation.z = 0.11574;
+			arm_pose.pose.orientation.w = -0.6865;
 
-	pub_arm_position.publish(obj_pose);
-	ros::Duration(0.5).sleep();
+			arm_pose.header.frame_id = "/jaco_api_origin";
+			arm_pose.header.stamp = ros::Time().now();
 
-}
+			for (int x = 0; x < 20; x++) {
+				arm_pose.header.stamp = ros::Time().now();
 
-obj_pose.pose.position.x = 0.14648;
+				pub_arm_position.publish(arm_pose);
+				ros::Duration(0.5).sleep();
 
-obj_pose.pose.position.y = -0.47118;
-obj_pose.pose.position.z = 0.2312;
+			}
+			obj_pose.header.stamp = ros::Time().now();
 
-obj_pose.pose.orientation.x = 0.717179;
-obj_pose.pose.orientation.y = 0.02939;
-obj_pose.pose.orientation.z = 0.11574;
-obj_pose.pose.orientation.w = -0.6865;
+			obj_pose.pose.orientation.x = 0.717179;
+			obj_pose.pose.orientation.y = 0.02939;
+			obj_pose.pose.orientation.z = 0.11574;
+			obj_pose.pose.orientation.w = -0.6865;
+			for (int x = 0; x < 20; x++) {
+				arm_pose.header.stamp = ros::Time().now();
 
-obj_pose.header.frame_id = "/jaco_api_origin";
-obj_pose.header.stamp = ros::Time().now();
+				pub_arm_position.publish(obj_pose);
+				ros::Duration(0.5).sleep();
 
-for (int x = 0; x < 20; x++) {
-	arm_pose.header.stamp = ros::Time().now();
+			}
 
-	pub_arm_position.publish(obj_pose);
-	ros::Duration(0.5).sleep();
+			ROS_INFO("fingers");
 
-}
-aero_srr_msgs::StateTransitionRequest state_transition;
+			fingers.Finger_1 = 54;
+			fingers.Finger_2 = 54;
+			fingers.Finger_3 = 54;
+			pub_set_finger_position.publish(fingers);
 
-state_transition.request.requested_state.state = previous_state;
-state_transition.request.requested_state.header.stamp = ros::Time().now();
-aero_state_transition_srv_client.call(state_transition);
-this->active_state = false;
+			ros::Duration(5).sleep();
 
-	} catch (std::exception& e) {
+			obj_pose.pose.position.z = 0.2312;
+
+			for (int x = 0; x < 20; x++) {
+				obj_pose.header.stamp = ros::Time().now();
+
+				pub_arm_position.publish(obj_pose);
+				ros::Duration(0.5).sleep();
+
+			}
+
+			obj_pose.pose.position.x = 0.14648;
+
+			obj_pose.pose.position.y = -0.47118;
+			obj_pose.pose.position.z = 0.2312;
+
+			obj_pose.pose.orientation.x = 0.717179;
+			obj_pose.pose.orientation.y = 0.02939;
+			obj_pose.pose.orientation.z = 0.11574;
+			obj_pose.pose.orientation.w = -0.6865;
+
+			obj_pose.header.frame_id = "/jaco_api_origin";
+			obj_pose.header.stamp = ros::Time().now();
+
+			for (int x = 0; x < 20; x++) {
+				arm_pose.header.stamp = ros::Time().now();
+
+				pub_arm_position.publish(obj_pose);
+				ros::Duration(0.5).sleep();
+
+			}
+			aero_srr_msgs::StateTransitionRequest state_transition;
+
+			state_transition.request.requested_state.state = previous_state;
+			state_transition.request.requested_state.header.stamp = ros::Time().now();
+			aero_state_transition_srv_client.call(state_transition);
+			this->active_state = false;
+
+		} catch (std::exception& e) {
 			ROS_ERROR_STREAM_THROTTLE(1, e.what());
 		}
 
-}
+	}
 }
 
 void ArmController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_state) {
 
-switch (aero_state.state) {
+	switch (aero_state.state) {
 
-case aero_srr_msgs::AeroState::PICKUP:
-	this->active_state = true;
-	break;
-case aero_srr_msgs::AeroState::COLLECT:
-	this->active_state = false;
-	break;
-case aero_srr_msgs::AeroState::SHUTDOWN:
-	this->active_state = false;
-	ros::shutdown();
-	break;
-case aero_srr_msgs::AeroState::PAUSE:
-	this->active_state = false;
-	break;
-case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
-default:
-	this->active_state = false;
-	previous_state = aero_state.state;
+	case aero_srr_msgs::AeroState::PICKUP:
+		this->active_state = true;
+		break;
+	case aero_srr_msgs::AeroState::COLLECT:
+		this->active_state = false;
+		break;
+	case aero_srr_msgs::AeroState::SHUTDOWN:
+		this->active_state = false;
+		ros::shutdown();
+		break;
+	case aero_srr_msgs::AeroState::PAUSE:
+		this->active_state = false;
+		break;
+	case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
+	default:
+		this->active_state = false;
+		previous_state = aero_state.state;
 
-	break;
-}
+		break;
+	}
 }
 
 int main(int argc, char **argv) {
 
-/* Set up ROS */
-ros::init(argc, argv, "arm_controller");
-ros::NodeHandle nh;
-ros::NodeHandle param_nh("~");
+	/* Set up ROS */
+	ros::init(argc, argv, "arm_controller");
+	ros::NodeHandle nh;
+	ros::NodeHandle param_nh("~");
 
 //create the arm object
-ArmController arm(nh, param_nh);
+	ArmController arm(nh, param_nh);
 
-ros::spin();
+	ros::spin();
 }
 
