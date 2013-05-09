@@ -43,8 +43,8 @@ ImageConverter::ImageConverter()
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("points2",1);
 
-	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
@@ -172,11 +172,11 @@ inline bool isValidPoint(const cv::Vec3f& pt)
 }
 void ImageConverter::computeDisparity()
 {
-//	processImage(left_image, mat_left, WINDOWLeft);
-//	processImage(right_image, mat_right, WINDOWRight);
+	processImage(left_image, mat_left, WINDOWLeft);
+	processImage(right_image, mat_right, WINDOWRight);
 //	ROS_INFO_STREAM("Finished acquiring images");
-//	Mat_t leftRect, img1_rect;
-//	Mat_t rightRect,img2_rect;
+	Mat_t leftRect;
+	Mat_t rightRect;
 //	leftRect  =  imread("/home/srr/ObjectDetectionData/Tskuba/ALeft.jpg", CV_LOAD_IMAGE_COLOR);
 //	rightRect  = imread("/home/srr/ObjectDetectionData/Tskuba/ARight.jpg", CV_LOAD_IMAGE_COLOR);
 //	Mat_t img1_rect(leftRect.rows,leftRect.cols,CV_8U);
@@ -255,12 +255,15 @@ this->stereo_model.fromCameraInfo(this->left_info, this->right_info);
 	remap(right_gray,img2_rect,mx2, my2,cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
  **/
 #endif
-const cv::Mat_<uint8_t> img1_rect(left_image.height, left_image.width,
-                                 const_cast<uint8_t*>(&left_image.data[0]),
-                                 left_image.step);
- const cv::Mat_<uint8_t> img2_rect(right_image.height, right_image.width,
-                                 const_cast<uint8_t*>(&right_image.data[0]),
-                                 right_image.step);
+cvtColor(mat_left->image,leftRect,CV_BGR2GRAY);
+cvtColor(mat_right->image,rightRect,CV_BGR2GRAY);
+
+const cv::Mat_<uint8_t> img1_rect(leftRect.rows, leftRect.cols,
+                                 const_cast<uint8_t*>(&leftRect.data[0]),
+                                 rightRect.step);
+ const cv::Mat_<uint8_t> img2_rect(rightRect.rows, rightRect.cols,
+                                 const_cast<uint8_t*>(&rightRect.data[0]),
+                                 rightRect.step);
 // cv::Mat_<float> disp_image(disp_msg->image.height, disp_msg->image.width,
 //                            reinterpret_cast<float*>(&disp_msg->image.data[0]),
 //                            disp_msg->image.step);
@@ -273,13 +276,13 @@ const cv::Mat_<uint8_t> img1_rect(left_image.height, left_image.width,
 	Mat_t disp;
 
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 208;       //80        //256+80;
-	int SADSize = 9;				//10
+	int numDisp = 176;       //80        //256+80;
+	int SADSize = 21;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
 	int disp12MaxDiff =  -1	; // 1;
 	int preFilterCap =   31; //  2;
-	int uniqueness = 5;
+	int uniqueness = 15;
 	int specSize =   100; //50 //20;   //reduces noise
 	int specRange = 20  ;  //5 //1;
 
@@ -453,14 +456,14 @@ const cv::Mat_<uint8_t> img1_rect(left_image.height, left_image.width,
  	    Point3d center_obj_3d;
 	    float pre_disp_center = disp.at<float>((int)(heightL/2),(int)(widthL/2));
 	this->stereo_model.projectDisparityTo3d(center,pre_disp_center,center_obj_3d);
-	double dispOb = this->stereo_model.getDisparity(1.90515);
-	cout << "Object Disparity should be = "<< dispOb;
+//	double dispOb = this->stereo_model.getDisparity(1.90515);
+//	cout << "Object Disparity should be = "<< dispOb;
 cout <<  "Center"<< endl << " X: "<< center_obj_3d.x << endl << "Y: " << center_obj_3d.y << endl << "Z: " << center_obj_3d.z << endl;
 	    float disp_center = dispn.at<float>((int)(heightL/2),(int)(widthL/2));
 	    ROS_INFO_STREAM("Pre 16 Disparity Value at center = " << pre_disp_center);
-	    ROS_INFO_STREAM("Disparity Value at center = " << disp_center);
-
-
+//	    ROS_INFO_STREAM("Disparity Value at center = " << disp_center);
+	    this->stereo_model.getZ(pre_disp_center);
+	    ROS_INFO_STREAM("Z of disp center = " << pre_disp_center);
 #endif
 	//    cv::erode(disp, disp, NULL, 2);
 	//    cv::dilate(disp, disp, NULL, 2);
