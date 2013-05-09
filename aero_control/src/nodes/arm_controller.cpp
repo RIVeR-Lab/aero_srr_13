@@ -169,9 +169,9 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 
 			geometry_msgs::PoseStamped arm_pose;
 
-			arm_pose.pose.position.x = 0.14648;
+			arm_pose.pose.position.x = 0.13648;
 
-			arm_pose.pose.position.y = -0.47118;
+			arm_pose.pose.position.y = -0.43118;
 			arm_pose.pose.position.z = 0.2312;
 
 			arm_pose.pose.orientation.x = 0.717179;
@@ -197,15 +197,9 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 			pub_set_finger_position.publish(fingers);
 
 			ros::Duration(5).sleep();
-			arm_pose.pose.position.x = 0.14648;
 
-			arm_pose.pose.position.y = -0.47118;
 			arm_pose.pose.position.z = -0.1;
 
-			arm_pose.pose.orientation.x = 0.717179;
-			arm_pose.pose.orientation.y = 0.02939;
-			arm_pose.pose.orientation.z = 0.11574;
-			arm_pose.pose.orientation.w = -0.6865;
 
 			arm_pose.header.frame_id = "/jaco_api_origin";
 			arm_pose.header.stamp = ros::Time().now();
