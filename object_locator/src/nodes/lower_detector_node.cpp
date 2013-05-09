@@ -270,13 +270,14 @@ const cv::Mat_<uint8_t> img1_rect(leftRect.rows, leftRect.cols,
 
 	int heightL = img1_rect.rows;
 	int widthL = img1_rect.cols;
-//	Mat_t disp(  heightL, widthL, CV_16S );
+	Mat_t disp(  heightL, widthL, CV_16S );
 //	Mat_t vdisp( heightL, widthL, CV_32FC1 );
+//	Mat_t dispn2( heightL, widthL, CV_32F );
 	Mat_t dispn( heightL, widthL, CV_32F );
-	Mat_t disp;
+//	Mat_t disp;
 
 	int minDisp = 0;      //0         //-128-32;
-	int numDisp = 176;       //80        //256+80;
+	int numDisp = 192;       //80        //256+80;
 	int SADSize = 21;				//10
 	int P1 =  8*SADSize*SADSize;
 	int P2 = 32*SADSize*SADSize;
@@ -284,7 +285,7 @@ const cv::Mat_<uint8_t> img1_rect(leftRect.rows, leftRect.cols,
 	int preFilterCap =   31; //  2;
 	int uniqueness = 15;
 	int specSize =   100; //50 //20;   //reduces noise
-	int specRange = 20  ;  //5 //1;
+	int specRange = 4  ;  //5 //1;
 
 #ifdef CUDA_ENABLED
 
@@ -307,7 +308,7 @@ const cv::Mat_<uint8_t> img1_rect(leftRect.rows, leftRect.cols,
 	stereoBM.state->textureThreshold = 10;
 	stereoBM.state->speckleWindowSize = specSize;
 	stereoBM.state->speckleRange = specRange;
-
+	stereoBM.state->preFilterSize = 9;
 		stereoBM(img1_rect, img2_rect, disp, CV_32F);
 
 
@@ -460,10 +461,10 @@ const cv::Mat_<uint8_t> img1_rect(leftRect.rows, leftRect.cols,
 //	cout << "Object Disparity should be = "<< dispOb;
 cout <<  "Center"<< endl << " X: "<< center_obj_3d.x << endl << "Y: " << center_obj_3d.y << endl << "Z: " << center_obj_3d.z << endl;
 	    float disp_center = dispn.at<float>((int)(heightL/2),(int)(widthL/2));
-	    ROS_INFO_STREAM("Pre 16 Disparity Value at center = " << pre_disp_center);
+//	    ROS_INFO_STREAM("Pre 16 Disparity Value at center = " << pre_disp_center);
 //	    ROS_INFO_STREAM("Disparity Value at center = " << disp_center);
 	    this->stereo_model.getZ(pre_disp_center);
-	    ROS_INFO_STREAM("Z of disp center = " << pre_disp_center);
+//	    ROS_INFO_STREAM("Z of disp center = " << pre_disp_center);
 #endif
 	//    cv::erode(disp, disp, NULL, 2);
 	//    cv::dilate(disp, disp, NULL, 2);
@@ -496,17 +497,16 @@ cout <<  "Center"<< endl << " X: "<< center_obj_3d.x << endl << "Y: " << center_
 		{
 //			cout << "Getting Disparity" <<endl;
 	//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
-			short int disp_val = disp.at<short int>(obj_centroid.y,obj_centroid.x);
+			float disp_val = nNdisp(obj_centroid,disp);
 //cout << "Pre Disparity Value of detection "<< disp_val <<endl;			
 //cout << "Disparity Value of detection "<< disp_val <<endl;
-			
 			this->stereo_model.projectDisparityTo3d(obj_centroid,disp_val,obj_3d);
-//			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
+			cout << "Disp: "<< disp_val << endl << "X: "<< obj_3d.x << endl << "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
 			tf::Point detection(obj_3d.x,obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
-			camera_point.header.frame_id = "/stereo_bottom/center";
+			camera_point.header.frame_id = "/lower_stereo_optical_frame";
 			camera_point.header.stamp = tZero;
 			world_point.header.frame_id = "/world";
 			world_point.header.stamp = tZero;
@@ -562,7 +562,7 @@ cout <<  "Center"<< endl << " X: "<< center_obj_3d.x << endl << "Y: " << center_
 	Mat_t cmapped;
 	disp.convertTo(cmapped,CV_8U);
 cv::ellipse( cmapped, Point2d(detection.getX(),detection.getY()), cv::Size( 30, 30), 0, 0, 360, 0, 2, 8, 0 );
-	cv::ellipse( cmapped, center, cv::Size( 20, 20), 0, 0, 360, 0, 2, 8, 0 );
+	cv::ellipse( cmapped, center, cv::Size( 20, 20), 0, 0, 360, 255, 2, 8, 0 );
 	cv::imshow(WINDOWDisparity, cmapped );
 	cv::waitKey(3);
 
@@ -575,6 +575,27 @@ cv::ellipse( cmapped, Point2d(detection.getX(),detection.getY()), cv::Size( 30, 
 
 
 }
+
+float ImageConverter::nNdisp(const Point2d& pt, const Mat_t& disp)
+{	
+	int window = 10;
+	int startx = pt.x - window;
+	int starty = pt.y - window;
+	float sum =0.0;
+	for(int i = 0;i<window;i++)
+	{
+		for(int j = 0;j<window;j++)
+		{
+			float value = disp.at<float>(starty+i,startx+j);
+			if(value == -1)
+				value = 0.0;
+			sum = sum + value;
+		}
+	}
+
+	return sum/(float)(window*window);
+}
+
 Mat_t ImageConverter::gray2bgr(Mat_t img)
 {
 	Mat_t BGR( img.rows, img.cols, CV_32FC3 );

@@ -49,6 +49,7 @@ public:
 	void saveImage(const sensor_msgs::Image& msg,cv_bridge::CvImagePtr& cv_ptr, int O);
 	void rectRightCb(const sensor_msgs::ImageConstPtr& msg);
 	void rectLeftCb(const sensor_msgs::ImageConstPtr& msg);
+	float nNdisp(const cv::Point2d& pt, const Mat_t& disp);
 //	void pointCloudCb(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
 	Mat_t gray2bgr(Mat_t img);
