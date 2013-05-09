@@ -282,7 +282,7 @@ this->active_state = false;
 			ROS_ERROR_STREAM_THROTTLE(1, e.what());
 		}
 
-//}
+}
 }
 
 void ArmController::AeroStateMSG(const aero_srr_msgs::AeroState& aero_state) {
