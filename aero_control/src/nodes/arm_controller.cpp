@@ -21,7 +21,7 @@ using namespace aero_control;
 
 ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
-	std::string ArmPose("ArmPose"); ///String containing the topic name for arm position
+	std::string ArmPose("DesiredPosition"); ///String containing the topic name for arm position
 	std::string ObjectPose("ObjectPose"); ///String containing the topic name for object position
 	std::string SetFingerPosition("SetFingerPosition"); ///String containing the topic name for SetFingerPosition
 	std::string AeroState("aero/supervisor/state"); ///String containing the topic name for AeroState
