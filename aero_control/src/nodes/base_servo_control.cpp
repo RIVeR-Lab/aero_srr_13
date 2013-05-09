@@ -115,7 +115,6 @@ BaseServoController::~BaseServoController() {
 
 void BaseServoController::BaseServoStart(void) {
 
-	ROS_INFO("STARTING LOOP");
 	if (this->active_state == true) {
 		if (error_update_timer_flag == false) {
 			this->error_update_timer.start();
