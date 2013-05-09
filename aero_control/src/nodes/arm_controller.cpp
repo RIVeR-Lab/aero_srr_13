@@ -73,17 +73,13 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgConstPtr& object) {
 	geometry_msgs::PoseStamped obj_pose;
 
-	//if (active_state == true) {
+	if (active_state == true) {
 
 	try {
 		listener.waitForTransform("/arm_base", object->pose.header.frame_id,
 				object->pose.header.stamp, ros::Duration(1.0));
 		listener.transformPose("/arm_base", object->pose, obj_pose);
 
-
-	} catch (std::exception& e) {
-			ROS_ERROR_STREAM_THROTTLE(1, e.what());
-		}
 
 //		tf::Matrix3x3 grasp_rpy;
 //		tf::Quaternion grasp_quaternion;
@@ -281,6 +277,10 @@ state_transition.request.requested_state.state = previous_state;
 state_transition.request.requested_state.header.stamp = ros::Time().now();
 aero_state_transition_srv_client.call(state_transition);
 this->active_state = false;
+
+	} catch (std::exception& e) {
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
 
 //}
 }

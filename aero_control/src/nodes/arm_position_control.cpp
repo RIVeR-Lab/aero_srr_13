@@ -60,6 +60,7 @@ ArmPositionController::~ArmPositionController() {
 void ArmPositionController::CurrentPositionMSG(const geometry_msgs::PoseStampedConstPtr& current_pose) {
 	geometry_msgs::PoseStamped current_pose_api;
 
+try{
 	tf_listener.waitForTransform("/jaco_api_origin", current_pose->header.frame_id, current_pose->header.stamp, ros::Duration(1.0));
 
 	tf_listener.transformPose("/jaco_api_origin", *current_pose, current_pose_api);
@@ -77,10 +78,14 @@ void ArmPositionController::CurrentPositionMSG(const geometry_msgs::PoseStampedC
 	current_rotation.getRPY(current_pos.roll, current_pos.pitch, current_pos.yaw);
 	UpdateError();
 
+} catch (std::exception& e) {
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
+
 }
 void ArmPositionController::DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose) {
 	geometry_msgs::PoseStamped desired_pose_msg;
-
+try{
 	tf_listener.waitForTransform("/jaco_api_origin", object_pose->header.frame_id, object_pose->header.stamp, ros::Duration(0.1));
 	tf_listener.transformPose("/jaco_api_origin", *object_pose, desired_pose_msg);
 
@@ -108,6 +113,10 @@ void ArmPositionController::DesiredPositionMSG(const geometry_msgs::PoseStampedC
 	running = true;
 	last_position_time = ros::Time().now();
 
+} catch (std::exception& e) {
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
+
 }
 
 void ArmPositionController::UpdateCurrentPose(void) {
@@ -116,7 +125,7 @@ void ArmPositionController::UpdateCurrentPose(void) {
 	end_effector_pose.setRotation(tf::Quaternion(0, 0, 0, 1));
 	end_effector_pose.frame_id_ = "/jaco_end_effector";
 	end_effector_pose.stamp_ = ros::Time::now();
-
+try{
 	tf_listener.waitForTransform("/jaco_api_origin", end_effector_pose.frame_id_, end_effector_pose.stamp_, ros::Duration(1.0));
 
 	tf::Stamped<tf::Pose> current_StampPose;
@@ -130,6 +139,10 @@ void ArmPositionController::UpdateCurrentPose(void) {
 	tf::Matrix3x3 current_rotation(current_StampPose.getRotation());
 
 	current_rotation.getRPY(this->current_pos.roll, current_pos.pitch, current_pos.yaw);
+
+} catch (std::exception& e) {
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
 
 }
 
