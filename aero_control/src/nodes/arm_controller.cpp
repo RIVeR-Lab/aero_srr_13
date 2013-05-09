@@ -172,7 +172,7 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 		arm_pose.pose.orientation.z = 0.11574;
 		arm_pose.pose.orientation.w = -0.6865;
 
-		arm_pose.header.frame_id = "/jaco_api";
+		arm_pose.header.frame_id = "/jaco_api_origin";
 		arm_pose.header.stamp = ros::Time().now();
 
 		for (int x = 0; x < 20; x++) {
@@ -200,7 +200,7 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 		arm_pose.pose.orientation.z = 0.11574;
 		arm_pose.pose.orientation.w = -0.6865;
 
-		arm_pose.header.frame_id = "/jaco_api";
+		arm_pose.header.frame_id = "/jaco_api_origin";
 		arm_pose.header.stamp = ros::Time().now();
 
 		for (int x = 0; x < 20; x++) {
@@ -262,7 +262,7 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 								arm_pose.pose.orientation.z = 0.11574;
 								arm_pose.pose.orientation.w = -0.6865;
 
-								arm_pose.header.frame_id = "/jaco_api";
+								arm_pose.header.frame_id = "/jaco_api_origin";
 								arm_pose.header.stamp = ros::Time().now();
 
 								for (int x = 0; x < 20; x++) {
