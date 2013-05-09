@@ -71,8 +71,20 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 }
 
 void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgConstPtr& object) {
+	geometry_msgs::PoseStamped obj_pose;
 
 	//if (active_state == true) {
+
+	try {
+		listener.waitForTransform("arm_base", object->pose.header.frame_id,
+				object->pose.header.stamp, ros::Duration(1.0));
+		listener.transformPose("arm_base", object->pose, obj_pose);
+
+
+	} catch (std::exception& e) {
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		}
+
 //		tf::Matrix3x3 grasp_rpy;
 //		tf::Quaternion grasp_quaternion;
 //
@@ -210,24 +222,16 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 		ros::Duration(0.5).sleep();
 
 	}
-	object->pose.header.stamp = ros::Time().now();
-try {
-	listener.waitForTransform("arm_base", object->pose.header.frame_id,
-			object->pose.header.stamp, ros::Duration(1.0));
-	listener.transformPose("arm_base", object->pose, arm_pose);
+	obj_pose.header.stamp = ros::Time().now();
 
-	arm_pose.pose.orientation.x = 0.717179;
-	arm_pose.pose.orientation.y = 0.02939;
-	arm_pose.pose.orientation.z = 0.11574;
-	arm_pose.pose.orientation.w = -0.6865;
-} catch (std::exception& e) {
-		ROS_ERROR_STREAM_THROTTLE(1, e.what());
-	}
-
+	obj_pose.pose.orientation.x = 0.717179;
+	obj_pose.pose.orientation.y = 0.02939;
+	obj_pose.pose.orientation.z = 0.11574;
+	obj_pose.pose.orientation.w = -0.6865;
 for (int x = 0; x < 20; x++) {
 			arm_pose.header.stamp = ros::Time().now();
 
-			pub_arm_position.publish(arm_pose);
+			pub_arm_position.publish(obj_pose);
 			ros::Duration(0.5).sleep();
 
 		}
@@ -241,33 +245,33 @@ pub_set_finger_position.publish(fingers);
 
 ros::Duration(5).sleep();
 
-arm_pose.pose.position.z = 0.2312;
+obj_pose.pose.position.z = 0.2312;
 
 for (int x = 0; x < 20; x++) {
-	arm_pose.header.stamp = ros::Time().now();
+	obj_pose.header.stamp = ros::Time().now();
 
-	pub_arm_position.publish(arm_pose);
+	pub_arm_position.publish(obj_pose);
 	ros::Duration(0.5).sleep();
 
 }
 
-arm_pose.pose.position.x = 0.14648;
+obj_pose.pose.position.x = 0.14648;
 
-arm_pose.pose.position.y = -0.47118;
-arm_pose.pose.position.z = 0.2312;
+obj_pose.pose.position.y = -0.47118;
+obj_pose.pose.position.z = 0.2312;
 
-arm_pose.pose.orientation.x = 0.717179;
-arm_pose.pose.orientation.y = 0.02939;
-arm_pose.pose.orientation.z = 0.11574;
-arm_pose.pose.orientation.w = -0.6865;
+obj_pose.pose.orientation.x = 0.717179;
+obj_pose.pose.orientation.y = 0.02939;
+obj_pose.pose.orientation.z = 0.11574;
+obj_pose.pose.orientation.w = -0.6865;
 
-arm_pose.header.frame_id = "/jaco_api_origin";
-arm_pose.header.stamp = ros::Time().now();
+obj_pose.header.frame_id = "/jaco_api_origin";
+obj_pose.header.stamp = ros::Time().now();
 
 for (int x = 0; x < 20; x++) {
 	arm_pose.header.stamp = ros::Time().now();
 
-	pub_arm_position.publish(arm_pose);
+	pub_arm_position.publish(obj_pose);
 	ros::Duration(0.5).sleep();
 
 }
