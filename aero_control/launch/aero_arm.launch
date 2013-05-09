@@ -6,7 +6,7 @@
 <node name="aero_arm_controller" pkg="aero_control" type="arm_controller" output="screen">
 
   </node>
-  <node name="aero_arm_velocity_controller" pkg="aero_control" type="arm_velocity_control" output="screen">
+  <node name="aero_arm_position_controller" pkg="aero_control" type="arm_position_control" output="screen">
 
 
   </node>
