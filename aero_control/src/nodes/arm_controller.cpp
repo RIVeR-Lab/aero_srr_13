@@ -76,9 +76,9 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 	//if (active_state == true) {
 
 	try {
-		listener.waitForTransform("arm_base", object->pose.header.frame_id,
+		listener.waitForTransform("/arm_base", object->pose.header.frame_id,
 				object->pose.header.stamp, ros::Duration(1.0));
-		listener.transformPose("arm_base", object->pose, obj_pose);
+		listener.transformPose("/arm_base", object->pose, obj_pose);
 
 
 	} catch (std::exception& e) {
