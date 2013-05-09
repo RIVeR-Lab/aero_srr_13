@@ -168,10 +168,9 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 			jaco_driver::finger_position fingers;
 
 			geometry_msgs::PoseStamped arm_pose;
+			obj_pose.pose.position.x = 0.25;
 
-			arm_pose.pose.position.x = 0.13648;
-
-			arm_pose.pose.position.y = -0.43118;
+					obj_pose.pose.position.y = -0.41;
 			arm_pose.pose.position.z = 0.2312;
 
 			arm_pose.pose.orientation.x = 0.717179;
@@ -244,7 +243,7 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 
 			}
 
-			obj_pose.pose.position.x = 0.25;
+			obj_pose.pose.position.x = 0.3;
 
 			obj_pose.pose.position.y = -0.41;
 			obj_pose.pose.position.z = 0.2312;
