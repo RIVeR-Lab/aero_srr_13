@@ -189,6 +189,8 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 				ros::Duration(0.5).sleep();
 
 			}
+
+			ros::Duration(2).sleep();
 			ROS_INFO("fingers");
 
 			fingers.Finger_1 = 0;
@@ -211,20 +213,22 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 				ros::Duration(0.5).sleep();
 
 			}
-			obj_pose.header.stamp = ros::Time().now();
+			arm_pose.header.stamp = ros::Time().now();
 
-			obj_pose.pose.orientation.x = 0.717179;
-			obj_pose.pose.orientation.y = 0.02939;
-			obj_pose.pose.orientation.z = 0.11574;
-			obj_pose.pose.orientation.w = -0.6865;
+			arm_pose.pose.position.x = 0.35;
+
+			arm_pose.pose.orientation.x = 0.717179;
+			arm_pose.pose.orientation.y = 0.02939;
+			arm_pose.pose.orientation.z = 0.11574;
+			arm_pose.pose.orientation.w = -0.6865;
 			for (int x = 0; x < 20; x++) {
 				arm_pose.header.stamp = ros::Time().now();
 
-				pub_arm_position.publish(obj_pose);
+				pub_arm_position.publish(arm_pose);
 				ros::Duration(0.5).sleep();
 
 			}
-
+			ros::Duration(2).sleep();
 			ROS_INFO("fingers");
 
 			fingers.Finger_1 = 54;
@@ -234,33 +238,33 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 
 			ros::Duration(5).sleep();
 
-			obj_pose.pose.position.z = 0.2312;
-
-			for (int x = 0; x < 20; x++) {
-				obj_pose.header.stamp = ros::Time().now();
-
-				pub_arm_position.publish(obj_pose);
-				ros::Duration(0.5).sleep();
-
-			}
-
-			obj_pose.pose.position.x = 0.3;
-
-			obj_pose.pose.position.y = -0.41;
-			obj_pose.pose.position.z = 0.2312;
-
-			obj_pose.pose.orientation.x = 0.717179;
-			obj_pose.pose.orientation.y = 0.02939;
-			obj_pose.pose.orientation.z = 0.11574;
-			obj_pose.pose.orientation.w = -0.6865;
-
-			obj_pose.header.frame_id = "/jaco_api_origin";
-			obj_pose.header.stamp = ros::Time().now();
+			arm_pose.pose.position.z = 0.2312;
 
 			for (int x = 0; x < 20; x++) {
 				arm_pose.header.stamp = ros::Time().now();
 
-				pub_arm_position.publish(obj_pose);
+				pub_arm_position.publish(arm_pose);
+				ros::Duration(0.5).sleep();
+
+			}
+
+			arm_pose.pose.position.x = 0.3;
+
+			arm_pose.pose.position.y = -0.41;
+			arm_pose.pose.position.z = 0.2312;
+
+			arm_pose.pose.orientation.x = 0.717179;
+			arm_pose.pose.orientation.y = 0.02939;
+			arm_pose.pose.orientation.z = 0.11574;
+			arm_pose.pose.orientation.w = -0.6865;
+
+			arm_pose.header.frame_id = "/jaco_api_origin";
+			arm_pose.header.stamp = ros::Time().now();
+
+			for (int x = 0; x < 20; x++) {
+				arm_pose.header.stamp = ros::Time().now();
+
+				pub_arm_position.publish(arm_pose);
 				ros::Duration(0.5).sleep();
 
 			}
