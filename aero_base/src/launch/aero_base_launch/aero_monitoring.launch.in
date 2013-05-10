@@ -9,7 +9,9 @@
 
     <param name="num_parallel_units" value="2" />
     <param name="num_series_units" value="1" />
-    <param name="cells_per_unit" value="6" />
+    <param name="cells_per_unit" value="8" />
+    <param name="max_cell_voltage" value="3.5" />
+    <param name="max_total_voltage" value="28" />
 
     <param name="frame_id" value="/battery" />
     <param name="battery_topic" value="battery" />
