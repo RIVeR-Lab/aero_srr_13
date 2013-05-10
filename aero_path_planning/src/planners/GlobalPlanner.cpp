@@ -204,18 +204,15 @@ void GlobalPlanner::registerTopics()
 	ROS_INFO_STREAM("Registering Global Topics...");
 	//Comunication Parameters
 	std::string local_planner_topic(OCCUPANCY_TOPIC);
-	std::string odometry_topic(ODOMETRY_TOPIC);
 	std::string lidar_topic(LIDAR_GLOBAL_TOPIC);
 	std::string command_topic("/global_planning/commands");
 
 
 	this->global_laser_topic_    = lidar_topic;
 	this->local_occupancy_topic_ = local_planner_topic;
-	this->odom_topic_            = odometry_topic;
 
 	//Get Private Parameters
 	if(!this->p_nh_.getParam(local_planner_topic,this->local_occupancy_topic_))	PARAM_WARN(local_planner_topic,	local_planner_topic);
-	if(!this->p_nh_.getParam(odometry_topic,	 this->odom_topic_))		    PARAM_WARN(odometry_topic,		odometry_topic);
 	if(!this->p_nh_.getParam(lidar_topic,	     this->global_laser_topic_))    PARAM_WARN(lidar_topic,		    lidar_topic);
 
 	this->local_occ_pub_ = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>(this->local_occupancy_topic_, 2);
@@ -232,7 +229,6 @@ void GlobalPlanner::registerTimers()
 	ROS_INFO_STREAM("Registering Global Timers...");
 	this->chunck_timer_ = this->nh_.createTimer(ros::Duration(this->local_update_rate_),  &GlobalPlanner::chunckCB, this);
 	this->plan_timer_   = this->nh_.createTimer(ros::Duration(this->global_update_rate_), &GlobalPlanner::planCB,   this);
-	this->goal_timer_   = this->nh_.createTimer(ros::Duration(1.0/10.0), &GlobalPlanner::goalCB, this);
 }
 
 void GlobalPlanner::buildGlobalMap()
@@ -317,42 +313,6 @@ bool GlobalPlanner::calcRobotPointWorld(app::Point& point) const
 		success = false;
 	}
 	return success;
-}
-
-bool GlobalPlanner::reachedNextGoal(const app::Point& worldLocation, const double threshold) const
-{
-	app::Point goal_point;
-	this->global_map_->getConverter().convertToEng(this->carrot_path_.front(), goal_point);
-	double dist = pcl::distances::l2(worldLocation.getVector4fMap(), goal_point.getVector4fMap());
-	ROS_INFO_STREAM_THROTTLE(10, "At position <"<<worldLocation.x<<","<<worldLocation.y<<">, Goal Position <"<<goal_point.x<<","<<goal_point.y<<">, dist="<<dist);
-	return dist<threshold;
-}
-
-void GlobalPlanner::goalCB(const ros::TimerEvent& event)
-{
-	app::Point current_point;
-
-	if(this->calcRobotPointWorld(current_point))
-	{
-		if(!this->carrot_path_.empty())
-		{
-			if(this->reachedNextGoal(current_point, 1.25))
-			{
-				this->carrot_path_.pop_front();
-				this->updateGoal();
-			}
-		}
-		else
-		{
-			ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
-			if(!this->mission_goals_.empty())
-			{
-				this->mission_goals_.pop_front();
-			}
-		}
-
-		this->global_map_->getConverter().convertToGrid(current_point, this->current_point_);
-	}
 }
 
 void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
@@ -448,23 +408,6 @@ void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 	}
 }
 
-void GlobalPlanner::updateGoal() const
-{
-	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
-	if(!this->carrot_path_.empty())
-	{
-		Point goal_point;
-		this->global_map_->getConverter().convertToEng(this->carrot_path_.front(), goal_point);
-		geometry_msgs::PoseStamped goal_pose;
-		app::pointToPose(goal_point, goal_pose.pose);
-		goal_pose.header.frame_id    = this->global_frame_;
-		goal_pose.header.stamp       = ros::Time::now();
-		goal_pose.pose.orientation.w = 1;
-		this->goal_pub_.publish(goal_pose);
-	}
-
-}
-
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
@@ -491,7 +434,6 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 			path->header.stamp    = ros::Time::now();
 			this->carrotToPath(*path);
 			this->path_pub_.publish(path);
-			this->updateGoal();
 		}
 		else
 		{
@@ -547,13 +489,11 @@ void GlobalPlanner::setManual(bool enable)
 	{
 		this->plan_timer_.stop();
 		this->chunck_timer_.stop();
-		this->goal_timer_.stop();
 	}
 	else
 	{
 		this->plan_timer_.start();
 		this->chunck_timer_.start();
-		this->goal_timer_.start();
 	}
 }
 

@@ -119,15 +119,6 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Callback for handling Odometry messages
-	 * @param message
-	 *
-	 * This callback handles advancing the CarrotPath
-	 */
-	void odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPtr& message);
-
-	/**
-	 * @author Adam Panzica
 	 * @brief Chunks the global map into a local OccupancyGrid and sends it to the local planner
 	 * @param event
 	 */
@@ -142,22 +133,11 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief Updates the global goal
-	 * @param event
-	 */
-	void goalCB(const ros::TimerEvent& event);
-
-	/**
-	 * @author Adam Panzica
 	 * @brief Sends the global map out for vizualization
 	 */
 	void visualizeMap() const;
 
-	/**
-	 * @author Adam Panzica
-	 * @brief  Publishes the next goal on the carrot path
-	 */
-	void updateGoal() const;
+
 
 	/**
 	 * @author Adam Panzica
@@ -200,21 +180,11 @@ private:
 	 */
 	bool calcRobotPointWorld(app::Point& point) const;
 
-	/**
-	 * @author Adam Panzica
-	 * @brief Calculates if the next goal point in carrot path has been reached
-	 * @param [in] worldLocation The location of the robot in world coodinates (meters, not gird coordinates)
-	 * @param [in] threshold The threshold to consider the goal reached (meters, not grid coordinates)
-	 * @return True if reached, else false
-	 */
-	bool reachedNextGoal(const app::Point& worldLocation, const double threshold) const;
-
 	State       state_;
 	app::Point  current_point_;
 
 	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
 	std::string local_occupancy_topic_; ///Topic name for communicating with the local planner
-	std::string odom_topic_;            ///Topic name for receiving odometry data
 	std::string state_topic_;           ///Topic name for receiving robot state from the supervisor
 
 	std::string global_frame_;			///frame_id of the global scale frame
@@ -248,18 +218,16 @@ private:
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system
 	tf::TransformListener transformer_;   ///Hook into the tf system
-	ros::Subscriber       joy_sub_;       ///Subscriber for joy messages
 	ros::Publisher        local_occ_pub_; ///Publisher to send OccupancyGrids to the local planner
 	ros::Publisher        goal_pub_;      ///Publisher to visualize the global goal
 	ros::Publisher        map_viz_pub_;   ///Publisher to visualizing the global map
 	ros::Publisher        path_pub_;      ///Publisher to visualize the global path
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
-	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state
 	ros::Subscriber       slam_sub_;      ///Subscriber to nav_msgs::OccupancyGrid messages from SLAM
 	ros::Timer            chunck_timer_;  ///Timer to chunk global map into local map
 	ros::Timer            plan_timer_;    ///Timer to plan on the global map
-	ros::Timer            goal_timer_;    ///Timer to update the goal point
+
 	ros::Duration         plan_timerout_; ///Timeout to produce global plans
 };
 

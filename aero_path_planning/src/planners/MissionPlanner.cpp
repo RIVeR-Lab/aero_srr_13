@@ -7,6 +7,8 @@
  */
 
 //*********** SYSTEM DEPENDANCIES ****************//
+#include <boost/foreach.hpp>
+#include <vector>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/planners/MissionPlanner.h>
 //***********    NAMESPACES     ****************//
@@ -78,5 +80,105 @@ void MissionPlanner::drCB(const MissionPlannerConfig& config, uint32_t level)
 		this->path_goal_topic_ = config.path_goal_topic;
 		this->path_goal_pub_.shutdown();
 		this->path_goal_pub_    = this->nh_.advertise<geometry_msgs::PoseStamped>(this->path_goal_topic_, 1, true);
+	}
+}
+
+void MissionPlanner::pathCB(const nav_msgs::PathConstPtr& message)
+{
+	this->carrot_path_.clear();
+	BOOST_FOREACH(std::vector<geometry_msgs::PoseStamped>::value_type pose, message->poses)
+	{
+		this->carrot_path_.push_back(pose);
+	}
+}
+
+bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLocation, const double threshold) const
+{
+	tf::Point world_point;
+	tf::Point goal_point;
+	tf::pointMsgToTF(worldLocation.pose.position, world_point);
+	tf::pointMsgToTF(this->carrot_path_.front().pose.position, goal_point);
+	double dist = world_point.distance(goal_point);
+	ROS_INFO_STREAM_THROTTLE(10, "At position:"<<world_point<<"\nGoal position:"<<goal_point<<"\ndist="<<dist);
+	return dist<threshold;
+}
+
+void MissionPlanner::goalCB(const ros::TimerEvent& event)
+{
+	geometry_msgs::PoseStamped current_point;
+
+	if(this->calcRobotPointWorld(current_point))
+	{
+		if(!this->carrot_path_.empty())
+		{
+			if(this->reachedNextGoal(current_point, 1.25))
+			{
+				this->carrot_path_.pop_front();
+				this->updateGoal();
+			}
+		}
+		else
+		{
+			ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
+			if(!this->mission_goals_.empty())
+			{
+				this->mission_goals_.pop_front();
+			}
+		}
+	}
+}
+
+void MissionPlanner::updateGoal() const
+{
+	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
+	if(!this->carrot_path_.empty())
+	{
+		geometry_msgs::PoseStamped goal_pose(this->carrot_path_.front());
+		goal_pose.header.frame_id    = this->global_frame_;
+		goal_pose.header.stamp       = ros::Time::now();
+		goal_pose.pose.orientation.w = 1;
+		this->path_goal_pub_.publish(goal_pose);
+	}
+
+}
+
+bool MissionPlanner::calcRobotPointWorld(geometry_msgs::PoseStamped& point) const
+{
+	bool success = true;
+	geometry_msgs::PoseStamped robot_pose;
+	robot_pose.header.frame_id    = this->local_frame_;
+	robot_pose.header.stamp       = ros::Time::now();
+	robot_pose.pose.orientation.w = 1;
+
+	//look up the robot's position in the world frame
+	try
+	{
+		this->transformer_.waitForTransform(this->global_frame_, robot_pose.header.frame_id, robot_pose.header.stamp, ros::Duration(0.1));
+		this->transformer_.transformPose(this->global_frame_, robot_pose, point);
+	}
+	catch(std::exception& e)
+	{
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+		success = false;
+	}
+	return success;
+}
+
+void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
+{
+	typedef aero_srr_msgs::AeroState state_t;
+	switch(message->state)
+	{
+//	case state_t::ERROR:
+//	case state_t::MANUAL:
+//	case state_t::PAUSE:
+//	case state_t::SAFESTOP:
+//	case state_t::SHUTDOWN:
+//	case state_t::COLLECT:
+//	case state_t::SEARCH:
+//	case state_t::NAVOBJ:
+//	default:
+//		ROS_ERROR_STREAM("Received Unkown State: "<<*message);
+//		break;
 	}
 }

@@ -94,16 +94,16 @@ private:
 	 * @param [in] point Point to fill with the robot's location (in meters, not grid coordinates)
 	 * @return true if the transform was sucessful, else false
 	 */
-	bool calcRobotPointWorld(app::Point& point) const;
+	bool calcRobotPointWorld(geometry_msgs::PoseStamped& point) const;
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Calculates if the next goal point in carrot path has been reached
-	 * @param [in] worldLocation The location of the robot in world coodinates (meters, not gird coordinates)
+	 * @param [in] worldLocation The location of the robot in world coodinates
 	 * @param [in] threshold The threshold to consider the goal reached (meters, not grid coordinates)
 	 * @return True if reached, else false
 	 */
-	bool reachedNextGoal(const app::Point& worldLocation, const double threshold) const;
+	bool reachedNextGoal(const geometry_msgs::PoseStamped& worldLocation, const double threshold) const;
 
 	std::string state_topic_;           ///Topic name for receiving robot state from the supervisor
 	std::string path_topic_;            ///Topic name for receiving new carrot paths
@@ -128,7 +128,7 @@ private:
 	ros::Publisher        mission_goal_pub_;///Publisher to update the current mission goal used by GlobalPlanner
 	ros::Timer            goal_timer_;      ///Timer to update the goal point
 
-	dynamic_reconfigure::Server dr_server_; ///Server for dynamic_reconfigure requests
+	dynamic_reconfigure::Server<MissionPlannerConfig> dr_server_; ///Server for dynamic_reconfigure requests
 
 public:
 	/**
