@@ -105,6 +105,12 @@ private:
 	 */
 	bool reachedNextGoal(const geometry_msgs::PoseStamped& worldLocation, const double threshold) const;
 
+	/**
+	 * @author Adam Panzica
+	 * @brief Updates the current mission goal
+	 */
+	void updateMissionGoal() const;
+
 	std::string state_topic_;           ///Topic name for receiving robot state from the supervisor
 	std::string path_topic_;            ///Topic name for receiving new carrot paths
 	std::string path_goal_topic_;       ///Topic name to publish to to update the goal used by the local planner

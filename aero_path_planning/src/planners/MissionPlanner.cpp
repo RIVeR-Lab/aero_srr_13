@@ -15,19 +15,23 @@
 
 using namespace aero_path_planning;
 
-#define LOAD_PARAM(nh, param_name, param_store, message_stream) if(!nh.getParam(param_name, param_store)) ROS_WARN_STREAM("Parameter "<<param_name<<" not set, using default value:"<<message_stream)
+#define AERO_PATH_PLANNING_LOAD_PARAM(nh, param_name, param_store, message_stream) if(!nh.getParam(param_name, param_store)) ROS_WARN_STREAM("Parameter "<<param_name<<" not set, using default value:"<<message_stream)
 
 MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
-		nh_(nh),
-		p_nh_(p_nh),
-		transformer_(nh),
-		dr_server_(nh)
+				nh_(nh),
+				p_nh_(p_nh),
+				transformer_(nh),
+				dr_server_(nh)
 {
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
 	this->registerTopics();
 	this->registerTimers();
 	ROS_INFO_STREAM("Mission Planner Running!");
+	geometry_msgs::Pose mission_goal_one;
+	mission_goal_one.position.x = 10.0;
+	mission_goal_one.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal_one);
 }
 
 void MissionPlanner::loadParam()
@@ -39,13 +43,13 @@ void MissionPlanner::loadParam()
 	this->mission_goal_topic_ = "/mission_goal";
 	this->path_goal_topic_    = "/path_goal";
 	this->path_threshold_     = 1.0;
-	LOAD_PARAM(this->p_nh_, "local_frame", this->local_frame_, this->local_frame_);
-	LOAD_PARAM(this->p_nh_, "global_frame", this->global_frame_, this->global_frame_);
-	LOAD_PARAM(this->p_nh_, "state_topic", this->state_topic_, this->state_topic_);
-	LOAD_PARAM(this->p_nh_, "path_topic", this->path_topic_, this->path_topic_);
-	LOAD_PARAM(this->p_nh_, "path_threshold", this->path_threshold_, this->path_threshold_<<"m");
-	LOAD_PARAM(this->p_nh_, "mission_goal_topic", this->mission_goal_topic_, this->mission_goal_topic_);
-	LOAD_PARAM(this->p_nh_, "path_goal_topic", this->path_goal_topic_, this->path_goal_topic_);
+	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "local_frame", this->local_frame_, this->local_frame_);
+	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "global_frame", this->global_frame_, this->global_frame_);
+	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "state_topic", this->state_topic_, this->state_topic_);
+	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "path_topic", this->path_topic_, this->path_topic_);
+	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "path_threshold", this->path_threshold_, this->path_threshold_<<"m");
+	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "mission_goal_topic", this->mission_goal_topic_, this->mission_goal_topic_);
+	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "path_goal_topic", this->path_goal_topic_, this->path_goal_topic_);
 
 }
 
@@ -123,6 +127,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			if(!this->mission_goals_.empty())
 			{
 				this->mission_goals_.pop_front();
+				this->updateMissionGoal();
 			}
 		}
 	}
@@ -169,16 +174,28 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 	typedef aero_srr_msgs::AeroState state_t;
 	switch(message->state)
 	{
-//	case state_t::ERROR:
-//	case state_t::MANUAL:
-//	case state_t::PAUSE:
-//	case state_t::SAFESTOP:
-//	case state_t::SHUTDOWN:
-//	case state_t::COLLECT:
-//	case state_t::SEARCH:
-//	case state_t::NAVOBJ:
-//	default:
-//		ROS_ERROR_STREAM("Received Unkown State: "<<*message);
-//		break;
+	//	case state_t::ERROR:
+	//	case state_t::MANUAL:
+	//	case state_t::PAUSE:
+	//	case state_t::SAFESTOP:
+	//	case state_t::SHUTDOWN:
+	//	case state_t::COLLECT:
+	//	case state_t::SEARCH:
+	//	case state_t::NAVOBJ:
+	//	default:
+	//		ROS_ERROR_STREAM("Received Unkown State: "<<*message);
+	//		break;
+	}
+}
+
+
+void MissionPlanner::updateMissionGoal() const
+{
+	if(!this->mission_goals_.empty())
+	{
+		geometry_msgs::PoseStampedPtr message(new geometry_msgs::PoseStamped());
+		message->pose            = this->mission_goals_.front();
+		message->header.frame_id = this->global_frame_;
+		message->header.stamp    = ros::Time::now();
 	}
 }
