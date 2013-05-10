@@ -23,12 +23,11 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::CarrotPathFinder& path_planner):
-																				state_(MANUAL),
-																				path_planner_(&path_planner),
-																				path_threshold_(1.0),
-																				nh_(nh),
-																				p_nh_(p_nh),
-																				transformer_(nh)
+																						state_(MANUAL),
+																						path_planner_(&path_planner),
+																						nh_(nh),
+																						p_nh_(p_nh),
+																						transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 
@@ -36,31 +35,8 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::Ca
 	this->registerTopics();
 	this->registerTimers();
 	this->buildGlobalMap();
-	ROS_INFO_STREAM("Building Test Mission Goals...");
-	geometry_msgs::Pose pose1;
-	pose1.position.x = 10;
-	pose1.position.y = 0;
-	pose1.orientation.w = 1;
-	this->mission_goals_.push_back(pose1);
-	geometry_msgs::Pose pose2;
-	pose2.position.x = 10;
-	pose2.position.y = 10;
-	pose2.orientation.w = 1;
-	//this->mission_goals_.push_back(pose2);
-	geometry_msgs::Pose pose3;
-	pose3.position.x = 0;
-	pose3.position.y = 10;
-	pose3.orientation.w = 1;
-	//this->mission_goals_.push_back(pose3);
-	geometry_msgs::Pose pose4;
-	pose4.position.x = 0;
-	pose4.position.y = 0;
-	pose4.orientation.w = 1;
-	//this->mission_goals_.push_back(pose4);
-	ROS_INFO_STREAM("Test Mission Goals Built");
 
 	this->cf_ = boost::bind(&GlobalPlanner::checkCollision, this, _1, _2);
-	this->planCB(ros::TimerEvent());
 
 	ROS_INFO("Global Planner Running!");
 
@@ -222,6 +198,7 @@ void GlobalPlanner::registerTopics()
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
 	//this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
 	this->state_sub      = this->nh_.subscribe("/aero/state", 1, &GlobalPlanner::stateCB, this);
+	this->mission_goal_sub_ = this->nh_.subscribe("/aero/global/mission_goal", 1, &GlobalPlanner::missionGoalCB, this);
 }
 
 void GlobalPlanner::registerTimers()
@@ -411,38 +388,31 @@ void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
-	if(!this->mission_goals_.empty())
+	Point goal_point;
+	app::poseToPoint(this->mission_goal_.pose, goal_point);
+	goal_point.z = 0;
+	this->global_map_->getConverter().convertToGrid(goal_point, goal_point);
+	if(this->path_planner_!=NULL)
 	{
-		Point goal_point;
-		app::poseToPoint(this->mission_goals_.front(), goal_point);
-		goal_point.z = 0;
-		this->global_map_->getConverter().convertToGrid(goal_point, goal_point);
-		if(this->path_planner_!=NULL)
-		{
-			std::deque<Point> temp_path;
-			this->path_planner_->setCollision(this->cf_);
-			this->path_planner_->setCarrotDelta(5.0/this->global_res_);
-			this->path_planner_->setSearchMap(*this->global_map_);
-			//Need to use a temporary path because carrot_path might be being used by other callbacks in multi-threaded spinner and this will lock it for an extended period
-			this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, temp_path);
-			//Copy the temp path over to replace the old path
-			this->carrot_path_ = temp_path;
-			//Remove the start location from the path as it's the current location at best and more likely well behind the robot at this point
-			this->carrot_path_.pop_front();
-			nav_msgs::PathPtr path(new nav_msgs::Path());
-			path->header.frame_id = this->global_frame_;
-			path->header.stamp    = ros::Time::now();
-			this->carrotToPath(*path);
-			this->path_pub_.publish(path);
-		}
-		else
-		{
-			ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
-		}
+		std::deque<Point> temp_path;
+		this->path_planner_->setCollision(this->cf_);
+		this->path_planner_->setCarrotDelta(5.0/this->global_res_);
+		this->path_planner_->setSearchMap(*this->global_map_);
+		//Need to use a temporary path because carrot_path might be being used by other callbacks in multi-threaded spinner and this will lock it for an extended period
+		this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, temp_path);
+		//Copy the temp path over to replace the old path
+		this->carrot_path_ = temp_path;
+		//Remove the start location from the path as it's the current location at best and more likely well behind the robot at this point
+		this->carrot_path_.pop_front();
+		nav_msgs::PathPtr path(new nav_msgs::Path());
+		path->header.frame_id = this->global_frame_;
+		path->header.stamp    = ros::Time::now();
+		this->carrotToPath(*path);
+		this->path_pub_.publish(path);
 	}
 	else
 	{
-		ROS_WARN("No Mission Goals!");
+		ROS_ERROR("Cannot Make Global Plan Without a Planning Strategy!");
 	}
 }
 
@@ -507,5 +477,20 @@ void GlobalPlanner::setNavObj()
 {
 	//TODO actually implement
 	this->setManual(false);
+}
+
+void GlobalPlanner::missionGoalCB(const geometry_msgs::PoseStampedConstPtr& message)
+{
+	//Convert from the message's frame to the mapping frame (should be the same, but might not be)
+	try
+	{
+		this->transformer_.waitForTransform(this->global_frame_, message->header.frame_id, message->header.stamp, ros::Duration(1.0));
+		this->transformer_.transformPose(this->global_frame_, *message, this->mission_goal_);
+		this->planCB(ros::TimerEvent());
+	}
+	catch(std::exception& e)
+	{
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
 }
 

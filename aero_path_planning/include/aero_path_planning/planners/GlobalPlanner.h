@@ -133,6 +133,13 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Callback for handling getting a new mission goal
+	 * @param message
+	 */
+	void missionGoalCB(const geometry_msgs::PoseStampedConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Sends the global map out for vizualization
 	 */
 	void visualizeMap() const;
@@ -211,9 +218,8 @@ private:
 	CarrotPathFinder::collision_func_ cf_;            ///The collision function
 	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy
 	OccupancyGridPtr                  global_map_;    ///The global OccupancyGrid
-	std::deque<Point>                     carrot_path_;   ///The current set of points on the global path
-	std::deque<geometry_msgs::Pose>       mission_goals_; ///The chain of mission-goal points to fallow
-	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in grid units_
+	std::deque<Point>                 carrot_path_;   ///The current set of points on the global path
+	geometry_msgs::PoseStamped        mission_goal_; ///The current mission-goal to plan to
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system
@@ -225,6 +231,7 @@ private:
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state
 	ros::Subscriber       slam_sub_;      ///Subscriber to nav_msgs::OccupancyGrid messages from SLAM
+	ros::Subscriber       mission_goal_sub_; ///Subscriber to new mission goals
 	ros::Timer            chunck_timer_;  ///Timer to chunk global map into local map
 	ros::Timer            plan_timer_;    ///Timer to plan on the global map
 
