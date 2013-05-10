@@ -166,7 +166,11 @@ configure_file (
   "${PROJECT_BINARY_DIR}/AeroPathPlanningParameters.h"
 )
 
-add_subdirectory(helpers)
+add_subdirectory(planners)
+add_subdirectory(planning_strategies)
+add_subdirectory(utilities)
+add_subdirectory(occupancy_grid)
+add_subdirectory(tentacles)
 add_subdirectory(nodes)
 add_subdirectory(launch)
 add_subdirectory(dox)

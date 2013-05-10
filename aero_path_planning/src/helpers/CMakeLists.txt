@@ -1,5 +1,0 @@
-add_subdirectory(planners)
-add_subdirectory(planning_strategies)
-add_subdirectory(utilities)
-add_subdirectory(occupancy_grid)
-add_subdirectory(tentacles)
