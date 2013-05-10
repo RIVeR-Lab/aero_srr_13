@@ -12,6 +12,8 @@
     <param name="cells_per_unit" value="8" />
     <param name="max_cell_voltage" value="3.5" />
     <param name="max_total_voltage" value="28" />
+    <param name="warn_total_voltage" value="25.6" />
+    <param name="critical_total_voltage" value="24" />
 
     <param name="frame_id" value="/battery" />
     <param name="battery_topic" value="battery" />
