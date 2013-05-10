@@ -17,8 +17,9 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <aero_srr_msgs/AeroState.h>
 #include <deque>
+#include <dynamic_reconfigure/server.h>
 //************ LOCAL DEPENDANCIES ****************//
-
+#include <aero_path_planning/MissionPlannerConfig.h>
 //***********    NAMESPACES     ****************//
 
 namespace aero_path_planning
@@ -75,6 +76,14 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief callback for handling dynamic reconfigure callbacks
+	 * @param config
+	 * @param level
+	 */
+	void drCB(const MissionPlannerConfig& config, uint32_t level);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Publishes the next goal on the carrot path
 	 */
 	void updateGoal() const;
@@ -118,6 +127,8 @@ private:
 	ros::Publisher        path_goal_pub_;   ///Publisher to update the current global goal used by LocalPlanner
 	ros::Publisher        mission_goal_pub_;///Publisher to update the current mission goal used by GlobalPlanner
 	ros::Timer            goal_timer_;      ///Timer to update the goal point
+
+	dynamic_reconfigure::Server dr_server_; ///Server for dynamic_reconfigure requests
 
 public:
 	/**

@@ -18,7 +18,8 @@ using namespace aero_path_planning;
 MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 		nh_(nh),
 		p_nh_(p_nh),
-		transformer_(nh)
+		transformer_(nh),
+		dr_server_(nh)
 {
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
@@ -52,10 +53,30 @@ void MissionPlanner::registerTopics()
 	this->path_sub_         = this->nh_.subscribe(this->path_topic_, 1, &MissionPlanner::pathCB, this);
 	this->mission_goal_pub_ = this->nh_.advertise<geometry_msgs::PoseStamped>(this->mission_goal_topic_, 1, true);
 	this->path_goal_pub_    = this->nh_.advertise<geometry_msgs::PoseStamped>(this->path_goal_topic_, 1, true);
+	this->dr_server_.setCallback(boost::bind(&MissionPlanner::drCB, this, _1, _2));
 }
 
 void MissionPlanner::registerTimers()
 {
 
 	this->goal_timer_ = this->nh_.createTimer(ros::Duration(1.0/10.0), &MissionPlanner::goalCB, this);
+}
+
+void MissionPlanner::drCB(const MissionPlannerConfig& config, uint32_t level)
+{
+	this->local_frame_   = config.local_frame;
+	this->global_frame_  = config.global_frame;
+	this->path_threshold_= config.path_threshold;
+	if(!config.mission_goal_topic.compare(this->mission_goal_topic_))
+	{
+		this->mission_goal_topic_ = config.mission_goal_topic;
+		this->mission_goal_pub_.shutdown();
+		this->mission_goal_pub_ = this->nh_.advertise<geometry_msgs::PoseStamped>(this->mission_goal_topic_, 1, true);
+	}
+	if(!config.path_goal_topic.compare(this->path_goal_topic_))
+	{
+		this->path_goal_topic_ = config.path_goal_topic;
+		this->path_goal_pub_.shutdown();
+		this->path_goal_pub_    = this->nh_.advertise<geometry_msgs::PoseStamped>(this->path_goal_topic_, 1, true);
+	}
 }
