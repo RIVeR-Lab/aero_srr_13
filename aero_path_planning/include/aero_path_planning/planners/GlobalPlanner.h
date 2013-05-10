@@ -225,7 +225,6 @@ private:
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system
 	tf::TransformListener transformer_;   ///Hook into the tf system
 	ros::Publisher        local_occ_pub_; ///Publisher to send OccupancyGrids to the local planner
-	ros::Publisher        goal_pub_;      ///Publisher to visualize the global goal
 	ros::Publisher        map_viz_pub_;   ///Publisher to visualizing the global map
 	ros::Publisher        path_pub_;      ///Publisher to visualize the global path
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
