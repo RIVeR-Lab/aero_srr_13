@@ -82,10 +82,13 @@ void integrateVelocity(double u, double w, const ros::Time& time){
 void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& msg) {
   roboteq_driver::RoboteqMotorInfo left = msg->motors[0];
   roboteq_driver::RoboteqMotorInfo right = msg->motors[1];
+  //positions in rad
   double t1 = -left.position/rotations_per_meter*actual_rotations_per_meter*M_PI*2;
   double t2 = right.position/rotations_per_meter*actual_rotations_per_meter*M_PI*2;
+  //angular velocity in rad/s
   double w1 = -left.velocity/rotations_per_meter*actual_rotations_per_meter/60*M_PI*2;
   double w2 = right.velocity/rotations_per_meter*actual_rotations_per_meter/60*M_PI*2;
+  //linear velocity
   double u1 = -left.velocity/(rotations_per_meter*60);
   double u2 = right.velocity/(rotations_per_meter*60);
 
@@ -100,21 +103,22 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   odom_msg.pose.pose.position.x = x;
   odom_msg.pose.pose.position.y = y;
   odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromYaw(t);
-  odom_msg.pose.covariance[0] = 0.5;
-  odom_msg.pose.covariance[7] = 0.5;
-  odom_msg.pose.covariance[14] = 1.0e9;
-  odom_msg.pose.covariance[21] = 1.0e9;
-  odom_msg.pose.covariance[28] = 1.0e9;
-  odom_msg.pose.covariance[35] = 1e9;
+
+  odom_msg.pose.covariance[0] = 0.75;
+  odom_msg.pose.covariance[7] = 0.75;
+  odom_msg.pose.covariance[14] = 1.0e-9;
+  odom_msg.pose.covariance[21] = 1.0e-9;
+  odom_msg.pose.covariance[28] = 1.0e-9;
+  odom_msg.pose.covariance[35] = 0.01;
 
   odom_msg.child_frame_id = twist_frame;
   odom_msg.twist.covariance.assign(0);
-  odom_msg.twist.covariance[0] = 0.1;
-  odom_msg.twist.covariance[7] = 1.0e9;
-  odom_msg.twist.covariance[14] = 1.0e9;
-  odom_msg.twist.covariance[21] = 1.0e9;
-  odom_msg.twist.covariance[28] = 1.0e9;
-  odom_msg.twist.covariance[35] = 1e9;
+  odom_msg.twist.covariance[0] = 0.75;
+  odom_msg.twist.covariance[7] = 0.75;
+  odom_msg.twist.covariance[14] = 1.0e-9;
+  odom_msg.twist.covariance[21] = 1.0e-9;
+  odom_msg.twist.covariance[28] = 1.0e-9;
+  odom_msg.twist.covariance[35] = 0.01;
   odom_msg.twist.twist.linear.x = u;
   odom_msg.twist.twist.angular.z = w;
   odom_pub.publish(odom_msg);
