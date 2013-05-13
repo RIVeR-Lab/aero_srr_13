@@ -77,9 +77,11 @@ private:
 	std::string cascade_path_WHA,
 				cascade_path_PINK,
 				cascade_path_WHASUN,
-				cascade_path_RQT_BALL;
+				cascade_path_RQT_BALL,
+				cascade_path_PIPE;
 
-	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL;
+	Mat_t frame;
+	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 

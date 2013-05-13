@@ -41,7 +41,7 @@ bool DetectionManager::isEmpty() const
 	return this->detections_.empty();
 }
 
-double DetectionManager::averageConfidance() const
+double DetectionManager::averageConfidence() const
 {
 	if(this->size()!=0)
 	{
@@ -65,7 +65,7 @@ void DetectionManager::addDetection(const tf::Point& detection,const object_type
 	bool growth = false;
 	BOOST_FOREACH(DetectionArray_t::value_type item, this->detections_)
 	{
-		if(item->first.first.distance(detection) <= this->threshold_dist_  && item->first.second == type)
+		if(item->first.first.distance(detection) <= this->threshold_dist_ )
 		{
 			if(item->second < this->max_condifdence_)
 			{

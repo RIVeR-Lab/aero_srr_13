@@ -57,7 +57,7 @@ public:
 	 * @brief  Computes the average confidence of detections in the manager
 	 * @return The average confidence of detections in the manager
 	 */
-	double averageConfidance() const;
+	double averageConfidence() const;
 
 
 	/**
