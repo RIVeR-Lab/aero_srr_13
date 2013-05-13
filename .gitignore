@@ -57,3 +57,6 @@ object_locator/launch
 object_locator/docs
 object_locator/cfg/cpp
 
+aero_control/cfg/cpp
+aero_control/docs
+aero_control/src/aero_control
