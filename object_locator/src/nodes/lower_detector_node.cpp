@@ -547,6 +547,37 @@ void ImageConverter::computeDisparity() {
 				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
 				<< ", " << confidence << ", of type: " << typeString
 				<< std::endl;
+
+		searchPoint.x = detection.getX();
+		searchPoint.y = detection.getY();
+		searchPoint.z = detection.getZ();
+
+		int K = 10;
+			  std::vector<int> pointIdxVec;
+		  std::vector<int> pointIdxNKNSearch;
+		  std::vector<float> pointNKNSquaredDistance;
+
+		  std::cout << "K nearest neighbor search at (" << searchPoint.x
+		            << " " << searchPoint.y
+		            << " " << searchPoint.z
+		            << ") with K=" << K << std::endl;
+
+		  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
+		  {
+			  float sum =0.0;
+		    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+		    {
+		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+		      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
+		    }
+		    kAvgVal_ = sum/pointIdxNKNSearch.size ();
+		    ROS_WARN_STREAM("Average value at Voxel = " << kAvgVal_);
+		  }
+		 detection.setZ(kAvgVal_);
+
 		aero_srr_msgs::ObjectLocationMsg msg;
 
 		msg.header.frame_id = camera_point.header.frame_id;
@@ -557,34 +588,7 @@ void ImageConverter::computeDisparity() {
 		ObjLocationPub.publish(msg);
 	}
 
-	searchPoint.x = detection.getX();
-	searchPoint.y = detection.getY();
-	searchPoint.z = detection.getZ();
 
-	int K = 10;
-		  std::vector<int> pointIdxVec;
-	  std::vector<int> pointIdxNKNSearch;
-	  std::vector<float> pointNKNSquaredDistance;
-
-	  std::cout << "K nearest neighbor search at (" << searchPoint.x
-	            << " " << searchPoint.y
-	            << " " << searchPoint.z
-	            << ") with K=" << K << std::endl;
-
-	  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
-	  {
-		  float sum =0.0;
-	    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
-	    {
-	      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-	                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-	                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-	                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-	      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
-	    }
-	    float avgVal = sum/pointIdxNKNSearch.size ();
-	    ROS_WARN_STREAM("Average value at Voxel = " << avgVal);
-	  }
 	// Neighbors within voxel search
 
 

@@ -79,7 +79,7 @@ private:
 				cascade_path_WHASUN,
 				cascade_path_RQT_BALL,
 				cascade_path_PIPE;
-
+	float kAvgVal_;
 	Mat_t frame;
 	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE;
 	tf::TransformListener optimus_prime;
