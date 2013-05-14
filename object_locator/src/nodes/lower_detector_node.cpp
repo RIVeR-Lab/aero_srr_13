@@ -39,8 +39,11 @@ ImageConverter::ImageConverter() :
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("points2", 1);
 
-	image_left_  = it_.subscribeCamera("/upper_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/upper_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+
+
+	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
