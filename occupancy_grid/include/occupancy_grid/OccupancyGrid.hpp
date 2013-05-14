@@ -48,6 +48,8 @@ namespace nm  = nav_msgs;
 namespace occupancy_grid
 {
 
+typedef int8_t cell_data_t; ///typedef over the data type of the OccupancyGrid cell data
+
 /**
  * Utilities for working with occupancy grids
  */
@@ -149,7 +151,7 @@ inline int calcIndexRowMajor2D(int x, int y, int width)
  * @param [in]  size   The size of the input and output arrays
  * @param [out] result An array to write out the normalized values. May safely be the same array as input, though will be destructive in that case
  */
-inline void normalizeConfidance(const uint8_t values[], int size, uint8_t result[])
+inline void normalizeConfidance(const cell_data_t values[], int size, cell_data_t result[])
 {
 	int sum = 0;
 	for(int i=0; i<size; i++)
@@ -162,6 +164,17 @@ inline void normalizeConfidance(const uint8_t values[], int size, uint8_t result
 	}
 }
 
+/**
+ * @author Adam Panzica
+ * @brief Builds an empty nav_msgs::OccupancyGrid message using the MapMetaData contained in the info field of the message
+ * @param grid The message to initialize with an empty grid. The info field must be set to the desired dimensions
+ */
+inline void buildEmptyOccupancyGrid(nm::OccupancyGrid& grid)
+{
+	int size  = calcIndexRowMajor2D(grid.info.width, grid.info.height, grid.info.width);
+	grid.data = std::vector<cell_data_t>(size);
+}
+
 
 }; /* END UTILITIES */
 
@@ -171,10 +184,12 @@ class MultiTraitOccupancyGrid
 {
 	typedef ogu::CellTrait trait_t;
 private:
-	std::vector<nm::OccupancyGrid>           grid_;		   ///The backing map data. Index 0 is always the current max confidence PointTrait, with the remaining indexes defined by the trait map
+	typedef std::vector<nm::OccupancyGrid>   grid_slice_t;
+	grid_slice_t                             grid_;		   ///The backing map data. Index 0 is always the current max confidence PointTrait, with the remaining indexes defined by the trait map
 	nm::MapMetaData                          map_meta_data_; ///The meta-data defining information about the grid
 	boost::unordered_map<trait_t::Enum, int> trait_map_;     ///Mapping between PointTrait type and vector index
 	std::string                              frame_id_;
+	cell_data_t*                             temp_cell_values_; ///array for temporary storage of cell confidances used by normailization
 
 public:
 	MultiTraitOccupancyGrid();
@@ -186,6 +201,8 @@ public:
 	 * @param [in] traits A vector of the traits that a point could be
 	 */
 	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, const nm::MapMetaData& slice_info);
+
+	virtual ~MultiTraitOccupancyGrid();
 
 	/**
 	 * @author Adam Panzica

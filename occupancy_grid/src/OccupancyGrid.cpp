@@ -34,9 +34,9 @@
  */
 
 //*********** SYSTEM DEPENDANCIES ****************//
-#include <occupancy_grid/OccupancyGrid.hpp>
+#include <boost/foreach.hpp>
 //************ LOCAL DEPENDANCIES ****************//
-
+#include <occupancy_grid/OccupancyGrid.hpp>
 //***********    NAMESPACES     ****************//
 
 using namespace occupancy_grid;
@@ -158,6 +158,29 @@ std::string CellTrait::stringFromEnum(Enum value)
 
 //***************************** OCCUPANCYGRID **************************************//
 
+MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, const nav_msgs::MapMetaData& slice_info):
+		map_meta_data_(slice_info),
+		frame_id_(frame_id),
+		temp_cell_values_(new cell_data_t[traits.size()])
+{
+	//Initialize the trait vector
+	this->grid_ = grid_slice_t(traits.size()+1);
+	BOOST_FOREACH(grid_slice_t::value_type grid_trait, this->grid_)
+	{
+		grid_trait.info = this->map_meta_data_;
+		buildEmptyOccupancyGrid(grid_trait);
+	}
+	//Build mapping between a grid in the trait vector and a trait type
+	for(unsigned int i=1; i<traits.size()+1; i++)
+	{
+		this->trait_map_[traits.at(i).getEnum()] = i;
+	}
+}
+
+MultiTraitOccupancyGrid::~MultiTraitOccupancyGrid()
+{
+	delete[] this->temp_cell_values_;
+}
 
 
 int MultiTraitOccupancyGrid::getXSizeGrid() const
