@@ -42,7 +42,7 @@
 #include <boost/unordered_map.hpp>
 #include <tf/transform_datatypes.h>
 //************ LOCAL DEPENDANCIES ****************//
-
+#include <occupancy_grid/MultiTraitOccupancyGridMessage.h>
 //***********    NAMESPACES     ****************//
 namespace nm  = nav_msgs;
 namespace occupancy_grid
@@ -208,6 +208,13 @@ public:
 	 */
 	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nm::MapMetaData& slice_info);
 
+	/**
+	 * @author Adam Panzica
+	 * @brief Constructs a new grid from a MultiTraitOccupancyGridMessage
+	 * @param [in] message
+	 */
+	MultiTraitOccupancyGrid(const MultiTraitOccupancyGridMessage& message);
+
 	virtual ~MultiTraitOccupancyGrid();
 
 	/**
@@ -266,6 +273,13 @@ public:
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
 	 */
 	trait_t getPoitTrait(double x, double y) const;
+
+	/**
+	 * @author Adam panzica
+	 * @brief Generates a new ROS message from the grid
+	 * @param [out] message to create
+	 */
+	void toROSMsg(MultiTraitOccupancyGridMessage& message) const;
 
 	/**
 	 * @author Adam Panzica

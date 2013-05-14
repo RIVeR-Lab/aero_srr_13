@@ -48,6 +48,7 @@ protected:
 
 	void SetUp()
 	{
+		ros::Time::init();
 		traits_.push_back(utilities::CellTrait::UNKOWN);
 		traits_.push_back(utilities::CellTrait::FREE_LOW_COST);
 		traits_.push_back(utilities::CellTrait::FREE_HIGH_COST);
@@ -83,6 +84,18 @@ TEST_F(occ_test_fixture, testSetGet)
 	ASSERT_EQ(utilities::CellTrait::OBSTACLE, testGrid.getPointTrait(10,10).getEnum());
 }
 
+TEST_F(occ_test_fixture, testMessage)
+{
+	MultiTraitOccupancyGrid testGrid("test", traits_, utilities::CellTrait::UNKOWN, info_);
+	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
+	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
+	MultiTraitOccupancyGridMessage testMessage;
+	testGrid.toROSMsg(testMessage);
+	ASSERT_EQ("test", testMessage.header.frame_id);
+	MultiTraitOccupancyGrid copyedGrid(testMessage);
+	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyedGrid.getPointTrait(10,10).getEnum());
+
+}
 
 
 int main(int argc, char **argv)
