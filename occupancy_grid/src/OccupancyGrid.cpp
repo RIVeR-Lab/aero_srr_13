@@ -170,10 +170,11 @@ MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const std::string& frame_id, co
 		grid_trait.info = this->map_meta_data_;
 		buildEmptyOccupancyGrid(grid_trait);
 	}
-	//Build mapping between a grid in the trait vector and a trait type
+	//Build mapping between a grid in the trait vector and a trait type and vice-versa
 	for(unsigned int i=1; i<traits.size()+1; i++)
 	{
 		this->trait_map_[traits.at(i).getEnum()] = i;
+		this->index_map_[i] = traits.at(i).getEnum();
 	}
 }
 
@@ -227,4 +228,38 @@ MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(int x, i
 MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPoitTrait(double x, double y) const
 {
 	return this->getPointTrait(x/this->map_meta_data_.resolution, y/this->map_meta_data_.resolution);
+}
+
+void MultiTraitOccupancyGrid::addPointTrait(double x, double y, trait_t trait, int confidence)
+{
+	this->addPointTrait(x/this->map_meta_data_.resolution, y/this->map_meta_data_.resolution, trait, confidence);
+}
+
+void MultiTraitOccupancyGrid::addPointTrait(int x, int y, trait_t trait, int confidence)
+{
+	int cell_index = ogu::calcIndexRowMajor2D(x, y, this->map_meta_data_.width);
+	//Fill the temp values
+	BOOST_FOREACH(trait_map_t::value_type trait, this->trait_map_)
+	{
+		this->temp_cell_values_[trait.second-1] = this->grid_.at(trait.second).data[cell_index];
+	}
+	//Increase the confidence of the requested trait
+	this->temp_cell_values_[this->trait_map_[trait.getEnum()]-1] += confidence;
+
+	//Normalize the confidence values
+	normalizeConfidance(this->temp_cell_values_, this->grid_.size()-1, this->temp_cell_values_);
+
+	//Write back the values to the grid, update the current 'best' choice
+	int best_trait_index = -1;
+	cell_data_t best_trait_value = 0;
+	for(unsigned int i=0; i<this->grid_.size()-1; i++)
+	{
+		if(this->temp_cell_values_[i]>best_trait_value)
+		{
+			best_trait_index = i;
+			best_trait_value = this->temp_cell_values_[i];
+		}
+		this->grid_.at(i+1).data[cell_index] = this->temp_cell_values_[i];
+	}
+	this->grid_.at(0).data[cell_index] = this->index_map_[best_trait_index+1];
 }

@@ -185,11 +185,14 @@ class MultiTraitOccupancyGrid
 	typedef ogu::CellTrait trait_t;
 private:
 	typedef std::vector<nm::OccupancyGrid>   grid_slice_t;
-	grid_slice_t                             grid_;		   ///The backing map data. Index 0 is always the current max confidence PointTrait, with the remaining indexes defined by the trait map
-	nm::MapMetaData                          map_meta_data_; ///The meta-data defining information about the grid
-	boost::unordered_map<trait_t::Enum, int> trait_map_;     ///Mapping between PointTrait type and vector index
-	std::string                              frame_id_;
-	cell_data_t*                             temp_cell_values_; ///array for temporary storage of cell confidances used by normailization
+	typedef boost::unordered_map<trait_t::Enum, int> trait_map_t;
+	typedef boost::unordered_map<int, trait_t::Enum> index_map_t;
+	grid_slice_t       grid_;		   ///The backing map data. Index 0 is always the current max confidence PointTrait, with the remaining indexes defined by the trait map
+	nm::MapMetaData    map_meta_data_; ///The meta-data defining information about the grid
+	trait_map_t        trait_map_;     ///Mapping between PointTrait type and vector index
+	index_map_t        index_map_;     ///Mapping between vector index and PointTrait type
+	std::string        frame_id_;
+	cell_data_t*       temp_cell_values_; ///array for temporary storage of cell confidances used by normailization
 
 public:
 	MultiTraitOccupancyGrid();
