@@ -104,6 +104,11 @@ bool CellTrait::operator==(const int& rhs) const
 	return this->enum_ == enumFromValue(rhs);
 }
 
+bool CellTrait::operator==(const Enum& rhs) const
+{
+	return this->enum_ == rhs;
+}
+
 CellTrait::Enum CellTrait::enumFromValue(int value)
 {
 	switch(value)
@@ -158,23 +163,35 @@ std::string CellTrait::stringFromEnum(Enum value)
 
 //***************************** OCCUPANCYGRID **************************************//
 
-MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, const nav_msgs::MapMetaData& slice_info):
+MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nav_msgs::MapMetaData& slice_info):
 		map_meta_data_(slice_info),
 		frame_id_(frame_id),
 		temp_cell_values_(new cell_data_t[traits.size()])
 {
 	//Initialize the trait vector
 	this->grid_ = grid_slice_t(traits.size()+1);
-	BOOST_FOREACH(grid_slice_t::value_type grid_trait, this->grid_)
+	BOOST_FOREACH(grid_slice_t::value_type& grid_trait, this->grid_)
 	{
 		grid_trait.info = this->map_meta_data_;
 		buildEmptyOccupancyGrid(grid_trait);
 	}
+
 	//Build mapping between a grid in the trait vector and a trait type and vice-versa
 	for(unsigned int i=1; i<traits.size()+1; i++)
 	{
-		this->trait_map_[traits.at(i).getEnum()] = i;
-		this->index_map_[i] = traits.at(i).getEnum();
+		this->trait_map_[traits.at(i-1).getEnum()] = i;
+		this->index_map_[i] = traits.at(i-1).getEnum();
+	}
+
+	//Fill in the initial confidance type
+	for(unsigned int x=0; x<this->map_meta_data_.width; x++)
+	{
+		for(unsigned int y=0; y<this->map_meta_data_.height; y++)
+		{
+			int cell_index = ogu::calcIndexRowMajor2D(x, y, this->map_meta_data_.width);
+			this->grid_.at(this->trait_map_[initial_trait.getEnum()]).data[cell_index] = 100;
+			this->grid_.at(0).data.at(cell_index) = initial_trait.getEnum();
+		}
 	}
 }
 

@@ -38,6 +38,48 @@
 //************ LOCAL DEPENDANCIES ****************//
 #include <occupancy_grid/OccupancyGrid.hpp>
 //***********    NAMESPACES     ****************//
+using namespace occupancy_grid;
+
+class occ_test_fixture : public ::testing::Test
+{
+protected:
+	std::vector<occupancy_grid::MultiTraitOccupancyGrid::trait_t> traits_;
+	nav_msgs::MapMetaData info_;
+
+	void SetUp()
+	{
+		traits_.push_back(utilities::CellTrait::UNKOWN);
+		traits_.push_back(utilities::CellTrait::FREE_LOW_COST);
+		traits_.push_back(utilities::CellTrait::FREE_HIGH_COST);
+		traits_.push_back(utilities::CellTrait::OBSTACLE);
+		traits_.push_back(utilities::CellTrait::TRAVERSED);
+		traits_.push_back(utilities::CellTrait::GOAL);
+		info_.height = 100;
+		info_.width  = 200;
+		info_.resolution = 0.25;
+	}
+
+};
+
+TEST_F(occ_test_fixture, testBasicSetup)
+{
+	MultiTraitOccupancyGrid testGrid("test", traits_, utilities::CellTrait::UNKOWN, info_);
+	ASSERT_EQ("test", testGrid.getFrameID());
+	ASSERT_EQ(200, testGrid.getXSizeGrid());
+	ASSERT_EQ(50, testGrid.getXSizeMeter());
+	ASSERT_EQ(100, testGrid.getYSizeGrid());
+	ASSERT_EQ(25, testGrid.getYSizeMeter());
+	ASSERT_EQ(0.25, testGrid.getResolution());
+}
+
+TEST_F(occ_test_fixture, testSetGet)
+{
+	MultiTraitOccupancyGrid testGrid("test", traits_, utilities::CellTrait::UNKOWN, info_);
+	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(0,0).getEnum());
+	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(34,10).getEnum());
+	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(1.5,14.1).getEnum());
+}
+
 
 
 int main(int argc, char **argv)

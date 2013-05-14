@@ -107,6 +107,7 @@ public:
 	//Equality
 	bool operator==(const CellTrait& rhs) const;
 	bool operator==(const int& rhs) const;
+	bool operator==(const Enum& rhs) const;
 
 
 
@@ -182,6 +183,7 @@ namespace ogu = occupancy_grid::utilities;
 
 class MultiTraitOccupancyGrid
 {
+public:
 	typedef ogu::CellTrait trait_t;
 private:
 	typedef std::vector<nm::OccupancyGrid>   grid_slice_t;
@@ -202,8 +204,9 @@ public:
 	 * @brief [in] frame_id The frame that the map is representing
 	 * @param [in] slice_info MapMetaData defining the basic 2D properties of the grid
 	 * @param [in] traits A vector of the traits that a point could be
+	 * @param [in] initial_trait The trait to fill the map with initially
 	 */
-	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, const nm::MapMetaData& slice_info);
+	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nm::MapMetaData& slice_info);
 
 	virtual ~MultiTraitOccupancyGrid();
 
