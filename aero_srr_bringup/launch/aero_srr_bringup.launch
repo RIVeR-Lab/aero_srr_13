@@ -1,6 +1,6 @@
 <launch>
   <!-- ********************ARGUMENTS******************** -->
-  <arg name="imu_topic"                   value="aero/imu"/>
+  <arg name="imu_topic"                   value="aero/odom"/>
   <arg name="odom_topic"                  value="aero/odom_base"/>
   <arg name="odom_topic_ekf"              value="aero/odom_ekf"/>
   <arg name="velocity_command_topic"      value="aero/base/cmd_vel"/>
@@ -8,7 +8,8 @@
   <arg name="local_lidar_topic"           value="aero/lidar/local"/>
   <arg name="global_lidar_topic"          value="aero/lidar/global"/>
   <arg name="robot_frame"                 value="base_footprint"/>
-	
+
+  
   <include file="$(find aero_srr_bringup)/launch/srr_bringup.launch">
     <arg name="aero/platform"      		    value="1" />
     <arg name="aero/velocity_command_topic"	value="$(arg velocity_command_topic)" />
@@ -16,12 +17,13 @@
     <arg name="global_lidar_topic"          value="$(arg global_lidar_topic)"/>
     <arg name="odometry_topic"              value="$(arg odom_topic)"/>
   </include>
-
+  
   <include file="$(find aero_base)/launch/aero_base.launch">
     <arg name="imu_topic"              value="$(arg imu_topic)" />
     <arg name="odom_topic"             value="$(arg odom_topic)" />
     <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
   </include> 
+  
   
   <include file="$(find aero_srr_bringup)/launch/aero_srr_laser.launch">
 		<arg name="input_topic"  value="$(arg laser_scan_topic)"/>
@@ -29,10 +31,19 @@
 		<arg name="global_topic" value="$(arg global_lidar_topic)"/>
 		<arg name="local_frame"  value="$(arg robot_frame)"/>
   </include>  
+
+  <include file="$(find aero_srr_bringup)/launch/aero_srr_image_proc.launch"/>
+
   
   <include file="$(find aero_srr_bringup)/launch/aero_srr_odometry.launch">
     <arg name="imu_topic"    value="$(arg imu_topic)" />
     <arg name="odom_topic"   value="$(arg odom_topic)" />
     <arg name="output_topic" value="$(arg odom_topic_ekf)" />
   </include>
+
+  <include file="$(find aero_srr_bringup)/launch/aero_srr_supervisor.launch">
+  </include>
+
+  <include file="$(find aero_control)/launch/aero_base_servo.launch"/>
+    <include file="$(find aero_control)/launch/aero_arm.launch"/>
 </launch>

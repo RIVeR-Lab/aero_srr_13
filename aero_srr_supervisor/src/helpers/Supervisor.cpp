@@ -22,11 +22,12 @@ Supervisor::Supervisor(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 		p_nh_(p_nh)
 {
 	ROS_INFO_STREAM("Initializing Aero SRR Supervisor...");
-	this->state_.state = state_t::MANUAL;
+	this->state_.state = state_t::SEARCH;
 	this->loadParams();
 	this->registerTopics();
 	this->registerTimers();
 	this->buildStateTable();
+	this->stateUptd();
 	ROS_INFO_STREAM("Aero SRR Supervisor Running!");
 }
 
@@ -63,6 +64,7 @@ void Supervisor::buildStateTable()
 	this->state_table_.addStateStringRepresentation(state_t::SEARCH, "SEARCH");
 	this->state_table_.addStateStringRepresentation(state_t::SHUTDOWN, "SHUTDOWN");
 	this->state_table_.addStateStringRepresentation(state_t::STARTUP, "STARTUP");
+	this->state_table_.addStateStringRepresentation(state_t::PICKUP, "PICKUP");
 
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::COLLECT, true);
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::ERROR, false);
@@ -72,6 +74,7 @@ void Supervisor::buildStateTable()
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::SAFESTOP, false);
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::SEARCH, true);
 	this->state_table_.addTranstion(state_t::PAUSE, state_t::SHUTDOWN, false);
+	this->state_table_.addTranstion(state_t::PAUSE, state_t::PICKUP, true);
 
 	this->state_table_.addTranstion(state_t::STARTUP, state_t::MANUAL);
 	this->state_table_.addTranstion(state_t::STARTUP, state_t::SEARCH);
@@ -101,18 +104,27 @@ void Supervisor::buildStateTable()
 
 	this->state_table_.addTranstion(state_t::ERROR, state_t::SAFESTOP, true);
 
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::COLLECT, true);
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::NAVOBJ);
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::SEARCH);
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::ERROR);
+	this->state_table_.addTranstion(state_t::PICKUP, state_t::MANUAL);
+
 }
 
 bool Supervisor::stateTransitionReqCB(aero_srr_msgs::StateTransitionRequest::Request& request, aero_srr_msgs::StateTransitionRequest::Response& response)
 {
+	ROS_INFO_STREAM("Got a request to transition from current state:"<<this->state_<<"to new state:"<<request.requested_state);
 	if(this->state_table_.isValidTransition(this->state_.state, request.requested_state.state))
 	{
+		ROS_INFO_STREAM("The request was granted!");
 		this->state_     = request.requested_state;
 		this->stateUptd();
 		response.success = true;
 	}
 	else
 	{
+		ROS_INFO_STREAM("The reqest was denied!");
 		std::string current_state;
 		std::string requested_state;
 		std::string transition_list;
@@ -133,6 +145,7 @@ bool Supervisor::stateTransitionReqCB(aero_srr_msgs::StateTransitionRequest::Req
 
 void Supervisor::stateUptd() const
 {
+	ROS_INFO_STREAM("I'm transitioning to state:"<<this->state_);
 	typedef aero_srr_msgs::AeroState state_t;
 	aero_srr_msgs::AeroState message(this->state_);
 	message.header.stamp = ros::Time::now();

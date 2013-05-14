@@ -2,3 +2,4 @@
 add_subdirectory(aero_global_planner)
 add_subdirectory(aero_local_planner)
 add_subdirectory(aero_path_planning)
+add_subdirectory(aero_mission_planner)

@@ -1,0 +1,1 @@
+Copy the udev rules from this directory into the /etc/udev/rules.d/ directory.  You can then restart udev using "sudo service udev restart".  Note that if the IMU or KVH FTDI adapters are changed, the serial number in the device must be changed as well.

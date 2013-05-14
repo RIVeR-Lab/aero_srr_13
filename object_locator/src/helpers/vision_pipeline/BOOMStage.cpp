@@ -93,7 +93,7 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 //			normImg_.at<cv::Vec3b>(x,y) = nRGB;
 			browness = nR/nG;
 			whiteness = sumRGB/756;
-			if((nG > .38) || ((std::abs(browness - 1) < .2) && (whiteness < .9)))
+			if((nG > .39) || ((std::abs(browness - 1) < .2) && (whiteness < .9)))
 			{
 			    norma.at<cv::Vec3b>(x,y) = ZeroV;
 			}
@@ -104,6 +104,10 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 		}
 	}
 	normImage = norma;
+	   namedWindow( "b&w", CV_WINDOW_AUTOSIZE );
+	   imshow( "b&w", norma );
+	   waitKey(3);
+
 }
 
 void BOOMStage::blobIdentify(Mat_t& img)
@@ -118,7 +122,9 @@ void BOOMStage::blobIdentify(Mat_t& img)
 	vector<Vec4i> hierarchy;
 
 	 medianBlur(img,med, 11);
+
 normImg = med;
+
 	 cvtColor(normImg, src_gray, CV_BGR2GRAY);
 
 	 /// Detect edges using Threshold
@@ -162,7 +168,10 @@ normImg = med;
 	   /// Show in a window
 	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
 	   imshow( "Contours", drawing );
+
+
 	   cv::waitKey(3);
+
 //		std::stringstream s;
 //		s << "/home/srr/ObjectDetectionData/blob/0.png";
 //		cv::imwrite(s.str(), drawing);

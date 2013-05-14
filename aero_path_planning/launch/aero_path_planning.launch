@@ -87,6 +87,10 @@
 		<arg name="aero/lidar/global" value="$(arg aero/lidar/global)"/>
 	</include>
 	
+	<include file="$(find aero_path_planning)/launch/aero_mission_planner.launch">
+
+	</include>
+	
 	<!--
 	<group if="$(arg visualization)">
  			<node name="local_occupancy_visualization" pkg="aero_path_planning" type="occupancy_visualizer_node" output="screen">
