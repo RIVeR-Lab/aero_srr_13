@@ -14,6 +14,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/ros/conversions.h>
+#include <pcl/octree/octree.h>
 //#include <opencv2/gpu/stream_accessor.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
@@ -37,15 +38,15 @@ ImageConverter::ImageConverter() :
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("points2", 1);
 
-//	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-//	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
 //	right_rect_sub_ = nh_.subscribe("/stereo_camera/right/image_rect_color",1, &ImageConverter::rectRightCb, this);
 
-	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1,
-			&ImageConverter::imageCbLeft, this);
+//	image_left_ = it_.subscribeCamera("prosilica/image_raw", 1,
+//			&ImageConverter::imageCbLeft, this);
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 //	point_cloud_sub_ = nh_.subscribe<sensor_msgs::PointCloud2> ("/lower_stereo/points2", 2, &ImageConverter::pointCloudCb, this);
 	//********ROS Timer for Disparity image cb**************
@@ -415,8 +416,20 @@ void ImageConverter::computeDisparity() {
 				"Could not fill color channel of the point cloud, "
 						"unsupported encoding '%s'", encoding.c_str());
 	}
-
 	pub_points2_.publish(points_msg);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+	pcl::fromROSMsg(*points_msg,*cloud);
+
+	float resolution = 128.0f;
+	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
+
+    octree.setInputCloud (cloud);
+    octree.addPointsFromInputCloud ();
+
+    pcl::PointXYZ searchPoint;
+
+
+
 
 //	std::stringstream s,d;
 //		s << "/home/srr/ObjectDetectionData/Disparity1.png";
@@ -431,16 +444,34 @@ void ImageConverter::computeDisparity() {
 			(int) (widthL / 2));
 	this->stereo_model.projectDisparityTo3d(center, pre_disp_center,
 			center_obj_3d);
-//	double dispOb = this->stereo_model.getDisparity(1.90515);
-//	cout << "Object Disparity should be = "<< dispOb;
+
 	cout << "Center" << endl << " X: " << center_obj_3d.x << endl << "Y: "
 			<< center_obj_3d.y << endl << "Z: " << center_obj_3d.z << endl;
 	float disp_center = dispn.at<float>((int) (heightL / 2),
 			(int) (widthL / 2));
-//	    ROS_INFO_STREAM("Pre 16 Disparity Value at center = " << pre_disp_center);
-//	    ROS_INFO_STREAM("Disparity Value at center = " << disp_center);
-	this->stereo_model.getZ(pre_disp_center);
-//	    ROS_INFO_STREAM("Z of disp center = " << pre_disp_center);
+
+	searchPoint.x = center_obj_3d.x;
+	searchPoint.y = center_obj_3d.y;
+	searchPoint.z = center_obj_3d.z;
+
+	// Neighbors within voxel search
+
+	  std::vector<int> pointIdxVec;
+	  if (octree.voxelSearch (searchPoint, pointIdxVec))
+	  {
+	    std::cout << "Neighbors within voxel search at (" << searchPoint.x
+	     << " " << searchPoint.y
+	     << " " << searchPoint.z << ")"
+	     << std::endl;
+
+	    for (size_t i = 0; i < pointIdxVec.size (); ++i)
+	   std::cout << "    " << cloud->points[pointIdxVec[i]].x
+	       << " " << cloud->points[pointIdxVec[i]].y
+	       << " " << cloud->points[pointIdxVec[i]].z << std::endl;
+	  }
+
+
+
 #endif
 	//    cv::erode(disp, disp, NULL, 2);
 	//    cv::dilate(disp, disp, NULL, 2);
@@ -469,7 +500,7 @@ void ImageConverter::computeDisparity() {
 		if (obj_centroid.x < disp.cols && obj_centroid.y < disp.rows) {
 //			cout << "Getting Disparity" <<endl;
 			//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
-			float disp_val = nNdisp(obj_centroid, disp);
+			float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
 //cout << "Pre Disparity Value of detection "<< disp_val <<endl;			
 //cout << "Disparity Value of detection "<< disp_val <<endl;
 			this->stereo_model.projectDisparityTo3d(obj_centroid, disp_val,
