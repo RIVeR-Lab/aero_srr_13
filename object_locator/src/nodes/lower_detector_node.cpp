@@ -15,6 +15,7 @@
 #include <pcl/point_types.h>
 #include <pcl/ros/conversions.h>
 #include <pcl/octree/octree.h>
+#include <pcl/filters/voxel_grid.h>
 //#include <opencv2/gpu/stream_accessor.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
@@ -38,8 +39,8 @@ ImageConverter::ImageConverter() :
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("points2", 1);
 
-	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/upper_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/upper_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
@@ -417,10 +418,16 @@ void ImageConverter::computeDisparity() {
 						"unsupported encoding '%s'", encoding.c_str());
 	}
 	pub_points2_.publish(points_msg);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+	sensor_msgs::PointCloud2::Ptr cloud_filtered (new sensor_msgs::PointCloud2 ());
+	  pcl::VoxelGrid<sensor_msgs::PointCloud2> sor;
+	  sor.setInputCloud (points_msg);
+	  sor.setLeafSize (0.01f, 0.01f, 0.01f);
+	  sor.filter (*cloud_filtered);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromROSMsg(*points_msg,*cloud);
 
-	float resolution = 128.0f;
+	float resolution = 2.5f;
 	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
 
     octree.setInputCloud (cloud);
@@ -450,25 +457,8 @@ void ImageConverter::computeDisparity() {
 	float disp_center = dispn.at<float>((int) (heightL / 2),
 			(int) (widthL / 2));
 
-	searchPoint.x = center_obj_3d.x;
-	searchPoint.y = center_obj_3d.y;
-	searchPoint.z = center_obj_3d.z;
 
-	// Neighbors within voxel search
 
-	  std::vector<int> pointIdxVec;
-	  if (octree.voxelSearch (searchPoint, pointIdxVec))
-	  {
-	    std::cout << "Neighbors within voxel search at (" << searchPoint.x
-	     << " " << searchPoint.y
-	     << " " << searchPoint.z << ")"
-	     << std::endl;
-
-	    for (size_t i = 0; i < pointIdxVec.size (); ++i)
-	   std::cout << "    " << cloud->points[pointIdxVec[i]].x
-	       << " " << cloud->points[pointIdxVec[i]].y
-	       << " " << cloud->points[pointIdxVec[i]].z << std::endl;
-	  }
 
 
 
@@ -505,8 +495,8 @@ void ImageConverter::computeDisparity() {
 //cout << "Disparity Value of detection "<< disp_val <<endl;
 			this->stereo_model.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
-			cout << "Disp: " << disp_val << endl << "X: " << obj_3d.x << endl
-					<< "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
+	//		cout << "Disp: " << disp_val << endl << "X: " << obj_3d.x << endl
+//					<< "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
 			tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point.point);
@@ -563,11 +553,62 @@ void ImageConverter::computeDisparity() {
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
 	}
+
+	searchPoint.x = detection.getX();
+	searchPoint.y = detection.getY();
+	searchPoint.z = detection.getZ();
+
+	int K = 10;
+		  std::vector<int> pointIdxVec;
+	  std::vector<int> pointIdxNKNSearch;
+	  std::vector<float> pointNKNSquaredDistance;
+
+	  std::cout << "K nearest neighbor search at (" << searchPoint.x
+	            << " " << searchPoint.y
+	            << " " << searchPoint.z
+	            << ") with K=" << K << std::endl;
+
+	  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
+	  {
+		  float sum =0.0;
+	    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+	    {
+	      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+	                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+	                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+	                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+	      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
+	    }
+	    float avgVal = sum/pointIdxNKNSearch.size ();
+	    ROS_WARN_STREAM("Average value at Voxel = " << avgVal);
+	  }
+	// Neighbors within voxel search
+
+
+//	  if (octree.voxelSearch (searchPoint, pointIdxVec))
+//	  {
+//		  float sum =0.0;
+//	    std::cout << "Neighbors within voxel search at (" << searchPoint.x
+//	     << " " << searchPoint.y
+//	     << " " << searchPoint.z << ")"
+//	     << std::endl;
+//
+//	    for (size_t i = 0; i < pointIdxVec.size (); ++i)
+//	    {
+////	    	std::cout << "    " << cloud->points[pointIdxVec[i]].x
+////	       << " " << cloud->points[pointIdxVec[i]].y
+////	       << " " << cloud->points[pointIdxVec[i]].z << std::endl;
+//	    sum = cloud->points[pointIdxVec[i]].z + sum;
+//	    }
+//	    float avgVal = sum/pointIdxVec.size ();
+//	    ROS_WARN_STREAM("Average value at Voxel = " << avgVal);
+//	  }
+
 	Mat_t cmapped;
 	disp.convertTo(cmapped, CV_8U);
 	cv::ellipse(cmapped, Point2d(detection.getX(), detection.getY()),
 			cv::Size(30, 30), 0, 0, 360, 0, 2, 8, 0);
-//	cv::ellipse(cmapped, center, cv::Size(20, 20), 0, 0, 360, 255, 2, 8, 0);
+	cv::ellipse(cmapped, center, cv::Size(20, 20), 0, 0, 360, 255, 2, 8, 0);
 	cv::rectangle(frame, Point2d(detection.getX()-100, detection.getY()-100), Point2d(detection.getX()+100, detection.getY()+100),Scalar(255,255,255));
 	cv::imshow(WINDOWDisparity, cmapped);
 	cv::waitKey(3);
