@@ -78,6 +78,9 @@ TEST_F(occ_test_fixture, testSetGet)
 	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(0,0).getEnum());
 	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(34,10).getEnum());
 	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(1.5,14.1).getEnum());
+	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
+	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
+	ASSERT_EQ(utilities::CellTrait::OBSTACLE, testGrid.getPointTrait(10,10).getEnum());
 }
 
 
