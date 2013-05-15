@@ -41,6 +41,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <boost/unordered_map.hpp>
 #include <tf/transform_datatypes.h>
+#include <boost/shared_ptr.hpp>
 //************ LOCAL DEPENDANCIES ****************//
 #include <occupancy_grid/MultiTraitOccupancyGridMessage.h>
 //***********    NAMESPACES     ****************//
@@ -329,6 +330,9 @@ public:
 	void addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling = false, bool use_zero_as_free = true, bool use_negative_as_unkown = true);
 
 };
+
+typedef boost::shared_ptr<MultiTraitOccupancyGrid> MultiTraitOccupancyGridPtr;
+typedef boost::shared_ptr<const MultiTraitOccupancyGrid> MultiTraitOccupancyGridConstPtr;
 
 }; /* END OCCUPANCY_GRID */
 
