@@ -356,7 +356,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 {
 	ROS_INFO_STREAM("Recieved new SLAM map information!");
-	this->global_map_->setPointTrait(*message);
+	//this->global_map_->setPointTrait(*message);
 }
 
 
