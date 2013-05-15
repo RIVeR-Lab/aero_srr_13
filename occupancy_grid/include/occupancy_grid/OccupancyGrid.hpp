@@ -3,7 +3,7 @@
  *
  * @date   May 7, 2013
  * @author Adam Panzica
- * @brief  Class definitions for OccupancyGrid
+ * @brief  Function/Class definitions for occupancy_grid namespace
  */
 
 /*

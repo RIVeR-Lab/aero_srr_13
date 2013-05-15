@@ -2,8 +2,8 @@
  * @file   OccupancyGrid.cpp
  *
  * @date   May 7, 2013
- * @author parallels
- * @brief  \TODO
+ * @author Adam Panzica
+ * @brief  Implementation of the occupancy_grid namespace
  */
 
 /*
