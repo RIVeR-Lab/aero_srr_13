@@ -317,7 +317,7 @@ void MultiTraitOccupancyGrid::toROSMsg(trait_t trait, nm::OccupancyGrid& message
 	message.header.frame_id = this->frame_id_;
 	message.header.stamp    = ros::Time::now();
 	message.info            = this->map_meta_data_;
-	message.data            = this->grid_.at(this->trait_map_.at(trait.getEnum()));
+	message.data            = this->grid_.at(this->trait_map_.at(trait.getEnum())).data;
 }
 
 void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling, bool use_zero_as_free, bool use_negative_as_unkown)
