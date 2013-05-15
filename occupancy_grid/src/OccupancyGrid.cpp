@@ -336,8 +336,7 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 	{
 		for(unsigned int y = 0; y < copy_height; y++)
 		{
-			int copy_data_index        = ogu::calcIndexRowMajor2D(x, y, confidances.info.width);
-			int copy_confidence        = confidances.data[copy_data_index];
+			int copy_confidence        = confidances.data[ogu::calcIndexRowMajor2D(x, y, confidances.info.width)];
 			CellTrait copy_trait(trait);
 			if(use_zero_as_free)
 			{
