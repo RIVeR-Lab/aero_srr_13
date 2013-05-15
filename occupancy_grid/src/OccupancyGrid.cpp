@@ -45,13 +45,13 @@ using namespace occupancy_grid::utilities;
 //***************************************** CELLTRAIT *********************************************************//
 
 CellTrait::CellTrait():
-			enum_(UNKOWN)
+							enum_(UNKOWN)
 {
 
 }
 
 CellTrait::CellTrait(Enum value):
-				enum_(value)
+								enum_(value)
 {
 
 }
@@ -96,18 +96,18 @@ CellTrait& CellTrait::operator=(const int& rhs)
 }
 
 bool CellTrait::operator==(const CellTrait& rhs) const
-{
+				{
 	return rhs.enum_ == this->enum_;
-}
+				}
 bool CellTrait::operator==(const int& rhs) const
-{
+				{
 	return this->enum_ == enumFromValue(rhs);
-}
+				}
 
 bool CellTrait::operator==(const Enum& rhs) const
-{
+				{
 	return this->enum_ == rhs;
-}
+				}
 
 CellTrait::Enum CellTrait::enumFromValue(int value)
 {
@@ -165,9 +165,9 @@ std::string CellTrait::stringFromEnum(Enum value)
 MultiTraitOccupancyGrid::MultiTraitOccupancyGrid():temp_cell_values_(NULL){};
 
 MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const MultiTraitOccupancyGridMessage& message):
-		map_meta_data_(message.trait_grids.at(0).info),
-		frame_id_(message.header.frame_id),
-		temp_cell_values_(new cell_data_t[message.trait_vector.size()])
+						map_meta_data_(message.trait_grids.at(0).info),
+						frame_id_(message.header.frame_id),
+						temp_cell_values_(new cell_data_t[message.trait_vector.size()])
 {
 	this->grid_ = message.trait_grids;
 	for(unsigned int i=0; i<message.trait_vector.size(); i++)
@@ -181,9 +181,9 @@ MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const MultiTraitOccupancyGridMe
 
 
 MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nav_msgs::MapMetaData& slice_info):
-		map_meta_data_(slice_info),
-		frame_id_(frame_id),
-		temp_cell_values_(new cell_data_t[traits.size()])
+						map_meta_data_(slice_info),
+						frame_id_(frame_id),
+						temp_cell_values_(new cell_data_t[traits.size()])
 {
 	//Initialize the trait vector
 	this->grid_ = grid_slice_t(traits.size()+1);
@@ -318,4 +318,26 @@ void MultiTraitOccupancyGrid::toROSMsg(trait_t trait, nm::OccupancyGrid& message
 	message.header.stamp    = ros::Time::now();
 	message.info            = this->map_meta_data_;
 	message.data            = this->grid_.at(this->trait_map_.at(trait.getEnum()));
+}
+
+void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling)
+{
+	unsigned int copy_width  = confidances.info.width;
+	unsigned int copy_height = confidances.info.height;
+	if(copy_width > this->map_meta_data_.width)
+	{
+		copy_width = this->map_meta_data_.width;
+	}
+	if(copy_height > this->map_meta_data_.height)
+	{
+		copy_height = this->map_meta_data_.height;
+	}
+	for(unsigned int x = 0; x < copy_width; x++)
+	{
+		for(unsigned int y = 0; y < copy_height; y++)
+		{
+			int copy_data_index = ogu::calcIndexRowMajor2D(x, y, confidances.info.width);
+			this->addPointTrait((double)x*confidances.info.resolution, (double)y*confidances.info.resolution, trait, confidances.data[copy_data_index]);
+		}
+	}
 }

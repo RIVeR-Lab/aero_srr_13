@@ -313,6 +313,19 @@ public:
 	 */
 	void addPointTrait(double x, double y, trait_t trait, int confidence = 100);
 
+	/**
+	 * @author Adam Panzica
+	 * @brief Adds the confidance contained in an entier OccupancyGrid message to the grid.
+	 * @param [in] confidances The gird of confidances to merge in
+	 * @param [in] trait The trait type to treat the confidances as
+	 * @param [in] scaling True if the input grid should be up/down sampled to match the resolution and dimmensions of this grid, else it will be copied 1/1 and clipped if the dimmensions do not match
+	 *
+	 * Note that even with scaling disabled, there will always be down-sampling of a grid that has a higher resoltuion. Also the two grids must be axis alligned.
+	 *
+	 * @todo Implement scaling
+	 */
+	void addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling = false);
+
 };
 
 }; /* END OCCUPANCY_GRID */
