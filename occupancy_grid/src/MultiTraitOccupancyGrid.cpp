@@ -259,9 +259,14 @@ MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(int x, i
 	return this->grid_.at(0).data[index];
 }
 
-MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPoitTrait(double x, double y) const
+MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x, double y) const
 {
 	return this->getPointTrait(x/this->map_meta_data_.resolution, y/this->map_meta_data_.resolution);
+}
+
+MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(const gm::PoseStamped& point) const
+{
+	return this->getPointTrait(point.pose.position.x-this->map_meta_data_.origin.position.x, point.pose.position.y-this->map_meta_data_.origin.position.y);
 }
 
 void MultiTraitOccupancyGrid::addPointTrait(double x, double y, trait_t trait, int confidence)
@@ -357,4 +362,10 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 			this->addPointTrait((double)x*confidances.info.resolution, (double)y*confidances.info.resolution, copy_trait, copy_confidence);
 		}
 	}
+}
+
+
+void MultiTraitOccupancyGrid::addPointTrait(const gm::PoseStamped& point, trait_t trait, int confidence)
+{
+	this->addPointTrait(point.pose.position.x-this->map_meta_data_.origin.position.x, point.pose.position.y-this->map_meta_data_.origin.position.y, trait, confidence);
 }

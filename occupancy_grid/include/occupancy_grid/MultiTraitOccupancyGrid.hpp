@@ -46,6 +46,7 @@
 #include <occupancy_grid/MultiTraitOccupancyGridMessage.h>
 //***********    NAMESPACES     ****************//
 namespace nm  = nav_msgs;
+namespace gm  = geometry_msgs;
 namespace occupancy_grid
 {
 
@@ -273,7 +274,20 @@ public:
 	 * @param [in] y The y location on the grid, in meters
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
 	 */
-	trait_t getPoitTrait(double x, double y) const;
+	trait_t getPointTrait(double x, double y) const;
+
+
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Gets the trait of a point on the grid
+	 * @param [in] point A Pose who's x/y components corrispond to a location on the grid
+	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
+	 *
+	 * Assumes that the given pose is not origin corrected. That is, we subtract the origin
+	 * to get the location of the point relative to the grid.
+	 */
+	trait_t getPointTrait(const gm::PoseStamped& point) const;
 
 	/**
 	 * @author Adam panzica
@@ -313,6 +327,18 @@ public:
 	 * Adds confidence to the probability that a point contains a given trait. Also removes proportional confidence from the other trait possibilities
 	 */
 	void addPointTrait(double x, double y, trait_t trait, int confidence = 100);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Adds confidence to a point being a particular trait
+	 * @param [in] point A Pose who's x/y components corrispond to a location on the grid
+	 * @param [in] trait The trait to add confidence to
+	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
+	 *
+	 * Assumes that the given pose is not origin corrected. That is, we subtract the origin
+	 * to get the location of the point relative to the grid.
+	 */
+	void addPointTrait(const gm::PoseStamped& point, trait_t trait, int confidence = 100);
 
 	/**
 	 * @author Adam Panzica
