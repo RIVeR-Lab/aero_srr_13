@@ -1,1 +1,1 @@
-rosbuild_add_library(OccupancyGrid OccupancyGrid.cpp)
+rosbuild_add_library(MultiTraitOccupancyGrid MultiTraitOccupancyGrid.cpp)

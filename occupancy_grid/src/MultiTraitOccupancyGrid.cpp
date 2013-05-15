@@ -36,7 +36,7 @@
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <boost/foreach.hpp>
 //************ LOCAL DEPENDANCIES ****************//
-#include <occupancy_grid/OccupancyGrid.hpp>
+#include <occupancy_grid/MultiTraitOccupancyGrid.hpp>
 //***********    NAMESPACES     ****************//
 
 using namespace occupancy_grid;
