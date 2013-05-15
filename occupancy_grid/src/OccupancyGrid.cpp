@@ -311,3 +311,11 @@ void MultiTraitOccupancyGrid::toROSMsg(MultiTraitOccupancyGridMessage& message) 
 		message.trait_vector.at(trait_index.second-1) = trait_index.first;
 	}
 }
+
+void MultiTraitOccupancyGrid::toROSMsg(trait_t trait, nm::OccupancyGrid& message) const
+{
+	message.header.frame_id = this->frame_id_;
+	message.header.stamp    = ros::Time::now();
+	message.info            = this->map_meta_data_;
+	message.data            = this->grid_.at(this->trait_map_.at(trait.getEnum()));
+}

@@ -283,9 +283,17 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Generates a nav_msgs::OccupancyGrid message containing the confidences of a particular trait type
+	 * @param [in] trait The trait confidances to fill the message with
+	 * @param [out] message The message to fill
+	 */
+	void toROSMsg(trait_t trait, nm::OccupancyGrid& message) const;
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Adds confidence to a point being a particular trait
-	 * @param [in] x The x location on the grid, in grid-units
-	 * @param [in] y The y location on the grid, in grid units
+	 * @param [in] x The x location on the grid, in grid-units. Note that the grid always starts at 0
+	 * @param [in] y The y location on the grid, in grid units. Note that the grid always starts at 0
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
 	 *
@@ -296,8 +304,8 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Adds confidence to a point being a particular trait
-	 * @param [in] x The x location on the grid, in meters
-	 * @param [in] y The y location on the grid, in meters
+	 * @param [in] x The x location on the grid, in meters. Note that the grid always starts at 0m
+	 * @param [in] y The y location on the grid, in meters. Note that the grid always starts at 0m
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
 	 *
