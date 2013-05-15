@@ -15,7 +15,7 @@
   <depend package="tf"/>
   <depend package="geometry_msgs"/>
   <export>
-	<cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+	<cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lMultiTraitOccupancyGrid"/>
   </export>
 
 </package>

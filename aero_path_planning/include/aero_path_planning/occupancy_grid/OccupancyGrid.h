@@ -14,6 +14,7 @@
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include <aero_path_planning/utilities/AeroPathPlanningUtilities.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
+#include <occupancy_grid/MultiTraitOccupancyGrid.hpp>
 
 namespace nm  = nav_msgs;
 namespace sm  = sensor_msgs;
@@ -416,6 +417,7 @@ private:
 	app::Point goal_;		///The location of the goal point on the grid
 	OccupancyGridCloud occ_grid_;			///The point cloud which contains the data for this occupancy grid
 	app::PointConverter converter_;	///Used to convert the internal integer units to output engineering units
+	occupancy_grid::MultiTraitOccupancyGrid grid_;
 };
 
 
