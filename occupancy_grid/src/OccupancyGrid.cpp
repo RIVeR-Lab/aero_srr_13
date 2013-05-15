@@ -170,11 +170,12 @@ MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const MultiTraitOccupancyGridMe
 		temp_cell_values_(new cell_data_t[message.trait_vector.size()])
 {
 	this->grid_ = message.trait_grids;
-	for(unsigned int i=1; i<message.trait_vector.size()+1; i++)
+	for(unsigned int i=0; i<message.trait_vector.size(); i++)
 	{
-		CellTrait trait(message.trait_vector.at(i-1));
-		this->trait_map_[trait.getEnum()] = i;
-		this->index_map_[i] = trait.getEnum();
+		CellTrait trait(message.trait_vector.at(i));
+		//ROS_INFO_STREAM("Loading Trait "<<trait.getString()<<" to vector index "<<i+1);
+		this->trait_map_[trait.getEnum()] = i+1;
+		this->index_map_[i+1] = trait.getEnum();
 	}
 }
 
@@ -299,12 +300,14 @@ void MultiTraitOccupancyGrid::addPointTrait(int x, int y, trait_t trait, int con
 
 void MultiTraitOccupancyGrid::toROSMsg(MultiTraitOccupancyGridMessage& message) const
 {
-	message.trait_grids = this->grid_;
+	message.trait_grids     = this->grid_;
 	message.header.frame_id = this->frame_id_;
 	message.header.stamp    = ros::Time::now();
-	message.trait_vector    = std::vector<int32_t>(this->index_map_.size());
-	BOOST_FOREACH(index_map_t::value_type trait_index, this->index_map_)
+	message.trait_vector    = std::vector<int32_t>(this->trait_map_.size());
+	BOOST_FOREACH(trait_map_t::value_type trait_index, this->trait_map_)
 	{
-		message.trait_vector.at(trait_index.first) = trait_index.second;
+		CellTrait trait(trait_index.first);
+		//ROS_INFO_STREAM("Copying Trait "<<trait.getString()<<" to vector index "<<trait_index.second-1);
+		message.trait_vector.at(trait_index.second-1) = trait_index.first;
 	}
 }

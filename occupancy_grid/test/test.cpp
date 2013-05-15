@@ -88,12 +88,16 @@ TEST_F(occ_test_fixture, testMessage)
 {
 	MultiTraitOccupancyGrid testGrid("test", traits_, utilities::CellTrait::UNKOWN, info_);
 	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
-	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
 	MultiTraitOccupancyGridMessage testMessage;
 	testGrid.toROSMsg(testMessage);
 	ASSERT_EQ("test", testMessage.header.frame_id);
 	MultiTraitOccupancyGrid copyedGrid(testMessage);
+	//Should still be unkown because it takes two sets to change the type
+	ASSERT_EQ(utilities::CellTrait::UNKOWN, copyedGrid.getPointTrait(10,10).getEnum());
+	//If trait copying worked properly, this should tip the scales
+	copyedGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
 	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyedGrid.getPointTrait(10,10).getEnum());
+
 
 }
 
