@@ -320,7 +320,7 @@ void MultiTraitOccupancyGrid::toROSMsg(trait_t trait, nm::OccupancyGrid& message
 	message.data            = this->grid_.at(this->trait_map_.at(trait.getEnum()));
 }
 
-void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling)
+void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling, bool use_zero_as_free, bool use_negative_as_unkown)
 {
 	unsigned int copy_width  = confidances.info.width;
 	unsigned int copy_height = confidances.info.height;
@@ -336,8 +336,26 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 	{
 		for(unsigned int y = 0; y < copy_height; y++)
 		{
-			int copy_data_index = ogu::calcIndexRowMajor2D(x, y, confidances.info.width);
-			this->addPointTrait((double)x*confidances.info.resolution, (double)y*confidances.info.resolution, trait, confidances.data[copy_data_index]);
+			int copy_data_index        = ogu::calcIndexRowMajor2D(x, y, confidances.info.width);
+			int copy_confidence        = confidances.data[copy_data_index];
+			CellTrait copy_trait(trait);
+			if(use_zero_as_free)
+			{
+				if(copy_confidence == 0)
+				{
+					copy_trait      = CellTrait::FREE_LOW_COST;
+					copy_confidence = 100;
+				}
+			}
+			if(use_negative_as_unkown)
+			{
+				if(copy_confidence<0)
+				{
+					copy_trait      = CellTrait::UNKOWN;
+					copy_confidence = 10;
+				}
+			}
+			this->addPointTrait((double)x*confidances.info.resolution, (double)y*confidances.info.resolution, copy_trait, copy_confidence);
 		}
 	}
 }

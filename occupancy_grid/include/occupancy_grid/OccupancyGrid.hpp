@@ -203,7 +203,7 @@ public:
 	 * @brief Constructs a new grid
 	 * @brief [in] frame_id The frame that the map is representing
 	 * @param [in] slice_info MapMetaData defining the basic 2D properties of the grid
-	 * @param [in] traits A vector of the traits that a point could be
+	 * @param [in] traits A vector of the traits that a point could be. Must, at minimum, contain UNKOWN, FREE_LOW_COST, and OBSTACLE for merging nav_msgs::OccupancyGrids from SLAM services such as gampping to be possible
 	 * @param [in] initial_trait The trait to fill the map with initially
 	 */
 	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nm::MapMetaData& slice_info);
@@ -319,12 +319,14 @@ public:
 	 * @param [in] confidances The gird of confidances to merge in
 	 * @param [in] trait The trait type to treat the confidances as
 	 * @param [in] scaling True if the input grid should be up/down sampled to match the resolution and dimmensions of this grid, else it will be copied 1/1 and clipped if the dimmensions do not match
+	 * @param [in] use_zero_as_free Treates a value of zero as 100% confidance in FREE_LOW_COST at that location
+	 * @param [in] use_negative_as_unkown Treats a negative value as 10% confidance in UNKOWN at that location
 	 *
 	 * Note that even with scaling disabled, there will always be down-sampling of a grid that has a higher resoltuion. Also the two grids must be axis alligned.
 	 *
 	 * @todo Implement scaling
 	 */
-	void addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling = false);
+	void addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling = false, bool use_zero_as_free = true, bool use_negative_as_unkown = true);
 
 };
 
