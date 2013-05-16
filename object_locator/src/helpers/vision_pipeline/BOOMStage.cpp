@@ -26,11 +26,12 @@ void BOOMStage::onInit()
 
 void BOOMStage::loadParams()
 {
-	this->input_topic_="stereo_camera/left/image_raw";
+	this->input_topic_="upper_stereo/left/image_raw";
 	this->output_topic_="boom_stage/direction";
 	this->getPrivateNodeHandle().getParam(this->input_topic_,this->input_topic_);
 	this->getPrivateNodeHandle().getParam(this->output_topic_,this->output_topic_);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
+	this->HORIZON_ = 150;
 //	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
 //	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
 }
@@ -66,6 +67,7 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 	double R,G,B,sumRGB, nR,nG,nB, browness,whiteness;
 	Vec3b RGB,nRGB,ZeroV, Black;
 	Mat_t norma = img->image;
+
 	nRGB[0] = 0;
 	nRGB[1] = 0;
 	nRGB[2] = 0;
@@ -80,9 +82,9 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 		for(int x = 0; x<src.rows; x++)
 		{
 			RGB = src.at<cv::Vec3b>(x,y);
-			R = RGB[2];
+			B = RGB[2];
 			G = RGB[1];
-			B = RGB[0];
+			R = RGB[0];
 			sumRGB = R + G + B;
 			nR = R/sumRGB;
 			nG = G/sumRGB;
@@ -103,7 +105,15 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage)
 			}
 		}
 	}
+	 for(int i = 0; i<src.cols;i++)
+	 {
+		 for(int j =0;j<HORIZON_;j++)
+		 {
+			 norma.at<cv::Vec3b>(j,i) = ZeroV;
+		 }
+	 }
 	normImage = norma;
+	cv::line(norma,Point2d(0,HORIZON_),Point2d(norma.cols,HORIZON_),Scalar(0,255,0));
 	   namedWindow( "b&w", CV_WINDOW_AUTOSIZE );
 	   imshow( "b&w", norma );
 	   waitKey(3);
@@ -129,6 +139,7 @@ normImg = med;
 
 	 /// Detect edges using Threshold
 	 threshold( src_gray, threshold_output, thresh, 255, THRESH_BINARY );
+
 	   /// Find contours
 	 findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
@@ -166,6 +177,7 @@ normImg = med;
 	      }
 
 	   /// Show in a window
+		cv::line(drawing,Point2d(0,HORIZON_),Point2d(drawing.cols,HORIZON_),Scalar(0,255,0));
 	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
 	   imshow( "Contours", drawing );
 

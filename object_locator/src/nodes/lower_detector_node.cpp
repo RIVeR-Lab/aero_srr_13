@@ -16,6 +16,7 @@
 #include <pcl/ros/conversions.h>
 #include <pcl/octree/octree.h>
 #include <pcl/filters/voxel_grid.h>
+#include <boost/foreach.hpp>
 //#include <opencv2/gpu/stream_accessor.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
@@ -504,7 +505,7 @@ void ImageConverter::computeDisparity() {
 //			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
-			camera_point.header.frame_id = "/lower_stereo_optical_frame";
+			camera_point.header.frame_id = "/upper_stereo_optical_frame";
 			camera_point.header.stamp = tZero;
 			world_point.header.frame_id = "/world";
 			world_point.header.stamp = tZero;
@@ -709,17 +710,41 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	if (!cascade_PIPE.load(cascade_path_PIPE)) {
 		printf("--(!)Error loading\n");
 	}
-	cv::GaussianBlur(frame, frame, cv::Size(9, 9), 2, 2);
+//	cv::GaussianBlur(frame, frame, cv::Size(41, 41), 2, 2);
 
 	std::vector<cv::Rect> WHA_faces, PINK_faces, SUN_faces, RQT_faces,
 			Pipe_faces;
 	std::vector<std::vector<cv::Rect> > Detections;
 	int HORIZON = 150;
 
-
 	Mat_t frame_gray;
+	Mat_t hsv;
+	Mat_t mask(frame.rows,frame.cols,CV_8U);
+	Mat_t pipeMask = mask;
+  	cvtColor(frame, hsv,CV_RGB2HSV);
+//  	cvtColor(hsv, hsv,CV_RGB2HSV);
+  	GaussianBlur( hsv, hsv, Size(9, 9), 2, 2 );
+  	cv::Vec3b hsvPipe = hsv.at<cv::Vec3b>(300,300);
+  	int H = hsvPipe[0];
+  	int S = hsvPipe[1];
+  	int V = hsvPipe[2];
+//  	ROS_WARN_STREAM("HSV at pipe = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
+//  	cv::ellipse(hsv, Point2d(300,300),
+//  						cv::Size(2,2),
+//  						0, 0, 360, cv::Scalar(0, 0, 0), 2, 8, 0);
+//	inRange(hsv, Scalar(112,235, 112,0) , Scalar(117, 245, 115,0), mask );
+	inRange(hsv, Scalar(108,198, 54,0) , Scalar(115, 240, 128,0), pipeMask );
 
-	cv::cvtColor(frame, frame_gray, CV_BGR2GRAY);
+//	blobIdentify(mask);
+//	Mat_t mask2;
+//	addBbox(mask, mask2);
+	pipePoint_;
+	pipePoint_ = blobIdentify(pipeMask,200);
+	ROS_WARN_STREAM("Pipe is located at = (" << pipePoint_.x << "," << pipePoint_.y << ")");
+	cv::cvtColor(frame, frame_gray, CV_RGB2GRAY);
+
+
+
 	cv::equalizeHist(frame_gray, frame_gray);
 	cv::line(frame,Point2d(0,HORIZON),Point2d(frame_gray.cols,HORIZON),Scalar(0,255,0));
 
@@ -734,7 +759,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	cascade_WHASUN.detectMultiScale(frame_gray, SUN_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for WHASUN
 	cascade_PIPE.detectMultiScale(frame_gray, Pipe_faces, 1.1, 1, 0,
-			cv::Size(30, 70), cv::Size(50, 96)); // works for
+			cv::Size(51, 36), cv::Size(68, 48)); // works for
 
 	/*
 	 * WHA - White hook object inside detection loop
@@ -880,12 +905,122 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		detection_list_.push_back(newDetection);
 		}
 	}
+
+
+
 //	std::cout << "Finished Searching for Objects"<< std::endl;
 	//-- Show what you got
+	cv::imshow(WINDOWRight, mask);
+	cv::waitKey(3);
 	cv::imshow(WINDOWLeft, frame);
 
 	cv::waitKey(3);
 
+}
+void ImageConverter::addBbox(Mat_t& src, Mat_t& final)
+{
+	Mat_t img =src;
+   for(int i = 0; i <img.rows-1; i++)
+   {
+	   for(int j= 0; j<img.cols-1; j++)
+	   {
+		   if((img.at<Vec3b>(i,j)[0] == 255) && (i != 0)){
+			   img.at<Vec3b>(i-1,j)[0] = 255;
+			   img.at<Vec3b>(i-1,j-1)[0] = 255;
+//			   if(i != 0)
+//			   img.at<Vec3b>(i-1,j)[0] = 255;
+//			   i++;
+		   }
+	   }
+   }
+   final = img;
+}
+
+Point2f ImageConverter::blobIdentify(Mat_t& img, int objThresh)
+{
+	ROS_INFO_STREAM("IN BLOB IDENTIFY");
+	Mat_t med, src_gray,normImg;
+	int thresh = 100;
+	int max_thresh = 255;
+	RNG rng(12345);
+	Mat threshold_output;
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+	Point2f final;
+	int bestPoint =0;
+//	 medianBlur(img,med, 11);
+
+//normImg = med;
+
+//	 cvtColor(normImg, src_gray, CV_BGR2GRAY);
+	src_gray = img;
+	 /// Detect edges using Threshold
+	 threshold( src_gray, threshold_output, thresh, 255, THRESH_BINARY );
+
+	   /// Find contours
+	   /// Find contours
+	 findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+	   /// Approximate contours to polygons + get bounding rects and circles
+	   vector<vector<Point> > contours_poly( contours.size() );
+	   vector<Rect> boundRect( contours.size() );
+	   vector<Point2f>center( contours.size() );
+	   vector<float>radius( contours.size() );
+	   int flag[contours.size()];
+	   for( int i = 0; i < contours.size(); i++ )
+	 	  {
+
+	 	  approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
+	        boundRect[i] = boundingRect( Mat(contours_poly[i]) );
+	        minEnclosingCircle( (Mat)contours_poly[i], center[i], radius[i] );
+	  	  if(radius[i] > src_gray.cols/3)
+	  	     	   flag[i] = 1;
+	  	  else
+	  		  flag[i] = 0;
+	      }
+
+
+	   /// Draw polygonal contour + bonding rects + circles
+	   Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
+	   for( int i = 0; i< contours.size(); i++ )
+	      {
+
+	 	  if(flag[i] != 1)
+	 	  {
+	        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+	        drawContours( drawing, contours_poly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+	        if((int)radius[i] > 35)
+	        {
+	        	int thisPoint =i;
+	        	rectangle( drawing, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
+	        	circle( drawing, center[i], (int)radius[i], color, 2, 8, 0 );
+	        	rectangle( frame, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
+	        	circle( frame, center[i], (int)radius[i], color, 2, 8, 0 );
+	        	cout << "Center of object[" << i << "]" << "= "<< center[i].x<<","<< center[i].y << "radius := " << radius[i] <<endl;
+	        	if((radius[thisPoint]> radius[bestPoint])< objThresh)
+	        	{
+	        		final = center[thisPoint];
+	        		bestPoint = i;
+	        	}
+	        	else
+	        		final = center[bestPoint];
+	        }
+
+	 	  }
+	      }
+
+	   /// Show in a window
+//		cv::line(drawing,Point2d(0,HORIZON_),Point2d(drawing.cols,HORIZON_),Scalar(0,255,0));
+	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+	   imshow( "Contours", drawing );
+
+
+
+	   cv::waitKey(3);
+	   return final;
+//		std::stringstream s;
+//		s << "/home/srr/ObjectDetectionData/blob/0.png";
+//		cv::imwrite(s.str(), drawing);
 }
 
 int main(int argc, char** argv) {

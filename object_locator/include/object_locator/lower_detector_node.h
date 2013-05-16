@@ -51,8 +51,9 @@ public:
 	void rectLeftCb(const sensor_msgs::ImageConstPtr& msg);
 	float nNdisp(const cv::Point2d& pt, const Mat_t& disp);
 //	void pointCloudCb(const sensor_msgs::PointCloud2ConstPtr& cloud);
-
+	void addBbox(Mat_t& img, Mat_t& final);
 	Mat_t gray2bgr(Mat_t img);
+	cv::Point2f blobIdentify(Mat_t& img, int objThresh);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 
@@ -80,6 +81,8 @@ private:
 				cascade_path_RQT_BALL,
 				cascade_path_PIPE;
 	float kAvgVal_;
+	cv::Point2f pipePoint_;
+
 	Mat_t frame;
 	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE;
 	tf::TransformListener optimus_prime;
@@ -89,6 +92,9 @@ private:
 	typedef std::pair<PixPoint_t, object_type> Detection_t;
 	typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
 	std::vector<DetectionPtr_t> detection_list_;
+
+
+
 
 	image_geometry::StereoCameraModel stereo_model;
 	char* WINDOWLeft;

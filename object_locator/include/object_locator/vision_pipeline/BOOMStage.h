@@ -52,7 +52,7 @@ namespace object_locator
 		ros::Subscriber sync_image_sub_;
 		image_transport::ImageTransport* it_;
 		image_transport::CameraSubscriber image_left_;
-
+		int HORIZON_;
 
 		std::string input_topic_, output_topic_;
 		Mat_t load_;
