@@ -14,6 +14,15 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/ros/conversions.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/sac_model_sphere.h>
+#include <pcl/sample_consensus/sac_model_cylinder.h>.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/console/parse.h>
+#include <pcl/filters/extract_indices.h>
+#include <boost/thread/thread.hpp>
+#include <pcl/io/pcd_io.h>
 #include <pcl/octree/octree.h>
 #include <pcl/filters/voxel_grid.h>
 #include <boost/foreach.hpp>
@@ -39,6 +48,7 @@ ImageConverter::ImageConverter() :
 			"ObjectPose", 2);
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("points2", 1);
+	pub_points3_ = nh_.advertise<PointCloud2>("points3", 1);
 
 
 
@@ -63,11 +73,11 @@ ImageConverter::ImageConverter() :
 			"/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
 	cascade_path_PINK =
 			"/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
-	cascade_path_WHASUN =
-			"/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
+	cascade_path_PIPEDright =
+			"/home/srr/ObjectDetectionData/exec/cascadePipeDiag/cascade.xml";
 //	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	cascade_path_PIPE =
-			"/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
+			"/home/srr/ObjectDetectionData/exec/cascadePIPEX/cascade.xml";
 	ctrLeft = 0;
 	ctrRight = 0;
 	cv::namedWindow(WINDOWLeft);
@@ -169,6 +179,7 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 	return pt[2] != image_geometry::StereoCameraModel::MISSING_Z
 			&& !std::isinf(pt[2]);
 }
+
 void ImageConverter::computeDisparity() {
 	processImage(left_image, mat_left, WINDOWLeft);
 	processImage(right_image, mat_right, WINDOWRight);
@@ -431,6 +442,45 @@ void ImageConverter::computeDisparity() {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromROSMsg(*points_msg,*cloud);
 
+	//****** Cylinder model testing *******//
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudFilt (new pcl::PointCloud<pcl::PointXYZ>);
+	cloudFilt = cloud;
+	 pcl::PointCloud<pcl::PointXYZ>::Ptr final (new pcl::PointCloud<pcl::PointXYZ>);
+
+	  std::vector<int> inliers;
+	  int argF = 2;
+	  // created RandomSampleConsensus object and compute the appropriated model
+	  pcl::SampleConsensusModelSphere<pcl::PointXYZ>::Ptr
+	    model_s(new pcl::SampleConsensusModelSphere<pcl::PointXYZ> (cloudFilt));
+	  pcl::SampleConsensusModelPlane<pcl::PointXYZ>::Ptr
+	    model_p (new pcl::SampleConsensusModelPlane<pcl::PointXYZ> (cloudFilt));
+	  if(argF == 1)
+	  {
+	    pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_p);
+	    ransac.setDistanceThreshold (.01);
+	    ransac.computeModel();
+	    ransac.getInliers(inliers);
+	  }
+	  else if (argF == 2 )
+	  {
+	    pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_s);
+	    ransac.setDistanceThreshold (.01);
+	    ransac.computeModel();
+	    ransac.getInliers(inliers);
+	  }
+	  // copies all inliers of the model computed to another PointCloud
+	  pcl::copyPointCloud<pcl::PointXYZ>(*cloudFilt, inliers, *final);
+
+	  // creates the visualization object and adds either our orignial cloud or all of the inliers
+	  // depending on the command line arguments specified.
+	  sensor_msgs::PointCloud2Ptr filtered_msg =boost::make_shared<
+				sensor_msgs::PointCloud2>();
+	  pcl::PointCloud<pcl::PointXYZ>::ConstPtr finalc(new pcl::PointCloud<pcl::PointXYZ>);
+	  finalc = final;
+	  pcl::toROSMsg(*finalc, *filtered_msg);
+	  pub_points3_.publish(filtered_msg);
+
+	//*********Oct tree stuff *************//
 	float resolution = 2.5f;
 	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
 
@@ -700,7 +750,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	if (!cascade_PINK.load(cascade_path_PINK)) {
 		printf("--(!)Error loading\n");
 	}
-	if (!cascade_WHASUN.load(cascade_path_WHASUN)) {
+	if (!cascade_PIPE_Dright.load(cascade_path_PIPEDright)) {
 		printf("--(!)Error loading\n");
 	}
 //	if( !cascade_RQT_BALL.load(cascade_path_RQT_BALL))
@@ -718,29 +768,33 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	int HORIZON = 150;
 
 	Mat_t frame_gray;
-	Mat_t hsv;
+	Mat_t hsv,hsv2;
 	Mat_t mask(frame.rows,frame.cols,CV_8U);
 	Mat_t pipeMask = mask;
+	Mat_t WHAMask = mask;
   	cvtColor(frame, hsv,CV_RGB2HSV);
-//  	cvtColor(hsv, hsv,CV_RGB2HSV);
+  	cvtColor(frame, hsv2,CV_BGR2HSV);
   	GaussianBlur( hsv, hsv, Size(9, 9), 2, 2 );
-  	cv::Vec3b hsvPipe = hsv.at<cv::Vec3b>(300,300);
-  	int H = hsvPipe[0];
-  	int S = hsvPipe[1];
-  	int V = hsvPipe[2];
-//  	ROS_WARN_STREAM("HSV at pipe = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
-//  	cv::ellipse(hsv, Point2d(300,300),
-//  						cv::Size(2,2),
-//  						0, 0, 360, cv::Scalar(0, 0, 0), 2, 8, 0);
-//	inRange(hsv, Scalar(112,235, 112,0) , Scalar(117, 245, 115,0), mask );
+  	GaussianBlur( hsv2, hsv2, Size(9, 9), 2, 2 );
+//  	cv::Vec3b hsvPipe = hsv.at<cv::Vec3b>(300,300);
+//  	int H = hsvPipe[0];
+//  	int S = hsvPipe[1];
+//  	int V = hsvPipe[2];
+  	cv::Vec3b hsvRock = hsv2.at<cv::Vec3b>(300,300);
+  	int H = hsvRock[0];
+  	int S = hsvRock[1];
+  	int V = hsvRock[2];
+//  	ROS_WARN_STREAM("HSV at rock = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
+  	cv::ellipse(hsv2, Point2d(300,300),
+  						cv::Size(2,2),
+  						0, 0, 360, cv::Scalar(0, 0, 0), 2, 8, 0);
+//
 	inRange(hsv, Scalar(108,198, 54,0) , Scalar(115, 240, 128,0), pipeMask );
+	inRange(hsv2, Scalar(68,71, 76,0) , Scalar(83, 75, 112,0), WHAMask );
 
-//	blobIdentify(mask);
-//	Mat_t mask2;
-//	addBbox(mask, mask2);
-	pipePoint_;
-	pipePoint_ = blobIdentify(pipeMask,200);
-	ROS_WARN_STREAM("Pipe is located at = (" << pipePoint_.x << "," << pipePoint_.y << ")");
+//	pipePoint_ = blobIdentify(pipeMask,200);
+//	WHAPoint_ = blobIdentify(WHAMask,200);
+//	ROS_WARN_STREAM("Pipe is located at = (" << pipePoint_.x << "," << pipePoint_.y << ")");
 	cv::cvtColor(frame, frame_gray, CV_RGB2GRAY);
 
 
@@ -756,10 +810,10 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 			cv::Size(52, 59), cv::Size(85, 90)); // works for WHAground !&
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
-	cascade_WHASUN.detectMultiScale(frame_gray, SUN_faces, 1.1, 20, 0,
-			cv::Size(45, 45), cv::Size(80, 80)); // works for WHASUN
-	cascade_PIPE.detectMultiScale(frame_gray, Pipe_faces, 1.1, 1, 0,
-			cv::Size(51, 36), cv::Size(68, 48)); // works for
+	cascade_PIPE_Dright.detectMultiScale(frame_gray, SUN_faces, 1.1, 10, 0,
+			cv::Size(24, 30), cv::Size(150, 250)); // works for WHASUN
+	cascade_PIPE.detectMultiScale(frame_gray, Pipe_faces, 1.1,400, 0,
+			cv::Size(14, 90), cv::Size(35, 200)); // works for
 
 	/*
 	 * WHA - White hook object inside detection loop
@@ -779,7 +833,12 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 			cv::ellipse(frame, center,
 					cv::Size(WHA_faces[i].width / 2, WHA_faces[i].height / 2),
 					0, 0, 360, cv::Scalar(255, 0, 0), 2, 8, 0);
-
+			cv::rectangle(frame,
+							Point(center.x - WHA_faces[i].width / 2,
+									center.y - WHA_faces[i].height / 2),
+							Point(center.x + WHA_faces[i].width / 2,
+									center.y + WHA_faces[i].height / 2),
+									cv::Scalar(255, 0, 0));
 			//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
 			DetectionPtr_t newDetection(new Detection_t());
@@ -806,8 +865,13 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(PINK_faces[j].width / 2, PINK_faces[j].height / 2), 0,
-				0, 360, cv::Scalar(0, 255, 0), 2, 8, 0);
-
+				0, 360, cv::Scalar(255, 0, 255), 2, 8, 0);
+		cv::rectangle(frame,
+						Point(center.x - PINK_faces[j].width / 2,
+								center.y - PINK_faces[j].height / 2),
+						Point(center.x + PINK_faces[j].width / 2,
+								center.y + PINK_faces[j].height / 2),
+								cv::Scalar(255, 0, 255));
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
 		DetectionPtr_t newDetection(new Detection_t());
@@ -818,7 +882,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		}
 	}
 	/*
-	 * WHA_SUN - White hook object outdoor detection loop
+	 * PIPE- DIAG
 	 */
 	for (size_t j = 0; j < SUN_faces.size(); j++) {
 //		cout << "Entered circle drawing loop" << endl;
@@ -834,9 +898,14 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		cv::ellipse(frame, center,
 				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
 				360, cv::Scalar(0, 0, 255), 2, 8, 0);
-
+		cv::rectangle(frame,
+				Point(center.x - SUN_faces[j].width / 2,
+						center.y - SUN_faces[j].height / 2),
+				Point(center.x + SUN_faces[j].width / 2,
+						center.y + SUN_faces[j].height / 2),
+				cv::Scalar(0, 0, 255));
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-
+		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << Pipe_faces[j].width << "," << Pipe_faces[j].height);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
@@ -845,7 +914,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		}
 	}
 	/*
-	 * RQT_BALL - Raquet ball detection loop
+	 * Actually WHA but with different range
 	 */
 	for (size_t j = 0; j < RQT_faces.size(); j++) {
 //		cout << "Entered circle drawing loop" << endl;
@@ -860,7 +929,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(RQT_faces[j].width / 2, RQT_faces[j].height / 2), 0, 0,
-				360, cv::Scalar(255, 0, 255), 2, 8, 0);
+				360, cv::Scalar(0, 255,0), 2, 8, 0);
 
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
@@ -896,7 +965,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 				Point(center.x + Pipe_faces[j].width / 2,
 						center.y + Pipe_faces[j].height / 2),
 				cv::Scalar(15, 0, 255));
-		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+
 
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
@@ -910,8 +979,11 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 
 //	std::cout << "Finished Searching for Objects"<< std::endl;
 	//-- Show what you got
-	cv::imshow(WINDOWRight, mask);
-	cv::waitKey(3);
+//	   namedWindow( "hsv2", CV_WINDOW_AUTOSIZE );
+//	   imshow( "hsv2", hsv2);
+//		cv::waitKey(3);
+//	cv::imshow(WINDOWRight, mask);
+//	cv::waitKey(3);
 	cv::imshow(WINDOWLeft, frame);
 
 	cv::waitKey(3);

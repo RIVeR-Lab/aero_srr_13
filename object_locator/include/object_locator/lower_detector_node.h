@@ -70,6 +70,7 @@ private:
 	ros::Subscriber point_cloud_sub_;
 	image_transport::Publisher image_pub_;
 	ros::Publisher pub_points2_;
+	ros::Publisher pub_points3_;
 
 	sensor_msgs::Image left_image;
 	sensor_msgs::Image right_image;
@@ -79,12 +80,13 @@ private:
 				cascade_path_PINK,
 				cascade_path_WHASUN,
 				cascade_path_RQT_BALL,
-				cascade_path_PIPE;
+				cascade_path_PIPE,
+				cascade_path_PIPEDright;
 	float kAvgVal_;
-	cv::Point2f pipePoint_;
+	cv::Point2f pipePoint_,WHAPoint_;
 
 	Mat_t frame;
-	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE;
+	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE, cascade_PIPE_Dright;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
