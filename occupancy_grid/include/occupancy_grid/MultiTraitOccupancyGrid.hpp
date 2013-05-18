@@ -287,6 +287,16 @@ public:
 	 */
 	std::string getFrameID() const;
 
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Gets the OccupancyGrid corrisponding to a trait type
+	 * @param [out] message The message to fill
+	 * @param [in] trait The trait to get confidances for
+	 * @return True if that trait was in the grid, else false
+	 */
+	bool generateOccupancyGridforTrait(nm::OccupancyGrid& message, ogu::CellTrait trait) const;
+
 	/**
 	 * @author Adam Panzica
 	 * @brief Adds a goal to the grid

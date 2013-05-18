@@ -273,7 +273,7 @@ std::string MultiTraitOccupancyGrid::getFrameID() const
 MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(int x, int y) const
 {
 	int index = ogu::calcIndexRowMajor2D(x, y, this->map_meta_data_.width);
-	return this->grid_.at(0).data[index];;
+	return this->grid_.at(0).data[index];
 }
 
 MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x, double y) const
@@ -432,4 +432,14 @@ void MultiTraitOccupancyGrid::place_goal(int x, int y)
 ros::Time MultiTraitOccupancyGrid::getCreationTime() const
 {
 	return this->map_meta_data_.map_load_time;
+}
+
+bool MultiTraitOccupancyGrid::generateOccupancyGridforTrait(nm::OccupancyGrid& message, ogu::CellTrait trait) const
+{
+	if(this->trait_map_.count(trait.getEnum())==1)
+	{
+		message =  this->grid_.at(this->trait_map_.at(trait.getEnum()));
+		return true;
+	}
+	return false;
 }
