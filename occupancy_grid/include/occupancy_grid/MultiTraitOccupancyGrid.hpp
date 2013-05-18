@@ -264,6 +264,12 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @return The time that the grid was created
+	 */
+	ros::Time getCreationTime() const;
+
+	/**
+	 * @author Adam Panzica
 	 * @return The origin of the map. Will be in meters
 	 */
 	geometry_msgs::Pose getOrigin() const;

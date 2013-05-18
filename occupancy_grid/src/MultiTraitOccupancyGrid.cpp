@@ -428,3 +428,8 @@ void MultiTraitOccupancyGrid::place_goal(int x, int y)
 		this->addPointTrait(x, y, CellTrait::GOAL, 1000);
 	}
 }
+
+ros::Time MultiTraitOccupancyGrid::getCreationTime() const
+{
+	return this->map_meta_data_.map_load_time;
+}
