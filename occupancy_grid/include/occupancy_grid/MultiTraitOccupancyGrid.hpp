@@ -226,6 +226,13 @@ public:
 	 */
 	MultiTraitOccupancyGrid(const MultiTraitOccupancyGridMessage& message);
 
+	/**
+	 * @author Adam Panzica
+	 * @brief copy constructor
+	 * @param [in] copy
+	 */
+	MultiTraitOccupancyGrid(const MultiTraitOccupancyGrid& copy);
+
 	virtual ~MultiTraitOccupancyGrid();
 
 	/**
