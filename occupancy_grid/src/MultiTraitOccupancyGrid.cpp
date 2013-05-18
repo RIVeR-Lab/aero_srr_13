@@ -367,5 +367,5 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 
 void MultiTraitOccupancyGrid::addPointTrait(const gm::PoseStamped& point, trait_t trait, int confidence)
 {
-	this->addPointTrait(point.pose.position.x-this->map_meta_data_.origin.position.x, point.pose.position.y-this->map_meta_data_.origin.position.y, trait, confidence);
+	this->addPointTrait(point.pose.position.x+this->map_meta_data_.origin.position.x, point.pose.position.y+this->map_meta_data_.origin.position.y, trait, confidence);
 }

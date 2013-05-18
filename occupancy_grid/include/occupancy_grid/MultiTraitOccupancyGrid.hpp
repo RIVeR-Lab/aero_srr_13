@@ -335,7 +335,7 @@ public:
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
 	 *
-	 * Assumes that the given pose is not origin corrected. That is, we subtract the origin
+	 * Assumes that the given pose is not origin corrected. That is, we add the origin
 	 * to get the location of the point relative to the grid.
 	 */
 	void addPointTrait(const gm::PoseStamped& point, trait_t trait, int confidence = 100);
