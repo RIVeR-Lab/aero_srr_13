@@ -36,7 +36,7 @@
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <gtest/gtest.h>
 //************ LOCAL DEPENDANCIES ****************//
-#include <occupancy_grid/OccupancyGrid.hpp>
+#include <occupancy_grid/MultiTraitOccupancyGrid.hpp>
 //***********    NAMESPACES     ****************//
 using namespace occupancy_grid;
 
@@ -71,6 +71,13 @@ TEST_F(occ_test_fixture, testBasicSetup)
 	ASSERT_EQ(100, testGrid.getYSizeGrid());
 	ASSERT_EQ(25, testGrid.getYSizeMeter());
 	ASSERT_EQ(0.25, testGrid.getResolution());
+	MultiTraitOccupancyGrid copyGrid(testGrid);
+	ASSERT_EQ("test", copyGrid.getFrameID());
+	ASSERT_EQ(200, copyGrid.getXSizeGrid());
+	ASSERT_EQ(50, copyGrid.getXSizeMeter());
+	ASSERT_EQ(100, copyGrid.getYSizeGrid());
+	ASSERT_EQ(25, copyGrid.getYSizeMeter());
+	ASSERT_EQ(0.25, copyGrid.getResolution());
 }
 
 TEST_F(occ_test_fixture, testSetGet)
@@ -78,10 +85,12 @@ TEST_F(occ_test_fixture, testSetGet)
 	MultiTraitOccupancyGrid testGrid("test", traits_, utilities::CellTrait::UNKOWN, info_);
 	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(0,0).getEnum());
 	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(34,10).getEnum());
-	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(1.5,14.1).getEnum());
+	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(1.5,4.1).getEnum());
 	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
 	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
 	ASSERT_EQ(utilities::CellTrait::OBSTACLE, testGrid.getPointTrait(10,10).getEnum());
+	MultiTraitOccupancyGrid copyGrid(testGrid);
+	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyGrid.getPointTrait(10,10).getEnum());
 }
 
 TEST_F(occ_test_fixture, testMessage)

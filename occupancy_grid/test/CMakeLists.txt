@@ -1,2 +1,2 @@
 rosbuild_add_gtest(occ_tests test.cpp)
-target_link_libraries(occ_tests OccupancyGrid)
+target_link_libraries(occ_tests MultiTraitOccupancyGrid)

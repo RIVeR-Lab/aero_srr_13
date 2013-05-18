@@ -273,12 +273,13 @@ std::string MultiTraitOccupancyGrid::getFrameID() const
 MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(int x, int y) const
 {
 	int index = ogu::calcIndexRowMajor2D(x, y, this->map_meta_data_.width);
-	return this->grid_.at(0).data[index];
+	return this->grid_.at(0).data[index];;
 }
 
 MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x, double y) const
 {
-	return this->getPointTrait(x/this->map_meta_data_.resolution, y/this->map_meta_data_.resolution);
+	ROS_INFO_STREAM("I Got Called With Double Values!");
+	return this->getPointTrait((int)(x/this->map_meta_data_.resolution), (int)(y/this->map_meta_data_.resolution));
 }
 
 MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(const gm::PoseStamped& point) const
@@ -288,7 +289,7 @@ MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(const gm
 
 void MultiTraitOccupancyGrid::addPointTrait(double x, double y, trait_t trait, int confidence)
 {
-	this->addPointTrait(x/this->map_meta_data_.resolution, y/this->map_meta_data_.resolution, trait, confidence);
+	this->addPointTrait((int)(x/this->map_meta_data_.resolution), (int)(y/this->map_meta_data_.resolution), trait, confidence);
 }
 
 void MultiTraitOccupancyGrid::addPointTrait(int x, int y, trait_t trait, int confidence)
