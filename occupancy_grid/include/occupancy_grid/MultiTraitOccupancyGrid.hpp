@@ -197,7 +197,16 @@ private:
 	index_map_t        index_map_;     ///Mapping between vector index and PointTrait type
 	std::string        frame_id_;
 	cell_data_t*       temp_cell_values_; ///array for temporary storage of cell confidances used by normailization
+	gm::Pose           goal_pose_;     ///The location of the goal pose on the grid, if there is one
+	bool               has_goal_;      ///flag for signalling the goal point
 
+	/**
+	 * @author Adam Panzica
+	 * @brief helper function for placing a goal point on the map
+	 * @param x
+	 * @param y
+	 */
+	void place_goal(int x, int y);
 public:
 	MultiTraitOccupancyGrid();
 	/**
@@ -254,9 +263,48 @@ public:
 
 	/**
 	 * @author Adam Panzica
+	 * @param [out] goal The most recently added goal pose, if any
+	 * @return true if there is a goal, else false
+	 */
+	bool getGoal(gm::Pose& goal) const;
+
+	/**
+	 * @author Adam Panzica
 	 * @return The frame_id that the map is in
 	 */
 	std::string getFrameID() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Adds a goal to the grid
+	 * @param [in] goal The position of the goal to add
+	 *
+	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
+	 * and can only be found via the getGoal method
+	 */
+	void setGoal(const gm::Pose& goal);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Adds a goal to the grid
+	 * @param [in] x The x location on the grid, in grid-units
+	 * @param [in] y The y location on the grid, in grid-units
+	 *
+	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
+	 * and can only be found via the getGoal method
+	 */
+	void setGoal(int x, int y);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Adds a goal to the grid
+	 * @param [in] x The x location on the grid, in meters
+	 * @param [in] y The y location on the grid, in meters
+	 *
+	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
+	 * and can only be found via the getGoal method
+	 */
+	void setGoal(double x, double y);
 
 	/**
 	 * @author Adam Panzica
