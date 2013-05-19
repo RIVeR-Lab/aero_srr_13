@@ -206,7 +206,16 @@ private:
 	 * @param x
 	 * @param y
 	 */
-	void place_goal(int x, int y);
+	void place_goal(unsigned int x, unsigned int y);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Checks if the requested point is in the grid
+	 * @param x The x-coord of the grid, in grid units
+	 * @param y The y-coord of the grid, in grid units
+	 * @return True if the point was in bounds, else fase
+	 */
+	bool boundsCheck(unsigned int x, unsigned int y) const;
 public:
 	MultiTraitOccupancyGrid();
 	/**
@@ -316,13 +325,14 @@ public:
 	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
 	 * and can only be found via the getGoal method
 	 */
-	void setGoal(int x, int y);
+	void setGoal(unsigned int x, unsigned int y);
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Adds a goal to the grid
 	 * @param [in] x The x location on the grid, in meters
 	 * @param [in] y The y location on the grid, in meters
+	 *
 	 *
 	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
 	 * and can only be found via the getGoal method
@@ -335,8 +345,9 @@ public:
 	 * @param [in] x The x location on the grid, in grid-units
 	 * @param [in] y The y location on the grid, in grid-units
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
+	 * @throw bool false if the requested point was not on the grid
 	 */
-	trait_t getPointTrait(int x, int y) const;
+	trait_t getPointTrait(unsigned int x, unsigned int y) const throw (bool);
 
 	/**
 	 * @author Adam Panzica
@@ -344,8 +355,9 @@ public:
 	 * @param [in] x The x location on the grid, in meters
 	 * @param [in] y The y location on the grid, in meters
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
+	 * @throw bool false if the requested point was not on the grid
 	 */
-	trait_t getPointTrait(double x, double y) const;
+	trait_t getPointTrait(double x, double y) const throw (bool);
 
 
 
@@ -354,11 +366,12 @@ public:
 	 * @brief Gets the trait of a point on the grid
 	 * @param [in] point A Pose who's x/y components corrispond to a location on the grid
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
+	 * @throw bool false if the requested point was not on the grid
 	 *
 	 * Assumes that the given pose is not origin corrected. That is, we subtract the origin
 	 * to get the location of the point relative to the grid.
 	 */
-	trait_t getPointTrait(const gm::PoseStamped& point) const;
+	trait_t getPointTrait(const gm::PoseStamped& point) const throw (bool);
 
 	/**
 	 * @author Adam panzica
@@ -382,10 +395,11 @@ public:
 	 * @param [in] y The y location on the grid, in grid units. Note that the grid always starts at 0
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
+	 * @throw bool false if the requested point was not on the grid
 	 *
 	 * Adds confidence to the probability that a point contains a given trait. Also removes proportional confidence from the other trait possibilities
 	 */
-	void addPointTrait(int x, int y, trait_t trait, int confidence = 100);
+	void addPointTrait(unsigned int x, unsigned int y, trait_t trait, int confidence = 100) throw (bool);
 
 	/**
 	 * @author Adam Panzica
@@ -394,10 +408,11 @@ public:
 	 * @param [in] y The y location on the grid, in meters. Note that the grid always starts at 0m
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
+	 * @throw bool false if the requested point was not on the grid
 	 *
 	 * Adds confidence to the probability that a point contains a given trait. Also removes proportional confidence from the other trait possibilities
 	 */
-	void addPointTrait(double x, double y, trait_t trait, int confidence = 100);
+	void addPointTrait(double x, double y, trait_t trait, int confidence = 100) throw (bool);
 
 	/**
 	 * @author Adam Panzica
@@ -405,11 +420,12 @@ public:
 	 * @param [in] point A Pose who's x/y components corrispond to a location on the grid
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
+	 * @throw bool false if the requested point was not on the grid
 	 *
 	 * Assumes that the given pose is not origin corrected. That is, we add the origin
 	 * to get the location of the point relative to the grid.
 	 */
-	void addPointTrait(const gm::PoseStamped& point, trait_t trait, int confidence = 100);
+	void addPointTrait(const gm::PoseStamped& point, trait_t trait, int confidence = 100) throw (bool);
 
 	/**
 	 * @author Adam Panzica
@@ -419,12 +435,13 @@ public:
 	 * @param [in] scaling True if the input grid should be up/down sampled to match the resolution and dimmensions of this grid, else it will be copied 1/1 and clipped if the dimmensions do not match
 	 * @param [in] use_zero_as_free Treates a value of zero as 100% confidance in FREE_LOW_COST at that location
 	 * @param [in] use_negative_as_unkown Treats a negative value as 10% confidance in UNKOWN at that location
+	 * @throw bool false if the requested point was not on the grid
 	 *
 	 * Note that even with scaling disabled, there will always be down-sampling of a grid that has a higher resoltuion. Also the two grids must be axis alligned.
 	 *
 	 * @todo Implement scaling
 	 */
-	void addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling = false, bool use_zero_as_free = true, bool use_negative_as_unkown = true);
+	void addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling = false, bool use_zero_as_free = true, bool use_negative_as_unkown = true) throw (bool);
 
 };
 
