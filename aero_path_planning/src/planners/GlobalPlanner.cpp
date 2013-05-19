@@ -213,8 +213,8 @@ void GlobalPlanner::buildGlobalMap()
 {
 	ROS_INFO_STREAM("Building initial global map!");
 	nav_msgs::MapMetaData info;
-	info.origin.position.x = this->global_x_ori_;
-	info.origin.position.y = this->global_y_ori_;
+	info.origin.position.x = (double)this->global_x_ori_*this->global_res_;
+	info.origin.position.y = (double)this->global_y_ori_*this->global_res_;
 	info.origin.position.z = this->global_z_ori_;
 	info.width = this->global_x_size_;
 	info.height= this->global_y_size_;
