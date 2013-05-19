@@ -416,7 +416,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			this->working_grid_= this->occupancy_buffer_.front();
 			this->occupancy_buffer_.pop_front();
 		}
-		if(this->working_grid_!=occupancy_grid::MultiTraitOccupancyGridMessagePtr())
+		if(this->working_grid_!=occupancy_grid::MultiTraitOccupancyGridPtr())
 		{
 			//Build a working grid to apply the LIDAR patch to
 			og::MultiTraitOccupancyGrid working_grid(*this->working_grid_);
