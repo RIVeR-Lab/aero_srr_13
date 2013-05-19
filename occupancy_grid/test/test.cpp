@@ -83,29 +83,29 @@ TEST_F(occ_test_fixture, testBasicSetup)
 TEST_F(occ_test_fixture, testSetGet)
 {
 	MultiTraitOccupancyGrid testGrid("test", traits_, utilities::CellTrait::UNKOWN, info_);
-	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(0,0).getEnum());
-	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(34,10).getEnum());
+	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait((unsigned int)0,(unsigned int)0).getEnum());
+	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait((unsigned int)34,(unsigned int)10).getEnum());
 	ASSERT_EQ(utilities::CellTrait::UNKOWN, testGrid.getPointTrait(1.5,4.1).getEnum());
-	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
-	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
-	ASSERT_EQ(utilities::CellTrait::OBSTACLE, testGrid.getPointTrait(10,10).getEnum());
+	testGrid.addPointTrait((unsigned int)10,(unsigned int)10, utilities::CellTrait::OBSTACLE);
+	testGrid.addPointTrait((unsigned int)10,(unsigned int)10, utilities::CellTrait::OBSTACLE);
+	ASSERT_EQ(utilities::CellTrait::OBSTACLE, testGrid.getPointTrait((unsigned int)10,(unsigned int)10).getEnum());
 	MultiTraitOccupancyGrid copyGrid(testGrid);
-	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyGrid.getPointTrait(10,10).getEnum());
+	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyGrid.getPointTrait((unsigned int)10,(unsigned int)10).getEnum());
 }
 
 TEST_F(occ_test_fixture, testMessage)
 {
 	MultiTraitOccupancyGrid testGrid("test", traits_, utilities::CellTrait::UNKOWN, info_);
-	testGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
+	testGrid.addPointTrait((unsigned int)10,(unsigned int)10, utilities::CellTrait::OBSTACLE);
 	MultiTraitOccupancyGridMessage testMessage;
 	testGrid.toROSMsg(testMessage);
 	ASSERT_EQ("test", testMessage.header.frame_id);
 	MultiTraitOccupancyGrid copyedGrid(testMessage);
 	//Should still be unkown because it takes two sets to change the type
-	ASSERT_EQ(utilities::CellTrait::UNKOWN, copyedGrid.getPointTrait(10,10).getEnum());
+	ASSERT_EQ(utilities::CellTrait::UNKOWN, copyedGrid.getPointTrait((unsigned int)10,(unsigned int)10).getEnum());
 	//If trait copying worked properly, this should tip the scales
-	copyedGrid.addPointTrait(10,10, utilities::CellTrait::OBSTACLE);
-	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyedGrid.getPointTrait(10,10).getEnum());
+	copyedGrid.addPointTrait((unsigned int)10,(unsigned int)10, utilities::CellTrait::OBSTACLE);
+	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyedGrid.getPointTrait((unsigned int)10,(unsigned int)10).getEnum());
 
 
 }

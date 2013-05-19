@@ -280,9 +280,14 @@ MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(unsigned
 	else throw false;
 }
 
-MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x, double y) const  throw (bool)
+MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x, double y, bool origin_corrected) const  throw (bool)
 {
 	ROS_INFO_STREAM("I Got Called With Double Values!");
+	if(!origin_corrected)
+	{
+		x += this->map_meta_data_.origin.position.x;
+		y += this->map_meta_data_.origin.position.y;
+	}
 	return this->getPointTrait((unsigned int)(x/this->map_meta_data_.resolution), (unsigned int)(y/this->map_meta_data_.resolution));
 }
 
@@ -296,8 +301,13 @@ void MultiTraitOccupancyGrid::addPointTrait(const gm::PoseStamped& point, trait_
 	this->addPointTrait((double)(point.pose.position.x+this->map_meta_data_.origin.position.x), (double)(point.pose.position.y+this->map_meta_data_.origin.position.y), trait, confidence);
 }
 
-void MultiTraitOccupancyGrid::addPointTrait(double x, double y, trait_t trait, int confidence)  throw (bool)
+void MultiTraitOccupancyGrid::addPointTrait(double x, double y, trait_t trait, int confidence, bool origin_corrected)  throw (bool)
 {
+	if(!origin_corrected)
+	{
+		x += this->map_meta_data_.origin.position.x;
+		y += this->map_meta_data_.origin.position.y;
+	}
 	this->addPointTrait((unsigned int)(x/this->map_meta_data_.resolution), (unsigned int)(y/this->map_meta_data_.resolution), trait, confidence);
 }
 
@@ -409,8 +419,13 @@ void MultiTraitOccupancyGrid::setGoal(unsigned int x, unsigned int y)
 	this->place_goal(x, y);
 }
 
-void MultiTraitOccupancyGrid::setGoal(double x, double y)
+void MultiTraitOccupancyGrid::setGoal(double x, double y, bool origin_corrected)
 {
+	if(!origin_corrected)
+	{
+		x += this->map_meta_data_.origin.position.x;
+		y += this->map_meta_data_.origin.position.y;
+	}
 	this->has_goal_ = true;
 	this->goal_pose_.position.x = x;
 	this->goal_pose_.position.y = y;

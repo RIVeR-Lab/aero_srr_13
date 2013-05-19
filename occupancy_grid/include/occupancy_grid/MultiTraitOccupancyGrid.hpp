@@ -332,12 +332,13 @@ public:
 	 * @brief Adds a goal to the grid
 	 * @param [in] x The x location on the grid, in meters
 	 * @param [in] y The y location on the grid, in meters
+	 * @param [in] origin_corrected true to state that the x/y coordinates have been properly offset by the origin. Defaults to faulse
 	 *
 	 *
 	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
 	 * and can only be found via the getGoal method
 	 */
-	void setGoal(double x, double y);
+	void setGoal(double x, double y, bool origin_correct=false);
 
 	/**
 	 * @author Adam Panzica
@@ -354,10 +355,11 @@ public:
 	 * @brief Gets the trait of a point on the grid
 	 * @param [in] x The x location on the grid, in meters
 	 * @param [in] y The y location on the grid, in meters
+	 * @param [in] origin_corrected true to state that the x/y coordinates have been properly offset by the origin. Defaults to faulse
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
 	 * @throw bool false if the requested point was not on the grid
 	 */
-	trait_t getPointTrait(double x, double y) const throw (bool);
+	trait_t getPointTrait(double x, double y, bool origin_correct=false) const throw (bool);
 
 
 
@@ -408,11 +410,12 @@ public:
 	 * @param [in] y The y location on the grid, in meters. Note that the grid always starts at 0m
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
+	 * @param [in] origin_corrected true to state that the x/y coordinates have been properly offset by the origin. Defaults to faulse
 	 * @throw bool false if the requested point was not on the grid
 	 *
 	 * Adds confidence to the probability that a point contains a given trait. Also removes proportional confidence from the other trait possibilities
 	 */
-	void addPointTrait(double x, double y, trait_t trait, int confidence = 100) throw (bool);
+	void addPointTrait(double x, double y, trait_t trait, int confidence = 100, bool origin_correct=false) throw (bool);
 
 	/**
 	 * @author Adam Panzica
