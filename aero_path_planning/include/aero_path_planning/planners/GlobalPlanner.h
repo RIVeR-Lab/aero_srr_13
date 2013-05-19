@@ -218,6 +218,8 @@ private:
 	CarrotPathFinder::collision_func_          cf_;            ///The collision function
 	CarrotPathFinder*                          path_planner_;  ///The current global planner strategy
 	occupancy_grid::MultiTraitOccupancyGridPtr global_map_;    ///The global OccupancyGrid
+	nav_msgs::MapMetaData                      local_info_;    ///Map data on the local map chuncks
+	std::vector<occupancy_grid::utilities::CellTrait> traits_; ///Cell traits used by the occupancy grids
 	std::deque<geometry_msgs::Pose>            carrot_path_;   ///The current set of points on the global path
 	geometry_msgs::PoseStamped                 mission_goal_; ///The current mission-goal to plan to
 

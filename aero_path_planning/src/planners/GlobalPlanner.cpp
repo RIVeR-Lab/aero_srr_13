@@ -220,14 +220,20 @@ void GlobalPlanner::buildGlobalMap()
 	info.height= this->global_y_size_;
 	info.map_load_time = ros::Time::now();
 	info.resolution    = this->global_res_;
-	std::vector<occupancy_grid::utilities::CellTrait> traits;
-	traits.push_back(occupancy_grid::utilities::CellTrait::UNKOWN);
-	traits.push_back(occupancy_grid::utilities::CellTrait::FREE_LOW_COST);
-	traits.push_back(occupancy_grid::utilities::CellTrait::FREE_HIGH_COST);
-	traits.push_back(occupancy_grid::utilities::CellTrait::OBSTACLE);
-	traits.push_back(occupancy_grid::utilities::CellTrait::TRAVERSED);
-	traits.push_back(occupancy_grid::utilities::CellTrait::GOAL);
-	this->global_map_ = occupancy_grid::MultiTraitOccupancyGridPtr(new occupancy_grid::MultiTraitOccupancyGrid(this->global_frame_, traits, occupancy_grid::utilities::CellTrait::UNKOWN, info));
+	this->traits_.push_back(occupancy_grid::utilities::CellTrait::UNKOWN);
+	this->traits_.push_back(occupancy_grid::utilities::CellTrait::FREE_LOW_COST);
+	this->traits_.push_back(occupancy_grid::utilities::CellTrait::FREE_HIGH_COST);
+	this->traits_.push_back(occupancy_grid::utilities::CellTrait::OBSTACLE);
+	this->traits_.push_back(occupancy_grid::utilities::CellTrait::TRAVERSED);
+	this->traits_.push_back(occupancy_grid::utilities::CellTrait::GOAL);
+	this->global_map_ = occupancy_grid::MultiTraitOccupancyGridPtr(new occupancy_grid::MultiTraitOccupancyGrid(this->global_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, info));
+
+
+	this->local_info_.height = this->local_y_size_;
+	this->local_info_.width  = this->local_x_size_;
+	this->local_info_.resolution = this->local_res_;
+	this->local_info_.origin.position.x = (double)this->local_x_ori_*this->local_res_;
+	this->local_info_.origin.position.y = (double)this->local_y_ori_*this->local_res_;
 }
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
@@ -306,61 +312,12 @@ bool GlobalPlanner::calcRobotPointWorld(tf::Point& point) const
 void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 {
 	//ROS_INFO_STREAM("I'm Chunking the Global Map!");
-	Point origin;
-	origin.x = this->local_x_ori_;
-	origin.y = this->local_y_ori_;
-	origin.z = this->local_z_ori_;
-	origin.rgb = aero_path_planning::ROBOT;
-	OccupancyGrid local_grid(this->local_x_size_, this->local_y_size_, this->local_z_size_, this->local_res_, origin, aero_path_planning::UNKNOWN, this->local_frame_);
-
-	OccupancyGridCloud copyCloud;
-	try
-	{
-		//Look up the transform from the local grid to the global frame
-		tf::StampedTransform local_to_global;
-		this->transformer_.waitForTransform(this->global_frame_, local_grid.getFrameId(), local_grid.getGrid().header.stamp, ros::Duration(this->local_update_rate_));
-		this->transformer_.lookupTransform(this->global_frame_, local_grid.getFrameId(), local_grid.getGrid().header.stamp, local_to_global);
-
-		//Adjust the origin to account for the difference between grid-units and meters
-		tf::Vector3 ltg_origin = local_to_global.getOrigin();
-		app::Point ltg_origin_point;
-		app::vectorToPoint(ltg_origin, ltg_origin_point);
-//		this->global_map_->getConverter().convertToGrid(ltg_origin_point, ltg_origin_point);
-		app::pointToVector(ltg_origin_point, ltg_origin);
-		local_to_global.setOrigin(ltg_origin);
-		pcl_ros::transformPointCloud(local_grid.getGrid(), copyCloud, local_to_global);
-
-		//Copy the data in the global frame at the transformed local-coordinates into the local grid
-#pragma omp parallel for
-		for(int i=0; i<(int)copyCloud.size(); i++)
-		{
-			try
-			{
-				//Get rid of any rounding issues
-				copyCloud.at(i).x = std::floor(copyCloud.at(i).x);
-				copyCloud.at(i).y = std::floor(copyCloud.at(i).y);
-				copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
-				Point copy_point(local_grid.getGrid().at(i));
-
-				//Copy the PointTrait data from the global frame to the local frame
-				local_grid.setPointTrait(copy_point);
-			}
-			catch(std::runtime_error& e)
-			{
-				//Do nothing, means the local grid has gone outside the bounds of the global frame so we have no data anyway
-			}
-		}
+	occupancy_grid::MultiTraitOccupancyGridMessagePtr message(new occupancy_grid::MultiTraitOccupancyGridMessage);
+	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_);
+	local_gird.toROSMsg(*message);
+	this->local_occ_pub_.publish(message);
 
 
-		//Send the new local grid to the local planner
-		OccupancyGridMsgPtr occ_grid_msg(new OccupancyGridMsg());
-		local_grid.generateMessage(*occ_grid_msg);
-		this->local_occ_pub_.publish(occ_grid_msg);
-	}
-	catch (std::exception& e)
-	{
-		ROS_ERROR_STREAM_THROTTLE(1, e.what());
-	}
 }
 
 void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
