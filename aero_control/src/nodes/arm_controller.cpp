@@ -22,6 +22,7 @@ using namespace aero_control;
 ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
 	std::string ArmPose("DesiredARMPosition"); ///String containing the topic name for arm position
+	std::string ArmError("ArmError"); ///String containing the topic name for arm error
 	std::string ObjectPose("ObjectPose"); ///String containing the topic name for object position
 	std::string SetFingerPosition("SetFingerPosition"); ///String containing the topic name for SetFingerPosition
 	std::string AeroState("aero/supervisor/state"); ///String containing the topic name for AeroState
@@ -45,12 +46,16 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 		ROS_WARN(
 				"Parameter <%s> Not Set. Using Default Aero State Transition Topic <%s>!", AeroStateTransition.c_str(), AeroStateTransition.c_str());
 
+	if (!param_nh.getParam(ArmError, ArmError))
+			ROS_WARN(
+					"Parameter <%s> Not Set. Using Default Arm Error Topic <%s>!", ArmError.c_str(), ArmError.c_str());
 	//Print out received topics
-	ROS_DEBUG("Got Object Position Topic Name: <%s>", ObjectPose.c_str());
-	ROS_DEBUG("Got Arm Position Topic Name: <%s>", ArmPose.c_str());
-	ROS_DEBUG("Got Set Finger Position Topic Name: <%s>", SetFingerPosition.c_str());
+	ROS_DEBUG("Using Object Position Topic Name: <%s>", ObjectPose.c_str());
+	ROS_DEBUG("Using Arm Position Topic Name: <%s>", ArmPose.c_str());
+	ROS_DEBUG("Using Set Finger Position Topic Name: <%s>", SetFingerPosition.c_str());
 	ROS_DEBUG("Using Aero State Topic Name: <%s>", AeroState.c_str());
 	ROS_DEBUG("Using Aero State Transition Topic Name: <%s>", AeroStateTransition.c_str());
+	ROS_DEBUG("Using Arm Error Topic Name: <%s>", ArmError.c_str());
 
 	ROS_INFO("Starting Up Arm Controller...");
 

@@ -34,7 +34,7 @@ namespace aero_control {
 
 class ArmPositionController {
 public:
-	ArmPositionController(ros::NodeHandle nh, std::string DesiredPosition,std::string JointVelocity, std::string JointAngles, std::string CurrentPosition);
+	ArmPositionController(ros::NodeHandle nh, ros::NodeHandle param_nh);
 	~ArmPositionController();
 private:
 
