@@ -55,7 +55,14 @@ bool addPointCloudPatch(aero_path_planning::PointCloud& cloud, occupancy_grid::u
 			geometry_msgs::PoseStamped point_poise;
 			point_poise.header.frame_id = grid.getFrameID();
 			aero_path_planning::pointToPose(point, point_poise.pose);
-			grid.addPointTrait(point_poise, trait, confidence);
+			try
+			{
+				grid.addPointTrait(point_poise, trait, confidence);
+			}
+			catch(bool& e)
+			{
+				//do nothing, just means one of the points wasn't on the map
+			}
 		}
 		return true;
 	}

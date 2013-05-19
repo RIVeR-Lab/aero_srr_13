@@ -342,9 +342,9 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 						default:
 							break;
 						}
-					}catch(OccupancyGridAccessException& e)
+					}catch(bool& e)
 					{
-						ROS_ERROR("%s", e.what());
+						ROS_ERROR_STREAM("Went Out of Bounds While Searching a Tentacle!");
 					}
 				}
 				//ROS_INFO_STREAM("I'm Checking The Distance To Goal");
