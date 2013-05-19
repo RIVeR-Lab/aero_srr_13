@@ -446,6 +446,28 @@ public:
 	 */
 	void addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling = false, bool use_zero_as_free = true, bool use_negative_as_unkown = true) throw (bool);
 
+	/**
+	 * @author Adam Panzica
+	 * @brief Converter between meter indecies and grid cells
+	 * @param [in]  xm x coordinate of the point in meters
+	 * @param [in]  ym y coordinate of the point in meters
+	 * @param [out] xg x coordinate of the point in grid units (always indexed from 0)
+	 * @param [out] yg y coordinate of the point in grid units (always indexed from 0)
+	 * @param origin_corrected True if the point in meters is already corrected for the origin offset in the grid. Defaults to false
+	 */
+	void meterToGridCell(double xm, double ym, unsigned int& xg, unsigned int& yg, bool origin_corrected = false) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Converter between grid cells and meter indicies
+	 * @param [in]  xg x coordinate of the point in grid units (always indexed from 0)
+	 * @param [in]  yg y coordinate of the point in grid units (always indexed from 0)
+	 * @param [out] xm x coordinate of the point in meters
+	 * @param [out] ym y coordinate of the point in meters
+	 * @param origin_correct True if the point in meters should be offset by the origin of the grid. Defaults to true
+	 */
+	void gridCellToMeter(unsigned int xg, unsigned int yg, double& xm, double& ym, bool origin_correct = true) const;
+
 };
 
 typedef boost::shared_ptr<MultiTraitOccupancyGrid> MultiTraitOccupancyGridPtr;

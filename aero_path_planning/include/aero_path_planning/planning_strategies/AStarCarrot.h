@@ -23,8 +23,8 @@ namespace aero_path_planning
 
 namespace astar_utilities
 {
-typedef boost::function<double (aero_path_planning::Point, aero_path_planning::Point)> huristic_func;
-typedef boost::function<double (aero_path_planning::Point, aero_path_planning::Point)> cost_func;
+typedef boost::function<double (tf::Point, tf::Point)> huristic_func;
+typedef boost::function<double (tf::Point, tf::Point)> cost_func;
 
 /**
  * @author Adam Panzica
@@ -33,7 +33,7 @@ typedef boost::function<double (aero_path_planning::Point, aero_path_planning::P
  * @param [in] goal  The goal point to measure the huristic to
  * @return The euclidian distance between the points
  */
-double ed_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal);
+double ed_huristic(const tf::Point& point, const tf::Point& goal);
 
 /**
  * @author Adam Panzica
@@ -42,7 +42,7 @@ double ed_huristic(const aero_path_planning::Point& point, const aero_path_plann
  * @param [in] last_point The last point in the chain to use for calculating cost
  * @return The cost for moving to this_point @todo fill in actual math here
  */
-double pt_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point);
+double pt_cost(const tf::Point& this_point, const tf::Point& last_point);
 
 /**
  * @author Adam Panzica
@@ -64,13 +64,13 @@ public:
 	 * @param [in] cost      The cost_func to use with calculating the cost of this node
 	 * @param [in] huristic  The huristic_func to use whith calculating the huristic value of this node
 	 */
-	AStarNode(const Point& location, const Point& goal, const AStarNodePtr parent, cost_func cost, huristic_func huristic);
+	AStarNode(const tf::Point& location, const tf::Point& goal, const AStarNodePtr parent, cost_func cost, huristic_func huristic);
 
 	/**
 	 * @author Adam Panzica
 	 * @return The location of this node
 	 */
-	const Point& getLocation() const;
+	const tf::Point& getLocation() const;
 
 	/**
 	 * @author Adam Panzica
@@ -139,7 +139,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& in, const AStarNode& rhs)
 	{
 		std::string parent((rhs.getParent()!=AStarNode::AStarNodePtr())?("Yes"):("No"));
-		in<<"Node(Location: "<<rhs.getLocation().x<<","<<rhs.getLocation().y<<", Parent: "<<parent
+		in<<"Node(Location: "<<rhs.getLocation().x()<<","<<rhs.getLocation().y()<<", Parent: "<<parent
 		  <<", G:"<<rhs.getG()<<",H:"<<rhs.getH()<<",F:"<<rhs.getF()<<")";
 		return in;
 	}
@@ -150,14 +150,24 @@ public:
 	}
 
 private:
-	aero_path_planning::Point location_; ///The location of this node in seach space
+	tf::Point    location_; ///The location of this node in seach space
 	AStarNodePtr parent_;                ///The parent AStarNode of this node
 	double g_;                           ///The total cost of moving to this node
 	double h_;                           ///The huristic value of this node
 	double f_;                           ///The fitness of this node, \[f=g+h\]
 };
 
-
+/**
+ * @author Adam Panzica
+ * @brief Converts a tF::Point into a stream-compatable representation
+ * @param [in] in The stream to insert into
+ * @param [in] rhs The tf::point to convert
+ * @return the stream with the tf::Point inserted in the format x<<y<<z
+ */
+inline std::ostream& nodeLocationToStream(std::ostream& in, const tf::Point& rhs)
+{
+	return in<<"<"<<rhs.x()<<","<<rhs.y()<<","<<rhs.z()<<">";
+}
 
 
 }
@@ -170,10 +180,10 @@ public:
 	virtual ~AStarCarrot();
 
 	virtual bool setCarrotDelta(double delta);
-	virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map);
+	virtual bool setSearchMap(occupancy_grid::MultiTraitOccupancyGridConstPtr map);
 	virtual bool setCollision(collision_func_& collision_checker);
 	virtual bool allowsPartialPath();
-	virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::deque<aero_path_planning::Point>& result_path);
+	virtual bool search(const geometry_msgs::Pose& start_point, const geometry_msgs::Pose& goal_point, ros::Duration& timeout, std::deque<geometry_msgs::Pose>& result_path);
 	virtual bool getPlanningType(std::string& type) const;
 
 	AStarCarrot& operator=(AStarCarrot const &copy);
@@ -186,24 +196,24 @@ private:
 	bool has_map_;
 	bool has_coll_;
 
-	int                               delta_;
-	aero_path_planning::OccupancyGrid map_;
-	collision_func_                   collision_checker_;
+	int                                     delta_;
+	occupancy_grid::MultiTraitOccupancyGridConstPtr map_;
+	collision_func_                         collision_checker_;
 
-	Point n_pxy_;
-	Point n_xpy_;
-	Point n_nxy_;
-	Point n_xny_;
-	Point n_dpxpy_;
-	Point n_dnxpy_;
-	Point n_dpxny_;
-	Point n_dnxny_;
+	tf::Point n_pxy_;
+	tf::Point n_xpy_;
+	tf::Point n_nxy_;
+	tf::Point n_xny_;
+	tf::Point n_dpxpy_;
+	tf::Point n_dnxpy_;
+	tf::Point n_dpxny_;
+	tf::Point n_dnxny_;
 
 	void setUpNeighborPoints();
 
-	bool calcNeighbors(const Point& point, std::vector<Point>& neighbors) const;
+	bool calcNeighbors(const tf::Point& point, std::vector<tf::Point>& neighbors) const;
 
-	void buildSolutionPath(const Node_t& goal_node, std::deque<Point>& path) const;
+	void buildSolutionPath(const Node_t& goal_node, std::deque<geometry_msgs::Pose>& path) const;
 
 	bool canSearch() const;
 

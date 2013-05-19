@@ -471,3 +471,25 @@ bool MultiTraitOccupancyGrid::boundsCheck(unsigned int x, unsigned int y) const
 	bool ybound = y<this->map_meta_data_.height;
 	return xbound&&ybound;
 }
+
+void MultiTraitOccupancyGrid::meterToGridCell(double xm, double ym, unsigned int& xg, unsigned int& yg, bool origin_corrected) const
+{
+	if(!origin_corrected)
+	{
+		xm+=this->map_meta_data_.origin.position.x;
+		ym+=this->map_meta_data_.origin.position.y;
+	}
+	xg = (unsigned int)(xm/this->map_meta_data_.resolution);
+	yg = (unsigned int)(ym/this->map_meta_data_.resolution);
+}
+
+void MultiTraitOccupancyGrid::gridCellToMeter(unsigned int xg, unsigned int yg, double& xm, double& ym, bool origin_correct) const
+{
+	xm = (double)(xg)*this->map_meta_data_.resolution;
+	ym = (double)(yg)*this->map_meta_data_.resolution;
+	if(origin_correct)
+	{
+		xm-=this->map_meta_data_.origin.position.x;
+		ym-=this->map_meta_data_.origin.position.y;
+	}
+}

@@ -170,7 +170,7 @@ private:
 	 * @param [in] map   The map to check against for collision
 	 * @return True if in collision, else false
 	 */
-	bool checkCollision(const app::Point& point, const app::OccupancyGrid& map) const;
+	bool checkCollision(const tf::Point& point, const occupancy_grid::MultiTraitOccupancyGrid& map) const;
 
 	/**
 	 * @author Adam Panzica
@@ -185,10 +185,10 @@ private:
 	 * @param [in] point Point to fill with the robot's location (in meters, not grid coordinates)
 	 * @return true if the transform was sucessful, else false
 	 */
-	bool calcRobotPointWorld(app::Point& point) const;
+	bool calcRobotPointWorld(tf::Point& point) const;
 
-	aero_srr_msgs::AeroState       state_;
-	app::Point  current_point_;
+	aero_srr_msgs::AeroState   state_;
+	geometry_msgs::Pose        current_point_;
 
 	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
 	std::string local_occupancy_topic_; ///Topic name for communicating with the local planner
@@ -215,11 +215,11 @@ private:
 	double      global_res_;            ///Global occupancy grid resolution
 	double      global_update_rate_;    ///Update frequency for planning on the global path
 
-	CarrotPathFinder::collision_func_ cf_;            ///The collision function
-	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy
-	OccupancyGridPtr                  global_map_;    ///The global OccupancyGrid
-	std::deque<Point>                 carrot_path_;   ///The current set of points on the global path
-	geometry_msgs::PoseStamped        mission_goal_; ///The current mission-goal to plan to
+	CarrotPathFinder::collision_func_          cf_;            ///The collision function
+	CarrotPathFinder*                          path_planner_;  ///The current global planner strategy
+	occupancy_grid::MultiTraitOccupancyGridPtr global_map_;    ///The global OccupancyGrid
+	std::deque<geometry_msgs::Pose>            carrot_path_;   ///The current set of points on the global path
+	geometry_msgs::PoseStamped                 mission_goal_; ///The current mission-goal to plan to
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system

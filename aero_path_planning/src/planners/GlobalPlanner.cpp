@@ -13,6 +13,7 @@
 #include<pcl_ros/transforms.h>
 #include<geometry_msgs/PoseStamped.h>
 #include<geometry_msgs/PointStamped.h>
+#include<occupancy_grid/MultiTraitOccupancyGridMessage.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/planners/GlobalPlanner.h>
 #include<aero_path_planning/planning_strategies/RRTCarrot.h>
@@ -211,12 +212,22 @@ void GlobalPlanner::registerTimers()
 void GlobalPlanner::buildGlobalMap()
 {
 	ROS_INFO_STREAM("Building initial global map!");
-	Point origin;
-	origin.x = this->global_x_ori_;
-	origin.y = this->global_y_ori_;
-	origin.z = this->global_z_ori_;
-	origin.rgba = app::UNKNOWN;
-	this->global_map_ = OccupancyGridPtr(new OccupancyGrid(this->global_x_size_, this->global_y_size_, this->global_z_size_, this->global_res_, origin, app::UNKNOWN, this->global_frame_));
+	nav_msgs::MapMetaData info;
+	info.origin.position.x = this->global_x_ori_;
+	info.origin.position.y = this->global_y_ori_;
+	info.origin.position.z = this->global_z_ori_;
+	info.width = this->global_x_size_;
+	info.height= this->global_y_size_;
+	info.map_load_time = ros::Time::now();
+	info.resolution    = this->global_res_;
+	std::vector<occupancy_grid::utilities::CellTrait> traits;
+	traits.push_back(occupancy_grid::utilities::CellTrait::UNKOWN);
+	traits.push_back(occupancy_grid::utilities::CellTrait::FREE_LOW_COST);
+	traits.push_back(occupancy_grid::utilities::CellTrait::FREE_HIGH_COST);
+	traits.push_back(occupancy_grid::utilities::CellTrait::OBSTACLE);
+	traits.push_back(occupancy_grid::utilities::CellTrait::TRAVERSED);
+	traits.push_back(occupancy_grid::utilities::CellTrait::GOAL);
+	this->global_map_ = occupancy_grid::MultiTraitOccupancyGridPtr(new occupancy_grid::MultiTraitOccupancyGrid(this->global_frame_, traits, occupancy_grid::utilities::CellTrait::UNKOWN, info));
 }
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
@@ -269,7 +280,7 @@ void GlobalPlanner::lidarMsgToOccGridPatch(const sm::PointCloud2& scan_cloud, ap
 	}
 }
 
-bool GlobalPlanner::calcRobotPointWorld(app::Point& point) const
+bool GlobalPlanner::calcRobotPointWorld(tf::Point& point) const
 {
 	bool success = true;
 	geometry_msgs::PoseStamped robot_pose;
@@ -282,7 +293,7 @@ bool GlobalPlanner::calcRobotPointWorld(app::Point& point) const
 	{
 		this->transformer_.waitForTransform(this->global_frame_, robot_pose.header.frame_id, robot_pose.header.stamp, ros::Duration(0.1));
 		this->transformer_.transformPose(this->global_frame_, robot_pose, robot_pose);
-		app::poseToPoint(robot_pose.pose, point);
+		tf::pointMsgToTF(robot_pose.pose.position, point);
 	}
 	catch(std::exception& e)
 	{
@@ -314,7 +325,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 		tf::Vector3 ltg_origin = local_to_global.getOrigin();
 		app::Point ltg_origin_point;
 		app::vectorToPoint(ltg_origin, ltg_origin_point);
-		this->global_map_->getConverter().convertToGrid(ltg_origin_point, ltg_origin_point);
+//		this->global_map_->getConverter().convertToGrid(ltg_origin_point, ltg_origin_point);
 		app::pointToVector(ltg_origin_point, ltg_origin);
 		local_to_global.setOrigin(ltg_origin);
 		pcl_ros::transformPointCloud(local_grid.getGrid(), copyCloud, local_to_global);
@@ -330,7 +341,6 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 				copyCloud.at(i).y = std::floor(copyCloud.at(i).y);
 				copyCloud.at(i).z = std::floor(copyCloud.at(i).z);
 				Point copy_point(local_grid.getGrid().at(i));
-				copy_point.rgba = this->global_map_->getPointTrait(copyCloud.at(i));
 
 				//Copy the PointTrait data from the global frame to the local frame
 				local_grid.setPointTrait(copy_point);
@@ -356,7 +366,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 {
 	ROS_INFO_STREAM("Recieved new SLAM map information!");
-	this->global_map_->setPointTrait(*message);
+	//this->global_map_->setPointTrait(*message);
 }
 
 
@@ -390,18 +400,14 @@ void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
-	Point goal_point;
-	app::poseToPoint(this->mission_goal_.pose, goal_point);
-	goal_point.z = 0;
-	this->global_map_->getConverter().convertToGrid(goal_point, goal_point);
 	if(this->path_planner_!=NULL)
 	{
-		std::deque<Point> temp_path;
+		std::deque<geometry_msgs::Pose> temp_path;
 		this->path_planner_->setCollision(this->cf_);
 		this->path_planner_->setCarrotDelta(5.0/this->global_res_);
-		this->path_planner_->setSearchMap(*this->global_map_);
+		this->path_planner_->setSearchMap(this->global_map_);
 		//Need to use a temporary path because carrot_path might be being used by other callbacks in multi-threaded spinner and this will lock it for an extended period
-		this->path_planner_->search(this->current_point_, goal_point, this->plan_timerout_, temp_path);
+		this->path_planner_->search(this->current_point_, this->mission_goal_.pose, this->plan_timerout_, temp_path);
 		//Copy the temp path over to replace the old path
 		this->carrot_path_ = temp_path;
 		//Remove the start location from the path as it's the current location at best and more likely well behind the robot at this point
@@ -421,29 +427,26 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 void GlobalPlanner::carrotToPath(nav_msgs::Path& path) const
 {
 	app::Point path_point;
-	const PointConverter& converter = this->global_map_->getConverter();
-	BOOST_FOREACH(std::deque<app::Point>::value_type point, this->carrot_path_)
+	BOOST_FOREACH(std::deque<geometry_msgs::Pose>::value_type point, this->carrot_path_)
 	{
-		converter.convertToEng(point, path_point);
 		geometry_msgs::PoseStamped path_pose;
-		path_pose.header             = path.header;
-		app::pointToPose(path_point, path_pose.pose);
-		path_pose.pose.orientation.w = 1;
+		path_pose.header = path.header;
+		path_pose.pose   = point;
 		path.poses.push_back(path_pose);
 	}
 }
 
-bool GlobalPlanner::checkCollision(const app::Point& point, const app::OccupancyGrid& map) const
+bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid::MultiTraitOccupancyGrid& map) const
 {
 	bool collision = false;
 	try
 	{
-		if(map.getPointTrait(point)==app::OBSTACLE)
+		if(map.getPointTrait(point.x(), point.y())==occupancy_grid::utilities::CellTrait::OBSTACLE)
 		{
 			collision = true;
 		}
 	}
-	catch(std::exception& e)
+	catch(bool& e)
 	{
 		collision = true;
 	}
