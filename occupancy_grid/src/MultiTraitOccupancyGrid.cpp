@@ -282,7 +282,6 @@ MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(unsigned
 
 MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x, double y, bool origin_corrected) const  throw (bool)
 {
-	ROS_INFO_STREAM("I Got Called With Double Values!");
 	if(!origin_corrected)
 	{
 		x += this->map_meta_data_.origin.position.x;
