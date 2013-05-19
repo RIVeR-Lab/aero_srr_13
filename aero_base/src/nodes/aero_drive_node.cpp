@@ -11,6 +11,7 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/JointState.h>
+#include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include "roboteq_driver/roboteq_manager_lib.h"
 #include "roboteq_driver/RoboteqGroupInfo.h"
 #include <tf/tf.h>
@@ -19,6 +20,7 @@
 
 
 static ros::Publisher odom_pub;
+static ros::Publisher twist_pub;
 static ros::Publisher joint_pub;
 static roboteq_driver::RoboteqManagerClient* motor_controller;
 double driver_rotations_per_rotation = 1.0;
@@ -107,24 +109,32 @@ void roboteqFeedbackCallback(const roboteq_driver::RoboteqGroupInfo::ConstPtr& m
   odom_msg.pose.pose.position.y = y;
   odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromYaw(t);
 
-  odom_msg.pose.covariance[0] = 1e-9;
-  odom_msg.pose.covariance[7] = 1e-9;
-  odom_msg.pose.covariance[14] = 1.0e-9;
-  odom_msg.pose.covariance[21] = 1.0e-9;
-  odom_msg.pose.covariance[28] = 1.0e-9;
-  odom_msg.pose.covariance[35] = 0.01;
+  odom_msg.pose.covariance[0] = 0.1;
+  odom_msg.pose.covariance[7] = 0.1;
+  odom_msg.pose.covariance[14] = 99999;
+  odom_msg.pose.covariance[21] = 99999;
+  odom_msg.pose.covariance[28] = 99999;
+  odom_msg.pose.covariance[35] = 0.1;
 
   odom_msg.child_frame_id = twist_frame;
   odom_msg.twist.covariance.assign(0);
-  odom_msg.twist.covariance[0] = 0.75;
-  odom_msg.twist.covariance[7] = 0.75;
-  odom_msg.twist.covariance[14] = 1.0e-9;
-  odom_msg.twist.covariance[21] = 1.0e-9;
-  odom_msg.twist.covariance[28] = 1.0e-9;
+  odom_msg.twist.covariance[0] = 0.1;
+  odom_msg.pose.covariance[7] = 99999;
+  odom_msg.pose.covariance[14] = 99999;
+  odom_msg.pose.covariance[21] = 99999;
+  odom_msg.pose.covariance[28] = 99999;
   odom_msg.twist.covariance[35] = 0.01;
   odom_msg.twist.twist.linear.x = u;
   odom_msg.twist.twist.angular.z = w;
   odom_pub.publish(odom_msg);
+
+
+  geometry_msgs::TwistWithCovarianceStamped twist_msg;
+  twist_msg.twist = odom_msg.twist;
+  twist_msg.header.frame_id = twist_frame;
+  twist_msg.header.stamp = msg->header.stamp;
+  twist_pub.publish(twist_msg);
+
 
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = ros::Time::now();
@@ -188,6 +198,7 @@ int main(int argc, char **argv) {
 	ros::Subscriber twist_sub = nh.subscribe(twist_topic, 1000, twistCallback);
 	ros::Subscriber feedback_sub = nh.subscribe(roboteq_manager_feedback_topic, 1000, roboteqFeedbackCallback);
 	odom_pub = nh.advertise<nav_msgs::Odometry>(odom_topic, 1000);
+	twist_pub = nh.advertise<geometry_msgs::TwistWithCovarianceStamped>("drive_twist", 1000);
 	joint_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
 
 	ros::spin();
