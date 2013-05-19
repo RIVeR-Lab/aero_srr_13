@@ -441,7 +441,7 @@ bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid:
 	bool collision = false;
 	try
 	{
-		if(map.getPointTrait(point.x(), point.y())==occupancy_grid::utilities::CellTrait::OBSTACLE)
+		if(map.getPointTrait((unsigned int)point.x(), (unsigned int)point.y())==occupancy_grid::utilities::CellTrait::OBSTACLE)
 		{
 			collision = true;
 		}
