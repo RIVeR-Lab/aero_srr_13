@@ -315,10 +315,9 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 				while(traverser.hasNext()&&traversing)
 				{
 					converter.convertToEng(traverser.next(), temp_point);
-					app::pointToPose(temp_point, point_pose.pose);
 					try
 					{
-						switch(search_grid.getPointTrait(point_pose.pose).getEnum())
+						switch(search_grid.getPointTrait(temp_point.x, temp_point.y).getEnum())
 						{
 						case ogu::CellTrait::OBSTACLE:
 							//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
@@ -344,7 +343,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 						}
 					}catch(bool& e)
 					{
-						ROS_ERROR_STREAM("Went Out of Bounds While Searching a Tentacle!");
+						ROS_ERROR_STREAM("Went Out of Bounds While Searching a Tentacle with point ("<<temp_point.x<<","<<temp_point.y<<"!");
 					}
 				}
 				//ROS_INFO_STREAM("I'm Checking The Distance To Goal");
