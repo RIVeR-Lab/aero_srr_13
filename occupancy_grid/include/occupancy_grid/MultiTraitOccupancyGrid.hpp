@@ -204,14 +204,6 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief helper function for placing a goal point on the map
-	 * @param x
-	 * @param y
-	 */
-	void place_goal(int x, int y);
-
-	/**
-	 * @author Adam Panzica
 	 * @brief Checks if the requested point is in the grid
 	 * @param x The x-coord of the grid, in grid units
 	 * @param y The y-coord of the grid, in grid units
@@ -226,6 +218,15 @@ private:
 	 * @param y
 	 */
 	void offsetAdjust(int& x, int&y) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Projects a pose to a grid-relative location
+	 * @param pose The pose to project
+	 * @param x The resultatnt X-coord, in grid untis, relative to the 0 point on the grid
+	 * @param y The resultatnt Y-coord, in grid units, relative to the 0 point on the grid
+	 */
+	void projectPoseToGrid(const gm::Pose& pose, int& x, int& y) const;
 public:
 	MultiTraitOccupancyGrid();
 	/**
@@ -316,7 +317,7 @@ public:
 
 	/**
 	 * @author Adam Panzica
-	 * @param [out] goal The most recently added goal pose, if any
+	 * @param [out] goal The most recently added goal pose, if any. The pose is in the frame of the grid
 	 * @return true if there is a goal, else false
 	 */
 	bool getGoal(gm::Pose& goal) const;
@@ -340,7 +341,7 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Adds a goal to the grid
-	 * @param [in] goal The position of the goal to add
+	 * @param [in] goal The position of the goal to add. Must be in the same frame as the grid
 	 *
 	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
 	 * and can only be found via the getGoal method
@@ -361,10 +362,8 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Adds a goal to the grid
-	 * @param [in] x The x location on the grid, in meters
-	 * @param [in] y The y location on the grid, in meters
-	 * @param [in] origin_corrected true to state that the x/y coordinates have been properly offset by the origin. Defaults to faulse
-	 *
+	 * @param [in] x The x location on the grid, in meters, relative to the grid offset
+	 * @param [in] y The y location on the grid, in meters, relative to the grid offset
 	 *
 	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
 	 * and can only be found via the getGoal method
@@ -401,10 +400,9 @@ public:
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
 	 * @throw bool false if the requested point was not on the grid
 	 *
-	 * Assumes that the given pose is not origin corrected. That is, we subtract the origin
-	 * to get the location of the point relative to the grid.
+	 * Assumes that the pose is in the same frame as the grid, but does treat it as an actual point in that frame, not in the grid-relative frame
 	 */
-	trait_t getPointTrait(const gm::PoseStamped& point) const throw (bool);
+	trait_t getPointTrait(const gm::Pose& point) const throw (bool);
 
 	/**
 	 * @author Adam panzica
@@ -456,10 +454,9 @@ public:
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
 	 * @throw bool false if the requested point was not on the grid
 	 *
-	 * Assumes that the given pose is not origin corrected. That is, we add the origin
-	 * to get the location of the point relative to the grid.
+	 * Assumes that the pose is in the same frame as the grid, but does treat it as an actual point in that frame, not in the grid-relative frame
 	 */
-	void addPointTrait(const gm::PoseStamped& point, trait_t trait, int confidence = 100) throw (bool);
+	void addPointTrait(const gm::Pose& point, trait_t trait, int confidence = 100) throw (bool);
 
 	/**
 	 * @author Adam Panzica
@@ -473,7 +470,7 @@ public:
 	 *
 	 * Note that even with scaling disabled, there will always be down-sampling of a grid that has a higher resoltuion. Also the two grids must be axis alligned.
 	 *
-	 * @todo Implement scaling
+	 * @todo Implement scaling make work properly
 	 */
 	void addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling = false, bool use_zero_as_free = true, bool use_negative_as_unkown = true) throw (bool);
 

@@ -295,14 +295,20 @@ MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x
 	return this->getPointTrait((int)(x/this->map_meta_data_.resolution), (int)(y/this->map_meta_data_.resolution));
 }
 
-MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(const gm::PoseStamped& point) const  throw (bool)
+MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(const gm::Pose& point) const  throw (bool)
 {
-	return this->getPointTrait((double)(point.pose.position.x+this->map_meta_data_.origin.position.x), (double)(point.pose.position.y+this->map_meta_data_.origin.position.y));
+	int tx;
+	int ty;
+	this->projectPoseToGrid(point, tx, ty);
+	return this->getPointTrait(tx, ty, false);
 }
 
-void MultiTraitOccupancyGrid::addPointTrait(const gm::PoseStamped& point, trait_t trait, int confidence)  throw (bool)
+void MultiTraitOccupancyGrid::addPointTrait(const gm::Pose& point, trait_t trait, int confidence)  throw (bool)
 {
-	this->addPointTrait((double)(point.pose.position.x+this->map_meta_data_.origin.position.x), (double)(point.pose.position.y+this->map_meta_data_.origin.position.y), trait, confidence);
+	int tx;
+	int ty;
+	this->projectPoseToGrid(point, tx, ty);
+	this->addPointTrait(tx, ty, trait, confidence, false);
 }
 
 void MultiTraitOccupancyGrid::addPointTrait(double x, double y, trait_t trait, int confidence)  throw (bool)
@@ -419,36 +425,48 @@ bool MultiTraitOccupancyGrid::getGoal(gm::Pose& goal) const
 
 void MultiTraitOccupancyGrid::setGoal(int x, int y)
 {
+	int tx = x+this->x_offset_;
+	int ty = y+this->y_offset_;
+	this->gridCellToMeter(tx, ty, this->goal_pose_.position.x, this->goal_pose_.position.y);
+	this->goal_pose_.position.x += this->map_meta_data_.origin.position.x;
+	this->goal_pose_.position.y += this->map_meta_data_.origin.position.y;
 	this->has_goal_ = true;
-	this->goal_pose_.position.x = (double)(x+this->x_offset_)*this->map_meta_data_.resolution+this->map_meta_data_.origin.position.x;
-	this->goal_pose_.position.y = (double)(y+this->y_offset_)*this->map_meta_data_.resolution+this->map_meta_data_.origin.position.y;
-	this->place_goal(x, y);
+	try
+	{
+		this->addPointTrait(x, y, CellTrait::GOAL, 1000);
+	}
+	catch(bool& e)
+	{
+		//Do nothing, just means the goal isn't on the map
+	}
 }
 
 void MultiTraitOccupancyGrid::setGoal(double x, double y)
 {
 	this->has_goal_ = true;
-	this->goal_pose_.position.x = x+this->map_meta_data_.origin.position.x;
-	this->goal_pose_.position.y = y+this->map_meta_data_.origin.position.y;
-	this->place_goal(x/this->map_meta_data_.resolution, x/this->map_meta_data_.resolution);
+	this->goal_pose_.position.x = x+((double)this->x_offset_)/this->map_meta_data_.resolution+this->map_meta_data_.origin.position.x;
+	this->goal_pose_.position.y = y+((double)this->y_offset_)/this->map_meta_data_.resolution+this->map_meta_data_.origin.position.y;
+	try
+	{
+		this->addPointTrait(x, y, CellTrait::GOAL, 1000);
+	}
+	catch(bool& e)
+	{
+		//Do nothing, just means the goal isn't on the map
+	}
 }
 
 void MultiTraitOccupancyGrid::setGoal(const gm::Pose& goal)
 {
-	gm::Pose corrected_goal(goal);
-	corrected_goal.position.x += this->map_meta_data_.origin.position.x;
-	corrected_goal.position.y += this->map_meta_data_.origin.position.y;
-	corrected_goal.position.z = 0;
 	this->has_goal_  = true;
-	this->goal_pose_ = corrected_goal;
-	this->place_goal(corrected_goal.position.x/this->map_meta_data_.resolution, corrected_goal.position.y/this->map_meta_data_.resolution);
-}
-
-void MultiTraitOccupancyGrid::place_goal(int x, int y)
-{
-	if(x<(int)this->map_meta_data_.width&&y<(int)this->map_meta_data_.height)
+	this->goal_pose_ = goal;
+	try
 	{
-		this->addPointTrait(x, y, CellTrait::GOAL, 1000);
+		this->addPointTrait(goal, CellTrait::GOAL, 1000);
+	}
+	catch(bool& e)
+	{
+		//Do nothing, just means the goal isn't on the map
 	}
 }
 
@@ -490,4 +508,9 @@ void MultiTraitOccupancyGrid::offsetAdjust(int& x, int& y) const
 {
 	x+=this->x_offset_;
 	y+=this->y_offset_;
+}
+
+void MultiTraitOccupancyGrid::projectPoseToGrid(const gm::Pose& pose, int& x, int& y) const
+{
+	this->meterToGridCell(pose.position.x-this->map_meta_data_.origin.position.x, pose.position.y-this->map_meta_data_.origin.position.y, x, y);
 }
