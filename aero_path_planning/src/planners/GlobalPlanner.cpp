@@ -232,7 +232,7 @@ void GlobalPlanner::buildGlobalMap()
 	this->local_info_.height = this->local_y_size_;
 	this->local_info_.width  = this->local_x_size_;
 	this->local_info_.resolution = this->local_res_;
-	this->local_info_.origin.position.x = -((double)(local_info_.width)*this->local_res_)/2.0;
+	this->local_info_.origin.position.x = 0;
 	this->local_info_.origin.position.y = -((double)(local_info_.height)*this->local_res_)/2.0;
 }
 
