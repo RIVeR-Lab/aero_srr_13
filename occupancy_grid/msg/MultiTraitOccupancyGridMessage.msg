@@ -1,6 +1,10 @@
 #Message for passing MultiTraitOccupancyGrids between nodes
 Header header
 
+#X/Y gird offsets
+int32 x_offset
+int32 y_offset
+
 #Each grid corrisponds to a trait
 nav_msgs/OccupancyGrid[] trait_grids
 

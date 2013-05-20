@@ -199,6 +199,8 @@ private:
 	cell_data_t*       temp_cell_values_; ///array for temporary storage of cell confidances used by normailization
 	gm::Pose           goal_pose_;     ///The location of the goal pose on the grid, if there is one
 	bool               has_goal_;      ///flag for signalling the goal point
+	int                x_offset_;      ///Offeset, in grid units, between the origin of the grid (0,0), and the origin of point insertion/retrieval
+	int                y_offset_;      ///Offeset, in grid units, between the origin of the grid (0,0), and the origin of point insertion/retrieval
 
 	/**
 	 * @author Adam Panzica
@@ -206,7 +208,7 @@ private:
 	 * @param x
 	 * @param y
 	 */
-	void place_goal(unsigned int x, unsigned int y);
+	void place_goal(int x, int y);
 
 	/**
 	 * @author Adam Panzica
@@ -216,6 +218,14 @@ private:
 	 * @return True if the point was in bounds, else fase
 	 */
 	bool boundsCheck(unsigned int x, unsigned int y) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Corrects an x/y point by an origin offset
+	 * @param x
+	 * @param y
+	 */
+	void offsetAdjust(int& x, int&y) const;
 public:
 	MultiTraitOccupancyGrid();
 	/**
@@ -225,8 +235,10 @@ public:
 	 * @param [in] slice_info MapMetaData defining the basic 2D properties of the grid
 	 * @param [in] traits A vector of the traits that a point could be. Must, at minimum, contain UNKOWN, FREE_LOW_COST, and OBSTACLE for merging nav_msgs::OccupancyGrids from SLAM services such as gampping to be possible
 	 * @param [in] initial_trait The trait to fill the map with initially
+	 * @param [in] x_offset Offeset, in grid units, between the origin of the grid (0,0), and the origin of point insertion/retrieval
+	 * @param [in] y_offset Offeset, in grid units, between the origin of the grid (0,0), and the origin of point insertion/retrieval
 	 */
-	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nm::MapMetaData& slice_info);
+	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nm::MapMetaData& slice_info, int x_offset, int y_offset);
 
 	/**
 	 * @author Adam Panzica
@@ -248,7 +260,13 @@ public:
 	 * @author Adam Panzica
 	 * @return The X size of the grid, in grid units
 	 */
-	int    getXSizeGrid()  const;
+	unsigned int getXSizeGrid()  const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The X offset in grid units for point insertion/retrieval
+	 */
+	unsigned int getXOffsetGrid() const;
 	/**
 	 * @author Adam Panzica
 	 * @return The X size of the grid, in meters
@@ -258,12 +276,19 @@ public:
 	 * @author Adam Panzica
 	 * @return The Y size of the grid, in grid units
 	 */
-	int    getYSizeGrid()  const;
+	unsigned int getYSizeGrid()  const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return The Y offset in grid units for point insertion/retrieval
+	 */
+	unsigned int getYOffsetGrid() const;
 	/**
 	 * @author Adam Panzica
 	 * @return The Y size of the grid, in meters
 	 */
 	double getYSizeMeter() const;
+
 
 	/**
 	 * @author Adam Panzica
@@ -319,13 +344,13 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Adds a goal to the grid
-	 * @param [in] x The x location on the grid, in grid-units
-	 * @param [in] y The y location on the grid, in grid-units
+	 * @param [in] x The x location on the grid, in grid-units, realtive to the grid offset
+	 * @param [in] y The y location on the grid, in grid-units, realtive to the grid offset
 	 *
 	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
 	 * and can only be found via the getGoal method
 	 */
-	void setGoal(unsigned int x, unsigned int y);
+	void setGoal(int x, int y);
 
 	/**
 	 * @author Adam Panzica
@@ -338,28 +363,28 @@ public:
 	 * Note that the goal point does not need to acctually be on the map. However in this situation it will not have a representation on the grid,
 	 * and can only be found via the getGoal method
 	 */
-	void setGoal(double x, double y, bool origin_correct=false);
+	void setGoal(double x, double y);
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the trait of a point on the grid
-	 * @param [in] x The x location on the grid, in grid-units
-	 * @param [in] y The y location on the grid, in grid-units
+	 * @param [in] x The x location on the grid, in grid-units, realtive to the grid offset
+	 * @param [in] y The y location on the grid, in grid-units, realtive to the grid offset
+	 * @param [in] offset_adjust True if the given x/y pair needs to be corrected by the grid offset
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
 	 * @throw bool false if the requested point was not on the grid
 	 */
-	trait_t getPointTrait(unsigned int x, unsigned int y) const throw (bool);
+	trait_t getPointTrait(int x, int y, bool offset_adjust=true) const throw (bool);
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Gets the trait of a point on the grid
 	 * @param [in] x The x location on the grid, in meters
 	 * @param [in] y The y location on the grid, in meters
-	 * @param [in] origin_corrected true to state that the x/y coordinates have been properly offset by the origin. Defaults to faulse
 	 * @return The point trait at the given location on the grid. Will be the trait that has the highest normalized confidence
 	 * @throw bool false if the requested point was not on the grid
 	 */
-	trait_t getPointTrait(double x, double y, bool origin_correct=false) const throw (bool);
+	trait_t getPointTrait(double x, double y) const throw (bool);
 
 
 
@@ -393,15 +418,16 @@ public:
 	/**
 	 * @author Adam Panzica
 	 * @brief Adds confidence to a point being a particular trait
-	 * @param [in] x The x location on the grid, in grid-units. Note that the grid always starts at 0
-	 * @param [in] y The y location on the grid, in grid units. Note that the grid always starts at 0
+	 * @param [in] x The x location on the grid, in grid-units
+	 * @param [in] y The y location on the grid, in grid units
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
+	 * @param [in[ offset_adjust True if the given x/y pair needs to be corrected by the grid offset
 	 * @throw bool false if the requested point was not on the grid
 	 *
 	 * Adds confidence to the probability that a point contains a given trait. Also removes proportional confidence from the other trait possibilities
 	 */
-	void addPointTrait(unsigned int x, unsigned int y, trait_t trait, int confidence = 100) throw (bool);
+	void addPointTrait(int x, int y, trait_t trait, int confidence = 100, bool offset_adjust = true) throw (bool);
 
 	/**
 	 * @author Adam Panzica
@@ -410,12 +436,11 @@ public:
 	 * @param [in] y The y location on the grid, in meters. Note that the grid always starts at 0m
 	 * @param [in] trait The trait to add confidence to
 	 * @param [in] confidence The amount of confidence to add. Defaults to 100 (full confidence)
-	 * @param [in] origin_corrected true to state that the x/y coordinates have been properly offset by the origin. Defaults to faulse
 	 * @throw bool false if the requested point was not on the grid
 	 *
 	 * Adds confidence to the probability that a point contains a given trait. Also removes proportional confidence from the other trait possibilities
 	 */
-	void addPointTrait(double x, double y, trait_t trait, int confidence = 100, bool origin_correct=false) throw (bool);
+	void addPointTrait(double x, double y, trait_t trait, int confidence = 100) throw (bool);
 
 	/**
 	 * @author Adam Panzica
@@ -451,22 +476,20 @@ public:
 	 * @brief Converter between meter indecies and grid cells
 	 * @param [in]  xm x coordinate of the point in meters
 	 * @param [in]  ym y coordinate of the point in meters
-	 * @param [out] xg x coordinate of the point in grid units (always indexed from 0)
-	 * @param [out] yg y coordinate of the point in grid units (always indexed from 0)
-	 * @param origin_corrected True if the point in meters is already corrected for the origin offset in the grid. Defaults to false
+	 * @param [out] xg x coordinate of the point in grid units, realtive to the grid offset
+	 * @param [out] yg y coordinate of the point in grid units, realtive to the grid offset
 	 */
-	void meterToGridCell(double xm, double ym, unsigned int& xg, unsigned int& yg, bool origin_corrected = false) const;
+	void meterToGridCell(double xm, double ym, int& xg, int& yg) const;
 
 	/**
 	 * @author Adam Panzica
 	 * @brief Converter between grid cells and meter indicies
-	 * @param [in]  xg x coordinate of the point in grid units (always indexed from 0)
-	 * @param [in]  yg y coordinate of the point in grid units (always indexed from 0)
+	 * @param [in]  xg x coordinate of the point in grid units, relative to the grid offset
+	 * @param [in]  yg y coordinate of the point in grid units, realtive to the grid offset
 	 * @param [out] xm x coordinate of the point in meters
 	 * @param [out] ym y coordinate of the point in meters
-	 * @param origin_correct True if the point in meters should be offset by the origin of the grid. Defaults to true
 	 */
-	void gridCellToMeter(unsigned int xg, unsigned int yg, double& xm, double& ym, bool origin_correct = true) const;
+	void gridCellToMeter(int xg, int yg, double& xm, double& ym) const;
 
 };
 

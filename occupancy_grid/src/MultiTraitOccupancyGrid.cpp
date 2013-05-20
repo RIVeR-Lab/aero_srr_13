@@ -162,7 +162,7 @@ std::string CellTrait::stringFromEnum(Enum value)
 }
 
 //***************************** OCCUPANCYGRID **************************************//
-MultiTraitOccupancyGrid::MultiTraitOccupancyGrid():temp_cell_values_(NULL),has_goal_(false){};
+MultiTraitOccupancyGrid::MultiTraitOccupancyGrid():temp_cell_values_(NULL),has_goal_(false), x_offset_(0), y_offset_(0){};
 
 MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const MultiTraitOccupancyGrid& copy):
 		grid_(copy.grid_),
@@ -172,7 +172,9 @@ MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const MultiTraitOccupancyGrid& 
 		frame_id_(copy.frame_id_),
 		temp_cell_values_(new cell_data_t[copy.trait_map_.size()]),
 		goal_pose_(copy.goal_pose_),
-		has_goal_(copy.has_goal_)
+		has_goal_(copy.has_goal_),
+		x_offset_(copy.x_offset_),
+		y_offset_(copy.y_offset_)
 {
 
 }
@@ -180,7 +182,9 @@ MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const MultiTraitOccupancyGrid& 
 MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const MultiTraitOccupancyGridMessage& message):
 						map_meta_data_(message.trait_grids.at(0).info),
 						frame_id_(message.header.frame_id),
-						temp_cell_values_(new cell_data_t[message.trait_vector.size()])
+						temp_cell_values_(new cell_data_t[message.trait_vector.size()]),
+						x_offset_(message.x_offset),
+						y_offset_(message.y_offset)
 {
 	this->grid_ = message.trait_grids;
 	this->goal_pose_ = message.goal;
@@ -195,10 +199,12 @@ MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const MultiTraitOccupancyGridMe
 }
 
 
-MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nav_msgs::MapMetaData& slice_info):
+MultiTraitOccupancyGrid::MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nav_msgs::MapMetaData& slice_info, int x_offset, int y_offset):
 						map_meta_data_(slice_info),
 						frame_id_(frame_id),
-						temp_cell_values_(new cell_data_t[traits.size()])
+						temp_cell_values_(new cell_data_t[traits.size()]),
+						x_offset_(x_offset),
+						y_offset_(y_offset)
 {
 	this->goal_pose_.orientation.w = 1;
 	this->has_goal_ = false;
@@ -235,7 +241,7 @@ MultiTraitOccupancyGrid::~MultiTraitOccupancyGrid()
 }
 
 
-int MultiTraitOccupancyGrid::getXSizeGrid() const
+unsigned int MultiTraitOccupancyGrid::getXSizeGrid() const
 {
 	return this->map_meta_data_.width;
 }
@@ -245,7 +251,7 @@ double MultiTraitOccupancyGrid::getXSizeMeter() const
 	return this->map_meta_data_.width*this->map_meta_data_.resolution;
 }
 
-int MultiTraitOccupancyGrid::getYSizeGrid() const
+unsigned int MultiTraitOccupancyGrid::getYSizeGrid() const
 {
 	return this->map_meta_data_.height;
 }
@@ -270,8 +276,12 @@ std::string MultiTraitOccupancyGrid::getFrameID() const
 	return this->frame_id_;
 }
 
-MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(unsigned int x, unsigned int y) const  throw (bool)
+MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(int x, int y, bool offset_adjust) const  throw (bool)
 {
+	if(offset_adjust)
+	{
+		this->offsetAdjust(x, y);
+	}
 	if(this->boundsCheck(x, y))
 	{
 		int index = ogu::calcIndexRowMajor2D(x, y, this->map_meta_data_.width);
@@ -280,14 +290,9 @@ MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(unsigned
 	else throw false;
 }
 
-MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x, double y, bool origin_corrected) const  throw (bool)
+MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(double x, double y) const  throw (bool)
 {
-	if(!origin_corrected)
-	{
-		x += this->map_meta_data_.origin.position.x;
-		y += this->map_meta_data_.origin.position.y;
-	}
-	return this->getPointTrait((unsigned int)(x/this->map_meta_data_.resolution), (unsigned int)(y/this->map_meta_data_.resolution));
+	return this->getPointTrait((int)(x/this->map_meta_data_.resolution), (int)(y/this->map_meta_data_.resolution));
 }
 
 MultiTraitOccupancyGrid::trait_t MultiTraitOccupancyGrid::getPointTrait(const gm::PoseStamped& point) const  throw (bool)
@@ -300,18 +305,17 @@ void MultiTraitOccupancyGrid::addPointTrait(const gm::PoseStamped& point, trait_
 	this->addPointTrait((double)(point.pose.position.x+this->map_meta_data_.origin.position.x), (double)(point.pose.position.y+this->map_meta_data_.origin.position.y), trait, confidence);
 }
 
-void MultiTraitOccupancyGrid::addPointTrait(double x, double y, trait_t trait, int confidence, bool origin_corrected)  throw (bool)
+void MultiTraitOccupancyGrid::addPointTrait(double x, double y, trait_t trait, int confidence)  throw (bool)
 {
-	if(!origin_corrected)
-	{
-		x += this->map_meta_data_.origin.position.x;
-		y += this->map_meta_data_.origin.position.y;
-	}
-	this->addPointTrait((unsigned int)(x/this->map_meta_data_.resolution), (unsigned int)(y/this->map_meta_data_.resolution), trait, confidence);
+	this->addPointTrait((int)(x/this->map_meta_data_.resolution), (int)(y/this->map_meta_data_.resolution), trait, confidence);
 }
 
-void MultiTraitOccupancyGrid::addPointTrait(unsigned int x, unsigned int y, trait_t trait, int confidence)  throw (bool)
+void MultiTraitOccupancyGrid::addPointTrait(int x, int y, trait_t trait, int confidence, bool offset_adjust)  throw (bool)
 {
+	if(offset_adjust)
+	{
+		this->offsetAdjust(x, y);
+	}
 	if(this->boundsCheck(x, y))
 	{
 		int cell_index = ogu::calcIndexRowMajor2D(x, y, this->map_meta_data_.width);
@@ -349,6 +353,8 @@ void MultiTraitOccupancyGrid::toROSMsg(MultiTraitOccupancyGridMessage& message) 
 	message.header.frame_id = this->frame_id_;
 	message.header.stamp    = ros::Time::now();
 	message.trait_vector    = std::vector<int32_t>(this->trait_map_.size());
+	message.x_offset        = this->x_offset_;
+	message.y_offset        = this->y_offset_;
 	BOOST_FOREACH(trait_map_t::value_type trait_index, this->trait_map_)
 	{
 		CellTrait trait(trait_index.first);
@@ -367,6 +373,7 @@ void MultiTraitOccupancyGrid::toROSMsg(trait_t trait, nm::OccupancyGrid& message
 
 void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling, bool use_zero_as_free, bool use_negative_as_unkown)  throw (bool)
 {
+	//TODO This does not work properly right now
 	unsigned int copy_width  = confidances.info.width;
 	unsigned int copy_height = confidances.info.height;
 	if(copy_width > this->map_meta_data_.width)
@@ -410,24 +417,19 @@ bool MultiTraitOccupancyGrid::getGoal(gm::Pose& goal) const
 	return this->has_goal_;
 }
 
-void MultiTraitOccupancyGrid::setGoal(unsigned int x, unsigned int y)
+void MultiTraitOccupancyGrid::setGoal(int x, int y)
 {
 	this->has_goal_ = true;
-	this->goal_pose_.position.x = (double)x*this->map_meta_data_.resolution;
-	this->goal_pose_.position.y = (double)y*this->map_meta_data_.resolution;
+	this->goal_pose_.position.x = (double)(x+this->x_offset_)*this->map_meta_data_.resolution+this->map_meta_data_.origin.position.x;
+	this->goal_pose_.position.y = (double)(y+this->y_offset_)*this->map_meta_data_.resolution+this->map_meta_data_.origin.position.y;
 	this->place_goal(x, y);
 }
 
-void MultiTraitOccupancyGrid::setGoal(double x, double y, bool origin_corrected)
+void MultiTraitOccupancyGrid::setGoal(double x, double y)
 {
-	if(!origin_corrected)
-	{
-		x += this->map_meta_data_.origin.position.x;
-		y += this->map_meta_data_.origin.position.y;
-	}
 	this->has_goal_ = true;
-	this->goal_pose_.position.x = x;
-	this->goal_pose_.position.y = y;
+	this->goal_pose_.position.x = x+this->map_meta_data_.origin.position.x;
+	this->goal_pose_.position.y = y+this->map_meta_data_.origin.position.y;
 	this->place_goal(x/this->map_meta_data_.resolution, x/this->map_meta_data_.resolution);
 }
 
@@ -442,7 +444,7 @@ void MultiTraitOccupancyGrid::setGoal(const gm::Pose& goal)
 	this->place_goal(corrected_goal.position.x/this->map_meta_data_.resolution, corrected_goal.position.y/this->map_meta_data_.resolution);
 }
 
-void MultiTraitOccupancyGrid::place_goal(unsigned int x, unsigned int y)
+void MultiTraitOccupancyGrid::place_goal(int x, int y)
 {
 	if(x<(int)this->map_meta_data_.width&&y<(int)this->map_meta_data_.height)
 	{
@@ -472,24 +474,20 @@ bool MultiTraitOccupancyGrid::boundsCheck(unsigned int x, unsigned int y) const
 	return xbound&&ybound;
 }
 
-void MultiTraitOccupancyGrid::meterToGridCell(double xm, double ym, unsigned int& xg, unsigned int& yg, bool origin_corrected) const
+void MultiTraitOccupancyGrid::meterToGridCell(double xm, double ym, int& xg, int& yg) const
 {
-	if(!origin_corrected)
-	{
-		xm+=this->map_meta_data_.origin.position.x;
-		ym+=this->map_meta_data_.origin.position.y;
-	}
-	xg = (unsigned int)(xm/this->map_meta_data_.resolution);
-	yg = (unsigned int)(ym/this->map_meta_data_.resolution);
+	xg = (int)(xm/this->map_meta_data_.resolution);
+	yg = (int)(ym/this->map_meta_data_.resolution);
 }
 
-void MultiTraitOccupancyGrid::gridCellToMeter(unsigned int xg, unsigned int yg, double& xm, double& ym, bool origin_correct) const
+void MultiTraitOccupancyGrid::gridCellToMeter(int xg, int yg, double& xm, double& ym) const
 {
 	xm = (double)(xg)*this->map_meta_data_.resolution;
 	ym = (double)(yg)*this->map_meta_data_.resolution;
-	if(origin_correct)
-	{
-		xm-=this->map_meta_data_.origin.position.x;
-		ym-=this->map_meta_data_.origin.position.y;
-	}
+}
+
+void MultiTraitOccupancyGrid::offsetAdjust(int& x, int& y) const
+{
+	x+=this->x_offset_;
+	y+=this->y_offset_;
 }
