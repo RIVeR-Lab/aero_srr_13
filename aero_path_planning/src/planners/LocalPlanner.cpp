@@ -343,7 +343,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 						}
 					}catch(bool& e)
 					{
-						ROS_ERROR_STREAM("Went Out of Bounds While Searching a Tentacle with point ("<<temp_point.x<<","<<temp_point.y<<"), Map X:"<<search_grid.getXSizeMeter()<<"m, Map Y:"<<search_grid.getYSizeMeter()<<",!");
+						//ROS_ERROR_STREAM("Went Out of Bounds While Searching a Tentacle with point ("<<temp_point.x<<","<<temp_point.y<<"), Map X:"<<search_grid.getXSizeMeter()<<"m, Map Y:"<<search_grid.getYSizeMeter()<<",!");
 					}
 				}
 				//ROS_INFO_STREAM("I'm Checking The Distance To Goal");
