@@ -40,19 +40,25 @@ namespace object_locator
 		 * @param [in] msg
 		 * @param [out] normImage is the output image where the normalized and filtered image is stored
 		 */
-		virtual void grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage);
+		virtual void grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage, Mat_t& maskt);
 		/**
 		 * @author Samir Zutshi
 		 * @brief Takes a grayscale image and detects for blobs and outputs its center.
 		 * @param [in] img of type Mat CV_8UC1
 		 */
-		virtual void blobIdentify(Mat_t& img);
+		virtual void blobIdentify(Mat_t& img, Mat_t& mask);
+		virtual void fillHoles(Mat_t& img);
+
+
 		virtual void generateMsg();
 
 		ros::Subscriber sync_image_sub_;
 		image_transport::ImageTransport* it_;
 		image_transport::CameraSubscriber image_left_;
-		int HORIZON_;
+		int HORIZON_TOP_;
+		int HORIZON_BTM_;
+		cv::Vec3b ZeroV,White;
+
 
 		std::string input_topic_, output_topic_;
 		Mat_t load_;

@@ -443,42 +443,42 @@ void ImageConverter::computeDisparity() {
 	pcl::fromROSMsg(*points_msg,*cloud);
 
 	//****** Cylinder model testing *******//
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudFilt (new pcl::PointCloud<pcl::PointXYZ>);
-	cloudFilt = cloud;
-	 pcl::PointCloud<pcl::PointXYZ>::Ptr final (new pcl::PointCloud<pcl::PointXYZ>);
-
-	  std::vector<int> inliers;
-	  int argF = 2;
-	  // created RandomSampleConsensus object and compute the appropriated model
-	  pcl::SampleConsensusModelSphere<pcl::PointXYZ>::Ptr
-	    model_s(new pcl::SampleConsensusModelSphere<pcl::PointXYZ> (cloudFilt));
-	  pcl::SampleConsensusModelPlane<pcl::PointXYZ>::Ptr
-	    model_p (new pcl::SampleConsensusModelPlane<pcl::PointXYZ> (cloudFilt));
-	  if(argF == 1)
-	  {
-	    pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_p);
-	    ransac.setDistanceThreshold (.01);
-	    ransac.computeModel();
-	    ransac.getInliers(inliers);
-	  }
-	  else if (argF == 2 )
-	  {
-	    pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_s);
-	    ransac.setDistanceThreshold (.01);
-	    ransac.computeModel();
-	    ransac.getInliers(inliers);
-	  }
-	  // copies all inliers of the model computed to another PointCloud
-	  pcl::copyPointCloud<pcl::PointXYZ>(*cloudFilt, inliers, *final);
-
-	  // creates the visualization object and adds either our orignial cloud or all of the inliers
-	  // depending on the command line arguments specified.
-	  sensor_msgs::PointCloud2Ptr filtered_msg =boost::make_shared<
-				sensor_msgs::PointCloud2>();
-	  pcl::PointCloud<pcl::PointXYZ>::ConstPtr finalc(new pcl::PointCloud<pcl::PointXYZ>);
-	  finalc = final;
-	  pcl::toROSMsg(*finalc, *filtered_msg);
-	  pub_points3_.publish(filtered_msg);
+//	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudFilt (new pcl::PointCloud<pcl::PointXYZ>);
+//	cloudFilt = cloud;
+//	 pcl::PointCloud<pcl::PointXYZ>::Ptr final (new pcl::PointCloud<pcl::PointXYZ>);
+//
+//	  std::vector<int> inliers;
+//	  int argF = 2;
+//	  // created RandomSampleConsensus object and compute the appropriated model
+//	  pcl::SampleConsensusModelSphere<pcl::PointXYZ>::Ptr
+//	    model_s(new pcl::SampleConsensusModelSphere<pcl::PointXYZ> (cloudFilt));
+//	  pcl::SampleConsensusModelPlane<pcl::PointXYZ>::Ptr
+//	    model_p (new pcl::SampleConsensusModelPlane<pcl::PointXYZ> (cloudFilt));
+//	  if(argF == 1)
+//	  {
+//	    pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_p);
+//	    ransac.setDistanceThreshold (.01);
+//	    ransac.computeModel();
+//	    ransac.getInliers(inliers);
+//	  }
+//	  else if (argF == 2 )
+//	  {
+//	    pcl::RandomSampleConsensus<pcl::PointXYZ> ransac (model_s);
+//	    ransac.setDistanceThreshold (.01);
+//	    ransac.computeModel();
+//	    ransac.getInliers(inliers);
+//	  }
+//	  // copies all inliers of the model computed to another PointCloud
+//	  pcl::copyPointCloud<pcl::PointXYZ>(*cloudFilt, inliers, *final);
+//
+//	  // creates the visualization object and adds either our orignial cloud or all of the inliers
+//	  // depending on the command line arguments specified.
+//	  sensor_msgs::PointCloud2Ptr filtered_msg =boost::make_shared<
+//				sensor_msgs::PointCloud2>();
+//	  pcl::PointCloud<pcl::PointXYZ>::ConstPtr finalc(new pcl::PointCloud<pcl::PointXYZ>);
+//	  finalc = final;
+//	  pcl::toROSMsg(*finalc, *filtered_msg);
+//	  pub_points3_.publish(filtered_msg);
 
 	//*********Oct tree stuff *************//
 	float resolution = 2.5f;
@@ -816,7 +816,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 			cv::Size(14, 90), cv::Size(35, 200)); // works for
 
 	/*
-	 * WHA - White hook object inside detection loop
+	 * WHA - White hook object inside detection loop BLUE
 	 */
 	for (size_t i = 0; i < WHA_faces.size(); i++) {
 //		cout << "Entered circle drawing loop" << endl;
@@ -850,7 +850,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 
 	}
 	/*
-	 * PINK_BALL - Tennis ball detection loop
+	 * PINK_BALL - Tennis ball detection loop PINK
 	 */
 	for (size_t j = 0; j < PINK_faces.size(); j++) {
 //		cout << "Entered circle drawing loop" << endl;
@@ -882,7 +882,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		}
 	}
 	/*
-	 * PIPE- DIAG
+	 * PIPE- DIAG - RED
 	 */
 	for (size_t j = 0; j < SUN_faces.size(); j++) {
 //		cout << "Entered circle drawing loop" << endl;
@@ -914,7 +914,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		}
 	}
 	/*
-	 * Actually WHA but with different range
+	 * Actually WHA but with different range GREEN
 	 */
 	for (size_t j = 0; j < RQT_faces.size(); j++) {
 //		cout << "Entered circle drawing loop" << endl;
@@ -944,36 +944,36 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	/*
 	 * PIPE - Pipe Detection Loop
 	 */
-	for (size_t j = 0; j < Pipe_faces.size(); j++) {
-//		cout << "Entered circle drawing loop" << endl;
-
-		Mat_t faceROI = frame_gray(Pipe_faces[j]);
-
-		//-- In each face, detect eyes
-
-		//-- Draw the face
-		cv::Point center(Pipe_faces[j].x + Pipe_faces[j].width / 2,
-				Pipe_faces[j].y + Pipe_faces[j].height / 2);
-		if (center.y > HORIZON) {
-		cv::ellipse(frame, center,
-				cv::Size(Pipe_faces[j].width / 2, Pipe_faces[j].height / 2), 0,
-				0, 360, cv::Scalar(15, 0, 255), 2, 8, 0);
-
-		cv::rectangle(frame,
-				Point(center.x - Pipe_faces[j].width / 2,
-						center.y - Pipe_faces[j].height / 2),
-				Point(center.x + Pipe_faces[j].width / 2,
-						center.y + Pipe_faces[j].height / 2),
-				cv::Scalar(15, 0, 255));
-
-
-		DetectionPtr_t newDetection(new Detection_t());
-		newDetection->first.first = center.x;
-		newDetection->first.second = center.y;
-		newDetection->second = WHA;
-		detection_list_.push_back(newDetection);
-		}
-	}
+//	for (size_t j = 0; j < Pipe_faces.size(); j++) {
+////		cout << "Entered circle drawing loop" << endl;
+//
+//		Mat_t faceROI = frame_gray(Pipe_faces[j]);
+//
+//		//-- In each face, detect eyes
+//
+//		//-- Draw the face
+//		cv::Point center(Pipe_faces[j].x + Pipe_faces[j].width / 2,
+//				Pipe_faces[j].y + Pipe_faces[j].height / 2);
+//		if (center.y > HORIZON) {
+//		cv::ellipse(frame, center,
+//				cv::Size(Pipe_faces[j].width / 2, Pipe_faces[j].height / 2), 0,
+//				0, 360, cv::Scalar(15, 0, 255), 2, 8, 0);
+//
+//		cv::rectangle(frame,
+//				Point(center.x - Pipe_faces[j].width / 2,
+//						center.y - Pipe_faces[j].height / 2),
+//				Point(center.x + Pipe_faces[j].width / 2,
+//						center.y + Pipe_faces[j].height / 2),
+//				cv::Scalar(15, 0, 255));
+//
+//
+//		DetectionPtr_t newDetection(new Detection_t());
+//		newDetection->first.first = center.x;
+//		newDetection->first.second = center.y;
+//		newDetection->second = WHA;
+//		detection_list_.push_back(newDetection);
+//		}
+//	}
 
 
 
