@@ -701,6 +701,8 @@ void LocalPlanner::visualizeOcc(const og::MultiTraitOccupancyGrid& grid)
 
 	nav_msgs::OccupancyGridPtr message(new nav_msgs::OccupancyGrid);
 	grid.generateOccupancyGridforTrait(*message, ogu::CellTrait::OBSTACLE);
+	message->header.frame_id = grid.getFrameID();
+	message->header.stamp    = ros::Time::now();
 	this->occ_viz_pub_.publish(message);
 }
 

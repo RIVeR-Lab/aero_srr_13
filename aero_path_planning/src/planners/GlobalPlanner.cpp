@@ -213,11 +213,11 @@ void GlobalPlanner::buildGlobalMap()
 {
 	ROS_INFO_STREAM("Building initial global map!");
 	nav_msgs::MapMetaData info;
-	info.origin.position.x = (double)this->global_x_ori_*this->global_res_;
-	info.origin.position.y = (double)this->global_y_ori_*this->global_res_;
-	info.origin.position.z = this->global_z_ori_;
 	info.width = this->global_x_size_;
 	info.height= this->global_y_size_;
+	info.origin.position.x = -((double)this->global_x_ori_*this->global_res_)/2.0;
+	info.origin.position.y = -((double)this->global_y_ori_*this->global_res_)/2.0;
+	info.origin.position.z = 0;
 	info.map_load_time = ros::Time::now();
 	info.resolution    = this->global_res_;
 	this->traits_.push_back(occupancy_grid::utilities::CellTrait::UNKOWN);
@@ -232,8 +232,8 @@ void GlobalPlanner::buildGlobalMap()
 	this->local_info_.height = this->local_y_size_;
 	this->local_info_.width  = this->local_x_size_;
 	this->local_info_.resolution = this->local_res_;
-	this->local_info_.origin.position.x = (double)this->local_x_ori_*this->local_res_;
-	this->local_info_.origin.position.y = (double)this->local_y_ori_*this->local_res_;
+	this->local_info_.origin.position.x = -((double)(local_info_.width)*this->local_res_)/2.0;
+	this->local_info_.origin.position.y = -((double)(local_info_.height)*this->local_res_)/2.0;
 }
 
 void GlobalPlanner::laserCB(const sensor_msgs::PointCloud2ConstPtr& message)
@@ -313,7 +313,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 {
 	//ROS_INFO_STREAM("I'm Chunking the Global Map!");
 	occupancy_grid::MultiTraitOccupancyGridMessagePtr message(new occupancy_grid::MultiTraitOccupancyGridMessage);
-	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_, 0, this->local_info_.height/2);
+	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_, 0, -this->local_info_.height/2);
 	local_gird.toROSMsg(*message);
 	this->local_occ_pub_.publish(message);
 
