@@ -237,6 +237,12 @@ public:
 	 * @param [in] initial_trait The trait to fill the map with initially
 	 * @param [in] x_offset Offeset, in grid units, between the origin of the grid (0,0), and the origin of point insertion/retrieval
 	 * @param [in] y_offset Offeset, in grid units, between the origin of the grid (0,0), and the origin of point insertion/retrieval
+	 *
+	 * Note that the origin in the MapMetaData and the grid offset are different in their purpose. The MapMetaData origin specifices where in a given frame the 0,0 coordinate of the
+	 * raw grid exists. This is needed by tools like rviz to render nav_msgs::OccupancyGrids into arbirary frames. The grid-offset, on the other hand, simply shifts where the
+	 * insertion point for points is, relative to 0,0. So for example if you had a 100*100 grid, but wanted to place points from -50->50 along exach axis, you would specify
+	 * an x/y offset of 50. If this grid then represented your world frame, and you wanted the apparent origin of your -50->50 map to lie at the origin of the world frame, you would
+	 * specify an origin in the MapMetaData of -50*resolution/-50*resolution in the /world frame.
 	 */
 	MultiTraitOccupancyGrid(const std::string& frame_id, const std::vector<trait_t>& traits, trait_t initial_trait, const nm::MapMetaData& slice_info, int x_offset, int y_offset);
 
