@@ -57,7 +57,7 @@ bool addPointCloudPatch(aero_path_planning::PointCloud& cloud, occupancy_grid::u
 			aero_path_planning::pointToPose(point, point_poise.pose);
 			try
 			{
-				grid.addPointTrait(point_poise, trait, confidence);
+				grid.addPointTrait(point_poise.pose, trait, confidence);
 			}
 			catch(bool& e)
 			{

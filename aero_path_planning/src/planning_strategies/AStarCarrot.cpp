@@ -371,8 +371,8 @@ bool AStarCarrot::search(const geometry_msgs::Pose& start_point, const geometry_
 		tf::pointMsgToTF(goal_point.position, goal);
 
 		//Convert the start/goal points to grid-cells
-		unsigned int tx;
-		unsigned int ty;
+		int tx;
+		int ty;
 		this->map_->meterToGridCell(start.x(), start.y(), tx, ty);
 		start.setX(tx);
 		start.setY(ty);

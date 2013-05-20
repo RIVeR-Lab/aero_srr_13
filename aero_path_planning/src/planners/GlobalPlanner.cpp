@@ -226,7 +226,7 @@ void GlobalPlanner::buildGlobalMap()
 	this->traits_.push_back(occupancy_grid::utilities::CellTrait::OBSTACLE);
 	this->traits_.push_back(occupancy_grid::utilities::CellTrait::TRAVERSED);
 	this->traits_.push_back(occupancy_grid::utilities::CellTrait::GOAL);
-	this->global_map_ = occupancy_grid::MultiTraitOccupancyGridPtr(new occupancy_grid::MultiTraitOccupancyGrid(this->global_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, info));
+	this->global_map_ = occupancy_grid::MultiTraitOccupancyGridPtr(new occupancy_grid::MultiTraitOccupancyGrid(this->global_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, info, info.width/2, info.height/2));
 
 
 	this->local_info_.height = this->local_y_size_;
@@ -313,7 +313,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 {
 	//ROS_INFO_STREAM("I'm Chunking the Global Map!");
 	occupancy_grid::MultiTraitOccupancyGridMessagePtr message(new occupancy_grid::MultiTraitOccupancyGridMessage);
-	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_);
+	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_, 0, this->local_info_.height/2);
 	local_gird.toROSMsg(*message);
 	this->local_occ_pub_.publish(message);
 
@@ -398,7 +398,7 @@ bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid:
 	bool collision = false;
 	try
 	{
-		if(map.getPointTrait((unsigned int)point.x(), (unsigned int)point.y())==occupancy_grid::utilities::CellTrait::OBSTACLE)
+		if(map.getPointTrait((int)point.x(), (int)point.y())==occupancy_grid::utilities::CellTrait::OBSTACLE)
 		{
 			collision = true;
 		}

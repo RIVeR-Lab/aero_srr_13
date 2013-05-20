@@ -80,7 +80,7 @@ protected:
 	{
 		try
 		{
-			if(map.getPointTrait((unsigned int)point.x(), (unsigned int)point.y())==occupancy_grid::utilities::CellTrait::OBSTACLE)
+			if(map.getPointTrait((int)point.x(), (int)point.y())==occupancy_grid::utilities::CellTrait::OBSTACLE)
 			{
 				return true;
 			}
@@ -202,7 +202,7 @@ TEST_F(AStarCarrotTestFixture, testCost)
 TEST_F(AStarCarrotTestFixture, testAStarCarrot)
 {
 	std::string frame_id("/robot");
-	occupancy_grid::MultiTraitOccupancyGridPtr test_map(new occupancy_grid::MultiTraitOccupancyGrid(frame_id, traits_, occupancy_grid::utilities::CellTrait::FREE_LOW_COST, info_));
+	occupancy_grid::MultiTraitOccupancyGridPtr test_map(new occupancy_grid::MultiTraitOccupancyGrid(frame_id, traits_, occupancy_grid::utilities::CellTrait::FREE_LOW_COST, info_, 0, 0));
 	app::AStarCarrot test_planner;
 	std::deque<geometry_msgs::Pose> result_path;
 	ros::Duration timeout(10);

@@ -318,7 +318,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 					app::pointToPose(temp_point, point_pose.pose);
 					try
 					{
-						switch(search_grid.getPointTrait(point_pose).getEnum())
+						switch(search_grid.getPointTrait(point_pose.pose).getEnum())
 						{
 						case ogu::CellTrait::OBSTACLE:
 							//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
