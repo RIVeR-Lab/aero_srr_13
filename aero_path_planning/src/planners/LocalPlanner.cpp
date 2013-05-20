@@ -432,7 +432,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				//ROS_INFO_STREAM("Patch Applied"<<success<<"!");
 				if(!success)
 				{
-					ROS_INFO_STREAM(error_message);
+					ROS_INFO_STREAM("Failed to Copy LIDAR Data due to:"<<error_message);
 				}
 			}
 
