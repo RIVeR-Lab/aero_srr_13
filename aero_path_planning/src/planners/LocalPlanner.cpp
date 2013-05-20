@@ -243,7 +243,7 @@ void LocalPlanner::regTopic()
 	this->lidar_sub_ = this->nh_.subscribe(this->lidar_topic_, 1, &LocalPlanner::lidarCB, this);
 	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 1);
 	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 1);
-	this->occ_viz_pub_ = this->nh_.advertise<nav_msgs::OccupancyGrid>("/aero/local/occupancy_viz",1);
+	this->occ_viz_pub_ = this->nh_.advertise<nav_msgs::OccupancyGrid>("/aero/local/obstacle_data",1);
 	this->goal_sub_  = this->nh_.subscribe("/aero/global/goal", 1, &LocalPlanner::goalCB, this);
 
 	std::string software_stop_topic("aero/software_stop");
