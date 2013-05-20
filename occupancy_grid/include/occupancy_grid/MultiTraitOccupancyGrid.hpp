@@ -174,8 +174,7 @@ inline void normalizeConfidance(const cell_data_t values[], int size, cell_data_
  */
 inline void buildEmptyOccupancyGrid(nm::OccupancyGrid& grid)
 {
-	int size  = calcIndexRowMajor2D(grid.info.width, grid.info.height, grid.info.width);
-	grid.data = std::vector<cell_data_t>(size);
+	grid.data = std::vector<cell_data_t>(grid.info.height*grid.info.width);
 }
 
 
