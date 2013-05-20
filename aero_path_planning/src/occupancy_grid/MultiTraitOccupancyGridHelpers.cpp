@@ -54,6 +54,8 @@ bool addPointCloudPatch(aero_path_planning::PointCloud& cloud, occupancy_grid::u
 		{
 			geometry_msgs::PoseStamped point_poise;
 			point_poise.header.frame_id = grid.getFrameID();
+			point_poise.pose.position.x = point.x;
+			point_poise.pose.position.y = point.y;
 			aero_path_planning::pointToPose(point, point_poise.pose);
 			try
 			{
