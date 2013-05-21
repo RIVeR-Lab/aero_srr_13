@@ -110,6 +110,9 @@ TEST_F(occ_test_fixture, testSetGetOffset)
 	MultiTraitOccupancyGrid copyGrid(testGrid);
 	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyGrid.getPointTrait(10,10).getEnum());
 	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyGrid.getPointTrait(-10,-5).getEnum());
+
+	copyGrid.addPointTrait(10,10,utilities::CellTrait::OBSTACLE, 1000);
+	ASSERT_EQ(utilities::CellTrait::OBSTACLE, copyGrid.getPointTrait(10,10).getEnum());
 }
 
 TEST_F(occ_test_fixture, testMessage)
