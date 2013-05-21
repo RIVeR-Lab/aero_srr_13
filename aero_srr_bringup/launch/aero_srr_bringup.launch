@@ -32,7 +32,7 @@
 		<arg name="local_frame"  value="$(arg robot_frame)"/>
   </include>  
 
-  <include file="$(find aero_srr_bringup)/launch/aero_srr_image_proc.launch"/>
+
 
   
   <include file="$(find aero_srr_bringup)/launch/aero_srr_odometry.launch">

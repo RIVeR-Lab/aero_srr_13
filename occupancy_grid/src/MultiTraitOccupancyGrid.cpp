@@ -308,6 +308,7 @@ void MultiTraitOccupancyGrid::addPointTrait(const gm::Pose& point, trait_t trait
 	int tx;
 	int ty;
 	this->projectPoseToGrid(point, tx, ty);
+	//ROS_INFO_STREAM("I'm placing a point at location:"<<tx<<","<<ty<<" of type: "<<trait.getString()<<" with confidance:"<<confidence);
 	this->addPointTrait(tx, ty, trait, confidence, false);
 }
 

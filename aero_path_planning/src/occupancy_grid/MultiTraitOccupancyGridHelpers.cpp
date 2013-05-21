@@ -58,7 +58,7 @@ bool addPointCloudPatch(aero_path_planning::PointCloud& cloud, occupancy_grid::u
 			point_poise.pose.position.x = point.x;
 			point_poise.pose.position.y = point.y;
 			aero_path_planning::pointToPose(point, point_poise.pose);
-			ROS_INFO_STREAM("I'm copying the following Point Onto the Map:"<<point_poise.pose.position);
+			//ROS_INFO_STREAM("I'm copying the following Point Onto the Map:"<<point_poise.pose.position);
 			try
 			{
 				grid.addPointTrait(point_poise.pose, trait, confidence);

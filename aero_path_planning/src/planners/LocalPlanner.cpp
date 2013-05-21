@@ -273,6 +273,7 @@ void LocalPlanner::goalCB(const geometry_msgs::PoseStampedConstPtr& message)
 
 bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTraitOccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx)
 {
+	ROS_INFO_STREAM("I'm Searching Tentacle:"<<speedset_idx<<","<<tentacle_idx);
 	typedef std::pair<int, int> TentacleData_t;
 	typedef boost::shared_ptr<TentacleData_t > TentacleDataPtr_t;
 	FitnessQueue<double,  TentacleDataPtr_t> best_tentacle_candidates;
@@ -320,12 +321,12 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 						switch(search_grid.getPointTrait(temp_point.x, temp_point.y).getEnum())
 						{
 						case ogu::CellTrait::OBSTACLE:
-							//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
-							//PRINT_POINT("Hit Point", point_pose);
+							ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
+							PRINT_POINT("Hit Point", temp_point);
 							traversing = false;
 							break;
 						case ogu::CellTrait::GOAL:
-							//ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
+							ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
 							traversing = false;
 							hit_goal   = true;
 							break;
