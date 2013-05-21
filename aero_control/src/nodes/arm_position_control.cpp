@@ -22,7 +22,7 @@ using namespace aero_control;
 ArmPositionController::ArmPositionController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
 	std::string DesiredPosition("DesiredARMPosition"); ///String containing the topic name for goal position
-	std::string ArmError("ArmError"); ///String containing the topic name for arm error
+	std::string ArmState("ArmState"); ///String containing the topic name for arm state
 	std::string JointVelocity("CartesianVelocity"); ///String containing the topic name for JointVelocity
 	std::string JointAngles("JointAngles"); ///String containing the topic name for JointAngles
 	std::string CurrentPosition("ToolPosition"); ///String containing the topic name for CurrentPosition
@@ -40,16 +40,16 @@ ArmPositionController::ArmPositionController(ros::NodeHandle nh, ros::NodeHandle
 	if (!param_nh.getParam(CurrentPosition, CurrentPosition))
 		ROS_WARN(
 				"Parameter <%s> Not Set. Using Default Current Position Topic <%s>!", CurrentPosition.c_str(), CurrentPosition.c_str());
-	if (!param_nh.getParam(ArmError, ArmError))
+	if (!param_nh.getParam(ArmState, ArmState))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Arm Error Topic <%s>!", ArmError.c_str(), ArmError.c_str());
+				"Parameter <%s> Not Set. Using Default Arm State Topic <%s>!", ArmState.c_str(), ArmState.c_str());
 
 //Print out received topics
 	ROS_DEBUG("Got Desired Position Topic Name: <%s>", DesiredPosition.c_str());
 	ROS_DEBUG("Got Joint Velocity Topic Name: <%s>", JointVelocity.c_str());
 	ROS_DEBUG("Got Joint Angles Topic Name: <%s>", JointAngles.c_str());
 	ROS_DEBUG("Got Current Position Topic Name: <%s>", CurrentPosition.c_str());
-	ROS_DEBUG("Using Arm Error Topic Name: <%s>", ArmError.c_str());
+	ROS_DEBUG("Using Arm State Topic Name: <%s>", ArmState.c_str());
 
 	ROS_INFO("Starting Up Arm Velocity Controller...");
 
@@ -62,11 +62,13 @@ ArmPositionController::ArmPositionController(ros::NodeHandle nh, ros::NodeHandle
 
 	this->joint_angles_sub = nh.subscribe(JointAngles, 1, &ArmPositionController::JointAnglesMSG,
 			this);
-	this->joint_angles_sub = nh.subscribe(JointAngles, 1, &ArmPositionController::JointAnglesMSG,
-			this);
+	this->arm_state_pub = nh.advertise<aero_control::arm_state>(ArmState, 2, true);
+
 	last_position_time = ros::Time().now();
+	goal_time = ros::Time().now();
+
 	running = false;
-	//UpdateError();
+	goal_reached = false;
 
 	PID_X = new pid::PIDController(3, 0, 0.5, pos_err.x_err);
 	PID_Y = new pid::PIDController(3, 0, 0.5, pos_err.y_err);
@@ -198,6 +200,25 @@ void ArmPositionController::UpdateError(void) {
 //	ROS_INFO("rY_CUR = %f, rY_DES = %f, rY_ERR_ = %f", current_pos.pitch, desired_pos.pitch, pos_err.pitch_err);
 //	ROS_INFO("rZ_CUR = %f, rZ_DES = %f, rZ_ERR_ = %f", current_pos.yaw, desired_pos.yaw, pos_err.yaw_err);
 
+
+	/* Check if we are at the goal */
+	if (pos_err.x_err < LinearErrorRange() && pos_err.y_err < LinearErrorRange()
+			&& pos_err.z_err < LinearErrorRange() && pos_err.roll_err < RotationalErrorRange()
+			&& pos_err.pitch_err < RotationalErrorRange()
+			&& pos_err.yaw_err < RotationalErrorRange()) {
+		/* if we have been at the goal for a given time */
+		if (ros::Time().now().toSec() - goal_time.toSec() > 1) {
+			goal_reached = true;//Goal has been reached
+		}
+	} else {
+		goal_reached = false;//goal not reached
+
+		goal_time = ros::Time().now();//update current time
+
+	}
+
+	SendArmStateMSG();//send the arm state
+
 	if (running == true) {
 		UpdatePID();
 	}
@@ -206,56 +227,74 @@ void ArmPositionController::UpdateError(void) {
 		running = false;
 	}
 }
+
+void ArmPositionController::SendArmStateMSG(void) {
+	aero_control::arm_state state_msg;
+
+	state_msg.header.stamp = ros::Time().now();
+
+	state_msg.moving = running;
+	state_msg.goal_reached = goal_reached;
+	state_msg.error.x_error = pos_err.x_err;
+	state_msg.error.y_error = pos_err.y_err;
+	state_msg.error.z_error = pos_err.z_err;
+	state_msg.error.roll_error = pos_err.roll_err;
+	state_msg.error.pitch_error = pos_err.pitch_err;
+	state_msg.error.yaw_error = pos_err.yaw_err;
+
+	arm_state_pub.publish(state_msg);
+}
+
 void ArmPositionController::UpdatePID(void) {
 	Eigen::VectorXf cartisian_velocity(6);
 
 	cartisian_velocity(0) = PID_X->PIDUpdate(pos_err.x_err);
 	cartisian_velocity(0) *= linear_gain;
 
-	if (cartisian_velocity(0) > 0.037) {
-		cartisian_velocity(0) = 0.037;
-	} else if (cartisian_velocity(0) < -0.037) {
-		cartisian_velocity(0) = -0.037;
+	if (cartisian_velocity(0) > MaxLinearVel()) {
+		cartisian_velocity(0) = MaxLinearVel();
+	} else if (cartisian_velocity(0) < -MaxLinearVel()) {
+		cartisian_velocity(0) = -MaxLinearVel();
 	}
 	cartisian_velocity(1) = PID_Y->PIDUpdate(pos_err.y_err);
 	cartisian_velocity(1) *= linear_gain;
 
-	if (cartisian_velocity(1) > 0.037) {
-		cartisian_velocity(1) = 0.037;
-	} else if (cartisian_velocity(1) < -0.037) {
-		cartisian_velocity(1) = -0.037;
+	if (cartisian_velocity(1) > MaxLinearVel()) {
+		cartisian_velocity(1) = MaxLinearVel();
+	} else if (cartisian_velocity(1) < -MaxLinearVel()) {
+		cartisian_velocity(1) = -MaxLinearVel();
 	}
 	cartisian_velocity(2) = PID_Z->PIDUpdate(pos_err.z_err);
 	cartisian_velocity(2) *= linear_gain;
 
-	if (cartisian_velocity(2) > 0.037) {
-		cartisian_velocity(2) = 0.037;
-	} else if (cartisian_velocity(2) < -0.037) {
-		cartisian_velocity(2) = -0.037;
+	if (cartisian_velocity(2) > MaxLinearVel()) {
+		cartisian_velocity(2) = MaxLinearVel();
+	} else if (cartisian_velocity(2) < -MaxLinearVel()) {
+		cartisian_velocity(2) = -MaxLinearVel();
 	}
 	cartisian_velocity(3) = PID_Roll->PIDUpdate(pos_err.roll_err);
 	cartisian_velocity(3) *= rotational_gain;
 
-	if (cartisian_velocity(3) > 0.15) {
-		cartisian_velocity(3) = 0.15;
-	} else if (cartisian_velocity(3) < -0.15) {
-		cartisian_velocity(3) = -0.15;
+	if (cartisian_velocity(3) > MaxAngularVel()) {
+		cartisian_velocity(3) = MaxAngularVel();
+	} else if (cartisian_velocity(3) < -MaxAngularVel()) {
+		cartisian_velocity(3) = -MaxAngularVel();
 	}
 	cartisian_velocity(4) = PID_Pitch->PIDUpdate(pos_err.pitch_err);
 	cartisian_velocity(4) *= rotational_gain;
 
-	if (cartisian_velocity(4) > 0.15) {
-		cartisian_velocity(4) = 0.15;
-	} else if (cartisian_velocity(4) < -0.15) {
-		cartisian_velocity(4) = -0.15;
+	if (cartisian_velocity(4) > MaxAngularVel()) {
+		cartisian_velocity(4) = MaxAngularVel();
+	} else if (cartisian_velocity(4) < -MaxAngularVel()) {
+		cartisian_velocity(4) = -MaxAngularVel();
 	}
 	cartisian_velocity(5) = PID_Yaw->PIDUpdate(pos_err.yaw_err);
 	cartisian_velocity(5) *= rotational_gain;
 
-	if (cartisian_velocity(5) > 0.15) {
-		cartisian_velocity(5) = 0.15;
-	} else if (cartisian_velocity(5) < -0.15) {
-		cartisian_velocity(5) = -0.15;
+	if (cartisian_velocity(5) > MaxAngularVel()) {
+		cartisian_velocity(5) = MaxAngularVel();
+	} else if (cartisian_velocity(5) < -MaxAngularVel()) {
+		cartisian_velocity(5) = -MaxAngularVel();
 	}
 
 //	ROS_INFO("X_V = %f", cartisian_velocity(0));
@@ -285,6 +324,8 @@ void ArmPositionController::UpdatePID(void) {
 	joint_velocity_pub.publish(cartesian_velocity_msg);
 
 }
+
+/* This didn't work very well, needs some tweaking */
 void ArmPositionController::JointAnglesMSG(const jaco_driver::joint_anglesConstPtr& joint_angles) {
 //	UpdateError();
 //
