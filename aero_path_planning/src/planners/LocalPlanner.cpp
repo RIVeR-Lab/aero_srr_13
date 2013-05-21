@@ -594,8 +594,22 @@ void LocalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 
 void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 {
+	PointCloudPtr lidar_patch(new PointCloud());
+	pcl::PointCloud<pcl::PointXYZ> raw_cloud;
+	pcl::fromROSMsg(*message, raw_cloud);
 
-	this->lidar_patch_ = message;
+	//#pragma omp parallel for
+	for(int i=0; i<(int)raw_cloud.size(); i++)
+	{
+		Point point;
+		point.x = raw_cloud.at(i).x;
+		point.y = raw_cloud.at(i).y;
+		point.z = 0;
+		point.rgba = OBSTACLE;
+		lidar_patch->push_back(point);
+	}
+	lidar_patch->header = message->header;
+	this->lidar_patch_ = lidar_patch;
 }
 
 
