@@ -300,7 +300,6 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 		//#pragma omp parallel for
 		for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 		{
-			ROS_INFO_STREAM("I'm Searching Tentacle:"<<speedset_idx<<","<<tentacle_idx);
 			//If we already hit the goal, short circuit since we can't break from OpenMP loops
 			if(!hit_goal)
 			{
@@ -318,6 +317,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 					converter.convertToEng(traverser.next(), temp_point);
 					try
 					{
+						ROS_INFO_STREAM("I got point type:"<<search_grid.getPointTrait(temp_point.x, temp_point.y).getString()<<"At Location:"<<temp_point.x<<","<<temp_point.y);
 						switch(search_grid.getPointTrait(temp_point.x, temp_point.y).getEnum())
 						{
 						case ogu::CellTrait::OBSTACLE:
@@ -436,7 +436,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				//ROS_INFO_STREAM("Patch Applied"<<success<<"!");
 				if(!success)
 				{
-					ROS_INFO_STREAM("Failed to Copy LIDAR Data due to:"<<error_message);
+					ROS_ERROR_STREAM("Failed to Copy LIDAR Data due to:"<<error_message);
 				}
 			}
 
@@ -702,7 +702,7 @@ void LocalPlanner::visualizeOcc(const og::MultiTraitOccupancyGrid& grid)
 	grid.generateOccupancyGridforTrait(*message, ogu::CellTrait::OBSTACLE);
 	BOOST_FOREACH(og::cell_data_t& data, message->data)
 	{
-		if(data>50)
+		if(data>0)
 		{
 			data = 100;
 		}
