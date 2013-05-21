@@ -50,6 +50,7 @@ bool addPointCloudPatch(aero_path_planning::PointCloud& cloud, occupancy_grid::u
 	{
 		transformer_.waitForTransform(grid.getFrameID(), cloud.header.frame_id, grid.getCreationTime(), ros::Duration(1.0/10));
 		pcl_ros::transformPointCloud(grid.getFrameID(), cloud, transformed_cloud, transformer_);
+		int fail_count = 0;
 		BOOST_FOREACH(aero_path_planning::PointCloud::PointType& point, transformed_cloud)
 		{
 			geometry_msgs::PoseStamped point_poise;
@@ -57,15 +58,18 @@ bool addPointCloudPatch(aero_path_planning::PointCloud& cloud, occupancy_grid::u
 			point_poise.pose.position.x = point.x;
 			point_poise.pose.position.y = point.y;
 			aero_path_planning::pointToPose(point, point_poise.pose);
+			ROS_INFO_STREAM("I'm copying the following Point Onto the Map:"<<point_poise.pose.position);
 			try
 			{
 				grid.addPointTrait(point_poise.pose, trait, confidence);
 			}
 			catch(bool& e)
 			{
+				fail_count++;
 				//do nothing, just means one of the points wasn't on the map
 			}
 		}
+		ROS_INFO_STREAM("I failed to place "<<fail_count<<" points out of "<<transformed_cloud.size());
 		return true;
 	}
 	catch(std::exception& e)
