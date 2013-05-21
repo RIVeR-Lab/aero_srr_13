@@ -18,10 +18,10 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																																				nh_(nh),
-																																				p_nh_(p_nh),
-																																				limiter_(NULL),
-																																				occupancy_buffer_(2)
+																																						nh_(nh),
+																																						p_nh_(p_nh),
+																																						limiter_(NULL),
+																																						occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -273,12 +273,11 @@ void LocalPlanner::goalCB(const geometry_msgs::PoseStampedConstPtr& message)
 
 bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTraitOccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx)
 {
-	ROS_INFO_STREAM("I'm Searching Tentacle:"<<speedset_idx<<","<<tentacle_idx);
 	typedef std::pair<int, int> TentacleData_t;
 	typedef boost::shared_ptr<TentacleData_t > TentacleDataPtr_t;
 	FitnessQueue<double,  TentacleDataPtr_t> best_tentacle_candidates;
 	std::vector<SpeedSet> sets;
-	app::PointConverter converter(this->res_);
+	app::PointConverter converter(search_grid.getResolution());
 
 	SpeedSet current_set = this->tentacles_->getSpeedSet(this->current_vel_);
 	sets.push_back(current_set);
@@ -301,6 +300,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 		//#pragma omp parallel for
 		for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 		{
+			ROS_INFO_STREAM("I'm Searching Tentacle:"<<speedset_idx<<","<<tentacle_idx);
 			//If we already hit the goal, short circuit since we can't break from OpenMP loops
 			if(!hit_goal)
 			{
@@ -356,14 +356,17 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 					{
 						//Will throw false if there was no goal point_pose
 						gm::Pose goal_pose;
-						search_grid.getGoal(goal_pose);
-						aero_path_planning::Point goal_point;
-						app::poseToPoint(goal_pose, goal_point);
-						converter.convertToGrid(goal_point, goal_point);
-						const aero_path_planning::Point end_point = traverser.next();
-						double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
-						//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
-						length_modifier-= dist_to_goal*this->goal_weight_;
+						has_goal = search_grid.getGoal(goal_pose);
+						if(has_goal)
+						{
+							aero_path_planning::Point goal_point;
+							app::poseToPoint(goal_pose, goal_point);
+							converter.convertToGrid(goal_point, goal_point);
+							const aero_path_planning::Point end_point = traverser.next();
+							double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
+							//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
+							length_modifier-= dist_to_goal*this->goal_weight_;
+						}
 					}
 					catch(bool& e)
 					{
