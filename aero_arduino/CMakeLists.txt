@@ -9,5 +9,5 @@ set(FIRMWARE_NAME aero_arduino)
 
 set(${FIRMWARE_NAME}_BOARD mega2560)         # Arduino Target board
 set(${FIRMWARE_NAME}_SRCS src/arduino.cpp )
-set(${FIRMWARE_NAME}_PORT /dev/ttyACM0)            # Serial upload port
+set(${FIRMWARE_NAME}_PORT /dev/ARDUINO)            # Serial upload port
 generate_ros_firmware(${FIRMWARE_NAME})

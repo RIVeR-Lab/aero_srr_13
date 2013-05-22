@@ -66,4 +66,11 @@
     <arg name="pose_control_service" value="$(arg camera_boom_control_service)" />
   </include>
 
+
+  <!-- Launch rosserial and controller node for arduino -->
+  <node pkg="rosserial_python" type="serial_node.py" name="aero_arduino" args="/dev/ARDUINO"/>
+  <node pkg="aero_base" type="aero_arduino_controller" name="aero_arduino_controller">
+    <param name="imu_topic" value="$(arg imu_topic)" />
+  </node>
+
 </launch>
