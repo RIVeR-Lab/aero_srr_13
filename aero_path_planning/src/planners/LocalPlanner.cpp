@@ -6,21 +6,22 @@
  */
 
 //********************** SYSTEM DEPENDANCIES **********************//
-
+#include <geometry_msgs/PointStamped.h>
 //********************** LOCAL  DEPENDANCIES **********************//
 #include <aero_path_planning/planners/LocalPlanner.h>
 #include <aero_path_planning/utilities/FitnessQueue.h>
 #include "OryxPathPlannerConfig.h"
+#include <aero_path_planning/occupancy_grid/MultiTraitOccupancyGridHelpers.h>
 
 using namespace aero_path_planning;
 
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																																		nh_(nh),
-																																		p_nh_(p_nh),
-																																		occupancy_buffer_(2),
-limiter_(NULL)
+																																						nh_(nh),
+																																						p_nh_(p_nh),
+																																						limiter_(NULL),
+																																						occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -242,7 +243,7 @@ void LocalPlanner::regTopic()
 	this->lidar_sub_ = this->nh_.subscribe(this->lidar_topic_, 1, &LocalPlanner::lidarCB, this);
 	this->vel_pub_   = this->nh_.advertise<geometry_msgs::Twist>(this->v_action_topic_, 1);
 	this->tent_pub_  = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/tencale_visualization", 1);
-	this->occ_viz_pub_ = this->nh_.advertise<sensor_msgs::PointCloud2>("/aero/local/occupancy_viz",1);
+	this->occ_viz_pub_ = this->nh_.advertise<nav_msgs::OccupancyGrid>("/aero/local/obstacle_data",1);
 	this->goal_sub_  = this->nh_.subscribe("/aero/global/goal", 1, &LocalPlanner::goalCB, this);
 
 	std::string software_stop_topic("aero/software_stop");
@@ -270,12 +271,15 @@ void LocalPlanner::goalCB(const geometry_msgs::PoseStampedConstPtr& message)
 	this->global_goal_ = message;
 }
 
-bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx)
+bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTraitOccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx)
 {
 	typedef std::pair<int, int> TentacleData_t;
 	typedef boost::shared_ptr<TentacleData_t > TentacleDataPtr_t;
 	FitnessQueue<double,  TentacleDataPtr_t> best_tentacle_candidates;
 	std::vector<SpeedSet> sets;
+	app::PointConverter converter(search_grid.getResolution());
+
+	//ROS_INFO_STREAM("I'm searching a grid of resolution:"<<search_grid.getResolution()<<", dimmension x:"<<search_grid.getXSizeMeter()<<", y:"<<search_grid.getYSizeMeter()<<", with xoffset:"<<search_grid.getXOffsetGrid()<<", yoffset:"<<search_grid.getYOffsetGrid());
 
 	SpeedSet current_set = this->tentacles_->getSpeedSet(this->current_vel_);
 	sets.push_back(current_set);
@@ -295,7 +299,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 	for(int s=0; s<(int)sets.size(); s++)
 	{
 		SpeedSet cur_set(sets.at(s));
-//#pragma omp parallel for
+		//#pragma omp parallel for
 		for(int i=0; i<(int)current_set.getNumTentacle(); i++)
 		{
 			//If we already hit the goal, short circuit since we can't break from OpenMP loops
@@ -308,38 +312,41 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 				length_modifier = 0;
 
 				//As long as the tentacle has points still, and we're still traversing, continue traversing
+				app::Point      temp_point;
+				gm::PoseStamped point_pose;
 				while(traverser.hasNext()&&traversing)
 				{
-					const aero_path_planning::Point& point = traverser.next();
+					converter.convertToEng(traverser.next(), temp_point);
 					try
 					{
-						switch(search_grid.getPointTrait(point))
+						//ROS_INFO_STREAM("I got point type:"<<search_grid.getPointTrait(temp_point.x, temp_point.y).getString()<<"At Location:"<<temp_point.x<<","<<temp_point.y);
+						switch(search_grid.getPointTrait(temp_point.x, temp_point.y).getEnum())
 						{
-						case aero_path_planning::OBSTACLE:
+						case ogu::CellTrait::OBSTACLE:
 							//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
-							//PRINT_POINT("Hit Point", point);
+							//PRINT_POINT("Hit Point", temp_point);
 							traversing = false;
 							break;
-						case aero_path_planning::GOAL:
+						case ogu::CellTrait::GOAL:
 							//ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
 							traversing = false;
 							hit_goal   = true;
 							break;
-						case aero_path_planning::FREE_HIGH_COST:
+						case ogu::CellTrait::FREE_HIGH_COST:
 							length_modifier -= traverser.deltaLength()*this->diff_weight_;
 							break;
-						case aero_path_planning::TRAVERSED:
+						case ogu::CellTrait::TRAVERSED:
 							length_modifier -= traverser.deltaLength()*this->trav_weight_;
 							break;
-						case aero_path_planning::UNKNOWN:
+						case ogu::CellTrait::UNKOWN:
 							length_modifier += traverser.deltaLength()*this->unkn_weight_;
 							break;
 						default:
 							break;
 						}
-					}catch(OccupancyGridAccessException& e)
+					}catch(bool& e)
 					{
-						ROS_ERROR("%s", e.what());
+						//ROS_ERROR_STREAM("Went Out of Bounds While Searching a Tentacle with point ("<<temp_point.x<<","<<temp_point.y<<"), Map X:"<<search_grid.getXSizeMeter()<<"m, Map Y:"<<search_grid.getYSizeMeter()<<",!");
 					}
 				}
 				//ROS_INFO_STREAM("I'm Checking The Distance To Goal");
@@ -349,12 +356,19 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const OccupancyGrid
 					//ROS_INFO_STREAM("There is a goal...");
 					try
 					{
-						//Will throw false if there was no goal point
-						const aero_path_planning::Point goal_point = search_grid.getGoalPoint();
-						const aero_path_planning::Point end_point = traverser.next();
-						double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
-						//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
-						length_modifier-= dist_to_goal*this->goal_weight_;
+						//Will throw false if there was no goal point_pose
+						gm::Pose goal_pose;
+						has_goal = search_grid.getGoal(goal_pose);
+						if(has_goal)
+						{
+							aero_path_planning::Point goal_point;
+							app::poseToPoint(goal_pose, goal_point);
+							converter.convertToGrid(goal_point, goal_point);
+							const aero_path_planning::Point end_point = traverser.next();
+							double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
+							//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
+							length_modifier-= dist_to_goal*this->goal_weight_;
+						}
 					}
 					catch(bool& e)
 					{
@@ -407,26 +421,24 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			this->working_grid_= this->occupancy_buffer_.front();
 			this->occupancy_buffer_.pop_front();
 		}
-		//Build a working grid to apply the LIDAR patch to
-		OccupancyGrid working_grid(this->working_grid_);
-		//If we actually have a working grid, plan on it
-		if(working_grid.size()>0)
+		if(this->working_grid_!=occupancy_grid::MultiTraitOccupancyGridPtr())
 		{
+			//Build a working grid to apply the LIDAR patch to
+			og::MultiTraitOccupancyGrid working_grid(*this->working_grid_);
+			//If we actually have a working grid, plan on it
 			//ROS_INFO_STREAM("I Have  Working Grid to Local Plan On!");
 			//If we have a LIDAR patch, apply it
 			if(this->lidar_patch_!= PointCloudPtr())
 			{
-				try
+				//ROS_INFO_STREAM("I'm apllying the LIDAR pach...");
+				//ros::Time lidarStart(ros::Time::now());
+				std::string error_message;
+				bool success = app::addPointCloudPatch(*this->lidar_patch_, ogu::CellTrait::OBSTACLE, 1000, working_grid, this->transformer_, error_message);
+				//ROS_INFO_STREAM("Lidar Copying Took "<<ros::Time::now()-lidarStart<<" seconds");
+				//ROS_INFO_STREAM("Patch Applied"<<success<<"!");
+				if(!success)
 				{
-					//ROS_INFO_STREAM("I'm apllying the LIDAR pach...");
-					ros::Time lidarStart(ros::Time::now());
-					bool success = working_grid.setPointTrait(*this->lidar_patch_);
-					//ROS_INFO_STREAM("Lidar Copying Took "<<ros::Time::now()-lidarStart<<" seconds");
-					//ROS_INFO_STREAM("Patch Applied"<<success<<"!");
-				}
-				catch(std::exception& e)
-				{
-					ROS_ERROR_STREAM_THROTTLE(1, e.what());
+					ROS_ERROR_STREAM("Failed to Copy LIDAR Data due to:"<<error_message);
 				}
 			}
 
@@ -438,18 +450,21 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 
 			//Check to see if we're at the goal
 			double dist;
-			try
+			geometry_msgs::Pose local_goal;
+			if(working_grid.getGoal(local_goal))
 			{
-				dist = working_grid.getGoalPoint().getVector3fMap().norm();
-				ROS_INFO_STREAM_THROTTLE(1, "Distance to Local Goal:"<<dist<<", goal <"<<working_grid.getGoalPoint().x<<","<<working_grid.getGoalPoint().y<<">");
+				tf::Vector3 goal_position;
+				tf::pointMsgToTF(local_goal.position, goal_position);
+				dist = goal_position.length();
+				ROS_INFO_STREAM_THROTTLE(1, "Distance to Local Goal:"<<dist<<", goal <"<<goal_position.x()<<","<<goal_position.y()<<">");
 			}
-			catch(bool)
+			else
 			{
-				//means there was no goal, so we can never be at it
+				//Means we have no goal, we can't be at it
 				dist = std::numeric_limits<double>::infinity();
 			}
-			
-			if(dist>=(0.25/this->res_))
+			//Check to see if we got within a threshold distance of the local goal
+			if(dist>=0.25)
 			{
 				int speedset_idx = 0;
 				int tentacle_idx = 0;
@@ -472,7 +487,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 		}
 		else
 		{
-			//ROS_INFO_STREAM("I Have  No Working Grid To Plan On!");
+			ROS_WARN_STREAM("I Have  No Working Grid To Plan On!");
 			this->set_vel_ = 0;
 			this->set_rad_ = 0;
 		}
@@ -485,7 +500,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 	}
 }
 
-void LocalPlanner::applyGoal(OccupancyGrid& grid) const
+void LocalPlanner::applyGoal(og::MultiTraitOccupancyGrid& grid) const
 {
 	geometry_msgs::PoseStamped local_goal;
 	if(this->global_goal_!=geometry_msgs::PoseStampedConstPtr())
@@ -493,13 +508,10 @@ void LocalPlanner::applyGoal(OccupancyGrid& grid) const
 		try
 		{
 			PointConverter converter(this->res_);
-			this->transformer_.waitForTransform(grid.getFrameId(), this->global_goal_->header.frame_id, grid.getGrid().header.stamp, ros::Duration(1.0/20.0));
-			this->transformer_.transformPose(grid.getFrameId(), grid.getGrid().header.stamp, *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
-			Point goal_point;
-			app::poseToPoint(local_goal.pose, goal_point);
-			converter.convertToGrid(goal_point, goal_point);
+			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, grid.getCreationTime(), ros::Duration(1.0/20.0));
+			this->transformer_.transformPose(grid.getFrameID(), grid.getCreationTime(), *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
 
-			grid.setGoalPoint(goal_point);
+			grid.setGoal(local_goal.pose);
 
 		}
 		catch(std::exception& e)
@@ -534,14 +546,13 @@ void LocalPlanner::stopCB(const aero_srr_msgs::SoftwareStopConstPtr& message){
 }
 
 
-void LocalPlanner::pcCB(const aero_path_planning::OccupancyGridMsgConstPtr& message){
+void LocalPlanner::pcCB(const og::MultiTraitOccupancyGridMessageConstPtr& message){
 	//To prevent processing of stale data, ignore anything received while we shouldn't be planning
 	if(this->should_plan_)
 	{
-		OccupancyGrid recievedGrid(*message);
 		//ROS_INFO("Grid Processed...");
 		//ROS_INFO("Callback got the grid:\n%s", recievedGrid.toString(0,0)->c_str());
-		this->occupancy_buffer_.push_back(recievedGrid);
+		this->occupancy_buffer_.push_back(og::MultiTraitOccupancyGridPtr(new og::MultiTraitOccupancyGrid(*message)));
 	}
 }
 
@@ -592,7 +603,6 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 	PointCloudPtr lidar_patch(new PointCloud());
 	pcl::PointCloud<pcl::PointXYZ> raw_cloud;
 	pcl::fromROSMsg(*message, raw_cloud);
-	PointConverter converter(this->res_);
 
 	//#pragma omp parallel for
 	for(int i=0; i<(int)raw_cloud.size(); i++)
@@ -602,13 +612,9 @@ void LocalPlanner::lidarCB(const sensor_msgs::PointCloud2ConstPtr& message)
 		point.y = raw_cloud.at(i).y;
 		point.z = 0;
 		point.rgba = OBSTACLE;
-		converter.convertToGrid(point, point);
-		if(this->boundsCheck(point))
-		{
-			lidar_patch->push_back(point);
-		}
+		lidar_patch->push_back(point);
 	}
-
+	lidar_patch->header = message->header;
 	this->lidar_patch_ = lidar_patch;
 }
 
@@ -691,37 +697,23 @@ void LocalPlanner::visualizeTentacle(int speed_set, int tentacle)
 	this->tent_pub_.publish(message);
 }
 
-void LocalPlanner::visualizeOcc(const OccupancyGrid& grid)
+void LocalPlanner::visualizeOcc(const og::MultiTraitOccupancyGrid& grid)
 {
-	PointConverter converter(this->res_);
-	OccupancyGridCloud cloud(grid.getGrid());
-#pragma omp parallel for
-	for(int i=0; i<(int)cloud.size(); i++)
+
+	nav_msgs::OccupancyGridPtr message(new nav_msgs::OccupancyGrid);
+	grid.generateOccupancyGridforTrait(*message, ogu::CellTrait::OBSTACLE);
+	BOOST_FOREACH(og::cell_data_t& data, message->data)
 	{
-		Point& point = cloud.at(i);
-		converter.convertToEng(point, point);
-	}
-	OccupancyGridCloud obst_cloud;
-	for(int i=0; i<(int)cloud.size(); i++)
-	{
-		if(cloud.at(i).rgba==OBSTACLE)
+		if(data>0)
 		{
-			obst_cloud.push_back(cloud.at(i));
+			data = 100;
+		}
+		else
+		{
+			data = 0;
 		}
 	}
-	try
-	{
-		Point goal(grid.getGoalPoint());
-		converter.convertToEng(goal, goal);
-		obst_cloud.push_back(goal);
-	}
-	catch(bool& e)
-	{
-		//do nothing, means there was no goal
-	}
-	sensor_msgs::PointCloud2Ptr message(new sensor_msgs::PointCloud2());
-	pcl::toROSMsg(obst_cloud, *message);
-	message->header.frame_id = grid.getFrameId();
+	message->header.frame_id = grid.getFrameID();
 	message->header.stamp    = ros::Time::now();
 	this->occ_viz_pub_.publish(message);
 }
