@@ -46,7 +46,7 @@ private:
 TreeDetectionCls::TreeDetectionCls() {
 	ROS_INFO("Starting tree detector");
 
-	d_image_sub_ = nh_.subscribe<sensor_msgs::Image> ("camera/depth_image", 1, &TreeDetectionCls::imageCallback, this);
+	d_image_sub_ = nh_.subscribe<sensor_msgs::Image> ("stereo_camera/disparity", 1, &TreeDetectionCls::imageCallback, this);
 	//rgb_image_sub_ = nh_.subscribe<sensor_msgs::Image> ("camera/rgb_image", 1, &TreeDetectionCls::imageCallback, this);
 	tree_locs_image_pub_ = nh_.advertise<tree_detector::Trees> ("tree_locs", 1);
 
