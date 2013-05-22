@@ -91,7 +91,8 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 //	computeDisparityCb();
 	Mat_t src = img->image;
 	Mat_t normImage,mask,finalMask;
-	grassRemove(*msg, normImage,mask);
+	grassRemove(*msg, normImage);
+	maskCreate(*msg,mask);
 //	fenceCheckerStd(normImage);
 //	fillHoles(mask);
 	blobIdentify(normImage,mask, finalMask);
@@ -132,7 +133,7 @@ void BOOMStage::showAlpha(Mat_t& src, Mat_t& fMask)
 	imshow("overlay",overlay);
 	waitKey(3);
 }
-void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage, Mat_t& maskt) {
+void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
@@ -142,12 +143,12 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage, Mat
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
-	Mat_t src = img->image;
+	Mat_t src(img->image);
 	Mat_t psrc = src;
 	double R, G, B, sumRGB, nR, nG, nB, browness, whiteness;
 	Vec3b RGB, nRGB;
-	Mat_t norma = img->image;
-	Mat_t mask = img->image;
+	Mat_t norma(img->image);
+
 
 
 	nRGB[0] = 0;
@@ -174,11 +175,11 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage, Mat
 			if ((nG > .33)
 					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
 				norma.at<cv::Vec3b>(x, y) = ZeroV;
-				mask.at<cv::Vec3b>(x, y) = White;
+
 			}
 			else {
 				norma.at<cv::Vec3b>(x, y) = White;
-				mask.at<cv::Vec3b>(x, y) = ZeroV;
+
 			}
 			if ((x == 278) && (y == 803)) {
 				NODELET_WARN_STREAM(
@@ -201,6 +202,89 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage, Mat
 			norma.at<cv::Vec3b>(k, m) = ZeroV;
 		}
 		}
+
+
+
+
+	normImage = norma;
+
+	cv::line(norma, Point2d(0, HORIZON_BTM_), Point2d(norma.cols, HORIZON_BTM_),
+			Scalar(0, 255, 0));
+;
+
+//
+imshow("norm", norma);
+waitKey(3);
+
+
+}
+void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
+	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
+	cv_bridge::CvImagePtr img;
+//	Mat_t src = load_;
+	try {
+		img = cv_bridge::toCvCopy(msg, enc::RGB8);
+	} catch (cv_bridge::Exception& e) {
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+	Mat_t src(img->image);
+	Mat_t psrc = src;
+	double R, G, B, sumRGB, nR, nG, nB, browness, whiteness;
+	Vec3b RGB, nRGB;
+	Mat_t norma(img->image);
+	Mat_t mask(img->image);
+
+
+	nRGB[0] = 0;
+	nRGB[1] = 0;
+	nRGB[2] = 0;
+
+	GaussianBlur(src,src,Size(9,9),2,8,0);
+	for (int y = 0; y < src.cols; y++) {
+		for (int x = 0; x < src.rows; x++) {
+			RGB = src.at<cv::Vec3b>(x, y); //x is y, y is x
+			B = RGB[2];
+			G = RGB[1];
+			R = RGB[0];
+			sumRGB = R + G + B;
+			nR = R / sumRGB;
+			nG = G / sumRGB;
+			nB = B / sumRGB;
+//			nRGB[0] = nR;
+//			nRGB[1] = nG;
+//			nRGB[2] = nB;
+//			normImg_.at<cv::Vec3b>(x,y) = nRGB;
+			browness = nR / nG;
+			whiteness = sumRGB / 756;
+			if ((nG > .33)
+					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
+				mask.at<cv::Vec3b>(x, y) = White;
+			}
+			else {
+				mask.at<cv::Vec3b>(x, y) = ZeroV;
+			}
+			if ((x == 278) && (y == 803)) {
+				NODELET_WARN_STREAM(
+						"nR = " << nR << std::endl << "nG =" << nG << std::endl << "nB =" << nB);
+
+			}
+			if ((nR > nG) && (nG > nB) && (nR > .40)) {
+//				NODELET_WARN_STREAM("Fence Detected");
+
+			}
+		}
+//		HORIZON_ = Fence_;
+	}
+
+
+	for(int k = 0; k< HORIZON_TOP_; k++)
+		{
+		for(int m = 0;m<mask.cols; m++)
+		{
+			mask.at<cv::Vec3b>(k, m) = ZeroV;
+		}
+		}
 	dilate(mask,mask, cv::Mat(4,4,CV_8UC1));
 	erode(mask,mask, cv::Mat(30,30,CV_8UC1));
 	medianBlur(mask,mask,15);
@@ -210,40 +294,25 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage, Mat
 
 	maskt = mask;
 
-	normImage = norma;
-	cv::line(mask, Point2d(0, HORIZON_TOP_), Point2d(norma.cols, HORIZON_TOP_),
+
+	cv::line(mask, Point2d(0, HORIZON_TOP_), Point2d(mask.cols, HORIZON_TOP_),
 			Scalar(0, 255, 0));
-	cv::line(norma, Point2d(0, HORIZON_BTM_), Point2d(norma.cols, HORIZON_BTM_),
-			Scalar(0, 255, 0));
-;
-//
-//	imshow("mask", mask);
-//	waitKey(3);
+
+
+	imshow("mask", mask);
+	waitKey(3);
 
 }
 
 void BOOMStage::blobIdentify(const Mat_t& img, Mat_t& mask, Mat_t& final) {
 	NODELET_INFO_STREAM("IN BLOB IDENTIFY");
-	Mat_t med, src_gray, normImg;
+	Mat_t src_gray(mask);
 	int thresh = 100;
 	int max_thresh = 255;
 	RNG rng(12345);
 	Mat threshold_output;
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
-
-	medianBlur(img, med, 11);
-
-	normImg = med;
-	for(int k = 0; k< normImg.rows; k++)
-		{
-		for(int m = 0;m<normImg.cols; m++)
-		{
-			if(mask.at<cv::Vec3b>(k, m) == ZeroV)
-				normImg.at<cv::Vec3b>(k, m)= ZeroV;
-		}
-		}
-	cvtColor(normImg, src_gray, CV_BGR2GRAY);
 
 
 

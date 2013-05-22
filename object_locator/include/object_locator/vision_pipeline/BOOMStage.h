@@ -46,7 +46,8 @@ namespace object_locator
 		 * @param [in] msg
 		 * @param [out] normImage is the output image where the normalized and filtered image is stored
 		 */
-		virtual void grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage, Mat_t& maskt);
+		virtual void grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage);
+		virtual void maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt);
 		/**
 		 * @author Samir Zutshi
 		 * @brief Takes a grayscale image and detects for blobs and outputs its center.
