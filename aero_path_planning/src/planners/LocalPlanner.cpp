@@ -324,7 +324,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 						{
 						case ogu::CellTrait::OBSTACLE:
 							//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
-							PRINT_POINT("Hit Point", temp_point);
+							//PRINT_POINT("Hit Point", temp_point);
 							traversing = false;
 							break;
 						case ogu::CellTrait::GOAL:
