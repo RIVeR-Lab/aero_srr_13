@@ -271,19 +271,19 @@ bool GlobalPlanner::lidarToGlobal(const sm::PointCloud2& scan_cloud, sm::PointCl
 
 void GlobalPlanner::lidarMsgToOccGridPatch(const sm::PointCloud2& scan_cloud, app::PointCloud& result_cloud) const
 {
-	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
-	pcl::fromROSMsg(scan_cloud, copy_cloud);
-
-#pragma omp parallel for
-	for(int i=0; i<(int)copy_cloud.size(); i++)
-	{
-		aero_path_planning::Point copy_point;
-		copy_point.x    = copy_cloud.at(i).x;
-		copy_point.y    = copy_cloud.at(i).y;
-		copy_point.z    = copy_cloud.at(i).z;
-		copy_point.rgba = aero_path_planning::OBSTACLE;
-		result_cloud.push_back(copy_point);
-	}
+//	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
+//	pcl::fromROSMsg(scan_cloud, copy_cloud);
+//
+//#pragma omp parallel for
+//	for(int i=0; i<(int)copy_cloud.size(); i++)
+//	{
+//		aero_path_planning::Point copy_point;
+//		copy_point.x    = copy_cloud.at(i).x;
+//		copy_point.y    = copy_cloud.at(i).y;
+//		copy_point.z    = copy_cloud.at(i).z;
+//		copy_point.rgba = aero_path_planning::OBSTACLE;
+//		result_cloud.push_back(copy_point);
+//	}
 }
 
 bool GlobalPlanner::calcRobotPointWorld(tf::Point& point) const
@@ -313,7 +313,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 {
 	//ROS_INFO_STREAM("I'm Chunking the Global Map!");
 	occupancy_grid::MultiTraitOccupancyGridMessagePtr message(new occupancy_grid::MultiTraitOccupancyGridMessage);
-	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_, 0, -this->local_info_.height/2);
+	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_, 0, this->local_info_.height/2);
 	local_gird.toROSMsg(*message);
 	this->local_occ_pub_.publish(message);
 
