@@ -266,13 +266,13 @@ public:
 	 * @author Adam Panzica
 	 * @return The X size of the grid, in grid units
 	 */
-	unsigned int getXSizeGrid()  const;
+	int getXSizeGrid()  const;
 
 	/**
 	 * @author Adam Panzica
 	 * @return The X offset in grid units for point insertion/retrieval
 	 */
-	unsigned int getXOffsetGrid() const;
+	int getXOffsetGrid() const;
 	/**
 	 * @author Adam Panzica
 	 * @return The X size of the grid, in meters

@@ -266,12 +266,12 @@ double MultiTraitOccupancyGrid::getResolution() const
 	return this->map_meta_data_.resolution;
 }
 
-unsigned int MultiTraitOccupancyGrid::getXOffsetGrid() const
+int MultiTraitOccupancyGrid::getXOffsetGrid() const
 {
 	return this->x_offset_;
 }
 
-unsigned int MultiTraitOccupancyGrid::getYOffsetGrid() const
+int MultiTraitOccupancyGrid::getYOffsetGrid() const
 {
 	return this->y_offset_;
 }
