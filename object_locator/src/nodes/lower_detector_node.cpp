@@ -73,8 +73,8 @@ ImageConverter::ImageConverter() :
 			"/home/srr/ObjectDetectionData/exec/cascadeWHAground/cascade.xml";
 	cascade_path_PINK =
 			"/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
-	cascade_path_PIPEDright =
-			"/home/srr/ObjectDetectionData/exec/cascadePipeDiag/cascade.xml";
+	cascade_path_PUCK =
+			"/home/srr/ObjectDetectionData/exec/cascadePUCK2/cascade.xml";
 //	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	cascade_path_PIPE =
 			"/home/srr/ObjectDetectionData/exec/cascadePIPEX/cascade.xml";
@@ -750,7 +750,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	if (!cascade_PINK.load(cascade_path_PINK)) {
 		printf("--(!)Error loading\n");
 	}
-	if (!cascade_PIPE_Dright.load(cascade_path_PIPEDright)) {
+	if (!cascade_PUCK.load(cascade_path_PUCK)) {
 		printf("--(!)Error loading\n");
 	}
 //	if( !cascade_RQT_BALL.load(cascade_path_RQT_BALL))
@@ -810,8 +810,8 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 			cv::Size(52, 59), cv::Size(85, 90)); // works for WHAground !&
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
-	cascade_PIPE_Dright.detectMultiScale(frame_gray, SUN_faces, 1.1, 10, 0,
-			cv::Size(24, 30), cv::Size(150, 250)); // works for WHASUN
+	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 8, 0,
+			cv::Size(50, 40), cv::Size(80, 75)); // works for WHASUN
 	cascade_PIPE.detectMultiScale(frame_gray, Pipe_faces, 1.1,400, 0,
 			cv::Size(14, 90), cv::Size(35, 200)); // works for
 
@@ -882,37 +882,37 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		}
 	}
 	/*
-	 * PIPE- DIAG - RED
+	 * Puck- - RED
 	 */
-//	for (size_t j = 0; j < SUN_faces.size(); j++) {
-////		cout << "Entered circle drawing loop" << endl;
-//
-//		Mat_t faceROI = frame_gray(SUN_faces[j]);
-//
-//		//-- In each face, detect eyes
-//
-//		//-- Draw the face
-//		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
-//				SUN_faces[j].y + SUN_faces[j].height / 2);
-//		if (center.y > HORIZON) {
-//		cv::ellipse(frame, center,
-//				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
-//				360, cv::Scalar(0, 0, 255), 2, 8, 0);
-//		cv::rectangle(frame,
-//				Point(center.x - SUN_faces[j].width / 2,
-//						center.y - SUN_faces[j].height / 2),
-//				Point(center.x + SUN_faces[j].width / 2,
-//						center.y + SUN_faces[j].height / 2),
-//				cv::Scalar(0, 0, 255));
-//		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-//		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << Pipe_faces[j].width << "," << Pipe_faces[j].height);
+	for (size_t j = 0; j < SUN_faces.size(); j++) {
+//		cout << "Entered circle drawing loop" << endl;
+
+		Mat_t faceROI = frame_gray(SUN_faces[j]);
+
+		//-- In each face, detect eyes
+
+		//-- Draw the face
+		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
+				SUN_faces[j].y + SUN_faces[j].height / 2);
+		if (center.y > HORIZON) {
+		cv::ellipse(frame, center,
+				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
+				360, cv::Scalar(0, 0, 255), 2, 8, 0);
+		cv::rectangle(frame,
+				Point(center.x - SUN_faces[j].width / 2,
+						center.y - SUN_faces[j].height / 2),
+				Point(center.x + SUN_faces[j].width / 2,
+						center.y + SUN_faces[j].height / 2),
+				cv::Scalar(0, 0, 255));
+		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+//		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
 //		DetectionPtr_t newDetection(new Detection_t());
 //		newDetection->first.first = center.x;
 //		newDetection->first.second = center.y;
 //		newDetection->second = WHA;
 //		detection_list_.push_back(newDetection);
-//		}
-//	}
+		}
+	}
 	/*
 	 * Actually WHA but with different range GREEN
 	 */
