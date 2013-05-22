@@ -52,8 +52,8 @@ ImageConverter::ImageConverter() :
 
 
 
-	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/upper_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/upper_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
@@ -161,7 +161,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg,
 	left_info = *cam_info;
 	gotLeft = true;
 	detectAndDisplay(left_image, mat_left, WINDOWLeft);
-//		saveImage(left_image, mat_left,0);
+		saveImage(left_image, mat_left,0);
 
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg,
@@ -884,35 +884,35 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	/*
 	 * PIPE- DIAG - RED
 	 */
-	for (size_t j = 0; j < SUN_faces.size(); j++) {
-//		cout << "Entered circle drawing loop" << endl;
-
-		Mat_t faceROI = frame_gray(SUN_faces[j]);
-
-		//-- In each face, detect eyes
-
-		//-- Draw the face
-		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
-				SUN_faces[j].y + SUN_faces[j].height / 2);
-		if (center.y > HORIZON) {
-		cv::ellipse(frame, center,
-				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
-				360, cv::Scalar(0, 0, 255), 2, 8, 0);
-		cv::rectangle(frame,
-				Point(center.x - SUN_faces[j].width / 2,
-						center.y - SUN_faces[j].height / 2),
-				Point(center.x + SUN_faces[j].width / 2,
-						center.y + SUN_faces[j].height / 2),
-				cv::Scalar(0, 0, 255));
-		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << Pipe_faces[j].width << "," << Pipe_faces[j].height);
-		DetectionPtr_t newDetection(new Detection_t());
-		newDetection->first.first = center.x;
-		newDetection->first.second = center.y;
-		newDetection->second = WHA;
-		detection_list_.push_back(newDetection);
-		}
-	}
+//	for (size_t j = 0; j < SUN_faces.size(); j++) {
+////		cout << "Entered circle drawing loop" << endl;
+//
+//		Mat_t faceROI = frame_gray(SUN_faces[j]);
+//
+//		//-- In each face, detect eyes
+//
+//		//-- Draw the face
+//		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
+//				SUN_faces[j].y + SUN_faces[j].height / 2);
+//		if (center.y > HORIZON) {
+//		cv::ellipse(frame, center,
+//				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
+//				360, cv::Scalar(0, 0, 255), 2, 8, 0);
+//		cv::rectangle(frame,
+//				Point(center.x - SUN_faces[j].width / 2,
+//						center.y - SUN_faces[j].height / 2),
+//				Point(center.x + SUN_faces[j].width / 2,
+//						center.y + SUN_faces[j].height / 2),
+//				cv::Scalar(0, 0, 255));
+//		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+//		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << Pipe_faces[j].width << "," << Pipe_faces[j].height);
+//		DetectionPtr_t newDetection(new Detection_t());
+//		newDetection->first.first = center.x;
+//		newDetection->first.second = center.y;
+//		newDetection->second = WHA;
+//		detection_list_.push_back(newDetection);
+//		}
+//	}
 	/*
 	 * Actually WHA but with different range GREEN
 	 */

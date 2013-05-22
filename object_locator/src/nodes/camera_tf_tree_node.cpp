@@ -25,7 +25,7 @@ public:
 		cam_q.setEuler((3.14159/2.0)+(39*(3.14159/180)),0, 3*(3.14159/2.0));
 //		cam_q.setEuler(0.0,0.0,0.0);
 		camera.setRotation(cam_q);
-		broadcastCam.sendTransform(tf::StampedTransform(camera, ros::Time::now(),  "/world", "/stereo_camera_optical_frame"));
+		broadcastCam.sendTransform(tf::StampedTransform(camera, ros::Time::now(),  "/world", "/upper_stereo_optical_frame"));
 
 
 		armbase.setOrigin(tf::Vector3(0, 0, 0));
