@@ -13,8 +13,9 @@
 #include <nav_msgs/Odometry.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
+#include <actionlib/client/simple_action_client.h>
 #include "hd_driver/HDMotorInfo.h"
-#include "hd_driver/SetPosition.h"
+#include "hd_driver/SetPositionAction.h"
 //************ LOCAL DEPENDANCIES ****************//
 #include "aero_base/SetPose.h"
 //***********    NAMESPACES     ****************//
@@ -22,7 +23,7 @@
 
 static ros::Publisher pose_pub;
 static ros::Publisher joint_pub;
-static ros::ServiceClient hd_control_srv;
+static boost::shared_ptr<actionlib::SimpleActionClient<hd_driver::SetPositionAction> > hd_control_srv;
 static ros::ServiceServer pose_control_srv;
 
 double ticks_per_radian = 1.0;
@@ -30,10 +31,10 @@ std::string target_frame("/camera_boom_rot");
 
 bool poseControlCallback(aero_base::SetPose::Request  &req,
 		     aero_base::SetPose::Response &res){
-  hd_driver::SetPosition::Request hd_req;
+  hd_driver::SetPositionGoal hd_req;
   hd_req.position = (int32_t)(tf::getYaw(req.pose.orientation) * ticks_per_radian);
-  hd_driver::SetPosition::Response hd_res;
-  return hd_control_srv.call(hd_req, hd_res);
+  hd_control_srv->sendGoalAndWait(hd_req);
+  return true;
 }
 
 
@@ -90,10 +91,10 @@ int main(int argc, char **argv) {
   pose_pub = nh.advertise<geometry_msgs::Pose>(pose_topic, 1000);
   joint_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
 
-  hd_control_srv = nh.serviceClient<hd_driver::SetPosition>(hd_control_service);
+  hd_control_srv = boost::shared_ptr<actionlib::SimpleActionClient<hd_driver::SetPositionAction> >(new actionlib::SimpleActionClient<hd_driver::SetPositionAction>(hd_control_service, true));
   pose_control_srv = nh.advertiseService(pose_control_service, poseControlCallback);
 
+  hd_control_srv->waitForServer();
 
-  ros::MultiThreadedSpinner spinner(2);
-  spinner.spin();
+  ros::spin();
 }
