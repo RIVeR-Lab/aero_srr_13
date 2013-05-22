@@ -266,7 +266,7 @@ public:
 	 * @author Adam Panzica
 	 * @return The X size of the grid, in grid units
 	 */
-	int getXSizeGrid()  const;
+	unsigned int getXSizeGrid()  const;
 
 	/**
 	 * @author Adam Panzica
@@ -288,7 +288,7 @@ public:
 	 * @author Adam Panzica
 	 * @return The Y offset in grid units for point insertion/retrieval
 	 */
-	unsigned int getYOffsetGrid() const;
+	int getYOffsetGrid() const;
 	/**
 	 * @author Adam Panzica
 	 * @return The Y size of the grid, in meters
