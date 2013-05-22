@@ -81,12 +81,12 @@ private:
 				cascade_path_WHASUN,
 				cascade_path_RQT_BALL,
 				cascade_path_PIPE,
-				cascade_path_PIPEDright;
+				cascade_path_PUCK;
 	float kAvgVal_;
 	cv::Point2f pipePoint_,WHAPoint_;
 
 	Mat_t frame;
-	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE, cascade_PIPE_Dright;
+	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE, cascade_PUCK;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
