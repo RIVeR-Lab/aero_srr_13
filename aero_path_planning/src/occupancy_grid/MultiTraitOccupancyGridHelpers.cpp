@@ -69,7 +69,7 @@ bool addPointCloudPatch(aero_path_planning::PointCloud& cloud, occupancy_grid::u
 				//do nothing, just means one of the points wasn't on the map
 			}
 		}
-		ROS_INFO_STREAM("I failed to place "<<fail_count<<" points out of "<<transformed_cloud.size());
+		ROS_DEBUG_STREAM("I failed to place "<<fail_count<<" points out of "<<transformed_cloud.size());
 		return true;
 	}
 	catch(std::exception& e)
