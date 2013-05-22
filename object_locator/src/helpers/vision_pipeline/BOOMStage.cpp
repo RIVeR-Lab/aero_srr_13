@@ -24,8 +24,8 @@ void BOOMStage::onInit() {
 }
 
 void BOOMStage::loadParams() {
-	this->left_input_topic_ = "stereo_camera/left/image_raw";
-	this->right_input_topic_ = "stereo_camera/right/image_raw";
+	this->left_input_topic_ = "upper_stereo/left/image_raw";
+	this->right_input_topic_ = "upper_stereo/right/image_raw";
 	this->output_topic_ = "boom_stage/poses";
 	this->getPrivateNodeHandle().getParam(this->left_input_topic_,
 			this->left_input_topic_);
