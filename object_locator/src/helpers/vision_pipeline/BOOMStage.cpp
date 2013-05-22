@@ -444,7 +444,7 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 		if (flag[i] != 1) {
 			Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255),
 					rng.uniform(0, 255));
-			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > 15 && radius[i] < 100)){
+			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > 20 && radius[i] < 40)){
 			drawContours(drawing, contours_poly, i, color, 1, 8,
 					vector<Vec4i>(), 0, Point());
 			rectangle(drawing, boundRect[i].tl(), boundRect[i].br(), color, 2,
