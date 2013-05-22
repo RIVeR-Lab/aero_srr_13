@@ -279,6 +279,8 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 	std::vector<SpeedSet> sets;
 	app::PointConverter converter(search_grid.getResolution());
 
+	ROS_INFO_STREAM("I'm searching a grid of resolution:"<<search_grid.getResolution()<<", dimmension x:"<<search_grid.getXSizeMeter()<<", y:"<<search_grid.getYSizeMeter()<<", with xoffset:"<<search_grid.getXOffsetGrid()<<", yoffset:"<<search_grid.getYOffsetGrid());
+
 	SpeedSet current_set = this->tentacles_->getSpeedSet(this->current_vel_);
 	sets.push_back(current_set);
 
