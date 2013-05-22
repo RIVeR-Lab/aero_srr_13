@@ -74,7 +74,7 @@ ImageConverter::ImageConverter() :
 	cascade_path_PINK =
 			"/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	cascade_path_PUCK =
-			"/home/srr/ObjectDetectionData/exec/cascadePUCK/cascade.xml";
+			"/home/srr/ObjectDetectionData/exec/cascadePUCK2/cascade.xml";
 //	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	cascade_path_PIPE =
 			"/home/srr/ObjectDetectionData/exec/cascadePIPEX/cascade.xml";
@@ -905,12 +905,12 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 						center.y + SUN_faces[j].height / 2),
 				cv::Scalar(0, 0, 255));
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
-		DetectionPtr_t newDetection(new Detection_t());
-		newDetection->first.first = center.x;
-		newDetection->first.second = center.y;
-		newDetection->second = WHA;
-		detection_list_.push_back(newDetection);
+//		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
+//		DetectionPtr_t newDetection(new Detection_t());
+//		newDetection->first.first = center.x;
+//		newDetection->first.second = center.y;
+//		newDetection->second = WHA;
+//		detection_list_.push_back(newDetection);
 		}
 	}
 	/*
