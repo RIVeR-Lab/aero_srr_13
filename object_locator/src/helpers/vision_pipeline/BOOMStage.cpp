@@ -213,8 +213,8 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 ;
 
 //
-imshow("norm", norma);
-waitKey(3);
+//imshow("norm", norma);
+//waitKey(3);
 
 
 }
@@ -444,12 +444,17 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 		if (flag[i] != 1) {
 			Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255),
 					rng.uniform(0, 255));
-			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > 20 && radius[i] < 40)){
+			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > 15 && radius[i] < 40)){
 			drawContours(drawing, contours_poly, i, color, 1, 8,
 					vector<Vec4i>(), 0, Point());
 			rectangle(drawing, boundRect[i].tl(), boundRect[i].br(), color, 2,
 					8, 0);
 			circle(drawing, center[i], (int) radius[i], color, 2, 8, 0);
+			drawContours(src_gray, contours_poly, i, color, 1, 8,
+					vector<Vec4i>(), 0, Point());
+			rectangle(src_gray, boundRect[i].tl(), boundRect[i].br(), color, 2,
+					8, 0);
+			circle(src_gray, center[i], (int) radius[i], color, 2, 8, 0);
 			cout << "Center of object[" << i << "]" << "= " << center[i].x
 									<< "," << center[i].y << endl;
 			DetectionPtr_t newDetection(new Detection_t());
@@ -467,6 +472,9 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 	cv::line(drawing, Point2d(0, HORIZON_BTM_), Point2d(drawing.cols, HORIZON_BTM_),
 			Scalar(0, 255, 0));
 
+	imshow("Anomalies on norm", src_gray);
+//
+	cv::waitKey(3);
 	imshow("Anomaly Contours", drawing);
 //
 	cv::waitKey(3);
