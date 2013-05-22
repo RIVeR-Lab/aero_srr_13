@@ -1,6 +1,5 @@
-rosbuild_add_executable(aero_base_node aero_base_node.cpp)
-target_link_libraries(aero_base_node ${PROJECT_NAME}Core)
-
 rosbuild_add_executable(aero_drive_node aero_drive_node.cpp)
 
 rosbuild_add_executable(aero_camera_boom_node aero_camera_boom_node.cpp)
+
+rosbuild_add_executable(aero_arduino_controller aero_arduino_controller.cpp)

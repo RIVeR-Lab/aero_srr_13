@@ -1,6 +1,6 @@
 <launch>
   <!-- ********************ARGUMENTS******************** -->
-  <arg name="imu_topic"                   value="aero/imu"/>
+  <arg name="imu_topic"                   value="aero/odom"/>
   <arg name="odom_topic"                  value="aero/odom_base"/>
   <arg name="odom_topic_ekf"              value="aero/odom_ekf"/>
   <arg name="velocity_command_topic"      value="aero/base/cmd_vel"/>
@@ -32,9 +32,6 @@
 		<arg name="local_frame"  value="$(arg robot_frame)"/>
   </include>  
 
-  <include file="$(find aero_srr_bringup)/launch/aero_srr_image_proc.launch"/>
-
-  
   <include file="$(find aero_srr_bringup)/launch/aero_srr_odometry.launch">
     <arg name="imu_topic"    value="$(arg imu_topic)" />
     <arg name="odom_topic"   value="$(arg odom_topic)" />

@@ -18,6 +18,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <occupancy_grid/MultiTraitOccupancyGrid.hpp>
+#include <occupancy_grid/MultiTraitOccupancyGridMessage.h>
 //********************** LOCAL  DEPENDANCIES **********************//
 #include <aero_path_planning/utilities/AeroPathPlanning.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
@@ -25,6 +27,8 @@
 #include <aero_path_planning/LocalPlannerConfig.h>
 #include <aero_path_planning/utilities/TentacleRateLimiter.h>
 
+namespace og = occupancy_grid;
+namespace ogu= occupancy_grid::utilities;
 namespace aero_path_planning
 {
 class LocalPlanner
@@ -94,8 +98,8 @@ private:
 	TentacleRateLimiter*  limiter_;      ///Limiter for clamping the rate-change between tentacle selections
 
 
-	boost::circular_buffer<OccupancyGrid > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
-	OccupancyGrid working_grid_;                                ///The last new occupancy grid recieved
+	boost::circular_buffer<og::MultiTraitOccupancyGridPtr > occupancy_buffer_;	///Buffer to store received OccupancyGrid data
+	og::MultiTraitOccupancyGridPtr working_grid_;                  ///The last new occupancy grid recieved
 	PointCloudPtr lidar_patch_;                                 ///The last patch of LIDAR data recieved
 	geometry_msgs::PoseStampedConstPtr global_goal_;			///The most reciently recieved global goal
 
@@ -126,13 +130,11 @@ private:
 
 	/**
 	 * @author	Adam Panzica
-	 * @brief	Callback for processing new point cloud data
-	 * @param message The aero_path_planning::OccupancyGridMsg message to process
+	 * @brief	Callback for processing new local map data
+	 * @param message The occupancy_grid::MultiTraitOccupancyGridMessage message to process
 	 *
-	 * Takes the data from the PointCloud2 message, processes it into a new occupancy grid,
-	 * and places it on the occupancy grid buffer for processing by the planner
 	 */
-	void pcCB(const aero_path_planning::OccupancyGridMsgConstPtr& message);
+	void pcCB(const og::MultiTraitOccupancyGridMessageConstPtr& message);
 
 	/**
 	 * @author Adam Panzica
@@ -181,7 +183,7 @@ private:
 
 
 	void visualizeTentacle(int speed_set, int tentacle);
-	void visualizeOcc(const OccupancyGrid& grid);
+	void visualizeOcc(const og::MultiTraitOccupancyGrid& grid);
 
 	/**
 	 * @author Adam Panzica
@@ -210,7 +212,7 @@ private:
 	 * @param [out] tentacle_idx The tentacle index of the selected tentacle
 	 * @return True if a tentacle was successfully selected, or false if there were no valid tentacles
 	 */
-	bool selectTentacle(const double& current_vel, const OccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx);
+	bool selectTentacle(const double& current_vel, const og::MultiTraitOccupancyGrid& search_grid, int& speedset_idx, int& tentacle_idx);
 
 	/**
 	 * @author Adam Panzica
@@ -250,7 +252,7 @@ private:
 	 * @brief Applies a global goal to the local frame
 	 * @param in] grid The gird to apply the goal to
 	 */
-	void applyGoal(OccupancyGrid& grid) const;
+	void applyGoal(og::MultiTraitOccupancyGrid& grid) const;
 
 };
 
