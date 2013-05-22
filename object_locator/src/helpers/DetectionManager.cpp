@@ -15,11 +15,11 @@
 using namespace object_locator;
 
 DetectionManager::DetectionManager(double threshold_dist, double growth_rate, double shrink_rate, double threshold_det):
-								threshold_dist_(threshold_dist),
-								growth_rate_(growth_rate),
-								shrink_rate_(shrink_rate),
-								threshold_det_(threshold_det),
-								max_condifdence_(1.0)
+												threshold_dist_(threshold_dist),
+												growth_rate_(growth_rate),
+												shrink_rate_(shrink_rate),
+												threshold_det_(threshold_det),
+												max_condifdence_(1.0)
 {
 
 }
@@ -95,18 +95,22 @@ void DetectionManager::addDetection(const tf::Point& detection,const object_type
 void DetectionManager::shrink()
 {
 
-		for(DetectionArray_t::iterator itr = this->detections_.begin(); itr!=this->detections_.end(); itr++)
+	for(DetectionArray_t::iterator itr = this->detections_.begin(); itr!=this->detections_.end(); itr++)
+	{
+
+		if(*itr!=DetectionPtr())
 		{
-
 			(*itr)->second-= this->shrink_rate_;
-//			if((*itr)->second <= 0)
-//			{
-//				this->detections_.erase(itr);
-//			}
-
+			if((*itr)->second <= 0)
+			{
+				this->detections_.erase(itr);
+			}
 		}
+	}
 
 }
+
+
 
 bool DetectionManager::getDetection(tf::Point& detection,object_type &type, double& confidence) const
 {
@@ -139,6 +143,21 @@ bool DetectionManager::getDetection(tf::Point& detection,object_type &type, doub
 	{
 		return false;
 	}
+}
+
+bool DetectionManager::getAllAboveConf(std::vector<tf::Point>& detections) const
+{
+	if(this->size() > 0)
+	{
+		BOOST_FOREACH(DetectionArray_t::value_type item, this->detections_)
+						{
+			if(item->second > this->threshold_det_)
+				detections.push_back(item->first.first);
+						}
+		return true;
+	}
+	else
+		return false;
 }
 
 void DetectionManager::clear()

@@ -14,7 +14,8 @@ namespace object_locator
 	{
 		WHA,
 		PINK_BALL,
-		RQT_BALL
+		RQT_BALL,
+		Unknown
 	};
 }
 

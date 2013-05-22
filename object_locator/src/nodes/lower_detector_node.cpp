@@ -52,8 +52,8 @@ ImageConverter::ImageConverter() :
 
 
 
-	image_left_  = it_.subscribeCamera("/upper_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/upper_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/stereo_camera/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/stereo_camera/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
 
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
@@ -442,13 +442,13 @@ void ImageConverter::computeDisparity() {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromROSMsg(*points_msg,*cloud);
 
-	//****** Cylinder model testing *******//
+	/****** Cylinder model testing *******/
 //	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudFilt (new pcl::PointCloud<pcl::PointXYZ>);
 //	cloudFilt = cloud;
 //	 pcl::PointCloud<pcl::PointXYZ>::Ptr final (new pcl::PointCloud<pcl::PointXYZ>);
 //
 //	  std::vector<int> inliers;
-//	  int argF = 2;
+//	  int argF = 1;
 //	  // created RandomSampleConsensus object and compute the appropriated model
 //	  pcl::SampleConsensusModelSphere<pcl::PointXYZ>::Ptr
 //	    model_s(new pcl::SampleConsensusModelSphere<pcl::PointXYZ> (cloudFilt));
