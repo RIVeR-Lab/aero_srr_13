@@ -66,3 +66,8 @@ aero_control/docs
 aero_control/src/aero_control
 
 aero_arduino/src/ros_lib
+
+rosserial_arduino/libraries
+rosserial_arduino/src/rosserial_arduino
+
+rosserial_msgs/src/rosserial_msgs
