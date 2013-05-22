@@ -161,7 +161,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg,
 	left_info = *cam_info;
 	gotLeft = true;
 	detectAndDisplay(left_image, mat_left, WINDOWLeft);
-		saveImage(left_image, mat_left,0);
+//		saveImage(left_image, mat_left,0);
 
 }
 void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg,
