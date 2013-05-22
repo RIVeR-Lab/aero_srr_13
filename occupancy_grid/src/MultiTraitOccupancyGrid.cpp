@@ -266,6 +266,16 @@ double MultiTraitOccupancyGrid::getResolution() const
 	return this->map_meta_data_.resolution;
 }
 
+unsigned int MultiTraitOccupancyGrid::getXOffsetGrid() const
+{
+	return this->x_offset_;
+}
+
+unsigned int MultiTraitOccupancyGrid::getYOffsetGrid() const
+{
+	return this->y_offset_;
+}
+
 geometry_msgs::Pose MultiTraitOccupancyGrid::getOrigin() const
 {
 	return this->map_meta_data_.origin;
