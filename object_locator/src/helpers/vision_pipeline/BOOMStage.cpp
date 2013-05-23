@@ -88,7 +88,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	left_image_ = img->image;
 	left_info_ = *info;
 	got_left_ = true;
-//	computeDisparityCb();
+	computeDisparityCb();
 	Mat_t src = img->image;
 	Mat_t normImage,mask,finalMask;
 	grassRemove(*msg, normImage);
@@ -299,8 +299,8 @@ void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
 			Scalar(0, 255, 0));
 
 
-	imshow("mask", mask);
-	waitKey(3);
+//	imshow("mask", mask);
+//	waitKey(3);
 
 }
 
@@ -389,8 +389,8 @@ void BOOMStage::blobIdentify(const Mat_t& img, Mat_t& mask, Mat_t& final) {
 			Scalar(0, 255, 0));
 //	namedWindow("b", CV_WINDOW_AUTOSIZE);
 //	imshow("b", finalMask);
-	namedWindow("Contours", CV_WINDOW_AUTOSIZE);
-	imshow("After Fill Cont", mergedBin);
+//	namedWindow("Contours", CV_WINDOW_AUTOSIZE);
+//	imshow("After Fill Cont", mergedBin);
 
 
 	cv::waitKey(3);
@@ -566,6 +566,10 @@ void BOOMStage::computeDisparity()
 				}
 			this->pose_array_pub_.publish(poses);
 		}
+		Mat_t cmapped;
+		disp.convertTo(cmapped, CV_8U);
+		imshow("disparty",cmapped);
+		waitKey(3);
 
 }
 
