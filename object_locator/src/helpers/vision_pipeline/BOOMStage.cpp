@@ -24,8 +24,8 @@ void BOOMStage::onInit() {
 }
 
 void BOOMStage::loadParams() {
-	this->left_input_topic_ = "upper_stereo/left/image_raw";
-	this->right_input_topic_ = "upper_stereo/right/image_raw";
+	this->left_input_topic_ = "upper_stereo/left/image_rect_color";
+	this->right_input_topic_ = "upper_stereo/right/image_rect_color";
 	this->output_topic_ = "boom_stage/poses";
 	this->getPrivateNodeHandle().getParam(this->left_input_topic_,
 			this->left_input_topic_);
@@ -69,8 +69,8 @@ void BOOMStage::loadParams() {
 void BOOMStage::registerTopics() {
 	this->image_left_ = it_->subscribeCamera(this->left_input_topic_, 2,
 			&BOOMStage::boomImageCbleft, this);
-//	this->image_right_ = it_->subscribeCamera(this->right_input_topic_, 2,
-//				&BOOMStage::boomImageCbright, this);
+	this->image_right_ = it_->subscribeCamera(this->right_input_topic_, 2,
+				&BOOMStage::boomImageCbright, this);
 //	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
 	this->pose_array_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->output_topic_,2);
 }
