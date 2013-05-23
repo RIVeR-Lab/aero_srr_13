@@ -3,7 +3,7 @@
 #include <std_msgs/Float32.h>
 
 const int LIGHT_PIN = 13;
-const int PAUSE_PIN = 7;
+const int PAUSE_PIN = 12;
 
 unsigned long last_invert = 0;
 float flash_rate = 1.0;
