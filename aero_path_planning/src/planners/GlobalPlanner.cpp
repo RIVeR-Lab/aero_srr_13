@@ -25,10 +25,10 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::CarrotPathFinder& path_planner):
-																						path_planner_(&path_planner),
-																						nh_(nh),
-																						p_nh_(p_nh),
-																						transformer_(nh)
+																								path_planner_(&path_planner),
+																								nh_(nh),
+																								p_nh_(p_nh),
+																								transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 	this->state_.state = aero_srr_msgs::AeroState::SEARCH;
@@ -271,19 +271,19 @@ bool GlobalPlanner::lidarToGlobal(const sm::PointCloud2& scan_cloud, sm::PointCl
 
 void GlobalPlanner::lidarMsgToOccGridPatch(const sm::PointCloud2& scan_cloud, app::PointCloud& result_cloud) const
 {
-//	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
-//	pcl::fromROSMsg(scan_cloud, copy_cloud);
-//
-//#pragma omp parallel for
-//	for(int i=0; i<(int)copy_cloud.size(); i++)
-//	{
-//		aero_path_planning::Point copy_point;
-//		copy_point.x    = copy_cloud.at(i).x;
-//		copy_point.y    = copy_cloud.at(i).y;
-//		copy_point.z    = copy_cloud.at(i).z;
-//		copy_point.rgba = aero_path_planning::OBSTACLE;
-//		result_cloud.push_back(copy_point);
-//	}
+	//	pcl::PointCloud<pcl::PointXYZ> copy_cloud;
+	//	pcl::fromROSMsg(scan_cloud, copy_cloud);
+	//
+	//#pragma omp parallel for
+	//	for(int i=0; i<(int)copy_cloud.size(); i++)
+	//	{
+	//		aero_path_planning::Point copy_point;
+	//		copy_point.x    = copy_cloud.at(i).x;
+	//		copy_point.y    = copy_cloud.at(i).y;
+	//		copy_point.z    = copy_cloud.at(i).z;
+	//		copy_point.rgba = aero_path_planning::OBSTACLE;
+	//		result_cloud.push_back(copy_point);
+	//	}
 }
 
 bool GlobalPlanner::calcRobotPointWorld(tf::Point& point) const
@@ -357,23 +357,32 @@ void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
-	if(this->path_planner_!=NULL)
+	if(this->path_planner_!=NULL&&this->global_map_!=occupancy_grid::MultiTraitOccupancyGridPtr())
 	{
 		std::deque<geometry_msgs::Pose> temp_path;
 		this->path_planner_->setCollision(this->cf_);
 		this->path_planner_->setCarrotDelta(5.0/this->global_res_);
 		this->path_planner_->setSearchMap(this->global_map_);
-		//Need to use a temporary path because carrot_path might be being used by other callbacks in multi-threaded spinner and this will lock it for an extended period
-		this->path_planner_->search(this->current_point_, this->mission_goal_.pose, this->plan_timerout_, temp_path);
-		//Copy the temp path over to replace the old path
-		this->carrot_path_ = temp_path;
-		//Remove the start location from the path as it's the current location at best and more likely well behind the robot at this point
-		this->carrot_path_.pop_front();
-		nav_msgs::PathPtr path(new nav_msgs::Path());
-		path->header.frame_id = this->global_frame_;
-		path->header.stamp    = ros::Time::now();
-		this->carrotToPath(*path);
-		this->path_pub_.publish(path);
+		tf::Point current_point;
+		if(this->calcRobotPointWorld(current_point))
+		{
+			tf::pointTFToMsg(current_point, this->current_point_.position);
+			//Need to use a temporary path because carrot_path might be being used by other callbacks in multi-threaded spinner and this will lock it for an extended period
+			this->path_planner_->search(this->current_point_, this->mission_goal_.pose, this->plan_timerout_, temp_path);
+			//Copy the temp path over to replace the old path
+			this->carrot_path_ = temp_path;
+			//Remove the start location from the path as it's the current location at best and more likely well behind the robot at this point
+			this->carrot_path_.pop_front();
+			nav_msgs::PathPtr path(new nav_msgs::Path());
+			path->header.frame_id = this->global_frame_;
+			path->header.stamp    = ros::Time::now();
+			this->carrotToPath(*path);
+			this->path_pub_.publish(path);
+		}
+		else
+		{
+			ROS_ERROR("Could Not Plan Due to Inability to Look Up Robot in World!");
+		}
 	}
 	else
 	{
@@ -383,14 +392,13 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 
 void GlobalPlanner::carrotToPath(nav_msgs::Path& path) const
 {
-	app::Point path_point;
 	BOOST_FOREACH(std::deque<geometry_msgs::Pose>::value_type point, this->carrot_path_)
-	{
+			{
 		geometry_msgs::PoseStamped path_pose;
 		path_pose.header = path.header;
 		path_pose.pose   = point;
 		path.poses.push_back(path_pose);
-	}
+			}
 }
 
 bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid::MultiTraitOccupancyGrid& map) const
