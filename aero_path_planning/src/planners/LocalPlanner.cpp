@@ -230,6 +230,22 @@ void LocalPlanner::loadParam()
 	this->origin_.z = z_ori;
 	this->tentacles_ = TentacleGeneratorPtr(new TentacleGenerator(min_tent, min_speed,max_speed,num_speed_set, num_tent, exp_fact, this->res_, this->x_dim_, this->y_dim_));
 
+	//Build initial working grid
+	std::vector<occupancy_grid::utilities::CellTrait> traits;
+	traits.push_back(occupancy_grid::utilities::CellTrait::OBSTACLE);
+	traits.push_back(occupancy_grid::utilities::CellTrait::UNKOWN);
+	traits.push_back(occupancy_grid::utilities::CellTrait::GOAL);
+	traits.push_back(occupancy_grid::utilities::CellTrait::FREE_LOW_COST);
+	nav_msgs::MapMetaData info;
+	info.height = this->x_dim_;
+	info.width  = this->y_dim_;
+	info.resolution = this->res_;
+	info.map_load_time = ros::Time::now();
+	info.origin.position.x = 0;
+	info.origin.position.y = -(double)(this->y_dim_/2)*this->res_;
+
+	this->working_grid_ = occupancy_grid::MultiTraitOccupancyGridPtr(new occupancy_grid::MultiTraitOccupancyGrid("/base_footprint", traits, occupancy_grid::utilities::CellTrait::UNKOWN, info, 0, this->y_dim_/2));
+
 	std::string p_rate_limit("rate_limit");
 	this->rate_limit_ = 5;
 	this->limiter_   = new TentacleRateLimiter(num_tent-1, this->rate_limit_);
