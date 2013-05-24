@@ -11,6 +11,7 @@
 
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
+#include <sensor_msgs/Image.h>
 #include <object_locator/SyncImageMsg.h>
 #include <object_locator/typedefinitions.h>
 #include <aero_srr_msgs/ObjectLocationMsg.h>
@@ -27,6 +28,13 @@
 #include <time.h>
 #include <geometry_msgs/PoseArray.h>
 #include <boost/foreach.hpp>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/ros/conversions.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/octree/octree.h>
+#include <pcl/filters/voxel_grid.h>
 
 namespace object_locator
 {
@@ -48,6 +56,7 @@ namespace object_locator
 		 */
 		virtual void grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage);
 		virtual void maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt);
+
 		/**
 		 * @author Samir Zutshi
 		 * @brief Takes a grayscale image and detects for blobs and outputs its center.
@@ -65,6 +74,7 @@ namespace object_locator
 		image_transport::CameraSubscriber image_left_, image_right_;
 		sensor_msgs::CameraInfo left_info_,right_info_;
 		Mat_t left_image_,right_image_;
+		sensor_msgs::Image left_msg_;
 		bool got_left_,got_right_;
 		int HORIZON_TOP_;
 		int HORIZON_BTM_;
@@ -77,6 +87,7 @@ namespace object_locator
 		typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
 		std::vector<DetectionPtr_t> detection_list_;
 		tf::TransformListener optimus_prime;
+		float kAvgVal_;
 
 		//***sherlock Parameters*****/
 		double thresh_dist_, growth_rate_, shrink_rate_, thresh_det_;
