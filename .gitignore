@@ -41,20 +41,28 @@ CMakeCache.txt
 
 #Build artifacts
 *.cfgc
+
 aero_base/launch
-aero_path_planning/src/aero_path_planning
-aero_srr_msgs/src/aero_srr_msgs
-roboteq_driver/src/roboteq_driver
-hd_driver/src/hd_driver
 aero_base/src/aero_base
+
+aero_srr_msgs/src/aero_srr_msgs
+
+hd_driver/src/hd_driver
+hd_driver/cfg/cpp
+hd_driver/docs
+hd_driver/msg/SetPosition*.msg
+
+roboteq_driver/cfg/cpp
+roboteq_driver/docs
+roboteq_driver/src/roboteq_driver
 
 aero_laser_filter/cfg/cpp
 aero_laser_filter/docs
 aero_laser_filter/src/aero_laser_filter
+
+aero_path_planning/src/aero_path_planning
 aero_path_planning/cfg/cpp
 aero_path_planning/docs
-roboteq_driver/cfg/cpp
-roboteq_driver/docs
 
 object_locator/src/object_locator
 object_locator/launch
