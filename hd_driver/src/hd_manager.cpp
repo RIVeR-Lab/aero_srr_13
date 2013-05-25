@@ -33,8 +33,9 @@ private:
 
 public:
 	void controlCallback(const hd_driver::SetPositionGoalConstPtr & goal, boost::shared_ptr<actionlib::SimpleActionServer<hd_driver::SetPositionAction> >& as_){
+	        hd_driver::SetPositionResult result;
 		try{
-			ROS_DEBUG("Setting position to: [%d]", goal->position);
+			ROS_INFO("Setting position to: [%d]", goal->position);
 			{
 				boost::lock_guard<boost::mutex> lock(controller_mutex);
 				if(!is_paused)
@@ -50,15 +51,21 @@ public:
 			}
 			{
 				boost::lock_guard<boost::mutex> lock(controller_mutex);
-				if(is_paused)
+				if(is_paused){
+   				        ROS_WARN("Motor was paused when attempting to move");
+				        as_->setAborted(result, "Could not set motor position, motor was paused");
 					return;
-				if(controller->get_trajectory_status()&TRAJECTORY_MOVE_ABORTED)
+				}
+				if(controller->get_trajectory_status()&TRAJECTORY_MOVE_ABORTED){	
+   				        ROS_WARN("Move was aborted");
+					as_->setAborted(result, "Move was aborted");
 					return;
-				hd_driver::SetPositionResult result;
+				}
 				as_->setSucceeded(result);
 			}
 		} catch(device_driver::Exception& e){
 			ROS_WARN_STREAM("Error setting motor position: "<<e.what());
+			as_->setAborted(result, "Exception thrown while setting position");
 		}
 	}
 
@@ -82,6 +89,7 @@ public:
 			boost::lock_guard<boost::mutex> lock(controller_mutex);
 			if(msg->stop)
 				controller->set_state(hd_driver::HDMotorController::amplifier_disabled);
+			//device is enabled in position set
 			is_paused = msg->stop;
 		}
 	}
@@ -107,6 +115,9 @@ public:
 	}
 	void closeDevice(){
 		ROS_INFO_STREAM("Closing device '"<<port_<<"'");
+		try{
+		        controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//try to disable controller
+		} catch(...){}
 		controller->close();
 	}
 
