@@ -47,6 +47,10 @@ aero_base/src/aero_base
 
 aero_srr_msgs/src/aero_srr_msgs
 
+aero_srr_supervisor/src/aero_srr_supervisor
+
+occupancy_grid/src/occupancy_grid
+
 hd_driver/src/hd_driver
 hd_driver/cfg/cpp
 hd_driver/docs
@@ -59,10 +63,12 @@ roboteq_driver/src/roboteq_driver
 aero_laser_filter/cfg/cpp
 aero_laser_filter/docs
 aero_laser_filter/src/aero_laser_filter
+aero_laser_filter/launch
 
 aero_path_planning/src/aero_path_planning
 aero_path_planning/cfg/cpp
 aero_path_planning/docs
+aero_path_planning/launch
 
 object_locator/src/object_locator
 object_locator/launch
