@@ -7,17 +7,18 @@
 
 #include <beacon_detect/BeaconDetector.h>
 
-/* Headers April tag */
-#include <AprilTags/TagDetector.h>
-#include <AprilTags/Tag36h11.h>
-#include <Eigen/Geometry>
+#include <sensor_msgs/image_encodings.h>
+#include <ros/package.h>
 
 
 using namespace cv;
 
 BeaconDetector::BeaconDetector():it_(nh_)
 {
-	getRosParam();										//initialize all the Ros Parameters
+	getRosParam();										//initialize all the ROS Parameters
+	active_=false;										//keep the beacon detector inactive by default]
+
+	ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
 
 	/* Start the camera video from the camera topic */
 	if(!cam_topic_.empty())
@@ -27,7 +28,11 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	}
 	else
 		return;
-	//thread the beacon detector function
+
+	/* Set up the publisher for the stamped pose */
+	pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("becon_drive", 5);
+
+	/* thread the beacon detector function*/
 	boost::thread detector_thread_( boost::bind( &BeaconDetector::detectBeacons, this ) );
 }
 void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -54,8 +59,38 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	newimg_=true;
 }
 
+void BeaconDetector::initConfiguration(string fname)
+{
+	FileStorage fs(fname,FileStorage::READ);
+	if(!fs.isOpened())
+	{
+		ROS_ERROR("Cant open Configuration file!");
+	}
+	int no=fs["tag_no"];			//get the no of tags from the opencv xml file
+	string name="tag";
+	string id="tag_id";
+
+	pair<int,string > temp;
+	for(int i=0;i<no;i++)
+	{
+		char tname[20];
+		sprintf(tname,"%s%d",name.c_str(),i);
+		temp.second=string(fs[tname]);
+		sprintf(tname,"%s%d",id.c_str(),i);
+		temp.first=fs[tname];
+		constellation_.push_back(temp);
+	}
+}
 void BeaconDetector::getRosParam()
 {
+	//Options to/exposed
+	//cam_topic 		- the topic which has the camera images with the camera info streaming
+	//tag_size			- the size of the tag in m
+	//configuration		- configuration file name for determining the tag constelation
+	//histeq			- histogram equalization or not
+	//show_result 		- show results on screen or not
+	//robot_topic		- system status message topic
+
 	ros::NodeHandle pnh("~");							//handle to the local param list
 	if(!pnh.getParam("cam_topic", cam_topic_))				//initialize var from launch file
 	{
@@ -66,17 +101,41 @@ void BeaconDetector::getRosParam()
 		ROS_ERROR("tag_size not set, will use 0.166");
 		tag_size_ = 0.166;								//this is the default value when you print on A4
 	}
-	if(!pnh.getParam("tag_frame_prefix", tag_frame_prefix_))			//the prefix for the tag frame
+	string cfile;
+	if(!pnh.getParam("configuration",cfile ))			//the prefix for the tag frame
 	{
-		ROS_WARN("tag_size not set, will use Tag_ as the default prefix");
-		tag_frame_prefix_ = "Tag_";
+		ROS_ERROR("Without specifing the configuration file that describes how the tags are arranged wrt to the world, this node will not work");
 	}
+	std::string path = ros::package::getPath("beacon_detect");
+	initConfiguration(path+"/"+cfile);
+
 	if(!pnh.getParam("robot_topic", robot_topic_))			//the prefix for the tag frame
 	{
 		ROS_WARN("The topic which publishes the robot state was not set");
 	}
+	if(!pnh.getParam("histeq", histeq_))						//initialize histogram option from launch file
+	{
+		ROS_WARN("By default histogram equalization is on\n");
+		histeq_=true;
+	}
+	if(!pnh.getParam("show_result", show_))						//initialize if the result needs to be displayed
+	{
+		ROS_WARN("By default the result is not displayed as image n\n");
+		show_=false;
+	}
 }
-
+void BeaconDetector::systemCb(const aero_srr_msgs::AeroStateConstPtr& status)
+{
+	//if the state of the robot is to look for home
+	if(status->state==aero_srr_msgs::AeroState::HOME)
+	{
+		active_=true;						//activate the beacon detector
+	}
+	else
+	{
+		active_=false;						//deactivate the beacon detector
+	}
+}
 void BeaconDetector::histEq(cv::Mat &frame)
 {
 	Mat ycrcb;
@@ -92,7 +151,16 @@ void BeaconDetector::histEq(cv::Mat &frame)
 
 	frame=result;
 }
+string BeaconDetector::checkInConst(AprilTags::TagDetection tag)
+{
 
+	for(int i=0;i<constellation_.size();i++)	//loop through the tags in the consellation
+	{
+		if(tag.id==constellation_[i].first)		//if the id match then declare true
+			return constellation_[i].second;						//return the tag id so you can do search and display
+	}
+	return string();								//return empty string if its not in the constellation
+}
 void BeaconDetector::detectBeacons()
 {
 	Mat frame,gray;
@@ -103,6 +171,10 @@ void BeaconDetector::detectBeacons()
 
 	while(ros::ok())
 	{
+		//check if the beacon detect state is on
+		if(!active_)
+			continue;
+
 	//load the variables locally
 		{
 			boost::mutex::scoped_lock lock(imglock_);				//make sure no one else is accessing these variables
@@ -130,22 +202,36 @@ void BeaconDetector::detectBeacons()
 
 		if(process)
 		{
-			histEq(frame);										//TODO: with dynamic reconfigure expose this as a parameter pls
+			if(histeq_)
+				histEq(frame);										//TODO: with dynamic reconfigure expose this as a parameter pls
 
 			cv::cvtColor(frame, gray, CV_BGR2GRAY);						//convert the color Image to gray image
-			std::vector<AprilTags::TagDetection> detections = tag_detector.extractTags(gray);	//get tags if detected
+			detections_ = tag_detector.extractTags(gray);	//get tags if detected
 
-			ROS_INFO("%d tag detected: \n",detections.size());									//DEBUG information
+			ROS_INFO("%d tag detected. \n",detections_.size());									//DEBUG information
+			string tag;										//the tag name if it is valid
+			geometry_msgs::PoseStamped res;					//to find the average pose that the robot needs to move in
+			res.pose.orientation.w=1;						//initialize
+			res.pose.orientation.x=0;
+			res.pose.orientation.y=0;
+			res.pose.orientation.z=0;
 
-			for (int i=0; i<detections.size(); i++)
+			res.pose.position.x=0;
+			res.pose.position.y=0;
+			res.pose.position.z=0;
+
+			int ctr=0;										//the neumber of valid tags detected
+
+			for (int i=0; i<detections_.size(); i++)
 			{
-				ROS_DEBUG( "  Id: %d --- Hamming distance: %f \n",detections[i].id,  detections[i].hammingDistance );
+				tag=checkInConst(detections_[i]);			//check if it is the constellation if so whats is its name in home tf tree?
+				if(tag.empty())
+					continue;
 
-				// also highlight in the image
-				//draw_detection(*frame, detections[i]);
+				ROS_INFO( "  Id: %d --- Hamming distance: %f \n",detections_[i].id,  detections_[i].hammingDistance );
 
 				// recovering the relative pose requires camera calibration;
-				Eigen::Matrix4d T = detections[i].getRelativeTransform(tag_size_, fx, fy, px, py);
+				Eigen::Matrix4d T = detections_[i].getRelativeTransform(tag_size_, fx, fy, px, py);
 
 				// the orientation of the tag
 				Eigen::Matrix3d rot = T.block(0,0,3,3);
@@ -157,19 +243,115 @@ void BeaconDetector::detectBeacons()
 				transform.setRotation( tf::Quaternion(final.x(), final.y(), final.z(),final.w()) );
 				char frameid[50];
 
-				sprintf(frameid,"%s%d",tag_frame_prefix_.c_str(),detections[i].id );		//debug information
+				sprintf(frameid,"estimated_%s",tag.c_str());		//debug information
 				//transmit the tf
 				br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent_frame_.c_str(), frameid));
 
+				//calculate the pose of the robot so the estimated tf of the tag and the actuall beacon will alighn
+				geometry_msgs::Pose temp=getRobotPose(tag);
+
+				//add it to the res
+				res.pose.position.x+=temp.position.x;
+				res.pose.position.y+=temp.position.y;
+				res.pose.position.z+=temp.position.z;
+				res.pose.orientation.w+=temp.orientation.w;
+				res.pose.orientation.x+=temp.orientation.x;
+				res.pose.orientation.y+=temp.orientation.y;
+				res.pose.orientation.z+=temp.orientation.z;
+
+				//increase counter;
+				ctr++;
+
 			}
-			imshow("see",frame);
+			//publish the pose in the /becon_drive topic
+			if(ctr>0)
+			{
+				//find avg
+				res.pose.position.x/=ctr;
+				res.pose.position.y/=ctr;
+				res.pose.position.z/=ctr;
+				res.pose.orientation.w/=ctr;
+				res.pose.orientation.x/=ctr;
+				res.pose.orientation.y/=ctr;
+				res.pose.orientation.z/=ctr;
+
+				//header
+				res.header.frame_id="/base_footprint";
+				res.header.stamp=ros::Time::now();
+
+				pose_pub_.publish(res);				//publish the average solution
+			}
+
 			process=false;
+			if(show_)
+				showResult();
 		}
 	}
 	if(detector_thread_.joinable())
 	{
 		detector_thread_.join();
 	}
+}
+geometry_msgs::Pose BeaconDetector::getRobotPose(string tag)
+{
+	geometry_msgs::Pose tran;
+	//calculate the transform between the tag and the robot_base
+	tf::StampedTransform tag2base;
+	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag,ros::Time(0),tag2base);
+
+	//calculate the transform between the tag and the world
+	tf::StampedTransform tag2world;
+	tf_lr_.lookupTransform("/world",string("/")+tag,ros::Time(0),tag2world);
+
+	//calculate the transform between the robot_base and the world
+	tf::StampedTransform 	world2base;
+	world2base=tag2world;
+	world2base.inverseTimes(tag2base);
+
+	//convert transform into pose message
+	tran.position.x=world2base.getOrigin()[0];
+	tran.position.y=world2base.getOrigin()[1];
+	tran.position.z=world2base.getOrigin()[2];
+	tran.orientation.w=world2base.getRotation().w();
+	tran.orientation.x=world2base.getRotation().x();
+	tran.orientation.y=world2base.getRotation().y();
+	tran.orientation.z=world2base.getRotation().z();
+
+	return(tran);
+}
+void BeaconDetector::showResult()
+{
+	Mat image=colorImg_.clone();
+
+	for (int i=0; i<detections_.size(); i++)
+	{
+		string tag=checkInConst(detections_[i]);
+		if(tag.empty())
+			continue;
+		// use corner points detected by line intersection
+		std::pair<float, float> p1 = detections_[i].p[0];
+		std::pair<float, float> p2 = detections_[i].p[1];
+		std::pair<float, float> p3 = detections_[i].p[2];
+		std::pair<float, float> p4 = detections_[i].p[3];
+
+		// plot outline
+		cv::line(image, cv::Point2f(p1.first, p1.second), cv::Point2f(p2.first, p2.second), cv::Scalar(255,0,0,0) );
+		cv::line(image, cv::Point2f(p2.first, p2.second), cv::Point2f(p3.first, p3.second), cv::Scalar(0,255,0,0) );
+		cv::line(image, cv::Point2f(p3.first, p3.second), cv::Point2f(p4.first, p4.second), cv::Scalar(0,0,255,0) );
+		cv::line(image, cv::Point2f(p4.first, p4.second), cv::Point2f(p1.first, p1.second), cv::Scalar(255,0,255,0) );
+
+		// mark center
+		cv::circle(image, cv::Point2f(detections_[i].cxy.first, detections_[i].cxy.second), 8, cv::Scalar(0,0,255,0), 2);
+
+		// print ID
+		std::ostringstream strSt;
+		strSt << "#" << detections_[i].id;
+		cv::putText(image, strSt.str(),
+	              cv::Point2f(detections_[i].cxy.first + 10, detections_[i].cxy.second + 10),
+	              cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0,0,255));
+	}
+	imshow("Result",image);
+	waitKey(20);
 }
 BeaconDetector::~BeaconDetector()
 {

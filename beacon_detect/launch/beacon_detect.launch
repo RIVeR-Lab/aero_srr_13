@@ -1,7 +1,8 @@
 <launch>
   <node name="beacondetector" pkg="beacon_detect" type="beacondetect" output="screen">
-      <param name="cam_topic" type="str" value="/stereo_camera/left/image_raw" />
-      <param name="tag_frame" type="str" value="beacon" />
+      <param name="cam_topic" type="str" value="/image_raw" />
+      <param name="configuration" type="str" value="configuration.xml" />
       <param name="tag_size" value=" 0.166" />	
+      <param name="show_result" value="true" />
   </node>
 </launch>

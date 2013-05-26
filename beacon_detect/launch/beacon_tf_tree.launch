@@ -1,0 +1,26 @@
+<launch>
+<!-- create the tf tree for the beacon so you can calculate the robots relative location with respect to the beacon 
+     the beacon has both small and normal tags. small tags have the post s
+     adjust the heights properly can be simplifieed by setting up an xacro
+     for the tags, the z axis is out of the tag
+                   the y axis is down from the top right corner ----> VERIFY
+                   the x asis is along the oppositie direction of the tag id below ---> VERIFY 
+-->
+<node pkg="tf" type="static_transform_publisher" name="home_broadcaster" args="1 0 0 0 0 0 world home 100" />
+
+<!--front-->
+<node pkg="tf" type="static_transform_publisher" name="tag1_broadcaster" args="-.5 0 1 0 -1.57 0 home tag_1 100" />
+<node pkg="tf" type="static_transform_publisher" name="tag1s_broadcaster" args="-.5 0 0.5 0 -1.57 0 home tag_1s 100" />
+
+<!--back-->
+<node pkg="tf" type="static_transform_publisher" name="tag2_broadcaster" args=".5 0 1 0 1.57 0 home tag_2 100" />
+<node pkg="tf" type="static_transform_publisher" name="tag2s_broadcaster" args=".5 0 0.5 0 1.57 0 home tag_2s 100" />
+
+<!--left-->
+<node pkg="tf" type="static_transform_publisher" name="tag3_broadcaster" args="0 0.5 1 0 0 -1.57 home tag_3 100" />
+<node pkg="tf" type="static_transform_publisher" name="tag3s_broadcaster" args="0 0.5 0.5 0 0 -1.57 home tag_3s 100" />
+
+<!--right-->
+<node pkg="tf" type="static_transform_publisher" name="tag4_broadcaster" args="0 -0.5 1 0 0 1.57 home tag_4 100" />
+<node pkg="tf" type="static_transform_publisher" name="tag4s_broadcaster" args="0 -0.5 0.5 0 0 1.57 home tag_4s 100" />
+</launch>

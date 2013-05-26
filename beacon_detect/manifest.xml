@@ -14,8 +14,9 @@
   
   <depend package="image_transport" />
   <depend package="image_geometry" />
-  
   <depend package ="sensor_msgs"/>
+  <depend package ="geometry_msgs"/>
+
   <depend package="apriltags"/>
   <depend package="tf"/>
   <depend package="aero_srr_msgs"/>
