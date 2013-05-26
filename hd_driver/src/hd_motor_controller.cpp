@@ -16,6 +16,14 @@ HDMotorController::~HDMotorController(){
 
 void HDMotorController::open(std::string port){
   serial_port_.open(port, (speed_t)B9600, 8, serial_parity_none);
+  sleep(2);//wait for device to reset (2s)
+  printf("Status: %u\n", get(memory_bank_ram, variable_status_register));
+  printf("Fault: %u\n", get(memory_bank_ram, variable_fault_register));
+  set(memory_bank_ram, variable_fault_register, 128);
+  //reset();
+  //sleep(2);//wait for device to reset (2s)
+  //printf("Status: %u\n", get(memory_bank_ram, variable_status_register));
+  //printf("Fault: %u\n", get(memory_bank_ram, variable_fault_register));
   //TODO increase baud rate
 }
 
@@ -61,13 +69,13 @@ uint32_t HDMotorController::get_trajectory_status(){
 #define parse_ok_or_error(command, buf)		\
   if(streq("ok", buf))\
     return;\
-  parse_error("set", buf)
+  parse_error(command , buf)
 
 #define parse_intval_or_error(command, buf)		\
   int value;\
   if(sscanf(buf, "v %d", &value)==1)\
     return value;\
-  parse_error("set", buf)
+  parse_error(command, buf)
 
 void HDMotorController::set(memory_bank_t memory_bank, variable_t variable_id, memory_value_t value){
   serial_port_.writef(10, "s %c0x%x %d\r", memory_bank, variable_id, value);
