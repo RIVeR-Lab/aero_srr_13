@@ -3,10 +3,10 @@ FILE(REMOVE_RECURSE
   "../src/rgbdslam/srv"
   "CMakeFiles/ROSBUILD_gensrv_py"
   "../src/rgbdslam/srv/__init__.py"
-  "../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py"
-  "../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py"
-  "../src/rgbdslam/srv/_rgbdslam_ros_ui.py"
   "../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py"
+  "../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py"
+  "../src/rgbdslam/srv/_rgbdslam_ros_ui.py"
+  "../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py"
 )
 
 # Per-language clean rules from dependency scanning.

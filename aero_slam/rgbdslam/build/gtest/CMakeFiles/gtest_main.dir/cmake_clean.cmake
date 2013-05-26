@@ -1,7 +1,7 @@
 FILE(REMOVE_RECURSE
   "CMakeFiles/gtest_main.dir/src/gtest_main.cc.o"
-  "/home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/lib/libgtest_main.pdb"
-  "/home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/lib/libgtest_main.so"
+  "/home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/lib/libgtest_main.pdb"
+  "/home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/lib/libgtest_main.so"
 )
 
 # Per-language clean rules from dependency scanning.

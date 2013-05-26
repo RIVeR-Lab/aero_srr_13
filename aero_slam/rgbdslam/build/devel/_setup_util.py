@@ -43,7 +43,7 @@ import sys
 
 # environment at generation time
 CMAKE_PREFIX_PATH = '/opt/ros/groovy'.split(';')
-setup_dir = '/home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/devel'
+setup_dir = '/home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/devel'
 if setup_dir not in CMAKE_PREFIX_PATH:
     CMAKE_PREFIX_PATH.insert(0, setup_dir)
 CMAKE_PREFIX_PATH = os.pathsep.join(CMAKE_PREFIX_PATH)

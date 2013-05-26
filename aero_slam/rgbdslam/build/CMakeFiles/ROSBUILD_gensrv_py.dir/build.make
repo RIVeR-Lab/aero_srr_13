@@ -35,10 +35,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam
+CMAKE_SOURCE_DIR = /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build
+CMAKE_BINARY_DIR = /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build
 
 # Utility rule file for ROSBUILD_gensrv_py.
 
@@ -47,202 +47,13 @@ include CMakeFiles/ROSBUILD_gensrv_py.dir/progress.make
 
 CMakeFiles/ROSBUILD_gensrv_py: ../src/rgbdslam/srv/__init__.py
 
-../src/rgbdslam/srv/__init__.py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py
-../src/rgbdslam/srv/__init__.py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py
-../src/rgbdslam/srv/__init__.py: ../src/rgbdslam/srv/_rgbdslam_ros_ui.py
 ../src/rgbdslam/srv/__init__.py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_1)
+../src/rgbdslam/srv/__init__.py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py
+../src/rgbdslam/srv/__init__.py: ../src/rgbdslam/srv/_rgbdslam_ros_ui.py
+../src/rgbdslam/srv/__init__.py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/rgbdslam/srv/__init__.py"
-	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --initpy /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/srv/rgbdslam_ros_ui_f.srv /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/srv/rgbdslam_ros_ui_s.srv /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/srv/rgbdslam_ros_ui.srv /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/srv/rgbdslam_ros_ui_b.srv
-
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: ../srv/rgbdslam_ros_ui_f.srv
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/lib/roslib/gendeps
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: ../manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/cpp_common/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rostime/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/roscpp_traits/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/roscpp_serialization/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/genmsg/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/genpy/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/message_runtime/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/std_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/geometry_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosconsole/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosgraph_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/xmlrpcpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/roscpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/message_filters/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/sensor_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/tf/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/flann/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/catkin/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rospack/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/roslib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosgraph/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rospy/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/topic_tools/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosbag/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/pcl_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/pcl/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosmsg/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosservice/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/bond/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/smclib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/bondcpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/nodelet/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/console_bridge/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/class_loader/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/pluginlib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/nodelet_topic_tools/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/pcl_ros/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/opencv2/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/cv_bridge/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/visualization_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/nav_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/gencpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/genlisp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/message_generation/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/actionlib_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/trajectory_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/std_srvs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/octomap_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/octomap/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/octomap_ros/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/stacks/octomap_mapping/octomap_server/manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/msg_gen/generated
-../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_2)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py"
-	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --noinitpy /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/srv/rgbdslam_ros_ui_f.srv
-
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: ../srv/rgbdslam_ros_ui_s.srv
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/lib/roslib/gendeps
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: ../manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/cpp_common/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rostime/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/roscpp_traits/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/roscpp_serialization/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/genmsg/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/genpy/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/message_runtime/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/std_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/geometry_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosconsole/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosgraph_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/xmlrpcpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/roscpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/message_filters/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/sensor_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/tf/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/flann/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/catkin/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rospack/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/roslib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosgraph/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rospy/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/topic_tools/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosbag/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/pcl_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/pcl/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosmsg/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosservice/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/bond/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/smclib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/bondcpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/nodelet/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/console_bridge/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/class_loader/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/pluginlib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/nodelet_topic_tools/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/pcl_ros/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/opencv2/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/cv_bridge/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/visualization_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/nav_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/gencpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/genlisp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/message_generation/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/actionlib_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/trajectory_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/std_srvs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/octomap_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/octomap/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/octomap_ros/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/stacks/octomap_mapping/octomap_server/manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/msg_gen/generated
-../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_3)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py"
-	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --noinitpy /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/srv/rgbdslam_ros_ui_s.srv
-
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: ../srv/rgbdslam_ros_ui.srv
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/lib/roslib/gendeps
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: ../manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/cpp_common/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rostime/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/roscpp_traits/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/roscpp_serialization/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/genmsg/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/genpy/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/message_runtime/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/std_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/geometry_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosconsole/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosgraph_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/xmlrpcpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/roscpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/message_filters/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/sensor_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/tf/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/flann/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/catkin/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rospack/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/roslib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosgraph/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rospy/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/topic_tools/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosbag/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/pcl_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/pcl/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosmsg/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosservice/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/bond/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/smclib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/bondcpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/nodelet/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/console_bridge/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/class_loader/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/pluginlib/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/nodelet_topic_tools/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/pcl_ros/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/opencv2/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/cv_bridge/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/visualization_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/nav_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/gencpp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/genlisp/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/message_generation/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/actionlib_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/trajectory_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/std_srvs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/octomap_msgs/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/octomap/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/octomap_ros/package.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/stacks/octomap_mapping/octomap_server/manifest.xml
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/msg_gen/generated
-../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_4)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/rgbdslam/srv/_rgbdslam_ros_ui.py"
-	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --noinitpy /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/srv/rgbdslam_ros_ui.srv
+	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --initpy /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/srv/rgbdslam_ros_ui_b.srv /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/srv/rgbdslam_ros_ui_f.srv /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/srv/rgbdslam_ros_ui.srv /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/srv/rgbdslam_ros_ui_s.srv
 
 ../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py: ../srv/rgbdslam_ros_ui_b.srv
 ../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py: /opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py
@@ -303,16 +114,205 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/rgbdslam/srv/__init__.py
 ../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py: /opt/ros/groovy/stacks/octomap_mapping/octomap_server/manifest.xml
 ../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/msg_gen/generated
 ../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_5)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py"
-	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --noinitpy /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/srv/rgbdslam_ros_ui_b.srv
+	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --noinitpy /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/srv/rgbdslam_ros_ui_b.srv
+
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: ../srv/rgbdslam_ros_ui_f.srv
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/lib/roslib/gendeps
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: ../manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/cpp_common/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rostime/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/roscpp_traits/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/roscpp_serialization/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/genmsg/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/genpy/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/message_runtime/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/std_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/geometry_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosconsole/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosgraph_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/xmlrpcpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/roscpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/message_filters/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/sensor_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/tf/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/flann/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/catkin/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rospack/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/roslib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosgraph/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rospy/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/topic_tools/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosbag/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/pcl_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/pcl/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosmsg/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/rosservice/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/bond/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/smclib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/bondcpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/nodelet/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/console_bridge/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/class_loader/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/pluginlib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/nodelet_topic_tools/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/pcl_ros/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/opencv2/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/cv_bridge/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/visualization_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/nav_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/gencpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/genlisp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/message_generation/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/actionlib_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/trajectory_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/std_srvs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/octomap_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/octomap/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/share/octomap_ros/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/stacks/octomap_mapping/octomap_server/manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/msg_gen/generated
+../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_3)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py"
+	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --noinitpy /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/srv/rgbdslam_ros_ui_f.srv
+
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: ../srv/rgbdslam_ros_ui.srv
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/lib/roslib/gendeps
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: ../manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/cpp_common/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rostime/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/roscpp_traits/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/roscpp_serialization/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/genmsg/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/genpy/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/message_runtime/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/std_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/geometry_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosconsole/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosgraph_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/xmlrpcpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/roscpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/message_filters/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/sensor_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/tf/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/flann/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/catkin/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rospack/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/roslib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosgraph/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rospy/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/topic_tools/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosbag/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/pcl_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/pcl/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosmsg/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/rosservice/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/bond/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/smclib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/bondcpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/nodelet/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/console_bridge/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/class_loader/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/pluginlib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/nodelet_topic_tools/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/pcl_ros/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/opencv2/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/cv_bridge/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/visualization_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/nav_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/gencpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/genlisp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/message_generation/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/actionlib_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/trajectory_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/std_srvs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/octomap_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/octomap/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/share/octomap_ros/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/stacks/octomap_mapping/octomap_server/manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/msg_gen/generated
+../src/rgbdslam/srv/_rgbdslam_ros_ui.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_4)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/rgbdslam/srv/_rgbdslam_ros_ui.py"
+	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --noinitpy /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/srv/rgbdslam_ros_ui.srv
+
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: ../srv/rgbdslam_ros_ui_s.srv
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/lib/roslib/gendeps
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: ../manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/cpp_common/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rostime/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/roscpp_traits/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/roscpp_serialization/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/genmsg/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/genpy/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/message_runtime/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/std_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/geometry_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosconsole/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosgraph_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/xmlrpcpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/roscpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/message_filters/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/sensor_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/tf/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/flann/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/catkin/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rospack/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/roslib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosgraph/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rospy/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/topic_tools/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosbag/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/pcl_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/pcl/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosmsg/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/rosservice/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/bond/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/smclib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/bondcpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/nodelet/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/console_bridge/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/class_loader/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/pluginlib/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/nodelet_topic_tools/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/pcl_ros/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/opencv2/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/cv_bridge/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/visualization_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/nav_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/gencpp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/genlisp/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/message_generation/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/actionlib_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/trajectory_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/std_srvs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/octomap_msgs/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/octomap/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/share/octomap_ros/package.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/stacks/octomap_mapping/octomap_server/manifest.xml
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/msg_gen/generated
+../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py: /opt/ros/groovy/stacks/arm_navigation/arm_navigation_msgs/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/CMakeFiles $(CMAKE_PROGRESS_5)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py"
+	/opt/ros/groovy/share/rospy/rosbuild/scripts/gensrv_py.py --noinitpy /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/srv/rgbdslam_ros_ui_s.srv
 
 ROSBUILD_gensrv_py: CMakeFiles/ROSBUILD_gensrv_py
 ROSBUILD_gensrv_py: ../src/rgbdslam/srv/__init__.py
-ROSBUILD_gensrv_py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py
-ROSBUILD_gensrv_py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py
-ROSBUILD_gensrv_py: ../src/rgbdslam/srv/_rgbdslam_ros_ui.py
 ROSBUILD_gensrv_py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_b.py
+ROSBUILD_gensrv_py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_f.py
+ROSBUILD_gensrv_py: ../src/rgbdslam/srv/_rgbdslam_ros_ui.py
+ROSBUILD_gensrv_py: ../src/rgbdslam/srv/_rgbdslam_ros_ui_s.py
 ROSBUILD_gensrv_py: CMakeFiles/ROSBUILD_gensrv_py.dir/build.make
 .PHONY : ROSBUILD_gensrv_py
 
@@ -325,6 +325,6 @@ CMakeFiles/ROSBUILD_gensrv_py.dir/clean:
 .PHONY : CMakeFiles/ROSBUILD_gensrv_py.dir/clean
 
 CMakeFiles/ROSBUILD_gensrv_py.dir/depend:
-	cd /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build /home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/CMakeFiles/ROSBUILD_gensrv_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build /home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/CMakeFiles/ROSBUILD_gensrv_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ROSBUILD_gensrv_py.dir/depend
 

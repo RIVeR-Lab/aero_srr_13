@@ -16,6 +16,7 @@
   <depend package="image_geometry" />
   <depend package ="sensor_msgs"/>
   <depend package ="geometry_msgs"/>
+  <depend package ="nav_msgs"/>
 
   <depend package="apriltags"/>
   <depend package="tf"/>

@@ -1,12 +1,15 @@
 <!-- This file demonstrates the parameterization for a computer with low performance
      The openni driver is started from this file -->
+
 <launch>
-  <include file="$(find openni_launch)/launch/openni.launch"/>
+  <param name="use_sim_time" value="true"/>
   <node pkg="rgbdslam" type="rgbdslam" name="rgbdslam" cwd="node" required="true" output="log"> 
     <!-- Input data settings-->
-    <param name="config/topic_image_mono"              value="/camera/rgb/image_rect_color"/> <!--could also be color -->
-  	<param name="config/topic_image_depth"             value="/camera/depth_registered/image_rect"/>
-
+    <param name="config/camera_info_topic"             value="/stereo_camera/left/camera_info"/>
+    <param name="config/wide_topic"                    value="/stereo_camera/left/image_mono"/>
+    <param name="config/wide_cloud_topic"              value="/stereo_camera/points2"/>
+    <param name="config/subscriber_queue_size"         value="2"/>
+    <param name="config/drop_async_frames"             value="false"/> <!-- Check association of depth and visual image, reject if not in sync -->
     <param name="config/feature_detector_type"         value="ORB"/><!-- ORB are fastest and require no GPU -->
     <param name="config/feature_extractor_type"        value="ORB"/><!-- ORB are fastest and require no GPU -->
     <param name="config/max_keypoints"                 value="200"/><!-- Frame-to-frame comparisons are faster with few features-->

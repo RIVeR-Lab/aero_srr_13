@@ -29,8 +29,11 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	else
 		return;
 
-	/* Set up the publisher for the stamped pose */
+	/* Set up the publisher for the result stamped pose */
 	pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("becon_drive", 5);
+
+	/*set up the publisher for the odom so the ekf filter can use it as visual odometry, need to remap it to /vo */
+	odom_pub_ = nh_.advertise<nav_msgs::Odometry>("tag_odom",5);
 
 	/* thread the beacon detector function*/
 	boost::thread detector_thread_( boost::bind( &BeaconDetector::detectBeacons, this ) );
@@ -250,6 +253,9 @@ void BeaconDetector::detectBeacons()
 				//calculate the pose of the robot so the estimated tf of the tag and the actuall beacon will alighn
 				geometry_msgs::Pose temp=getRobotPose(tag);
 
+				//publish nav::odom message for ekf
+				pubOdom(temp);
+
 				//add it to the res
 				res.pose.position.x+=temp.position.x;
 				res.pose.position.y+=temp.position.y;
@@ -291,6 +297,27 @@ void BeaconDetector::detectBeacons()
 	{
 		detector_thread_.join();
 	}
+}
+void BeaconDetector::pubOdom(geometry_msgs::Pose pose)
+{
+	nav_msgs::Odometry msg;
+	msg.header.stamp = ros::Time::now();           // time of current measurement
+    msg.header.frame_id = "base_footprint";        // the tracked robot frame
+	msg.pose.pose.position.x = pose.position.x;    // x measurement tag.
+	msg.pose.pose.position.y = pose.position.y;    // y measurement tag.
+	msg.pose.pose.position.z = pose.position.z;    // z measurement tag.
+    msg.pose.pose.orientation.x = pose.orientation.x;
+	msg.pose.pose.orientation.y = pose.orientation.y;
+	msg.pose.pose.orientation.z = pose.orientation.z;
+	msg.pose.pose.orientation.w = pose.orientation.w;
+
+	msg.pose.covariance[0]=0.007;
+	msg.pose.covariance[7]=0.007;
+	msg.pose.covariance[14]=0.007;
+	msg.pose.covariance[21]=0.007;
+	msg.pose.covariance[28]=0.007;
+	msg.pose.covariance[35]=0.007;
+	odom_pub_.publish(msg);
 }
 geometry_msgs::Pose BeaconDetector::getRobotPose(string tag)
 {

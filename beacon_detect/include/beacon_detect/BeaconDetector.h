@@ -15,6 +15,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Odometry.h>
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
@@ -49,6 +50,7 @@ class BeaconDetector {
 	image_transport::CameraSubscriber 	subImg_;						//the camera subscriber
 	image_transport::Publisher 			pub_;							//a image publisher
 	ros::Publisher 						pose_pub_;						//to publish pose of home
+	ros::Publisher						odom_pub_;						//publishes the odometry messages
 
 	//boost thread
 	boost::mutex						imglock_;						//mutext to sync the image callback with the detector thread
@@ -94,6 +96,10 @@ public:
 	 * This function calculated the stamped pose for the robot to correct give the tag id
 	 */
 	geometry_msgs::Pose getRobotPose(string tag);
+	/*
+	 * This function publishes the nav::odom messages for the visual odometry function
+	 */
+	void pubOdom(geometry_msgs::Pose pose);
 
 	virtual ~BeaconDetector();
 };
