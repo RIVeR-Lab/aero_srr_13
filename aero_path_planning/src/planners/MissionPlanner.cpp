@@ -21,17 +21,17 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				nh_(nh),
 				p_nh_(p_nh),
 				transformer_(nh),
-				dr_server_(nh)
+				dr_server_(p_nh)
 {
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
 	this->registerTopics();
 	this->registerTimers();
 	ROS_INFO_STREAM("Mission Planner Running!");
-	geometry_msgs::Pose mission_goal_one;
-	mission_goal_one.position.x = 10.0;
-	mission_goal_one.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal_one);
+	//geometry_msgs::Pose mission_goal_one;
+	//mission_goal_one.position.x = 10.0;
+	//mission_goal_one.orientation.w = 1;
+	//this->mission_goals_.push_back(mission_goal_one);
 }
 
 void MissionPlanner::loadParam()

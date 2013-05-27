@@ -24,6 +24,8 @@
 #include <math.h>
 #include <queue>
 #include <message_filters/subscriber.h>
+#include <sensor_msgs/PointCloud2.h>
+
 
 
 
@@ -47,7 +49,11 @@ public:
 	void saveImage(const sensor_msgs::Image& msg,cv_bridge::CvImagePtr& cv_ptr, int O);
 	void rectRightCb(const sensor_msgs::ImageConstPtr& msg);
 	void rectLeftCb(const sensor_msgs::ImageConstPtr& msg);
+	float nNdisp(const cv::Point2d& pt, const Mat_t& disp);
+//	void pointCloudCb(const sensor_msgs::PointCloud2ConstPtr& cloud);
+	void addBbox(Mat_t& img, Mat_t& final);
 	Mat_t gray2bgr(Mat_t img);
+	cv::Point2f blobIdentify(Mat_t& img, int objThresh);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 
@@ -61,8 +67,10 @@ private:
 	ros::Subscriber disp_image_sub_;
 	ros::Subscriber left_rect_sub_;
 	ros::Subscriber right_rect_sub_;
+	ros::Subscriber point_cloud_sub_;
 	image_transport::Publisher image_pub_;
-
+	ros::Publisher pub_points2_;
+	ros::Publisher pub_points3_;
 
 	sensor_msgs::Image left_image;
 	sensor_msgs::Image right_image;
@@ -71,9 +79,14 @@ private:
 	std::string cascade_path_WHA,
 				cascade_path_PINK,
 				cascade_path_WHASUN,
-				cascade_path_RQT_BALL;
+				cascade_path_RQT_BALL,
+				cascade_path_PIPE,
+				cascade_path_PUCK;
+	float kAvgVal_;
+	cv::Point2f pipePoint_,WHAPoint_;
 
-	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL;
+	Mat_t frame;
+	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE, cascade_PUCK;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
@@ -81,6 +94,9 @@ private:
 	typedef std::pair<PixPoint_t, object_type> Detection_t;
 	typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
 	std::vector<DetectionPtr_t> detection_list_;
+
+
+
 
 	image_geometry::StereoCameraModel stereo_model;
 	char* WINDOWLeft;

@@ -19,44 +19,63 @@
   <include filename="$(find aero_description)/urdf/stereo_camera_pair.urdf.xacro" />
   <include filename="$(find aero_description)/urdf/sick_laser.urdf.xacro" />
   <include filename="$(find aero_description)/urdf/simple_transform.urdf.xacro" />
+  <include filename="$(find aero_description)/urdf/simple_transform.urdf.xacro" />
+  <include filename="$(find jaco_model)/urdf/jaco_arm.xacro" />
+
+  <property name="boom_length" value="1.085" />
+  <property name="boom_diameter" value="0.0538" />
+
 
 
   <xacro:husky/>  
 
-  <!-- Cameras -->
-  <xacro:stereo_camera_pair parent="base_link_front_mount_part" prefix="lower_stereo" xyz="0.07 0 0.02" rpy="0 ${M_PI/180*6} 0" camera_offset="0.08"/>
-  <xacro:stereo_camera_pair parent="boom" prefix="upper_stereo" xyz="0 0 0.022606" rpy="0 0 0" camera_offset="0.294386"/>
-
-  <xacro:static_transform parent="base_link_top_plate_part" name="boom_base" xyz="-0.422402 0 -0.09906" rpy="0 0 0">
+  <!-- Boom -->
+  <xacro:static_transform parent="top_plate" name="boom_base" xyz="-0.23 0 0.0762" rpy="0 0 0">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 -0.02" rpy="0 0 0" />
       <geometry>
-	<box size="0.01 0.01 0.01" />
+	<box size="0.05 0.05 0.05" />
       </geometry>
       <material name="Blue" />
     </visual>
   </xacro:static_transform>
-  <xacro:revolute_pan_transform parent="boom_base" name="boom" xyz="0 0 1.014476" rpy="0 0 0" lower_limit="-2" upper_limit="2">
+  <xacro:revolute_pan_transform parent="boom_base" name="boom" xyz="0 0 0" rpy="0 0 0" lower_limit="-2" upper_limit="2">
     <visual>
-      <origin xyz="0.0 0.0 -0.45" rpy="0 0 0" />
+      <origin xyz="0.0 0.0 ${boom_length/2}" rpy="0 0 0" />
       <geometry>
-	<cylinder length="0.9" radius="0.02" />
+	<cylinder length="${boom_length}" radius="${boom_diameter/2}" />
       </geometry>
-      <material name="DarkGray" />
+      <material name="Black" />
     </visual>
   </xacro:revolute_pan_transform>
+  <xacro:static_transform parent="boom" name="boom_top" xyz="0 0 ${boom_length}" rpy="0 0 0">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+	<box size="0.00 0.00 0.00" />
+      </geometry>
+    </visual>
+  </xacro:static_transform>
+
+
+
+  <!-- Cameras -->
+  <xacro:stereo_camera_pair parent="boom_top" prefix="upper_stereo" xyz="0 0 0.005" rpy="0 0 0" camera_base_length="0.3" camera_tilt="${10*M_PI/180}"/>
+  <xacro:stereo_camera_pair parent="boom_top" prefix="lower_stereo" xyz="0 0 -0.127" rpy="0 0 0" camera_base_length="0.11" camera_tilt="${30*M_PI/180}"/>
+
+
 
   <!-- Laser -->
-  <xacro:sick_laser_v0 name="laser" parent="base_link_front_mount_part" ros_topic="laser" update_rate="25" >
-    <origin xyz="0.053086 0 -0.057912" rpy="${M_PI} 0 0" />
+  <xacro:sick_laser_v0 name="laser" parent="base_link" ros_topic="laser" update_rate="25" >
+    <origin xyz="${base_length/2+0.0635} 0 0.0254" rpy="0 0 0" />
   </xacro:sick_laser_v0> 
-  <gazebo reference="lidar">
-    <material>Gazebo/White</material>
-  </gazebo>
+
+
+
 
 
   <!-- Arm -->
-  <xacro:static_transform parent="base_link_top_plate_part" name="arm_mount" xyz="0.325374 0 0.085852" rpy="0 0 0">
+  <xacro:static_transform parent="base_link" name="arm_mount" xyz="0.325374 0 0.1" rpy="0 0 0">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -74,6 +93,8 @@
       <material name="Blue" />
     </visual>
   </xacro:static_transform>
+<xacro:jaco_arm  parent="arm_base"/>
+
 
   <!-- IMU -->
   <xacro:static_transform parent="base_link" name="imu" xyz="0 0 0" rpy="0 ${-M_PI/2} ${-3*M_PI/4}">

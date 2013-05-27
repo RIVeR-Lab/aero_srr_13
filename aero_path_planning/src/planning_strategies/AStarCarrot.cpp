@@ -22,34 +22,34 @@ using namespace aero_path_planning::astar_utilities;
 
 //********************* HURISTIC/COST FUNCTIONS *********************//
 
-double astar_utilities::ed_huristic(const aero_path_planning::Point& point, const aero_path_planning::Point& goal)
+double astar_utilities::ed_huristic(const tf::Point& point, const tf::Point& goal)
 {
-	return pcl::distances::l2(point.getVector4fMap(), goal.getVector4fMap());
+	return point.distance(goal);
 }
 
-double astar_utilities::pt_cost(const aero_path_planning::Point& this_point, const aero_path_planning::Point& last_point)
+double astar_utilities::pt_cost(const tf::Point& this_point, const tf::Point& last_point)
 {
-	double pcost = 0;
+//	double pcost = 0;
 
-	switch(this_point.rgba)
-	{
-	case aero_path_planning::UNKNOWN:
-	case aero_path_planning::FREE_LOW_COST:
-	case aero_path_planning::GOAL:
-		pcost = 1.0;
-		break;
-	case aero_path_planning::FREE_HIGH_COST:
-		pcost = 2.0;
-		break;
-	case aero_path_planning::TRAVERSED:
-		pcost = 1.25;
-		break;
-	default:
-		pcost = 1;
-		break;
-	}
+//	switch(trait.getEnum())
+//	{
+//	case occupancy_grid::utilities::CellTrait::UNKOWN:
+//	case occupancy_grid::utilities::CellTrait::FREE_LOW_COST:
+//	case occupancy_grid::utilities::CellTrait::GOAL:
+//		pcost = 1.0;
+//		break;
+//	case occupancy_grid::utilities::CellTrait::FREE_HIGH_COST:
+//		pcost = 2.0;
+//		break;
+//	case occupancy_grid::utilities::CellTrait::TRAVERSED:
+//		pcost = 1.25;
+//		break;
+//	default:
+//		pcost = 1;
+//		break;
+//	}
 
-	return astar_utilities::ed_huristic(this_point, last_point)*pcost;
+	return astar_utilities::ed_huristic(this_point, last_point);
 }
 
 AStarNode::AStarNode():
@@ -72,7 +72,7 @@ AStarNode::AStarNode(const AStarNodePtr& copy)
 
 //********************* ASTARNODE IMPLEMENTATION *********************//
 
-AStarNode::AStarNode(const Point& location, const Point& goal, const AStarNodePtr parent, cost_func cost, huristic_func huristic):
+AStarNode::AStarNode(const tf::Point& location, const tf::Point& goal, const AStarNodePtr parent, cost_func cost, huristic_func huristic):
 						location_(location),
 						parent_(parent),
 						h_(huristic(location, goal))
@@ -103,7 +103,7 @@ double AStarNode::getF() const
 	return this->f_;
 }
 
-const aero_path_planning::Point& AStarNode::getLocation() const
+const tf::Point& AStarNode::getLocation() const
 {
 	return this->location_;
 }
@@ -115,12 +115,7 @@ const AStarNode::AStarNodePtr& AStarNode::getParent() const
 
 bool AStarNode::sameLocation(const AStarNode& node) const
 {
-	bool same = true;
-	same &= this->location_.x == node.getLocation().x;
-	same &= this->location_.y == node.getLocation().y;
-	same &= this->location_.z == node.getLocation().z;
-
-	return same;
+	return this->location_.distance(node.getLocation())==0;
 }
 
 AStarNode& AStarNode::operator= (AStarNode const & rhs)
@@ -175,37 +170,37 @@ AStarCarrot::~AStarCarrot()
 
 void AStarCarrot::setUpNeighborPoints()
 {
-	this->n_pxy_.x = 1;
-	this->n_pxy_.y = 0;
-	this->n_pxy_.z = 0;
+	this->n_pxy_.setX(1);
+	this->n_pxy_.setY(0);
+	this->n_pxy_.setZ(0);
 
-	this->n_xpy_.x = 0;
-	this->n_xpy_.y = 1;
-	this->n_xpy_.z = 0;
+	this->n_xpy_.setX(0);
+	this->n_xpy_.setY(1);
+	this->n_xpy_.setZ(0);
 
-	this->n_nxy_.x = -1;
-	this->n_nxy_.y = 0;
-	this->n_nxy_.z = 0;
+	this->n_nxy_.setX(-1);
+	this->n_nxy_.setY(0);
+	this->n_nxy_.setZ(0);
 
-	this->n_xny_.x = 0;
-	this->n_xny_.y = -1;
-	this->n_xny_.z = 0;
+	this->n_xny_.setX(0);
+	this->n_xny_.setY(-1);
+	this->n_xny_.setZ(0);
 
-	this->n_dpxpy_.x = 1;
-	this->n_dpxpy_.y = 1;
-	this->n_dpxpy_.z = 0;
+	this->n_dpxpy_.setX(1);
+	this->n_dpxpy_.setY(1);
+	this->n_dpxpy_.setZ(0);
 
-	this->n_dnxny_.x = -1;
-	this->n_dnxny_.y = -1;
-	this->n_dnxny_.z = 0;
+	this->n_dnxny_.setX(-1);
+	this->n_dnxny_.setY(-1);
+	this->n_dnxny_.setZ(0);
 
-	this->n_dnxpy_.x = -1;
-	this->n_dnxpy_.y = 1;
-	this->n_dnxpy_.z = 0;
+	this->n_dnxpy_.setX(-1);
+	this->n_dnxpy_.setY(1);
+	this->n_dnxpy_.setZ(0);
 
-	this->n_dpxny_.x = 1;
-	this->n_dpxny_.y = -1;
-	this->n_dpxny_.z = 0;
+	this->n_dpxny_.setX(1);
+	this->n_dpxny_.setY(-1);
+	this->n_dpxny_.setZ(0);
 }
 
 bool AStarCarrot::setCarrotDelta(double delta)
@@ -215,7 +210,7 @@ bool AStarCarrot::setCarrotDelta(double delta)
 	return this->has_delta_;
 }
 
-bool AStarCarrot::setSearchMap(const aero_path_planning::OccupancyGrid& map)
+bool AStarCarrot::setSearchMap(occupancy_grid::MultiTraitOccupancyGridConstPtr map)
 {
 	this->map_     = map;
 	this->has_map_ = true;
@@ -251,38 +246,30 @@ AStarCarrot& AStarCarrot::operator =(const AStarCarrot& copy)
 	return *this;
 }
 
-bool AStarCarrot::calcNeighbors(const Point& point, std::vector<Point>& neightbors) const
+bool AStarCarrot::calcNeighbors(const tf::Point& point, std::vector<tf::Point>& neightbors) const
 {
 
-	Point neighbor1;
-	neighbor1.getVector4fMap() = point.getVector4fMap() + this->n_xpy_.getVector4fMap();
+	tf::Point neighbor1(point+this->n_xpy_);
 
 
-	Point neighbor2;
-	neighbor2.getVector4fMap() = point.getVector4fMap() + this->n_pxy_.getVector4fMap();
+	tf::Point neighbor2(point + this->n_pxy_);
 
 
-	Point neighbor3;
-	neighbor3.getVector4fMap() = point.getVector4fMap() + this->n_xny_.getVector4fMap();
+	tf::Point neighbor3(point + this->n_xny_);
 
 
-	Point neighbor4;
-	neighbor4.getVector4fMap() = point.getVector4fMap() + this->n_nxy_.getVector4fMap();
+	tf::Point neighbor4(point + this->n_nxy_);
 
 
-	Point neighbor5;
-	neighbor5.getVector4fMap() = point.getVector4fMap() + this->n_dpxpy_.getVector4fMap();
+	tf::Point neighbor5(point + this->n_dpxpy_);
 
 
-	Point neighbor6;
-	neighbor6.getVector4fMap() = point.getVector4fMap() + this->n_dnxpy_.getVector4fMap();
+	tf::Point neighbor6(point + this->n_dnxpy_);
 
-	Point neighbor7;
-	neighbor7.getVector4fMap() = point.getVector4fMap() + this->n_dnxny_.getVector4fMap();
+	tf::Point neighbor7(point + this->n_dnxny_);
 
 
-	Point neighbor8;
-	neighbor8.getVector4fMap() = point.getVector4fMap() + this->n_dpxny_.getVector4fMap();
+	tf::Point neighbor8(point + this->n_dpxny_);
 
 	neightbors.push_back(neighbor1);
 	neightbors.push_back(neighbor2);
@@ -297,23 +284,31 @@ bool AStarCarrot::calcNeighbors(const Point& point, std::vector<Point>& neightbo
 	return true;
 }
 
-void AStarCarrot::buildSolutionPath(const Node_t& goal_node, std::deque<Point>& path) const
+void AStarCarrot::buildSolutionPath(const Node_t& goal_node, std::deque<geometry_msgs::Pose>& path) const
 {
-
-	path.push_front(goal_node.getLocation());
+	geometry_msgs::Pose temp_pose;
+	temp_pose.orientation.w = 1;
+	tf::pointTFToMsg(goal_node.getLocation(), temp_pose.position);
+	//Convert from grid cells to meters
+	this->map_->gridCellToMeter(temp_pose.position.x, temp_pose.position.y, temp_pose.position.x, temp_pose.position.y);
+	path.push_front(temp_pose);
 	NodePtr_t path_node(goal_node.getParent());
-	Point lastPoint = goal_node.getLocation();
+	tf::Point lastPoint = goal_node.getLocation();
 
 	while(path_node->getParent() != NodePtr_t())
 	{
-		if(pcl::distances::l2(path_node->getLocation().getVector4fMap(), lastPoint.getVector4fMap())>this->delta_)
+		if(path_node->getLocation().distance(lastPoint)>this->delta_)
 		{
-			path.push_front(path_node->getLocation());
+			tf::pointTFToMsg(path_node->getLocation(), temp_pose.position);
+			//Convert from grid cells to meters
+			this->map_->gridCellToMeter(temp_pose.position.x, temp_pose.position.y, temp_pose.position.x, temp_pose.position.y);
+			path.push_front(temp_pose);
 			lastPoint = path_node->getLocation();
 		}
 		path_node = path_node->getParent();
 	}
-	path.push_front(path_node->getLocation());
+	tf::pointTFToMsg(path_node->getLocation(), temp_pose.position);
+	path.push_front(temp_pose);
 
 //	for(int i=temp_path.size()-1; i>0; i--)
 //	{
@@ -348,12 +343,13 @@ bool AStarCarrot::openSetContains(const NodePtr_t& node, const aero_path_plannin
 	return contains;
 }
 
-bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros::Duration& timeout, std::deque<Point>& result_path)
+bool AStarCarrot::search(const geometry_msgs::Pose& start_point, const geometry_msgs::Pose& goal_point, ros::Duration& timeout, std::deque<geometry_msgs::Pose>& result_path)
 {
 	bool success    = false;
 
 	if(this->canSearch())
 	{
+		ROS_INFO_STREAM("I'm searching from: "<<start_point<<", to: "<<goal_point);
 		//ROS_INFO("I'm Searching!");
 		//Set up the huristics
 		cost_func     costf = boost::bind(&pt_cost, _1, _2);
@@ -362,19 +358,36 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		//Create open/closed sets
 		aero_path_planning::FitnessQueue<Node_t, NodePtr_t> open_set;
 		boost::unordered_map<std::string, NodePtr_t>        closed_set;
-		std::vector<Point>                                  neighbors;
+		std::vector<tf::Point>                              neighbors;
 
 		//Set timout checking conditions
 		ros::Time start_time   = ros::Time::now();
 		ros::Time current_time = start_time;
 
 		//Set up the initial node
-		NodePtr_t start_node(new Node_t(start_point, goal_point, NodePtr_t(), costf, hursf));
+		tf::Point start;
+		tf::Point goal;
+		tf::pointMsgToTF(start_point.position, start);
+		tf::pointMsgToTF(goal_point.position, goal);
+
+		//Convert the start/goal points to grid-cells
+		int tx;
+		int ty;
+		this->map_->meterToGridCell(start.x(), start.y(), tx, ty);
+		start.setX(tx);
+		start.setY(ty);
+		this->map_->meterToGridCell(goal.x(), goal.y(), tx, ty);
+		goal.setX(tx);
+		goal.setY(ty);
+
+		NodePtr_t start_node(new Node_t(start, goal, NodePtr_t(), costf, hursf));
+		//ROS_INFO_STREAM("Start Node Set to: "<<(*start_node));
 		open_set.push(*start_node, start_node);
 
 		//Set up a node to use to check for the termination condition, and will contain the solution path head
 		//upon search compleation
-		Node_t    goal_node_dummy(goal_point, goal_point, NodePtr_t(), costf, hursf);
+		Node_t    goal_node_dummy(goal, goal, NodePtr_t(), costf, hursf);
+		//ROS_INFO_STREAM("Goal Node Set to: "<<goal_node_dummy);
 
 
 		//ROS_INFO_STREAM("I'm Searching with "<<PRINT_POINT_S("Start Point", start_point)<<" and "<<PRINT_POINT_S("Goal Point", goal_point));
@@ -385,7 +398,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		{
 			if(closed_set.size()%10000 == 0)
 			{
-				ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_.size()<<" possible nodes");
+				ROS_INFO_STREAM("I've expanded "<<closed_set.size()<<" nodes of"<<map_->getXSizeGrid()*map_->getYSizeGrid()<<" possible nodes");
 			}
 			os_empty  = open_set.empty();
 			timeout_c = (current_time-start_time)>timeout;
@@ -393,15 +406,16 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 			NodePtr_t current_node = open_set.top();
 			open_set.pop();
 
-			//ROS_INFO_STREAM("I'm Expanding "<<current_node<<"...");
+			//ROS_INFO_STREAM("I'm Expanding "<<current_node);
 
 			std::stringstream node_rep;
-			node_rep<<PRINT_POINT_S("",current_node->getLocation());
+			nodeLocationToStream(node_rep, current_node->getLocation());
+			//ROS_INFO_STREAM("The Node Representation was:"<<node_rep.str());
 
 			//Check to see if we hit the goal
 			if(current_node->sameLocation(goal_node_dummy))
 			{
-				//ROS_INFO_STREAM("I Hit the "<<PRINT_POINT_S("Goal: ", goal_node_dummy.getLocation())<<" with "<<current_node);
+				//ROS_INFO_STREAM("I Hit the Goal with "<<current_node);
 				closed_set[node_rep.str()] = current_node;
 				goal_node_dummy = *current_node;
 				success         = true;
@@ -422,11 +436,11 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 				for(unsigned int i=0; i<neighbors.size(); i++)
 				{
 					//Check to see if the neighbor is free
-					if(!this->collision_checker_(neighbors.at(i), this->map_))
+					if(!this->collision_checker_(neighbors.at(i), *this->map_))
 					{
-						NodePtr_t node(new Node_t(neighbors.at(i), goal_point, current_node, costf, hursf));
+						NodePtr_t node(new Node_t(neighbors.at(i), goal, current_node, costf, hursf));
 						std::stringstream neighbor_rep;
-						neighbor_rep<<PRINT_POINT_S("",node->getLocation());
+						nodeLocationToStream(neighbor_rep, node->getLocation());
 
 						//Check to see if we've already expanded the neighbor node
 						if(closed_set.count(neighbor_rep.str())==0 && !this->openSetContains(node, open_set))
@@ -460,7 +474,7 @@ bool AStarCarrot::search(const Point& start_point, const Point& goal_point, ros:
 		//If we got a path, stuff the solution vector
 		if(success)
 		{
-			//ROS_INFO_STREAM("I Got A Solution, Generating Solution Path");
+			ROS_INFO_STREAM("I Got A Solution, Generating Solution Path");
 			this->buildSolutionPath(goal_node_dummy, result_path);
 		}
 	}

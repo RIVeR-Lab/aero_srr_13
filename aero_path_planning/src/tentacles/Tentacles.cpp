@@ -17,7 +17,7 @@
 #endif
 
 #ifndef MIN_TENTACLE_LENGTH
-#define MIN_TENTACLE_LENGTH 0.8
+#define MIN_TENTACLE_LENGTH 0.25
 #else
 #error MIN_TENTACLE_LENGTH is already defined!
 #endif

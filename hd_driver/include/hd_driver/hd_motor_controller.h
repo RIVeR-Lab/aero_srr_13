@@ -178,7 +178,6 @@ class HDMotorController{
   uint32_t get_trajectory_status();
 
 
- private:
   /**
    * @brief perform a set in either flash or RAM
    * @param memory_bank where to set the value (flash or RAM)
