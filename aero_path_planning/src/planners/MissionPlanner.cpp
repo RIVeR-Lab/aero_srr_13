@@ -21,7 +21,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				nh_(nh),
 				p_nh_(p_nh),
 				transformer_(nh),
-				dr_server_(nh)
+				dr_server_(p_nh)
 {
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
