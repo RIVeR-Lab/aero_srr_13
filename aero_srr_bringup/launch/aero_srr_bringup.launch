@@ -22,6 +22,8 @@
     <arg name="imu_topic"              value="$(arg imu_topic)" />
     <arg name="odom_topic"             value="$(arg odom_topic)" />
     <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
+    <arg name="pause_topic"             value="/aero/software_stop" />
+    <arg name="state_topic"             value="/aero/state" />
   </include> 
   
   
