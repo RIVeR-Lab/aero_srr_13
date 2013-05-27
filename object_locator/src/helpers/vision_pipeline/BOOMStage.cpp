@@ -45,6 +45,8 @@ void BOOMStage::loadParams() {
 	this->White[2] = 255;
 	this->got_left_ = false;
 	this->got_right_ = false;
+//	this->left_header_ = 0;
+//	this->left_encoding_ = enc::RGB8;
 
 //	std::string thresh_dist("thresh_dist");
 	thresh_dist_ = .5;
@@ -87,16 +89,18 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	}
 	left_image_ = img->image;
 	left_info_ = *info;
+	left_msg_ = *msg;
 	got_left_ = true;
 	computeDisparityCb();
 	Mat_t src = img->image;
 	Mat_t normImage,mask,finalMask;
+//	circleFind(*msg);
 	grassRemove(*msg, normImage);
 	maskCreate(*msg,mask);
 //	fenceCheckerStd(normImage);
 //	fillHoles(mask);
 	blobIdentify(normImage,mask, finalMask);
-	showAlpha(img->image,finalMask);
+	showAlpha(src,finalMask);
 	detectAnomalies(normImage,finalMask);
 
 }
@@ -133,6 +137,14 @@ void BOOMStage::showAlpha(Mat_t& src, Mat_t& fMask)
 	imshow("overlay",overlay);
 	waitKey(3);
 }
+inline bool isValidPoint(const cv::Vec3f& pt) {
+	// Check both for disparities explicitly marked as invalid (where OpenCV maps pt.z to MISSING_Z)
+	// and zero disparities (point mapped to infinity).
+	return pt[2] != image_geometry::StereoCameraModel::MISSING_Z
+			&& !std::isinf(pt[2]);
+}
+
+
 void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
 	cv_bridge::CvImagePtr img;
@@ -525,6 +537,134 @@ void BOOMStage::computeDisparity()
 		stereoBM.state->preFilterSize = 9;
 		stereoBM(img1_rect, img2_rect, disp, CV_32F);
 
+		cv::Mat_<cv::Vec3f> points_mat_;
+			this->stereo_model.projectDisparityImageTo3d(disp, points_mat_, true);
+			cv::Mat_<cv::Vec3f> mat = points_mat_;
+
+			sensor_msgs::PointCloud2Ptr points_msg = boost::make_shared<
+					sensor_msgs::PointCloud2>();
+			points_msg->header = left_msg_.header;
+			points_msg->height = mat.rows;
+			points_msg->width = mat.cols;
+			points_msg->fields.resize(4);
+			points_msg->fields[0].name = "x";
+			points_msg->fields[0].offset = 0;
+			points_msg->fields[0].count = 1;
+			points_msg->fields[0].datatype = sensor_msgs::PointField::FLOAT32;
+			points_msg->fields[1].name = "y";
+			points_msg->fields[1].offset = 4;
+			points_msg->fields[1].count = 1;
+			points_msg->fields[1].datatype = sensor_msgs::PointField::FLOAT32;
+			points_msg->fields[2].name = "z";
+			points_msg->fields[2].offset = 8;
+			points_msg->fields[2].count = 1;
+			points_msg->fields[2].datatype = sensor_msgs::PointField::FLOAT32;
+			points_msg->fields[3].name = "rgb";
+			points_msg->fields[3].offset = 12;
+			points_msg->fields[3].count = 1;
+			points_msg->fields[3].datatype = sensor_msgs::PointField::FLOAT32;
+
+			//points_msg->is_bigendian = false; ???
+			static const int STEP = 16;
+			points_msg->point_step = STEP;
+			points_msg->row_step = points_msg->point_step * points_msg->width;
+			points_msg->data.resize(points_msg->row_step * points_msg->height);
+			points_msg->is_dense = false; // there may be invalid points
+
+			float bad_point = std::numeric_limits<float>::quiet_NaN();
+			int offset = 0;
+			for (int v = 0; v < mat.rows; ++v) {
+				for (int u = 0; u < mat.cols; ++u, offset += STEP) {
+					if (isValidPoint(mat(v, u))) {
+						// x,y,z,rgba
+						memcpy(&points_msg->data[offset + 0], &mat(v, u)[0],
+								sizeof(float));
+						memcpy(&points_msg->data[offset + 4], &mat(v, u)[1],
+								sizeof(float));
+						memcpy(&points_msg->data[offset + 8], &mat(v, u)[2],
+								sizeof(float));
+					} else {
+						memcpy(&points_msg->data[offset + 0], &bad_point,
+								sizeof(float));
+						memcpy(&points_msg->data[offset + 4], &bad_point,
+								sizeof(float));
+						memcpy(&points_msg->data[offset + 8], &bad_point,
+								sizeof(float));
+					}
+				}
+			}
+			// Fill in color
+			namespace enc = sensor_msgs::image_encodings;
+			const std::string& encoding = left_msg_.encoding;
+			offset = 0;
+			if (encoding == enc::MONO8) {
+				const cv::Mat_<uint8_t> color(right_image_.rows, right_image_.cols,
+						(uint8_t*) &right_image_.data[0], right_image_.step);
+				for (int v = 0; v < mat.rows; ++v) {
+					for (int u = 0; u < mat.cols; ++u, offset += STEP) {
+						if (isValidPoint(mat(v, u))) {
+							uint8_t g = color(v, u);
+							int32_t rgb = (g << 16) | (g << 8) | g;
+							memcpy(&points_msg->data[offset + 12], &rgb,
+									sizeof(int32_t));
+						} else {
+							memcpy(&points_msg->data[offset + 12], &bad_point,
+									sizeof(float));
+						}
+					}
+				}
+			} else if (encoding == enc::RGB8) {
+				const cv::Mat_<cv::Vec3b> color(right_image_.rows, right_image_.cols,
+						(cv::Vec3b*) &right_image_.data[0], right_image_.step);
+				for (int v = 0; v < mat.rows; ++v) {
+					for (int u = 0; u < mat.cols; ++u, offset += STEP) {
+						if (isValidPoint(mat(v, u))) {
+							const cv::Vec3b& rgb = color(v, u);
+							int32_t rgb_packed = (rgb[0] << 16) | (rgb[1] << 8)
+									| rgb[2];
+							memcpy(&points_msg->data[offset + 12], &rgb_packed,
+									sizeof(int32_t));
+						} else {
+							memcpy(&points_msg->data[offset + 12], &bad_point,
+									sizeof(float));
+						}
+					}
+				}
+			} else if (encoding == enc::BGR8) {
+				const cv::Mat_<cv::Vec3b> color(right_image_.rows, right_image_.cols,
+						(cv::Vec3b*) &right_image_.data[0], right_image_.step);
+				for (int v = 0; v < mat.rows; ++v) {
+					for (int u = 0; u < mat.cols; ++u, offset += STEP) {
+						if (isValidPoint(mat(v, u))) {
+							const cv::Vec3b& bgr = color(v, u);
+							int32_t rgb_packed = (bgr[2] << 16) | (bgr[1] << 8)
+									| bgr[0];
+							memcpy(&points_msg->data[offset + 12], &rgb_packed,
+									sizeof(int32_t));
+						} else {
+							memcpy(&points_msg->data[offset + 12], &bad_point,
+									sizeof(float));
+						}
+					}
+				}
+			} else {
+				ROS_WARN_THROTTLE(30,
+						"Could not fill color channel of the point cloud, "
+								"unsupported encoding '%s'", encoding.c_str());
+			}
+
+			//*********Oct tree stuff *************//
+			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+			pcl::fromROSMsg(*points_msg,*cloud);
+			float resolution = 2.5f;
+			pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
+
+		    octree.setInputCloud (cloud);
+		    octree.addPointsFromInputCloud ();
+
+		    pcl::PointXYZ searchPoint;
+
+
 		geometry_msgs::PointStamped camera_point, world_point;
 		for (int i = 0; i < (int) detection_list_.size(); i++) {
 			Point2d obj_centroid(detection_list_.at(i)->first.first,
@@ -536,7 +676,38 @@ void BOOMStage::computeDisparity()
 				float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
 				this->stereo_model.projectDisparityTo3d(obj_centroid, disp_val,
 						obj_3d);
+
+
 				tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
+				searchPoint.x = detection.getX();
+						searchPoint.y = detection.getY();
+						searchPoint.z = detection.getZ();
+
+						int K = 10;
+							  std::vector<int> pointIdxVec;
+						  std::vector<int> pointIdxNKNSearch;
+						  std::vector<float> pointNKNSquaredDistance;
+
+						  std::cout << "K nearest neighbor search at (" << searchPoint.x
+						            << " " << searchPoint.y
+						            << " " << searchPoint.z
+						            << ") with K=" << K << std::endl;
+
+						  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
+						  {
+							  float sum =0.0;
+						    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+						    {
+						      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+						                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+						                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+						                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+						      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
+						    }
+						    kAvgVal_ = sum/pointIdxNKNSearch.size ();
+						    ROS_WARN_STREAM("Average value at Voxel = " << kAvgVal_);
+						  }
+						 detection.setZ(kAvgVal_);
 				tf::pointTFToMsg(detection, camera_point.point);
 				ros::Time tZero(0);
 				camera_point.header.frame_id = "/upper_stereo_optical_frame";
@@ -572,6 +743,7 @@ void BOOMStage::computeDisparity()
 		waitKey(3);
 
 }
+
 
 void BOOMStage::generateMsg() {
 
