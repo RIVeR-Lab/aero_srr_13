@@ -23,6 +23,7 @@
 #include <string.h>
 #include <aero_control/pid_control.h>
 #include <jaco_driver/joint_velocity.h>
+#include <aero_control/arm_state.h>
 
 #include <jaco_driver/joint_angles.h>
 #include <Eigen/Dense>
@@ -56,18 +57,35 @@ private:
 		double yaw;
 	}arm_position;
 
+	void SendArmStateMSG(void);
 		void CurrentPositionMSG(const geometry_msgs::PoseStampedConstPtr& current_pose);
 		void DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose);
 	void JointAnglesMSG(const jaco_driver::joint_anglesConstPtr& joint_angles);
 	void UpdateCurrentPose(void);
 	void UpdatePID(void);
-
 	void UpdateError(void);
+	inline double MaxLinearVel(void) {
+		return 0.037;
+	}
+
+	inline double MaxAngularVel(void) {
+		return 0.15;
+	}
+
+	inline double LinearErrorRange(void) {
+		return 0.01;
+	}
+	inline double RotationalErrorRange(void) {
+			return 0.01;
+		}
+
 	ros::NodeHandle nh_;
 	ros::Subscriber desired_position_sub;
 	ros::Subscriber current_position_sub;
-	ros::Publisher joint_velocity_pub;
 	ros::Subscriber joint_angles_sub;
+
+	ros::Publisher joint_velocity_pub;
+	ros::Publisher arm_state_pub;
 
 	tf::TransformListener tf_listener;
 
@@ -87,8 +105,15 @@ private:
 	ros::Time last_position_time;
 
 	bool running;
+	bool goal_reached;
+	ros::Time goal_time;
+
 	float linear_gain;
 	float rotational_gain;
+
+
+
+
 };
 
 }

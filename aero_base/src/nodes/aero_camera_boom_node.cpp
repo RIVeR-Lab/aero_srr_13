@@ -17,7 +17,7 @@
 #include "hd_driver/HDMotorInfo.h"
 #include "hd_driver/SetPositionAction.h"
 //************ LOCAL DEPENDANCIES ****************//
-#include "aero_base/SetPose.h"
+#include "aero_base/SetBoomPosition.h"
 //***********    NAMESPACES     ****************//
 
 
@@ -29,10 +29,11 @@ static ros::ServiceServer pose_control_srv;
 double ticks_per_radian = 1.0;
 std::string target_frame("/camera_boom_rot");
 
-bool poseControlCallback(aero_base::SetPose::Request  &req,
-		     aero_base::SetPose::Response &res){
+bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
+		     aero_base::SetBoomPosition::Response &res){
   hd_driver::SetPositionGoal hd_req;
-  hd_req.position = (int32_t)(tf::getYaw(req.pose.orientation) * ticks_per_radian);
+  hd_req.position = (int32_t)(req.angle * ticks_per_radian);
+  hd_req.max_velocity = (float)(req.max_velocity * ticks_per_radian);
   hd_control_srv->sendGoalAndWait(hd_req);
   return true;
 }
