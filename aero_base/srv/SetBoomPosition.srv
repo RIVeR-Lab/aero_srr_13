@@ -1,0 +1,4 @@
+# Sets the position of the boom
+
+std_msgs/Float64 angle
+---
