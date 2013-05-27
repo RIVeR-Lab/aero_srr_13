@@ -32,7 +32,7 @@ std::string target_frame("/camera_boom_rot");
 bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
 		     aero_base::SetBoomPosition::Response &res){
   hd_driver::SetPositionGoal hd_req;
-  hd_req.position = (int32_t)(req.angle.data * ticks_per_radian);
+  hd_req.position = (int32_t)(req.angle * ticks_per_radian);
   hd_control_srv->sendGoalAndWait(hd_req);
   return true;
 }
