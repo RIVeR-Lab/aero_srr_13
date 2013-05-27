@@ -33,6 +33,7 @@ bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
 		     aero_base::SetBoomPosition::Response &res){
   hd_driver::SetPositionGoal hd_req;
   hd_req.position = (int32_t)(req.angle * ticks_per_radian);
+  hd_req.max_velocity = (float)(req.max_velocity * ticks_per_radian);
   hd_control_srv->sendGoalAndWait(hd_req);
   return true;
 }

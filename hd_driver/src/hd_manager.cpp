@@ -39,7 +39,7 @@ public:
 			{
 				boost::lock_guard<boost::mutex> lock(controller_mutex);
 				if(!is_paused)
-					controller->set_position(goal->position);
+				  controller->set_position(goal->position, goal->max_velocity);
 			}
 			while(1){
 				{

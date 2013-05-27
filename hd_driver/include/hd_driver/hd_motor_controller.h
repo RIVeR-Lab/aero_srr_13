@@ -172,7 +172,7 @@ class HDMotorController{
    * @param state the new state of the amplifier
    */
   void set_state(amplifier_state_t state);
-  void set_position(int32_t position);
+  void set_position(int32_t position, float max_velocity);
   int get_position();
   uint32_t get_status();
   uint32_t get_trajectory_status();
