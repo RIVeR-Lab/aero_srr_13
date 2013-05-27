@@ -31,7 +31,8 @@
 class BeaconDetector {
 	//variables
 	std::string 	cam_topic_;								//the camera topic name
-	double 			tag_size_;								//need it so you can calculate the tf
+	double 			tag_size_big_;							//need it so you can calculate the tf
+	double 			tag_size_small_;						//need it so you can calculate the tf
 	std::string 	robot_topic_;							//the topic that will send the robot state message
 	cv::Mat			colorImg_;								//the Mat the defines the color image
 	std::string 	parent_frame_;							//the name of the parent frame in the tf tree
@@ -41,6 +42,7 @@ class BeaconDetector {
 	bool 			histeq_;								//if set to true, histogram equalization on the images is done
 	bool			show_;									//if set to true, the results of the detected tag is displayed on screen
 	bool			active_;								//determine if the beacon detector must be active use he topic
+	bool 			test_;									//used to set test mode
 
 	//ros handles
 	tf::TransformBroadcaster 			br_;							//the TF broadcaseter for ROS
@@ -56,8 +58,9 @@ class BeaconDetector {
 	boost::mutex						imglock_;						//mutext to sync the image callback with the detector thread
 	boost::thread						detector_thread_;				//boost detector thread handle
 
-	std::vector<AprilTags::TagDetection> 	detections_;					//the extracted tags
-	vector<pair<int,string> > 				constellation_;
+	std::vector<AprilTags::TagDetection> 	detections_;				//the extracted tags
+	vector<pair<int,string> > 				constellation_;				//defines the correspondace between the tag and the tf
+	vector<bool>							tag_type_;					//if big it is 1 if small 0
 
 	void imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info);
 	void systemCb(const aero_srr_msgs::AeroStateConstPtr& status);
@@ -79,7 +82,7 @@ public:
 	 * this function is used to check if the detected tag is part of the home constellation
 	 * and return the corresponding tag id
 	 */
-	string checkInConst(AprilTags::TagDetection tag);
+	string checkInConst(AprilTags::TagDetection tag,bool &tag_type);
 	/*
 	 * this function histogram equalizes the color image
 	 */

@@ -18,7 +18,8 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	getRosParam();										//initialize all the ROS Parameters
 	active_=false;										//keep the beacon detector inactive by default]
 
-	ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
+	if(!test_)											//in test mode do not subscribe to the robot status
+	  ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
 
 	/* Start the camera video from the camera topic */
 	if(!cam_topic_.empty())
@@ -72,8 +73,11 @@ void BeaconDetector::initConfiguration(string fname)
 	int no=fs["tag_no"];			//get the no of tags from the opencv xml file
 	string name="tag";
 	string id="tag_id";
+	string type="tag_type";
 
-	pair<int,string > temp;
+
+	pair<int,string > temp;				//the temp pair to load
+	int temp_type;						//the temp type to load
 	for(int i=0;i<no;i++)
 	{
 		char tname[20];
@@ -82,6 +86,9 @@ void BeaconDetector::initConfiguration(string fname)
 		sprintf(tname,"%s%d",id.c_str(),i);
 		temp.first=fs[tname];
 		constellation_.push_back(temp);
+		sprintf(tname,"%s%d",type.c_str(),i);
+		temp_type=fs[tname];
+		tag_type_.push_back((temp_type>0)?true:false);
 	}
 }
 void BeaconDetector::getRosParam()
@@ -99,10 +106,15 @@ void BeaconDetector::getRosParam()
 	{
 		ROS_ERROR("cam_topic not set in launch file\n");
 	}
-	if(!pnh.getParam("tag_size", tag_size_))
+	if(!pnh.getParam("tag_size_big", tag_size_big_))
 	{
-		ROS_ERROR("tag_size not set, will use 0.166");
-		tag_size_ = 0.166;								//this is the default value when you print on A4
+		ROS_ERROR("Big tag size not set, will use 0.166");
+		tag_size_big_ = 0.166;								//this is the default value when you print on A4
+	}
+	if(!pnh.getParam("tag_size_small", tag_size_small_))
+	{
+		ROS_ERROR("small tag size not set, will use 0.166");
+		tag_size_small_ = 0.166;								//this is the default value when you print on A4
 	}
 	string cfile;
 	if(!pnh.getParam("configuration",cfile ))			//the prefix for the tag frame
@@ -125,6 +137,11 @@ void BeaconDetector::getRosParam()
 	{
 		ROS_WARN("By default the result is not displayed as image n\n");
 		show_=false;
+	}
+	if(!pnh.getParam("test_mode", test_))						//provision for test mode
+	{
+		ROS_WARN("By default the test mode is not on and the node expects robot state messages\n");
+		test_=false;
 	}
 }
 void BeaconDetector::systemCb(const aero_srr_msgs::AeroStateConstPtr& status)
@@ -154,13 +171,16 @@ void BeaconDetector::histEq(cv::Mat &frame)
 
 	frame=result;
 }
-string BeaconDetector::checkInConst(AprilTags::TagDetection tag)
+string BeaconDetector::checkInConst(AprilTags::TagDetection tag, bool &tag_type)
 {
 
 	for(int i=0;i<constellation_.size();i++)	//loop through the tags in the consellation
 	{
 		if(tag.id==constellation_[i].first)		//if the id match then declare true
+		{
+			tag_type=tag_type_[i];
 			return constellation_[i].second;						//return the tag id so you can do search and display
+		}
 	}
 	return string();								//return empty string if its not in the constellation
 }
@@ -175,6 +195,7 @@ void BeaconDetector::detectBeacons()
 	while(ros::ok())
 	{
 		//check if the beacon detect state is on
+		if(!test_)		//if test mode dont check for the robot status messages
 		if(!active_)
 			continue;
 
@@ -213,6 +234,8 @@ void BeaconDetector::detectBeacons()
 
 			ROS_INFO("%d tag detected. \n",detections_.size());									//DEBUG information
 			string tag;										//the tag name if it is valid
+			bool tag_type;									//if small use the small size for cal else use big
+
 			geometry_msgs::PoseStamped res;					//to find the average pose that the robot needs to move in
 			res.pose.orientation.w=1;						//initialize
 			res.pose.orientation.x=0;
@@ -223,19 +246,29 @@ void BeaconDetector::detectBeacons()
 			res.pose.position.y=0;
 			res.pose.position.z=0;
 
-			int ctr=0;										//the neumber of valid tags detected
+			int sctr=0;										//the neumber of valid tags detected
+			int bctr=0;										//the number of big tags detected
 
 			for (int i=0; i<detections_.size(); i++)
 			{
-				tag=checkInConst(detections_[i]);			//check if it is the constellation if so whats is its name in home tf tree?
+				tag=checkInConst(detections_[i],tag_type);			//check if it is the constellation if so whats is its name in home tf tree?
 				if(tag.empty())
 					continue;
 
 				ROS_INFO( "  Id: %d --- Hamming distance: %f \n",detections_[i].id,  detections_[i].hammingDistance );
 
 				// recovering the relative pose requires camera calibration;
-				Eigen::Matrix4d T = detections_[i].getRelativeTransform(tag_size_, fx, fy, px, py);
-
+				Eigen::Matrix4d T;
+				if(tag_type)
+				{
+					T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
+					bctr++;
+				}
+				else
+				{
+					T = detections_[i].getRelativeTransform(tag_size_small_, fx, fy, px, py);
+					sctr++;
+				}
 				// the orientation of the tag
 				Eigen::Matrix3d rot = T.block(0,0,3,3);
 				Eigen::Quaternion<double> final = Eigen::Quaternion<double>(rot);	//convert it to quaternion
@@ -265,13 +298,14 @@ void BeaconDetector::detectBeacons()
 				res.pose.orientation.y+=temp.orientation.y;
 				res.pose.orientation.z+=temp.orientation.z;
 
-				//increase counter;
-				ctr++;
 
 			}
 			//publish the pose in the /becon_drive topic
-			if(ctr>0)
+			if(sctr+bctr>0)
 			{
+				int ctr=sctr+bctr;
+				ROS_INFO("%d tags of the beacon detected. \n",ctr);
+				ROS_INFO("%d tags are big",bctr);
 				//find avg
 				res.pose.position.x/=ctr;
 				res.pose.position.y/=ctr;
@@ -324,6 +358,7 @@ geometry_msgs::Pose BeaconDetector::getRobotPose(string tag)
 	geometry_msgs::Pose tran;
 	//calculate the transform between the tag and the robot_base
 	tf::StampedTransform tag2base;
+	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag, ros::Time(0), ros::Duration(10.0) );//might not have yet registered so wait till it becomes available
 	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag,ros::Time(0),tag2base);
 
 	//calculate the transform between the tag and the world
@@ -352,7 +387,8 @@ void BeaconDetector::showResult()
 
 	for (int i=0; i<detections_.size(); i++)
 	{
-		string tag=checkInConst(detections_[i]);
+		bool dummy;
+		string tag=checkInConst(detections_[i],dummy);
 		if(tag.empty())
 			continue;
 		// use corner points detected by line intersection
@@ -367,7 +403,9 @@ void BeaconDetector::showResult()
 		cv::line(image, cv::Point2f(p3.first, p3.second), cv::Point2f(p4.first, p4.second), cv::Scalar(0,0,255,0) );
 		cv::line(image, cv::Point2f(p4.first, p4.second), cv::Point2f(p1.first, p1.second), cv::Scalar(255,0,255,0) );
 
-		// mark center
+		//just a check for determining max size of tag
+		cout<<"image_size: "<<image.cols<<"x"<<image.rows<<endl;
+		cout<<"size: "<<norm(cv::Point(p2.first-p1.first, p2.second-p1.second))<<endl;
 		cv::circle(image, cv::Point2f(detections_[i].cxy.first, detections_[i].cxy.second), 8, cv::Scalar(0,0,255,0), 2);
 
 		// print ID
