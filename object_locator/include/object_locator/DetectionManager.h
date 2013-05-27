@@ -57,7 +57,7 @@ public:
 	 * @brief  Computes the average confidence of detections in the manager
 	 * @return The average confidence of detections in the manager
 	 */
-	double averageConfidance() const;
+	double averageConfidence() const;
 
 
 	/**
@@ -85,7 +85,7 @@ public:
 	 * @return True if there was a point that was past the confidence threshold, else false
 	 */
 	bool getDetection(tf::Point& detection, object_type &type, double& confidence) const;
-
+	bool getAllAboveConf(std::vector<tf::Point>& detections) const;
 	/**
 	 * @author Adam Panzica
 	 * @brief  Clears all detections in the manager

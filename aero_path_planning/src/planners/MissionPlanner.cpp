@@ -28,10 +28,10 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	this->registerTopics();
 	this->registerTimers();
 	ROS_INFO_STREAM("Mission Planner Running!");
-	geometry_msgs::Pose mission_goal_one;
-	mission_goal_one.position.x = 10.0;
-	mission_goal_one.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal_one);
+	//geometry_msgs::Pose mission_goal_one;
+	//mission_goal_one.position.x = 10.0;
+	//mission_goal_one.orientation.w = 1;
+	//this->mission_goals_.push_back(mission_goal_one);
 }
 
 void MissionPlanner::loadParam()
