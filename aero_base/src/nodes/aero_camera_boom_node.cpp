@@ -12,7 +12,6 @@
 #include <sensor_msgs/JointState.h>
 #include <nav_msgs/Odometry.h>
 #include <tf/tf.h>
-#include <tf/transform_broadcaster.h>
 #include <actionlib/client/simple_action_client.h>
 #include "hd_driver/HDMotorInfo.h"
 #include "hd_driver/SetPositionAction.h"
@@ -26,13 +25,14 @@ static ros::Publisher joint_pub;
 static boost::shared_ptr<actionlib::SimpleActionClient<hd_driver::SetPositionAction> > hd_control_srv;
 static ros::ServiceServer pose_control_srv;
 
-double ticks_per_radian = 1.0;
+double ticks_per_radian = 4172151.34019;
+int32_t zero_tick_position = 0;
 std::string target_frame("/camera_boom_rot");
 
 bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
 		     aero_base::SetBoomPosition::Response &res){
   hd_driver::SetPositionGoal hd_req;
-  hd_req.position = (int32_t)(req.angle * ticks_per_radian);
+  hd_req.position = (int32_t)(req.angle * ticks_per_radian + zero_tick_position);
   hd_req.max_velocity = (float)(req.max_velocity * ticks_per_radian);
   hd_control_srv->sendGoalAndWait(hd_req);
   return true;
@@ -40,22 +40,17 @@ bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
 
 
 void hdFeedbackCallback(const hd_driver::HDMotorInfo::ConstPtr& msg) {
-  static tf::TransformBroadcaster tf_broadcaster;
+  double angle = (msg->position-zero_tick_position)/ticks_per_radian;
   geometry_msgs::Pose pose_msg;
-  pose_msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, msg->position/ticks_per_radian);
+  pose_msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, angle);
   pose_pub.publish(pose_msg);
   
-  tf::Transform transform;
-  transform.setOrigin( tf::Vector3(0, 0, 0) );
-  transform.setRotation( tf::createQuaternionFromRPY(0, 0, msg->position/ticks_per_radian) );
-  tf_broadcaster.sendTransform(tf::StampedTransform(transform, msg->header.stamp, msg->header.frame_id, target_frame));
-
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = msg->header.stamp;
   joint_state.name.resize(1);
   joint_state.position.resize(1);
   joint_state.name[0] ="boom_joint";
-  joint_state.position[0] = msg->position/ticks_per_radian;
+  joint_state.position[0] = angle;
   joint_pub.publish(joint_state);
 }
 
@@ -66,7 +61,10 @@ int main(int argc, char **argv) {
   if(!ros::param::get("~ticks_per_radian", ticks_per_radian))
     ROS_WARN_STREAM("Parameter <~ticks_per_radian> not set. Using default value '"<<ticks_per_radian<<"'");
 
-  if(!ros::param::get("~target_frame", target_frame))
+  if(!ros::param::get("~zero_tick_position", zero_tick_position))
+    ROS_WARN_STREAM("Parameter <~zero_tick_position> not set. Using default value '"<<zero_tick_position<<"'");
+ 
+ if(!ros::param::get("~target_frame", target_frame))
     ROS_WARN_STREAM("Parameter <~target_frame> not set. Using default value '"<<target_frame<<"'");
 
 	    
