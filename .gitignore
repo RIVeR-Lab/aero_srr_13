@@ -42,7 +42,6 @@ CMakeCache.txt
 #Build artifacts
 *.cfgc
 
-aero_base/launch
 aero_base/src/aero_base
 
 aero_srr_msgs/src/aero_srr_msgs

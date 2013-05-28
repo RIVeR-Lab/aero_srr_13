@@ -12,35 +12,6 @@
   <arg name="camera_boom_control_service" default="/camera_boom_control" />
 
 
-  <!-- Load Parameters onto the server -->
-  <group ns="@R_NS@">
-    <group ns="@T_NS@">
-      <group ns="@T_IMU@">
-	<param name="frame" value="@T_IMU@"/>
-      </group>
-      
-      <group ns="@T_ARM@">
-	<param name="frame" value="@T_ARM@"/>
-      </group>
-      
-      <group ns="@T_LFC@">
-	<param name="frame" value="@T_LFC@"/>
-      </group>
-      
-      <group ns="@T_RTC@">
-	<param name="frame" value="@T_RTC@"/>
-      </group>
-      
-      <group ns="@T_BOM@">
-	<param name="frame" value="@T_BOM@"/>
-      </group>
-      
-      <group ns="@T_LDR@">
-	<param name="frame" value="@T_LDR@"/>
-      </group>
-    </group>
-  </group>
-  
   <include file="$(find aero_description)/launch/aero.launch"/>
 
   <include file="$(find aero_base)/launch/aero_monitoring.launch"/>
