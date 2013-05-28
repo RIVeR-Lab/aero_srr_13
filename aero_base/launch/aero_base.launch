@@ -12,7 +12,9 @@
   <arg name="camera_boom_control_service" default="/camera_boom_control" />
 
 
-  <include file="$(find aero_description)/launch/aero.launch"/>
+  <include file="$(find aero_description)/launch/aero.launch">
+    <arg name="launch_joint_state_publisher" value="0" />
+  </include>
 
   <include file="$(find aero_base)/launch/aero_monitoring.launch"/>
 

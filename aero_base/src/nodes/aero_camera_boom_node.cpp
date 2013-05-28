@@ -28,19 +28,35 @@ static ros::ServiceServer pose_control_srv;
 double ticks_per_radian = 4172151.34019;
 int32_t zero_tick_position = 0;
 std::string target_frame("/camera_boom_rot");
+double min_angle = -M_PI-0.1;
+double max_angle = M_PI+0.1;
 
 bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
 		     aero_base::SetBoomPosition::Response &res){
+  if(req.max_velocity < 0.001){
+    ROS_ERROR("Got request to go to angle with a max velocity of basically 0 (%f)", req.max_velocity);
+    return false;
+  }
+  if(req.angle<min_angle){
+    ROS_WARN("Requested angle (%f) was less than min angle (%f). Limiting to min angle", req.angle, min_angle);
+    req.angle = min_angle;
+  }
+  if(req.angle>max_angle){
+    ROS_WARN("Requested angle (%f) was greater than max angle (%f). Limiting to max angle", req.angle, max_angle);
+    req.angle = max_angle;
+  }
+  ROS_INFO("Boom going to angle %f at max velocity %f", req.angle, req.max_velocity);
   hd_driver::SetPositionGoal hd_req;
-  hd_req.position = (int32_t)(req.angle * ticks_per_radian + zero_tick_position);
+  hd_req.position = (int32_t)(-req.angle * ticks_per_radian + zero_tick_position);
   hd_req.max_velocity = (float)(req.max_velocity * ticks_per_radian);
   hd_control_srv->sendGoalAndWait(hd_req);
+  ROS_INFO("Boom reached goal %f", req.angle);
   return true;
 }
 
 
 void hdFeedbackCallback(const hd_driver::HDMotorInfo::ConstPtr& msg) {
-  double angle = (msg->position-zero_tick_position)/ticks_per_radian;
+  double angle = -(msg->position-zero_tick_position)/ticks_per_radian;
   geometry_msgs::Pose pose_msg;
   pose_msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, angle);
   pose_pub.publish(pose_msg);
@@ -95,5 +111,6 @@ int main(int argc, char **argv) {
 
   hd_control_srv->waitForServer();
 
-  ros::spin();
+  ros::MultiThreadedSpinner spinner(2);
+  spinner.spin();
 }
