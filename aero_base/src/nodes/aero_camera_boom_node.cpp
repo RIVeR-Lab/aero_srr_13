@@ -47,7 +47,7 @@ bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
   }
   ROS_INFO("Boom going to angle %f at max velocity %f", req.angle, req.max_velocity);
   hd_driver::SetPositionGoal hd_req;
-  hd_req.position = (int32_t)(req.angle * ticks_per_radian + zero_tick_position);
+  hd_req.position = (int32_t)(-req.angle * ticks_per_radian + zero_tick_position);
   hd_req.max_velocity = (float)(req.max_velocity * ticks_per_radian);
   hd_control_srv->sendGoalAndWait(hd_req);
   ROS_INFO("Boom reached goal %f", req.angle);
@@ -56,7 +56,7 @@ bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
 
 
 void hdFeedbackCallback(const hd_driver::HDMotorInfo::ConstPtr& msg) {
-  double angle = (msg->position-zero_tick_position)/ticks_per_radian;
+  double angle = -(msg->position-zero_tick_position)/ticks_per_radian;
   geometry_msgs::Pose pose_msg;
   pose_msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, angle);
   pose_pub.publish(pose_msg);
