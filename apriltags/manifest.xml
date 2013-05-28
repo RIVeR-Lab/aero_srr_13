@@ -1,0 +1,22 @@
+<package>
+  <description brief="vision_comm">
+
+     vision_comm
+
+  </description>
+  <author>bpwiselybabu</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/vision_comm</url>
+  
+  <depend package="roscpp"/>
+  <depend package="opencv2"/>
+  <rosdep name="eigen" />
+  
+ <export>
+    <cpp cflags="`pkg-config --cflags eigen3` -I${prefix}/include `rosboost-cfg --cflags`" 
+         lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lapriltag"/>
+  </export>
+</package>
+
+

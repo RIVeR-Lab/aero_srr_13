@@ -26,6 +26,7 @@ rosbuild_add_library(bd src/BeaconDetector.cpp )
 rosbuild_add_boost_directories()
 #rosbuild_link_boost(${beacon_detect} thread)
 rosbuild_add_executable(beacondetect src/beaconNode.cpp)
+rosbuild_add_executable(genconfig src/genConfiguration.cpp)
 target_link_libraries(beacondetect  bd)
 
 
