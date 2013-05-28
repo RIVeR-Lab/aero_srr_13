@@ -111,5 +111,6 @@ int main(int argc, char **argv) {
 
   hd_control_srv->waitForServer();
 
-  ros::spin();
+  ros::MultiThreadedSpinner spinner(2);
+  spinner.spin();
 }
