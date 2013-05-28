@@ -56,6 +56,9 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 			aero_state_transition);
 	this->boom_control_srv_client = nh.serviceClient<aero_base::SetBoomPosition>(boom_control);
 	this->PlanBoomPath();
+	
+	ros::Rate home_rate(1);
+	
 	while (ros::ok())
 	{
 		ROS_INFO("Entered While Loop!");
@@ -79,6 +82,7 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 			ROS_INFO("Home!");
 
 			GoHome();
+			home_rate.sleep();
 		}
 		ROS_INFO("Spinning!");
 
