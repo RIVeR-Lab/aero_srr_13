@@ -1,5 +1,5 @@
 <launch>
-<node name="aero_boom_controller" pkg="aero_control" type="boom_controlller" output="screen">
+<node name="aero_boom_controller" pkg="aero_control" type="boom_controller" output="screen">
 	<param name="boom_control" value="/camera_boom_control" />
 	<param name="aero_state_transition" value="/aero/supervisor/control_mode" />
 	<param name="aero_state" value="/aero/supervisor/state" />

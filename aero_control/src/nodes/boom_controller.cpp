@@ -83,6 +83,7 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 		ROS_INFO("Spinning!");
 
 		ros::spinOnce();
+		ros::Duration(2.0).sleep();
 
 	}
 
