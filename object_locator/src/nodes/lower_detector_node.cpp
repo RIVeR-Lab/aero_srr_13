@@ -565,7 +565,7 @@ void ImageConverter::computeDisparity() {
 					ros::Duration(1.0));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
-			tf::pointMsgToTF(camera_point.point, detection);
+			tf::pointMsgToTF(world_point.point, detection);
 			sherlock.addDetection(detection, detection_list_.at(i)->second);
 //			cout << "Added detection to manager" <<endl;
 		}
@@ -631,9 +631,9 @@ void ImageConverter::computeDisparity() {
 
 		aero_srr_msgs::ObjectLocationMsg msg;
 
-		msg.header.frame_id = camera_point.header.frame_id;
+		msg.header.frame_id = world_point.header.frame_id;
 		msg.header.stamp = ros::Time::now();
-		msg.pose.header.frame_id = camera_point.header.frame_id;
+		msg.pose.header.frame_id = world_point.header.frame_id;
 		msg.pose.header.stamp = ros::Time::now();
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
@@ -813,7 +813,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 1, 0,
 			cv::Size(5, 5), cv::Size(46,46)); //
 	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,8, 0,
-			cv::Size(5, 6), cv::Size(52, 59)); // works for
+			cv::Size(10, 11), cv::Size(52, 59)); // works for
 
 	/*
 	 * WHA - White hook object inside detection loop BLUE
@@ -895,15 +895,15 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
 				SUN_faces[j].y + SUN_faces[j].height / 2);
 		if (center.y > HORIZON) {
-		cv::ellipse(frame, center,
-				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
-				360, cv::Scalar(0, 0, 255), 2, 8, 0);
-		cv::rectangle(frame,
-				Point(center.x - SUN_faces[j].width / 2,
-						center.y - SUN_faces[j].height / 2),
-				Point(center.x + SUN_faces[j].width / 2,
-						center.y + SUN_faces[j].height / 2),
-				cv::Scalar(0, 0, 255));
+//		cv::ellipse(frame, center,
+//				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
+//				360, cv::Scalar(0, 0, 255), 2, 8, 0);
+//		cv::rectangle(frame,
+//				Point(center.x - SUN_faces[j].width / 2,
+//						center.y - SUN_faces[j].height / 2),
+//				Point(center.x + SUN_faces[j].width / 2,
+//						center.y + SUN_faces[j].height / 2),
+//				cv::Scalar(0, 0, 255));
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
 //		DetectionPtr_t newDetection(new Detection_t());
