@@ -9,7 +9,7 @@
 
   //Camera Boom
   <arg name="camera_boom_pose_topic" default="/camera_boom_pose" />
-  <arg name="camera_boom_control_service" default="/camer_boom_control" />
+  <arg name="camera_boom_control_service" default="/camera_boom_control" />
 
 
   <!-- Load Parameters onto the server -->
