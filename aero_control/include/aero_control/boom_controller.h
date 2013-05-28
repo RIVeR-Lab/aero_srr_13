@@ -67,12 +67,12 @@ namespace aero_control
 			}
 
 			/* Set path here */
-			inline void PlanHorizontalPath(void)
+			inline void PlanBoomPath(void)
 			{
 				boom_path_steps = 0;
 
-				SetBoomPathStep(M_PI,0.1,0.5);
-				SetBoomPathStep(-M_PI,0.1,0.5);
+				SetBoomPathStep(M_PI_2,0.1,0.5);
+				SetBoomPathStep(-M_PI_2,0.1,0.5);
 
 			}
 			uint8_t boom_path_step_num;

@@ -55,7 +55,7 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	this->aero_state_transition_srv_client = nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(
 			AeroStateTransition);
 	this->boom_control_srv_client = nh.serviceClient<aero_base::SetBoomPosition>(BoomControl);
-
+	this->PlanBoomPath();
 	while (ros::ok())
 	{
 
