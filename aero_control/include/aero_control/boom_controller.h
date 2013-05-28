@@ -50,7 +50,6 @@ namespace aero_control
 
 				if (this->boom_path_steps < MAX_BOOM_PATH_STEPS)
 				{
-					/* Finger motion */
 					this->boom_path[boom_path_steps].angle = angle;
 					this->boom_path[boom_path_steps].velocity = velocity;
 					this->boom_path[boom_path_steps].delay = delay;

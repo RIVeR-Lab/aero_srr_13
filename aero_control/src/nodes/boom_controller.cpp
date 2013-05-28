@@ -46,7 +46,6 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 
 	this->active_state = false;
 	this->pause_state = false;
-	this->boom_path_step_num = 0;
 
 	/* Messages */
 	this->aero_state_sub = nh.subscribe(aero_state, 1, &BoomController::AeroStateMSG, this);
@@ -56,7 +55,8 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 			aero_state_transition);
 	this->boom_control_srv_client = nh.serviceClient<aero_base::SetBoomPosition>(boom_control);
 	this->PlanBoomPath();
-	
+	this->boom_path_step_num = 0;
+
 	ros::Rate home_rate(10);
 	
 	while (ros::ok())
@@ -70,9 +70,9 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 		{
 			ROS_INFO("Active!");
 
-			GoToPosition(this->boom_path[boom_path_steps].angle,this->boom_path[boom_path_steps].velocity ,this->boom_path[boom_path_steps].delay);
+			GoToPosition(this->boom_path[boom_path_step_num].angle,this->boom_path[boom_path_step_num].velocity ,this->boom_path[boom_path_step_num].delay);
 			boom_path_step_num++;
-			if( boom_path_step_num >=boom_path_steps)
+			if( boom_path_step_num >= boom_path_steps)
 			{
 				boom_path_step_num = 0;
 			}
