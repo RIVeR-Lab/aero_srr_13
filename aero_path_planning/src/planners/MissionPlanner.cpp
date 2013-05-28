@@ -167,6 +167,14 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 					this->requestCollect();
 				}
 			}
+			else
+			{
+				//Means we've reached the end of the search pattern, start going to objects of interest
+				if(this->searching_)
+				{
+					this->requestNavObj();
+				}
+			}
 		}
 	}
 }
@@ -278,18 +286,34 @@ void MissionPlanner::generateDetectionGoalList()
 
 void MissionPlanner::requestCollect()
 {
+	ROS_INFO_STREAM("Mission Planner Requesting Transition to COLLECT...");
+	aero_srr_msgs::AeroState request;
+	request.state = aero_srr_msgs::AeroState::COLLECT;
+	this->requestStateTransition(request);
+}
+
+void MissionPlanner::requestNavObj()
+{
+	ROS_INFO_STREAM("Mission Planner Requesting Transition to NAVOBJ...");
+	aero_srr_msgs::AeroState request;
+	request.state = aero_srr_msgs::AeroState::NAVOBJ;
+	this->requestStateTransition(request);
+}
+
+void MissionPlanner::requestStateTransition(aero_srr_msgs::AeroState& requested_state)
+{
 	aero_srr_msgs::StateTransitionRequestRequest request;
 	aero_srr_msgs::StateTransitionRequestResponse response;
-	request.requested_state.state = aero_srr_msgs::AeroState::COLLECT;
+	request.requested_state = requested_state;
 	if(this->state_request_client_.call(request, response))
 	{
 		if(response.success)
 		{
-			ROS_INFO_STREAM("Mission Planner Succesfully Moved to Collect!");
+			ROS_INFO_STREAM("Mission Planner Succesfully Moved to "<<requested_state.state<<" !");
 		}
 		else
 		{
-			ROS_ERROR_STREAM("Mission Planner could not transition to COLLECT: "<<response.error_message);
+			ROS_ERROR_STREAM("Mission Planner could not transition to "<<requested_state.state<<": "<<response.error_message);
 		}
 	}
 	else

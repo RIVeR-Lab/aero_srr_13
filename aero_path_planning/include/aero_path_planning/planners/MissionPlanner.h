@@ -120,6 +120,10 @@ private:
 
 	void requestCollect();
 
+	void requestNavObj();
+
+	void requestStateTransition(aero_srr_msgs::AeroState& requested_state);
+
 	void pause(bool enable);
 
 	std::string state_topic_;           ///Topic name for receiving robot state from the supervisor
