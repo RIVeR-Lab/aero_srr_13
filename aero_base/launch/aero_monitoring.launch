@@ -3,7 +3,7 @@
 
   <!-- Launch BMS monitoring -->
   <node pkg="manzanita_mk3_driver" type="mk3_driver" name="bms_node">
-    <param name="port" value="/dev/ttyUSB1" />
+    <param name="port" value="/dev/BMS" />
 
     <param name="update_rate" value="0.25" />
 

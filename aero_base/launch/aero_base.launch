@@ -21,7 +21,7 @@
   <!-- Launch IMU Driver -->
   <node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
     <param name="device_id" value="kvh-1750" />
-    <param name="device_address" value="/dev/ttyUSB0" />
+    <param name="device_address" value="/dev/IMU" />
     <param name="imu_topic" value="$(arg imu_topic)" />
   </node>
 
@@ -41,7 +41,7 @@
 
 
   <!-- Launch rosserial and controller node for arduino -->
-  <node pkg="rosserial_python" type="serial_node.py" name="aero_arduino" args="/dev/ARDUINO"/>
+  <node pkg="rosserial_python" type="serial_node.py" name="aero_arduino" args="/dev/ARDUINO" respawn="true"/>
   <node pkg="aero_base" type="aero_arduino_controller" name="aero_arduino_controller">
     <param name="imu_topic" value="$(arg imu_topic)" />
   </node>
