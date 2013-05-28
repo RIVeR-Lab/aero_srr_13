@@ -80,7 +80,7 @@ namespace object_locator
 		int HORIZON_BTM_;
 		cv::Vec3b ZeroV,White;
 
-		ros::Publisher pose_array_pub_;
+		ros::Publisher pose_array_pub_, disp_img_pub_,point_cloud_pub_;
 
 		typedef std::pair<int, int> PixPoint_t;
 		typedef std::pair<PixPoint_t, object_type> Detection_t;
@@ -95,7 +95,7 @@ namespace object_locator
 
 		image_geometry::StereoCameraModel stereo_model;
 
-		std::string left_input_topic_, right_input_topic_, output_topic_;
+		std::string left_input_topic_, right_input_topic_, output_topic_, disp_out_topic_, points_out_topic_;
 		Mat_t load_;
 	};
 }

@@ -74,7 +74,7 @@ void detectAndDisplay( Mat frame )
    equalizeHist( frame_gray, frame_gray );
 
    //-- Detect faces
-   face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0, Size(80, 80) );
+   face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0, Size(20, 20), Size(80, 80) );
 
    for( size_t i = 0; i < faces.size(); i++ )
     {

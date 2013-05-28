@@ -114,6 +114,7 @@ public:
 	void openDevice(){
 		ROS_INFO_STREAM("Opening device '"<<port_<<"'");
 		controller->open(port_);
+		controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//disable the controller on startup
 	}
 	void closeDevice(){
 		ROS_INFO_STREAM("Closing device '"<<port_<<"'");

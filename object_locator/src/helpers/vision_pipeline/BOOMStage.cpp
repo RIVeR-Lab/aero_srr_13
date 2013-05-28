@@ -26,6 +26,9 @@ void BOOMStage::onInit() {
 void BOOMStage::loadParams() {
 	this->left_input_topic_ = "upper_stereo/left/image_rect_color";
 	this->right_input_topic_ = "upper_stereo/right/image_rect_color";
+	this->disp_out_topic_ = "upper_stereo/disparityImage";
+	this->points_out_topic_ = "upper_stereo/pointCloud";
+
 	this->output_topic_ = "boom_stage/poses";
 	this->getPrivateNodeHandle().getParam(this->left_input_topic_,
 			this->left_input_topic_);
@@ -75,6 +78,8 @@ void BOOMStage::registerTopics() {
 				&BOOMStage::boomImageCbright, this);
 //	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
 	this->pose_array_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->output_topic_,2);
+	this->disp_img_pub_ = this->getNodeHandle().advertise<sensor_msgs::Image>(this->disp_out_topic_,2);
+	this->point_cloud_pub_ = this->getNodeHandle().advertise<sensor_msgs::PointCloud2>(this->points_out_topic_,2);
 }
 
 void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
@@ -184,22 +189,13 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 //			normImg_.at<cv::Vec3b>(x,y) = nRGB;
 			browness = nR / nG;
 			whiteness = sumRGB / 756;
-			if ((nB > .33)
-					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
+			if ((nB > .37)){
+//					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
 				norma.at<cv::Vec3b>(x, y) = ZeroV;
 
 			}
 			else {
 				norma.at<cv::Vec3b>(x, y) = White;
-
-			}
-			if ((x == 278) && (y == 803)) {
-				NODELET_WARN_STREAM(
-						"nR = " << nR << std::endl << "nG =" << nG << std::endl << "nB =" << nB);
-
-			}
-			if ((nR > nG) && (nG > nB) && (nR > .40)) {
-//				NODELET_WARN_STREAM("Fence Detected");
 
 			}
 		}
@@ -467,6 +463,9 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 			rectangle(src_gray, boundRect[i].tl(), boundRect[i].br(), color, 2,
 					8, 0);
 			circle(src_gray, center[i], (int) radius[i], color, 2, 8, 0);
+			rectangle(left_image_, boundRect[i].tl(), boundRect[i].br(), color, 2,
+					8, 0);
+			circle(left_image_, center[i], (int) radius[i], color, 2, 8, 0);
 			cout << "Center of object[" << i << "]" << "= " << center[i].x
 									<< "," << center[i].y << endl;
 			DetectionPtr_t newDetection(new Detection_t());
@@ -487,7 +486,7 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 	imshow("Anomalies on norm", src_gray);
 //
 	cv::waitKey(3);
-	imshow("Anomaly Contours", drawing);
+	imshow("Anomaly Contours", left_image_);
 //
 	cv::waitKey(3);
 
@@ -536,7 +535,14 @@ void BOOMStage::computeDisparity()
 		stereoBM.state->speckleRange = specRange;
 		stereoBM.state->preFilterSize = 9;
 		stereoBM(img1_rect, img2_rect, disp, CV_32F);
-
+		sensor_msgs::ImagePtr disp_msg = boost::make_shared<
+				sensor_msgs::Image>();
+		cv_bridge::CvImage carrier;
+		disp_msg->header = left_msg_.header;
+		disp_msg->encoding = enc::TYPE_32FC1;
+		carrier.image = disp;
+		carrier.toImageMsg(*disp_msg);
+		this->disp_img_pub_.publish(disp_msg);
 		cv::Mat_<cv::Vec3f> points_mat_;
 			this->stereo_model.projectDisparityImageTo3d(disp, points_mat_, true);
 			cv::Mat_<cv::Vec3f> mat = points_mat_;
@@ -653,6 +659,7 @@ void BOOMStage::computeDisparity()
 								"unsupported encoding '%s'", encoding.c_str());
 			}
 
+			this->point_cloud_pub_.publish(points_msg);
 			//*********Oct tree stuff *************//
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 			pcl::fromROSMsg(*points_msg,*cloud);
@@ -718,7 +725,7 @@ void BOOMStage::computeDisparity()
 						camera_point.header.frame_id, ros::Time(0),
 						ros::Duration(1.0));
 				optimus_prime.transformPoint("/world", camera_point, world_point);
-				tf::pointMsgToTF(camera_point.point, detection);
+				tf::pointMsgToTF(world_point.point, detection);
 				watson_->addDetection(detection, detection_list_.at(i)->second);
 			}
 		}
@@ -726,8 +733,10 @@ void BOOMStage::computeDisparity()
 		detection_list_.clear();
 		watson_->shrink();
 		geometry_msgs::PoseArrayPtr poses(new geometry_msgs::PoseArray);
+		poses->header.frame_id = "upper_stereo_optical_frame";
 		geometry_msgs::Pose tempPose;
 		tempPose.orientation.w  = 1;
+
 		if (watson_->getAllAboveConf(detections))
 		{
 			BOOST_FOREACH(std::vector<tf::Point>::value_type item, detections)
@@ -737,6 +746,7 @@ void BOOMStage::computeDisparity()
 				}
 			this->pose_array_pub_.publish(poses);
 		}
+		ROS_WARN_STREAM("Number of detections in list = " << detections.size());
 		Mat_t cmapped;
 		disp.convertTo(cmapped, CV_8U);
 		imshow("disparty",cmapped);
