@@ -45,7 +45,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	boost::mutex::scoped_lock lock(imglock_);								//ensures that the variables being set here are independent of the race conditions
 	try
 	{
-	   cv_ptr = cv_bridge::toCvCopy(msg);
+	   cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
 	}
 	catch (cv_bridge::Exception& e)
 	{
@@ -324,7 +324,7 @@ void BeaconDetector::detectBeacons()
 
 			process=false;
 			if(show_)
-				showResult();
+				showResult(frame);
 		}
 	}
 	if(detector_thread_.joinable())
@@ -381,7 +381,7 @@ geometry_msgs::Pose BeaconDetector::getRobotPose(string tag)
 
 	return(tran);
 }
-void BeaconDetector::showResult()
+void BeaconDetector::showResult(cv::Mat img)
 {
 	Mat image=colorImg_.clone();
 

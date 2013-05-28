@@ -94,7 +94,7 @@ public:
 	/**
 	 * this function is used to display the result on an image
 	 */
-	void showResult();
+	void showResult(cv::Mat img);
 	/*
 	 * This function calculated the stamped pose for the robot to correct give the tag id
 	 */
