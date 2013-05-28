@@ -322,3 +322,136 @@ void aero_path_planning::pointToVector(const aero_path_planning::Point& point, t
 	vector.setY(point.y);
 	vector.setZ(point.z);
 }
+
+
+//********************************* OBJECT OF INTEREST MANAGER *********************************//
+ObjectOfInterestManager::ObjectOfInterestEntry::ObjectOfInterestEntry(const tf::Point& location, OoI_list_t::const_iterator idx):
+		tf::Point(location),
+		idx_(idx)
+{
+
+}
+
+ObjectOfInterestManager::ObjectOfInterestEntry::ObjectOfInterestEntry(const ObjectOfInterestEntry& copy):
+		tf::Point(copy),
+		idx_(copy.idx_)
+{
+
+}
+
+ObjectOfInterestManager::ObjectOfInterestEntry::ObjectOfInterestEntry(){};
+
+ObjectOfInterestManager::ObjectOfInterestEntry& ObjectOfInterestManager::ObjectOfInterestEntry::operator =(const ObjectOfInterestEntry& rhs)
+{
+	this->setX(rhs.getX());
+	this->setY(rhs.getY());
+	this->setZ(rhs.getZ());
+	this->setW(1);
+	this->idx_ = rhs.idx_;
+	return *this;
+}
+
+
+
+
+ObjectOfInterestManager::ObjectOfInterestManager(double distance_threshold):
+		dist_thresh_(distance_threshold)
+{
+}
+
+ObjectOfInterestManager::~ObjectOfInterestManager(){};
+
+bool ObjectOfInterestManager::sameLocation(const tf::Point& a, const tf::Point& b) const
+{
+	return a.distance(b) <= this->dist_thresh_;
+}
+
+void ObjectOfInterestManager::weightedAverage(const OoI_weight_pair& existing, const tf::Point& addition, OoI_weight_pair& result) const
+{
+	double sum = existing.first + 1.0;
+	double ewx = existing.second.getX()*existing.first;
+	double ewy = existing.second.getY()*existing.first;
+	double ewz = existing.second.getZ()*existing.first;
+	result.first++;
+	result.second.setX((ewx+addition.getX())/sum);
+	result.second.setY((ewy+addition.getY())/sum);
+	result.second.setZ((ewz+addition.getZ())/sum);
+}
+
+void ObjectOfInterestManager::addOoI(const tf::Point& object)
+{
+	OoI_list_t::iterator same_itr;
+	bool got_same   = false;
+	for(OoI_list_t::iterator itr = this->detections_.begin(); itr!=this->detections_.end(); itr++)
+	{
+		if(sameLocation(itr->second, object))
+		{
+			same_itr = itr;
+			got_same = true;
+			break;
+		}
+	}
+
+	if(got_same)
+	{
+		weightedAverage(*same_itr, object, *same_itr);
+	}
+	else
+	{
+		OoI_weight_pair newOoI(1, object);
+		this->detections_.push_back(newOoI);
+	}
+}
+
+double ObjectOfInterestManager::getDistanceThreshold() const
+{
+	return this->dist_thresh_;
+}
+
+bool ObjectOfInterestManager::empty() const
+{
+	return this->detections_.empty();
+}
+
+void ObjectOfInterestManager::setDisanceThreshold(double distance_treshold)
+{
+	this->dist_thresh_ = distance_treshold;
+}
+
+/**
+ * right now this is just returning front
+ */
+ObjectOfInterestManager::ObjectOfInterestEntry ObjectOfInterestManager::getNearestNeighbor(const tf::Point& location) const throw(bool)
+{
+	OoI_list_t::const_iterator result_itr;
+	if(!this->detections_.empty())
+	{
+//		double short_dist = std::numeric_limits<double>::infinity();
+//		for(OoI_list_t::const_iterator itr = this->detections_.begin(); itr != this->detections_.end(); itr++)
+//		{
+//			double dist = itr->second.distance(location);
+//			if(dist < short_dist)
+//			{
+//				short_dist = dist;
+//				result_itr = itr;
+//			}
+//		}
+
+		result_itr = this->detections_.begin();
+	}
+	else throw false;
+
+	return ObjectOfInterestEntry(result_itr->second, result_itr);
+}
+
+/**
+ * Right now this is just poping the front
+ */
+bool ObjectOfInterestManager::removeOoI(const ObjectOfInterestEntry& object)
+{
+	//this->detections_.erase(object.idx_);
+	this->detections_.pop_front();
+	return true;
+}
+
+
