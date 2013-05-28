@@ -94,6 +94,8 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 
 void BoomController::SendBoomControl(aero_base::SetBoomPosition boom_position)
 {
+	ROS_INFO("Sending arm to angle %f at rate of %f",boom_position.request.angle,boom_position.request.max_velocity);
+
 	boom_control_srv_client.call(boom_position);
 }
 
