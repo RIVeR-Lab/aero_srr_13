@@ -26,6 +26,9 @@ void BOOMStage::onInit() {
 void BOOMStage::loadParams() {
 	this->left_input_topic_ = "upper_stereo/left/image_rect_color";
 	this->right_input_topic_ = "upper_stereo/right/image_rect_color";
+	this->disp_out_topic_ = "upper_stereo/disparityImage";
+	this->points_out_topic_ = "upper_stereo/pointCloud";
+
 	this->output_topic_ = "boom_stage/poses";
 	this->getPrivateNodeHandle().getParam(this->left_input_topic_,
 			this->left_input_topic_);
@@ -75,6 +78,8 @@ void BOOMStage::registerTopics() {
 				&BOOMStage::boomImageCbright, this);
 //	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
 	this->pose_array_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->output_topic_,2);
+	this->disp_img_pub_ = this->getNodeHandle().advertise<sensor_msgs::Image>(this->disp_out_topic_,2);
+	this->point_cloud_pub_ = this->getNodeHandle().advertise<sensor_msgs::PointCloud2>(this->points_out_topic_,2);
 }
 
 void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
@@ -530,7 +535,14 @@ void BOOMStage::computeDisparity()
 		stereoBM.state->speckleRange = specRange;
 		stereoBM.state->preFilterSize = 9;
 		stereoBM(img1_rect, img2_rect, disp, CV_32F);
-
+		sensor_msgs::ImagePtr disp_msg = boost::make_shared<
+				sensor_msgs::Image>();
+		cv_bridge::CvImage carrier;
+		disp_msg->header = left_msg_.header;
+		disp_msg->encoding = enc::TYPE_32FC1;
+		carrier.image = disp;
+		carrier.toImageMsg(*disp_msg);
+		this->disp_img_pub_.publish(disp_msg);
 		cv::Mat_<cv::Vec3f> points_mat_;
 			this->stereo_model.projectDisparityImageTo3d(disp, points_mat_, true);
 			cv::Mat_<cv::Vec3f> mat = points_mat_;
@@ -647,7 +659,7 @@ void BOOMStage::computeDisparity()
 								"unsupported encoding '%s'", encoding.c_str());
 			}
 
-
+			this->point_cloud_pub_.publish(points_msg);
 			//*********Oct tree stuff *************//
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 			pcl::fromROSMsg(*points_msg,*cloud);
