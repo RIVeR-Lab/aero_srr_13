@@ -18,7 +18,7 @@ int main(int argc, char **argv){
 
 	printf("Motor starting at: %d\n", controller.get_position());
 	printf("Moving motor to: %ld\n", position);
-	controller.set_position(position);
+	controller.set_position(position, 3276800);
 	while(controller.get_status()&STATUS_TRAJECTORY_RUNNING){
 	  usleep(100000);
 	  printf("Motor at: %d\n", controller.get_position());

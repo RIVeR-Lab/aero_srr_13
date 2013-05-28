@@ -17,13 +17,6 @@ HDMotorController::~HDMotorController(){
 void HDMotorController::open(std::string port){
   serial_port_.open(port, (speed_t)B9600, 8, serial_parity_none);
   sleep(2);//wait for device to reset (2s)
-  printf("Status: %u\n", get(memory_bank_ram, variable_status_register));
-  printf("Fault: %u\n", get(memory_bank_ram, variable_fault_register));
-  set(memory_bank_ram, variable_fault_register, 128);
-  //reset();
-  //sleep(2);//wait for device to reset (2s)
-  //printf("Status: %u\n", get(memory_bank_ram, variable_status_register));
-  //printf("Fault: %u\n", get(memory_bank_ram, variable_fault_register));
   //TODO increase baud rate
 }
 
@@ -36,9 +29,11 @@ void HDMotorController::set_state(amplifier_state_t state){
   set(memory_bank_ram, variable_amplifier_state, state);
 }
 
-void HDMotorController::set_position(int32_t position){
+void HDMotorController::set_position(int32_t position, float max_velocity){
   set(memory_bank_ram, variable_position_profile_type, position_profile_absolute_trapazoidal);
   set(memory_bank_ram, variable_position_command, position);
+  //velocity is in 0.1 counts/second
+  set(memory_bank_ram, variable_position_maximum_velocity, (int32_t)(max_velocity*10));
   set_state(amplifier_servo_trajectory_gen);
   trajectory(trajectory_update_move);
 }
