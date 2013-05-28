@@ -1,11 +1,8 @@
 <launch>
 <node name="aero_boom_controller" pkg="aero_control" type="boom_controlller" output="screen">
-<!-- <param name="feedback_rate" value="5" />
-    <param name="reference_frame" value="/boom_base" />
-    <param name="port" value="/dev/ttyUSB2" />
-    <param name="control_service" value="hd_camera_boom_control" />
-    <param name="info_topic" value="hd_camera_boom_feedback" />
-    <param name="pause_topic" value="/pause" />-->
+	<param name="boom_control" value="/camera_boom_control" />
+	<param name="aero_state_transition" value="/aero/supervisor/control_mode" />
+	<param name="aero_state" value="/aero/supervisor/state" />
   </node>
 
 </launch>
