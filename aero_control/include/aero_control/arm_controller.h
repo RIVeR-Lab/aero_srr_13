@@ -30,12 +30,12 @@ namespace aero_control {
 class ArmController {
 public:
 	ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh);
+
+private:
 	void PathTimerCallback(const ros::TimerEvent&);
 	void ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
 	void ArmStateMSG(const aero_control::arm_stateConstPtr& arm_state);
 	void AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_state);
-private:
-
 	typedef struct {
 		/* Finger motion */
 		bool finger_motion;
