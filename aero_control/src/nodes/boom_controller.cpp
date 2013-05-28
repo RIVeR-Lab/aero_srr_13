@@ -57,7 +57,7 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	this->boom_control_srv_client = nh.serviceClient<aero_base::SetBoomPosition>(boom_control);
 	this->PlanBoomPath();
 	
-	ros::Rate home_rate(1);
+	ros::Rate home_rate(10);
 	
 	while (ros::ok())
 	{
@@ -87,7 +87,7 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 		ROS_INFO("Spinning!");
 
 		ros::spinOnce();
-		ros::Duration(2.0).sleep();
+		ros::Duration(1.0).sleep();
 
 	}
 
