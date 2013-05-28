@@ -31,10 +31,16 @@ std::string target_frame("/camera_boom_rot");
 
 bool poseControlCallback(aero_base::SetBoomPosition::Request  &req,
 		     aero_base::SetBoomPosition::Response &res){
+  if(req.max_velocity < 0.001){
+    ROS_ERROR("Got request to go to angle with a max velocity of basically 0 (%f)", req.max_velocity);
+    return false;
+  }
+  ROS_INFO("Boom going to angle %f at max velocity %f", req.angle, req.max_velocity);
   hd_driver::SetPositionGoal hd_req;
   hd_req.position = (int32_t)(req.angle * ticks_per_radian + zero_tick_position);
   hd_req.max_velocity = (float)(req.max_velocity * ticks_per_radian);
   hd_control_srv->sendGoalAndWait(hd_req);
+  ROS_INFO("Boom reached goal %f", req.angle);
   return true;
 }
 
