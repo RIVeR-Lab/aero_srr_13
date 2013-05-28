@@ -15,6 +15,7 @@
       <depend package="jaco_driver"/>
 	<rosdep name="eigen" />
         <depend package="dynamic_reconfigure"/>
+              <depend package="aero_base"/>
       
 </package>
 
