@@ -71,8 +71,8 @@ namespace aero_control
 			{
 				boom_path_steps = 0;
 
-				SetBoomPathStep(180,0.1,0.5);
-				SetBoomPathStep(-180,0.1,0.5);
+				SetBoomPathStep(3.14159,0.1,0.5);
+				SetBoomPathStep(-3.14159,0.1,0.5);
 
 			}
 			uint8_t boom_path_step_num;
