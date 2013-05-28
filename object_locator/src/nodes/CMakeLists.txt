@@ -17,6 +17,7 @@ target_link_libraries(gpu ${OpenCV_LIBS})
 target_link_libraries(blob ${OpenCV_LIBS})
 target_link_libraries(blob2 ${OpenCV_LIBS})
 #target_link_libraries(hough ${OpenCV_LIBS})
+#target_link_libraries(surf ${OpenCV_LIBS})
 
 target_link_libraries (lower_detector_node ${PCL_LIBRARIES})
 

@@ -57,10 +57,10 @@ public:
 					return;
 				}
 				if(controller->get_trajectory_status()&TRAJECTORY_MOVE_ABORTED){	
-   				        ROS_WARN("Move was aborted");
-					  printf("Status: %u\n", controller->get(hd_driver::HDMotorController::memory_bank_ram, hd_driver::HDMotorController::variable_status_register));
-					  printf("Fault: %u\n", controller->get(hd_driver::HDMotorController::memory_bank_ram, hd_driver::HDMotorController::variable_fault_register));
 					as_->setAborted(result, "Move was aborted");
+   				        ROS_WARN("Move was aborted");
+					ROS_WARN("Status: %u\n", controller->get(hd_driver::HDMotorController::memory_bank_ram, hd_driver::HDMotorController::variable_status_register));
+					ROS_WARN("Fault: %u\n", controller->get(hd_driver::HDMotorController::memory_bank_ram, hd_driver::HDMotorController::variable_fault_register));
 					return;
 				}
 				as_->setSucceeded(result);
@@ -114,6 +114,7 @@ public:
 	void openDevice(){
 		ROS_INFO_STREAM("Opening device '"<<port_<<"'");
 		controller->open(port_);
+		controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//disable the controller on startup
 	}
 	void closeDevice(){
 		ROS_INFO_STREAM("Closing device '"<<port_<<"'");
