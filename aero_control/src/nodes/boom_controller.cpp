@@ -60,6 +60,9 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	{
 		ROS_INFO("Entered While Loop!");
 
+		ROS_INFO("Active State = %d, Pause State = %d",this->active_state,this->pause_state);
+
+
 		if (this->active_state == true && this->pause_state != true)
 		{
 			ROS_INFO("Active!");
@@ -111,9 +114,11 @@ void BoomController::GoHome(void)
 
 void BoomController::AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_state)
 {
+	ROS_INFO("State = %d",aero_state->state);
 
 	switch (aero_state->state)
 	{
+
 
 		case aero_srr_msgs::AeroState::SEARCH:
 			this->active_state = true;
