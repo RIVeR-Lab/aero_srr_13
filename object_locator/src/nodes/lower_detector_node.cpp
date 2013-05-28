@@ -555,7 +555,7 @@ void ImageConverter::computeDisparity() {
 //			cout << "adding detection to camera_point" <<endl;
 			tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
-			camera_point.header.frame_id = "/upper_stereo_optical_frame";
+			camera_point.header.frame_id = "/lower_stereo_optical_frame";
 			camera_point.header.stamp = tZero;
 			world_point.header.frame_id = "/world";
 			world_point.header.stamp = tZero;
