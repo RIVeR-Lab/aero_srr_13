@@ -21,6 +21,7 @@ using namespace aero_path_planning;
 MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				OoI_manager_(0.25),
 				searching_(true),
+				recieved_path_(false),
 				nh_(nh),
 				p_nh_(p_nh),
 				transformer_(nh),
@@ -43,6 +44,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
+	this->updateMissionGoal();
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
 	this->registerTopics();
@@ -111,6 +113,7 @@ void MissionPlanner::drCB(const MissionPlannerConfig& config, uint32_t level)
 
 void MissionPlanner::pathCB(const nav_msgs::PathConstPtr& message)
 {
+	this->recieved_path_ = true;
 	this->carrot_path_.clear();
 	BOOST_FOREACH(std::vector<geometry_msgs::PoseStamped>::value_type pose, message->poses)
 	{
@@ -158,7 +161,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 		else
 		{
 			ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
-			if(!this->mission_goals_.empty())
+			if(!this->mission_goals_.empty() && this->recieved_path_)
 			{
 				this->mission_goals_.pop_front();
 				this->updateMissionGoal();

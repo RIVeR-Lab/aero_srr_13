@@ -4,7 +4,7 @@
      aero_path_planning
 
   </description>
-  <maintainer email="robot@wpi.edu">aruis</maintainer>
+  <maintainer email="robot@wpi.edu">Adam Panzica</maintainer>
   <license>BSD</license>
   <url>http://ros.org/wiki/oryx_path_planning</url>
 
