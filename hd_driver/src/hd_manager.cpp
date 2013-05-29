@@ -108,7 +108,6 @@ public:
 	}
 
 	void feedbackTimerCallback(const ros::TimerEvent& e){
-		try{
 			MotorFeedback msg;
 			{
 				boost::lock_guard<boost::mutex> lock(controller_mutex);
@@ -117,9 +116,6 @@ public:
 				msg.position = controller->get_position();
 			}
 			feedback_pub->publish(msg);
-		} catch(device_driver::Exception& e){
-			ROS_WARN_STREAM("Error reading motor info: "<<e.what());
-		}
 	}
 
 	void openDevice(){
