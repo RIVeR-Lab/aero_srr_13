@@ -262,7 +262,8 @@ void BeaconDetector::detectBeacons()
 				if(tag_type)
 				{
 					cout<<"Fx: "<<fx<<" fy: "<<fy<<" px "<<px<<" py "<<py<<endl;
-					T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
+					
+T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
 					bctr++;
 				}
 				else
@@ -275,7 +276,8 @@ void BeaconDetector::detectBeacons()
 				Eigen::Quaternion<double> final = Eigen::Quaternion<double>(rot);	//convert it to quaternion
 
 				// the x,y,z location of the tag
-				transform.setOrigin( tf::Vector3(T(0,3),T(1,3), T(3,3)) );
+				transform.setOrigin( tf::Vector3(T(0,3),T(1,3), T(2,3)) );
+                                cout<<"x: "<<T(0,3)<<" y: "<<T(1,3)<<" z: "<<T(2,3)<<endl;
 				//set up the transform rotation
 				transform.setRotation( tf::Quaternion(final.x(), final.y(), final.z(),final.w()) );
 				char frameid[50];
