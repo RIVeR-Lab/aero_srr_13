@@ -17,8 +17,8 @@
     <param name="zero_tick_position" value="-110100" />
     <param name="src_frame" value="boom_base" />
     <param name="joint_name" value="boom_joint" />
-    <param name="motor_control_service" value="hd_camera_boom_control" />
-    <param name="joint_control_service" value="$(arg pose_control_service)" />
+    <param name="motor_control_name" value="hd_camera_boom_control" />
+    <param name="joint_control_name" value="$(arg pose_control_service)" />
     <param name="motor_feedback_topic" value="hd_camera_boom_feedback" />
     <param name="is_angle_bounded" value="true" />
     <param name="min_angle" value="-3.2" />
