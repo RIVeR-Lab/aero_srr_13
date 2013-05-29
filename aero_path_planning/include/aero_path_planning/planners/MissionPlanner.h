@@ -112,7 +112,7 @@ private:
 	 * @author Adam Panzica
 	 * @brief Updates the current mission goal
 	 */
-	void updateMissionGoal() const;
+	void updateMissionGoal();
 
 	void ooiCB(const geometry_msgs::PoseArrayConstPtr& message);
 
