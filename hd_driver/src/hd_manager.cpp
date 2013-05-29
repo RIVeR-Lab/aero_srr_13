@@ -72,6 +72,7 @@ public:
 				if(as_->isPreemptRequested()){
 				  controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//stop the motor
 				  as_->setPreempted(result, "Set position was preempted");
+				  return;
 				}
 				as_->setSucceeded(result);
 			}
