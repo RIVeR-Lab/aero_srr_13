@@ -53,7 +53,7 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	/* Services */
 	this->aero_state_transition_srv_client = nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(
 			aero_state_transition);
-	this->boom_control_srv_client = nh.serviceClient<aero_base::SetBoomPosition>(boom_control);
+	this->boom_control_client = boost::shared_ptr<BoomClient>(new BoomClient(nh, boom_control, true));
 	this->PlanBoomPath();
 	this->boom_path_step_num = 0;
 
@@ -91,18 +91,17 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 
 }
 
-void BoomController::SendBoomControl(aero_base::SetBoomPosition boom_position)
+void BoomController::SendBoomControl(device_driver_base::SetJointPositionGoal& boom_position)
 {
-
-	boom_control_srv_client.call(boom_position);
+  boom_control_client->sendGoalAndWait(boom_position, ros::Duration(20));
 }
 
 void BoomController::GoToPosition(double angle, double velocity, double delay)
 {
 
-	aero_base::SetBoomPosition boom_position;
-	boom_position.request.angle = angle;
-	boom_position.request.max_velocity = velocity;
+	device_driver_base::SetJointPositionGoal boom_position;
+	boom_position.angle = angle;
+	boom_position.max_velocity = velocity;
 	SendBoomControl(boom_position);
 	ros::Duration(delay).sleep();
 

@@ -16,7 +16,8 @@
 #include <time.h>
 #include <aero_srr_msgs/AeroState.h>
 #include <aero_srr_msgs/StateTransitionRequest.h>
-#include <aero_base/SetBoomPosition.h>
+#include <actionlib/client/simple_action_client.h>
+#include <device_driver_base/SetJointPositionAction.h>
 
 namespace aero_control
 {
@@ -29,7 +30,9 @@ namespace aero_control
 			BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh);
 
 		private:
-			void SendBoomControl(aero_base::SetBoomPosition boom_position);
+			typedef actionlib::SimpleActionClient<device_driver_base::SetJointPositionAction> BoomClient;
+
+			void SendBoomControl(device_driver_base::SetJointPositionGoal& boom_position);
 			void GoToPosition(double angle, double velocity,double delay);
 			void GoHome(void);
 			void AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_state);
@@ -78,7 +81,7 @@ namespace aero_control
 
 			ros::Subscriber aero_state_sub;
 			ros::ServiceClient aero_state_transition_srv_client;
-			ros::ServiceClient boom_control_srv_client;
+			boost::shared_ptr<BoomClient> boom_control_client;
 			bool active_state;
 			bool pause_state;
 
