@@ -42,27 +42,36 @@ public:
 				if(!is_paused)
 				  controller->set_position(goal->position, goal->max_velocity);
 			}
-			while(1){
+			while(ros::ok() && !as_->isPreemptRequested() && !is_paused){
 				{
 					boost::lock_guard<boost::mutex> lock(controller_mutex);
-					if(is_paused || !(controller->get_status()&STATUS_TRAJECTORY_RUNNING))
+					if(!(controller->get_status()&STATUS_TRAJECTORY_RUNNING))
 						break;
 				}
 				usleep(100000);
 			}
+			if(!ros::ok())
+			  return;//just return, ros is dead
 			{
 				boost::lock_guard<boost::mutex> lock(controller_mutex);
+				result.final_position = controller->get_position();
 				if(is_paused){
    				        ROS_WARN("Motor was paused when attempting to move");
+					controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//make sure were actually paused
 				        as_->setAborted(result, "Could not set motor position, motor was paused");
 					return;
 				}
 				if(controller->get_trajectory_status()&TRAJECTORY_MOVE_ABORTED){	
+					controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//stop the motor
 					as_->setAborted(result, "Move was aborted");
    				        ROS_WARN("Move was aborted");
 					ROS_WARN("Status: %u\n", controller->get(hd_driver::HDMotorController::memory_bank_ram, hd_driver::HDMotorController::variable_status_register));
 					ROS_WARN("Fault: %u\n", controller->get(hd_driver::HDMotorController::memory_bank_ram, hd_driver::HDMotorController::variable_fault_register));
 					return;
+				}
+				if(as_->isPreemptRequested()){
+				  controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//stop the motor
+				  as_->setPreempted(result, "Set position was preempted");
 				}
 				as_->setSucceeded(result);
 			}
