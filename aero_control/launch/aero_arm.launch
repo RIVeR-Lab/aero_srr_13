@@ -5,9 +5,20 @@
   </include> 
 <node name="aero_arm_controller" pkg="aero_control" type="arm_controller" output="screen">
 
+	<param name="desired_arm_pose" value="/desired_arm_pose" />
+	<param name="arm_state" value="/arm_state" />
+	<param name="object_pose" value="/object_pose" />
+	<param name="set_finger_position" value="/set_finger_position" />
+	<param name="aero_state" value="/aero_state" />
+	<param name="aero_state_transition" value="/aero_state_transition" />
+
   </node>
   <node name="aero_arm_position_controller" pkg="aero_control" type="arm_position_control" output="screen">
-
+  	<param name="desired_arm_position" value="/desired_arm_pose" />
+  	<param name="arm_state" value="/arm_state" />
+  	<param name="cartesian_velocity" value="/cartesian_velocity" />
+  	<param name="current_position" value="/tool_position" />
+ 
 
   </node>
 

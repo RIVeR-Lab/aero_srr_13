@@ -10,7 +10,7 @@
  * @file arm_position_control.cpp
  *
  * @date   Feb 20, 2013
- * @author parallels
+ * @author mdedonato
  * @brief \todo
  */
 
@@ -21,48 +21,42 @@ using namespace aero_control;
 
 ArmPositionController::ArmPositionController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
-	std::string DesiredPosition("DesiredARMPosition"); ///String containing the topic name for goal position
-	std::string ArmState("ArmState"); ///String containing the topic name for arm state
-	std::string JointVelocity("CartesianVelocity"); ///String containing the topic name for JointVelocity
-	std::string JointAngles("JointAngles"); ///String containing the topic name for JointAngles
-	std::string CurrentPosition("ToolPosition"); ///String containing the topic name for CurrentPosition
+	std::string desired_arm_position("desired_arm_position"); ///String containing the topic name for goal position
+	std::string arm_state("arm_state"); ///String containing the topic name for arm state
+	std::string cartesian_velocity("cartesian_velocity"); ///String containing the topic name for cartesian_velocity
+	std::string current_position("current_position"); ///String containing the topic name for current_position
 
 	//Grab the topic parameters, print warnings if using default values
-	if (!param_nh.getParam(DesiredPosition, DesiredPosition))
+	if (!param_nh.getParam(desired_arm_position, desired_arm_position))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
-	if (!param_nh.getParam(JointVelocity, JointVelocity))
+				"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", desired_arm_position.c_str(), desired_arm_position.c_str());
+	if (!param_nh.getParam(cartesian_velocity, cartesian_velocity))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Joint Velocity Topic <%s>!", JointVelocity.c_str(), JointVelocity.c_str());
-	if (!param_nh.getParam(JointAngles, JointAngles))
+				"Parameter <%s> Not Set. Using Default Cartesian Velocity Topic <%s>!", cartesian_velocity.c_str(), cartesian_velocity.c_str());
+	if (!param_nh.getParam(current_position, current_position))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Joint Angles Topic <%s>!", JointAngles.c_str(), JointAngles.c_str());
-	if (!param_nh.getParam(CurrentPosition, CurrentPosition))
+				"Parameter <%s> Not Set. Using Default Current Position Topic <%s>!", current_position.c_str(), current_position.c_str());
+	if (!param_nh.getParam(arm_state, arm_state))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Current Position Topic <%s>!", CurrentPosition.c_str(), CurrentPosition.c_str());
-	if (!param_nh.getParam(ArmState, ArmState))
-		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Arm State Topic <%s>!", ArmState.c_str(), ArmState.c_str());
+				"Parameter <%s> Not Set. Using Default Arm State Topic <%s>!", arm_state.c_str(), arm_state.c_str());
 
 //Print out received topics
-	ROS_DEBUG("Got Desired Position Topic Name: <%s>", DesiredPosition.c_str());
-	ROS_DEBUG("Got Joint Velocity Topic Name: <%s>", JointVelocity.c_str());
-	ROS_DEBUG("Got Joint Angles Topic Name: <%s>", JointAngles.c_str());
-	ROS_DEBUG("Got Current Position Topic Name: <%s>", CurrentPosition.c_str());
-	ROS_DEBUG("Using Arm State Topic Name: <%s>", ArmState.c_str());
+	ROS_DEBUG("Got Desired Position Topic Name: <%s>", desired_arm_position.c_str());
+	ROS_DEBUG("Got Cartesian Velocity Topic Name: <%s>", cartesian_velocity.c_str());
+	ROS_DEBUG("Got Current Position Topic Name: <%s>", current_position.c_str());
+	ROS_DEBUG("Using Arm State Topic Name: <%s>", arm_state.c_str());
 
 	ROS_INFO("Starting Up Arm Velocity Controller...");
 
-	this->desired_position_sub = nh.subscribe(DesiredPosition, 1,
+	this->desired_position_sub = nh.subscribe(desired_arm_position, 1,
 			&ArmPositionController::DesiredPositionMSG, this);
-	this->current_position_sub = nh.subscribe(CurrentPosition, 1,
+	this->current_position_sub = nh.subscribe(current_position, 1,
 			&ArmPositionController::CurrentPositionMSG, this);
 
-	this->joint_velocity_pub = nh.advertise<geometry_msgs::TwistStamped>(JointVelocity, 2);
+	this->cartesian_velocity_pub = nh.advertise<geometry_msgs::TwistStamped>(cartesian_velocity, 2);
 
-	this->joint_angles_sub = nh.subscribe(JointAngles, 1, &ArmPositionController::JointAnglesMSG,
-			this);
-	this->arm_state_pub = nh.advertise<aero_control::arm_state>(ArmState, 2, true);
+
+	this->arm_state_pub = nh.advertise<aero_control::arm_state>(arm_state, 2, true);
 
 	last_position_time = ros::Time().now();
 	goal_time = ros::Time().now();
@@ -139,13 +133,6 @@ void ArmPositionController::DesiredPositionMSG(
 		tf::Matrix3x3 desired_rotation(desired_StampPose.getRotation());
 
 		desired_rotation.getRPY(desired_pos.roll, desired_pos.pitch, desired_pos.yaw);
-//	ROS_INFO("Desired");
-//	ROS_INFO("X_Desired = %f", desired_pos.x);
-//	ROS_INFO("Y_Desired = %f", desired_pos.y);
-//	ROS_INFO("Z_Desired = %f", desired_pos.z);
-//	ROS_INFO("RX_Desired = %f", desired_pos.roll);
-//	ROS_INFO("RY_Desired = %f", desired_pos.pitch);
-//	ROS_INFO("RZ_Desired = %f", desired_pos.y);
 
 		running = true;
 		last_position_time = ros::Time().now();
@@ -192,13 +179,6 @@ void ArmPositionController::UpdateError(void) {
 	pos_err.roll_err = desired_pos.roll - current_pos.roll;
 	pos_err.pitch_err = desired_pos.pitch - current_pos.pitch;
 	pos_err.yaw_err = desired_pos.yaw - current_pos.yaw;
-//
-//	ROS_INFO("X_CUR = %f, X_DES = %f, X_ERR_ = %f", current_pos.x, desired_pos.x, pos_err.x_err);
-//	ROS_INFO("Y_CUR = %f, Y_DES = %f, Y_ERR_ = %f", current_pos.y, desired_pos.y, pos_err.y_err);
-//	ROS_INFO("Z_CUR = %f, Z_DES = %f, Z_ERR_ = %f", current_pos.z, desired_pos.z, pos_err.z_err);
-//	ROS_INFO("rX_CUR = %f, rX_DES = %f, rX_ERR_ = %f", current_pos.roll, desired_pos.roll, pos_err.roll_err);
-//	ROS_INFO("rY_CUR = %f, rY_DES = %f, rY_ERR_ = %f", current_pos.pitch, desired_pos.pitch, pos_err.pitch_err);
-//	ROS_INFO("rZ_CUR = %f, rZ_DES = %f, rZ_ERR_ = %f", current_pos.yaw, desired_pos.yaw, pos_err.yaw_err);
 
 
 	/* Check if we are at the goal */
@@ -297,12 +277,7 @@ void ArmPositionController::UpdatePID(void) {
 		cartisian_velocity(5) = -MaxAngularVel();
 	}
 
-//	ROS_INFO("X_V = %f", cartisian_velocity(0));
-//	ROS_INFO("Y_V = %f", cartisian_velocity(1));
-//	ROS_INFO("Z_V = %f", cartisian_velocity(2));
-//	ROS_INFO("Roll_V = %f", cartisian_velocity(3));
-//	ROS_INFO("Pitch_V = %f", cartisian_velocity(4));
-//	ROS_INFO("Yaw_V = %f", cartisian_velocity(5));
+
 
 	geometry_msgs::TwistStamped cartesian_velocity_msg;
 	cartesian_velocity_msg.header.frame_id = "/arm_base";
@@ -314,288 +289,12 @@ void ArmPositionController::UpdatePID(void) {
 	cartesian_velocity_msg.twist.angular.y = cartisian_velocity(4);
 	cartesian_velocity_msg.twist.angular.z = cartisian_velocity(5);
 
-//	cartesian_velocity_msg.Velocity_X = 100;//cartisian_velocity(0);
-//	cartesian_velocity_msg.twist.linear.y = 0;//cartisian_velocity(1);
-	//cartesian_velocity_msg.twist.linear.z = 0;//cartisian_velocity(2);
-	//cartesian_velocity_msg.twist.angular.x = 0;//cartisian_velocity(3);
-	//cartesian_velocity_msg.twist.angular.y = 0;//cartisian_velocity(4);
-	//cartesian_velocity_msg.twist.angular.z = 0;//cartisian_velocity(5);
 
-	joint_velocity_pub.publish(cartesian_velocity_msg);
+	cartesian_velocity_pub.publish(cartesian_velocity_msg);
 
 }
 
-/* This didn't work very well, needs some tweaking */
-void ArmPositionController::JointAnglesMSG(const jaco_driver::joint_anglesConstPtr& joint_angles) {
-//	UpdateError();
-//
-//
-//
-//
-///*
-//	ros::Time start = ros::Time().now();
-//
-//	//Precalculated Jacobian
-//	Eigen::MatrixXf jacobian(6, 6);
-//
-//	jacobian(0, 0) = -(.6590121487
-//			* (-sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) - sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3))
-//			* sin((double)joint_angles->Angle_J4) + .6590121487 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4)) * cos((double)joint_angles->Angle_J5)
-//			- (1.148952620
-//					* (-sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//							- sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					- 1.148952620 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4)) * sin((double)joint_angles->Angle_J5)
-//			- (-.9411668873 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					+ .9411668873 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			+ (-1.143254838 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//					- 1.143254838 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			+ 1.143254838 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4) + .3810546647 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			- .3810546647 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + 0.113e-1 * cos((double)joint_angles->Angle_J1)
-//			- .41 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2);
-//
-//	jacobian(0, 1) = -(-6590121487 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			+ .6590121487 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4) * cos((double)joint_angles->Angle_J5)
-//			- (-1.148952620 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					+ 1.148952620 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4) * sin((double)joint_angles->Angle_J5)
-//			- (.9411668873 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//					+ .9411668873 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			+ (-1.143254838 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					+ 1.143254838 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .3810546647 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			- .3810546647 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .41 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2);
-//
-//	jacobian(0, 2) = -(.6590121487 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			- .6590121487 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4) * cos((double)joint_angles->Angle_J5)
-//			- (1.148952620 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					- 1.148952620 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4) * sin((double)joint_angles->Angle_J5)
-//			- (-.9411668873 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//					- .9411668873 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			+ (1.143254838 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					- 1.143254838 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			+ .3810546647 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//			+ .3810546647 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3);
-//
-//	jacobian(0, 3) =
-//			-(.6590121487
-//					* (cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3))
-//					* cos((double)joint_angles->Angle_J4) - .6590121487 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4)) * cos((double)joint_angles->Angle_J5)
-//					- (-1.148952620
-//							* (cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//									+ cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//							- 1.148952620 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4)) * sin((double)joint_angles->Angle_J5)
-//					+ (1.143254838 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//							+ 1.143254838 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					- 1.143254838 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4);
-//
-//	jacobian(0, 4) =
-//			(.6590121487
-//					* (cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3))
-//					* sin((double)joint_angles->Angle_J4) + .6590121487 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4)) * sin((double)joint_angles->Angle_J5)
-//					- (1.148952620
-//							* (cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//									+ cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//							- 1.148952620 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4)) * cos((double)joint_angles->Angle_J5)
-//					+ (.9411668873 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//							- .9411668873 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J5);
-//
-//	jacobian(0, 5) = 0;
-//
-//	jacobian(1, 0) = -(.6590121487
-//			* (-cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) - cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3))
-//			* sin((double)joint_angles->Angle_J4) - .6590121487 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4)) * cos((double)joint_angles->Angle_J5)
-//			- (1.148952620
-//					* (-cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//							- cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					+ 1.148952620 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4)) * sin((double)joint_angles->Angle_J5)
-//			- (-.9411668873 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					+ .9411668873 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			+ (-1.143254838 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//					- 1.143254838 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- 1.143254838 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4) + .3810546647 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			- .3810546647 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) - 0.113e-1 * sin((double)joint_angles->Angle_J1)
-//			- .41 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2);
-//
-//	jacobian(1, 1) = -(.6590121487 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			- .6590121487 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4) * cos((double)joint_angles->Angle_J5)
-//			- (1.148952620 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					- 1.148952620 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4) * sin((double)joint_angles->Angle_J5)
-//			- (-.9411668873 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//					- .9411668873 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			+ (1.143254838 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					- 1.143254838 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			+ .3810546647 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			+ .3810546647 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) - .41 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2);
-//
-//	jacobian(1, 2) = -(-.6590121487 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			+ .6590121487 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4) * cos((double)joint_angles->Angle_J5)
-//			- (-1.148952620 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					+ 1.148952620 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4) * sin((double)joint_angles->Angle_J5)
-//			- (.9411668873 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//					+ .9411668873 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			+ (-1.143254838 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					+ 1.143254838 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .3810546647 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//			- .3810546647 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3);
-//
-//	jacobian(1, 3) = -(.6590121487
-//			* (-sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) - sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3))
-//			* cos((double)joint_angles->Angle_J4) - .6590121487 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4)) * cos((double)joint_angles->Angle_J5)
-//			- (-1.148952620
-//					* (-sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//							- sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//					- 1.148952620 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4)) * sin((double)joint_angles->Angle_J5)
-//			+ (-1.143254838 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//					- 1.143254838 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//			- 1.143254838 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4);
-//
-//	jacobian(1, 4) = (.6590121487
-//			* (-sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) - sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3))
-//			* sin((double)joint_angles->Angle_J4) + .6590121487 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4)) * sin((double)joint_angles->Angle_J5)
-//			- (1.148952620
-//					* (-sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//							- sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					- 1.148952620 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4)) * cos((double)joint_angles->Angle_J5)
-//			+ (-.9411668873 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					+ .9411668873 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J5);
-//
-//	jacobian(1, 5) = 0;
-//
-//	jacobian(2, 0) = 0;
-//
-//	jacobian(2, 1) = -(.6590121487 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) + .6590121487 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			* cos((double)joint_angles->Angle_J5)
-//			- (1.148952620 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) + 1.148952620 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					* sin((double)joint_angles->Angle_J5)
-//			- (-.9411668873 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .9411668873 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			+ (1.143254838 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) + 1.143254838 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .3810546647 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) + .3810546647 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .41 * sin((double)joint_angles->Angle_J2);
-//
-//	jacobian(2, 2) = -(-.6590121487 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - .6590121487 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			* cos((double)joint_angles->Angle_J5)
-//			- (-1.148952620 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - 1.148952620 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					* sin((double)joint_angles->Angle_J5)
-//			- (.9411668873 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) - .9411668873 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			+ (-1.143254838 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - 1.143254838 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .3810546647 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .3810546647 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3);
-//
-//	jacobian(2, 3) = -(-.6590121487 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .6590121487 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//			* cos((double)joint_angles->Angle_J5)
-//			+ (-1.148952620 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + 1.148952620 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//					* sin((double)joint_angles->Angle_J5)
-//			+ (-1.143254838 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + 1.143254838 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4);
-//
-//	jacobian(2, 4) = (-.6590121487 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .6590121487 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			* sin((double)joint_angles->Angle_J5)
-//			- (-1.148952620 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + 1.148952620 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					* cos((double)joint_angles->Angle_J5)
-//			+ (-.9411668873 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - .9411668873 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J5);
-//
-//	jacobian(2, 5) = 0;
-//
-//	jacobian(3, 0) = 0;
-//
-//	jacobian(3, 1) = -sin((double)joint_angles->Angle_J1);
-//
-//	jacobian(3, 2) = sin((double)joint_angles->Angle_J1);
-//
-//	jacobian(3, 3) = cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//	jacobian(3, 4) = -(.8191520445 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//			+ .8191520445 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .8191520445 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4) + .5735764360 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			- .5735764360 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//	jacobian(3, 5) =
-//			(.4698463102
-//					* (cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3))
-//					* sin((double)joint_angles->Angle_J4) + .4698463102 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4)) * cos((double)joint_angles->Angle_J5)
-//					+ (.8191520445
-//							* (cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//									+ cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//							- .8191520445 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4)) * sin((double)joint_angles->Angle_J5)
-//					+ (.6710100720 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//							- .6710100720 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//					- (.4698463102 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//							+ .4698463102 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//					- .4698463102 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4) + .3289899279 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					- .3289899279 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//	jacobian(4, 0) = 0;
-//
-//	jacobian(4, 1) = -cos((double)joint_angles->Angle_J1);
-//
-//	jacobian(4, 2) = cos((double)joint_angles->Angle_J1);
-//
-//	jacobian(4, 3) = -sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) + sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//	jacobian(4, 4) = -(-.8191520445 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//			- .8191520445 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .8191520445 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4) - .5735764360 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			+ .5735764360 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//	jacobian(4, 5) = (.4698463102
-//			* (-sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) - sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3))
-//			* sin((double)joint_angles->Angle_J4) + .4698463102 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4)) * cos((double)joint_angles->Angle_J5)
-//			+ (.8191520445
-//					* (-sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//							- sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					- .8191520445 * cos((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J4)) * sin((double)joint_angles->Angle_J5)
-//			+ (-.6710100720 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//					+ .6710100720 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			- (-.4698463102 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)
-//					- .4698463102 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .4698463102 * cos((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J4) - .3289899279 * sin((double)joint_angles->Angle_J1) * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)
-//			+ .3289899279 * sin((double)joint_angles->Angle_J1) * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//	jacobian(5, 0) = -1;
-//
-//	jacobian(5, 1) = 0;
-//
-//	jacobian(5, 2) = 0;
-//
-//	jacobian(5, 3) = -cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//	jacobian(5, 4) = -(-.8191520445 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .8191520445 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .5735764360 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - .5735764360 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//	jacobian(5, 5) = (-.4698463102 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .4698463102 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			* cos((double)joint_angles->Angle_J5)
-//			+ (-.8191520445 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .8191520445 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J4)
-//					* sin((double)joint_angles->Angle_J5)
-//			+ (-.6710100720 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - .6710100720 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3)) * cos((double)joint_angles->Angle_J5)
-//			- (-.4698463102 * cos((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3) + .4698463102 * sin((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3)) * sin((double)joint_angles->Angle_J4)
-//			- .3289899279 * cos((double)joint_angles->Angle_J2) * cos((double)joint_angles->Angle_J3) - .3289899279 * sin((double)joint_angles->Angle_J2) * sin((double)joint_angles->Angle_J3);
-//
-//
-//	Eigen::VectorXf joint_velocity(6);
-//
-//
-//	Eigen::MatrixXf pinvtemp(6, 6);
-//
-//
-//	pinvtemp=(jacobian*jacobian.transpose());
-//
-//	joint_velocity = (jacobian.transpose()*pinvtemp.inverse())* cartisian_velocity;
-//	ROS_INFO("Time1= %f",(start - ros::Time().now()).sec);
-//
-//	jaco_driver::joint_velocity joint_velocity_msg;
-//
-//	joint_velocity_msg.Velocity_J1 = joint_velocity(0);
-//	joint_velocity_msg.Velocity_J2 = joint_velocity(1);
-//	joint_velocity_msg.Velocity_J3 = joint_velocity(2);
-//	joint_velocity_msg.Velocity_J4 = joint_velocity(3);
-//	joint_velocity_msg.Velocity_J5 = joint_velocity(4);
-//	joint_velocity_msg.Velocity_J6 = joint_velocity(5);
-//
-//	ROS_INFO("J1_V = %f",joint_velocity(0));
-//	ROS_INFO("J2_V = %f",joint_velocity(1));
-//	ROS_INFO("J3_V = %f",joint_velocity(2));
-//	ROS_INFO("J4_V = %f",joint_velocity(3));
-//	ROS_INFO("J5_V = %f",joint_velocity(4));
-//	ROS_INFO("J6_V = %f",joint_velocity(5));
-//
-//	joint_velocity_pub.publish(joint_velocity_msg);*/
-}
+
 
 int main(int argc, char **argv) {
 

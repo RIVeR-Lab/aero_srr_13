@@ -61,14 +61,11 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	
 	while (ros::ok())
 	{
-		ROS_INFO("Entered While Loop!");
 
-		ROS_INFO("Active State = %d, Pause State = %d",this->active_state,this->pause_state);
 
 
 		if (this->active_state == true && this->pause_state != true)
 		{
-			ROS_INFO("Active!");
 
 			GoToPosition(this->boom_path[boom_path_step_num].angle,this->boom_path[boom_path_step_num].velocity ,this->boom_path[boom_path_step_num].delay);
 			boom_path_step_num++;
@@ -79,7 +76,6 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 
 		} else if (this->pause_state != true)
 		{
-			ROS_INFO("Home!");
 
 			GoHome();
 			home_rate.sleep();
@@ -92,13 +88,11 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	}
 
 	GoHome();
-	ROS_INFO("Done!");
 
 }
 
 void BoomController::SendBoomControl(aero_base::SetBoomPosition boom_position)
 {
-	ROS_INFO("Sending arm to angle %f at rate of %f",boom_position.request.angle,boom_position.request.max_velocity);
 
 	boom_control_srv_client.call(boom_position);
 }
@@ -121,7 +115,6 @@ void BoomController::GoHome(void)
 
 void BoomController::AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_state)
 {
-	ROS_INFO("State = %d",aero_state->state);
 
 	switch (aero_state->state)
 	{
