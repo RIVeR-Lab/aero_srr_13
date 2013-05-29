@@ -52,6 +52,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 
 void MissionPlanner::loadParam()
 {
+	ROS_INFO_STREAM("Mission Planner Loading Parameters...");
 	this->local_frame_        = "/base_footprint";
 	this->global_frame_       = "/world";
 	this->path_topic_         = "/path";
@@ -75,6 +76,7 @@ void MissionPlanner::loadParam()
 
 void MissionPlanner::registerTopics()
 {
+	ROS_INFO_STREAM("Mission Planner Registering Topics...");
 	this->state_sub_        = this->nh_.subscribe(this->state_topic_, 1,  &MissionPlanner::stateCB, this);
 	this->path_sub_         = this->nh_.subscribe(this->path_topic_, 1, &MissionPlanner::pathCB, this);
 	this->mission_goal_pub_ = this->nh_.advertise<geometry_msgs::PoseStamped>(this->mission_goal_topic_, 1, true);
@@ -86,7 +88,7 @@ void MissionPlanner::registerTopics()
 
 void MissionPlanner::registerTimers()
 {
-
+	ROS_INFO_STREAM("Mission Planner Registering Timers...");
 	this->goal_timer_ = this->nh_.createTimer(ros::Duration(1.0/10.0), &MissionPlanner::goalCB, this);
 }
 
@@ -111,6 +113,7 @@ void MissionPlanner::drCB(const MissionPlannerConfig& config, uint32_t level)
 
 void MissionPlanner::pathCB(const nav_msgs::PathConstPtr& message)
 {
+	ROS_INFO_STREAM("Mission Planner Recieved new Carrot Path!");
 	this->recieved_path_ = true;
 	this->carrot_path_.clear();
 	BOOST_FOREACH(std::vector<geometry_msgs::PoseStamped>::value_type pose, message->poses)
@@ -259,6 +262,8 @@ void MissionPlanner::updateMissionGoal()
 		message->pose            = this->mission_goals_.front();
 		message->header.frame_id = this->global_frame_;
 		message->header.stamp    = ros::Time::now();
+		ROS_INFO_STREAM("Upating Mission Goal to:"<<(*message));
+		this->mission_goal_pub_.publish(message);
 		this->recieved_path_ = false;
 	}
 }
