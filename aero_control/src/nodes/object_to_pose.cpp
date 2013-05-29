@@ -33,25 +33,25 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string ObjectLocation("ObjectPose"); ///String containing the topic name for ObjectLocation
-	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for DesiredPosition
+	std::string object_location("object_location"); ///String containing the topic name for ObjectLocation
+	std::string desired_position("desired_position"); ///String containing the topic name for desired_position
 
 	//Grab the topic parameters, print warnings if using default values
-	if (!param_nh.getParam(ObjectLocation, ObjectLocation))
+	if (!param_nh.getParam(object_location, object_location))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Object Location Topic <%s>!", ObjectLocation.c_str(), ObjectLocation.c_str());
-	if (!param_nh.getParam(DesiredPosition, DesiredPosition))
+				"Parameter <%s> Not Set. Using Default Object Location Topic <%s>!", object_location.c_str(), object_location.c_str());
+	if (!param_nh.getParam(desired_position, desired_position))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
+				"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", desired_position.c_str(), desired_position.c_str());
 
-	ROS_DEBUG("Using Object Location Topic Name: <%s>", ObjectLocation.c_str());
-	ROS_DEBUG("Using Desired Position Topic Name: <%s>", DesiredPosition.c_str());
+	ROS_DEBUG("Using Object Location Topic Name: <%s>", object_location.c_str());
+	ROS_DEBUG("Using Desired Position Topic Name: <%s>", desired_position.c_str());
 
 	ROS_INFO("Starting Up Object to Pose...");
 
 
-	desired_position_pub = nh.advertise<geometry_msgs::PoseStamped>(DesiredPosition, 1,true);
-	object_location_sub = nh.subscribe(ObjectLocation, 1, &ObjectLocationMSG);
+	desired_position_pub = nh.advertise<geometry_msgs::PoseStamped>(desired_position, 1,true);
+	object_location_sub = nh.subscribe(object_location, 1, &ObjectLocationMSG);
 
 	ros::spin();
 }

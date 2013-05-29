@@ -21,38 +21,38 @@ using namespace aero_control;
 
 BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
-	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for goal position
-	std::string WorkspacePosition("WorkspacePosition"); ///String containing the topic name for WorkspacePosition
-	std::string BaseVelocity("aero/manual_twist_topic"); ///String containing the topic name for BaseVelocity
-	std::string AeroState("aero/supervisor/state"); ///String containing the topic name for AeroState
-	std::string AeroStateTransition("aero/supervisor/state_transition_request"); ///String containing the topic name for AeroStateTransition
+	std::string desired_position("desired_position"); ///String containing the topic name for goal position
+	std::string workspace_position("workspace_position"); ///String containing the topic name for workspace_position
+	std::string base_velocity("base_velocity"); ///String containing the topic name for base_velocity
+	std::string aero_state("aero_state"); ///String containing the topic name for AeroState
+	std::string aero_state_transition("aero_state_transition"); ///String containing the topic name for AeroStateTransition
 
 	//Grab the topic parameters, print warnings if using default values
-	if (!param_nh.getParam(DesiredPosition, DesiredPosition))
+	if (!param_nh.getParam(desired_position, desired_position))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
-	if (!param_nh.getParam(BaseVelocity, BaseVelocity))
+				"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", desired_position.c_str(), desired_position.c_str());
+	if (!param_nh.getParam(base_velocity, base_velocity))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Base Velocity Topic <%s>!", BaseVelocity.c_str(), BaseVelocity.c_str());
+				"Parameter <%s> Not Set. Using Default Base Velocity Topic <%s>!", base_velocity.c_str(), base_velocity.c_str());
 
-	if (!param_nh.getParam(WorkspacePosition, WorkspacePosition))
+	if (!param_nh.getParam(workspace_position, workspace_position))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Workspace Position Topic <%s>!", WorkspacePosition.c_str(), WorkspacePosition.c_str());
+				"Parameter <%s> Not Set. Using Default Workspace Position Topic <%s>!", workspace_position.c_str(), workspace_position.c_str());
 
-	if (!param_nh.getParam(AeroState, AeroState))
+	if (!param_nh.getParam(aero_state, aero_state))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Aero State Topic <%s>!", AeroState.c_str(), AeroState.c_str());
+				"Parameter <%s> Not Set. Using Default Aero State Topic <%s>!", aero_state.c_str(), aero_state.c_str());
 
-	if (!param_nh.getParam(AeroStateTransition, AeroStateTransition))
+	if (!param_nh.getParam(aero_state_transition, aero_state_transition))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Aero State Transition Topic <%s>!", AeroStateTransition.c_str(), AeroStateTransition.c_str());
+				"Parameter <%s> Not Set. Using Default Aero State Transition Topic <%s>!", aero_state_transition.c_str(), aero_state_transition.c_str());
 
 //Print out received topics
-	ROS_DEBUG("Using Desired Position Topic Name: <%s>", DesiredPosition.c_str());
-	ROS_DEBUG("Using Base Velocity Topic Name: <%s>", BaseVelocity.c_str());
-	ROS_DEBUG("Using Workspace Position Topic Name: <%s>", WorkspacePosition.c_str());
-	ROS_DEBUG("Using Aero State Topic Name: <%s>", AeroState.c_str());
-	ROS_DEBUG("Using Aero State Transition Topic Name: <%s>", AeroStateTransition.c_str());
+	ROS_DEBUG("Using Desired Position Topic Name: <%s>", desired_position.c_str());
+	ROS_DEBUG("Using Base Velocity Topic Name: <%s>", base_velocity.c_str());
+	ROS_DEBUG("Using Workspace Position Topic Name: <%s>", workspace_position.c_str());
+	ROS_DEBUG("Using Aero State Topic Name: <%s>", aero_state.c_str());
+	ROS_DEBUG("Using Aero State Transition Topic Name: <%s>", aero_state_transition.c_str());
 
 	ROS_INFO("Starting Up Base Servo Controller...");
 
@@ -62,15 +62,15 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 	PID_start_time = ros::Time().now();
 
 	/* Messages */
-	this->desired_position_sub = nh.subscribe(DesiredPosition, 1,
+	this->desired_position_sub = nh.subscribe(desired_position, 1,
 			&BaseServoController::DesiredPositionMSG, this);
-	this->aero_state_sub = nh.subscribe(AeroState, 1, &BaseServoController::AeroStateMSG, this);
-	this->workspace_postion_pub = nh.advertise<geometry_msgs::PoseStamped>(WorkspacePosition, 1,
+	this->aero_state_sub = nh.subscribe(aero_state, 1, &BaseServoController::AeroStateMSG, this);
+	this->workspace_postion_pub = nh.advertise<geometry_msgs::PoseStamped>(workspace_position, 1,
 			true);
-	this->base_velocity_pub = nh.advertise<geometry_msgs::Twist>(BaseVelocity, 2);
+	this->base_velocity_pub = nh.advertise<geometry_msgs::Twist>(base_velocity, 2);
 	/* Services */
 	this->aero_state_transition_srv_client =
-			nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(AeroStateTransition);
+			nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(aero_state_transition);
 	/* Timers */
 	this->error_update_timer = nh.createTimer(ros::Duration(0.1),
 			&BaseServoController::ErrorUpdateTimerCallback, this);
