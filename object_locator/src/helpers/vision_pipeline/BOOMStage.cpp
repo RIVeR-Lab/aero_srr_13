@@ -24,18 +24,33 @@ void BOOMStage::onInit() {
 }
 
 void BOOMStage::loadParams() {
-	this->left_input_topic_ = "upper_stereo/left/image_rect_color";
-	this->right_input_topic_ = "upper_stereo/right/image_rect_color";
-	this->disp_out_topic_ = "upper_stereo/disparityImage";
-	this->points_out_topic_ = "upper_stereo/pointCloud";
+	this->left_camera = "left_camera";
+	this->right_camera = "right_camera";
+	this->disparity = "disparity";
+	this->point_cloud = "point_cloud";
+	this->optical_frame ="optical_frame";
+	this->lower_bound_name = "lower_bound";
+	this->upper_bound_name = "upper_bound";
 
-	this->output_topic_ = "boom_stage/poses";
-	this->getPrivateNodeHandle().getParam(this->left_input_topic_,
-			this->left_input_topic_);
-	this->getPrivateNodeHandle().getParam(this->right_input_topic_,
-			this->right_input_topic_);
-	this->getPrivateNodeHandle().getParam(this->output_topic_,
-			this->output_topic_);
+	this->lower_bound = 4;
+	this->upper_bound = 100;
+	this->output_topic = "output_topic";
+	this->getPrivateNodeHandle().getParam(this->left_camera,
+			this->left_camera);
+	this->getPrivateNodeHandle().getParam(this->right_camera,
+			this->right_camera);
+	this->getPrivateNodeHandle().getParam(this->disparity,
+			this->disparity);
+	this->getPrivateNodeHandle().getParam(this->point_cloud,
+			this->point_cloud);
+	this->getPrivateNodeHandle().getParam(this->optical_frame,
+			this->optical_frame);
+	this->getPrivateNodeHandle().getParam(this->output_topic,
+			this->output_topic);
+	this->getPrivateNodeHandle().getParam(this->lower_bound_name,
+			this->lower_bound);
+	this->getPrivateNodeHandle().getParam(this->lower_bound_name,
+			this->upper_bound);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
 	this->HORIZON_TOP_ = 125;
 	this->HORIZON_BTM_ = 730;
@@ -72,14 +87,14 @@ void BOOMStage::loadParams() {
 }
 
 void BOOMStage::registerTopics() {
-	this->image_left_ = it_->subscribeCamera(this->left_input_topic_, 2,
+	this->image_left_ = it_->subscribeCamera(this->left_camera, 2,
 			&BOOMStage::boomImageCbleft, this);
-	this->image_right_ = it_->subscribeCamera(this->right_input_topic_, 2,
+	this->image_right_ = it_->subscribeCamera(this->right_camera, 2,
 				&BOOMStage::boomImageCbright, this);
 //	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
-	this->pose_array_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->output_topic_,2);
-	this->disp_img_pub_ = this->getNodeHandle().advertise<sensor_msgs::Image>(this->disp_out_topic_,2);
-	this->point_cloud_pub_ = this->getNodeHandle().advertise<sensor_msgs::PointCloud2>(this->points_out_topic_,2);
+	this->pose_array_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->output_topic,2);
+	this->disp_img_pub_ = this->getNodeHandle().advertise<sensor_msgs::Image>(this->disparity,2);
+	this->point_cloud_pub_ = this->getNodeHandle().advertise<sensor_msgs::PointCloud2>(this->point_cloud,2);
 }
 
 void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
@@ -452,7 +467,7 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 		if (flag[i] != 1) {
 			Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255),
 					rng.uniform(0, 255));
-			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > 4 && radius[i] < 100)){
+			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > this->lower_bound && radius[i] < this->upper_bound)){
 			drawContours(drawing, contours_poly, i, color, 1, 8,
 					vector<Vec4i>(), 0, Point());
 			rectangle(drawing, boundRect[i].tl(), boundRect[i].br(), color, 2,
@@ -717,7 +732,7 @@ void BOOMStage::computeDisparity()
 						 detection.setZ(kAvgVal_);
 				tf::pointTFToMsg(detection, camera_point.point);
 				ros::Time tZero(0);
-				camera_point.header.frame_id = "/upper_stereo_optical_frame";
+				camera_point.header.frame_id = this->optical_frame;
 				camera_point.header.stamp = tZero;
 				world_point.header.frame_id = "/world";
 				world_point.header.stamp = tZero;
