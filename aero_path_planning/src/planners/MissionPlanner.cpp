@@ -44,11 +44,11 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
-	this->updateMissionGoal();
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
 	this->registerTopics();
 	this->registerTimers();
+	this->updateMissionGoal();
 	ROS_INFO_STREAM("Mission Planner Running!");
 }
 
