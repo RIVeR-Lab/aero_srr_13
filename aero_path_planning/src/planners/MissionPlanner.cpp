@@ -189,9 +189,6 @@ void MissionPlanner::updateGoal() const
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PoseStamped goal_pose(this->carrot_path_.front());
-		goal_pose.header.frame_id    = this->global_frame_;
-		goal_pose.header.stamp       = ros::Time::now();
-		goal_pose.pose.orientation.w = 1;
 		this->path_goal_pub_.publish(goal_pose);
 	}
 
