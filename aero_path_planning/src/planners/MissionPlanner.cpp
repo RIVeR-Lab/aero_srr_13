@@ -253,7 +253,7 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 }
 
 
-void MissionPlanner::updateMissionGoal() const
+void MissionPlanner::updateMissionGoal()
 {
 	if(!this->mission_goals_.empty())
 	{
