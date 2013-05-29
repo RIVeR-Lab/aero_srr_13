@@ -10,7 +10,7 @@
  * @file arm_position_control.cpp
  *
  * @date   Feb 20, 2013
- * @author parallels
+ * @author mdedonato
  * @brief \todo
  */
 
@@ -277,12 +277,7 @@ void ArmPositionController::UpdatePID(void) {
 		cartisian_velocity(5) = -MaxAngularVel();
 	}
 
-//	ROS_INFO("X_V = %f", cartisian_velocity(0));
-//	ROS_INFO("Y_V = %f", cartisian_velocity(1));
-//	ROS_INFO("Z_V = %f", cartisian_velocity(2));
-//	ROS_INFO("Roll_V = %f", cartisian_velocity(3));
-//	ROS_INFO("Pitch_V = %f", cartisian_velocity(4));
-//	ROS_INFO("Yaw_V = %f", cartisian_velocity(5));
+
 
 	geometry_msgs::TwistStamped cartesian_velocity_msg;
 	cartesian_velocity_msg.header.frame_id = "/arm_base";
@@ -294,12 +289,6 @@ void ArmPositionController::UpdatePID(void) {
 	cartesian_velocity_msg.twist.angular.y = cartisian_velocity(4);
 	cartesian_velocity_msg.twist.angular.z = cartisian_velocity(5);
 
-//	cartesian_velocity_msg.Velocity_X = 100;//cartisian_velocity(0);
-//	cartesian_velocity_msg.twist.linear.y = 0;//cartisian_velocity(1);
-	//cartesian_velocity_msg.twist.linear.z = 0;//cartisian_velocity(2);
-	//cartesian_velocity_msg.twist.angular.x = 0;//cartisian_velocity(3);
-	//cartesian_velocity_msg.twist.angular.y = 0;//cartisian_velocity(4);
-	//cartesian_velocity_msg.twist.angular.z = 0;//cartisian_velocity(5);
 
 	cartesian_velocity_pub.publish(cartesian_velocity_msg);
 
