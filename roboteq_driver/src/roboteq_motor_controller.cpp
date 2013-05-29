@@ -51,8 +51,8 @@ void RoboteqMotorController::open(std::string port){
 	setConfig(_AMOD, 1, 1);
 	setConfig(_AMOD, 4, 1);
 
-	setCurrentTrigger(1, 250, 12);
-	setCurrentTrigger(2, 250, 12);
+	setCurrentTrigger(1, 250, 75);
+	setCurrentTrigger(2, 250, 75);
 
 	saveToEEPROM();
 
