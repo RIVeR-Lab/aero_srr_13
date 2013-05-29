@@ -16,8 +16,6 @@
 
 using namespace aero_path_planning;
 
-#define AERO_PATH_PLANNING_LOAD_PARAM(nh, param_name, param_store, message_stream) if(!nh.getParam(param_name, param_store)) ROS_WARN_STREAM("Parameter "<<param_name<<" not set, using default value:"<<message_stream)
-
 MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				OoI_manager_(0.25),
 				searching_(true),
