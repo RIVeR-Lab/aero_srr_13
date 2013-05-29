@@ -261,6 +261,7 @@ void MissionPlanner::updateMissionGoal() const
 		message->pose            = this->mission_goals_.front();
 		message->header.frame_id = this->global_frame_;
 		message->header.stamp    = ros::Time::now();
+		this->recieved_path_ = false;
 	}
 }
 
