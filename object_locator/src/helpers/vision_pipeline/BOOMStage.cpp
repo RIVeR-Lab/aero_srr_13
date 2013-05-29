@@ -49,9 +49,12 @@ void BOOMStage::loadParams() {
 			this->output_topic);
 	this->getPrivateNodeHandle().getParam(this->lower_bound_name,
 			this->lower_bound);
-	this->getPrivateNodeHandle().getParam(this->lower_bound_name,
+	this->getPrivateNodeHandle().getParam(this->upper_bound_name,
 			this->upper_bound);
+	this->getPrivateNodeHandle().getParam(this->HORIZON_TOP_NAME,
+			this->HORIZON_TOP_);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
+	this->HORIZON_TOP_NAME = "HORIZON";
 	this->HORIZON_TOP_ = 125;
 	this->HORIZON_BTM_ = 730;
 	this->ZeroV[0] = 0;
@@ -426,7 +429,7 @@ void BOOMStage::blobIdentify(const Mat_t& img, Mat_t& mask, Mat_t& final) {
 void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 	NODELET_INFO_STREAM("IN FILLHOLES IDENTIFY");
 	Mat_t med, src_gray, normImg;
-	int thresh = 100;
+	int thresh = 0;
 	int max_thresh = 255;
 	RNG rng(12345);
 	Mat threshold_output;
@@ -436,7 +439,6 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 
 	normImg = img;
 	cvtColor(normImg, src_gray, CV_BGR2GRAY);
-
 	/// Detect edges using Threshold
 	threshold(src_gray, threshold_output, thresh, 255, THRESH_BINARY);
 

@@ -52,8 +52,8 @@ ImageConverter::ImageConverter() :
 
 
 
-	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_raw", 1, &ImageConverter::imageCbRight, this);
 
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
@@ -828,6 +828,11 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		//-- Draw the face
 		cv::Point center(WHA_faces[i].x + WHA_faces[i].width / 2,
 				WHA_faces[i].y + WHA_faces[i].height / 2);
+
+		Rect cropROI(center.x-WHA_faces[i].width / 2, center.y-WHA_faces[i].height / 2, WHA_faces[i].width, WHA_faces[i].height);
+		Mat_t sample = frame(cropROI);
+		object_locator::object_type type = queryObject(sample);
+
 		if (center.y > HORIZON) {
 
 			cv::ellipse(frame, center,
@@ -840,11 +845,11 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 									center.y + WHA_faces[i].height / 2),
 									cv::Scalar(255, 0, 0));
 			//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-
+//			ROS_ERROR_STREAM("Detection is of type " << type);
 			DetectionPtr_t newDetection(new Detection_t());
 			newDetection->first.first = center.x;
 			newDetection->first.second = center.y;
-			newDetection->second = WHA;
+			newDetection->second = type;
 			detection_list_.push_back(newDetection);
 		}
 
@@ -862,6 +867,11 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 		//-- Draw the face
 		cv::Point center(PINK_faces[j].x + PINK_faces[j].width / 2,
 				PINK_faces[j].y + PINK_faces[j].height / 2);
+
+		Rect cropROI(center.x-(PINK_faces[j].width / 2), center.y-(PINK_faces[j].height / 2), PINK_faces[j].width, PINK_faces[j].height);
+		Mat_t sample = frame(cropROI);
+		object_locator::object_type type = queryObject(sample);
+
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(PINK_faces[j].width / 2, PINK_faces[j].height / 2), 0,
@@ -873,11 +883,11 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 								center.y + PINK_faces[j].height / 2),
 								cv::Scalar(255, 0, 255));
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-
+//		ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
-		newDetection->second = PINK_BALL;
+		newDetection->second = type;
 		detection_list_.push_back(newDetection);
 		}
 	}
@@ -921,11 +931,13 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 
 		Mat_t faceROI = frame_gray(RQT_faces[j]);
 
-		//-- In each face, detect eyes
 
-		//-- Draw the face
 		cv::Point center(RQT_faces[j].x + RQT_faces[j].width / 2,
 				RQT_faces[j].y + RQT_faces[j].height / 2);
+
+		Rect cropROI(center.x - RQT_faces[j].width / 2, center.y - RQT_faces[j].height / 2, RQT_faces[j].width, RQT_faces[j].height );
+		Mat_t sample = frame(cropROI);
+		object_locator::object_type type = queryObject(sample);
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(RQT_faces[j].width / 2, RQT_faces[j].height / 2), 0, 0,
@@ -933,10 +945,11 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
+		ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
-		newDetection->second = RQT_BALL;
+		newDetection->second = type;
 		detection_list_.push_back(newDetection);
 		}
 	}
@@ -949,11 +962,16 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 
 		Mat_t faceROI = frame_gray(Pipe_faces[j]);
 
-		//-- In each face, detect eyes
 
-		//-- Draw the face
+
 		cv::Point center(Pipe_faces[j].x + Pipe_faces[j].width / 2,
 				Pipe_faces[j].y + Pipe_faces[j].height / 2);
+
+		Rect cropROI(center.x - Pipe_faces[j].width / 2,
+				center.y - Pipe_faces[j].height / 2, Pipe_faces[j].width,
+				Pipe_faces[j].height);
+		Mat_t sample = frame(cropROI);
+		object_locator::object_type type = queryObject(sample);
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(Pipe_faces[j].width / 2, Pipe_faces[j].height / 2), 0,
@@ -966,11 +984,11 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 						center.y + Pipe_faces[j].height / 2),
 				cv::Scalar(125, 255, 255));
 
-
+//		ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
-		newDetection->second = WHA;
+		newDetection->second = type;
 		detection_list_.push_back(newDetection);
 		}
 	}
@@ -1007,6 +1025,44 @@ void ImageConverter::addBbox(Mat_t& src, Mat_t& final)
    }
    final = img;
 }
+
+object_locator::object_type ImageConverter::queryObject(const Mat_t& crop)
+{
+	Vec3b White,Black;
+	int whiteCtr = 0;
+	int blackCtr = 0;
+	Mat_t sample(crop);
+	White[0] = 255;
+	White[1] = 255;
+	White[2] = 255;
+
+	Black[0] = 0;
+	Black[1] = 0;
+	Black[2] = 0;
+	   for(int i = (crop.rows/2); i <(crop.rows/2)+(crop.rows/4); i++)
+	   {
+		   for(int j= (crop.cols/2)-(crop.cols/4); j<(crop.cols/2)+(crop.cols/4); j++)
+		   {
+			   if(crop.at<Vec3b>(i,j)[0] > 220){
+				   sample.at<Vec3b>(i,j) = White;
+				   whiteCtr++;
+			   }
+			   else{
+				   sample.at<Vec3b>(i,j) = Black;
+				   blackCtr++;
+			   }
+		   }
+	   }
+
+	   imshow("CroppedSample", sample);
+	   waitKey(3);
+	   if(whiteCtr > blackCtr)
+		   return WHA;
+	   else
+		   return Unknown;
+	   return Unknown;
+}
+
 
 Point2f ImageConverter::blobIdentify(Mat_t& img, int objThresh)
 {

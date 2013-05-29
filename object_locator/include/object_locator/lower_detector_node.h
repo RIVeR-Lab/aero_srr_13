@@ -54,6 +54,7 @@ public:
 	void addBbox(Mat_t& img, Mat_t& final);
 	Mat_t gray2bgr(Mat_t img);
 	cv::Point2f blobIdentify(Mat_t& img, int objThresh);
+	object_locator::object_type queryObject(const Mat_t& crop);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 

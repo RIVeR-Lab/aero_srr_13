@@ -95,7 +95,7 @@ namespace object_locator
 
 		image_geometry::StereoCameraModel stereo_model;
 
-		std::string left_camera, right_camera, output_topic, disparity, point_cloud, optical_frame,lower_bound_name, upper_bound_name;
+		std::string left_camera, right_camera, output_topic, disparity, point_cloud, optical_frame,lower_bound_name, upper_bound_name,HORIZON_TOP_NAME;
 		int lower_bound,upper_bound;
 		Mat_t load_;
 	};
