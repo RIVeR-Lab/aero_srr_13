@@ -21,8 +21,8 @@
     <param name="joint_control_name" value="$(arg pose_control_service)" />
     <param name="motor_feedback_topic" value="hd_camera_boom_feedback" />
     <param name="is_angle_bounded" value="true" />
-    <param name="min_angle" value="-3.2" />
-    <param name="max_angle" value="3.2" />
+    <param name="min_angle" value="-1.6" />
+    <param name="max_angle" value="1.6" />
     <param name="velocity_zero_threshold" value="0.001" />
   </node>
 </launch>
