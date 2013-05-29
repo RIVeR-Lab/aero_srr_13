@@ -31,7 +31,7 @@ void BOOMStage::loadParams() {
 	this->optical_frame ="optical_frame";
 	this->lower_bound_name = "lower_bound";
 	this->upper_bound_name = "upper_bound";
-
+	this->comparison_out_topic = "comparison_out_topic";
 	this->lower_bound = 4;
 	this->upper_bound = 100;
 	this->output_topic = "output_topic";
@@ -53,6 +53,8 @@ void BOOMStage::loadParams() {
 			this->upper_bound);
 	this->getPrivateNodeHandle().getParam(this->HORIZON_TOP_NAME,
 			this->HORIZON_TOP_);
+	this->getPrivateNodeHandle().getParam(this->comparison_out_topic,
+			this->comparison_out_topic);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
 	this->HORIZON_TOP_NAME = "HORIZON";
 	this->HORIZON_TOP_ = 125;
@@ -96,6 +98,7 @@ void BOOMStage::registerTopics() {
 				&BOOMStage::boomImageCbright, this);
 //	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
 	this->pose_array_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->output_topic,2);
+	this->comparison_out_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->comparison_out_topic,2);
 	this->disp_img_pub_ = this->getNodeHandle().advertise<sensor_msgs::Image>(this->disparity,2);
 	this->point_cloud_pub_ = this->getNodeHandle().advertise<sensor_msgs::PointCloud2>(this->point_cloud,2);
 }
@@ -103,7 +106,7 @@ void BOOMStage::registerTopics() {
 void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 		const sensor_msgs::CameraInfoConstPtr& info) {
 	cv_bridge::CvImagePtr img;
-	NODELET_INFO_STREAM("In Boom Image CB");
+//	NODELET_INFO_STREAM("In Boom Image CB");
 	try {
 		img = cv_bridge::toCvCopy(msg, enc::RGB8);
 	} catch (cv_bridge::Exception& e) {
@@ -130,7 +133,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 void BOOMStage::boomImageCbright(const sensor_msgs::ImageConstPtr& msg,
 		const sensor_msgs::CameraInfoConstPtr& info) {
 	cv_bridge::CvImagePtr img;
-	NODELET_INFO_STREAM("In Boom Image CB");
+//	NODELET_INFO_STREAM("In Boom Image CB");
 	try {
 		img = cv_bridge::toCvCopy(msg, enc::RGB8);
 	} catch (cv_bridge::Exception& e) {
@@ -169,7 +172,7 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 
 
 void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
-	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
+//	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
 	try {
@@ -207,8 +210,8 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 //			normImg_.at<cv::Vec3b>(x,y) = nRGB;
 			browness = nR / nG;
 			whiteness = sumRGB / 756;
-			if ((nG > .37)
-					|| ((std::abs(browness - 1) < .15) && (whiteness < .9))) {
+			if ((nG > .33)
+					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
 				norma.at<cv::Vec3b>(x, y) = ZeroV;
 
 			}
@@ -245,7 +248,7 @@ waitKey(3);
 
 }
 void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
-	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
+//	NODELET_INFO_STREAM("IN MASK CREATE");
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
 	try {
@@ -290,15 +293,6 @@ void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
 			else {
 				mask.at<cv::Vec3b>(x, y) = ZeroV;
 			}
-			if ((x == 278) && (y == 803)) {
-				NODELET_WARN_STREAM(
-						"nR = " << nR << std::endl << "nG =" << nG << std::endl << "nB =" << nB);
-
-			}
-			if ((nR > nG) && (nG > nB) && (nR > .40)) {
-//				NODELET_WARN_STREAM("Fence Detected");
-
-			}
 		}
 //		HORIZON_ = Fence_;
 	}
@@ -325,13 +319,13 @@ void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
 			Scalar(0, 255, 0));
 
 
-//	imshow("mask", mask);
-//	waitKey(3);
+	imshow("mask", mask);
+	waitKey(3);
 
 }
 
 void BOOMStage::blobIdentify(const Mat_t& img, Mat_t& mask, Mat_t& final) {
-	NODELET_INFO_STREAM("IN BLOB IDENTIFY");
+//	NODELET_INFO_STREAM("IN BLOB IDENTIFY");
 	Mat_t src_gray(mask);
 	int thresh = 100;
 	int max_thresh = 255;
@@ -427,7 +421,7 @@ void BOOMStage::blobIdentify(const Mat_t& img, Mat_t& mask, Mat_t& final) {
 }
 
 void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
-	NODELET_INFO_STREAM("IN FILLHOLES IDENTIFY");
+//	NODELET_INFO_STREAM("IN FILLHOLES IDENTIFY");
 	Mat_t med, src_gray, normImg;
 	int thresh = 0;
 	int max_thresh = 255;
@@ -483,8 +477,8 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 			rectangle(left_image_, boundRect[i].tl(), boundRect[i].br(), color, 2,
 					8, 0);
 			circle(left_image_, center[i], (int) radius[i], color, 2, 8, 0);
-			cout << "Center of object[" << i << "]" << "= " << center[i].x
-									<< "," << center[i].y << endl;
+//			cout << "Center of object[" << i << "]" << "= " << center[i].x
+//									<< "," << center[i].y << endl;
 			DetectionPtr_t newDetection(new Detection_t());
 			newDetection->first.first = center[i].x;
 			newDetection->first.second = center[i].y;
@@ -712,25 +706,26 @@ void BOOMStage::computeDisparity()
 						  std::vector<int> pointIdxNKNSearch;
 						  std::vector<float> pointNKNSquaredDistance;
 
-						  std::cout << "K nearest neighbor search at (" << searchPoint.x
-						            << " " << searchPoint.y
-						            << " " << searchPoint.z
-						            << ") with K=" << K << std::endl;
+//						  std::cout << "K nearest neighbor search at (" << searchPoint.x
+//						            << " " << searchPoint.y
+//						            << " " << searchPoint.z
+//						            << ") with K=" << K << std::endl;
 
 						  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
 						  {
 							  float sum =0.0;
 						    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
 						    {
-						      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-						                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-						                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-						                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+//						      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+//						                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+//						                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+//						                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
 						      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
 						    }
 						    kAvgVal_ = sum/pointIdxNKNSearch.size ();
-						    ROS_WARN_STREAM("Average value at Voxel = " << kAvgVal_);
+
 						  }
+						  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
 						 detection.setZ(kAvgVal_);
 				tf::pointTFToMsg(detection, camera_point.point);
 				ros::Time tZero(0);
@@ -751,6 +746,7 @@ void BOOMStage::computeDisparity()
 		watson_->shrink();
 		geometry_msgs::PoseArrayPtr poses(new geometry_msgs::PoseArray);
 		poses->header.frame_id = "/world";
+		poses->header.stamp = left_msg_.header.stamp;
 		geometry_msgs::Pose tempPose;
 		tempPose.orientation.w  = 1;
 
@@ -762,6 +758,8 @@ void BOOMStage::computeDisparity()
 					poses->poses.push_back(tempPose);
 				}
 			this->pose_array_pub_.publish(poses);
+			this->comparison_out_pub_.publish(poses);
+			ROS_ERROR_STREAM("Sent color msg from color Detector");
 		}
 		ROS_WARN_STREAM("Number of detections in list = " << detections.size());
 		Mat_t cmapped;

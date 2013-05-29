@@ -1,3 +1,10 @@
+/*
+ * LOWER_DETECTOR_NODE.cpp
+ *
+ *  Created on: Mar 7, 2013
+ *      Author: Samir Zutshi
+ */
+
 #include <object_locator/lower_detector_node.h>
 #include <opencv2/gpu/gpu.hpp>
 #include <opencv2/gpu/gpumat.hpp>
@@ -34,7 +41,7 @@ using namespace std;
 using namespace cv;
 using namespace sensor_msgs;
 
-ImageConverter::ImageConverter() :
+DetectorNode::DetectorNode() :
 		it_(nh_), WINDOWLeft("Left Camera"), WINDOWRight("Right Camera"), WINDOWDisparity(
 				"Disparity"), sherlock(.5, .15, .05, .5), gotLeft(false), gotRight(
 				false)
@@ -45,15 +52,15 @@ ImageConverter::ImageConverter() :
 
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>(
-			"ObjectPose", 2);
+			"classiferObjectMsg", 2);
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("lower_stereo/pointCloud", 1);
 	pub_points3_ = nh_.advertise<PointCloud2>("points3", 1);
 
 
 
-	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_raw", 1, &ImageConverter::imageCbLeft, this);
-	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_raw", 1, &ImageConverter::imageCbRight, this);
+	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &DetectorNode::imageCbLeft, this);
+	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &DetectorNode::imageCbRight, this);
 
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
@@ -66,7 +73,7 @@ ImageConverter::ImageConverter() :
 //	point_cloud_sub_ = nh_.subscribe<sensor_msgs::PointCloud2> ("/lower_stereo/points2", 2, &ImageConverter::pointCloudCb, this);
 	//********ROS Timer for Disparity image cb**************
 	disp_timer = nh_.createTimer(ros::Duration(1 / 18),
-			&ImageConverter::computeDisparityCb, this);
+			&DetectorNode::computeDisparityCb, this);
 
 	//Cascade Trained xml file locations
 	cascade_path_WHA =
@@ -87,14 +94,14 @@ ImageConverter::ImageConverter() :
 
 }
 
-ImageConverter::~ImageConverter() {
+DetectorNode::~DetectorNode() {
 	cv::destroyWindow(WINDOWLeft);
 	cv::destroyWindow(WINDOWRight);
 	cv::destroyWindow(WINDOWDisparity);
 	//	cvDestroyAllWindows();
 }
 
-void ImageConverter::processImage(const sensor_msgs::Image& msg,
+void DetectorNode::processImage(const sensor_msgs::Image& msg,
 		cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW) {
 //	ROS_INFO_STREAM("encoding = " << msg.encoding);
 	try {
@@ -116,7 +123,7 @@ void ImageConverter::processImage(const sensor_msgs::Image& msg,
 	//		    	 tune(img,WINDOW);
 //	image_pub_.publish(cv_ptr->toImageMsg());
 }
-void ImageConverter::saveImage(const sensor_msgs::Image& msg,
+void DetectorNode::saveImage(const sensor_msgs::Image& msg,
 		cv_bridge::CvImagePtr& cv_ptr, int O) {
 	try {
 		cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
@@ -145,17 +152,17 @@ void ImageConverter::saveImage(const sensor_msgs::Image& msg,
 	}
 }
 
-void ImageConverter::rectLeftCb(const sensor_msgs::ImageConstPtr& msg) {
+void DetectorNode::rectLeftCb(const sensor_msgs::ImageConstPtr& msg) {
 	left_image = *msg;
 	gotLeft = true;
 	detectAndDisplay(left_image, mat_left, WINDOWLeft);
 }
 
-void ImageConverter::rectRightCb(const sensor_msgs::ImageConstPtr& msg) {
+void DetectorNode::rectRightCb(const sensor_msgs::ImageConstPtr& msg) {
 	right_image = *msg;
 	gotRight = true;
 }
-void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg,
+void DetectorNode::imageCbLeft(const sensor_msgs::ImageConstPtr& msg,
 		const sensor_msgs::CameraInfoConstPtr& cam_info) {
 	left_image = *msg;
 	left_info = *cam_info;
@@ -164,7 +171,7 @@ void ImageConverter::imageCbLeft(const sensor_msgs::ImageConstPtr& msg,
 //		saveImage(left_image, mat_left,0);
 
 }
-void ImageConverter::imageCbRight(const sensor_msgs::ImageConstPtr& msg,
+void DetectorNode::imageCbRight(const sensor_msgs::ImageConstPtr& msg,
 		const sensor_msgs::CameraInfoConstPtr& cam_info) {
 
 	right_image = *msg;
@@ -180,7 +187,7 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 			&& !std::isinf(pt[2]);
 }
 
-void ImageConverter::computeDisparity() {
+void DetectorNode::computeDisparity() {
 	processImage(left_image, mat_left, WINDOWLeft);
 	processImage(right_image, mat_right, WINDOWRight);
 //	ROS_INFO_STREAM("Finished acquiring images");
@@ -608,25 +615,26 @@ void ImageConverter::computeDisparity() {
 		  std::vector<int> pointIdxNKNSearch;
 		  std::vector<float> pointNKNSquaredDistance;
 
-		  std::cout << "K nearest neighbor search at (" << searchPoint.x
-		            << " " << searchPoint.y
-		            << " " << searchPoint.z
-		            << ") with K=" << K << std::endl;
+//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
+//		            << " " << searchPoint.y
+//		            << " " << searchPoint.z
+//		            << ") with K=" << K << std::endl;
 
 		  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
 		  {
 			  float sum =0.0;
 		    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
 		    {
-		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
 		      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
 		    }
 		    kAvgVal_ = sum/pointIdxNKNSearch.size ();
-		    ROS_WARN_STREAM("Average value at Voxel = " << kAvgVal_);
+
 		  }
+		  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
 		 detection.setZ(kAvgVal_);
 
 		aero_srr_msgs::ObjectLocationMsg msg;
@@ -637,6 +645,7 @@ void ImageConverter::computeDisparity() {
 		msg.pose.header.stamp = ros::Time::now();
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
+		ROS_ERROR_STREAM("Sent Obj msg from Classifier");
 	}
 
 
@@ -680,7 +689,7 @@ void ImageConverter::computeDisparity() {
 
 }
 
-float ImageConverter::nNdisp(const Point2d& pt, const Mat_t& disp) {
+float DetectorNode::nNdisp(const Point2d& pt, const Mat_t& disp) {
 	int window = 10;
 	int startx = pt.x - window;
 	int starty = pt.y - window;
@@ -697,7 +706,7 @@ float ImageConverter::nNdisp(const Point2d& pt, const Mat_t& disp) {
 	return sum / (float) (window * window);
 }
 
-Mat_t ImageConverter::gray2bgr(Mat_t img) {
+Mat_t DetectorNode::gray2bgr(Mat_t img) {
 	Mat_t BGR(img.rows, img.cols, CV_32FC3);
 	for (int i = 0; i < img.rows; i++) {
 		for (int j = 0; j < img.cols; j++) {
@@ -715,7 +724,7 @@ Mat_t ImageConverter::gray2bgr(Mat_t img) {
 	return BGR;
 }
 
-void ImageConverter::buildMsg(const tf::Point& point,
+void DetectorNode::buildMsg(const tf::Point& point,
 		geometry_msgs::PoseStamped& msg) const {
 	tf::pointTFToMsg(point, msg.pose.position);
 	tf::Quaternion q;
@@ -724,7 +733,7 @@ void ImageConverter::buildMsg(const tf::Point& point,
 	tf::quaternionTFToMsg(q, msg.pose.orientation);
 }
 
-void ImageConverter::computeDisparityCb(const ros::TimerEvent& event) {
+void DetectorNode::computeDisparityCb(const ros::TimerEvent& event) {
 	if (gotLeft && gotRight) {
 		computeDisparity();
 		gotLeft = false;
@@ -732,7 +741,7 @@ void ImageConverter::computeDisparityCb(const ros::TimerEvent& event) {
 	}
 //	computeDisparity();
 }
-void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
+void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW) {
 
 	try {
@@ -772,22 +781,15 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	Mat_t mask(frame.rows,frame.cols,CV_8U);
 	Mat_t pipeMask = mask;
 	Mat_t WHAMask = mask;
-  	cvtColor(frame, hsv,CV_RGB2HSV);
-  	cvtColor(frame, hsv2,CV_BGR2HSV);
-  	GaussianBlur( hsv, hsv, Size(9, 9), 2, 2 );
-  	GaussianBlur( hsv2, hsv2, Size(9, 9), 2, 2 );
+
+
 //  	cv::Vec3b hsvPipe = hsv.at<cv::Vec3b>(300,300);
 //  	int H = hsvPipe[0];
 //  	int S = hsvPipe[1];
 //  	int V = hsvPipe[2];
-  	cv::Vec3b hsvRock = hsv2.at<cv::Vec3b>(300,300);
-  	int H = hsvRock[0];
-  	int S = hsvRock[1];
-  	int V = hsvRock[2];
+
 //  	ROS_WARN_STREAM("HSV at rock = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
-  	cv::ellipse(hsv2, Point2d(300,300),
-  						cv::Size(2,2),
-  						0, 0, 360, cv::Scalar(0, 0, 0), 2, 8, 0);
+
 //
 //	inRange(hsv, Scalar(108,198, 54,0) , Scalar(115, 240, 128,0), pipeMask );
 //	inRange(hsv2, Scalar(68,71, 76,0) , Scalar(83, 75, 112,0), WHAMask );
@@ -915,7 +917,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 //						center.y + SUN_faces[j].height / 2),
 //				cv::Scalar(0, 0, 255));
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
+//		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
 //		DetectionPtr_t newDetection(new Detection_t());
 //		newDetection->first.first = center.x;
 //		newDetection->first.second = center.y;
@@ -1007,7 +1009,7 @@ void ImageConverter::detectAndDisplay(const sensor_msgs::Image& msg,
 	cv::waitKey(3);
 
 }
-void ImageConverter::addBbox(Mat_t& src, Mat_t& final)
+void DetectorNode::addBbox(Mat_t& src, Mat_t& final)
 {
 	Mat_t img =src;
    for(int i = 0; i <img.rows-1; i++)
@@ -1026,7 +1028,7 @@ void ImageConverter::addBbox(Mat_t& src, Mat_t& final)
    final = img;
 }
 
-object_locator::object_type ImageConverter::queryObject(const Mat_t& crop)
+object_locator::object_type DetectorNode::queryObject(const Mat_t& crop)
 {
 	Vec3b White,Black;
 	int whiteCtr = 0;
@@ -1064,7 +1066,7 @@ object_locator::object_type ImageConverter::queryObject(const Mat_t& crop)
 }
 
 
-Point2f ImageConverter::blobIdentify(Mat_t& img, int objThresh)
+Point2f DetectorNode::blobIdentify(Mat_t& img, int objThresh)
 {
 	ROS_INFO_STREAM("IN BLOB IDENTIFY");
 	Mat_t med, src_gray,normImg;
@@ -1152,8 +1154,8 @@ Point2f ImageConverter::blobIdentify(Mat_t& img, int objThresh)
 }
 
 int main(int argc, char** argv) {
-	ros::init(argc, argv, "image_converter");
-	ImageConverter ic;
+	ros::init(argc, argv, "detector_node");
+	DetectorNode ic;
 	ros::spin();
 	return 0;
 }

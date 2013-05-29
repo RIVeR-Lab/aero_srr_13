@@ -2,7 +2,7 @@
  * LOWER_DETECTOR_NODE.h
  *
  *  Created on: Mar 7, 2013
- *      Author: ssr
+ *      Author: Samir Zutshi
  */
 
 #ifndef LOWER_DETECTOR_NODE_H_
@@ -33,12 +33,12 @@
 namespace object_locator
 {
 
-class ImageConverter
+class DetectorNode
 {
 
 public:
-	ImageConverter();
-	virtual ~ImageConverter();
+	DetectorNode();
+	virtual ~DetectorNode();
 	void processImage(const sensor_msgs::Image& msg,  cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW);
 	void imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
 	void imageCbRight(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info);

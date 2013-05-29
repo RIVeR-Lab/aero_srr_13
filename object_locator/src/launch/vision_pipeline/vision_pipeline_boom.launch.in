@@ -2,13 +2,14 @@
   <node pkg="nodelet" type="nodelet" name="vision_pipeline_boom"  args="manager" output="screen"/>
   
     <node pkg="nodelet" type="nodelet" name="BOOMStage" args="load object_locator/BOOMStage vision_pipeline_boom" output="screen">
-    <param name="left_camera" value="/upper_stereo/left/image_raw" />
-    <param name="right_camera" value="/upper_stereo/right/image_raw" />
+    <param name="left_camera" value="/upper_stereo/left/image_rect_color" />
+    <param name="right_camera" value="/upper_stereo/right/image_rect_color" />
     <param name="disparity" value="/upper_stereo/disparity_image" />
     <param name="point_cloud" value="/upper_stereo/point_cloud" />
     <param name="optical_frame" value="/upper_stereo_optical_frame" />
-    <param name="lower_bound" value="3" />
-    <param name="upper_bound" value="100" />
+    <param name="comparison_out_topic" value="/redundant_color_topic_ignore" />
+    <param name="lower_bound" value="6" />
+    <param name="upper_bound" value="20" />
     <param name="HORIZON" value="130" />
     
   </node>

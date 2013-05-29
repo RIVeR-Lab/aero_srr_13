@@ -2,15 +2,17 @@
   <node pkg="nodelet" type="nodelet" name="vision_pipeline_bottom"  args="manager" output="screen"/>
   
     <node pkg="nodelet" type="nodelet" name="BOTTOMStage" args="load object_locator/BOOMStage vision_pipeline_bottom" output="screen">
-    <param name="left_camera" value="/lower_stereo/left/image_raw" />
-    <param name="right_camera" value="/lower_stereo/right/image_raw" />
+    <param name="left_camera" value="/lower_stereo/left/image_rect_color" />
+    <param name="right_camera" value="/lower_stereo/right/image_rect_color" />
     <param name="disparity" value="/lower_stereo/disparity_image" />
     <param name="point_cloud" value="/lower_stereo/point_cloud" />
     <param name="optical_frame" value="/lower_stereo_optical_frame" />
+    <param name="comparison_out_topic" value="/colorObjectsMsg" />
     <param name="lower_bound" value="10" />
-    <param name="upper_bound" value="100" />
+    <param name="upper_bound" value="40" />
      <param name="HORIZON" value="0" />
     
   </node>
        <node name="lower_detector_node" pkg="object_locator" type="lower_detector_node" output="screen"/>
+       <node name="detectionHandler" pkg="object_locator" type="detectionHandler" output="screen"/>
 </launch>
