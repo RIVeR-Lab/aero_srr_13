@@ -14,9 +14,9 @@ set(STATE_TOPIC_CDF STATE_TOPIC)
 set(STATE_TOPIC_VAL "\"${R_NS}/${SP_NS}/state\"")
 
 #Parameter defining the ControlMode topic
-set(CTRLMD_TOPIC_ARG ${R_NS}/${SP_NS}/control_mode)
+set(CTRLMD_TOPIC_ARG ${R_NS}/${SP_NS}/state_transition_request)
 set(CTRLMD_TOPIC_CDF CTRLMD_TOPIC)
-set(CTRLMD_TOPIC_VAL "\"${R_NS}/${SP_NS}/control_mode\"")
+set(CTRLMD_TOPIC_VAL "\"${R_NS}/${SP_NS}/state_transition_request\"")
 
 #Build the parameter header
 configure_file (

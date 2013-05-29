@@ -13,7 +13,9 @@ namespace object_locator
 	enum object_type
 	{
 		WHA,
-		PINK_BALL
+		PINK_BALL,
+		RQT_BALL,
+		Unknown
 	};
 }
 

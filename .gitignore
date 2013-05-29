@@ -15,6 +15,10 @@
 *.la
 *.a
 
+*.eep
+*.elf
+*.hex
+
 #Stuff built by rosmake
 */build
 */bin
@@ -37,23 +41,46 @@ CMakeCache.txt
 
 #Build artifacts
 *.cfgc
-aero_base/launch
-aero_path_planning/src/aero_path_planning
-aero_srr_msgs/src/aero_srr_msgs
-roboteq_driver/src/roboteq_driver
-hd_driver/src/hd_driver
+
 aero_base/src/aero_base
+
+aero_srr_msgs/src/aero_srr_msgs
+
+aero_srr_supervisor/src/aero_srr_supervisor
+
+occupancy_grid/src/occupancy_grid
+
+hd_driver/src/hd_driver
+hd_driver/cfg/cpp
+hd_driver/docs
+hd_driver/msg/SetPosition*.msg
+
+roboteq_driver/cfg/cpp
+roboteq_driver/docs
+roboteq_driver/src/roboteq_driver
 
 aero_laser_filter/cfg/cpp
 aero_laser_filter/docs
 aero_laser_filter/src/aero_laser_filter
+aero_laser_filter/launch
+
+aero_path_planning/src/aero_path_planning
 aero_path_planning/cfg/cpp
 aero_path_planning/docs
-roboteq_driver/cfg/cpp
-roboteq_driver/docs
+aero_path_planning/launch
 
 object_locator/src/object_locator
 object_locator/launch
 object_locator/docs
 object_locator/cfg/cpp
 
+aero_control/cfg/cpp
+aero_control/docs
+aero_control/src/aero_control
+
+aero_arduino/src/ros_lib
+
+rosserial_arduino/libraries
+rosserial_arduino/src/rosserial_arduino
+
+rosserial_msgs/src/rosserial_msgs

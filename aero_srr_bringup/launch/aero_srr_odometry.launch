@@ -1,7 +1,7 @@
 <!-- Bring up anything needed for calculating odometry here -->
 <launch>
   <!-- Input Arguments -->
-  <arg name="imu_topic"    default="kvh/imu" />
+  <arg name="imu_topic"    default="kvh/odom" />
   <arg name="odom_topic"   default="odom" />
   <arg name="output_topic" default="aero/odom_combined" />
   
@@ -20,11 +20,17 @@
   </node>
   
   <!-- bring up SLAM -->
-  <include file="$(find aero_slam)/launch/gmapping.launch">
+  <include file="$(find aero_slam)/launch/gmapping.launch"></include>
+  <!--<node pkg="hector_mapping" type="hector_mapping" name="hector_mapping">
+    <param name="pub_map_odom_transform"   value="true"/>
+    <param name="map_frame"   value="world"/>
+    <param name="base_frame"   value="base_footprint"/>
+    <param name="odom_frame"   value="odom"/>
+  </node>-->
   
-  </include>
-  <!-- publish a transform from world to odom 
-  <node pkg="tf" type="static_transform_publisher" name="world_odom_broadcaster" args="0 0 0 0 0 0 /world /odom 20" />
--->
+
+  <!--
+  <node pkg="tf" type="static_transform_publisher" name="world_odom_broadcaster" args="0 0 0 0 0 0 /world /odom 20" />-->
+
   
 </launch>

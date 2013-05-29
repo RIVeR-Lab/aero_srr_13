@@ -19,18 +19,56 @@
 
 using namespace aero_control;
 
-ArmPositionController::ArmPositionController(ros::NodeHandle nh, std::string DesiredPosition, std::string JointVelocity, std::string JointAngles, std::string CurrentPosition) {
+ArmPositionController::ArmPositionController(ros::NodeHandle nh, ros::NodeHandle param_nh) {
 
-	this->desired_position_sub = nh.subscribe(DesiredPosition, 1, &ArmPositionController::DesiredPositionMSG, this);
-	this->current_position_sub = nh.subscribe(CurrentPosition, 1, &ArmPositionController::CurrentPositionMSG, this);
+	std::string DesiredPosition("DesiredARMPosition"); ///String containing the topic name for goal position
+	std::string ArmState("ArmState"); ///String containing the topic name for arm state
+	std::string JointVelocity("CartesianVelocity"); ///String containing the topic name for JointVelocity
+	std::string JointAngles("JointAngles"); ///String containing the topic name for JointAngles
+	std::string CurrentPosition("ToolPosition"); ///String containing the topic name for CurrentPosition
+
+	//Grab the topic parameters, print warnings if using default values
+	if (!param_nh.getParam(DesiredPosition, DesiredPosition))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
+	if (!param_nh.getParam(JointVelocity, JointVelocity))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Joint Velocity Topic <%s>!", JointVelocity.c_str(), JointVelocity.c_str());
+	if (!param_nh.getParam(JointAngles, JointAngles))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Joint Angles Topic <%s>!", JointAngles.c_str(), JointAngles.c_str());
+	if (!param_nh.getParam(CurrentPosition, CurrentPosition))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Current Position Topic <%s>!", CurrentPosition.c_str(), CurrentPosition.c_str());
+	if (!param_nh.getParam(ArmState, ArmState))
+		ROS_WARN(
+				"Parameter <%s> Not Set. Using Default Arm State Topic <%s>!", ArmState.c_str(), ArmState.c_str());
+
+//Print out received topics
+	ROS_DEBUG("Got Desired Position Topic Name: <%s>", DesiredPosition.c_str());
+	ROS_DEBUG("Got Joint Velocity Topic Name: <%s>", JointVelocity.c_str());
+	ROS_DEBUG("Got Joint Angles Topic Name: <%s>", JointAngles.c_str());
+	ROS_DEBUG("Got Current Position Topic Name: <%s>", CurrentPosition.c_str());
+	ROS_DEBUG("Using Arm State Topic Name: <%s>", ArmState.c_str());
+
+	ROS_INFO("Starting Up Arm Velocity Controller...");
+
+	this->desired_position_sub = nh.subscribe(DesiredPosition, 1,
+			&ArmPositionController::DesiredPositionMSG, this);
+	this->current_position_sub = nh.subscribe(CurrentPosition, 1,
+			&ArmPositionController::CurrentPositionMSG, this);
 
 	this->joint_velocity_pub = nh.advertise<geometry_msgs::TwistStamped>(JointVelocity, 2);
 
-	this->joint_angles_sub = nh.subscribe(JointAngles, 1, &ArmPositionController::JointAnglesMSG, this);
+	this->joint_angles_sub = nh.subscribe(JointAngles, 1, &ArmPositionController::JointAnglesMSG,
+			this);
+	this->arm_state_pub = nh.advertise<aero_control::arm_state>(ArmState, 2, true);
 
 	last_position_time = ros::Time().now();
+	goal_time = ros::Time().now();
+
 	running = false;
-	//UpdateError();
+	goal_reached = false;
 
 	PID_X = new pid::PIDController(3, 0, 0.5, pos_err.x_err);
 	PID_Y = new pid::PIDController(3, 0, 0.5, pos_err.y_err);
@@ -41,7 +79,6 @@ ArmPositionController::ArmPositionController(ros::NodeHandle nh, std::string Des
 
 	linear_gain = 2;
 	rotational_gain = 1;
-
 
 }
 
@@ -55,48 +92,53 @@ ArmPositionController::~ArmPositionController() {
 
 }
 
-
-
-void ArmPositionController::CurrentPositionMSG(const geometry_msgs::PoseStampedConstPtr& current_pose) {
+void ArmPositionController::CurrentPositionMSG(
+		const geometry_msgs::PoseStampedConstPtr& current_pose) {
 	geometry_msgs::PoseStamped current_pose_api;
 
-	tf_listener.waitForTransform("/jaco_api_origin", current_pose->header.frame_id, current_pose->header.stamp, ros::Duration(1.0));
+	try {
+		tf_listener.waitForTransform("/jaco_api_origin", current_pose->header.frame_id,
+				current_pose->header.stamp, ros::Duration(1.0));
 
-	tf_listener.transformPose("/jaco_api_origin", *current_pose, current_pose_api);
+		tf_listener.transformPose("/jaco_api_origin", *current_pose, current_pose_api);
 
-	tf::Stamped<tf::Pose> Current_StampPose;
+		tf::Stamped<tf::Pose> Current_StampPose;
 
-	tf::poseStampedMsgToTF(current_pose_api, Current_StampPose);
+		tf::poseStampedMsgToTF(current_pose_api, Current_StampPose);
 
-	current_pos.x = Current_StampPose.getOrigin().getX();
-	current_pos.y = Current_StampPose.getOrigin().getY();
-	current_pos.z = Current_StampPose.getOrigin().getZ();
+		current_pos.x = Current_StampPose.getOrigin().getX();
+		current_pos.y = Current_StampPose.getOrigin().getY();
+		current_pos.z = Current_StampPose.getOrigin().getZ();
 
-	tf::Matrix3x3 current_rotation(Current_StampPose.getRotation());
+		tf::Matrix3x3 current_rotation(Current_StampPose.getRotation());
 
-	current_rotation.getRPY(current_pos.roll, current_pos.pitch, current_pos.yaw);
-	UpdateError();
+		current_rotation.getRPY(current_pos.roll, current_pos.pitch, current_pos.yaw);
+		UpdateError();
+
+	} catch (std::exception& e) {
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
 
 }
-void ArmPositionController::DesiredPositionMSG(const geometry_msgs::PoseStampedConstPtr& object_pose) {
+void ArmPositionController::DesiredPositionMSG(
+		const geometry_msgs::PoseStampedConstPtr& object_pose) {
 	geometry_msgs::PoseStamped desired_pose_msg;
+	try {
+		tf_listener.waitForTransform("/jaco_api_origin", object_pose->header.frame_id,
+				object_pose->header.stamp, ros::Duration(0.1));
+		tf_listener.transformPose("/jaco_api_origin", *object_pose, desired_pose_msg);
 
-	tf_listener.waitForTransform("/jaco_api_origin", object_pose->header.frame_id, object_pose->header.stamp, ros::Duration(0.1));
-	tf_listener.transformPose("/jaco_api_origin", *object_pose, desired_pose_msg);
+		tf::Stamped<tf::Pose> desired_StampPose;
 
-	tf::Stamped<tf::Pose> desired_StampPose;
+		tf::poseStampedMsgToTF(desired_pose_msg, desired_StampPose);
 
-	tf::poseStampedMsgToTF(desired_pose_msg, desired_StampPose);
+		desired_pos.x = desired_StampPose.getOrigin().getX();
+		desired_pos.y = desired_StampPose.getOrigin().getY();
+		desired_pos.z = desired_StampPose.getOrigin().getZ();
 
-	desired_pos.x = desired_StampPose.getOrigin().getX();
-	desired_pos.y = desired_StampPose.getOrigin().getY();
-	desired_pos.z = desired_StampPose.getOrigin().getZ();
+		tf::Matrix3x3 desired_rotation(desired_StampPose.getRotation());
 
-
-
-	tf::Matrix3x3 desired_rotation(desired_StampPose.getRotation());
-
-	desired_rotation.getRPY(desired_pos.roll, desired_pos.pitch, desired_pos.yaw);
+		desired_rotation.getRPY(desired_pos.roll, desired_pos.pitch, desired_pos.yaw);
 //	ROS_INFO("Desired");
 //	ROS_INFO("X_Desired = %f", desired_pos.x);
 //	ROS_INFO("Y_Desired = %f", desired_pos.y);
@@ -105,8 +147,12 @@ void ArmPositionController::DesiredPositionMSG(const geometry_msgs::PoseStampedC
 //	ROS_INFO("RY_Desired = %f", desired_pos.pitch);
 //	ROS_INFO("RZ_Desired = %f", desired_pos.y);
 
-	running = true;
-	last_position_time = ros::Time().now();
+		running = true;
+		last_position_time = ros::Time().now();
+
+	} catch (std::exception& e) {
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
 
 }
 
@@ -116,20 +162,25 @@ void ArmPositionController::UpdateCurrentPose(void) {
 	end_effector_pose.setRotation(tf::Quaternion(0, 0, 0, 1));
 	end_effector_pose.frame_id_ = "/jaco_end_effector";
 	end_effector_pose.stamp_ = ros::Time::now();
+	try {
+		tf_listener.waitForTransform("/jaco_api_origin", end_effector_pose.frame_id_,
+				end_effector_pose.stamp_, ros::Duration(1.0));
 
-	tf_listener.waitForTransform("/jaco_api_origin", end_effector_pose.frame_id_, end_effector_pose.stamp_, ros::Duration(1.0));
+		tf::Stamped<tf::Pose> current_StampPose;
 
-	tf::Stamped<tf::Pose> current_StampPose;
+		tf_listener.transformPose("/jaco_api_origin", end_effector_pose, current_StampPose);
 
-	tf_listener.transformPose("/jaco_api_origin", end_effector_pose, current_StampPose);
+		current_pos.x = current_StampPose.getOrigin().getX();
+		current_pos.y = current_StampPose.getOrigin().getY();
+		current_pos.z = current_StampPose.getOrigin().getZ();
 
-	current_pos.x = current_StampPose.getOrigin().getX();
-	current_pos.y = current_StampPose.getOrigin().getY();
-	current_pos.z = current_StampPose.getOrigin().getZ();
+		tf::Matrix3x3 current_rotation(current_StampPose.getRotation());
 
-	tf::Matrix3x3 current_rotation(current_StampPose.getRotation());
+		current_rotation.getRPY(this->current_pos.roll, current_pos.pitch, current_pos.yaw);
 
-	current_rotation.getRPY(this->current_pos.roll, current_pos.pitch, current_pos.yaw);
+	} catch (std::exception& e) {
+		ROS_ERROR_STREAM_THROTTLE(1, e.what());
+	}
 
 }
 
@@ -149,66 +200,101 @@ void ArmPositionController::UpdateError(void) {
 //	ROS_INFO("rY_CUR = %f, rY_DES = %f, rY_ERR_ = %f", current_pos.pitch, desired_pos.pitch, pos_err.pitch_err);
 //	ROS_INFO("rZ_CUR = %f, rZ_DES = %f, rZ_ERR_ = %f", current_pos.yaw, desired_pos.yaw, pos_err.yaw_err);
 
-if(running == true)
-{
-	UpdatePID();
+
+	/* Check if we are at the goal */
+	if (pos_err.x_err < LinearErrorRange() && pos_err.y_err < LinearErrorRange()
+			&& pos_err.z_err < LinearErrorRange() && pos_err.roll_err < RotationalErrorRange()
+			&& pos_err.pitch_err < RotationalErrorRange()
+			&& pos_err.yaw_err < RotationalErrorRange()) {
+		/* if we have been at the goal for a given time */
+		if (ros::Time().now().toSec() - goal_time.toSec() > 1) {
+			goal_reached = true;//Goal has been reached
+		}
+	} else {
+		goal_reached = false;//goal not reached
+
+		goal_time = ros::Time().now();//update current time
+
+	}
+
+	SendArmStateMSG();//send the arm state
+
+	if (running == true) {
+		UpdatePID();
+	}
+
+	if (running == true && (ros::Time().now().toSec() - last_position_time.toSec() > 1)) {
+		running = false;
+	}
 }
 
-if(running == true && (ros::Time().now().toSec()-last_position_time.toSec() > 1))
-		{
-	running = false;
-		}
+void ArmPositionController::SendArmStateMSG(void) {
+	aero_control::arm_state state_msg;
+
+	state_msg.header.stamp = ros::Time().now();
+
+	state_msg.moving = running;
+	state_msg.goal_reached = goal_reached;
+	state_msg.error.x_error = pos_err.x_err;
+	state_msg.error.y_error = pos_err.y_err;
+	state_msg.error.z_error = pos_err.z_err;
+	state_msg.error.roll_error = pos_err.roll_err;
+	state_msg.error.pitch_error = pos_err.pitch_err;
+	state_msg.error.yaw_error = pos_err.yaw_err;
+
+	arm_state_pub.publish(state_msg);
 }
+
 void ArmPositionController::UpdatePID(void) {
 	Eigen::VectorXf cartisian_velocity(6);
 
 	cartisian_velocity(0) = PID_X->PIDUpdate(pos_err.x_err);
 	cartisian_velocity(0) *= linear_gain;
 
-	if (cartisian_velocity(0) > 0.037) {
-		cartisian_velocity(0) = 0.037;
-	} else if (cartisian_velocity(0) < -0.037) {
-		cartisian_velocity(0) = -0.037;
+	if (cartisian_velocity(0) > MaxLinearVel()) {
+		cartisian_velocity(0) = MaxLinearVel();
+	} else if (cartisian_velocity(0) < -MaxLinearVel()) {
+		cartisian_velocity(0) = -MaxLinearVel();
 	}
 	cartisian_velocity(1) = PID_Y->PIDUpdate(pos_err.y_err);
 	cartisian_velocity(1) *= linear_gain;
 
-	if (cartisian_velocity(1) > 0.037) {
-		cartisian_velocity(1) = 0.037;
-	} else if (cartisian_velocity(1) < -0.037) {
-		cartisian_velocity(1) = -0.037;
+	if (cartisian_velocity(1) > MaxLinearVel()) {
+		cartisian_velocity(1) = MaxLinearVel();
+	} else if (cartisian_velocity(1) < -MaxLinearVel()) {
+		cartisian_velocity(1) = -MaxLinearVel();
 	}
 	cartisian_velocity(2) = PID_Z->PIDUpdate(pos_err.z_err);
 	cartisian_velocity(2) *= linear_gain;
 
-	if (cartisian_velocity(2) > 0.037) {
-		cartisian_velocity(2) = 0.037;
-	} else if (cartisian_velocity(2) < -0.037) {
-		cartisian_velocity(2) = -0.037;
+	if (cartisian_velocity(2) > MaxLinearVel()) {
+		cartisian_velocity(2) = MaxLinearVel();
+	} else if (cartisian_velocity(2) < -MaxLinearVel()) {
+		cartisian_velocity(2) = -MaxLinearVel();
 	}
 	cartisian_velocity(3) = PID_Roll->PIDUpdate(pos_err.roll_err);
 	cartisian_velocity(3) *= rotational_gain;
 
-	if (cartisian_velocity(3) > 0.15) {
-		cartisian_velocity(3) = 0.15;
-	} else if (cartisian_velocity(3) < -0.15) {
-		cartisian_velocity(3) = -0.15;
+	if (cartisian_velocity(3) > MaxAngularVel()) {
+		cartisian_velocity(3) = MaxAngularVel();
+	} else if (cartisian_velocity(3) < -MaxAngularVel()) {
+		cartisian_velocity(3) = -MaxAngularVel();
 	}
 	cartisian_velocity(4) = PID_Pitch->PIDUpdate(pos_err.pitch_err);
 	cartisian_velocity(4) *= rotational_gain;
 
-	if (cartisian_velocity(4) > 0.15) {
-		cartisian_velocity(4) = 0.15;
-	} else if (cartisian_velocity(4) < -0.15) {
-		cartisian_velocity(4) = -0.15;
+	if (cartisian_velocity(4) > MaxAngularVel()) {
+		cartisian_velocity(4) = MaxAngularVel();
+	} else if (cartisian_velocity(4) < -MaxAngularVel()) {
+		cartisian_velocity(4) = -MaxAngularVel();
 	}
 	cartisian_velocity(5) = PID_Yaw->PIDUpdate(pos_err.yaw_err);
 	cartisian_velocity(5) *= rotational_gain;
 
-	if (cartisian_velocity(5) > 0.15) {
-		cartisian_velocity(5) = 0.15;
-	} else if (cartisian_velocity(5) < -0.15) {
-		cartisian_velocity(5) = -0.15;
+	if (cartisian_velocity(5) > MaxAngularVel()) {
+		cartisian_velocity(5) = MaxAngularVel();
+	} else if (cartisian_velocity(5) < -MaxAngularVel()) {
+		cartisian_velocity(5) = -MaxAngularVel();
 	}
 
 //	ROS_INFO("X_V = %f", cartisian_velocity(0));
@@ -235,10 +321,11 @@ void ArmPositionController::UpdatePID(void) {
 	//cartesian_velocity_msg.twist.angular.y = 0;//cartisian_velocity(4);
 	//cartesian_velocity_msg.twist.angular.z = 0;//cartisian_velocity(5);
 
-
 	joint_velocity_pub.publish(cartesian_velocity_msg);
 
 }
+
+/* This didn't work very well, needs some tweaking */
 void ArmPositionController::JointAnglesMSG(const jaco_driver::joint_anglesConstPtr& joint_angles) {
 //	UpdateError();
 //
@@ -517,36 +604,8 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string DesiredPosition("DesiredPosition"); ///String containing the topic name for goal position
-	std::string JointVelocity("CartesianVelocity"); ///String containing the topic name for JointVelocity
-	std::string JointAngles("JointAngles"); ///String containing the topic name for JointAngles
-	std::string CurrentPosition("ToolPosition"); ///String containing the topic name for CurrentPosition
-
-	if (argc < 1) {
-		ROS_INFO( "Usage: arm_position_control desired_position_topic joint_velocity_topic joint_angles_topic");
-		return 1;
-	} else {
-		//Grab the topic parameters, print warnings if using default values
-		if (!param_nh.getParam(DesiredPosition, DesiredPosition))
-			ROS_WARN( "Parameter <%s> Not Set. Using Default Desired Position Topic <%s>!", DesiredPosition.c_str(), DesiredPosition.c_str());
-		if (!param_nh.getParam(JointVelocity, JointVelocity))
-			ROS_WARN( "Parameter <%s> Not Set. Using Default Joint Velocity Topic <%s>!", JointVelocity.c_str(), JointVelocity.c_str());
-		if (!param_nh.getParam(JointAngles, JointAngles))
-			ROS_WARN( "Parameter <%s> Not Set. Using Default Joint Angles Topic <%s>!", JointAngles.c_str(), JointAngles.c_str());
-		if (!param_nh.getParam(CurrentPosition, CurrentPosition))
-			ROS_WARN( "Parameter <%s> Not Set. Using Default Current Position Topic <%s>!", CurrentPosition.c_str(), CurrentPosition.c_str());
-	}
-
-//Print out received topics
-	ROS_DEBUG("Got Desired Position Topic Name: <%s>", DesiredPosition.c_str());
-	ROS_DEBUG("Got Joint Velocity Topic Name: <%s>", JointVelocity.c_str());
-	ROS_DEBUG("Got Joint Angles Topic Name: <%s>", JointAngles.c_str());
-	ROS_DEBUG("Got Current Position Topic Name: <%s>", CurrentPosition.c_str());
-
-	ROS_INFO("Starting Up Arm Velocity Controller...");
-
 //create the arm object
-	ArmPositionController arm_position(nh, DesiredPosition, JointVelocity, JointAngles, CurrentPosition);
+	ArmPositionController arm_position(nh, param_nh);
 
 	ros::spin();
 }

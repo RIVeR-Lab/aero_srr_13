@@ -21,3 +21,7 @@ target_link_libraries(aero_global_planner GlobalPlanner)
 #Build the occupancy visualizer node
 rosbuild_add_executable(occupancy_visualizer_node occupancy_visualizer_node.cpp)
 target_link_libraries(occupancy_visualizer_node OccupancyGrid OccupancyVisualizer)
+
+#Build the MissionPlanner node
+rosbuild_add_executable(aero_mission_planner aero_mission_planner.cpp)
+target_link_libraries(aero_mission_planner MissionPlanner)

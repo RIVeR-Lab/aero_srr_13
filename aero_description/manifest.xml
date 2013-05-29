@@ -8,9 +8,9 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/AERO_description</url>
-  <depend package="urdf" /> <!-- Testing -->
-  <depend package="xacro" /> <!-- Testing -->
-  <depend package="husky_description" />
+  <depend package="urdf" />
+  <depend package="xacro" />
+  <depend package="jaco_model" />
 
 </package>
 

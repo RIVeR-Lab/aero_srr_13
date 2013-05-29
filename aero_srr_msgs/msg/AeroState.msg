@@ -35,4 +35,7 @@ uint8 MANUAL=8
 
 #The robot is currently in startup mode
 uint8 STARTUP=9
+
+#The robot is currently picking up an object of interest
+uint8 PICKUP=10
 ##############################################

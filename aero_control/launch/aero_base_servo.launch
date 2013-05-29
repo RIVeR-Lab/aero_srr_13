@@ -1,0 +1,9 @@
+<launch>
+<node name="object_to_pose_converter" pkg="aero_control" type="object_to_pose" output="screen">
+
+  </node>
+<node name="aero_base_servo" pkg="aero_control" type="base_servo_control" output="screen">
+
+  </node>
+
+</launch>

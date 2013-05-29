@@ -29,7 +29,7 @@ class StateTable
 {
 
 private:
-	typedef as::State state_t;
+	typedef uint8_t state_t;
 	typedef std::vector<state_t>  svec_t;
 	typedef boost::unordered_map<state_t, svec_t>      tmap_t;
 	typedef boost::unordered_map<state_t, std::string> smap_t;

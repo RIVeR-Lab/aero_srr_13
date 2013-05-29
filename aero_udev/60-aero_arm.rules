@@ -1,0 +1,2 @@
+# libusb Jaco nodes
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device",ATTRS{idVendor}=="22cd", MODE="0777"

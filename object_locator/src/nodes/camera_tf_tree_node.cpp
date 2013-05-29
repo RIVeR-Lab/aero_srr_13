@@ -25,12 +25,12 @@ public:
 		cam_q.setEuler((3.14159/2.0)+(39*(3.14159/180)),0, 3*(3.14159/2.0));
 //		cam_q.setEuler(0.0,0.0,0.0);
 		camera.setRotation(cam_q);
-		broadcastCam.sendTransform(tf::StampedTransform(camera, ros::Time::now(),  "/world", "/stereo_bottom/center"));
+//		broadcastCam.sendTransform(tf::StampedTransform(camera, ros::Time::now(),  "/world", "/upper_stereo_optical_frame"));
 
 
 		armbase.setOrigin(tf::Vector3(0, 0, 0));
 		armbase.setRotation(tf::Quaternion(0, 0, 0));
-		broadcastArm.sendTransform(tf::StampedTransform(armbase, ros::Time::now(),  "/world", "/arm_base"));
+		broadcastArm.sendTransform(tf::StampedTransform(armbase, ros::Time::now(),  "/world", "/base_footprint"));
 	}
 
 private:
