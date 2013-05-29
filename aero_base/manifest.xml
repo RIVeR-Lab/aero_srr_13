@@ -21,5 +21,6 @@
   <depend package="manzanita_mk3_driver"/>
   <depend package="computer_sensors"/>
   <depend package="aero_arduino"/>
+  <depend package="robot_base_msgs"/>
 
 </package>

@@ -21,6 +21,7 @@
   <depend package="sensor_msgs"/>
   <depend package="dynamic_reconfigure"/>
   <depend package="occupancy_grid"/>
+  <depend package="robot_base_msgs"/>
 
 </package>
 

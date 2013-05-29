@@ -546,7 +546,7 @@ void LocalPlanner::velUpdateCB(const ros::TimerEvent& event)
 	this->sendVelCom(this->set_vel_, this->set_rad_);
 }
 
-void LocalPlanner::stopCB(const aero_srr_msgs::SoftwareStopConstPtr& message){
+void LocalPlanner::stopCB(const robot_base_msgs::SoftwareStopConstPtr& message){
 	//Need to flip as message is true when should stop
 	if(message->stop)
 	{
