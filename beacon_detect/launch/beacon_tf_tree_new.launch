@@ -1,0 +1,14 @@
+<launch>
+<!-- create the tf tree for the beacon so you can calculate the robots relative location with respect to the beacon 
+     the beacon has both small and normal tags. small tags have the post s
+     adjust the heights properly can be simplifieed by setting up an xacro
+     for the tags, the z axis is out of the tag
+                   the y axis is down from the top right corner  VERIFY
+                   the x asis is along the oppositie direction of the tag id below  VERIFY 
+-->
+<node pkg="tf" type="static_transform_publisher" name="home_broadcaster" args="1 0 0 0 0 0 world home 100" />
+
+<!--front-->
+<node pkg="tf" type="static_transform_publisher" name="tag1_broadcaster" args="-.5 0 1 0 -1.57 0 home tag_1 100" />
+
+</launch>
