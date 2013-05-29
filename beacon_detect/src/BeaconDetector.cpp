@@ -261,6 +261,7 @@ void BeaconDetector::detectBeacons()
 				Eigen::Matrix4d T;
 				if(tag_type)
 				{
+					cout<<"Fx: "<<fx<<" fy: "<<fy<<" px "<<px<<" py "<<py<<endl;
 					T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
 					bctr++;
 				}
