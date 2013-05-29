@@ -12,13 +12,17 @@
     <param name="pause_topic" value="/pause" />
   </node>
   <!-- Launch Camera Boom Controller -->
-  <node pkg="aero_base" type="aero_camera_boom_node" name="aero_camera_boom_node">
+  <node pkg="device_driver_base" type="motor_joint_position_controller" name="aero_camera_boom_node">
     <param name="ticks_per_radian" value="2086075.67009" />
     <param name="zero_tick_position" value="-110100" />
-    <param name="target_frame" value="/camera_boom_rot" />
-    <param name="hd_control_service" value="hd_camera_boom_control" />
-    <param name="pose_control_service" value="$(arg pose_control_service)" />
-    <param name="hd_feedback_topic" value="hd_camera_boom_feedback" />
-    <param name="pose_topic" value="$(arg pose_topic)" />
+    <param name="src_frame" value="boom_base" />
+    <param name="joint_name" value="boom_joint" />
+    <param name="motor_control_service" value="hd_camera_boom_control" />
+    <param name="joint_control_service" value="$(arg pose_control_service)" />
+    <param name="motor_feedback_topic" value="hd_camera_boom_feedback" />
+    <param name="is_angle_bounded" value="true" />
+    <param name="min_angle" value="-3.2" />
+    <param name="max_angle" value="3.2" />
+    <param name="velocity_zero_threshold" value="0.001" />
   </node>
 </launch>

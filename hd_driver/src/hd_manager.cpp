@@ -1,8 +1,8 @@
 #include "ros/ros.h"
 #include "hd_driver/hd_motor_controller.h"
 #include "hd_driver/HDConfig.h"
-#include "hd_driver/HDMotorInfo.h"
-#include "hd_driver/SetPositionAction.h"
+#include "device_driver_base/MotorFeedback.h"
+#include "device_driver_base/SetMotorPositionAction.h"
 #include "robot_base_msgs/SoftwareStop.h"
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
@@ -12,6 +12,7 @@
 #include "device_driver_base/SensorLevels.h"
 
 using namespace device_driver;
+using namespace device_driver_base;
 
 class HDManager : public device_driver::ReconfigurableDeviceDriver<hd_driver::HDConfig>{
 private:
@@ -32,8 +33,8 @@ private:
 
 
 public:
-	void controlCallback(const hd_driver::SetPositionGoalConstPtr & goal, boost::shared_ptr<actionlib::SimpleActionServer<hd_driver::SetPositionAction> >& as_){
-	        hd_driver::SetPositionResult result;
+	void controlCallback(const SetMotorPositionGoalConstPtr & goal, boost::shared_ptr<actionlib::SimpleActionServer<SetMotorPositionAction> >& as_){
+	        SetMotorPositionResult result;
 		try{
 			ROS_INFO("Setting position to: [%d]", goal->position);
 			{
@@ -98,7 +99,7 @@ public:
 
 	void feedbackTimerCallback(const ros::TimerEvent& e){
 		try{
-			hd_driver::HDMotorInfo msg;
+			MotorFeedback msg;
 			{
 				boost::lock_guard<boost::mutex> lock(controller_mutex);
 				msg.header.stamp = ros::Time::now();
@@ -128,9 +129,9 @@ public:
 		addDriverStateFunctions(device_driver_state::OPEN, &HDManager::openDevice, &HDManager::closeDevice, this);
 
 		pause_sub = addReconfigurableSubscriber<robot_base_msgs::SoftwareStop>(device_driver_state::RUNNING, "/pause", 1000, boost::bind(&HDManager::pauseCallback, this, _1));
-		feedback_pub = addReconfigurableAdvertise<hd_driver::HDMotorInfo>(device_driver_state::RUNNING, "hd_info", 1000);
+		feedback_pub = addReconfigurableAdvertise<MotorFeedback>(device_driver_state::RUNNING, "hd_info", 1000);
 		feedback_timer = addReconfigurableTimer<HDManager>(device_driver_state::RUNNING, ros::Duration(0.1), &HDManager::feedbackTimerCallback, this);
-		control_server = addReconfigurableActionServer<hd_driver::SetPositionAction>(device_driver_state::RUNNING, "hd_control", boost::bind(&HDManager::controlCallback, this, _1, _2));
+		control_server = addReconfigurableActionServer<SetMotorPositionAction>(device_driver_state::RUNNING, "hd_control", boost::bind(&HDManager::controlCallback, this, _1, _2));
 	}
 
 };

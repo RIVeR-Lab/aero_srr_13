@@ -22,5 +22,6 @@
   <depend package="computer_sensors"/>
   <depend package="aero_arduino"/>
   <depend package="robot_base_msgs"/>
+  <depend package="device_driver_base"/>
 
 </package>
