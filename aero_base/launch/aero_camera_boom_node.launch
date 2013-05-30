@@ -13,7 +13,7 @@
   </node>
   <!-- Launch Camera Boom Controller -->
   <node pkg="device_driver_base" type="motor_joint_position_controller" name="aero_camera_boom_node">
-    <param name="ticks_per_radian" value="2086075.67009" />
+    <param name="ticks_per_radian" value="-2086075.67009" />
     <param name="zero_tick_position" value="140800" />
     <param name="src_frame" value="boom_base" />
     <param name="joint_name" value="boom_joint" />
