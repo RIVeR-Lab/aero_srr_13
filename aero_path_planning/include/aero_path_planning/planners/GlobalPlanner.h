@@ -61,6 +61,12 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Waits for all needed transforms to become valid
+	 */
+	void waitForTransforms();
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Registers topics with the ROS system
 	 */
 	void registerTopics();
