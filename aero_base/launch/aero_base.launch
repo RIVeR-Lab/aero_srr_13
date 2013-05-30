@@ -8,7 +8,6 @@
   <arg name="drive_twist_frame" default="/base_footprint" />
 
   <!-- Camera Boom -->
-  <arg name="camera_boom_pose_topic" default="/camera_boom_pose" />
   <arg name="camera_boom_control_service" default="/camera_boom_control" />
 
   <arg name="pause_topic" default="/pause" />
@@ -37,7 +36,7 @@
 
   <!-- Launch Camera Boom Controller and motor driver -->
   <include file="$(find aero_base)/launch/aero_camera_boom_node.launch">
-    <arg name="pose_topic" value="$(arg camera_boom_pose_topic)" />
+    <arg name="pause_topic" value="$(arg pause_topic)" />
     <arg name="pose_control_service" value="$(arg camera_boom_control_service)" />
   </include>
 

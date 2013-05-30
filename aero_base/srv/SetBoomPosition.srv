@@ -1,5 +1,0 @@
-# Sets the position of the boom
-
-float64 angle
-float64 max_velocity
----

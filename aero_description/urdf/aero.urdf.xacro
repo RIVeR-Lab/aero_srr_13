@@ -74,7 +74,7 @@
 
 
 
-  <!-- Arm -->
+  <!-- Arm --><!--0.0826-->
   <xacro:static_transform parent="base_link" name="arm_mount" xyz="0.325374 0 0.1" rpy="0 0 0">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
