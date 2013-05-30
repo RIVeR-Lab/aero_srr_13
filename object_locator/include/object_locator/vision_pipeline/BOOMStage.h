@@ -35,6 +35,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/octree/octree.h>
 #include <pcl/filters/voxel_grid.h>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/legacy/legacy.hpp>
 
 namespace object_locator
 {
@@ -66,7 +68,7 @@ namespace object_locator
 		virtual void detectAnomalies(Mat_t& img, Mat_t& mask);
 		virtual void showAlpha(Mat_t& src, Mat_t& fMask);
 		virtual void computeDisparity();
-
+		virtual void gmmRemove(const sensor_msgs::ImageConstPtr& msg);
 		virtual void generateMsg();
 
 		ros::Subscriber sync_image_sub_;
@@ -80,7 +82,7 @@ namespace object_locator
 		int HORIZON_BTM_;
 		cv::Vec3b ZeroV,White;
 
-		ros::Publisher pose_array_pub_, disp_img_pub_,point_cloud_pub_;
+		ros::Publisher pose_array_pub_, disp_img_pub_,point_cloud_pub_, comparison_out_pub_;
 
 		typedef std::pair<int, int> PixPoint_t;
 		typedef std::pair<PixPoint_t, object_type> Detection_t;
@@ -95,8 +97,15 @@ namespace object_locator
 
 		image_geometry::StereoCameraModel stereo_model;
 
-		std::string left_input_topic_, right_input_topic_, output_topic_, disp_out_topic_, points_out_topic_;
+		std::string left_camera, right_camera, output_topic, disparity, point_cloud, optical_frame,lower_bound_name, upper_bound_name,HORIZON_TOP_NAME, comparison_out_topic, grass_level_name;
+		int lower_bound,upper_bound;
+		double grass_level;
+		bool train_;
 		Mat_t load_;
+
+		//GMM
+		cv::Mat means;
+		cv::Mat weights;
 	};
 }
 
