@@ -164,7 +164,6 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 
 	if (active_state == true)
 	{
-
 		try
 		{
 			if (path_active == false)
