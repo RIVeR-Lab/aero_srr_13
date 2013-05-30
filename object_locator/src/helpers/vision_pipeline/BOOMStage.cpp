@@ -35,6 +35,7 @@ void BOOMStage::loadParams() {
 	this->lower_bound = 4;
 	this->upper_bound = 100;
 	this->output_topic = "output_topic";
+	this->grass_level_name = "grass_level";
 	this->getPrivateNodeHandle().getParam(this->left_camera,
 			this->left_camera);
 	this->getPrivateNodeHandle().getParam(this->right_camera,
@@ -55,10 +56,13 @@ void BOOMStage::loadParams() {
 			this->HORIZON_TOP_);
 	this->getPrivateNodeHandle().getParam(this->comparison_out_topic,
 			this->comparison_out_topic);
+	this->getPrivateNodeHandle().getParam(this->grass_level_name,
+			this->grass_level);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
 	this->HORIZON_TOP_NAME = "HORIZON";
 	this->HORIZON_TOP_ = 125;
 	this->HORIZON_BTM_ = 730;
+	this->grass_level = .33;
 	this->ZeroV[0] = 0;
 	this->ZeroV[1] = 0;
 	this->ZeroV[2] = 0;
@@ -89,6 +93,7 @@ void BOOMStage::loadParams() {
 	this->watson_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
 //	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
 //	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
+	this->train_ = true;
 }
 
 void BOOMStage::registerTopics() {
@@ -108,7 +113,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	cv_bridge::CvImagePtr img;
 //	NODELET_INFO_STREAM("In Boom Image CB");
 	try {
-		img = cv_bridge::toCvCopy(msg, enc::RGB8);
+		img = cv_bridge::toCvCopy(msg, enc::BGR8);
 	} catch (cv_bridge::Exception& e) {
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
@@ -121,6 +126,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	Mat_t src = img->image;
 	Mat_t normImage,mask,finalMask;
 //	circleFind(*msg);
+//	gmmRemove(msg);
 	grassRemove(*msg, normImage);
 	maskCreate(*msg,mask);
 //	fenceCheckerStd(normImage);
@@ -169,6 +175,101 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 	return pt[2] != image_geometry::StereoCameraModel::MISSING_Z
 			&& !std::isinf(pt[2]);
 }
+void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg)
+{
+	cv_bridge::CvImagePtr img;
+//	Mat_t src = load_;
+	try {
+		img = cv_bridge::toCvCopy(msg, enc::BGR8);
+	} catch (cv_bridge::Exception& e) {
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+	cv::Mat source(img->image);
+    //ouput ima
+
+
+
+
+    cv::Mat meanImg(source.rows, source.cols, CV_32FC3);
+    cv::Mat fgImg(source.rows, source.cols, CV_8UC3);
+    cv::Mat bgImg(source.rows, source.cols, CV_8UC3);
+
+    Rect roi(0, source.rows -101,100,100);
+    cv::Mat crop = source(roi);
+
+    cv::Mat floatCrop;
+    crop.convertTo(floatCrop, CV_32F);
+    cv::Mat floatSource;
+    source.convertTo(floatSource, CV_32F);
+    //convert the input image to float
+
+    cv::Mat cropSamples(crop.rows * crop.cols, 3, CV_32FC1);
+    int idx = 0;
+    for (int y = 0; y < crop.rows; y++) {
+        cv::Vec3f* row = floatSource.ptr<cv::Vec3f > (y);
+        for (int x = 0; x < crop.cols; x++) {
+        	cropSamples.at<cv::Vec3f > (idx++, 0) = row[x];
+        }
+    }
+
+    //now convert the float image to column vector
+    cv::Mat samples(source.rows * source.cols, 3, CV_32FC1);
+     idx = 0;
+    for (int y = 0; y < source.rows; y++) {
+        cv::Vec3f* row = floatSource.ptr<cv::Vec3f > (y);
+        for (int x = 0; x < source.cols; x++) {
+            samples.at<cv::Vec3f > (idx++, 0) = row[x];
+        }
+    }
+
+    //we need just 2 clusters
+    cv::EMParams params(2);
+    cv::ExpectationMaximization em(cropSamples, cv::Mat(), params);
+
+	    means = em.getMeans();
+	    weights = em.getWeights();
+
+	    //the two dominating colors
+
+	    //the weights of the two dominant colors
+
+
+	    //we define the foreground as the dominant color with the largest weight
+	    const int fgId = weights.at<float>(0) > weights.at<float>(1) ? 0 : 1;
+
+	    //now classify each of the source pixels
+	    idx = 0;
+	    for (int y = 0; y < source.rows; y++) {
+	        for (int x = 0; x < source.cols; x++) {
+
+	            //classify
+	            const int result = cvRound(em.predict(samples.row(idx++), NULL));
+	            //get the according mean (dominant color)
+	            const double* ps = means.ptr<double>(result, 0);
+
+	            //set the according mean value to the mean image
+	            float* pd = meanImg.ptr<float>(y, x);
+	            //float images need to be in [0..1] range
+	            pd[0] = ps[0] / 255.0;
+	            pd[1] = ps[1] / 255.0;
+	            pd[2] = ps[2] / 255.0;
+
+	            //set either foreground or background
+	            if (result == fgId) {
+	                fgImg.at<cv::Point3_<uchar> >(y, x, 0) = source.at<cv::Point3_<uchar> >(y, x, 0);
+	            } else {
+	                bgImg.at<cv::Point3_<uchar> >(y, x, 0) = source.at<cv::Point3_<uchar> >(y, x, 0);
+	            }
+	        }
+	    }
+
+//	    cv::imshow("Means", meanImg);
+	    cv::imshow("Foreground", fgImg);
+	    cv::imshow("Background", bgImg);
+	    cv::waitKey(3);
+
+}
 
 
 void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
@@ -210,7 +311,7 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 //			normImg_.at<cv::Vec3b>(x,y) = nRGB;
 			browness = nR / nG;
 			whiteness = sumRGB / 756;
-			if ((nG > .33)
+			if ((nG > grass_level)
 					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
 				norma.at<cv::Vec3b>(x, y) = ZeroV;
 
@@ -286,7 +387,7 @@ void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
 //			normImg_.at<cv::Vec3b>(x,y) = nRGB;
 			browness = nR / nG;
 			whiteness = sumRGB / 756;
-			if ((nG > .33)
+			if ((nG > grass_level)
 					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
 				mask.at<cv::Vec3b>(x, y) = White;
 			}

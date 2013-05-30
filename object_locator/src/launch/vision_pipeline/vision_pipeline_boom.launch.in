@@ -10,7 +10,8 @@
     <param name="comparison_out_topic" value="/redundant_color_topic_ignore" />
     <param name="lower_bound" value="6" />
     <param name="upper_bound" value="20" />
-    <param name="HORIZON" value="130" />
+    <param name="HORIZON" value="200" />
+    <param name="grass_level" value="0.31" />
     
   </node>
   

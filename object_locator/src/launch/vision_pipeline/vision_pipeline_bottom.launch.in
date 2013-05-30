@@ -11,6 +11,7 @@
     <param name="lower_bound" value="10" />
     <param name="upper_bound" value="40" />
      <param name="HORIZON" value="0" />
+     <param name="grass_level" value="0.33" />
     
   </node>
        <node name="lower_detector_node" pkg="object_locator" type="lower_detector_node" output="screen"/>
