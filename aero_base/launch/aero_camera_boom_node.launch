@@ -1,6 +1,6 @@
 <launch>
-  <arg name="pose_topic" default="/camera_boom_pose" />
   <arg name="pose_control_service" default="/camera_boom_control" />
+  <arg name="pause_topic" default="/pause" />
 
   <!-- Launch Motor Controller Driver -->
   <node pkg="hd_driver" type="hd_manager" name="aero_camera_boom_hd_manager">
@@ -9,7 +9,7 @@
     <param name="port" value="/dev/BOOM" />
     <param name="control_service" value="hd_camera_boom_control" />
     <param name="info_topic" value="hd_camera_boom_feedback" />
-    <param name="pause_topic" value="/pause" />
+    <param name="pause_topic" value="$(arg pause_topic)" />
   </node>
   <!-- Launch Camera Boom Controller -->
   <node pkg="device_driver_base" type="motor_joint_position_controller" name="aero_camera_boom_node">
