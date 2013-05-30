@@ -284,6 +284,7 @@ LocalPlanner::~LocalPlanner()
 
 void LocalPlanner::goalCB(const geometry_msgs::PoseStampedConstPtr& message)
 {
+	ROS_INFO_STREAM("Got new global goal in Local Planner:"<<*message);
 	this->global_goal_ = message;
 }
 
@@ -523,10 +524,8 @@ void LocalPlanner::applyGoal(og::MultiTraitOccupancyGrid& grid) const
 	{
 		try
 		{
-			PointConverter converter(this->res_);
 			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, grid.getCreationTime(), ros::Duration(1.0/20.0));
 			this->transformer_.transformPose(grid.getFrameID(), grid.getCreationTime(), *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
-
 			grid.setGoal(local_goal.pose);
 
 		}
@@ -546,7 +545,7 @@ void LocalPlanner::velUpdateCB(const ros::TimerEvent& event)
 	this->sendVelCom(this->set_vel_, this->set_rad_);
 }
 
-void LocalPlanner::stopCB(const aero_srr_msgs::SoftwareStopConstPtr& message){
+void LocalPlanner::stopCB(const robot_base_msgs::SoftwareStopConstPtr& message){
 	//Need to flip as message is true when should stop
 	if(message->stop)
 	{

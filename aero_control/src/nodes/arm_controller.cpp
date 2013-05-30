@@ -22,41 +22,41 @@ using namespace aero_control;
 ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 {
 
-	std::string ArmPose("DesiredARMPosition"); ///String containing the topic name for arm position
-	std::string ArmState("ArmState"); ///String containing the topic name for arm State
-	std::string ObjectPose("ObjectPose"); ///String containing the topic name for object position
-	std::string SetFingerPosition("SetFingerPosition"); ///String containing the topic name for SetFingerPosition
-	std::string AeroState("aero/supervisor/state"); ///String containing the topic name for AeroState
-	std::string AeroStateTransition("aero/supervisor/control_mode"); ///String containing the topic name for AeroStateTransition
+	std::string desired_arm_pose("desired_arm_pose"); ///String containing the topic name for arm position
+	std::string arm_state("arm_state"); ///String containing the topic name for arm State
+	std::string object_pose("object_pose"); ///String containing the topic name for object position
+	std::string set_finger_position("set_finger_position"); ///String containing the topic name for set_finger_position
+	std::string aero_state("aero/supervisor/state"); ///String containing the topic name for aero_state
+	std::string aero_state_transition("aero/supervisor/control_mode"); ///String containing the topic name for aero_state_transition
 
 	//Grab the topic parameters, print warnings if using default values
-	if (!param_nh.getParam(ObjectPose, ObjectPose))
+	if (!param_nh.getParam(object_pose, object_pose))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Object Position Topic <%s>!", ObjectPose.c_str(), ObjectPose.c_str());
-	if (!param_nh.getParam(ArmPose, ArmPose))
+				"Parameter <%s> Not Set. Using Default Object Position Topic <%s>!", object_pose.c_str(), object_pose.c_str());
+	if (!param_nh.getParam(desired_arm_pose, desired_arm_pose))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Arm Position Topic <%s>!", ArmPose.c_str(), ArmPose.c_str());
-	if (!param_nh.getParam(SetFingerPosition, SetFingerPosition))
+				"Parameter <%s> Not Set. Using Default Arm Position Topic <%s>!", desired_arm_pose.c_str(), desired_arm_pose.c_str());
+	if (!param_nh.getParam(set_finger_position, set_finger_position))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Set Finger Position Topic <%s>!", SetFingerPosition.c_str(), SetFingerPosition.c_str());
-	if (!param_nh.getParam(AeroState, AeroState))
+				"Parameter <%s> Not Set. Using Default Set Finger Position Topic <%s>!", set_finger_position.c_str(), set_finger_position.c_str());
+	if (!param_nh.getParam(aero_state, aero_state))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Aero State Topic <%s>!", AeroState.c_str(), AeroState.c_str());
+				"Parameter <%s> Not Set. Using Default Aero State Topic <%s>!", aero_state.c_str(), aero_state.c_str());
 
-	if (!param_nh.getParam(AeroStateTransition, AeroStateTransition))
+	if (!param_nh.getParam(aero_state_transition, aero_state_transition))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Aero State Transition Topic <%s>!", AeroStateTransition.c_str(), AeroStateTransition.c_str());
+				"Parameter <%s> Not Set. Using Default Aero State Transition Topic <%s>!", aero_state_transition.c_str(), aero_state_transition.c_str());
 
-	if (!param_nh.getParam(ArmState, ArmState))
+	if (!param_nh.getParam(arm_state, arm_state))
 		ROS_WARN(
-				"Parameter <%s> Not Set. Using Default Arm State Topic <%s>!", ArmState.c_str(), ArmState.c_str());
+				"Parameter <%s> Not Set. Using Default Arm State Topic <%s>!", arm_state.c_str(), arm_state.c_str());
 	//Print out received topics
-	ROS_DEBUG("Using Object Position Topic Name: <%s>", ObjectPose.c_str());
-	ROS_DEBUG("Using Arm Position Topic Name: <%s>", ArmPose.c_str());
-	ROS_DEBUG("Using Set Finger Position Topic Name: <%s>", SetFingerPosition.c_str());
-	ROS_DEBUG("Using Aero State Topic Name: <%s>", AeroState.c_str());
-	ROS_DEBUG("Using Aero State Transition Topic Name: <%s>", AeroStateTransition.c_str());
-	ROS_DEBUG("Using Arm State Topic Name: <%s>", ArmState.c_str());
+	ROS_DEBUG("Using Object Position Topic Name: <%s>", object_pose.c_str());
+	ROS_DEBUG("Using Arm Position Topic Name: <%s>", desired_arm_pose.c_str());
+	ROS_DEBUG("Using Set Finger Position Topic Name: <%s>", set_finger_position.c_str());
+	ROS_DEBUG("Using Aero State Topic Name: <%s>", aero_state.c_str());
+	ROS_DEBUG("Using Aero State Transition Topic Name: <%s>", aero_state_transition.c_str());
+	ROS_DEBUG("Using Arm State Topic Name: <%s>", arm_state.c_str());
 
 	ROS_INFO("Starting Up Arm Controller...");
 
@@ -68,20 +68,20 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	this->path_step_start = true;
 	this->path_step_start_time = ros::Time().now();
 	/* Messages */
-	this->object_position_sub = nh.subscribe(ObjectPose, 1, &ArmController::ObjectPositionMSG,
+	this->object_position_sub = nh.subscribe(object_pose, 1, &ArmController::ObjectPositionMSG,
 			this);
-	this->aero_state_sub = nh.subscribe(AeroState, 1, &ArmController::AeroStateMSG, this);
+	this->aero_state_sub = nh.subscribe(aero_state, 1, &ArmController::AeroStateMSG, this);
 
-	this->arm_state_sub = nh.subscribe(ArmState, 1, &ArmController::ArmStateMSG, this);
+	this->arm_state_sub = nh.subscribe(arm_state, 1, &ArmController::ArmStateMSG, this);
 
-	this->arm_position_pub = nh.advertise<geometry_msgs::PoseStamped>(ArmPose, 2);
+	this->arm_position_pub = nh.advertise<geometry_msgs::PoseStamped>(desired_arm_pose, 2);
 
-	this->set_finger_position_pub = nh.advertise<jaco_driver::finger_position>(SetFingerPosition,
+	this->set_finger_position_pub = nh.advertise<jaco_driver::finger_position>(set_finger_position,
 			2);
 
 	/* Services */
 	this->aero_state_transition_srv_client =
-			nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(AeroStateTransition);
+			nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(aero_state_transition);
 
 	/* Timers */
 	this->path_timer = nh.createTimer(ros::Duration(0.05), &ArmController::PathTimerCallback, this);
@@ -164,7 +164,6 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 
 	if (active_state == true)
 	{
-
 		try
 		{
 			if (path_active == false)

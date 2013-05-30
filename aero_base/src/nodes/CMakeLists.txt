@@ -1,5 +1,3 @@
 rosbuild_add_executable(aero_drive_node aero_drive_node.cpp)
 
-rosbuild_add_executable(aero_camera_boom_node aero_camera_boom_node.cpp)
-
 rosbuild_add_executable(aero_arduino_controller aero_arduino_controller.cpp)

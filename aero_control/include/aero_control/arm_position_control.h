@@ -82,9 +82,8 @@ private:
 	ros::NodeHandle nh_;
 	ros::Subscriber desired_position_sub;
 	ros::Subscriber current_position_sub;
-	ros::Subscriber joint_angles_sub;
 
-	ros::Publisher joint_velocity_pub;
+	ros::Publisher cartesian_velocity_pub;
 	ros::Publisher arm_state_pub;
 
 	tf::TransformListener tf_listener;

@@ -16,11 +16,10 @@
 
 using namespace aero_path_planning;
 
-#define AERO_PATH_PLANNING_LOAD_PARAM(nh, param_name, param_store, message_stream) if(!nh.getParam(param_name, param_store)) ROS_WARN_STREAM("Parameter "<<param_name<<" not set, using default value:"<<message_stream)
-
 MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				OoI_manager_(0.25),
 				searching_(true),
+				recieved_path_(false),
 				nh_(nh),
 				p_nh_(p_nh),
 				transformer_(nh),
@@ -47,11 +46,13 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	this->loadParam();
 	this->registerTopics();
 	this->registerTimers();
+	this->updateMissionGoal();
 	ROS_INFO_STREAM("Mission Planner Running!");
 }
 
 void MissionPlanner::loadParam()
 {
+	ROS_INFO_STREAM("Mission Planner Loading Parameters...");
 	this->local_frame_        = "/base_footprint";
 	this->global_frame_       = "/world";
 	this->path_topic_         = "/path";
@@ -75,6 +76,7 @@ void MissionPlanner::loadParam()
 
 void MissionPlanner::registerTopics()
 {
+	ROS_INFO_STREAM("Mission Planner Registering Topics...");
 	this->state_sub_        = this->nh_.subscribe(this->state_topic_, 1,  &MissionPlanner::stateCB, this);
 	this->path_sub_         = this->nh_.subscribe(this->path_topic_, 1, &MissionPlanner::pathCB, this);
 	this->mission_goal_pub_ = this->nh_.advertise<geometry_msgs::PoseStamped>(this->mission_goal_topic_, 1, true);
@@ -86,7 +88,7 @@ void MissionPlanner::registerTopics()
 
 void MissionPlanner::registerTimers()
 {
-
+	ROS_INFO_STREAM("Mission Planner Registering Timers...");
 	this->goal_timer_ = this->nh_.createTimer(ros::Duration(1.0/10.0), &MissionPlanner::goalCB, this);
 }
 
@@ -111,6 +113,8 @@ void MissionPlanner::drCB(const MissionPlannerConfig& config, uint32_t level)
 
 void MissionPlanner::pathCB(const nav_msgs::PathConstPtr& message)
 {
+	ROS_INFO_STREAM("Mission Planner Recieved new Carrot Path!");
+	this->recieved_path_ = true;
 	this->carrot_path_.clear();
 	BOOST_FOREACH(std::vector<geometry_msgs::PoseStamped>::value_type pose, message->poses)
 	{
@@ -158,7 +162,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 		else
 		{
 			ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
-			if(!this->mission_goals_.empty())
+			if(!this->mission_goals_.empty() && this->recieved_path_)
 			{
 				this->mission_goals_.pop_front();
 				this->updateMissionGoal();
@@ -185,9 +189,6 @@ void MissionPlanner::updateGoal() const
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PoseStamped goal_pose(this->carrot_path_.front());
-		goal_pose.header.frame_id    = this->global_frame_;
-		goal_pose.header.stamp       = ros::Time::now();
-		goal_pose.pose.orientation.w = 1;
 		this->path_goal_pub_.publish(goal_pose);
 	}
 
@@ -250,7 +251,7 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 }
 
 
-void MissionPlanner::updateMissionGoal() const
+void MissionPlanner::updateMissionGoal()
 {
 	if(!this->mission_goals_.empty())
 	{
@@ -258,6 +259,9 @@ void MissionPlanner::updateMissionGoal() const
 		message->pose            = this->mission_goals_.front();
 		message->header.frame_id = this->global_frame_;
 		message->header.stamp    = ros::Time::now();
+		ROS_INFO_STREAM("Upating Mission Goal to:"<<(*message));
+		this->mission_goal_pub_.publish(message);
+		this->recieved_path_ = false;
 	}
 }
 

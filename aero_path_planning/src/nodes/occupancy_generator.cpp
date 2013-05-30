@@ -6,7 +6,7 @@
  */
 #include<ros/ros.h>
 #include<sensor_msgs/PointCloud2.h>
-#include<aero_srr_msgs/SoftwareStop.h>
+#include<robot_base_msgs/SoftwareStop.h>
 #include<aero_path_planning/OccupancyGridMsg.h>
 #include<aero_path_planning/occupancy_grid/OccupancyGrid.h>
 
@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "Occupancy_Generator");
 	ros::NodeHandle nh;
 	ros::Publisher pub = nh.advertise<aero_path_planning::OccupancyGridMsg>("aero/occupancy_point_cloud_topic", 2);
-	ros::Publisher s_pub = nh.advertise<aero_srr_msgs::SoftwareStop>("aero/software_stop", 2);
+	ros::Publisher s_pub = nh.advertise<robot_base_msgs::SoftwareStop>("aero/software_stop", 2);
 
 	//x dimension of occupancy grid
 	std::string p_x_dim("occupancy/x_dimension");

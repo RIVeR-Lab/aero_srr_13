@@ -51,6 +51,10 @@ void RoboteqMotorController::open(std::string port){
 	setConfig(_AMOD, 1, 1);
 	setConfig(_AMOD, 4, 1);
 
+	setCurrentTrigger(1, 250, 75);
+	setCurrentTrigger(2, 250, 75);
+
+	saveToEEPROM();
 
 	//Initialize to initial values
 	motor_mode1_ = motor_mode2_ = MOTOR_MODE_UNDEFINED;//make sure to reset local values
@@ -182,6 +186,19 @@ void RoboteqMotorController::saveRotationInfo(double maxRPM1, double maxRPM2, in
 	saveToEEPROM();
 }
 
+void RoboteqMotorController::setCurrentTrigger(uint8_t chan, uint32_t trigger_delay, float trigger_level){
+  if(chan==1){
+    setConfig(_ATGD, 1, trigger_delay);
+    setConfig(_ATRIG, 1, (uint32_t)(trigger_level*10));
+  }
+  else if(chan==2){
+    setConfig(_ATGD, 2, trigger_delay);
+    setConfig(_ATRIG, 2, (uint32_t)(trigger_level*10));
+  }
+  else
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
+}
+
 void RoboteqMotorController::saveToEEPROM(){
   setCommand(_EES);
 }
@@ -213,6 +230,7 @@ void RoboteqMotorController::setMotorMode(uint8_t chan, MotorMode new_mode){
   else
     DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
+
 void RoboteqMotorController::setRPM(uint8_t chan, double speed){
   setMotorMode(chan, MOTOR_MODE_RPM);
   if(chan==1)

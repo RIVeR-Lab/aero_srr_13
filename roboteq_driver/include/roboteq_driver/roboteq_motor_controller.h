@@ -91,6 +91,12 @@ class RoboteqMotorController{
   void saveRotationInfo(double maxRPM1, double maxRPM2,
 			 int ppr1, int ppr2);
   /**
+   * trigger_delay in ms
+   * trigger_level in A
+   */
+  void setCurrentTrigger(uint8_t chan, uint32_t trigger_delay, float trigger_level);
+
+  /**
    * Save the current configuration to persist between restarts
    */
   void saveToEEPROM();
