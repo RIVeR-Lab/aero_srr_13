@@ -120,6 +120,7 @@ void MissionPlanner::pathCB(const nav_msgs::PathConstPtr& message)
 	{
 		this->carrot_path_.push_back(pose);
 	}
+	this->updateGoal();
 }
 
 void MissionPlanner::ooiCB(const geometry_msgs::PoseArrayConstPtr& message)

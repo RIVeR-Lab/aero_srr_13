@@ -526,6 +526,7 @@ void LocalPlanner::applyGoal(og::MultiTraitOccupancyGrid& grid) const
 		{
 			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, grid.getCreationTime(), ros::Duration(1.0/20.0));
 			this->transformer_.transformPose(grid.getFrameID(), grid.getCreationTime(), *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
+			ROS_INFO_STREAM_THROTTLE(1, "Local Goal is:\n"<<local_goal.pose.position);
 			grid.setGoal(local_goal.pose);
 
 		}
