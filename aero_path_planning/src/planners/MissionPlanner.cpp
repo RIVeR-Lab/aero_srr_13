@@ -55,7 +55,7 @@ void MissionPlanner::loadParam()
 	ROS_INFO_STREAM("Mission Planner Loading Parameters...");
 	this->local_frame_        = "/base_footprint";
 	this->global_frame_       = "/world";
-	this->path_topic_         = "/path";
+	this->path_topic_         = "aero/global/path";
 	this->state_topic_        = "/state";
 	this->mission_goal_topic_ = "/mission_goal";
 	this->path_goal_topic_    = "/path_goal";
@@ -141,7 +141,7 @@ bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLoca
 	tf::pointMsgToTF(worldLocation.pose.position, world_point);
 	tf::pointMsgToTF(this->carrot_path_.front().pose.position, goal_point);
 	double dist = world_point.distance(goal_point);
-	ROS_INFO_STREAM_THROTTLE(10, "At position:"<<world_point<<"\nGoal position:"<<goal_point<<"\ndist="<<dist);
+	ROS_INFO_STREAM_THROTTLE(2.5, "\nAt position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\ndist="<<dist);
 	return dist<threshold;
 }
 
@@ -161,9 +161,10 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 		}
 		else
 		{
-			ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
+			ROS_INFO_STREAM_THROTTLE(5,"I have completed my current path!");
 			if(!this->mission_goals_.empty() && this->recieved_path_)
 			{
+				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
 				this->mission_goals_.pop_front();
 				this->updateMissionGoal();
 				if(!this->searching_)

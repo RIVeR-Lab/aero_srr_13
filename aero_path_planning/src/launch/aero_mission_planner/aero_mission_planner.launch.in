@@ -7,7 +7,7 @@
 	<arg name="path_topic"         default="/aero/global/path"/>
 	<arg name="state_topic"        default="/aero/supervisor/state"/>
 
-	<node pkg="aero_path_planning" type="aero_mission_planner" name="aero_mission_planner">
+	<node pkg="aero_path_planning" type="aero_mission_planner" name="aero_mission_planner" output="screen">
 		<param name="mission_goal_topic"  value="$(arg mission_goal_topic)"/>
 		<param name="path_goal_topic"     value="$(arg path_goal_topic)"/>
 		<param name="global_frame"        value="$(arg global_frame)"/>

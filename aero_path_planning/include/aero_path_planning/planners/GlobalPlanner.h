@@ -86,6 +86,12 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Causes the global planner to calculate a new carrot path
+	 */
+	void plan();
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Sets/unsets to manual mode
 	 * @param [in] enable true for manual, false for autonomous
 	 */
