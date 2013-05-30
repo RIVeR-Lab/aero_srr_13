@@ -11,6 +11,11 @@
 
   <depend package="aero_laser_filter"/>
   <depend package="aero_path_planning"/>
+  <depend package="aero_srr_supervisor"/>
+  <depend package="aero_base"/>
+  <depend package="aero_control"/>
+  <depend package="aero_prosilica_camera"/>
+  <depend package="stereo_image_proc"/>
 
 </package>
 

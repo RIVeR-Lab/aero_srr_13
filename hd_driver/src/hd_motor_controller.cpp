@@ -16,6 +16,7 @@ HDMotorController::~HDMotorController(){
 
 void HDMotorController::open(std::string port){
   serial_port_.open(port, (speed_t)B9600, 8, serial_parity_none);
+  sleep(2);//wait for device to reset (2s)
   //TODO increase baud rate
 }
 
@@ -28,9 +29,11 @@ void HDMotorController::set_state(amplifier_state_t state){
   set(memory_bank_ram, variable_amplifier_state, state);
 }
 
-void HDMotorController::set_position(int32_t position){
+void HDMotorController::set_position(int32_t position, float max_velocity){
   set(memory_bank_ram, variable_position_profile_type, position_profile_absolute_trapazoidal);
   set(memory_bank_ram, variable_position_command, position);
+  //velocity is in 0.1 counts/second
+  set(memory_bank_ram, variable_position_maximum_velocity, (int32_t)(max_velocity*10));
   set_state(amplifier_servo_trajectory_gen);
   trajectory(trajectory_update_move);
 }
@@ -61,13 +64,13 @@ uint32_t HDMotorController::get_trajectory_status(){
 #define parse_ok_or_error(command, buf)		\
   if(streq("ok", buf))\
     return;\
-  parse_error("set", buf)
+  parse_error(command , buf)
 
 #define parse_intval_or_error(command, buf)		\
   int value;\
   if(sscanf(buf, "v %d", &value)==1)\
     return value;\
-  parse_error("set", buf)
+  parse_error(command, buf)
 
 void HDMotorController::set(memory_bank_t memory_bank, variable_t variable_id, memory_value_t value){
   serial_port_.writef(10, "s %c0x%x %d\r", memory_bank, variable_id, value);

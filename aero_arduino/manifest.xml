@@ -1,0 +1,16 @@
+<package>
+  <description brief="aero_arduino">
+
+     aero_arduino
+
+  </description>
+  <author>Mitchell Wills</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aero_arduino</url>
+  <depend package="rosserial_arduino"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+

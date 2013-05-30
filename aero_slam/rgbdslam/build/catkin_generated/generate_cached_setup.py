@@ -9,9 +9,9 @@ if os.path.exists(os.path.join('/opt/ros/groovy/share/catkin/cmake', 'catkinConf
     sys.path.insert(0, os.path.join('/opt/ros/groovy/share/catkin/cmake', '..', 'python'))
 from catkin.environment_cache import generate_environment_script
 
-code = generate_environment_script('/home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/devel/env.sh')
+code = generate_environment_script('/home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/devel/env.sh')
 
-output_filename = '/home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/catkin_generated/setup_cached.sh'
+output_filename = '/home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/catkin_generated/setup_cached.sh'
 with open(output_filename, 'w') as f:
     #print('Generate script for cached setup "%s"' % output_filename)
     f.write('\n'.join(code))

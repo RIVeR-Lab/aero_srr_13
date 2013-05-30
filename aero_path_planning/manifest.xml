@@ -4,7 +4,7 @@
      aero_path_planning
 
   </description>
-  <maintainer email="robot@wpi.edu">aruis</maintainer>
+  <maintainer email="robot@wpi.edu">Adam Panzica</maintainer>
   <license>BSD</license>
   <url>http://ros.org/wiki/oryx_path_planning</url>
 
@@ -20,6 +20,8 @@
   <depend package="aero_srr_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="dynamic_reconfigure"/>
+  <depend package="occupancy_grid"/>
+  <depend package="robot_base_msgs"/>
 
 </package>
 

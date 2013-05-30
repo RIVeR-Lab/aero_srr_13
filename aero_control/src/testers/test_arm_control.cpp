@@ -42,7 +42,7 @@ void TimerCallback(const ros::TimerEvent&) {
 	q.setRPY(rx_pos, ry_pos, rz_pos);
 
 	tf::quaternionTFToMsg(q, test_msg.pose.pose.orientation);
-	test_msg.header.frame_id = "/arm_base";
+	test_msg.header.frame_id = "/world";
 	test_msg.pose.header.frame_id = test_msg.header.frame_id;
 	test_msg.header.stamp = ros::Time::now();
 	test_msg.pose.header.stamp = ros::Time::now();
@@ -65,9 +65,9 @@ void TimerCallback2(const ros::TimerEvent&) {
 
 	end_effector_pose.header.stamp = ros::Time::now();
 
-	listenerptr->waitForTransform("/arm_base", end_effector_pose.header.frame_id, end_effector_pose.header.stamp, ros::Duration(0.5));
+	listenerptr->waitForTransform("/world", end_effector_pose.header.frame_id, end_effector_pose.header.stamp, ros::Duration(0.5));
 
-	listenerptr->transformPose("/arm_base", end_effector_pose, arm_pose);
+	listenerptr->transformPose("/world", end_effector_pose, arm_pose);
 
 	ROS_INFO("X = %f", arm_pose.pose.position.x);
 	ROS_INFO("Y = %f", arm_pose.pose.position.y);

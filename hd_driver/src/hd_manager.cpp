@@ -1,118 +1,156 @@
 #include "ros/ros.h"
 #include "hd_driver/hd_motor_controller.h"
-#include "hd_driver/HDMotorInfo.h"
-#include "hd_driver/SetPosition.h"
-#include "aero_srr_msgs/SoftwareStop.h"
+#include "hd_driver/HDConfig.h"
+#include "device_driver_base/MotorFeedback.h"
+#include "device_driver_base/SetMotorPositionAction.h"
+#include "robot_base_msgs/SoftwareStop.h"
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/foreach.hpp>
 #include "device_driver_base/serial_port.h"
-#include "device_driver_base/driver_util.h"
+#include "device_driver_base/reconfigurable_device_driver.h"
+#include "device_driver_base/SensorLevels.h"
 
-static boost::mutex controller_mutex;
-hd_driver::HDMotorController* controller = NULL;
-ros::Publisher feedback_pub;
-ros::ServiceServer control_srv;
-ros::Subscriber pause_sub;
-bool is_paused = false;
+using namespace device_driver;
+using namespace device_driver_base;
 
-std::string reference_frame("/hd_reference_frame");
-
-bool controlCallback(hd_driver::SetPosition::Request  &req,
-		     hd_driver::SetPosition::Response &res){
-  try{
-    ROS_DEBUG("Setting position to: [%d]", req.position);
-    {
-      boost::lock_guard<boost::mutex> lock(controller_mutex);
-      if(!is_paused)
-	controller->set_position(req.position);
-    }
-    while(1){
-      {
-	boost::lock_guard<boost::mutex> lock(controller_mutex);
-	if(is_paused || !(controller->get_status()&STATUS_TRAJECTORY_RUNNING))
-	  break;
-      }
-      usleep(100000);
-    }
-    {
-      boost::lock_guard<boost::mutex> lock(controller_mutex);
-      if(is_paused)
-	return false;
-      if(controller->get_trajectory_status()&TRAJECTORY_MOVE_ABORTED)
-	return false;
-      return true;
-    }
-  } catch(device_driver::Exception& e){
-    ROS_WARN_STREAM("Error setting motor position: "<<e.what());
-  }
-  return false;
-}
+class HDManager : public device_driver::ReconfigurableDeviceDriver<hd_driver::HDConfig>{
+private:
 
 
-void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
-  {
-    boost::lock_guard<boost::mutex> lock(controller_mutex);
-    if(msg->stop)
-      controller->set_state(hd_driver::HDMotorController::amplifier_disabled);
-    is_paused = msg->stop;
-  }
-}
+	boost::mutex controller_mutex;
+	const boost::shared_ptr<hd_driver::HDMotorController> controller;
+	ReconfigurableAdvertisePtr feedback_pub;
+	ReconfigurableTimerPtr feedback_timer;
 
-uint32_t next_sequence_number = 0;
-void feedbackTimerCallback(const ros::TimerEvent& e){
-  try{
-    hd_driver::HDMotorInfo msg;
-    {
-      boost::lock_guard<boost::mutex> lock(controller_mutex);
-      msg.header.stamp = ros::Time::now();
-      msg.header.frame_id = reference_frame;
-      msg.header.seq = next_sequence_number++;
-      msg.position = controller->get_position();
-    }
-    feedback_pub.publish(msg);
-  } catch(device_driver::Exception& e){
-    ROS_WARN_STREAM("Error reading motor info: "<<e.what());
-  }
-}
+	ReconfigurableActionServerPtr control_server;
 
+	ReconfigurableSubscriberPtr pause_sub;
+	bool is_paused;
+
+	std::string reference_frame_;
+	std::string port_;
+
+
+public:
+	void controlCallback(const SetMotorPositionGoalConstPtr & goal, boost::shared_ptr<actionlib::SimpleActionServer<SetMotorPositionAction> >& as_){
+	        SetMotorPositionResult result;
+		try{
+			ROS_INFO("Setting position to: [%d]", goal->position);
+			{
+				boost::lock_guard<boost::mutex> lock(controller_mutex);
+				if(!is_paused)
+				  controller->set_position(goal->position, goal->max_velocity);
+			}
+			while(ros::ok() && !as_->isPreemptRequested() && !is_paused){
+				{
+					boost::lock_guard<boost::mutex> lock(controller_mutex);
+					if(!(controller->get_status()&STATUS_TRAJECTORY_RUNNING))
+						break;
+				}
+				usleep(100000);
+			}
+			if(!ros::ok())
+			  return;//just return, ros is dead
+			{
+				boost::lock_guard<boost::mutex> lock(controller_mutex);
+				result.final_position = controller->get_position();
+				if(is_paused){
+   				        ROS_WARN("Motor was paused when attempting to move");
+					controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//make sure were actually paused
+				        as_->setAborted(result, "Could not set motor position, motor was paused");
+					return;
+				}
+				if(controller->get_trajectory_status()&TRAJECTORY_MOVE_ABORTED){	
+					controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//stop the motor
+					as_->setAborted(result, "Move was aborted");
+   				        ROS_WARN("Move was aborted");
+					ROS_WARN("Status: %u\n", controller->get(hd_driver::HDMotorController::memory_bank_ram, hd_driver::HDMotorController::variable_status_register));
+					ROS_WARN("Fault: %u\n", controller->get(hd_driver::HDMotorController::memory_bank_ram, hd_driver::HDMotorController::variable_fault_register));
+					return;
+				}
+				if(as_->isPreemptRequested()){
+				  controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//stop the motor
+				  as_->setPreempted(result, "Set position was preempted");
+				  return;
+				}
+				as_->setSucceeded(result);
+			}
+		} catch(device_driver::Exception& e){
+			ROS_WARN_STREAM("Error setting motor position: "<<e.what());
+			as_->setAborted(result, "Exception thrown while setting position");
+		}
+	}
+
+
+	virtual void reconfigureStopped(hd_driver::HDConfig& config){
+		port_ = config.port;
+	}
+	virtual void reconfigureOpen(hd_driver::HDConfig& config){
+		control_server->setName(config.control_service);
+		feedback_pub->setTopic(config.info_topic);
+		feedback_timer->setPeriod(ros::Duration(1/config.feedback_rate));
+		pause_sub->setTopic(config.pause_topic);
+		reference_frame_ = config.reference_frame;
+	}
+	virtual void reconfigureRunning(hd_driver::HDConfig& config){
+	}
+
+
+	void pauseCallback(const robot_base_msgs::SoftwareStop::ConstPtr& msg){
+		{
+			boost::lock_guard<boost::mutex> lock(controller_mutex);
+			if(msg->stop)
+				controller->set_state(hd_driver::HDMotorController::amplifier_disabled);
+			//device is enabled in position set
+			is_paused = msg->stop;
+		}
+	}
+
+	void feedbackTimerCallback(const ros::TimerEvent& e){
+			MotorFeedback msg;
+			{
+				boost::lock_guard<boost::mutex> lock(controller_mutex);
+				msg.header.stamp = ros::Time::now();
+				msg.header.frame_id = reference_frame_;
+				msg.position = controller->get_position();
+			}
+			feedback_pub->publish(msg);
+	}
+
+	void openDevice(){
+		ROS_INFO_STREAM("Opening device '"<<port_<<"'");
+		controller->open(port_);
+		controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//disable the controller on startup
+	}
+	void closeDevice(){
+		ROS_INFO_STREAM("Closing device '"<<port_<<"'");
+		try{
+		        controller->set_state(hd_driver::HDMotorController::amplifier_disabled);//try to disable controller
+		} catch(...){}
+		controller->close();
+	}
+
+	HDManager():controller(new hd_driver::HDMotorController()), is_paused(false), reference_frame_("/hd_reference_frame"), port_("/dev/ttyUSB2"){
+		addDriverStateFunctions(device_driver_state::OPEN, &HDManager::openDevice, &HDManager::closeDevice, this);
+
+		pause_sub = addReconfigurableSubscriber<robot_base_msgs::SoftwareStop>(device_driver_state::RUNNING, "/pause", 1000, boost::bind(&HDManager::pauseCallback, this, _1));
+		feedback_pub = addReconfigurableAdvertise<MotorFeedback>(device_driver_state::RUNNING, "hd_info", 1000);
+		feedback_timer = addReconfigurableTimer<HDManager>(device_driver_state::RUNNING, ros::Duration(0.1), &HDManager::feedbackTimerCallback, this);
+		control_server = addReconfigurableActionServer<SetMotorPositionAction>(device_driver_state::RUNNING, "hd_control", boost::bind(&HDManager::controlCallback, this, _1, _2));
+	}
+
+};
 
 int main(int argc, char **argv){
-  ros::init(argc, argv, "hd_manager");
-  
-  ros::NodeHandle n;
+	ros::init(argc, argv, "hd_manager");
 
-  ROS_INFO("Initializing HD device");
+	ROS_INFO("Initializing HD device");
 
-  define_and_get_param(double, feedback_rate, "~feedback_rate", 1);
-  device_driver::get_param(reference_frame, "~reference_frame");
-  define_and_get_param(std::string, port, "~port", "/dev/ttyUSB0");
-  define_and_get_param(std::string, control_service, "~control_service", "hd_control");
-  define_and_get_param(std::string, info_topic, "~info_topic", "hd_info");
-  define_and_get_param(std::string, pause_topic, "~pause_topic", "/pause");
+	HDManager manager;
+	ROS_INFO("Initialization Complete");
 
+	manager.spin();
 
-  controller = new hd_driver::HDMotorController();
-
-  try{
-    controller->open(port);
-  } catch(device_driver::Exception& e){
-    ROS_FATAL_STREAM("Error opening port: "<<e.what());
-    delete controller;
-    return 1;
-  }
-
-    ROS_INFO("Initialization Complete");
-
-    control_srv = n.advertiseService(control_service, controlCallback);
-    pause_sub = n.subscribe(pause_topic, 1000, pauseCallback);
-    feedback_pub = n.advertise<hd_driver::HDMotorInfo>(info_topic, 1000);
-    ros::Timer feedback_timer = n.createTimer(ros::Duration(1/feedback_rate), feedbackTimerCallback);
-
-    ros::MultiThreadedSpinner spinner(4);
-    spinner.spin();
-
-  delete controller;
-
-  return 0;
+	return 0;
 }

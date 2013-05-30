@@ -12,9 +12,9 @@
 //*********** SYSTEM DEPENDANCIES ****************//
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
+#include <aero_srr_msgs/StateTransitionRequest.h>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_srr_supervisor/SupervisorUtilities.h>
-#include <aero_srr_supervisor/SetControlMode.h>
 #include <aero_srr_supervisor/StateTable.h>
 //***********    NAMESPACES     ****************//
 namespace aero_srr_supervisor
@@ -51,10 +51,10 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Callback for processing SetControlMode messages
+	 * @brief  Callback for processing StateTransitionRequest services
 	 * @param message
 	 */
-	void setCtrlMdCB(const aero_srr_supervisor::SetControlModeConstPtr& message);
+	bool stateTransitionReqCB(aero_srr_msgs::StateTransitionRequest::Request& request, aero_srr_msgs::StateTransitionRequest::Response& response);
 
 	/**
 	 * @author Adam Panzica
@@ -62,7 +62,14 @@ private:
 	 */
 	void stateUptd() const;
 
-	State state_;
+	/**
+	 * @author Adam Panzica
+	 * @param [in[  state The state to build the transition list of
+	 * @param [out] list  String to fill with the valid transitions
+	 */
+	void buildTransitionList(state_t state, std::string& list) const;
+
+	state_t state_;
 
 	std::string ctrlmd_topic_;
 	std::string aero_state_topic_;
@@ -70,7 +77,7 @@ private:
 	ros::NodeHandle nh_;
 	ros::NodeHandle p_nh_;
 
-	ros::Subscriber ctrlmd_sub_;
+	ros::ServiceServer state_transition_srv_;
 	ros::Publisher  aero_state_pub_;
 
 	ros::Timer      state_update_timer_;

@@ -1,0 +1,29 @@
+<launch>
+  <arg name="temperature_topic" default="temperature" />
+
+  <!-- Launch BMS monitoring -->
+  <node pkg="manzanita_mk3_driver" type="mk3_driver" name="bms_node">
+    <param name="port" value="/dev/BMS" />
+
+    <param name="update_rate" value="0.25" />
+
+    <param name="num_parallel_units" value="2" />
+    <param name="num_series_units" value="1" />
+    <param name="cells_per_unit" value="8" />
+    <param name="max_cell_voltage" value="3.5" />
+    <param name="max_total_voltage" value="28" />
+    <param name="warn_total_voltage" value="25.6" />
+    <param name="critical_total_voltage" value="24" />
+
+    <param name="frame_id" value="/battery" />
+    <param name="battery_topic" value="battery" />
+    <param name="temperature_topic" value="$(arg temperature_topic)" />
+  </node>
+  <!-- Launch computer sensors node -->
+  <node pkg="computer_sensors" type="sensor_monitor" name="computer_sensors_node">
+    <param name="temperature_topic" value="$(arg temperature_topic)" />
+    <param name="diagnostic_period" value="2" />
+    <param name="computer_frame" value="/computer" />
+  </node>
+  <node pkg="rqt_gui" type="rqt_gui" name="battery_monitor_gui" args="-s manzanita_mk3_driver/battery.BatteryDashboard"/>
+</launch>

@@ -3,5 +3,5 @@
 
 CATKIN_SHELL=zsh
 emulate sh # emulate POSIX
-. "/home/rj/Development/groovy/rgbdslam_freiburg/rgbdslam/build/devel/setup.sh"
+. "/home/bpwiselybabu/groovy_workspace/aero_srr/aero_slam/rgbdslam/build/devel/setup.sh"
 emulate zsh # back to zsh mode
