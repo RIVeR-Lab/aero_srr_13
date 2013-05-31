@@ -5,9 +5,9 @@
 	   <arg name="camera" value="upper_stereo"/>
 
 	   <arg name="auto_exposure" value="true" />
-	   <arg name="exposure_auto_target" value="30" />
+	   <arg name="exposure_auto_target" value="50" />
 	   <arg name="auto_gain" value="true" />
-	   <arg name="gain_auto_target" value="30" />
+	   <arg name="gain_auto_target" value="50" />
   </include>
   <group ns="/upper_stereo">
     <include file="$(find stereo_image_proc)/launch/stereo_image_proc.launch">
