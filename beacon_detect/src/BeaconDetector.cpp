@@ -17,11 +17,11 @@ BeaconDetector::BeaconDetector():it_(nh_)
 {
 	getRosParam();										//initialize all the ROS Parameters
 	active_=false;										//keep the beacon detector inactive by default]
-	init_=false;										//by default the tag system is not initialized,
+	init_=true;											//by default the tag system is not initialized,
 														//you need to find the tag_base to the world
 
-	if(!test_)											//in test mode do not subscribe to the robot status
-	  ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
+	//the robot state controls the state of this node to init_/active_
+	ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
 
 	/* Start the camera video from the camera topic */
 	if(!cam_topic_.empty())
@@ -151,23 +151,15 @@ void BeaconDetector::getRosParam()
 }
 void BeaconDetector::systemCb(const aero_srr_msgs::AeroStateConstPtr& status)
 {
-ROS_INFO("System state message recieved");
-	//if the state of the robot is to look for home
-	if(status->state==aero_srr_msgs::AeroState::HOME)
-	{
-		active_=true;						//activate the beacon detector
-	}
-	else
-	{
-		active_=false;						//deactivate the beacon detector
-	}
+	ROS_INFO("System state message recieved");
+
 	if(status->state==aero_srr_msgs::AeroState::STARTUP)
 	{
-		init_=true;
+		init_=true;								//startup is the initialization stage
 	}
 	else
 	{
-		init_=false;
+		init_=false;							//dont initalize if the robot is in any other stage
 	}
 }
 void BeaconDetector::histEq(cv::Mat &frame)
@@ -209,8 +201,7 @@ void BeaconDetector::detectBeacons()
 	while(ros::ok())
 	{
 		//check if the beacon detect state is on
-		if(!test_)		//if test mode dont check for the robot status messages
-		if(!active_)
+		if(!active_&&!init_)
 			continue;
 
 	//load the variables locally
