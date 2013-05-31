@@ -16,7 +16,8 @@
 #include <time.h>
 #include <aero_srr_msgs/AeroState.h>
 #include <aero_srr_msgs/StateTransitionRequest.h>
-#include <aero_base/SetBoomPosition.h>
+#include <actionlib/client/simple_action_client.h>
+#include <device_driver_base/SetJointPositionAction.h>
 
 namespace aero_control
 {
@@ -29,8 +30,9 @@ namespace aero_control
 			BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh);
 
 		private:
-			void SendBoomControl(aero_base::SetBoomPosition boom_position);
-			void GoToPosition(double angle, double velocity,double delay);
+			typedef actionlib::SimpleActionClient<device_driver_base::SetJointPositionAction> BoomClient;
+
+			void GoToPosition(double angle, double velocity);
 			void GoHome(void);
 			void AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_state);
 
@@ -38,22 +40,19 @@ namespace aero_control
 			{
 					double angle;
 					double velocity;
-					double delay;
 			} boom_path_step_t;
 
 			boom_path_step_t boom_path[MAX_BOOM_PATH_STEPS];
 
 			int boom_path_steps;
 
-			inline bool SetBoomPathStep(double angle, double velocity, double delay)
+			inline bool SetBoomPathStep(double angle, double velocity)
 			{
 
 				if (this->boom_path_steps < MAX_BOOM_PATH_STEPS)
 				{
 					this->boom_path[boom_path_steps].angle = angle;
 					this->boom_path[boom_path_steps].velocity = velocity;
-					this->boom_path[boom_path_steps].delay = delay;
-
 					this->boom_path_steps++;
 					return true;
 				} else
@@ -70,15 +69,15 @@ namespace aero_control
 			{
 				boom_path_steps = 0;
 
-				SetBoomPathStep(M_PI_2,0.1,0.5);
-				SetBoomPathStep(-M_PI_2,0.1,0.5);
+				SetBoomPathStep(M_PI_2,0.1);
+				SetBoomPathStep(-M_PI_2,0.1);
 
 			}
 			uint8_t boom_path_step_num;
 
 			ros::Subscriber aero_state_sub;
 			ros::ServiceClient aero_state_transition_srv_client;
-			ros::ServiceClient boom_control_srv_client;
+			boost::shared_ptr<BoomClient> boom_control_client;
 			bool active_state;
 			bool pause_state;
 

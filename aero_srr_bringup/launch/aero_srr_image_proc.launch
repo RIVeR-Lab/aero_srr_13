@@ -2,7 +2,8 @@
   <include file="$(find aero_prosilica_camera)/launch/stereo.launch">
   	   <arg name="left_ip_address" value="192.168.3.100"/>
   	   <arg name="right_ip_address" value="192.168.4.100"/>
-  	   <arg name="camera" value="upper_stereo"/>
+		<arg name="camera" value="upper_stereo"/>
+  
   </include>
   <group ns="/upper_stereo">
     <include file="$(find stereo_image_proc)/launch/stereo_image_proc.launch">

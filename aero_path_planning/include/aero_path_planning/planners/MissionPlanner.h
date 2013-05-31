@@ -112,7 +112,7 @@ private:
 	 * @author Adam Panzica
 	 * @brief Updates the current mission goal
 	 */
-	void updateMissionGoal() const;
+	void updateMissionGoal();
 
 	void ooiCB(const geometry_msgs::PoseArrayConstPtr& message);
 
@@ -140,8 +140,9 @@ private:
 
 	aero_path_planning::ObjectOfInterestManager OoI_manager_;
 
-	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in meters
-	bool                  searching_;
+	double                path_threshold_;///The threshold for determining we've gotten to a point on the path, in meters
+	bool                  searching_;     ///Flag to signal if the robot is searching or not
+	bool                  recieved_path_; ///Flag to signal if the robot has ever recieved a carrot path
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system

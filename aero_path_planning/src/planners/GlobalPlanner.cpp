@@ -25,21 +25,21 @@
 using namespace aero_path_planning;
 
 GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::CarrotPathFinder& path_planner):
-																								path_planner_(&path_planner),
-																								nh_(nh),
-																								p_nh_(p_nh),
-																								transformer_(nh)
+																										path_planner_(&path_planner),
+																										nh_(nh),
+																										p_nh_(p_nh),
+																										transformer_(nh)
 {
 	ROS_INFO("Initializing Global Planner...");
 	this->state_.state = aero_srr_msgs::AeroState::SEARCH;
 	this->loadOccupancyParam();
+	this->waitForTransforms();
 	this->registerTopics();
 	this->registerTimers();
 	//this->setManual(true);
 	this->buildGlobalMap();
 
 	this->cf_ = boost::bind(&GlobalPlanner::checkCollision, this, _1, _2);
-
 	ROS_INFO("Global Planner Running!");
 
 }
@@ -177,6 +177,24 @@ void GlobalPlanner::loadOccupancyParam()
 	if(!this->nh_.getParam(pg_res,	 this->global_res_))			PARAM_WARN(pg_res,		pg_res_msg.str());
 }
 
+void GlobalPlanner::waitForTransforms()
+{
+	ROS_INFO_STREAM("Global Planner Waiting for Transforms...");
+	bool done = false;
+	while(!done)
+	{
+		try
+		{
+			done = this->transformer_.canTransform(this->global_frame_, this->local_frame_, ros::Time(0));
+		}
+		catch(std::exception& e)
+		{
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+			//do nothing, just means one of the frames doesn't exist
+		}
+	}
+}
+
 void GlobalPlanner::registerTopics()
 {
 	ROS_INFO_STREAM("Registering Global Topics...");
@@ -196,7 +214,7 @@ void GlobalPlanner::registerTopics()
 	this->local_occ_pub_ = this->nh_.advertise<occupancy_grid::MultiTraitOccupancyGridMessage>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
 	//this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2, true);
-	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 2, true);
+	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 1, true);
 	//this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
 	this->state_sub      = this->nh_.subscribe("/aero/state", 1, &GlobalPlanner::stateCB, this);
 	this->mission_goal_sub_ = this->nh_.subscribe("/aero/global/mission_goal", 1, &GlobalPlanner::missionGoalCB, this);
@@ -356,6 +374,12 @@ void GlobalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 
 void GlobalPlanner::planCB(const ros::TimerEvent& event)
 {
+	ROS_INFO_STREAM("Performing regularly scheduled global planning!");
+	this->plan();
+}
+
+void GlobalPlanner::plan()
+{
 	ROS_INFO_STREAM("I'm making a new global plan using strategy "<<this->state_);
 	if(this->path_planner_!=NULL&&this->global_map_!=occupancy_grid::MultiTraitOccupancyGridPtr())
 	{
@@ -378,6 +402,7 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 			path->header.stamp    = ros::Time::now();
 			this->carrotToPath(*path);
 			this->path_pub_.publish(path);
+			ROS_INFO_STREAM("I published a path of size: "<<path->poses.size());
 		}
 		else
 		{
@@ -393,12 +418,12 @@ void GlobalPlanner::planCB(const ros::TimerEvent& event)
 void GlobalPlanner::carrotToPath(nav_msgs::Path& path) const
 {
 	BOOST_FOREACH(std::deque<geometry_msgs::Pose>::value_type point, this->carrot_path_)
-			{
+					{
 		geometry_msgs::PoseStamped path_pose;
 		path_pose.header = path.header;
 		path_pose.pose   = point;
 		path.poses.push_back(path_pose);
-			}
+					}
 }
 
 bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid::MultiTraitOccupancyGrid& map) const
@@ -460,7 +485,8 @@ void GlobalPlanner::missionGoalCB(const geometry_msgs::PoseStampedConstPtr& mess
 	{
 		this->transformer_.waitForTransform(this->global_frame_, message->header.frame_id, message->header.stamp, ros::Duration(1.0));
 		this->transformer_.transformPose(this->global_frame_, *message, this->mission_goal_);
-		this->planCB(ros::TimerEvent());
+		ROS_INFO_STREAM("Got New Mission Goal! Replanning...");
+		this->plan();
 	}
 	catch(std::exception& e)
 	{

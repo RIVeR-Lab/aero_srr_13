@@ -16,6 +16,7 @@
   <depend package="aero_srr_msgs"/>
   <depend package="device_driver_base"/>
   <depend package="actionlib"/>
+  <depend package="robot_base_msgs"/>
 
 </package>
 

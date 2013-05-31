@@ -61,6 +61,12 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Waits for all needed transforms to become valid
+	 */
+	void waitForTransforms();
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Registers topics with the ROS system
 	 */
 	void registerTopics();
@@ -83,6 +89,12 @@ private:
 	 * @param event
 	 */
 	void planCB(const ros::TimerEvent& event);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Causes the global planner to calculate a new carrot path
+	 */
+	void plan();
 
 	/**
 	 * @author Adam Panzica

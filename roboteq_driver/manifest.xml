@@ -15,6 +15,7 @@
   <depend package="geometry_msgs"/>
   <depend package="aero_srr_msgs"/>
   <depend package="device_driver_base"/>
+  <depend package="robot_base_msgs"/>
 
   <export>
     <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -lroboteq_manager_lib"/>

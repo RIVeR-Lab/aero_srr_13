@@ -11,7 +11,7 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
 #include <aero_srr_msgs/AeroState.h>
-#include <aero_srr_msgs/SoftwareStop.h>
+#include <robot_base_msgs/SoftwareStop.h>
 //************ LOCAL DEPENDANCIES ****************//
 //***********    NAMESPACES     ****************//
 
@@ -32,7 +32,7 @@ bool last_pause_state = true;
 void pauseCallback(const std_msgs::BoolConstPtr& is_paused){
   ROS_DEBUG_STREAM("Reveived software stop message from arduino: "<<is_paused->data);
   if(is_paused->data!=last_pause_state){
-    aero_srr_msgs::SoftwareStop msg;
+    robot_base_msgs::SoftwareStop msg;
     msg.stop = is_paused->data;
     msg.header.stamp = ros::Time::now();
     if(msg.stop)
@@ -59,16 +59,16 @@ void stateCallback(const aero_srr_msgs::AeroStateConstPtr& state_msg){
     publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::NAVOBJ:
-    publish_status_rate(2);
+    publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::COLLECT:
-    publish_status_rate(4);
+    publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::PICKUP:
-    publish_status_rate(6);
+    publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::HOME:
-    publish_status_rate(0.5);
+    publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::PAUSE:
     publish_status_rate(0.0);
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 	  ROS_WARN_STREAM("Parameter <~status_rate_topic> not set. Using default value '"<<status_rate_topic<<"'");
 
 	arduino_pause_sub = nh.subscribe(arduino_pause_topic, 1000, pauseCallback);
-	pause_pub = nh.advertise<aero_srr_msgs::SoftwareStop>(pause_topic, 1000, true);
+	pause_pub = nh.advertise<robot_base_msgs::SoftwareStop>(pause_topic, 1000, true);
 
 	state_sub = nh.subscribe(state_topic, 1000, stateCallback);
 	status_rate_pub = nh.advertise<std_msgs::Float32>(status_rate_topic, 1000, true);
