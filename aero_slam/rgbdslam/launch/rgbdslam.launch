@@ -1,5 +1,3 @@
-<!-- This file demonstrates the use of SIFT features for online SLAM with a Kinect.
-     The openni driver has to be started separately -->
 <launch>
 
   <node pkg="rgbdslam" type="rgbdslam" name="rgbdslam" cwd="node" required="true" output="log"> 
