@@ -62,10 +62,9 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	intrinsic_=(cv::Mat_<float>(3,3)<<  cam_info->K[0],cam_info->K[1],cam_info->K[2],\
 	                                    cam_info->K[3],cam_info->K[4],cam_info->K[5],\
 					                    cam_info->K[6],cam_info->K[7],cam_info->K[8]);
-	parent_frame_=cv_ptr->header.frame_id;
-
-
-	newimg_=true;
+	parent_frame_=cv_ptr->header.frame_id;	//the id of the frame
+	img_time_=cv_ptr->header.stamp;			//image time
+	newimg_=true;							//a flag for processing
 }
 
 void BeaconDetector::initConfiguration(string fname)
@@ -190,11 +189,21 @@ string BeaconDetector::checkInConst(AprilTags::TagDetection tag, bool &tag_type)
 	}
 	return string();								//return empty string if its not in the constellation
 }
+void BeaconDetector::publishWorld(tf::StampedTransform tf)
+{
+	while(ros::ok())
+		br_.sendTransform(tf::StampedTransform(tf, ros::Time::now()+ros::Duration(0.5), "/tag_base", "/world"));
+	if(world_broadcaster_.joinable())
+	{
+		world_broadcaster_.join();
+	}
+}
 void BeaconDetector::detectBeacons()
 {
 	Mat frame,gray;
 	double fx,fy,px,py;
 	bool process;
+	ros::Time 	img_time;										//the time of image for tf lookups
 	tf::Transform transform;									//the transform between the tag and the camera
 	AprilTags::TagDetector tag_detector(AprilTags::tagCodes36h11);// the tag detector not this is set to a specific family TODO: expose this as a dynamic reconfig
 
@@ -281,12 +290,13 @@ void BeaconDetector::detectBeacons()
 
 				sprintf(frameid,"estimated_%s",tag.c_str());		//debug information
 				//transmit the tf
-				br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent_frame_.c_str(), frameid));
+				br_.sendTransform(tf::StampedTransform(transform, img_time, parent_frame_.c_str(), frameid));
 			}
 			//calculate the pose of the robot to the beacon
-			br_.sendTransform(tf::StampedTransform(initWorld(tag), ros::Time::now(), "/tag_base", "/world"));
-                        
-			tf::Transform dummy;
+
+			//spawn the broadcaster
+			boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  initWorld(tag,img_time)) );
+			//tf::Transform dummy;
 			//dummy.setIdentity();
 			//br_.sendTransform(tf::StampedTransform(dummy, ros::Time::now(), "/world","/base_footprint"));
 			//ask the service to change the state from startup to search
@@ -374,13 +384,13 @@ void BeaconDetector::detectBeacons()
 
 				sprintf(frameid,"estimated_%s",tag.c_str());		//debug information
 				//transmit the tf
-				br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent_frame_.c_str(), frameid));
+				br_.sendTransform(tf::StampedTransform(transform, img_time, parent_frame_.c_str(), frameid));
 
 				//calculate the pose of the robot so the estimated tf of the tag and the actuall beacon will alighn
-				geometry_msgs::Pose temp=getRobotPose(tag);
+				geometry_msgs::Pose temp=getRobotPose(tag,img_time);
 
 				//publish nav::odom message for ekf
-				pubOdom(temp);
+				pubOdom(temp,img_time);
 
 				//add it to the res
 				res.pose.position.x+=temp.position.x;
@@ -410,7 +420,7 @@ void BeaconDetector::detectBeacons()
 
 				//header
 				res.header.frame_id="/base_footprint";
-				res.header.stamp=ros::Time::now();
+				res.header.stamp=img_time;
 
 				pose_pub_.publish(res);				//publish the average solution
 			}
@@ -425,15 +435,15 @@ void BeaconDetector::detectBeacons()
 		detector_thread_.join();
 	}
 }
-tf::StampedTransform BeaconDetector::initWorld(string tag_name)
+tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtime)
 {
 	//find transform to base_footprint
 	tf::StampedTransform tag2base;
-	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag_name, ros::Time(0), ros::Duration(10.0) );
-	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag_name,ros::Time(0),tag2base);
+	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag_name, imgtime, ros::Duration(10.0) );
+	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag_name,imgtime,tag2base);
 	//define find transform to the beacon_base
 	tf::StampedTransform tag2world;
-	tf_lr_.lookupTransform("/tag_base",string("/")+tag_name,ros::Time(0),tag2world);
+	tf_lr_.lookupTransform("/tag_base",string("/")+tag_name,imgtime,tag2world);
 	//find base_footprint to tag_base and declare it as the world in the beacon tf tree
 	//calculate the transform between the robot_base and the world
 	tf::StampedTransform 	world2base;
@@ -443,10 +453,10 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name)
 	return(world2base);
 
 }
-void BeaconDetector::pubOdom(geometry_msgs::Pose pose)
+void BeaconDetector::pubOdom(geometry_msgs::Pose pose, ros::Time time)
 {
 	nav_msgs::Odometry msg;
-	msg.header.stamp = ros::Time::now();           // time of current measurement
+	msg.header.stamp = time;           // time of current measurement
     msg.header.frame_id = "base_footprint";        // the tracked robot frame
 	msg.pose.pose.position.x = pose.position.x;    // x measurement tag.
 	msg.pose.pose.position.y = pose.position.y;    // y measurement tag.
@@ -464,17 +474,17 @@ void BeaconDetector::pubOdom(geometry_msgs::Pose pose)
 	msg.pose.covariance[35]=0.007;
 	odom_pub_.publish(msg);
 }
-geometry_msgs::Pose BeaconDetector::getRobotPose(string tag)
+geometry_msgs::Pose BeaconDetector::getRobotPose(string tag,ros::Time imgtime)
 {
 	geometry_msgs::Pose tran;
 	//calculate the transform between the tag and the robot_base
 	tf::StampedTransform tag2base;
-	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag, ros::Time(0), ros::Duration(10.0) );//might not have yet registered so wait till it becomes available
-	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag,ros::Time(0),tag2base);
+	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag, imgtime, ros::Duration(10.0) );//might not have yet registered so wait till it becomes available
+	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag,imgtime,tag2base);
 
 	//calculate the transform between the tag and the world
 	tf::StampedTransform tag2world;
-	tf_lr_.lookupTransform("/world",string("/")+tag,ros::Time(0),tag2world);
+	tf_lr_.lookupTransform("/world",string("/")+tag,imgtime,tag2world);
 
 	//calculate the transform between the robot_base and the world
 	tf::StampedTransform 	world2base;

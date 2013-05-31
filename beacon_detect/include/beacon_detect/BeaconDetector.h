@@ -39,6 +39,7 @@ class BeaconDetector {
 	std::string 	parent_frame_;							//the name of the parent frame in the tf tree
 	std::string 	sys_msgs_;								//the topic in which the system message for the status is broadcast
 	cv::Mat			intrinsic_;								//the intrinsic parameter of the camera
+	ros::Time		img_time_;								//The time the image was recieved
 	bool			newimg_;								//if the image is new and needs beacon detect to process it
 	bool 			histeq_;								//if set to true, histogram equalization on the images is done
 	bool			show_;									//if set to true, the results of the detected tag is displayed on screen
@@ -60,6 +61,7 @@ class BeaconDetector {
 	//boost thread
 	boost::mutex						imglock_;						//mutext to sync the image callback with the detector thread
 	boost::thread						detector_thread_;				//boost detector thread handle
+	boost::thread						world_broadcaster_;				//thread that does tf broadcast of the world
 
 	std::vector<AprilTags::TagDetection> 	detections_;				//the extracted tags
 	vector<pair<int,string> > 				constellation_;				//defines the correspondace between the tag and the tf
@@ -101,15 +103,19 @@ public:
 	/*
 	 * This function calculated the stamped pose for the robot to correct give the tag id
 	 */
-	geometry_msgs::Pose getRobotPose(string tag);
+	geometry_msgs::Pose getRobotPose(string tag, ros::Time imgtime);
 	/*
 	 * This function publishes the nav::odom messages for the visual odometry function
 	 */
-	void pubOdom(geometry_msgs::Pose pose);
+	void pubOdom(geometry_msgs::Pose pose, ros::Time imgtime);
 	/*
 	 * if the initialisation wit respect to base is to be done
 	 */
-	tf::StampedTransform initWorld(string tag_name);
+	tf::StampedTransform initWorld(string tag_name, ros::Time imgtime);
+	/*
+	 * The function to the thread that will continously publish the transform to the world
+	 */
+	void publishWorld(tf::StampedTransform tf);
 
 	virtual ~BeaconDetector();
 };
