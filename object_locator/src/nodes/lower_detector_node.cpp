@@ -52,7 +52,7 @@ DetectorNode::DetectorNode() :
 
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>(
-			"classiferObjectMsg", 2);
+			"object_location", 2);
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("lower_stereo/pointCloud", 1);
 	pub_points3_ = nh_.advertise<PointCloud2>("points3", 1);
@@ -601,10 +601,7 @@ void DetectorNode::computeDisparity() {
 			break;
 
 		}
-		cout << "I Got A Detection: " << endl << "X:" << detection.getX()
-				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
-				<< ", " << confidence << ", of type: " << typeString
-				<< std::endl;
+
 
 		searchPoint.x = detection.getX();
 		searchPoint.y = detection.getY();
@@ -636,6 +633,10 @@ void DetectorNode::computeDisparity() {
 		  }
 		  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
 		 detection.setZ(kAvgVal_);
+		cout << "I Got A Detection: " << endl << "X:" << detection.getX()
+				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
+				<< ", " << confidence << ", of type: " << typeString
+				<< std::endl;
 
 		aero_srr_msgs::ObjectLocationMsg msg;
 

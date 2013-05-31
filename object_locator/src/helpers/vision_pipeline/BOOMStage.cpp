@@ -113,7 +113,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	cv_bridge::CvImagePtr img;
 //	NODELET_INFO_STREAM("In Boom Image CB");
 	try {
-		img = cv_bridge::toCvCopy(msg, enc::BGR8);
+		img = cv_bridge::toCvCopy(msg, enc::RGB8);
 	} catch (cv_bridge::Exception& e) {
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
