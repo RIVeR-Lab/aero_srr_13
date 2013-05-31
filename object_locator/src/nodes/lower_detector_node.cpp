@@ -15,6 +15,7 @@
 #include <boost/format.hpp>
 #include <image_transport/subscriber_filter.h>
 #include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
@@ -24,7 +25,7 @@
 #include <pcl/sample_consensus/ransac.h>
 #include <pcl/sample_consensus/sac_model_plane.h>
 #include <pcl/sample_consensus/sac_model_sphere.h>
-#include <pcl/sample_consensus/sac_model_cylinder.h>.h>
+#include <pcl/sample_consensus/sac_model_cylinder.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/console/parse.h>
 #include <pcl/filters/extract_indices.h>
@@ -53,7 +54,7 @@ DetectorNode::DetectorNode() :
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>(
 			"ObjectPose", 2);
-	secondObjPub = nh_.advertise<geometry_msgs::PoseStamped>(
+	secondObjPub = nh_.advertise<geometry_msgs::PoseArray>(
 			"ObjectPose2", 2);
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("lower_stereo/pointCloud", 1);
@@ -449,7 +450,9 @@ void DetectorNode::computeDisparity() {
 	  sor.filter (*cloud_filtered);
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromROSMsg(*points_msg,*cloud);
+	pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
 
 	/****** Cylinder model testing *******/
 //	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudFilt (new pcl::PointCloud<pcl::PointXYZ>);
@@ -493,7 +496,7 @@ void DetectorNode::computeDisparity() {
 	float resolution = 2.5f;
 	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
 
-    octree.setInputCloud (cloud);
+    octree.setInputCloud (tcloud);
     octree.addPointsFromInputCloud ();
 
     pcl::PointXYZ searchPoint;
@@ -574,7 +577,7 @@ void DetectorNode::computeDisparity() {
 					ros::Duration(1.0));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
-			tf::pointMsgToTF(camera_point.point, detection);
+			tf::pointMsgToTF(world_point.point, detection);
 			sherlock.addDetection(detection, detection_list_.at(i)->second);
 //			cout << "Added detection to manager" <<endl;
 		}
@@ -628,7 +631,7 @@ void DetectorNode::computeDisparity() {
 //		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
 //		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
 //		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-		      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
+		      sum = tcloud->points[ pointIdxNKNSearch[i] ].z + sum;
 		    }
 		    kAvgVal_ = sum/pointIdxNKNSearch.size ();
 
@@ -641,10 +644,16 @@ void DetectorNode::computeDisparity() {
 				<< std::endl;
 
 		aero_srr_msgs::ObjectLocationMsg msg;
-		geometry_msgs::PoseStamped objPose;
-		buildMsg(detection,objPose);
-		objPose.header.frame_id = "lower_stereo_optical_frame";
-		secondObjPub.publish(objPose);
+		geometry_msgs::PoseArrayPtr poses(new geometry_msgs::PoseArray);
+		poses->header.frame_id = "/world";
+		poses->header.stamp = left_image.header.stamp;
+		geometry_msgs::Pose tempPose;
+		tf::pointTFToMsg(detection,tempPose.position);
+		tempPose.orientation.w  = 1;
+		poses->poses.push_back(tempPose);
+
+
+		secondObjPub.publish(poses);
 
 
 
