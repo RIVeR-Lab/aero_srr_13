@@ -17,6 +17,8 @@ BeaconDetector::BeaconDetector():it_(nh_)
 {
 	getRosParam();										//initialize all the ROS Parameters
 	active_=false;										//keep the beacon detector inactive by default]
+	init_=false;										//by default the tag system is not initialized,
+														//you need to find the tag_base to the world
 
 	if(!test_)											//in test mode do not subscribe to the robot status
 	  ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
@@ -35,6 +37,9 @@ BeaconDetector::BeaconDetector():it_(nh_)
 
 	/*set up the publisher for the odom so the ekf filter can use it as visual odometry, need to remap it to /vo */
 	odom_pub_ = nh_.advertise<nav_msgs::Odometry>("tag_odom",5);
+
+	/*set up the client for the robot state service */
+	state_client_ =	nh_.serviceClient<aero_srr_msgs::StateTransitionRequest>("aero/supervisor/state_transition_request");
 
 	/* thread the beacon detector function*/
 	boost::thread detector_thread_( boost::bind( &BeaconDetector::detectBeacons, this ) );
@@ -155,6 +160,14 @@ void BeaconDetector::systemCb(const aero_srr_msgs::AeroStateConstPtr& status)
 	{
 		active_=false;						//deactivate the beacon detector
 	}
+	if(status->state==aero_srr_msgs::AeroState::STARTUP)
+	{
+		init_=true;
+	}
+	else
+	{
+		init_=false;
+	}
 }
 void BeaconDetector::histEq(cv::Mat &frame)
 {
@@ -224,7 +237,73 @@ void BeaconDetector::detectBeacons()
 
 		}
 
-		if(process)
+		if(!init_&&process)
+		{
+			if(histeq_)
+				histEq(frame);										//TODO: with dynamic reconfigure expose this as a parameter pls
+
+			cv::cvtColor(frame, gray, CV_BGR2GRAY);						//convert the color Image to gray image
+			detections_ = tag_detector.extractTags(gray);	//get tags if detected
+
+			ROS_INFO("%d tag detected. \n",detections_.size());									//DEBUG information
+			string tag;										//the tag name if it is valid
+			bool tag_type;									//if small use the small size for cal else use big
+
+			int sctr=0;										//the neumber of valid tags detected
+			int bctr=0;										//the number of big tags detected
+
+			if(detections_.size()==0)
+				continue;
+
+			for (int i=0; i<detections_.size(); i++)
+			{
+				tag=checkInConst(detections_[i],tag_type);			//check if it is the constellation if so whats is its name in home tf tree?
+				if(tag.empty())
+					continue;
+
+				ROS_INFO( "  Id: %d --- Hamming distance: %f \n",detections_[i].id,  detections_[i].hammingDistance );
+
+				// recovering the relative pose requires camera calibration;
+				Eigen::Matrix4d T;
+				if(tag_type)
+				{
+						T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
+						bctr++;
+				}
+				else
+				{
+						T = detections_[i].getRelativeTransform(tag_size_small_, fx, fy, px, py);
+						sctr++;
+				}
+				// the orientation of the tag
+				Eigen::Matrix3d rot = T.block(0,0,3,3);
+				Eigen::Quaternion<double> final = Eigen::Quaternion<double>(rot);	//convert it to quaternion
+
+				// the x,y,z location of the tag
+				transform.setOrigin( tf::Vector3(T(0,3),T(1,3), T(2,3)) );
+
+				//set up the transform rotation
+				transform.setRotation( tf::Quaternion(final.x(), final.y(), final.z(),final.w()) );
+				char frameid[50];
+
+				sprintf(frameid,"estimated_%s",tag.c_str());		//debug information
+				//transmit the tf
+				br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent_frame_.c_str(), frameid));
+			}
+			//calculate the pose of the robot to the beacon
+			br_.sendTransform(tf::StampedTransform(initWorld(tag), ros::Time::now(), "/tag_base", "/world"));
+
+			//ask the service to change the state from startup to search
+			aero_srr_msgs::StateTransitionRequest state_transition;
+			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
+			state_transition.request.requested_state.header.stamp = ros::Time().now();
+			state_client_.call(state_transition);
+
+			process=false;
+			if(show_)
+				showResult(frame);
+		}
+		if(process&&init_)
 		{
 			if(histeq_)
 				histEq(frame);										//TODO: with dynamic reconfigure expose this as a parameter pls
@@ -261,9 +340,7 @@ void BeaconDetector::detectBeacons()
 				Eigen::Matrix4d T;
 				if(tag_type)
 				{
-					cout<<"Fx: "<<fx<<" fy: "<<fy<<" px "<<px<<" py "<<py<<endl;
-					
-T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
+					T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
 					bctr++;
 				}
 				else
@@ -277,7 +354,7 @@ T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
 
 				// the x,y,z location of the tag
 				transform.setOrigin( tf::Vector3(T(0,3),T(1,3), T(2,3)) );
-                                cout<<"x: "<<T(0,3)<<" y: "<<T(1,3)<<" z: "<<T(2,3)<<endl;
+
 				//set up the transform rotation
 				transform.setRotation( tf::Quaternion(final.x(), final.y(), final.z(),final.w()) );
 				char frameid[50];
@@ -334,6 +411,24 @@ T = detections_[i].getRelativeTransform(tag_size_big_, fx, fy, px, py);
 	{
 		detector_thread_.join();
 	}
+}
+tf::StampedTransform BeaconDetector::initWorld(string tag_name)
+{
+	//find transform to base_footprint
+	tf::StampedTransform tag2base;
+	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag_name, ros::Time(0), ros::Duration(10.0) );
+	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag_name,ros::Time(0),tag2base);
+	//define find transform to the beacon_base
+	tf::StampedTransform tag2world;
+	tf_lr_.lookupTransform("/tag_base",string("/")+tag_name,ros::Time(0),tag2world);
+	//find base_footprint to tag_base and declare it as the world in the beacon tf tree
+	//calculate the transform between the robot_base and the world
+	tf::StampedTransform 	world2base;
+	world2base=tag2world;
+	world2base.inverseTimes(tag2base);
+
+	return(world2base);
+
 }
 void BeaconDetector::pubOdom(geometry_msgs::Pose pose)
 {
@@ -407,8 +502,7 @@ void BeaconDetector::showResult(cv::Mat img)
 		cv::line(image, cv::Point2f(p4.first, p4.second), cv::Point2f(p1.first, p1.second), cv::Scalar(255,0,255,0) );
 
 		//just a check for determining max size of tag
-		cout<<"image_size: "<<image.cols<<"x"<<image.rows<<endl;
-		cout<<"size: "<<norm(cv::Point(p2.first-p1.first, p2.second-p1.second))<<endl;
+
 		cv::circle(image, cv::Point2f(detections_[i].cxy.first, detections_[i].cxy.second), 8, cv::Scalar(0,0,255,0), 2);
 
 		// print ID

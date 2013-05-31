@@ -27,6 +27,7 @@
 
 /*Headers Aero */
 #include <aero_srr_msgs/AeroState.h>
+#include <aero_srr_msgs/StateTransitionRequest.h>
 
 class BeaconDetector {
 	//variables
@@ -43,6 +44,7 @@ class BeaconDetector {
 	bool			show_;									//if set to true, the results of the detected tag is displayed on screen
 	bool			active_;								//determine if the beacon detector must be active use he topic
 	bool 			test_;									//used to set test mode
+	bool 			init_;									//if the tag tf tree is initialize
 
 	//ros handles
 	tf::TransformBroadcaster 			br_;							//the TF broadcaseter for ROS
@@ -53,6 +55,7 @@ class BeaconDetector {
 	image_transport::Publisher 			pub_;							//a image publisher
 	ros::Publisher 						pose_pub_;						//to publish pose of home
 	ros::Publisher						odom_pub_;						//publishes the odometry messages
+	ros::ServiceClient 					state_client_;					//the client responsible for make state change of the robot
 
 	//boost thread
 	boost::mutex						imglock_;						//mutext to sync the image callback with the detector thread
@@ -103,6 +106,10 @@ public:
 	 * This function publishes the nav::odom messages for the visual odometry function
 	 */
 	void pubOdom(geometry_msgs::Pose pose);
+	/*
+	 * if the initialisation wit respect to base is to be done
+	 */
+	tf::StampedTransform initWorld(string tag_name);
 
 	virtual ~BeaconDetector();
 };
