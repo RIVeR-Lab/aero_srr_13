@@ -32,6 +32,7 @@
     <arg name="pose_frame" value="$(arg drive_pose_frame)" />
     <arg name="twist_frame" value="$(arg drive_twist_frame)" />
     <arg name="velocity_command_topic" value="$(arg velocity_command_topic)" />
+    <arg name="pause_topic" value="$(arg pause_topic)" />
   </include>
 
   <!-- Launch Camera Boom Controller and motor driver -->
