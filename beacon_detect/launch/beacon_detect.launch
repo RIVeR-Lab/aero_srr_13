@@ -1,8 +1,12 @@
 <launch>
+
   <node name="beacondetector" pkg="beacon_detect" type="beacondetect" output="screen">
-      <param name="cam_topic" type="str" value="/image_raw" />
+      <param name="cam_topic" type="str" value="/upper_stereo_raw/left/image_raw" />
       <param name="configuration" type="str" value="configuration.xml" />
-      <param name="tag_size" value=" 0.166" />	
+      <param name="tag_size_big" value=" 0.5588" />
+      <param name="tag_size_small" value=" 0.1397" />	
       <param name="show_result" value="true" />
+      <param name="test_mode"	value="true" /> 
+      <param name="robot_topic" value="/aero/supervisor/state" />	
   </node>
 </launch>

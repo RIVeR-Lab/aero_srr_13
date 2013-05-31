@@ -28,8 +28,13 @@
 /*Headers Aero */
 #include <aero_srr_msgs/AeroState.h>
 #include <aero_srr_msgs/StateTransitionRequest.h>
+#include <actionlib/client/simple_action_client.h>
+#include <device_driver_base/SetJointPositionAction.h>
 
-class BeaconDetector {
+class BeaconDetector
+{
+
+	typedef actionlib::SimpleActionClient<device_driver_base::SetJointPositionAction> BoomClient;
 	//variables
 	std::string 	cam_topic_;								//the camera topic name
 	double 			tag_size_big_;							//need it so you can calculate the tf
@@ -57,6 +62,7 @@ class BeaconDetector {
 	ros::Publisher 						pose_pub_;						//to publish pose of home
 	ros::Publisher						odom_pub_;						//publishes the odometry messages
 	ros::ServiceClient 					state_client_;					//the client responsible for make state change of the robot
+	boost::shared_ptr<BoomClient> 		boom_client_;					//the action server for controlling the boom
 
 	//boost thread
 	boost::mutex						imglock_;						//mutext to sync the image callback with the detector thread
@@ -116,6 +122,18 @@ public:
 	 * The function to the thread that will continously publish the transform to the world
 	 */
 	void publishWorld(tf::StampedTransform tf);
+	/*
+	 * Rotate the boom so that it can see the beacon
+	 */
+	void rotateBoom();
+	/*
+	 * the process when in init stage
+	 */
+	tf::StampedTransform initProcess(double fx,double fy, double px, double py, ros::Time imgtime);
+	/*
+	 * the process when in active state
+	 */
+	void runProcess(double fx,double fy, double px, double py, ros::Time imgtime);
 
 	virtual ~BeaconDetector();
 };
