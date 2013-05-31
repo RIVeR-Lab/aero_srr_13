@@ -229,7 +229,7 @@ void BeaconDetector::detectBeacons()
 
 		}
 
-		if(!init_&&process)
+		if(init_&&process)
 		{
 			ROS_INFO("In initialization");
 			if(histeq_)
@@ -315,7 +315,7 @@ void BeaconDetector::detectBeacons()
 			if(show_)
 				showResult(frame);
 		}
-		if(process&&init_)
+		if(process&&active_)
 		{
 			ROS_INFO("In processing");
 			if(histeq_)
