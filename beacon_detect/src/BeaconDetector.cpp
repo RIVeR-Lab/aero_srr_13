@@ -296,10 +296,7 @@ void BeaconDetector::detectBeacons()
 
 			//spawn the broadcaster
 			boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  initWorld(tag,ros::Time(0))) );
-			//tf::Transform dummy;
-			//dummy.setIdentity();
-			//br_.sendTransform(tf::StampedTransform(dummy, ros::Time::now(), "/world","/base_footprint"));
-			//ask the service to change the state from startup to search
+
 			aero_srr_msgs::StateTransitionRequest state_transition;
 			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
 			state_transition.request.requested_state.header.stamp = ros::Time().now();
@@ -447,8 +444,12 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 	//find base_footprint to tag_base and declare it as the world in the beacon tf tree
 	//calculate the transform between the robot_base and the world
 	tf::StampedTransform 	world2base;
-	world2base=tag2world;
-	world2base.inverseTimes(tag2base);
+	world2base=tag2base;
+	world2base.inverseTimes(tag2world);
+	ROS_INFO("x: %d y: %d z: %d",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
+
+	char dummy;
+	cin>>dummy;
 
 	return(world2base);
 
