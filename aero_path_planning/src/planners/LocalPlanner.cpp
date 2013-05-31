@@ -515,9 +515,11 @@ void LocalPlanner::applyGoal(og::MultiTraitOccupancyGrid& grid) const
 	{
 		try
 		{
-			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, ros::Time(0), ros::Duration(1.0/20.0));
-			this->transformer_.transformPose(grid.getFrameID(), *this->global_goal_, local_goal);
-			ROS_INFO_STREAM_THROTTLE(1, "Local Goal is:\n"<<local_goal.pose.position);
+			ros::Time tf_time(ros::Time::now());
+			ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Global Goal is:\n"<<this->global_goal_->pose.position);
+			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, tf_time, ros::Duration(1.0/20.0));
+			this->transformer_.transformPose(grid.getFrameID(), tf_time, *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
+			ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Local Goal is:\n"<<local_goal.pose.position);
 			grid.setGoal(local_goal.pose);
 
 		}

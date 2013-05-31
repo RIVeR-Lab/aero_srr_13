@@ -421,7 +421,6 @@ SpeedSet::SpeedSet(int index, double min_length, double expFact, double seedRad,
 {
 	this->seed_rad_  = seedRad;
 	this->velocity_ = velocity;
-	int origin = numTent/2;
 	PRINTER("Generating a Speed Set with the Parameters <SRad=%f, Vel=%f, NumTent=%d, expF=%f>", seedRad, velocity, numTent, expFact);
 	for(int t=0; t<numTent; t++)
 	{

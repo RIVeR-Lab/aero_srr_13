@@ -142,7 +142,7 @@ bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLoca
 	tf::pointMsgToTF(worldLocation.pose.position, world_point);
 	tf::pointMsgToTF(this->carrot_path_.front().pose.position, goal_point);
 	double dist = world_point.distance(goal_point);
-	ROS_INFO_STREAM_THROTTLE(2.5, "\nAt position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\ndist="<<dist);
+	ROS_INFO_STREAM_THROTTLE(1, "\nMission Planner: At position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\nDistance to Goal:="<<dist);
 	return dist<threshold;
 }
 
@@ -187,7 +187,6 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 
 void MissionPlanner::updateGoal() const
 {
-	//ROS_INFO_STREAM("I'm Copying the Next Carrot Path Point Onto the Local Grid in frame "<<grid.getFrameId());
 	if(!this->carrot_path_.empty())
 	{
 		geometry_msgs::PoseStamped goal_pose(this->carrot_path_.front());
