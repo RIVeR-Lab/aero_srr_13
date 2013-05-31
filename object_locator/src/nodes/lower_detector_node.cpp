@@ -52,7 +52,9 @@ DetectorNode::DetectorNode() :
 
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>(
-			"object_location", 2);
+			"ObjectPose", 2);
+	secondObjPub = nh_.advertise<geometry_msgs::PoseStamped>(
+			"ObjectPose2", 2);
 	image_pub_ = it_.advertise("/out", 1);
 	pub_points2_ = nh_.advertise<PointCloud2>("lower_stereo/pointCloud", 1);
 	pub_points3_ = nh_.advertise<PointCloud2>("points3", 1);
@@ -572,7 +574,7 @@ void DetectorNode::computeDisparity() {
 					ros::Duration(1.0));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
-			tf::pointMsgToTF(world_point.point, detection);
+			tf::pointMsgToTF(camera_point.point, detection);
 			sherlock.addDetection(detection, detection_list_.at(i)->second);
 //			cout << "Added detection to manager" <<endl;
 		}
@@ -632,13 +634,19 @@ void DetectorNode::computeDisparity() {
 
 		  }
 		  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
-		 detection.setZ(kAvgVal_);
+			 detection.setZ(kAvgVal_);
 		cout << "I Got A Detection: " << endl << "X:" << detection.getX()
 				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
 				<< ", " << confidence << ", of type: " << typeString
 				<< std::endl;
 
 		aero_srr_msgs::ObjectLocationMsg msg;
+		geometry_msgs::PoseStamped objPose;
+		buildMsg(detection,objPose);
+		objPose.header.frame_id = "lower_stereo_optical_frame";
+		secondObjPub.publish(objPose);
+
+
 
 		msg.header.frame_id = world_point.header.frame_id;
 		msg.header.stamp = ros::Time::now();

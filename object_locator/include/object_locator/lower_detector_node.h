@@ -61,7 +61,7 @@ public:
 private:
 	ros::Timer disp_timer;
 	ros::NodeHandle nh_;
-	ros::Publisher ObjLocationPub;
+	ros::Publisher ObjLocationPub, secondObjPub;
 	image_transport::ImageTransport it_;
 	image_transport::CameraSubscriber image_left_;
 	image_transport::CameraSubscriber image_right_;
