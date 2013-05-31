@@ -192,7 +192,11 @@ string BeaconDetector::checkInConst(AprilTags::TagDetection tag, bool &tag_type)
 void BeaconDetector::publishWorld(tf::StampedTransform tf)
 {
 	while(ros::ok())
-		br_.sendTransform(tf::StampedTransform(tf, ros::Time::now()+ros::Duration(0.5), "/tag_base", "/world"));
+	{
+		ROS_INFO("publishing tf");
+		ROS_INFO_STREAM("tf is "<<tf.getOrigin().getX()<<" "<<tf.getOrigin().getY()<<" "<<tf.getOrigin().getZ());
+		br_.sendTransform(tf::StampedTransform(tf, ros::Time::now()+ros::Duration(0.5), "/world","/tag_base"));
+	}
 	if(world_broadcaster_.joinable())
 	{
 		world_broadcaster_.join();
@@ -222,6 +226,8 @@ void BeaconDetector::detectBeacons()
 
 			if(frame.empty())										//empty frame so cant process
 			process=false;
+
+			img_time=img_time_;										//get image time
 
 			if(!intrinsic_.empty())									//copy the intrinsic params
 			{
@@ -446,7 +452,7 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 	tf::StampedTransform 	world2base;
 	world2base=tag2base;
 	world2base.inverseTimes(tag2world);
-	world2base=world2base.inverse();
+	//world2base=world2base.inverse();
 	ROS_INFO("x: %d y: %d z: %d",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
 
 	char dummy;
@@ -490,8 +496,8 @@ geometry_msgs::Pose BeaconDetector::getRobotPose(string tag,ros::Time imgtime)
 
 	//calculate the transform between the robot_base and the world
 	tf::StampedTransform 	world2base;
-	world2base=tag2world;
-	world2base.inverseTimes(tag2base);
+	world2base=tag2base;
+	world2base.inverseTimes(tag2world);
 
 	//convert transform into pose message
 	tran.position.x=world2base.getOrigin()[0];
