@@ -24,21 +24,45 @@ void BOOMStage::onInit() {
 }
 
 void BOOMStage::loadParams() {
-	this->left_input_topic_ = "upper_stereo/left/image_rect_color";
-	this->right_input_topic_ = "upper_stereo/right/image_rect_color";
-	this->disp_out_topic_ = "upper_stereo/disparityImage";
-	this->points_out_topic_ = "upper_stereo/pointCloud";
-
-	this->output_topic_ = "boom_stage/poses";
-	this->getPrivateNodeHandle().getParam(this->left_input_topic_,
-			this->left_input_topic_);
-	this->getPrivateNodeHandle().getParam(this->right_input_topic_,
-			this->right_input_topic_);
-	this->getPrivateNodeHandle().getParam(this->output_topic_,
-			this->output_topic_);
+	this->left_camera = "left_camera";
+	this->right_camera = "right_camera";
+	this->disparity = "disparity";
+	this->point_cloud = "point_cloud";
+	this->optical_frame ="optical_frame";
+	this->lower_bound_name = "lower_bound";
+	this->upper_bound_name = "upper_bound";
+	this->comparison_out_topic = "comparison_out_topic";
+	this->lower_bound = 4;
+	this->upper_bound = 100;
+	this->output_topic = "output_topic";
+	this->grass_level_name = "grass_level";
+	this->getPrivateNodeHandle().getParam(this->left_camera,
+			this->left_camera);
+	this->getPrivateNodeHandle().getParam(this->right_camera,
+			this->right_camera);
+	this->getPrivateNodeHandle().getParam(this->disparity,
+			this->disparity);
+	this->getPrivateNodeHandle().getParam(this->point_cloud,
+			this->point_cloud);
+	this->getPrivateNodeHandle().getParam(this->optical_frame,
+			this->optical_frame);
+	this->getPrivateNodeHandle().getParam(this->output_topic,
+			this->output_topic);
+	this->getPrivateNodeHandle().getParam(this->lower_bound_name,
+			this->lower_bound);
+	this->getPrivateNodeHandle().getParam(this->upper_bound_name,
+			this->upper_bound);
+	this->getPrivateNodeHandle().getParam(this->HORIZON_TOP_NAME,
+			this->HORIZON_TOP_);
+	this->getPrivateNodeHandle().getParam(this->comparison_out_topic,
+			this->comparison_out_topic);
+	this->getPrivateNodeHandle().getParam(this->grass_level_name,
+			this->grass_level);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
+	this->HORIZON_TOP_NAME = "HORIZON";
 	this->HORIZON_TOP_ = 125;
 	this->HORIZON_BTM_ = 730;
+	this->grass_level = .33;
 	this->ZeroV[0] = 0;
 	this->ZeroV[1] = 0;
 	this->ZeroV[2] = 0;
@@ -69,23 +93,25 @@ void BOOMStage::loadParams() {
 	this->watson_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
 //	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
 //	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
+	this->train_ = true;
 }
 
 void BOOMStage::registerTopics() {
-	this->image_left_ = it_->subscribeCamera(this->left_input_topic_, 2,
+	this->image_left_ = it_->subscribeCamera(this->left_camera, 2,
 			&BOOMStage::boomImageCbleft, this);
-	this->image_right_ = it_->subscribeCamera(this->right_input_topic_, 2,
+	this->image_right_ = it_->subscribeCamera(this->right_camera, 2,
 				&BOOMStage::boomImageCbright, this);
 //	this->sync_image_sub_ = this->getNodeHandle().subscribe(this->input_topic_,2,&BOOMStage::boomImageCb,this);
-	this->pose_array_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->output_topic_,2);
-	this->disp_img_pub_ = this->getNodeHandle().advertise<sensor_msgs::Image>(this->disp_out_topic_,2);
-	this->point_cloud_pub_ = this->getNodeHandle().advertise<sensor_msgs::PointCloud2>(this->points_out_topic_,2);
+	this->pose_array_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->output_topic,2);
+	this->comparison_out_pub_ = this->getNodeHandle().advertise<geometry_msgs::PoseArray>(this->comparison_out_topic,2);
+	this->disp_img_pub_ = this->getNodeHandle().advertise<sensor_msgs::Image>(this->disparity,2);
+	this->point_cloud_pub_ = this->getNodeHandle().advertise<sensor_msgs::PointCloud2>(this->point_cloud,2);
 }
 
 void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 		const sensor_msgs::CameraInfoConstPtr& info) {
 	cv_bridge::CvImagePtr img;
-	NODELET_INFO_STREAM("In Boom Image CB");
+//	NODELET_INFO_STREAM("In Boom Image CB");
 	try {
 		img = cv_bridge::toCvCopy(msg, enc::RGB8);
 	} catch (cv_bridge::Exception& e) {
@@ -100,6 +126,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	Mat_t src = img->image;
 	Mat_t normImage,mask,finalMask;
 //	circleFind(*msg);
+//	gmmRemove(msg);
 	grassRemove(*msg, normImage);
 	maskCreate(*msg,mask);
 //	fenceCheckerStd(normImage);
@@ -112,7 +139,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 void BOOMStage::boomImageCbright(const sensor_msgs::ImageConstPtr& msg,
 		const sensor_msgs::CameraInfoConstPtr& info) {
 	cv_bridge::CvImagePtr img;
-	NODELET_INFO_STREAM("In Boom Image CB");
+//	NODELET_INFO_STREAM("In Boom Image CB");
 	try {
 		img = cv_bridge::toCvCopy(msg, enc::RGB8);
 	} catch (cv_bridge::Exception& e) {
@@ -148,10 +175,105 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 	return pt[2] != image_geometry::StereoCameraModel::MISSING_Z
 			&& !std::isinf(pt[2]);
 }
+void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg)
+{
+	cv_bridge::CvImagePtr img;
+//	Mat_t src = load_;
+	try {
+		img = cv_bridge::toCvCopy(msg, enc::BGR8);
+	} catch (cv_bridge::Exception& e) {
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+	cv::Mat source(img->image);
+    //ouput ima
+
+
+
+
+    cv::Mat meanImg(source.rows, source.cols, CV_32FC3);
+    cv::Mat fgImg(source.rows, source.cols, CV_8UC3);
+    cv::Mat bgImg(source.rows, source.cols, CV_8UC3);
+
+    Rect roi(0, source.rows -101,100,100);
+    cv::Mat crop = source(roi);
+
+    cv::Mat floatCrop;
+    crop.convertTo(floatCrop, CV_32F);
+    cv::Mat floatSource;
+    source.convertTo(floatSource, CV_32F);
+    //convert the input image to float
+
+    cv::Mat cropSamples(crop.rows * crop.cols, 3, CV_32FC1);
+    int idx = 0;
+    for (int y = 0; y < crop.rows; y++) {
+        cv::Vec3f* row = floatSource.ptr<cv::Vec3f > (y);
+        for (int x = 0; x < crop.cols; x++) {
+        	cropSamples.at<cv::Vec3f > (idx++, 0) = row[x];
+        }
+    }
+
+    //now convert the float image to column vector
+    cv::Mat samples(source.rows * source.cols, 3, CV_32FC1);
+     idx = 0;
+    for (int y = 0; y < source.rows; y++) {
+        cv::Vec3f* row = floatSource.ptr<cv::Vec3f > (y);
+        for (int x = 0; x < source.cols; x++) {
+            samples.at<cv::Vec3f > (idx++, 0) = row[x];
+        }
+    }
+
+    //we need just 2 clusters
+    cv::EMParams params(2);
+    cv::ExpectationMaximization em(cropSamples, cv::Mat(), params);
+
+	    means = em.getMeans();
+	    weights = em.getWeights();
+
+	    //the two dominating colors
+
+	    //the weights of the two dominant colors
+
+
+	    //we define the foreground as the dominant color with the largest weight
+	    const int fgId = weights.at<float>(0) > weights.at<float>(1) ? 0 : 1;
+
+	    //now classify each of the source pixels
+	    idx = 0;
+	    for (int y = 0; y < source.rows; y++) {
+	        for (int x = 0; x < source.cols; x++) {
+
+	            //classify
+	            const int result = cvRound(em.predict(samples.row(idx++), NULL));
+	            //get the according mean (dominant color)
+	            const double* ps = means.ptr<double>(result, 0);
+
+	            //set the according mean value to the mean image
+	            float* pd = meanImg.ptr<float>(y, x);
+	            //float images need to be in [0..1] range
+	            pd[0] = ps[0] / 255.0;
+	            pd[1] = ps[1] / 255.0;
+	            pd[2] = ps[2] / 255.0;
+
+	            //set either foreground or background
+	            if (result == fgId) {
+	                fgImg.at<cv::Point3_<uchar> >(y, x, 0) = source.at<cv::Point3_<uchar> >(y, x, 0);
+	            } else {
+	                bgImg.at<cv::Point3_<uchar> >(y, x, 0) = source.at<cv::Point3_<uchar> >(y, x, 0);
+	            }
+	        }
+	    }
+
+//	    cv::imshow("Means", meanImg);
+	    cv::imshow("Foreground", fgImg);
+	    cv::imshow("Background", bgImg);
+	    cv::waitKey(3);
+
+}
 
 
 void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
-	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
+//	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
 	try {
@@ -189,8 +311,8 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 //			normImg_.at<cv::Vec3b>(x,y) = nRGB;
 			browness = nR / nG;
 			whiteness = sumRGB / 756;
-			if ((nG > .37)
-					|| ((std::abs(browness - 1) < .15) && (whiteness < .9))) {
+			if ((nG > grass_level)
+					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
 				norma.at<cv::Vec3b>(x, y) = ZeroV;
 
 			}
@@ -227,7 +349,7 @@ waitKey(3);
 
 }
 void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
-	NODELET_INFO_STREAM("IN BLOB GRASS REMOVE");
+//	NODELET_INFO_STREAM("IN MASK CREATE");
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
 	try {
@@ -265,21 +387,12 @@ void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
 //			normImg_.at<cv::Vec3b>(x,y) = nRGB;
 			browness = nR / nG;
 			whiteness = sumRGB / 756;
-			if ((nG > .33)
+			if ((nG > grass_level)
 					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
 				mask.at<cv::Vec3b>(x, y) = White;
 			}
 			else {
 				mask.at<cv::Vec3b>(x, y) = ZeroV;
-			}
-			if ((x == 278) && (y == 803)) {
-				NODELET_WARN_STREAM(
-						"nR = " << nR << std::endl << "nG =" << nG << std::endl << "nB =" << nB);
-
-			}
-			if ((nR > nG) && (nG > nB) && (nR > .40)) {
-//				NODELET_WARN_STREAM("Fence Detected");
-
 			}
 		}
 //		HORIZON_ = Fence_;
@@ -307,13 +420,13 @@ void BOOMStage::maskCreate(const sensor_msgs::Image& msg, Mat_t& maskt) {
 			Scalar(0, 255, 0));
 
 
-//	imshow("mask", mask);
-//	waitKey(3);
+	imshow("mask", mask);
+	waitKey(3);
 
 }
 
 void BOOMStage::blobIdentify(const Mat_t& img, Mat_t& mask, Mat_t& final) {
-	NODELET_INFO_STREAM("IN BLOB IDENTIFY");
+//	NODELET_INFO_STREAM("IN BLOB IDENTIFY");
 	Mat_t src_gray(mask);
 	int thresh = 100;
 	int max_thresh = 255;
@@ -409,9 +522,9 @@ void BOOMStage::blobIdentify(const Mat_t& img, Mat_t& mask, Mat_t& final) {
 }
 
 void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
-	NODELET_INFO_STREAM("IN FILLHOLES IDENTIFY");
+//	NODELET_INFO_STREAM("IN FILLHOLES IDENTIFY");
 	Mat_t med, src_gray, normImg;
-	int thresh = 100;
+	int thresh = 0;
 	int max_thresh = 255;
 	RNG rng(12345);
 	Mat threshold_output;
@@ -421,7 +534,6 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 
 	normImg = img;
 	cvtColor(normImg, src_gray, CV_BGR2GRAY);
-
 	/// Detect edges using Threshold
 	threshold(src_gray, threshold_output, thresh, 255, THRESH_BINARY);
 
@@ -452,7 +564,7 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 		if (flag[i] != 1) {
 			Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255),
 					rng.uniform(0, 255));
-			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > 4 && radius[i] < 100)){
+			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > this->lower_bound && radius[i] < this->upper_bound)){
 			drawContours(drawing, contours_poly, i, color, 1, 8,
 					vector<Vec4i>(), 0, Point());
 			rectangle(drawing, boundRect[i].tl(), boundRect[i].br(), color, 2,
@@ -466,8 +578,8 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 			rectangle(left_image_, boundRect[i].tl(), boundRect[i].br(), color, 2,
 					8, 0);
 			circle(left_image_, center[i], (int) radius[i], color, 2, 8, 0);
-			cout << "Center of object[" << i << "]" << "= " << center[i].x
-									<< "," << center[i].y << endl;
+//			cout << "Center of object[" << i << "]" << "= " << center[i].x
+//									<< "," << center[i].y << endl;
 			DetectionPtr_t newDetection(new Detection_t());
 			newDetection->first.first = center[i].x;
 			newDetection->first.second = center[i].y;
@@ -695,29 +807,30 @@ void BOOMStage::computeDisparity()
 						  std::vector<int> pointIdxNKNSearch;
 						  std::vector<float> pointNKNSquaredDistance;
 
-						  std::cout << "K nearest neighbor search at (" << searchPoint.x
-						            << " " << searchPoint.y
-						            << " " << searchPoint.z
-						            << ") with K=" << K << std::endl;
+//						  std::cout << "K nearest neighbor search at (" << searchPoint.x
+//						            << " " << searchPoint.y
+//						            << " " << searchPoint.z
+//						            << ") with K=" << K << std::endl;
 
 						  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
 						  {
 							  float sum =0.0;
 						    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
 						    {
-						      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-						                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-						                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-						                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+//						      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+//						                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+//						                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+//						                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
 						      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
 						    }
 						    kAvgVal_ = sum/pointIdxNKNSearch.size ();
-						    ROS_WARN_STREAM("Average value at Voxel = " << kAvgVal_);
+
 						  }
+						  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
 						 detection.setZ(kAvgVal_);
 				tf::pointTFToMsg(detection, camera_point.point);
 				ros::Time tZero(0);
-				camera_point.header.frame_id = "/upper_stereo_optical_frame";
+				camera_point.header.frame_id = this->optical_frame;
 				camera_point.header.stamp = tZero;
 				world_point.header.frame_id = "/world";
 				world_point.header.stamp = tZero;
@@ -734,6 +847,7 @@ void BOOMStage::computeDisparity()
 		watson_->shrink();
 		geometry_msgs::PoseArrayPtr poses(new geometry_msgs::PoseArray);
 		poses->header.frame_id = "/world";
+		poses->header.stamp = left_msg_.header.stamp;
 		geometry_msgs::Pose tempPose;
 		tempPose.orientation.w  = 1;
 
@@ -745,6 +859,8 @@ void BOOMStage::computeDisparity()
 					poses->poses.push_back(tempPose);
 				}
 			this->pose_array_pub_.publish(poses);
+			this->comparison_out_pub_.publish(poses);
+			ROS_ERROR_STREAM("Sent color msg from color Detector");
 		}
 		ROS_WARN_STREAM("Number of detections in list = " << detections.size());
 		Mat_t cmapped;
