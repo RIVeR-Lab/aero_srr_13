@@ -303,7 +303,7 @@ void BeaconDetector::detectBeacons()
 				}
 				else
 				{
-				    ROS_ERROR("%s",state_transition.response.error_message);
+				    ROS_ERROR("%s",state_transition.response.error_message.c_str());
 				}
 			}
 			else
