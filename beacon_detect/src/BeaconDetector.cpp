@@ -290,12 +290,12 @@ void BeaconDetector::detectBeacons()
 
 				sprintf(frameid,"estimated_%s",tag.c_str());		//debug information
 				//transmit the tf
-				br_.sendTransform(tf::StampedTransform(transform, img_time, parent_frame_.c_str(), frameid));
+				br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent_frame_.c_str(), frameid));
 			}
 			//calculate the pose of the robot to the beacon
 
 			//spawn the broadcaster
-			boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  initWorld(tag,img_time)) );
+			boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  initWorld(tag,ros::Time(0))) );
 			//tf::Transform dummy;
 			//dummy.setIdentity();
 			//br_.sendTransform(tf::StampedTransform(dummy, ros::Time::now(), "/world","/base_footprint"));
@@ -384,10 +384,10 @@ void BeaconDetector::detectBeacons()
 
 				sprintf(frameid,"estimated_%s",tag.c_str());		//debug information
 				//transmit the tf
-				br_.sendTransform(tf::StampedTransform(transform, img_time, parent_frame_.c_str(), frameid));
+				br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent_frame_.c_str(), frameid));
 
 				//calculate the pose of the robot so the estimated tf of the tag and the actuall beacon will alighn
-				geometry_msgs::Pose temp=getRobotPose(tag,img_time);
+				geometry_msgs::Pose temp=getRobotPose(tag,ros::Time(0));
 
 				//publish nav::odom message for ekf
 				pubOdom(temp,img_time);
