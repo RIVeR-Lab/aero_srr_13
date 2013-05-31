@@ -33,6 +33,7 @@ GlobalPlanner::GlobalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh, app::Ca
 	ROS_INFO("Initializing Global Planner...");
 	this->state_.state = aero_srr_msgs::AeroState::SEARCH;
 	this->loadOccupancyParam();
+	this->waitForTransforms();
 	this->registerTopics();
 	this->registerTimers();
 	//this->setManual(true);
@@ -174,6 +175,24 @@ void GlobalPlanner::loadOccupancyParam()
 	if(!this->nh_.getParam(pg_y_ori, this->global_y_ori_))			PARAM_WARN(pg_y_ori,	pg_y_ori_msg.str());
 	if(!this->nh_.getParam(pg_z_ori, this->global_z_ori_))			PARAM_WARN(pg_z_ori,    pg_z_ori_msg.str());
 	if(!this->nh_.getParam(pg_res,	 this->global_res_))			PARAM_WARN(pg_res,		pg_res_msg.str());
+}
+
+void GlobalPlanner::waitForTransforms()
+{
+	ROS_INFO_STREAM("Global Planner Waiting for Transforms...");
+	bool done = false;
+	while(!done)
+	{
+		try
+		{
+			done = this->transformer_.canTransform(this->global_frame_, this->local_frame_, ros::Time(0));
+		}
+		catch(std::exception& e)
+		{
+			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+			//do nothing, just means one of the frames doesn't exist
+		}
+	}
 }
 
 void GlobalPlanner::registerTopics()

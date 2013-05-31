@@ -2,7 +2,7 @@
  * LOWER_DETECTOR_NODE.h
  *
  *  Created on: Mar 7, 2013
- *      Author: ssr
+ *      Author: Samir Zutshi
  */
 
 #ifndef LOWER_DETECTOR_NODE_H_
@@ -25,7 +25,7 @@
 #include <queue>
 #include <message_filters/subscriber.h>
 #include <sensor_msgs/PointCloud2.h>
-
+#include <geometry_msgs/PoseArray.h>
 
 
 
@@ -33,12 +33,12 @@
 namespace object_locator
 {
 
-class ImageConverter
+class DetectorNode
 {
 
 public:
-	ImageConverter();
-	virtual ~ImageConverter();
+	DetectorNode();
+	virtual ~DetectorNode();
 	void processImage(const sensor_msgs::Image& msg,  cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW);
 	void imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
 	void imageCbRight(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info);
@@ -54,13 +54,14 @@ public:
 	void addBbox(Mat_t& img, Mat_t& final);
 	Mat_t gray2bgr(Mat_t img);
 	cv::Point2f blobIdentify(Mat_t& img, int objThresh);
+	object_locator::object_type queryObject(const Mat_t& crop);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 
 private:
 	ros::Timer disp_timer;
 	ros::NodeHandle nh_;
-	ros::Publisher ObjLocationPub;
+	ros::Publisher ObjLocationPub, secondObjPub;
 	image_transport::ImageTransport it_;
 	image_transport::CameraSubscriber image_left_;
 	image_transport::CameraSubscriber image_right_;

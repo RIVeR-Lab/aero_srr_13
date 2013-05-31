@@ -59,16 +59,16 @@ void stateCallback(const aero_srr_msgs::AeroStateConstPtr& state_msg){
     publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::NAVOBJ:
-    publish_status_rate(2);
+    publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::COLLECT:
-    publish_status_rate(4);
+    publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::PICKUP:
-    publish_status_rate(6);
+    publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::HOME:
-    publish_status_rate(0.5);
+    publish_status_rate(1);
     break;
   case aero_srr_msgs::AeroState::PAUSE:
     publish_status_rate(0.0);

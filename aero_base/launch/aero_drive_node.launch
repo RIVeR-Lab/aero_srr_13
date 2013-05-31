@@ -3,6 +3,7 @@
   <arg name="pose_frame" default="/odom" />
   <arg name="twist_frame" default="/base_footprint" />
   <arg name="velocity_command_topic" default="/cmd_vel" />
+  <arg name="pause_topic" default="/pause" />
 
   <!-- Launch Motor Controller Driver -->
   <node pkg="roboteq_driver" type="roboteq_manager" name="aero_drive_roboteq_manager">
@@ -13,7 +14,7 @@
     <param name="port" value="/dev/ttyACM0" />
     <param name="control_topic" value="drive_cmd" />
     <param name="info_topic" value="aero_drive_feedback" />
-    <param name="pause_topic" value="/pause" />
+    <param name="pause_topic" value="$(arg pause_topic)" />
   </node>
   <!-- Launch Driver Controller -->
   <node pkg="aero_base" type="aero_drive_node" name="aero_drive_node">
