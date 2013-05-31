@@ -293,7 +293,23 @@ void BeaconDetector::detectBeacons()
 			aero_srr_msgs::StateTransitionRequest state_transition;
 			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
 			state_transition.request.requested_state.header.stamp = ros::Time().now();
-			state_client_.call(state_transition);
+			if(state_client_.call(state_transition))
+			{
+				if(state_transition.response.success)
+				{
+					ROS_INFO("Robot now in Search mode");
+					active_=true;
+					init_=false;
+				}
+				else
+				{
+				    ROS_ERROR("%s",state_transition.response.error_message);
+				}
+			}
+			else
+			{
+				ROS_ERROR("Not able to call the service");
+			}
 
 			process=false;
 			if(show_)
