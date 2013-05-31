@@ -239,6 +239,7 @@ void BeaconDetector::detectBeacons()
 
 		if(!init_&&process)
 		{
+			ROS_INFO("In initialization");
 			if(histeq_)
 				histEq(frame);										//TODO: with dynamic reconfigure expose this as a parameter pls
 
@@ -292,7 +293,9 @@ void BeaconDetector::detectBeacons()
 			}
 			//calculate the pose of the robot to the beacon
 			br_.sendTransform(tf::StampedTransform(initWorld(tag), ros::Time::now(), "/tag_base", "/world"));
-
+			tf::Transform dummy;
+			dummy.setIdentity();
+			br_.sendTransform(tf::StampedTransform(dummy, ros::Time::now(), "/world","/base_footprint"));
 			//ask the service to change the state from startup to search
 			aero_srr_msgs::StateTransitionRequest state_transition;
 			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
@@ -305,6 +308,7 @@ void BeaconDetector::detectBeacons()
 		}
 		if(process&&init_)
 		{
+			ROS_INFO("In processing");
 			if(histeq_)
 				histEq(frame);										//TODO: with dynamic reconfigure expose this as a parameter pls
 
