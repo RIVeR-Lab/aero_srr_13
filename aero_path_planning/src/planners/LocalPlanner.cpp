@@ -387,12 +387,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 				}
 
 				double raw_length   = traverser.lengthTraversed();
-				double tent_fitness = 0;
-				//Cuttoff for valid tentacle (to stop a goal inside a wall making the robot drive into it)
-				if(raw_length>.25/this->res_)
-				{
-					tent_fitness = raw_length+length_modifier;
-				}
+				double tent_fitness = raw_length+length_modifier;
 				//ROS_INFO("Searched Tentacle %d in set %d with fitness %f",current_set.getIndex(), working_tentacle.getIndex(), tent_fitness);
 				TentacleDataPtr_t tent_details(new TentacleData_t(cur_set.getIndex(), working_tentacle.getIndex()));
 				//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
