@@ -18,10 +18,10 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																																						nh_(nh),
-																																						p_nh_(p_nh),
-																																						limiter_(NULL),
-																																						occupancy_buffer_(2)
+																																								nh_(nh),
+																																								p_nh_(p_nh),
+																																								limiter_(NULL),
+																																								occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -370,28 +370,19 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 				//Modify length based on closeness to goal, if there is one
 				if(has_goal)
 				{
-					//ROS_INFO_STREAM("There is a goal...");
-					try
+					gm::Pose goal_pose;
+					has_goal = search_grid.getGoal(goal_pose);
+					if(has_goal)
 					{
-						//Will throw false if there was no goal point_pose
-						gm::Pose goal_pose;
-						has_goal = search_grid.getGoal(goal_pose);
-						if(has_goal)
-						{
-							aero_path_planning::Point goal_point;
-							app::poseToPoint(goal_pose, goal_point);
-							converter.convertToGrid(goal_point, goal_point);
-							const aero_path_planning::Point end_point = traverser.next();
-							double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
-							//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
-							length_modifier-= dist_to_goal*this->goal_weight_;
-						}
-					}
-					catch(bool& e)
-					{
-						//ROS_INFO("There is not a goal");
-						//There was no goal, set the flag
-						has_goal = e;
+						tf::Point goal_point;
+						tf::Point end_point;
+						app::Point temp_end(traverser.next());
+						converter.convertToEng(temp_end, temp_end);
+						app::pointToVector(temp_end, end_point);
+						tf::pointMsgToTF(goal_pose.position, goal_point);
+						double dist_to_goal = end_point.distance(goal_point);
+						//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
+						length_modifier-= dist_to_goal*this->goal_weight_;
 					}
 				}
 
@@ -524,8 +515,8 @@ void LocalPlanner::applyGoal(og::MultiTraitOccupancyGrid& grid) const
 	{
 		try
 		{
-			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, grid.getCreationTime(), ros::Duration(1.0/20.0));
-			this->transformer_.transformPose(grid.getFrameID(), grid.getCreationTime(), *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
+			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, ros::Time(0), ros::Duration(1.0/20.0));
+			this->transformer_.transformPose(grid.getFrameID(), *this->global_goal_, local_goal);
 			ROS_INFO_STREAM_THROTTLE(1, "Local Goal is:\n"<<local_goal.pose.position);
 			grid.setGoal(local_goal.pose);
 

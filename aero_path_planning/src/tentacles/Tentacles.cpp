@@ -127,7 +127,7 @@ bool TentTrav::hasNext() const
  * Where @f$ d(p_(k-1), p_k) @f$ is the linear distance between points @f$ p_(n-1) \text{ and } p_n @f$ .
  *
  */
-const aero_path_planning::Point& TentTrav::next()
+aero_path_planning::Point TentTrav::next()
 {
 	//If they're not equal, and we're not empty, we're already in the traversal, process the next point
 	if((this->next_point_ != this->last_point_)&&!this->empty_)
