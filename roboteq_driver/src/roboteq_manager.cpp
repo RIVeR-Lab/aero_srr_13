@@ -25,8 +25,8 @@ private:
 	ReconfigurableSubscriberPtr pause_sub;
 
 	ReconfigurableTimerPtr current_reset_timer;
-	int motor_stall_count = 0;
-	int motor_stall_max = 4;
+	int motor_stall_count;
+	int motor_stall_max;
 
 	bool is_paused_;
 
@@ -40,13 +40,9 @@ private:
 			if(is_paused_)
 				controller.setPower(motorControl.channel, 0);
 			else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::RPM){
-				if(motorControl.setpoint>0.01 || motorControl.setpoint<-0.01)
-					motor_stall_count = 0;
 				controller.setRPM(motorControl.channel, motorControl.setpoint);
 			}
 			else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::POWER){
-				if(motorControl.setpoint>0.01 || motorControl.setpoint<-0.01)
-					motor_stall_count = 0;
 				controller.setPower(motorControl.channel, motorControl.setpoint);
 			}
 			else
@@ -95,8 +91,14 @@ private:
 			++motor_stall_count;
 			if(motor_stall_count>=motor_stall_max){
 				boost::lock_guard<boost::mutex> lock(controller_mutex);
-				controller.setPower(1, 0);
-				controller.setPower(2, 0);
+				double v1, v2;
+				controller.getVelocity(1, v1);
+				controller.getVelocity(2, v2);
+				if((v1<1 && v1>-1) || (v2<1 && v2>-1)){
+					controller.setPower(1, 0);
+					controller.setPower(2, 0);
+				}
+				motor_stall_count = 0;
 			}
 		}
 	}
@@ -114,7 +116,8 @@ private:
 		controller.close();
 	}
 public:
-	RoboteqManager():is_paused_(false), port_("/dev/ttyACM0"), max_rpm_(250), ppr_(250), controller(max_rpm_, max_rpm_, ppr_, ppr_){
+	RoboteqManager():is_paused_(false), port_("/dev/ttyACM0"), max_rpm_(250), ppr_(250), controller(max_rpm_, max_rpm_, ppr_, ppr_),
+	motor_stall_max(4), motor_stall_count(0){
 		addDriverStateFunctions(device_driver_state::OPEN, &RoboteqManager::openDevice, &RoboteqManager::closeDevice, this);
 
 		control_sub = addReconfigurableThrottledSubscriber<roboteq_driver::RoboteqGroupMotorControl>(device_driver_state::RUNNING, 10, "roboteq_control", 1000, boost::bind(&RoboteqManager::controlCallback, this, _1));
