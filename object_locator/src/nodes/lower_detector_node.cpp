@@ -450,9 +450,9 @@ void DetectorNode::computeDisparity() {
 	  sor.filter (*cloud_filtered);
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
+//	pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromROSMsg(*points_msg,*cloud);
-	pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
+//	pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
 
 	/****** Cylinder model testing *******/
 //	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudFilt (new pcl::PointCloud<pcl::PointXYZ>);
@@ -496,7 +496,7 @@ void DetectorNode::computeDisparity() {
 	float resolution = 2.5f;
 	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
 
-    octree.setInputCloud (tcloud);
+    octree.setInputCloud (cloud);
     octree.addPointsFromInputCloud ();
 
     pcl::PointXYZ searchPoint;
@@ -565,6 +565,47 @@ void DetectorNode::computeDisparity() {
 //					<< "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
 			tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
+
+
+			searchPoint.x = detection.getX();
+			searchPoint.y = detection.getY();
+			searchPoint.z = detection.getZ();
+
+			int K = 10;
+				  std::vector<int> pointIdxVec;
+			  std::vector<int> pointIdxNKNSearch;
+			  std::vector<float> pointNKNSquaredDistance;
+
+	//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
+	//		            << " " << searchPoint.y
+	//		            << " " << searchPoint.z
+	//		            << ") with K=" << K << std::endl;
+
+			  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
+			  {
+				  float sumx =0.0;
+				  float sumy =0.0;
+				  float sumz =0.0;
+			    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+			    {
+	//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+	//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+			    	sumx = cloud->points[ pointIdxNKNSearch[i] ].x + sumx;
+			    	sumy = cloud->points[ pointIdxNKNSearch[i] ].y + sumy;
+			    	sumz = cloud->points[ pointIdxNKNSearch[i] ].z + sumz;
+			    }
+			    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
+			    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
+			    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
+
+			  }
+			  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
+			  	  detection.setX(xAvgVal_);
+			  	  detection.setY(yAvgVal_);
+				 detection.setZ(kAvgVal_);
+
 			tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
 			camera_point.header.frame_id = "/lower_stereo_optical_frame";
@@ -608,44 +649,7 @@ void DetectorNode::computeDisparity() {
 		}
 
 
-		searchPoint.x = detection.getX();
-		searchPoint.y = detection.getY();
-		searchPoint.z = detection.getZ();
 
-		int K = 10;
-			  std::vector<int> pointIdxVec;
-		  std::vector<int> pointIdxNKNSearch;
-		  std::vector<float> pointNKNSquaredDistance;
-
-//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
-//		            << " " << searchPoint.y
-//		            << " " << searchPoint.z
-//		            << ") with K=" << K << std::endl;
-
-		  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
-		  {
-			  float sumx =0.0;
-			  float sumy =0.0;
-			  float sumz =0.0;
-		    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
-		    {
-//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-		    	sumx = tcloud->points[ pointIdxNKNSearch[i] ].x + sumx;
-		    	sumy = tcloud->points[ pointIdxNKNSearch[i] ].y + sumy;
-		    	sumz = tcloud->points[ pointIdxNKNSearch[i] ].z + sumz;
-		    }
-		    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
-		    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
-		    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
-
-		  }
-		  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
-		  	  detection.setX(xAvgVal_);
-		  	  detection.setY(yAvgVal_);
-			 detection.setZ(kAvgVal_);
 		cout << "I Got A Detection: " << endl << "X:" << detection.getX()
 				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
 				<< ", " << confidence << ", of type: " << typeString
