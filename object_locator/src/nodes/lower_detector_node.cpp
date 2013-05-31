@@ -44,7 +44,7 @@ using namespace sensor_msgs;
 
 DetectorNode::DetectorNode() :
 		it_(nh_), WINDOWLeft("Left Camera"), WINDOWRight("Right Camera"), WINDOWDisparity(
-				"Disparity"), sherlock(.5, .15, .05, .5), gotLeft(false), gotRight(
+				"Disparity"), sherlock(.1, .15, .05, .5), gotLeft(false), gotRight(
 				false)
 
 {
@@ -566,7 +566,6 @@ void DetectorNode::computeDisparity() {
 			tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
 
-
 			searchPoint.x = detection.getX();
 			searchPoint.y = detection.getY();
 			searchPoint.z = detection.getZ();
@@ -606,7 +605,7 @@ void DetectorNode::computeDisparity() {
 			  	  detection.setY(yAvgVal_);
 				 detection.setZ(kAvgVal_);
 
-			tf::pointTFToMsg(detection, camera_point.point);
+	tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
 			camera_point.header.frame_id = "/lower_stereo_optical_frame";
 			camera_point.header.stamp = tZero;
@@ -648,7 +647,7 @@ void DetectorNode::computeDisparity() {
 
 		}
 
-
+		
 
 		cout << "I Got A Detection: " << endl << "X:" << detection.getX()
 				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
@@ -837,15 +836,15 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	//-- Detect faces
 
 	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 5, 0,
-			cv::Size(30, 39), cv::Size(85, 90)); // works for WHAground !&
+			cv::Size(30, 39), cv::Size(85, 90)); // works for WHAground !&5
 	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 5, 0,
-			cv::Size(52, 59), cv::Size(85, 90)); // works for WHAground !&
+			cv::Size(52, 59), cv::Size(85, 90)); // works for WHAground !&5
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
 	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 1, 0,
 			cv::Size(5, 5), cv::Size(46,46)); //
-	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,8, 0,
-			cv::Size(10, 11), cv::Size(52, 59)); // works for
+	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,20, 0,
+			cv::Size(10, 11), cv::Size(52, 59)); // works for 8
 
 	/*
 	 * WHA - White hook object inside detection loop BLUE
