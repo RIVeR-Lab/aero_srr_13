@@ -418,12 +418,12 @@ void GlobalPlanner::plan()
 void GlobalPlanner::carrotToPath(nav_msgs::Path& path) const
 {
 	BOOST_FOREACH(std::deque<geometry_msgs::Pose>::value_type point, this->carrot_path_)
-					{
+	{
 		geometry_msgs::PoseStamped path_pose;
 		path_pose.header = path.header;
 		path_pose.pose   = point;
 		path.poses.push_back(path_pose);
-					}
+	}
 }
 
 bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid::MultiTraitOccupancyGrid& map) const
@@ -485,7 +485,7 @@ void GlobalPlanner::missionGoalCB(const geometry_msgs::PoseStampedConstPtr& mess
 	{
 		this->transformer_.waitForTransform(this->global_frame_, message->header.frame_id, message->header.stamp, ros::Duration(1.0));
 		this->transformer_.transformPose(this->global_frame_, *message, this->mission_goal_);
-		ROS_INFO_STREAM("Got New Mission Goal! Replanning...");
+		ROS_INFO_STREAM("Global Planner Got New Mission Goal!\n"<<this->mission_goal_<<"\n Replanning...");
 		this->plan();
 	}
 	catch(std::exception& e)
