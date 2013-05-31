@@ -446,6 +446,7 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 	tf::StampedTransform 	world2base;
 	world2base=tag2base;
 	world2base.inverseTimes(tag2world);
+	world2base=world2base.inverse();
 	ROS_INFO("x: %d y: %d z: %d",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
 
 	char dummy;
