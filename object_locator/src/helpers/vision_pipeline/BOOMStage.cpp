@@ -774,11 +774,14 @@ void BOOMStage::computeDisparity()
 			this->point_cloud_pub_.publish(points_msg);
 			//*********Oct tree stuff *************//
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+			pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
 			pcl::fromROSMsg(*points_msg,*cloud);
+			pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
+
 			float resolution = 2.5f;
 			pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
 
-		    octree.setInputCloud (cloud);
+		    octree.setInputCloud (tcloud);
 		    octree.addPointsFromInputCloud ();
 
 		    pcl::PointXYZ searchPoint;
@@ -814,20 +817,28 @@ void BOOMStage::computeDisparity()
 
 						  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
 						  {
-							  float sum =0.0;
+							  float sumx =0.0;
+							  float sumy =0.0;
+							  float sumz =0.0;
 						    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
 						    {
 //						      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
 //						                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
 //						                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
 //						                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-						      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
+						    	sumx = tcloud->points[ pointIdxNKNSearch[i] ].x + sumx;
+						    	sumy = tcloud->points[ pointIdxNKNSearch[i] ].y + sumy;
+						    	sumz = tcloud->points[ pointIdxNKNSearch[i] ].z + sumz;
 						    }
-						    kAvgVal_ = sum/pointIdxNKNSearch.size ();
+						    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
+						    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
+						    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
 
 						  }
 						  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
-						 detection.setZ(kAvgVal_);
+					  	  detection.setX(xAvgVal_);
+					  	  detection.setY(yAvgVal_);
+						  detection.setZ(kAvgVal_);
 				tf::pointTFToMsg(detection, camera_point.point);
 				ros::Time tZero(0);
 				camera_point.header.frame_id = this->optical_frame;

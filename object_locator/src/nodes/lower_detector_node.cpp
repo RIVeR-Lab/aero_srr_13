@@ -624,19 +624,27 @@ void DetectorNode::computeDisparity() {
 
 		  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
 		  {
-			  float sum =0.0;
+			  float sumx =0.0;
+			  float sumy =0.0;
+			  float sumz =0.0;
 		    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
 		    {
 //		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
 //		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
 //		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
 //		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-		      sum = tcloud->points[ pointIdxNKNSearch[i] ].z + sum;
+		    	sumx = tcloud->points[ pointIdxNKNSearch[i] ].x + sumx;
+		    	sumy = tcloud->points[ pointIdxNKNSearch[i] ].y + sumy;
+		    	sumz = tcloud->points[ pointIdxNKNSearch[i] ].z + sumz;
 		    }
-		    kAvgVal_ = sum/pointIdxNKNSearch.size ();
+		    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
+		    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
+		    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
 
 		  }
 		  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
+		  	  detection.setX(xAvgVal_);
+		  	  detection.setY(yAvgVal_);
 			 detection.setZ(kAvgVal_);
 		cout << "I Got A Detection: " << endl << "X:" << detection.getX()
 				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
