@@ -1,6 +1,7 @@
 <!-- This file demonstrates the use of SIFT features for online SLAM with a Kinect.
-     The openni driver has to be started seperately -->
+     The openni driver has to be started separately -->
 <launch>
+
   <node pkg="rgbdslam" type="rgbdslam" name="rgbdslam" cwd="node" required="true" output="log"> 
     <!-- Input data settings-->
     <param name="config/topic_image_mono"              value="/upper_stereo/left/image_raw"/> <!--could also be color -->
@@ -12,4 +13,19 @@
     <param name="config/nn_distance_ratio"             value="0.95"/> <!-- Feature correspondence is valid if distance to nearest neighbour is smaller than this parameter times the distance to the 2nd neighbour -->
     <param name="config/max_keypoints"                 value="600"/><!-- Extract no more than this many keypoints (not honored by SIFTGPU)-->
   </node>
+
+  <!-- Launch octomap_server for mappingL: Listens to incoming PointCloud2 data 
+  and incrementally build an octomap. The data is sent out in different representations. -->
+  <node pkg="octomap_server" type="color_octomap_server_node" name="color_octomap_server" output="screen">
+    <param name="resolution" value="0.005" />
+    <!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+    <param name="frame_id" type="string" value="map" />
+    <!-- maximum range to integrate (speedup, accuracy) -->
+    <param name="max_sensor_range" value="6.0" />
+    <!-- Save octomap here on destruction of the server -->
+    <param name="save_directory" value="$(optenv OCTOMAP_SAVE_DIR ./)" />
+    <!-- data source to integrate (PointCloud2) -->
+    <remap from="cloud_in" to="/rgbdslam/batch_clouds" />
+  </node>
+
 </launch>

@@ -1,6 +1,6 @@
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find rgbdslam)/log.conf"/>
-  
+
   <!--might only work with the experimental octomap (as of May 11)-->
     <include file="$(find openni_camera)/launch/openni_node.launch"/>
     <node pkg="rgbdslam" type="rgbdslam" name="rgbdslam" cwd="node" required="false" output="log" > 
@@ -43,4 +43,5 @@
       <!-- data source to integrate (PointCloud2) -->
       <remap from="cloud_in" to="/rgbdslam/batch_clouds" />
     </node>
+
 </launch>
