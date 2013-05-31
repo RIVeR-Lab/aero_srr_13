@@ -439,8 +439,8 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 {
 	//find transform to base_footprint
 	tf::StampedTransform tag2base;
-	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag_name, imgtime, ros::Duration(10.0) );
-	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag_name,imgtime,tag2base);
+	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag_name, ros::Time(0), ros::Duration(10.0) );
+	tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag_name,ros::Time(0),tag2base);
 	//define find transform to the beacon_base
 	tf::StampedTransform tag2world;
 	tf_lr_.lookupTransform("/tag_base",string("/")+tag_name,imgtime,tag2world);
