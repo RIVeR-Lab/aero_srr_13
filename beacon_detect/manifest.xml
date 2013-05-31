@@ -10,10 +10,18 @@
   <url>http://ros.org/wiki/beacon_detect</url>
   <depend package="roscpp"/>
   <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  
+  <depend package="image_transport" />
+  <depend package="image_geometry" />
+  <depend package ="sensor_msgs"/>
+  <depend package ="geometry_msgs"/>
+  <depend package ="nav_msgs"/>
+
   <depend package="apriltags"/>
-  <depend package="vision_comm"/>
   <depend package="tf"/>
   <depend package="aero_srr_msgs"/>
+  <depend package="dynamic_reconfigure" />
 
 
 </package>

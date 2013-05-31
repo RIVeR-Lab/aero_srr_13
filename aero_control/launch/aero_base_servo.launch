@@ -1,0 +1,16 @@
+<launch>
+<node name="object_to_pose_converter" pkg="aero_control" type="object_to_pose" output="screen">
+	<param name="object_location" value="/object_location" />
+	<param name="desired_position" value="/desired_position" />
+</node>
+<node name="aero_base_servo" pkg="aero_control" type="base_servo_control" output="screen">
+	<param name="desired_position" value="/desired_position" />
+	<param name="workspace_position" value="/workspace_position" />
+	<param name="base_velocity" value="/aero/manual_twist_topic" />
+	<param name="aero_state" value="/aero/supervisor/state" />
+	<param name="aero_state_transition" value="/aero/supervisor/state_transition_request" />
+	
+
+</node>
+
+</launch>

@@ -1,0 +1,21 @@
+<launch>
+	<arg name="mission_goal_topic" default="/aero/global/mission_goal"/>
+	<arg name="path_goal_topic"    default="/aero/global/goal"/>
+	<arg name="global_frame"       default="/world"/>
+	<arg name="local_frame"        default="/base_footprint"/>
+	<arg name="path_threshold"     default="1.0"/>
+	<arg name="path_topic"         default="/aero/global/path"/>
+	<arg name="state_topic"        default="/aero/supervisor/state"/>
+
+	<node pkg="aero_path_planning" type="aero_mission_planner" name="aero_mission_planner" output="screen">
+		<param name="mission_goal_topic"  value="$(arg mission_goal_topic)"/>
+		<param name="path_goal_topic"     value="$(arg path_goal_topic)"/>
+		<param name="global_frame"        value="$(arg global_frame)"/>
+		<param name="local_frame"         value="$(arg local_frame)"/>
+		<param name="path_threshold"      value="$(arg path_threshold)"/>
+		<param name="path_topic"          value="$(arg path_topic)"/>
+		<param name="state_topic"         value="$(arg state_topic)"/>
+	</node>
+
+</launch>
+

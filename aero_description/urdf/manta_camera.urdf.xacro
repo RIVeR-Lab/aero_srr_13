@@ -5,6 +5,8 @@
       xmlns:xacro="http://ros.org/wiki/xacro">
   
   <include filename="$(find aero_description)/urdf/manta_camera.gazebo.xacro" />
+  <property name="manta_camera_width" value="0.04" />
+  <property name="manta_camera_height" value="0.02" />
 
   <xacro:macro name="manta_cam_v0" params="frame_name parent *origin camera_name">
     <joint name="${frame_name}_frame_joint" type="fixed">

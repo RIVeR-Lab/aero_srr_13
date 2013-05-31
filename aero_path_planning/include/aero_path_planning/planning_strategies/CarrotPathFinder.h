@@ -13,10 +13,12 @@
 #define PATHFINDER_H_
 
 //****************SYSTEM DEPENDANCIES**************************//
-#include<boost/function.hpp>
-#include<deque>
+#include <boost/function.hpp>
+#include <deque>
+#include <occupancy_grid/MultiTraitOccupancyGrid.hpp>
+#include <geometry_msgs/Pose.h>
 //*****************LOCAL DEPENDANCIES**************************//
-#include<aero_path_planning/occupancy_grid/OccupancyGrid.h>
+
 //**********************NAMESPACES*****************************//
 
 namespace aero_path_planning
@@ -38,7 +40,7 @@ namespace aero_path_planning
 		 * true if the point is in collision, else false. This function will likely be called
 		 * many many times, so should be as fast as possible
 		 */
-		typedef boost::function< bool (const aero_path_planning::Point&, const aero_path_planning::OccupancyGrid&)> collision_func_;
+		typedef boost::function< bool (const tf::Point&, const occupancy_grid::MultiTraitOccupancyGrid&)> collision_func_;
 
 
 		/**
@@ -55,7 +57,7 @@ namespace aero_path_planning
 		 * @param [in] map The map to search over
 		 * @return True if sucessfully set, else false
 		 */
-		virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map) = 0;
+		virtual bool setSearchMap(occupancy_grid::MultiTraitOccupancyGridConstPtr map) = 0;
 
 		/**
 		 * @author Adam Panzica
@@ -85,7 +87,7 @@ namespace aero_path_planning
 		 * and support should be checked by calling the allowsPartialPath() method
 		 *
 		 */
-		virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::deque<aero_path_planning::Point>& result_path) = 0;
+		virtual bool search(const geometry_msgs::Pose& start_point, const geometry_msgs::Pose& goal_point, ros::Duration& timeout, std::deque<geometry_msgs::Pose>& result_path) = 0;
 
 		/**
 		 * @author Adam Panzica

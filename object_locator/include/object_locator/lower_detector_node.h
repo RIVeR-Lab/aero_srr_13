@@ -2,7 +2,7 @@
  * LOWER_DETECTOR_NODE.h
  *
  *  Created on: Mar 7, 2013
- *      Author: ssr
+ *      Author: Samir Zutshi
  */
 
 #ifndef LOWER_DETECTOR_NODE_H_
@@ -24,6 +24,8 @@
 #include <math.h>
 #include <queue>
 #include <message_filters/subscriber.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <geometry_msgs/PoseArray.h>
 
 
 
@@ -31,12 +33,12 @@
 namespace object_locator
 {
 
-class ImageConverter
+class DetectorNode
 {
 
 public:
-	ImageConverter();
-	virtual ~ImageConverter();
+	DetectorNode();
+	virtual ~DetectorNode();
 	void processImage(const sensor_msgs::Image& msg,  cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW);
 	void imageCbLeft(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
 	void imageCbRight(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info);
@@ -47,22 +49,29 @@ public:
 	void saveImage(const sensor_msgs::Image& msg,cv_bridge::CvImagePtr& cv_ptr, int O);
 	void rectRightCb(const sensor_msgs::ImageConstPtr& msg);
 	void rectLeftCb(const sensor_msgs::ImageConstPtr& msg);
+	float nNdisp(const cv::Point2d& pt, const Mat_t& disp);
+//	void pointCloudCb(const sensor_msgs::PointCloud2ConstPtr& cloud);
+	void addBbox(Mat_t& img, Mat_t& final);
 	Mat_t gray2bgr(Mat_t img);
+	cv::Point2f blobIdentify(Mat_t& img, int objThresh);
+	object_locator::object_type queryObject(const Mat_t& crop);
 	cv_bridge::CvImagePtr mat_left;
 	cv_bridge::CvImagePtr mat_right;
 
 private:
 	ros::Timer disp_timer;
 	ros::NodeHandle nh_;
-	ros::Publisher ObjLocationPub;
+	ros::Publisher ObjLocationPub, secondObjPub;
 	image_transport::ImageTransport it_;
 	image_transport::CameraSubscriber image_left_;
 	image_transport::CameraSubscriber image_right_;
 	ros::Subscriber disp_image_sub_;
 	ros::Subscriber left_rect_sub_;
 	ros::Subscriber right_rect_sub_;
+	ros::Subscriber point_cloud_sub_;
 	image_transport::Publisher image_pub_;
-
+	ros::Publisher pub_points2_;
+	ros::Publisher pub_points3_;
 
 	sensor_msgs::Image left_image;
 	sensor_msgs::Image right_image;
@@ -70,9 +79,15 @@ private:
 	sensor_msgs::CameraInfo right_info;
 	std::string cascade_path_WHA,
 				cascade_path_PINK,
-				cascade_path_WHASUN;
+				cascade_path_WHASUN,
+				cascade_path_RQT_BALL,
+				cascade_path_PIPE,
+				cascade_path_PUCK;
+	float kAvgVal_;
+	cv::Point2f pipePoint_,WHAPoint_;
 
-	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN;
+	Mat_t frame;
+	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE, cascade_PUCK;
 	tf::TransformListener optimus_prime;
 	object_locator::DetectionManager sherlock;
 
@@ -80,6 +95,9 @@ private:
 	typedef std::pair<PixPoint_t, object_type> Detection_t;
 	typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
 	std::vector<DetectionPtr_t> detection_list_;
+
+
+
 
 	image_geometry::StereoCameraModel stereo_model;
 	char* WINDOWLeft;

@@ -6,6 +6,8 @@ using namespace device_driver;
 
 namespace roboteq_driver{
 
+#define MISSING_VALUE -1024
+
 RoboteqMotorController::RoboteqMotorController(double maxRPM1,
 					       double maxRPM2,
 					       int ppr1,
@@ -43,27 +45,17 @@ void RoboteqMotorController::open(std::string port){
 	usleep(10*1000);
 
 	//Configure the device
-	//set encoders pulse per rotation
-	setConfig(_EPPR, 1, ppr1_);
-	setConfig(_EPPR, 2, ppr2_);
-	//set encoders usage to feedback
-	setConfig(_EMOD, 1, 18);
-	setConfig(_EMOD, 2, 34);
 
 	//TODO configure temp pins
 	//setup analog inputs for temp (unused mode)
 	setConfig(_AMOD, 1, 1);
 	setConfig(_AMOD, 4, 1);
 
-	//set motors max rpm
-	setConfig(_MXRPM, 1, maxRPM1_);
-	setConfig(_MXRPM, 2, maxRPM2_);
-
-
 	//Initialize to initial values
 	motor_mode1_ = motor_mode2_ = MOTOR_MODE_UNDEFINED;//make sure to reset local values
-	setMotorMode(1, MOTOR_MODE_POWER);
-	setMotorMode(2, MOTOR_MODE_POWER);
+	setMotorMode(1, MOTOR_MODE_RPM);
+	setMotorMode(2, MOTOR_MODE_RPM);
+	
 	setPower(1, 0);
 	setPower(2, 0);
 }
@@ -93,6 +85,11 @@ void RoboteqMotorController::setCommand(int commandItem, int index, int value){
 			DRIVER_EXCEPT(Exception, "Failed to set device command.");
 	}
 }
+
+void RoboteqMotorController::setCommand(int commandItem){
+  setCommand(commandItem, MISSING_VALUE, MISSING_VALUE);
+}
+
 void RoboteqMotorController::setConfig(int configItem, int index, int value){
 	int status = device_.SetConfig(configItem, index, value);
 	if(status!=RQ_SUCCESS){
@@ -166,6 +163,41 @@ void RoboteqMotorController::setSerialWatchdog(int time){
 	setConfig(_RWD, time);
 }
 
+void RoboteqMotorController::saveRotationInfo(double maxRPM1, double maxRPM2, int ppr1, int ppr2){
+	maxRPM1_ = maxRPM1;
+	maxRPM2_ = maxRPM2;
+	ppr1_ = ppr1;
+	ppr2_ = ppr2;
+	//set encoders pulse per rotation
+	setConfig(_EPPR, 1, ppr1_);
+	setConfig(_EPPR, 2, ppr2_);
+	//set encoders usage to feedback
+	setConfig(_EMOD, 1, 18);
+	setConfig(_EMOD, 2, 34);
+	//set motors max rpm
+	setConfig(_MXRPM, 1, maxRPM1_);
+	setConfig(_MXRPM, 2, maxRPM2_);
+
+	saveToEEPROM();
+}
+
+void RoboteqMotorController::setCurrentTrigger(uint8_t chan, uint32_t trigger_delay, float trigger_level){
+  if(chan==1){
+    setConfig(_ATGD, 1, trigger_delay);
+    setConfig(_ATRIG, 1, (uint32_t)(trigger_level*10));
+  }
+  else if(chan==2){
+    setConfig(_ATGD, 2, trigger_delay);
+    setConfig(_ATRIG, 2, (uint32_t)(trigger_level*10));
+  }
+  else
+    DRIVER_EXCEPT(Exception, "Invalid motor channel");
+}
+
+void RoboteqMotorController::saveToEEPROM(){
+  setCommand(_EES);
+}
+
 
 static inline double limit(double val, double min, double max){
   if(val<min)
@@ -193,6 +225,7 @@ void RoboteqMotorController::setMotorMode(uint8_t chan, MotorMode new_mode){
   else
     DRIVER_EXCEPT(Exception, "Invalid motor channel");
 }
+
 void RoboteqMotorController::setRPM(uint8_t chan, double speed){
   setMotorMode(chan, MOTOR_MODE_RPM);
   if(chan==1)

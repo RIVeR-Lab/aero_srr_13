@@ -18,6 +18,7 @@
 #include<nav_msgs/Path.h>
 #include<nav_msgs/OccupancyGrid.h>
 #include<geometry_msgs/PoseWithCovarianceStamped.h>
+#include <aero_srr_msgs/AeroState.h>
 //*****************LOCAL DEPENDANCIES**************************//
 #include<aero_path_planning/utilities/AeroPathPlanning.h>
 #include<aero_path_planning/planning_strategies/CarrotPathFinder.h>
@@ -60,6 +61,12 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Waits for all needed transforms to become valid
+	 */
+	void waitForTransforms();
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Registers topics with the ROS system
 	 */
 	void registerTopics();
@@ -85,9 +92,28 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Sets the global planner to manual mode
+	 * @brief Causes the global planner to calculate a new carrot path
 	 */
-	void setManual();
+	void plan();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief  Sets/unsets to manual mode
+	 * @param [in] enable true for manual, false for autonomous
+	 */
+	void setManual(bool enable);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Sets the GlobalPlanner to search mode
+	 */
+	void setSearch();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Sets the GlobalPLanner to navigate to an object of interest
+	 */
+	void setNavObj();
 
 	/**
 	 * @author Adam Panzica
@@ -105,15 +131,6 @@ private:
 
 	/**
 	 * @author Adam Panzica
-	 * @brief  Callback for handling Odometry messages
-	 * @param message
-	 *
-	 * This callback handles advancing the CarrotPath
-	 */
-	void odomCB(const geometry_msgs::PoseWithCovarianceStampedConstPtr& message);
-
-	/**
-	 * @author Adam Panzica
 	 * @brief Chunks the global map into a local OccupancyGrid and sends it to the local planner
 	 * @param event
 	 */
@@ -121,15 +138,25 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Callback for handling changes in robot state
+	 * @param message
+	 */
+	void stateCB(const aero_srr_msgs::AeroStateConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Callback for handling getting a new mission goal
+	 * @param message
+	 */
+	void missionGoalCB(const geometry_msgs::PoseStampedConstPtr& message);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief Sends the global map out for vizualization
 	 */
 	void visualizeMap() const;
 
-	/**
-	 * @author Adam Panzica
-	 * @brief  Publishes the next goal on the carrot path
-	 */
-	void updateGoal() const;
+
 
 	/**
 	 * @author Adam Panzica
@@ -155,7 +182,7 @@ private:
 	 * @param [in] map   The map to check against for collision
 	 * @return True if in collision, else false
 	 */
-	bool checkCollision(const app::Point& point, const app::OccupancyGrid& map) const;
+	bool checkCollision(const tf::Point& point, const occupancy_grid::MultiTraitOccupancyGrid& map) const;
 
 	/**
 	 * @author Adam Panzica
@@ -164,11 +191,19 @@ private:
 	 */
 	void carrotToPath(nav_msgs::Path& path) const;
 
-	State       state_;
+	/**
+	 * @author Adam Panzica
+	 * @brief looks up the robot's current location in the world frame
+	 * @param [in] point Point to fill with the robot's location (in meters, not grid coordinates)
+	 * @return true if the transform was sucessful, else false
+	 */
+	bool calcRobotPointWorld(tf::Point& point) const;
+
+	aero_srr_msgs::AeroState   state_;
+	geometry_msgs::Pose        current_point_;
 
 	std::string global_laser_topic_;    ///Topic name for receiving LIDAR point clouds
 	std::string local_occupancy_topic_; ///Topic name for communicating with the local planner
-	std::string odom_topic_;            ///Topic name for receiving odometry data
 	std::string state_topic_;           ///Topic name for receiving robot state from the supervisor
 
 	std::string global_frame_;			///frame_id of the global scale frame
@@ -192,30 +227,29 @@ private:
 	double      global_res_;            ///Global occupancy grid resolution
 	double      global_update_rate_;    ///Update frequency for planning on the global path
 
-	nav_msgs::Odometry    last_odom_;   ///The odometry data received by the planner
-	Point				  current_point_;///The last recieved location of the robot
-
-	CarrotPathFinder::collision_func_ cf_;            ///The collision function
-	CarrotPathFinder*                 path_planner_;  ///The current global planner strategy
-	OccupancyGridPtr                  global_map_;    ///The global OccupancyGrid
-	std::deque<Point>                     carrot_path_;   ///The current set of points on the global path
-	std::deque<geometry_msgs::Pose>       mission_goals_; ///The chain of mission-goal points to fallow
-	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in grid units_
+	CarrotPathFinder::collision_func_          cf_;            ///The collision function
+	CarrotPathFinder*                          path_planner_;  ///The current global planner strategy
+	occupancy_grid::MultiTraitOccupancyGridPtr global_map_;    ///The global OccupancyGrid
+	nav_msgs::MapMetaData                      local_info_;    ///Map data on the local map chuncks
+	std::vector<occupancy_grid::utilities::CellTrait> traits_; ///Cell traits used by the occupancy grids
+	std::deque<geometry_msgs::Pose>            carrot_path_;   ///The current set of points on the global path
+	geometry_msgs::PoseStamped                 mission_goal_; ///The current mission-goal to plan to
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system
 	tf::TransformListener transformer_;   ///Hook into the tf system
-	ros::Subscriber       joy_sub_;       ///Subscriber for joy messages
 	ros::Publisher        local_occ_pub_; ///Publisher to send OccupancyGrids to the local planner
-	ros::Publisher        goal_pub_;      ///Publisher to visualize the global goal
 	ros::Publisher        map_viz_pub_;   ///Publisher to visualizing the global map
 	ros::Publisher        path_pub_;      ///Publisher to visualize the global path
 	ros::Subscriber       laser_sub_;     ///Subscriber for LIDAR scans
-	ros::Subscriber       odom_sub_;      ///Subscriber for Odometry messages
 	ros::Subscriber       state_sub;      ///Subscriber for the supervisor state
 	ros::Subscriber       slam_sub_;      ///Subscriber to nav_msgs::OccupancyGrid messages from SLAM
+	ros::ServiceClient    state_client_;  ///Client to request state transitions
+	ros::Subscriber       mission_goal_sub_; ///Subscriber to new mission goals
+
 	ros::Timer            chunck_timer_;  ///Timer to chunk global map into local map
 	ros::Timer            plan_timer_;    ///Timer to plan on the global map
+
 	ros::Duration         plan_timerout_; ///Timeout to produce global plans
 };
 

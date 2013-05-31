@@ -26,7 +26,7 @@ namespace aero_path_planning
 struct RRTNode
 {
 	boost::shared_ptr<RRTNode> parent_;   ///Pointer to the parent node of this node
-	Point                      location_; ///Pointer to the location of this node on a map
+	tf::Point                      location_; ///Pointer to the location of this node on a map
 };
 
 typedef boost::shared_ptr<RRTNode> node_ptr_t;
@@ -102,16 +102,6 @@ public:
 	 */
 	void flushTree();
 
-
-	/**
-	 * @author Adam Panzica
-	 * @brief Creates a visualization of the tree in the form of a sensor_msgs::image
-	 * @param [out] message The Image message to create the visualization in
-	 * @param [in]  x_height The x-width of the image
-	 * @param [in]  y_height The y-width of the image
-	 */
-	void visualizeTree(sensor_msgs::Image& message, int x_height, int y_height);
-
 	typedef node_deque::size_type size_type;
 	/**
 	 * @author Adam Panzica
@@ -163,10 +153,10 @@ public:
 
 
 	virtual bool setCarrotDelta(double delta);
-	virtual bool setSearchMap(const aero_path_planning::OccupancyGrid& map);
+	virtual bool setSearchMap(occupancy_grid::MultiTraitOccupancyGridConstPtr map);
 	virtual bool setCollision(collision_func_& collision_checker);
 	virtual bool allowsPartialPath();
-	virtual bool search(const aero_path_planning::Point& start_point, const aero_path_planning::Point& goal_point, ros::Duration& timeout, std::deque<aero_path_planning::Point>& result_path);
+	virtual bool search(const geometry_msgs::Pose& start_point, const geometry_msgs::Pose& goal_point, ros::Duration& timeout, std::deque<geometry_msgs::Pose>& result_path);
 	virtual bool getPlanningType(std::string& type) const;
 
 	RRTCarrot& operator=(RRTCarrot const &copy);
@@ -202,7 +192,7 @@ protected:
 	 * @param [out] next_node   Node to write the next step location along the vector to
 	 * @return True if sucessfully stepped, else false
 	 */
-	bool step(const node_ptr_t& last_node, const Eigen::Vector4f& step_vector, node_ptr_t& next_node);
+	bool step(const node_ptr_t& last_node, const tf::Vector3& step_vector, node_ptr_t& next_node);
 
 	/**
 	 * @author Adam Panzica
@@ -246,7 +236,7 @@ protected:
 	 * @param [out]  vector     The vector to write the result to
 	 * @return True if vector calculated, else false
 	 */
-	 bool generateStepVector(const Point& from_point, const Point& to_point, Eigen::Vector4f& vector) const;
+	 //bool generateStepVector(const tf::Point& from_point, const tf::Point& to_point, tf::Vector3& vector) const;
 
 	/**
 	 * @author Adam Panzica
@@ -267,7 +257,7 @@ private:
 	int  delta_;       ///The minimum distance between points on the generated path
 
 
-	aero_path_planning::OccupancyGrid map_; ///The map to search
+	occupancy_grid::MultiTraitOccupancyGridConstPtr map_; ///The map to search
 	collision_func_ collision_checker_;     ///The collusion checking function
 
 	RRTCarrotTree* start_tree_; ///The tree extending from the start point

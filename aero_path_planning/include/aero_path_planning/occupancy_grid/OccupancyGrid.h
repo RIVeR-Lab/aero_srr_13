@@ -14,6 +14,7 @@
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include <aero_path_planning/utilities/AeroPathPlanningUtilities.h>
 #include <aero_path_planning/OccupancyGridMsg.h>
+#include <occupancy_grid/MultiTraitOccupancyGrid.hpp>
 
 namespace nm  = nav_msgs;
 namespace sm  = sensor_msgs;
@@ -172,11 +173,10 @@ public:
 	 * @author	Adam Panzica
 	 * @brief	Sets the PointTrait of a point on the grid
 	 * @param point	The coordinates of the point on the grid
-	 * @param trait	The PointTrait to set the point to
 	 * @return True if successful, else false
 	 * @throw OccupancyGridAccessException if invalid coordinates were given
 	 */
-	bool setPointTrait(const app::Point& point, app::PointTrait trait) throw(OccupancyGridAccessException);
+	bool setPointTrait(app::Point point) throw(OccupancyGridAccessException);
 
 	/**
 	 * @author Adam Panzica
@@ -382,10 +382,8 @@ private:
 	 * @param z	z-coord
 	 * @return The point at the given coordinate
 	 */
-	Point& getPoint(app::Point& point , bool origin_corrected = true);
-	Point& getPoint(const app::Point& point , bool origin_corrected = true);
-	const Point& getPoint(app::Point& point , bool origin_corrected = true) const;
-	const Point& getPoint(const app::Point& point , bool origin_corrected = true) const;
+	app::Point& getPoint(const app::Point& point , bool origin_corrected = true);
+	const app::Point& getPoint(const app::Point& point, bool origin_corrected = true) const;
 
 	/**
 	 * Gets a point out of the point cloud based on integer coordinates
@@ -395,7 +393,7 @@ private:
 	 * @return The point at the given coordinate
 	 */
 	Point& getPoint(int x, int y, int z);
-	const Point& getPoint(int x, int y, int z) const;
+	const app::Point& getPoint(int x, int y, int z) const;
 
 	/**
 	 * @author Adam Panzica
@@ -419,6 +417,7 @@ private:
 	app::Point goal_;		///The location of the goal point on the grid
 	OccupancyGridCloud occ_grid_;			///The point cloud which contains the data for this occupancy grid
 	app::PointConverter converter_;	///Used to convert the internal integer units to output engineering units
+	occupancy_grid::MultiTraitOccupancyGrid grid_;
 };
 
 

@@ -11,10 +11,13 @@
   <depend package="rospy"/>
   <depend package="tf"/>
   <depend package="geometry_msgs"/>
-    <depend package="aero_srr_msgs"/>
-      <depend package="jaco_driver"/>
-	<rosdep name="eigen" />
-        <depend package="dynamic_reconfigure"/>
+  <depend package="aero_srr_msgs"/>
+  <depend package="jaco_driver"/>
+  <rosdep name="eigen" />
+  <depend package="dynamic_reconfigure"/>
+  <depend package="aero_base"/>
+  <depend package="device_driver_base"/>
+  <depend package="actionlib"/>
       
 </package>
 

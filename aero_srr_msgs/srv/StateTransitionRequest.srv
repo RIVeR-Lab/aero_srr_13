@@ -1,0 +1,12 @@
+#Request
+aero_srr_msgs/AeroState requested_state
+
+---
+#Respone
+
+#True if transition was sucessful, else false
+bool success
+
+#Discriptive error message as to why state transition was invalid in the format <curret_state><requested_state><valid_transition1 valid_transition2 ... valid_transitionN>
+string error_message
+
