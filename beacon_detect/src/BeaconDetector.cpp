@@ -78,9 +78,6 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	double px=cam_info->K[2];
 	double py=cam_info->K[5];
 
-	parent_frame_=cv_ptr->header.frame_id;	//the id of the frame
-	img_time_=cv_ptr->header.stamp;			//image time
-
 	std_msgs::Header img_header=cv_ptr->header; //the image header
 
 	tf::Transform transform;									//the transform between the tag and the camera
