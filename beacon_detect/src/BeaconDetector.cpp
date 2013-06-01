@@ -482,7 +482,7 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 	//define find transform to the beacon_base
 	tf::StampedTransform tag2world;
 	try{
-		tf_lr_.lookupTransform("/tag_base",string("/")+tag_name,imgtime,tag2world);
+		tf_lr_.lookupTransform(string("/")+tag_name,"/tag_base",imgtime,tag2world);
 	}
 	catch(tf::TransformException &ex)
 	{
@@ -493,7 +493,9 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 	//calculate the transform between the robot_base and the world
 	tf::StampedTransform 	world2base;
 	world2base=tag2base;
-	world2base.inverseTimes(tag2world);
+	world2base*=(tag2world);
+	tf::Transform res=world2base.inverse();
+	world2base=tf::StampedTransform(res,world2base.stamp_,world2base.frame_id_,world2base.child_frame_id_);
 
 	ROS_INFO("x: %f y: %f z: %f",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
 
