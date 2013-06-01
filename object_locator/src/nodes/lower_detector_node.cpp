@@ -551,7 +551,7 @@ void DetectorNode::computeDisparity() {
 
 //		std::cout << "Checking disparity at  " << obj_centroid.x <<","<< obj_centroid.y << std::endl;
 //		std::cout << "Range (rows,cols): " << vdisp1.rows <<","<< vdisp1.cols << std::endl;
-		if (obj_centroid.x < numDisp && obj_centroid.y < disp.rows) {
+		if (obj_centroid.x < disp.cols && obj_centroid.y < disp.rows) {
 //			cout << "Getting Disparity" <<endl;
 			//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
 			float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
