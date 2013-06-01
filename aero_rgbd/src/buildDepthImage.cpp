@@ -9,6 +9,9 @@
 #include "std_msgs/String.h"
 #include <sstream>
 
+#define VERBOSE
+//#define DEBUG
+
 class DepthImageBuilder {
 
     private:
@@ -55,32 +58,114 @@ class DepthImageBuilder {
 
 int main(int argc, char **argv)
 {
+#ifdef DEBUG
+    std_msgs::String msg;
+
+    std::stringstream ss;
+    ss << "Listening for image data. " << count;
+    msg.data = ss.str();
+
+    ROS_INFO("%s", msg.data.c_str());
+
+    ss.str("");
+#endif
+
     DepthImageBuilder builder;
+
+#ifdef DEBUG
+    ss.str("DepthImage Builder Object Created.");
+    msg.data = ss.str();
+
+    ROS_INFO("%s", msg.data.c_str());
+    ss.str("");
+#endif
 
     //Initialize, and create a node handle
     ros::init(argc, argv, "buildDepthImage");
     ros::NodeHandle n;
 
-    //Create subscriber for the PointCloud2
-    ros::Subscriber sub = n.subscribe<pcl::PointCloud<pcl::PointXYZRGB> >( "input", 1, &DepthImageBuilder::pointCloud_callback, &builder );
+#ifdef DEBUG
+    ss.str("ROS Initialized and Node Handle created.");
+    msg.data = ss.str();
 
-    //Just publishing junk message until I get the image message code written.
+    ROS_INFO("%s", msg.data.c_str());
+    ss.str("");
+#endif
+
+    //String for topic names
+    std::string depthImageTopic("/upper_stereo/depth_image");
+    std::string pointCloudTopic("/upper_stereo/points2");
+
+    //Get parameters
+    ros::NodeHandle param_n("~");
+
+    //Check for topic renames.
+    if (!param_n.getParam(pointCloudTopic, pointCloudTopic))
+#ifdef VERBOSE
+        ROS_WARN( "Parameter <%s> Not Set. Using Default Points2 Topic <%s>!", pointCloudTopic.c_str(), pointCloudTopic.c_str() );
+#endif
+    if (!param_n.getParam(depthImageTopic, depthImageTopic))
+#ifdef VERBOSE
+        ROS_WARN( "Parameter <%s> Not Set. Using Default Depth Image Topic <%s>!", depthImageTopic.c_str(), depthImageTopic.c_str() );
+#endif
+
+#ifdef DEBUG
+    ss.str("Topic names have been set to: ");
+    ss << "depthImageTopic = " << depthImageTopic << "and " << "pointCloudTopic = " << pointCloudTopic;
+    msg.data = ss.str();
+
+    ROS_INFO("%s", msg.data.c_str());
+    ss.str("");
+#endif
+
+    //Create subscriber for the PointCloud2
+    ros::Subscriber sub = n.subscribe<pcl::PointCloud<pcl::PointXYZRGB> >( pointCloudTopic, 1, &DepthImageBuilder::pointCloud_callback, &builder );
+
+#ifdef DEBUG
+    ss.str("Subscribed to point cloud topic.");
+    msg.data = ss.str();
+
+    ROS_INFO("%s", msg.data.c_str());
+    ss.str("");
+#endif
+
     //Setup image transport and publish the image message.
     image_transport::ImageTransport it(n);
-    image_transport::Publisher imagePublisher = it.advertise("/upper_stereo/depth_image", 1);
+    image_transport::Publisher imagePublisher = it.advertise(depthImageTopic, 1);
+
+#ifdef DEBUG
+    ss.str("Image_Transport Publisher Created.");
+    msg.data = ss.str();
+
+    ROS_INFO("%s", msg.data.c_str());
+    ss.str("");
+#endif
 
     ros::Rate loop_rate(10);
 
     int count = 0;
+
+#ifdef DEBUG
+    ss.str("Entering ROS ok loop.");
+    msg.data = ss.str();
+
+    ROS_INFO("%s", msg.data.c_str());
+    ss.str("");
+#endif
+
     while (ros::ok())
     {
-        std_msgs::String msg;
 
-        std::stringstream ss;
-        ss << "Listening for image data. " << count;
-        msg.data = ss.str();
+#ifdef DEBUG
+        if( 0 == count )
+        {
+            ss.str("Entering ROS ok loop.");
+            msg.data = ss.str();
 
-        ROS_INFO("%s", msg.data.c_str());
+            ROS_INFO("%s", msg.data.c_str());
+            ss.str("");
+        }
+#endif
 
         imagePublisher.publish(builder.getDepthImageMsg());
 
