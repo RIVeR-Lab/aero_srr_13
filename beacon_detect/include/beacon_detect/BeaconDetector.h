@@ -113,7 +113,7 @@ public:
 	/*
 	 * This function publishes the nav::odom messages for the visual odometry function
 	 */
-	void pubOdom(geometry_msgs::Pose pose, ros::Time imgtime);
+	void pubOdom(tf::Stamped<tf::Transform> pose, ros::Time imgtime);
 	/*
 	 * if the initialisation wit respect to base is to be done
 	 */
@@ -133,7 +133,7 @@ public:
 	/*
 	 * the process when in active state
 	 */
-	void runProcess(double fx,double fy, double px, double py, ros::Time imgtime);
+	void runProcess(double fx,double fy, double px, double py, std_msgs::Header imgheader);
 
 	virtual ~BeaconDetector();
 };

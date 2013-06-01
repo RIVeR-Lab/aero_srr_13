@@ -35,7 +35,7 @@ BeaconDetector::BeaconDetector():it_(nh_)
 
 
 	/* Set up the publisher for the result stamped pose */
-	pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("visualization", 5);
+	pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("tag_visualization", 5);
 
 	/*set up the publisher for the odom so the ekf filter can use it as visual odometry, need to remap it to /vo */
 	odom_pub_ = nh_.advertise<nav_msgs::Odometry>("tag_odom",5);
@@ -92,7 +92,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 
 	detections_ = tag_detector.extractTags(gray);	//get tags if detected
 
-	ROS_INFO("%d tag detected. \n",detections_.size());									//DEBUG information
+	ROS_INFO("%d tag detected. \n",(int)detections_.size());									//DEBUG information
 	if(detections_.size()==0)
 		return;
 
@@ -130,7 +130,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	}
 	if(active_)
 	{
-		runProcess(fx,fy,px,py,img_time_);
+		runProcess(fx,fy,px,py,img_header);
 	}
 	if(show_)
 		showResult(colorImg_);
@@ -248,7 +248,7 @@ void BeaconDetector::histEq(cv::Mat &frame)
 string BeaconDetector::checkInConst(AprilTags::TagDetection tag, bool &tag_type)
 {
 
-	for(int i=0;i<constellation_.size();i++)	//loop through the tags in the consellation
+	for(size_t i=0;i<constellation_.size();i++)	//loop through the tags in the consellation
 	{
 		if(tag.id==constellation_[i].first)		//if the id match then declare true
 		{
@@ -270,33 +270,32 @@ void BeaconDetector::publishWorld(tf::Stamped<tf::Transform>  tf)
 	}
 }
 
-void BeaconDetector::runProcess(double fx,double fy, double px, double py, ros::Time imgtime)
+void BeaconDetector::runProcess(double fx,double fy, double px, double py, std_msgs::Header imgheader)
 {
 	ROS_INFO("In processing");
 
 	string tag;										//the tag name if it is valid
 	bool tag_type;									//if small use the small size for cal else use big
-	tf::Transform transform;									//the transform between the tag and the camera
+
+	geometry_msgs::Pose tag_pose;					//the pose of the tag
+	tf::Stamped<tf::Transform> 	world2base;
+
 
 	geometry_msgs::PoseStamped res;					//to find the average pose that the robot needs to move in
-	res.pose.orientation.w=1;						//initialize
-	res.pose.orientation.x=0;
-	res.pose.orientation.y=0;
-	res.pose.orientation.z=0;
-	res.pose.position.x=0;
-	res.pose.position.y=0;
-	res.pose.position.z=0;
 
 	int sctr=0;										//the neumber of valid tags detected
 	int bctr=0;										//the number of big tags detected
 
-	for (int i=0; i<detections_.size(); i++)
+	for (size_t i=0; i<detections_.size(); i++)
 	{
 		tag=checkInConst(detections_[i],tag_type);			//check if it is the constellation if so whats is its name in home tf tree?
 		if(tag.empty())
+		{
+			ROS_INFO("Found a tag not in the tag constellation");
 			continue;
+		}
 
-		ROS_INFO( "  Id: %d --- Hamming distance: %f \n",detections_[i].id,  detections_[i].hammingDistance );
+		ROS_INFO( "  Id: %d --- Hamming distance: %d \n",detections_[i].id,  detections_[i].hammingDistance );
 
 		// recovering the relative pose requires camera calibration;
 		Eigen::Matrix4d T;
@@ -316,54 +315,51 @@ void BeaconDetector::runProcess(double fx,double fy, double px, double py, ros::
 		Eigen::Quaternion<double> final = Eigen::Quaternion<double>(rot);	//convert it to quaternion
 
 		// the x,y,z location of the tag
-		transform.setOrigin( tf::Vector3(T(0,3),T(1,3), T(2,3)) );
-
+		tag_pose.position.x=T(0,3);tag_pose.position.y=T(1,3);tag_pose.position.z=T(2,3);
 		//set up the transform rotation
-		transform.setRotation( tf::Quaternion(final.x(), final.y(), final.z(),final.w()) );
-		char frameid[50];
+		tag_pose.orientation.x=final.x();tag_pose.orientation.y=final.y();tag_pose.orientation.z=final.z();tag_pose.orientation.w=final.w();
 
-		sprintf(frameid,"estimated_%s",tag.c_str());		//debug information
 		//transmit the tf
-		br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent_frame_.c_str(), frameid));
+		geometry_msgs::PoseStamped tag_robot,tag_camera;
+		tag_camera.header=imgheader;tag_camera.pose=tag_pose;
 
-		//calculate the pose of the robot so the estimated tf of the tag and the actuall beacon will alighn
-		geometry_msgs::Pose temp=getRobotPose(tag,imgtime);
+		try
+		{
+			tf_lr_.transformPose("/base_footprint",tag_camera,tag_robot);
+		}
+		catch(tf::TransformException &ex)
+		{
+			ROS_ERROR("%s",ex.what());
+		}
+		pose_pub_.publish(tag_robot);
+
+		tf::StampedTransform tag2world;
+		try{
+			tf_lr_.lookupTransform(string("/")+tag,"/world",imgheader.stamp,tag2world);
+		}
+		catch(tf::TransformException &ex)
+		{
+			ROS_ERROR("%s",ex.what());
+		}
+
+		//find base_footprint to tag_base and declare it as the world in the beacon tf tree
+		//calculate the transform between the robot_base and the world
+		tf::poseStampedMsgToTF(tag_robot,world2base);
+
+		world2base*=(tag2world);
 
 		//publish nav::odom message for ekf
-		pubOdom(temp,imgtime);
-
-		//add it to the res
-		res.pose.position.x+=temp.position.x;
-		res.pose.position.y+=temp.position.y;
-		res.pose.position.z+=temp.position.z;
-		res.pose.orientation.w+=temp.orientation.w;
-		res.pose.orientation.x+=temp.orientation.x;
-		res.pose.orientation.y+=temp.orientation.y;
-		res.pose.orientation.z+=temp.orientation.z;
+		pubOdom(world2base,imgheader.stamp);
 
 	}
-
-	//publish the pose in the /becon_drive topic
-	if(sctr+bctr>0)
-	{
-		int ctr=sctr+bctr;
-		ROS_INFO("%d tags of the beacon detected. \n",ctr);
-		ROS_INFO("%d tags are big",bctr);
-		//find avg
-		res.pose.position.x/=ctr;
-		res.pose.position.y/=ctr;
-		res.pose.position.z/=ctr;
-		res.pose.orientation.w/=ctr;
-		res.pose.orientation.x/=ctr;
-		res.pose.orientation.y/=ctr;
-		res.pose.orientation.z/=ctr;
-
-		//header
-		res.header.frame_id="/base_footprint";
-		res.header.stamp=imgtime;
-
-		pose_pub_.publish(res);				//publish the average solution
-	}
+	res.header.frame_id="/base_footprint";
+	res.header.stamp=imgheader.stamp;
+	res.pose.position.x=world2base.getOrigin().getX();res.pose.position.y=world2base.getOrigin().getY();res.pose.position.z=world2base.getOrigin().getZ();
+	res.pose.orientation.x=world2base.getRotation().getX();
+	res.pose.orientation.y=world2base.getRotation().getY();
+	res.pose.orientation.z=world2base.getRotation().getZ();
+	res.pose.orientation.w=world2base.getRotation().getW();
+	pose_pub_.publish(res);				//publish the average solution
 }
 
 tf::Stamped<tf::Transform> BeaconDetector::initProcess(double fx,double fy, double px, double py, std_msgs::Header imgheader)
@@ -447,27 +443,24 @@ tf::Stamped<tf::Transform> BeaconDetector::initProcess(double fx,double fy, doub
 			br_.sendTransform(tf::StampedTransform(world2base, ros::Time::now()+ros::Duration(0.5), "/world","/tag_base"));
 
 	}
-	char dummy;
-	cin>>dummy;
-
 	return(world2base);
 }
 
 
-void BeaconDetector::pubOdom(geometry_msgs::Pose pose, ros::Time time)
+void BeaconDetector::pubOdom(tf::Stamped<tf::Transform> pose, ros::Time time)
 {
 	nav_msgs::Odometry msg;
 	msg.header.stamp = time;           // time of current measurement
     msg.header.frame_id = "base_footprint";        // the tracked robot frame
-	msg.pose.pose.position.x = pose.position.x;    // x measurement tag.
-	msg.pose.pose.position.y = pose.position.y;    // y measurement tag.
-	msg.pose.pose.position.z = pose.position.z;    // z measurement tag.
-    msg.pose.pose.orientation.x = pose.orientation.x;
-	msg.pose.pose.orientation.y = pose.orientation.y;
-	msg.pose.pose.orientation.z = pose.orientation.z;
-	msg.pose.pose.orientation.w = pose.orientation.w;
+	msg.pose.pose.position.x = pose.getOrigin().getX();    // x measurement tag.
+	msg.pose.pose.position.y = pose.getOrigin().getY();    // y measurement tag.
+	msg.pose.pose.position.z = pose.getOrigin().getZ();    // z measurement tag.
+    msg.pose.pose.orientation.x = pose.getRotation().getX();
+	msg.pose.pose.orientation.y = pose.getRotation().getY();
+	msg.pose.pose.orientation.z = pose.getRotation().getZ();
+	msg.pose.pose.orientation.w = pose.getRotation().getW();
 
-	ROS_INFO("x: %f y: %f z: %f",pose.position.x,pose.position.y,pose.position.z);
+	ROS_INFO("x: %f y: %f z: %f",pose.getOrigin().getX(),pose.getOrigin().getY(),pose.getOrigin().getZ());
 
 	msg.pose.covariance[0]=0.007;
 	msg.pose.covariance[7]=0.007;
@@ -477,38 +470,7 @@ void BeaconDetector::pubOdom(geometry_msgs::Pose pose, ros::Time time)
 	msg.pose.covariance[35]=0.007;
 	odom_pub_.publish(msg);
 }
-geometry_msgs::Pose BeaconDetector::getRobotPose(string tag,ros::Time imgtime)
-{
-	geometry_msgs::Pose tran;
-	//calculate the transform between the tag and the robot_base
-	tf::StampedTransform 	tag2base;
-	tf::StampedTransform 	world2base;
-	tf::StampedTransform 	tag2world;
-	try{
 
-		tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag, imgtime, ros::Duration(2.0) );//might not have yet registered so wait till it becomes available
-		tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag,imgtime,tag2base);
-		//calculate the transform between the tag and the world
-		tf_lr_.lookupTransform(string("/")+tag,"/world",imgtime,tag2world);
-		//calculate the transform between the robot_base and the world
-		world2base=tag2base;
-		world2base*=tag2world;
-	}
-	catch(tf::TransformException &ex)
-	{
-			ROS_ERROR("%s",ex.what());
-	}
-	//convert transform into pose message
-	tran.position.x=world2base.getOrigin()[0];
-	tran.position.y=world2base.getOrigin()[1];
-	tran.position.z=world2base.getOrigin()[2];
-	tran.orientation.w=world2base.getRotation().w();
-	tran.orientation.x=world2base.getRotation().x();
-	tran.orientation.y=world2base.getRotation().y();
-	tran.orientation.z=world2base.getRotation().z();
-
-	return(tran);
-}
 void BeaconDetector::showResult(cv::Mat img)
 {
 	Mat image=colorImg_.clone();
@@ -547,9 +509,5 @@ void BeaconDetector::showResult(cv::Mat img)
 }
 BeaconDetector::~BeaconDetector()
 {
-	if(detector_thread_.joinable())
-	{
-		detector_thread_.join();
-	}
 }
 
