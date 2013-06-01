@@ -296,6 +296,11 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 	std::vector<SpeedSet> sets;
 	app::PointConverter converter(search_grid.getResolution());
 
+	tf::Point goal_point;
+	gm::Pose goal_pose;
+	bool has_goal = search_grid.getGoal(goal_pose);
+	tf::pointMsgToTF(goal_pose.position, goal_point);
+
 	//ROS_INFO_STREAM("I'm searching a grid of resolution:"<<search_grid.getResolution()<<", dimmension x:"<<search_grid.getXSizeMeter()<<", y:"<<search_grid.getYSizeMeter()<<", with xoffset:"<<search_grid.getXOffsetGrid()<<", yoffset:"<<search_grid.getYOffsetGrid());
 
 	SpeedSet current_set = this->tentacles_->getSpeedSet(this->current_vel_);
@@ -311,7 +316,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 		SpeedSet fast_set    = this->tentacles_->getSpeedSet(current_set.getIndex()+1);
 		sets.push_back(fast_set);
 	}
-	bool   has_goal      = true;
+
 	bool   hit_goal      = false;
 	for(int s=0; s<(int)sets.size(); s++)
 	{
@@ -322,15 +327,19 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 			//If we already hit the goal, short circuit since we can't break from OpenMP loops
 			if(!hit_goal)
 			{
-				double length_modifier = 0;
-				bool traversing = true;
+				double length_modifier    = 0;
+				double goal_minima        = std::numeric_limits<double>::infinity();
+				bool traversing           = true;
+				bool need_minima          = true;
 				Tentacle working_tentacle = cur_set.getTentacle(i);
 				Tentacle::TentacleTraverser traverser(working_tentacle);
 				length_modifier = 0;
 
 				//As long as the tentacle has points still, and we're still traversing, continue traversing
-				app::Point      temp_point;
-				gm::PoseStamped point_pose;
+				app::Point temp_point;
+				tf::Point  end_point;
+				app::Point temp_end;
+
 				while(traverser.hasNext()&&traversing)
 				{
 					try
@@ -361,6 +370,21 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 						default:
 							break;
 						}
+						//Calculate the shortest distance to goal along the tentacle assuming we haven't alreadty found it
+						if(has_goal && need_minima)
+						{
+							converter.convertToEng(temp_point, temp_end);
+							app::pointToVector(temp_point, end_point);
+							double dist_to_goal = end_point.distance(goal_point);
+							if(dist_to_goal<goal_minima)
+							{
+								goal_minima = dist_to_goal;
+							}
+							else //If we didn't get a new minima, we are getting further away from goal moving along the arc and can stop calculating
+							{
+								need_minima = false;
+							}
+						}
 					}catch(bool& e)
 					{
 						//ROS_ERROR_STREAM("Went Out of Bounds While Searching a Tentacle with point ("<<temp_point.x<<","<<temp_point.y<<"), Map X:"<<search_grid.getXSizeMeter()<<"m, Map Y:"<<search_grid.getYSizeMeter()<<",!");
@@ -370,20 +394,8 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 				//Modify length based on closeness to goal, if there is one
 				if(has_goal)
 				{
-					gm::Pose goal_pose;
-					has_goal = search_grid.getGoal(goal_pose);
-					if(has_goal)
-					{
-						tf::Point goal_point;
-						tf::Point end_point;
-						app::Point temp_end(traverser.next());
-						converter.convertToEng(temp_end, temp_end);
-						app::pointToVector(temp_end, end_point);
-						tf::pointMsgToTF(goal_pose.position, goal_point);
-						double dist_to_goal = end_point.distance(goal_point);
-						//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
-						length_modifier-= dist_to_goal*this->goal_weight_;
-					}
+					//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
+					length_modifier-= goal_minima*this->goal_weight_;
 				}
 
 				//Need to convert the travers's length, which will be in grid units, to meters to compare with the goal distance
