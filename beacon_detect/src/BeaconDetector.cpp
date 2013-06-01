@@ -482,7 +482,7 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 	//define find transform to the beacon_base
 	tf::StampedTransform tag2base;
 	try{
-		tf_lr_.lookupTransform("/tag_base",string("/")+tag_name,imgtime,tag2base);
+		tf_lr_.lookupTransform(string("/")+tag_name,"/tag_base",imgtime,tag2base);
 	}
 	catch(tf::TransformException &ex)
 	{
