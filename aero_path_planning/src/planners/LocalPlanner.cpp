@@ -447,7 +447,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			}
 
 			//Apply a goal if we have one:
-			this->applyGoal(event.current_real, working_grid);
+			this->applyGoal(ros::Time(0), working_grid);
 
 			//Visualize the grid
 			this->visualizeOcc(working_grid);
