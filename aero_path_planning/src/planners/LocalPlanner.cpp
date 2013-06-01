@@ -301,10 +301,29 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 	bool has_goal = search_grid.getGoal(goal_pose);
 	tf::pointMsgToTF(goal_pose.position, goal_point);
 
-	//ROS_INFO_STREAM("I'm searching a grid of resolution:"<<search_grid.getResolution()<<", dimmension x:"<<search_grid.getXSizeMeter()<<", y:"<<search_grid.getYSizeMeter()<<", with xoffset:"<<search_grid.getXOffsetGrid()<<", yoffset:"<<search_grid.getYOffsetGrid());
+	//Account for the fact that if a goal is behind us, there is a range where the goal biasing becomes convergient and we will never rotate
+	if(has_goal)
+	{
+		if(goal_pose.position.x<0)
+		{
+			//We want x/y swapped to make the range always fall between 0->-PI
+			double goal_angle = std::atan2(goal_pose.position.x, goal_pose.position.y);
+			double min_angle  = -1.1780972451;
+			double max_angle  = -1.96349540849;
+			//If we're close to directly behind the robot, rotate
+			if(goal_angle<min_angle&&goal_angle>max_angle)
+			{
+				speedset_idx = 0;
+				tentacle_idx = 0;
+				return true;
+			}
+		}
+	}
 
 	SpeedSet current_set = this->tentacles_->getSpeedSet(this->current_vel_);
 	sets.push_back(current_set);
+
+	//ROS_INFO_STREAM("I'm searching a grid of resolution:"<<search_grid.getResolution()<<", dimmension x:"<<search_grid.getXSizeMeter()<<", y:"<<search_grid.getYSizeMeter()<<", with xoffset:"<<search_grid.getXOffsetGrid()<<", yoffset:"<<search_grid.getYOffsetGrid());
 
 	if(current_set.getIndex()!=0)
 	{
