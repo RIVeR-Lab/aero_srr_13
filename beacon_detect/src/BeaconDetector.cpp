@@ -236,7 +236,7 @@ void BeaconDetector::detectBeacons()
 			process=newimg_;										//if its a new image you need to process it
 
 			if(frame.empty())										//empty frame so cant process
-			process=false;
+				process=false;
 
 			img_time=img_time_;										//get image time
 
@@ -468,20 +468,21 @@ tf::StampedTransform BeaconDetector::initProcess(double fx,double fy, double px,
 tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtime)
 {
 	//find transform to base_footprint
-	tf::StampedTransform tag2base;
+	tf::StampedTransform base2tag;
+	//lookuptransform "taget frame(T)" "original frame(O)" "oFt"
 	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag_name, imgtime, ros::Duration(10.0) );
 	try{
 
-		tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag_name,imgtime,tag2base);
+		tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag_name,imgtime,base2tag);
 	}
 	catch(tf::TransformException &ex)
 	{
 		ROS_ERROR("%s",ex.what());
 	}
 	//define find transform to the beacon_base
-	tf::StampedTransform tag2world;
+	tf::StampedTransform tag2base;
 	try{
-		tf_lr_.lookupTransform("/tag_base",string("/")+tag_name,imgtime,tag2world);
+		tf_lr_.lookupTransform("/tag_base",string("/")+tag_name,imgtime,tag2base);
 	}
 	catch(tf::TransformException &ex)
 	{
@@ -490,16 +491,16 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 
 	//find base_footprint to tag_base and declare it as the world in the beacon tf tree
 	//calculate the transform between the robot_base and the world
-	tf::StampedTransform 	world2base;
-	world2base=tag2base;
-	world2base.inverseTimes(tag2world);
+	tf::StampedTransform 	base2world;
+	base2world=base2tag*tag2base;
+	//world2base.inverseTimes(tag2world);
 
-	ROS_INFO("x: %f y: %d z: %d",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
+	ROS_INFO("x: %f y: %f z: %f",base2world.getOrigin().getX(),base2world.getOrigin().getY(),base2world.getOrigin().getZ());
 
 	char dummy;
 	cin>>dummy;
 
-	return(world2base);
+	return(base2world);
 
 }
 void BeaconDetector::pubOdom(geometry_msgs::Pose pose, ros::Time time)
@@ -514,6 +515,8 @@ void BeaconDetector::pubOdom(geometry_msgs::Pose pose, ros::Time time)
 	msg.pose.pose.orientation.y = pose.orientation.y;
 	msg.pose.pose.orientation.z = pose.orientation.z;
 	msg.pose.pose.orientation.w = pose.orientation.w;
+
+	ROS_INFO("x: %f y: %f z: %f",pose.position.x,pose.position.y,pose.position.z);
 
 	msg.pose.covariance[0]=0.007;
 	msg.pose.covariance[7]=0.007;
