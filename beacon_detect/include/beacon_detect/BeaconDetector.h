@@ -66,6 +66,7 @@ class BeaconDetector
 
 	//boost thread
 	boost::mutex						imglock_;						//mutext to sync the image callback with the detector thread
+	boost::thread						detector_thread_;				//boost detector thread handle
 	boost::thread						world_broadcaster_;				//thread that does tf broadcast of the world
 
 	std::vector<AprilTags::TagDetection> 	detections_;				//the extracted tags
@@ -120,7 +121,7 @@ public:
 	/*
 	 * The function to the thread that will continously publish the transform to the world
 	 */
-	void publishWorld(tf::StampedTransform tf);
+	void publishWorld(tf::Stamped<tf::Transform>  tf);
 	/*
 	 * Rotate the boom so that it can see the beacon
 	 */
@@ -128,7 +129,7 @@ public:
 	/*
 	 * the process when in init stage
 	 */
-	tf::StampedTransform initProcess(double fx,double fy, double px, double py, ros::Time imgtime);
+	tf::Stamped<tf::Transform>  initProcess(double fx,double fy, double px, double py, std_msgs::Header imgheader);
 	/*
 	 * the process when in active state
 	 */

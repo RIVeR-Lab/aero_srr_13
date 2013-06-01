@@ -33,8 +33,9 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	else
 		return;
 
+
 	/* Set up the publisher for the result stamped pose */
-	pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("becon_drive", 5);
+	pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("visualization", 5);
 
 	/*set up the publisher for the odom so the ekf filter can use it as visual odometry, need to remap it to /vo */
 	odom_pub_ = nh_.advertise<nav_msgs::Odometry>("tag_odom",5);
@@ -80,8 +81,10 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	parent_frame_=cv_ptr->header.frame_id;	//the id of the frame
 	img_time_=cv_ptr->header.stamp;			//image time
 
+	std_msgs::Header img_header=cv_ptr->header; //the image header
+
 	tf::Transform transform;									//the transform between the tag and the camera
-	tf::StampedTransform tfbaseinworld;
+	tf::Stamped<tf::Transform> tfbaseinworld;
 	AprilTags::TagDetector tag_detector(AprilTags::tagCodes36h11);// the tag detector not this is set to a specific family TODO: expose this as a dynamic reconfig
 
 	Mat gray;
@@ -96,7 +99,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	if(init_)
 	{
 		//calculate the average tf of the world location using the detections_
-		tfbaseinworld=initProcess(fx,fy,px,py,img_time_);
+		tfbaseinworld=initProcess(fx,fy,px,py,img_header);
 		//till test period is over
 		if(!test_)
 		{
@@ -130,7 +133,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 		runProcess(fx,fy,px,py,img_time_);
 	}
 	if(show_)
-		showResult(frame);
+		showResult(colorImg_);
 }
 
 void BeaconDetector::initConfiguration(string fname)
@@ -255,7 +258,7 @@ string BeaconDetector::checkInConst(AprilTags::TagDetection tag, bool &tag_type)
 	}
 	return string();								//return empty string if its not in the constellation
 }
-void BeaconDetector::publishWorld(tf::StampedTransform tf)
+void BeaconDetector::publishWorld(tf::Stamped<tf::Transform>  tf)
 {
 	while(ros::ok())
 	{
@@ -264,100 +267,6 @@ void BeaconDetector::publishWorld(tf::StampedTransform tf)
 	if(world_broadcaster_.joinable())
 	{
 		world_broadcaster_.join();
-	}
-}
-void BeaconDetector::detectBeacons()
-{
-	Mat frame,gray;
-	double fx,fy,px,py;
-	bool process;
-	ros::Time 	img_time;										//the time of image for tf lookups
-	tf::Transform transform;									//the transform between the tag and the camera
-	tf::StampedTransform tfbaseinworld;
-	AprilTags::TagDetector tag_detector(AprilTags::tagCodes36h11);// the tag detector not this is set to a specific family TODO: expose this as a dynamic reconfig
-
-	while(ros::ok())
-	{
-		//check if the beacon detect state is on
-		if(!active_&&!init_)
-			continue;
-
-	//load the variables locally
-		{
-			boost::mutex::scoped_lock lock(imglock_);				//make sure no one else is accessing these variables
-			frame=colorImg_.clone();								//copy the image. = operater only copys the pointer so it will lead to race conditons
-
-			process=newimg_;										//if its a new image you need to process it
-
-			if(frame.empty())										//empty frame so cant process
-				process=false;
-
-			img_time=img_time_;										//get image time
-
-			if(!intrinsic_.empty())									//copy the intrinsic params
-			{
-				fx=double(intrinsic_.at<float>(0,0));
-				fy=double(intrinsic_.at<float>(1,1));
-				px=double(intrinsic_.at<float>(0,2));
-				py=double(intrinsic_.at<float>(1,2));
-			}
-			else
-			{
-				ROS_ERROR("Camera Info not being published");
-				process=false;									//if you dont have camera config you cant publish transform so dont process
-			}
-
-		}
-		if(process)
-		{
-			cv::cvtColor(frame, gray, CV_BGR2GRAY);						//convert the color Image to gray imagePr
-			detections_ = tag_detector.extractTags(gray);	//get tags if detected
-			ROS_INFO("%d tag detected. \n",detections_.size());									//DEBUG information
-			if(detections_.size()==0)
-				continue;
-			if(init_)
-			{
-				tfbaseinworld=initProcess(fx,fy,px,py,img_time);
-				//calculate the pose of the robot to the beacon
-				if(!test_)
-				{				
-				boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  tfbaseinworld) );
-
-				aero_srr_msgs::StateTransitionRequest state_transition;
-				state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
-				state_transition.request.requested_state.header.stamp = ros::Time().now();
-				
-					if(state_client_.call(state_transition))
-					{
-						if(state_transition.response.success)
-						{
-							ROS_INFO("Robot now in Search mode");
-							active_=true;
-							init_=false;
-						}
-						else
-						{
-							ROS_ERROR("%s",state_transition.response.error_message.c_str());
-						}
-					}
-					else
-					{
-						ROS_ERROR("Not able to call the service");
-					}
-				}
-			}
-			if(active_)
-			{
-				runProcess(fx,fy,px,py,img_time);
-			}
-			process=false;
-			if(show_)
-				showResult(frame);
-		}
-	}
-	if(detector_thread_.joinable())
-	{
-		detector_thread_.join();
 	}
 }
 
@@ -457,7 +366,7 @@ void BeaconDetector::runProcess(double fx,double fy, double px, double py, ros::
 	}
 }
 
-tf::StampedTransform BeaconDetector::initProcess(double fx,double fy, double px, double py, ros::Time imgtime)
+tf::Stamped<tf::Transform> BeaconDetector::initProcess(double fx,double fy, double px, double py, std_msgs::Header imgheader)
 {
 	ROS_INFO("In initialization");
 
@@ -467,14 +376,17 @@ tf::StampedTransform BeaconDetector::initProcess(double fx,double fy, double px,
 	int sctr=0;										//the neumber of valid tags detected
 	int bctr=0;										//the number of big tags detected
 
-	tf::Transform transform;									//the transform between the tag and the camera
-	tf::StampedTransform tfbaseinworld,stfbaseinworld;			//the total transform and the individual transform
+	geometry_msgs::Pose tag_pose;					//the pose of the tag
+	tf::Stamped<tf::Transform> 	world2base;
 
 	for (int i=0; i<detections_.size(); i++)
 	{
 		tag=checkInConst(detections_[i],tag_type);			//check if it is the constellation if so whats is its name in home tf tree?
 		if(tag.empty())
+		{
+			ROS_INFO("Detected tag is not the part of the beacon constellation");
 			continue;
+		}
 
 		ROS_INFO( "  Id: %d --- Hamming distance: %f \n",detections_[i].id,  detections_[i].hammingDistance );
 
@@ -496,69 +408,52 @@ tf::StampedTransform BeaconDetector::initProcess(double fx,double fy, double px,
 		Eigen::Quaternion<double> final = Eigen::Quaternion<double>(rot);	//convert it to quaternion
 
 		// the x,y,z location of the tag
-		transform.setOrigin( tf::Vector3(T(0,3),T(1,3), T(2,3)) );
-
+		tag_pose.position.x=T(0,3);tag_pose.position.x=T(1,3);tag_pose.position.x=T(2,3);
 		//set up the transform rotation
-		transform.setRotation( tf::Quaternion(final.x(), final.y(), final.z(),final.w()) );
-
-		char frameid[50];
-		sprintf(frameid,"estimated_%s",tag.c_str());		//debug information
+		tag_pose.orientation.x=final.x();tag_pose.orientation.y=final.y();tag_pose.orientation.z=final.z();tag_pose.orientation.w=final.w();
 
 		//transmit the tf
-		br_.sendTransform(tf::StampedTransform(transform, imgtime, parent_frame_.c_str(), frameid));
-		tfbaseinworld=initWorld(tag,imgtime);
-		//TODO
-		//add the tfbaseinworld for all the points till it is time to transmit
-		//spawn the broadcaster
-		if(test_)
-			br_.sendTransform(tf::StampedTransform(tfbaseinworld, ros::Time::now()+ros::Duration(0.5), "/world","/tag_base"));
-		//stfbaseinworld+=tfbaseinworld;
-	}
-
-	//return(tfbaseinworld/(sctr+bctr));
-	return(tfbaseinworld);
-}
-
-tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtime)
-{
-	//find transform to base_footprint
-	tf::StampedTransform tag2base;
-	//lookuptransform "taget frame(T)" "original frame(O)" "oFT"
-	tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag_name, imgtime, ros::Duration(10.0) );
-	try{
-
-		tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag_name,imgtime,tag2base);
-	}
-	catch(tf::TransformException &ex)
-	{
-		ROS_ERROR("%s",ex.what());
-	}
-	//define find transform to the beacon_base
-	tf::StampedTransform tag2world;
-	try{
-		tf_lr_.lookupTransform(string("/")+tag_name,"/tag_base",imgtime,tag2world);
-	}
-	catch(tf::TransformException &ex)
-	{
+		geometry_msgs::PoseStamped tag_robot,tag_camera;
+		tag_camera.header=imgheader;tag_camera.pose=tag_pose;
+		try
+		{
+			tf_lr_.transformPose("/base_footprint",tag_camera,tag_robot);
+		}
+		catch(tf::TransformException &ex)
+		{
 			ROS_ERROR("%s",ex.what());
+		}
+		pose_pub_.publish(tag_robot);
+
+		tf::StampedTransform tag2world;
+		try{
+			tf_lr_.lookupTransform(string("/")+tag,"/tag_base",imgheader.stamp,tag2world);
+		}
+		catch(tf::TransformException &ex)
+		{
+			ROS_ERROR("%s",ex.what());
+		}
+
+		//find base_footprint to tag_base and declare it as the world in the beacon tf tree
+		//calculate the transform between the robot_base and the world
+
+		tf::poseStampedMsgToTF(tag_robot,world2base);
+
+		world2base*=(tag2world);
+
+		ROS_INFO("x: %f y: %f z: %f",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
+
+		if(test_)
+			br_.sendTransform(tf::StampedTransform(world2base, ros::Time::now()+ros::Duration(0.5), "/world","/tag_base"));
+
 	}
-
-	//find base_footprint to tag_base and declare it as the world in the beacon tf tree
-	//calculate the transform between the robot_base and the world
-	tf::StampedTransform 	world2base;
-	world2base=tag2base;
-	world2base*=(tag2world);
-	//tf::Transform res=world2base.inverse();
-	//world2base=tf::StampedTransform(res,world2base.stamp_,world2base.frame_id_,world2base.child_frame_id_);
-
-	ROS_INFO("x: %f y: %f z: %f",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
-
 	char dummy;
 	cin>>dummy;
 
 	return(world2base);
-
 }
+
+
 void BeaconDetector::pubOdom(geometry_msgs::Pose pose, ros::Time time)
 {
 	nav_msgs::Odometry msg;
