@@ -30,18 +30,18 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
-	//mission_goal.position.x = 10.0;
-	//mission_goal.position.y = 10.0;
-	//mission_goal.orientation.w = 1;
-	//this->mission_goals_.push_back(mission_goal);
-	//mission_goal.position.x = 0;
-	//mission_goal.position.y = 10.0;
-	//mission_goal.orientation.w = 1;
-	//this->mission_goals_.push_back(mission_goal);
-	//mission_goal.position.x = 0;
-	//mission_goal.position.y = 0;
-	//mission_goal.orientation.w = 1;
-	//this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 5.0;
+	mission_goal.position.y = 2.0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 10;
+	mission_goal.position.y = -2.0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 5;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
 	this->registerTopics();
@@ -142,7 +142,7 @@ bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLoca
 	tf::pointMsgToTF(worldLocation.pose.position, world_point);
 	tf::pointMsgToTF(this->carrot_path_.front().pose.position, goal_point);
 	double dist = world_point.distance(goal_point);
-	ROS_INFO_STREAM_THROTTLE(1, "\nMission Planner: At position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\nDistance to Goal:="<<dist);
+	//ROS_INFO_STREAM_THROTTLE(1, "\nMission Planner: At position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\nDistance to Goal:="<<dist);
 	return dist<threshold;
 }
 
