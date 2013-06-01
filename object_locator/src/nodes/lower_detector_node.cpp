@@ -837,16 +837,16 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 	//-- Detect faces
 
-	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 16, 0,
-			cv::Size(30, 39), cv::Size(75, 80)); // works for WHAground !&5
-	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 20, 0,
-			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90
+	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 8, 0,
+			cv::Size(30, 39), cv::Size(75, 80)); // works for WHAground !&5 *16*
+	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 5, 0,
+			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90  *20*
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
 	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 10, 0,
 			cv::Size(5, 5), cv::Size(100,100)); //
-	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,32, 0,
-			cv::Size(10, 11), cv::Size(52, 59)); // works for 8
+	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,15, 0,
+			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 *32*
 
 	/*
 	 * WHA - White hook object inside detection loop BLUE

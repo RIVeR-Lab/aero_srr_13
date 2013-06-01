@@ -491,7 +491,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				tf::Vector3 goal_position;
 				tf::pointMsgToTF(local_goal.position, goal_position);
 				dist = goal_position.length();
-				//ROS_INFO_STREAM_THROTTLE(1, "Distance to Local Goal:"<<dist<<", goal <"<<goal_position.x()<<","<<goal_position.y()<<">");
+				ROS_INFO_STREAM_THROTTLE(2.5, "Local Planner: Distance to Local Goal:"<<dist<<", goal <"<<goal_position.x()<<","<<goal_position.y()<<">");
 			}
 			else
 			{

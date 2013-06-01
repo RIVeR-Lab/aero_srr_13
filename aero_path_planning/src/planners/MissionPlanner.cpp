@@ -30,23 +30,27 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
-	mission_goal.position.x = 5.0;
-	mission_goal.position.y = 2.0;
-	mission_goal.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal);
-	mission_goal.position.x = 10;
-	mission_goal.position.y = -2.0;
-	mission_goal.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal);
-	mission_goal.position.x = 5;
-	mission_goal.position.y = 0;
-	mission_goal.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal);
+	geometry_msgs::Pose mission_goal2;
+	mission_goal2.position.x = 5.0;
+	mission_goal2.position.y = 1.0;
+	mission_goal2.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal2);
+	geometry_msgs::Pose mission_goal3;
+	mission_goal3.position.x = 10;
+	mission_goal3.position.y = -1.0;
+	mission_goal3.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal3);
+	geometry_msgs::Pose mission_goal4;
+	mission_goal4.position.x = 5;
+	mission_goal4.position.y = 0;
+	mission_goal4.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal4);
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
 	this->registerTopics();
-	this->registerTimers();
 	this->updateMissionGoal();
+	this->mission_goals_.pop_front();
+	this->registerTimers();
 	ROS_INFO_STREAM("Mission Planner Running!");
 }
 
@@ -148,6 +152,7 @@ bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLoca
 
 void MissionPlanner::goalCB(const ros::TimerEvent& event)
 {
+	ROS_INFO_STREAM_THROTTLE(5, "Mission Planner: Currently "<<this->mission_goals_.size()<<" Mission Goals Remaining!");
 	geometry_msgs::PoseStamped current_point;
 
 	if(this->calcRobotPointWorld(current_point))
@@ -176,7 +181,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			else
 			{
 				//Means we've reached the end of the search pattern, start going to objects of interest
-				if(this->searching_)
+				if(this->searching_&&this->recieved_path_)
 				{
 					this->requestNavObj();
 				}
