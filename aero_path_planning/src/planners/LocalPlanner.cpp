@@ -345,7 +345,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 							traversing = false;
 							break;
 						case ogu::CellTrait::GOAL:
-							//ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
+							ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed()*this->res_);
 							traversing = false;
 							hit_goal   = true;
 							break;
@@ -386,7 +386,8 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 					}
 				}
 
-				double raw_length   = traverser.lengthTraversed();
+				//Need to convert the travers's length, which will be in grid units, to meters to compare with the goal distance
+				double raw_length   = traverser.lengthTraversed()*this->res_;
 				double tent_fitness = raw_length+length_modifier;
 				//ROS_INFO("Searched Tentacle %d in set %d with fitness %f",current_set.getIndex(), working_tentacle.getIndex(), tent_fitness);
 				TentacleDataPtr_t tent_details(new TentacleData_t(cur_set.getIndex(), working_tentacle.getIndex()));
