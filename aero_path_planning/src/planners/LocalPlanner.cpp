@@ -447,7 +447,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			}
 
 			//Apply a goal if we have one:
-			this->applyGoal(working_grid);
+			this->applyGoal(event.current_real, working_grid);
 
 			//Visualize the grid
 			this->visualizeOcc(working_grid);
@@ -504,18 +504,17 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 	}
 }
 
-void LocalPlanner::applyGoal(og::MultiTraitOccupancyGrid& grid) const
+void LocalPlanner::applyGoal(const ros::Time& time, og::MultiTraitOccupancyGrid& grid) const
 {
 	geometry_msgs::PoseStamped local_goal;
 	if(this->global_goal_!=geometry_msgs::PoseStampedConstPtr())
 	{
 		try
 		{
-			ros::Time tf_time(ros::Time::now());
 			geometry_msgs::PoseStamped temp_goal(*this->global_goal_);
-			temp_goal.header.stamp = tf_time;
+			temp_goal.header.stamp = time;
 			ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Global Goal is in "<<this->global_goal_->header.frame_id<<":\n"<<this->global_goal_->pose.position);
-			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, tf_time, ros::Duration(1.0/20.0));
+			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, time, ros::Duration(1.0/20.0));
 			this->transformer_.transformPose(grid.getFrameID(), temp_goal, local_goal);
 			ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Local Goal is in "<<local_goal.header.frame_id<<":\n"<<local_goal.pose.position);
 			grid.setGoal(local_goal.pose);

@@ -250,9 +250,10 @@ private:
 	/**
 	 * @author Adam Panzica
 	 * @brief Applies a global goal to the local frame
-	 * @param in] grid The gird to apply the goal to
+	 * @param [out] grid The gird to apply the goal to
+	 * @param [in] time The time at which to perform the transforms to apply the goal
 	 */
-	void applyGoal(og::MultiTraitOccupancyGrid& grid) const;
+	void applyGoal(const ros::Time& time, og::MultiTraitOccupancyGrid& grid) const;
 
 };
 
