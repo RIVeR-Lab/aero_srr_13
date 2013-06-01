@@ -84,7 +84,7 @@ DetectorNode::DetectorNode() :
 	cascade_path_PINK =
 			"/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	cascade_path_PUCK =
-			"/home/srr/ObjectDetectionData/exec/cascadeWHAfar1/cascade.xml";
+			"/home/srr/ObjectDetectionData/exec/cascadeFat1/cascade.xml";
 //	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	cascade_path_PIPE =
 			"/home/srr/ObjectDetectionData/exec/cascadePIPEX/cascade.xml";
@@ -702,6 +702,7 @@ void DetectorNode::computeDisparity() {
 	disp.convertTo(cmapped, CV_8U);
 	cv::line(cmapped, Point2d(numDisp,0),Point2d(numDisp,cmapped.rows),Scalar(255,255,255,0));
 	cv::rectangle(frame, Point2d(detection.getX()-100, detection.getY()-100), Point2d(detection.getX()+100, detection.getY()+100),Scalar(255,255,255));
+	namedWindow( WINDOWDisparity, CV_WINDOW_AUTOSIZE );
 	cv::imshow(WINDOWDisparity, cmapped);
 	cv::waitKey(3);
 
@@ -802,21 +803,20 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	int HORIZON = 0;
 
 	Mat_t frame_gray;
-	Mat_t hsv,hsv2;
+	Mat_t lab,lab_gray;
 	Mat_t mask(frame.rows,frame.cols,CV_8U);
 	Mat_t pipeMask = mask;
 	Mat_t WHAMask = mask;
-
-
-//  	cv::Vec3b hsvPipe = hsv.at<cv::Vec3b>(300,300);
+	cvtColor(frame,lab,CV_RGB2Lab);
+//  	cv::Vec3b hsvPipe = lab.at<cv::Vec3b>(center.x,center.y);
 //  	int H = hsvPipe[0];
 //  	int S = hsvPipe[1];
 //  	int V = hsvPipe[2];
 
-//  	ROS_WARN_STREAM("HSV at rock = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
+//  	ROS_ERROR_STREAM("HSV at rock = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
 
 //
-//	inRange(hsv, Scalar(108,198, 54,0) , Scalar(115, 240, 128,0), pipeMask );
+	inRange(lab, Scalar(45,120, 120,0) , Scalar(60, 150, 140,0), pipeMask );
 //	inRange(hsv2, Scalar(68,71, 76,0) , Scalar(83, 75, 112,0), WHAMask );
 
 //	pipePoint_ = blobIdentify(pipeMask,200);
@@ -837,8 +837,8 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
-	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 1, 0,
-			cv::Size(5, 5), cv::Size(46,46)); //
+	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 10, 0,
+			cv::Size(5, 5), cv::Size(100,100)); //
 	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,32, 0,
 			cv::Size(10, 11), cv::Size(52, 59)); // works for 8
 
@@ -932,15 +932,15 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
 				SUN_faces[j].y + SUN_faces[j].height / 2);
 		if (center.y > HORIZON) {
-//		cv::ellipse(frame, center,
-//				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
-//				360, cv::Scalar(0, 0, 255), 2, 8, 0);
-//		cv::rectangle(frame,
-//				Point(center.x - SUN_faces[j].width / 2,
-//						center.y - SUN_faces[j].height / 2),
-//				Point(center.x + SUN_faces[j].width / 2,
-//						center.y + SUN_faces[j].height / 2),
-//				cv::Scalar(0, 0, 255));
+		cv::ellipse(frame, center,
+				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
+				360, cv::Scalar(0, 0, 255), 2, 8, 0);
+		cv::rectangle(frame,
+				Point(center.x - SUN_faces[j].width / 2,
+						center.y - SUN_faces[j].height / 2),
+				Point(center.x + SUN_faces[j].width / 2,
+						center.y + SUN_faces[j].height / 2),
+				cv::Scalar(0, 0, 255));
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 //		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
 //		DetectionPtr_t newDetection(new Detection_t());
@@ -971,6 +971,8 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 				360, cv::Scalar(0, 255,0), 2, 8, 0);
 
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+
+
 
 		ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
@@ -1029,6 +1031,9 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //		cv::waitKey(3);
 //	cv::imshow(WINDOWRight, mask);
 //	cv::waitKey(3);
+//	imshow("lab",pipeMask);
+//	waitKey(3);
+	 namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE );
 	cv::imshow(WINDOWLeft, frame);
 
 	cv::waitKey(3);
