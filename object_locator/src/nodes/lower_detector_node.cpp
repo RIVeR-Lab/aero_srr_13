@@ -839,7 +839,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 16, 0,
 			cv::Size(30, 39), cv::Size(75, 80)); // works for WHAground !&5
-	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 15, 0,
+	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 20, 0,
 			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
@@ -864,7 +864,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 		Rect cropROI(center.x-WHA_faces[i].width / 2, center.y-WHA_faces[i].height / 2, WHA_faces[i].width, WHA_faces[i].height);
 		Mat_t sample = frame(cropROI);
-		object_locator::object_type type = queryObject(sample);
+		//object_locator::object_type type = queryObject(sample);
 
 		if (center.y > HORIZON) {
 
@@ -882,7 +882,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 			DetectionPtr_t newDetection(new Detection_t());
 			newDetection->first.first = center.x;
 			newDetection->first.second = center.y;
-			newDetection->second = type;
+			newDetection->second = WHA;
 			detection_list_.push_back(newDetection);
 		}
 
@@ -890,73 +890,73 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	/*
 	 * PINK_BALL - Tennis ball detection loop PINK
 	 */
-	for (size_t j = 0; j < PINK_faces.size(); j++) {
-//		cout << "Entered circle drawing loop" << endl;
-
-		Mat_t faceROI = frame_gray(PINK_faces[j]);
-
-		//-- In each face, detect eyes
-
-		//-- Draw the face
-		cv::Point center(PINK_faces[j].x + PINK_faces[j].width / 2,
-				PINK_faces[j].y + PINK_faces[j].height / 2);
-
-		Rect cropROI(center.x-(PINK_faces[j].width / 2), center.y-(PINK_faces[j].height / 2), PINK_faces[j].width, PINK_faces[j].height);
-		Mat_t sample = frame(cropROI);
-		object_locator::object_type type = queryObject(sample);
-
-		if (center.y > HORIZON) {
-//		cv::ellipse(frame, center,
-//				cv::Size(PINK_faces[j].width / 2, PINK_faces[j].height / 2), 0,
-//				0, 360, cv::Scalar(255, 0, 255), 2, 8, 0);
-//		cv::rectangle(frame,
-//						Point(center.x - PINK_faces[j].width / 2,
-//								center.y - PINK_faces[j].height / 2),
-//						Point(center.x + PINK_faces[j].width / 2,
-//								center.y + PINK_faces[j].height / 2),
-//								cv::Scalar(255, 0, 255));
-//		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-////		ROS_ERROR_STREAM("Detection is of type " << type);
-//		DetectionPtr_t newDetection(new Detection_t());
-//		newDetection->first.first = center.x;
-//		newDetection->first.second = center.y;
-//		newDetection->second = type;
-//		detection_list_.push_back(newDetection);
-		}
-	}
+//	for (size_t j = 0; j < PINK_faces.size(); j++) {
+////		cout << "Entered circle drawing loop" << endl;
+//
+//		Mat_t faceROI = frame_gray(PINK_faces[j]);
+//
+//		//-- In each face, detect eyes
+//
+//		//-- Draw the face
+//		cv::Point center(PINK_faces[j].x + PINK_faces[j].width / 2,
+//				PINK_faces[j].y + PINK_faces[j].height / 2);
+//
+//		//Rect cropROI(center.x-(PINK_faces[j].width / 2), center.y-(PINK_faces[j].height / 2), PINK_faces[j].width, PINK_faces[j].height);
+//		//Mat_t sample = frame(cropROI);
+//		//object_locator::object_type type = queryObject(sample);
+////
+////		if (center.y > HORIZON) {
+//////		cv::ellipse(frame, center,
+//////				cv::Size(PINK_faces[j].width / 2, PINK_faces[j].height / 2), 0,
+//////				0, 360, cv::Scalar(255, 0, 255), 2, 8, 0);
+//////		cv::rectangle(frame,
+//////						Point(center.x - PINK_faces[j].width / 2,
+//////								center.y - PINK_faces[j].height / 2),
+//////						Point(center.x + PINK_faces[j].width / 2,
+//////								center.y + PINK_faces[j].height / 2),
+//////								cv::Scalar(255, 0, 255));
+//////		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+////////		ROS_ERROR_STREAM("Detection is of type " << type);
+//////		DetectionPtr_t newDetection(new Detection_t());
+//////		newDetection->first.first = center.x;
+//////		newDetection->first.second = center.y;
+//////		newDetection->second = type;
+//////		detection_list_.push_back(newDetection);
+////		}
+//	}
 	/*
 	 * Puck- - RED
 	 */
-	for (size_t j = 0; j < SUN_faces.size(); j++) {
-//		cout << "Entered circle drawing loop" << endl;
-
-		Mat_t faceROI = frame_gray(SUN_faces[j]);
-
-		//-- In each face, detect eyes
-
-		//-- Draw the face
-		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
-				SUN_faces[j].y + SUN_faces[j].height / 2);
-		if (center.y > HORIZON) {
-		cv::ellipse(frame, center,
-				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
-				360, cv::Scalar(0, 0, 255), 2, 8, 0);
-		cv::rectangle(frame,
-				Point(center.x - SUN_faces[j].width / 2,
-						center.y - SUN_faces[j].height / 2),
-				Point(center.x + SUN_faces[j].width / 2,
-						center.y + SUN_faces[j].height / 2),
-				cv::Scalar(0, 0, 255));
-ROS_ERROR_STREAM("Detection is of size " <<SUN_faces[j].width << ","<< SUN_faces[j].height);
-		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-//		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
-//		DetectionPtr_t newDetection(new Detection_t());
-//		newDetection->first.first = center.x;
-//		newDetection->first.second = center.y;
-//		newDetection->second = WHA;
-//		detection_list_.push_back(newDetection);
-		}
-	}
+//	for (size_t j = 0; j < SUN_faces.size(); j++) {
+////		cout << "Entered circle drawing loop" << endl;
+//
+//		Mat_t faceROI = frame_gray(SUN_faces[j]);
+//
+//		//-- In each face, detect eyes
+//
+//		//-- Draw the face
+//		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
+//				SUN_faces[j].y + SUN_faces[j].height / 2);
+//		if (center.y > HORIZON) {
+//		cv::ellipse(frame, center,
+//				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
+//				360, cv::Scalar(0, 0, 255), 2, 8, 0);
+//		cv::rectangle(frame,
+//				Point(center.x - SUN_faces[j].width / 2,
+//						center.y - SUN_faces[j].height / 2),
+//				Point(center.x + SUN_faces[j].width / 2,
+//						center.y + SUN_faces[j].height / 2),
+//				cv::Scalar(0, 0, 255));
+//ROS_ERROR_STREAM("Detection is of size " <<SUN_faces[j].width << ","<< SUN_faces[j].height);
+//		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+////		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
+////		DetectionPtr_t newDetection(new Detection_t());
+////		newDetection->first.first = center.x;
+////		newDetection->first.second = center.y;
+////		newDetection->second = WHA;
+////		detection_list_.push_back(newDetection);
+//		}
+//	}
 	/*
 	 * Actually WHA but with different range GREEN
 	 */
@@ -971,7 +971,7 @@ ROS_ERROR_STREAM("Detection is of size " <<SUN_faces[j].width << ","<< SUN_faces
 
 		Rect cropROI(center.x - RQT_faces[j].width / 2, center.y - RQT_faces[j].height / 2, RQT_faces[j].width, RQT_faces[j].height );
 		Mat_t sample = frame(cropROI);
-		object_locator::object_type type = queryObject(sample);
+		//object_locator::object_type type = queryObject(sample);
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(RQT_faces[j].width / 2, RQT_faces[j].height / 2), 0, 0,
@@ -985,7 +985,7 @@ ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
-		newDetection->second = type;
+		newDetection->second = WHA;
 		detection_list_.push_back(newDetection);
 		}
 	}
@@ -1007,7 +1007,7 @@ ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces
 				center.y - Pipe_faces[j].height / 2, Pipe_faces[j].width,
 				Pipe_faces[j].height);
 		Mat_t sample = frame(cropROI);
-		object_locator::object_type type = queryObject(sample);
+		//object_locator::object_type type = queryObject(sample);
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(Pipe_faces[j].width / 2, Pipe_faces[j].height / 2), 0,
@@ -1024,7 +1024,7 @@ ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_fac
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
-		newDetection->second = type;
+		newDetection->second = WHA;
 		detection_list_.push_back(newDetection);
 		}
 	}
