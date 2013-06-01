@@ -1,0 +1,16 @@
+<package>
+  <description brief="aero_rgbd">
+
+     aero_rgbd
+
+  </description>
+  <author>RJ Linton</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aero_rgbd</url>
+
+  <depend package="roscpp"/>
+
+</package>
+
+
