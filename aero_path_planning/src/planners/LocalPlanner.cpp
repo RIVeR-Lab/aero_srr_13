@@ -491,7 +491,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				tf::Vector3 goal_position;
 				tf::pointMsgToTF(local_goal.position, goal_position);
 				dist = goal_position.length();
-				ROS_INFO_STREAM_THROTTLE(1, "Distance to Local Goal:"<<dist<<", goal <"<<goal_position.x()<<","<<goal_position.y()<<">");
+				//ROS_INFO_STREAM_THROTTLE(1, "Distance to Local Goal:"<<dist<<", goal <"<<goal_position.x()<<","<<goal_position.y()<<">");
 			}
 			else
 			{
@@ -544,10 +544,10 @@ void LocalPlanner::applyGoal(const ros::Time& time, og::MultiTraitOccupancyGrid&
 		{
 			geometry_msgs::PoseStamped temp_goal(*this->global_goal_);
 			temp_goal.header.stamp = time;
-			ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Global Goal is in "<<this->global_goal_->header.frame_id<<":\n"<<this->global_goal_->pose.position);
+			//ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Global Goal is in "<<this->global_goal_->header.frame_id<<":\n"<<this->global_goal_->pose.position);
 			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, time, ros::Duration(1.0/20.0));
 			this->transformer_.transformPose(grid.getFrameID(), temp_goal, local_goal);
-			ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Local Goal is in "<<local_goal.header.frame_id<<":\n"<<local_goal.pose.position);
+			//ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Local Goal is in "<<local_goal.header.frame_id<<":\n"<<local_goal.pose.position);
 			grid.setGoal(local_goal.pose);
 
 		}
