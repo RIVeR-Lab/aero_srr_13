@@ -5,8 +5,8 @@
       <param name="configuration" type="str" value="configuration.xml" />
       <param name="tag_size_big" value=" 0.5588" />
       <param name="tag_size_small" value=" 0.1397" />	
-      <param name="show_result" value="true" />
-      <param name="test_mode"	value="true" /> 
+      <param name="show_result" value="false" />
+      <param name="test_mode"	value="false" /> 
       <param name="robot_topic" value="/aero/supervisor/state" />	
   </node>
 </launch>

@@ -3,6 +3,7 @@
   <!-- Input Arguments -->
   <arg name="imu_topic"    default="imu" />
   <arg name="odom_topic"   default="odom" />
+  <arg name="vo_topic"   default="/tag_odom" />
   <arg name="output_topic" default="aero/odom_combined" />
   
   <!-- Bring Up Robot Pose Ekf -->
@@ -13,10 +14,11 @@
     <param name="sensor_timeout" value=".1"/>  
     <param name="odom_used"      value="true"/>
     <param name="imu_used"       value="true"/>
-    <param name="vo_used"        value="false"/>
+    <param name="vo_used"        value="true"/>
 
     <remap from="odom"     to="$(arg odom_topic)" />
     <remap from="imu_data" to="$(arg imu_topic)" />
+    <remap from="vo" to="$(arg vo_topic)" />
   </node>
   
   <!-- bring up SLAM -->
