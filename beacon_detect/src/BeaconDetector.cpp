@@ -406,9 +406,9 @@ tf::Stamped<tf::Transform> BeaconDetector::initProcess(double fx,double fy, doub
 		// the orientation of the tag
 		Eigen::Matrix3d rot = T.block(0,0,3,3);
 		Eigen::Quaternion<double> final = Eigen::Quaternion<double>(rot);	//convert it to quaternion
-		final=final.conjugate();
+
 		// the x,y,z location of the tag
-		tag_pose.position.x=T(0,3);tag_pose.position.x=T(1,3);tag_pose.position.x=T(2,3);
+		tag_pose.position.x=T(0,3);tag_pose.position.y=T(1,3);tag_pose.position.z=T(2,3);
 		//set up the transform rotation
 		tag_pose.orientation.x=final.x();tag_pose.orientation.y=final.y();tag_pose.orientation.z=final.z();tag_pose.orientation.w=final.w();
 
