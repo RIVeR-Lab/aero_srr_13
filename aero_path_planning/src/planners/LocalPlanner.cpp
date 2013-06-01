@@ -521,7 +521,7 @@ void LocalPlanner::applyGoal(og::MultiTraitOccupancyGrid& grid) const
 		}
 		catch(std::exception& e)
 		{
-			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+			ROS_ERROR_STREAM_THROTTLE(0.1,"LocalPlanner Could Not Transform Local Goal:\n"<< e.what());
 		}
 	}
 }
