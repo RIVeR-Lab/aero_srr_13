@@ -494,8 +494,8 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 	tf::StampedTransform 	world2base;
 	world2base=tag2base;
 	world2base*=(tag2world);
-	tf::Transform res=world2base.inverse();
-	world2base=tf::StampedTransform(res,world2base.stamp_,world2base.frame_id_,world2base.child_frame_id_);
+	//tf::Transform res=world2base.inverse();
+	//world2base=tf::StampedTransform(res,world2base.stamp_,world2base.frame_id_,world2base.child_frame_id_);
 
 	ROS_INFO("x: %f y: %f z: %f",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
 
@@ -537,13 +537,13 @@ geometry_msgs::Pose BeaconDetector::getRobotPose(string tag,ros::Time imgtime)
 	tf::StampedTransform 	tag2world;
 	try{
 
-		tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag, imgtime, ros::Duration(10.0) );//might not have yet registered so wait till it becomes available
+		tf_lr_.waitForTransform("/base_footprint",string("/estimated_")+tag, imgtime, ros::Duration(2.0) );//might not have yet registered so wait till it becomes available
 		tf_lr_.lookupTransform("/base_footprint",string("/estimated_")+tag,imgtime,tag2base);
 		//calculate the transform between the tag and the world
-		tf_lr_.lookupTransform("/world",string("/")+tag,imgtime,tag2world);
+		tf_lr_.lookupTransform(string("/")+tag,"/world",imgtime,tag2world);
 		//calculate the transform between the robot_base and the world
 		world2base=tag2base;
-		world2base.inverseTimes(tag2world);
+		world2base*=tag2world;
 	}
 	catch(tf::TransformException &ex)
 	{
