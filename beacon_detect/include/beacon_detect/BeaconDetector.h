@@ -66,7 +66,6 @@ class BeaconDetector
 
 	//boost thread
 	boost::mutex						imglock_;						//mutext to sync the image callback with the detector thread
-	boost::thread						detector_thread_;				//boost detector thread handle
 	boost::thread						world_broadcaster_;				//thread that does tf broadcast of the world
 
 	std::vector<AprilTags::TagDetection> 	detections_;				//the extracted tags

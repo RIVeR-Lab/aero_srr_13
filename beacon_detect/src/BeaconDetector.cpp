@@ -21,6 +21,7 @@ BeaconDetector::BeaconDetector():it_(nh_)
 														//you need to find the tag_base to the world
 
 	//the robot state controls the state of this node to init_/active_
+	//TODO: can you not listen to the robot states????
 	ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
 
 	/* Start the camera video from the camera topic */
@@ -44,8 +45,6 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	/*set up the action client for rotating the boom */
 	//boom_client_ = boost::shared_ptr<BoomClient>(new BoomClient(nh_, "/camera_boom_control", true));
 
-	/* thread the beacon detector function*/
-	boost::thread detector_thread_( boost::bind( &BeaconDetector::detectBeacons, this ) );
 	/* rotate boom 360 */
 	//rotateBoom();
 }
@@ -58,8 +57,10 @@ void BeaconDetector::rotateBoom()
 }
 void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
+	if(!active_&&!init_)
+		return;
+
 	cv_bridge::CvImagePtr cv_ptr;
-	boost::mutex::scoped_lock lock(imglock_);								//ensures that the variables being set here are independent of the race conditions
 	try
 	{
 	   cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
@@ -69,14 +70,67 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	    ROS_ERROR("cv_bridge exception: %s", e.what());
 	    return;
 	}
-	colorImg_=cv_ptr->image.clone();
+	colorImg_=cv_ptr->image;
 
-	intrinsic_=(cv::Mat_<float>(3,3)<<  cam_info->K[0],cam_info->K[1],cam_info->K[2],\
-	                                    cam_info->K[3],cam_info->K[4],cam_info->K[5],\
-					                    cam_info->K[6],cam_info->K[7],cam_info->K[8]);
+	double fx=cam_info->K[0];
+	double fy=cam_info->K[4];
+	double px=cam_info->K[2];
+	double py=cam_info->K[5];
+
 	parent_frame_=cv_ptr->header.frame_id;	//the id of the frame
 	img_time_=cv_ptr->header.stamp;			//image time
-	newimg_=true;							//a flag for processing
+
+	tf::Transform transform;									//the transform between the tag and the camera
+	tf::StampedTransform tfbaseinworld;
+	AprilTags::TagDetector tag_detector(AprilTags::tagCodes36h11);// the tag detector not this is set to a specific family TODO: expose this as a dynamic reconfig
+
+	Mat gray;
+	cv::cvtColor(colorImg_, gray, CV_BGR2GRAY);						//convert the color Image to gray imagePr
+
+	detections_ = tag_detector.extractTags(gray);	//get tags if detected
+
+	ROS_INFO("%d tag detected. \n",detections_.size());									//DEBUG information
+	if(detections_.size()==0)
+		return;
+
+	if(init_)
+	{
+		//calculate the average tf of the world location using the detections_
+		tfbaseinworld=initProcess(fx,fy,px,py,img_time_);
+		//till test period is over
+		if(!test_)
+		{
+			boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  tfbaseinworld) );
+
+			aero_srr_msgs::StateTransitionRequest state_transition;
+			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
+			state_transition.request.requested_state.header.stamp = ros::Time().now();
+
+			if(state_client_.call(state_transition))
+			{
+				if(state_transition.response.success)
+				{
+					ROS_INFO("Aero successfully transitioned to the Search mode");
+					active_=true;
+					init_=false;
+				}
+				else
+				{
+					ROS_ERROR("%s",state_transition.response.error_message.c_str());
+				}
+			}
+			else
+			{
+				ROS_ERROR("Aero state service is not running! Please start it");
+			}
+		}
+	}
+	if(active_)
+	{
+		runProcess(fx,fy,px,py,img_time_);
+	}
+	if(show_)
+		showResult(frame);
 }
 
 void BeaconDetector::initConfiguration(string fname)
