@@ -41,11 +41,8 @@ class BeaconDetector
 	double 			tag_size_small_;						//need it so you can calculate the tf
 	std::string 	robot_topic_;							//the topic that will send the robot state message
 	cv::Mat			colorImg_;								//the Mat the defines the color image
-	std::string 	parent_frame_;							//the name of the parent frame in the tf tree
 	std::string 	sys_msgs_;								//the topic in which the system message for the status is broadcast
-	cv::Mat			intrinsic_;								//the intrinsic parameter of the camera
-	ros::Time		img_time_;								//The time the image was recieved
-	bool			newimg_;								//if the image is new and needs beacon detect to process it
+
 	bool 			histeq_;								//if set to true, histogram equalization on the images is done
 	bool			show_;									//if set to true, the results of the detected tag is displayed on screen
 	bool			active_;								//determine if the beacon detector must be active use he topic
@@ -65,8 +62,6 @@ class BeaconDetector
 	boost::shared_ptr<BoomClient> 		boom_client_;					//the action server for controlling the boom
 
 	//boost thread
-	boost::mutex						imglock_;						//mutext to sync the image callback with the detector thread
-	boost::thread						detector_thread_;				//boost detector thread handle
 	boost::thread						world_broadcaster_;				//thread that does tf broadcast of the world
 
 	std::vector<AprilTags::TagDetection> 	detections_;				//the extracted tags
@@ -101,25 +96,13 @@ public:
 	/**
 	 * this function is performs the actual detection of the beacons
 	 */
-	void detectBeacons();
-	/**
-	 * this function is used to display the result on an image
-	 */
 	void showResult(cv::Mat img);
 	/*
 	 * This function calculated the stamped pose for the robot to correct give the tag id
 	 */
-	geometry_msgs::Pose getRobotPose(string tag, ros::Time imgtime);
-	/*
-	 * This function publishes the nav::odom messages for the visual odometry function
-	 */
 	void pubOdom(tf::Stamped<tf::Transform> pose, ros::Time imgtime);
 	/*
 	 * if the initialisation wit respect to base is to be done
-	 */
-	tf::StampedTransform initWorld(string tag_name, ros::Time imgtime);
-	/*
-	 * The function to the thread that will continously publish the transform to the world
 	 */
 	void publishWorld(tf::Stamped<tf::Transform>  tf);
 	/*
