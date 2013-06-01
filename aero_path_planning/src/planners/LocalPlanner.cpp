@@ -333,11 +333,11 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 				gm::PoseStamped point_pose;
 				while(traverser.hasNext()&&traversing)
 				{
-					converter.convertToEng(traverser.next(), temp_point);
 					try
 					{
+						temp_point = traverser.next();
 						//ROS_INFO_STREAM("I got point type:"<<search_grid.getPointTrait(temp_point.x, temp_point.y).getString()<<"At Location:"<<temp_point.x<<","<<temp_point.y);
-						switch(search_grid.getPointTrait(temp_point.x, temp_point.y).getEnum())
+						switch(search_grid.getPointTrait((int)temp_point.x, (int)temp_point.y).getEnum())
 						{
 						case ogu::CellTrait::OBSTACLE:
 							//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
