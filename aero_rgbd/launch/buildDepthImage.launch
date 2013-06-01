@@ -1,0 +1,8 @@
+<launch>
+
+    <node name="buildDepthImage" pkg="aero_rgbd" type="buildDepthImage" output="screen">
+        <param name="depthImageTopic" value="/upper_stereo/depth_image" />
+        <param name="pointCloudTopic" value="/upper_stereo/points2" />
+    </node>
+
+</launch>
