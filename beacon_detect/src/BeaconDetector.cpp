@@ -492,7 +492,8 @@ tf::StampedTransform BeaconDetector::initWorld(string tag_name, ros::Time imgtim
 	//find base_footprint to tag_base and declare it as the world in the beacon tf tree
 	//calculate the transform between the robot_base and the world
 	tf::StampedTransform 	base2world;
-	base2world=base2tag*tag2base;
+	base2world=base2tag;
+	base2world*=base2world;
 	//world2base.inverseTimes(tag2world);
 
 	ROS_INFO("x: %f y: %f z: %f",base2world.getOrigin().getX(),base2world.getOrigin().getY(),base2world.getOrigin().getZ());
