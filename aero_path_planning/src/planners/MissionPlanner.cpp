@@ -26,7 +26,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				dr_server_(p_nh)
 {
 	geometry_msgs::Pose mission_goal;
-	mission_goal.position.x = 10.0;
+	mission_goal.position.x = 2.0;
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
@@ -59,7 +59,7 @@ void MissionPlanner::loadParam()
 	this->state_topic_        = "/state";
 	this->mission_goal_topic_ = "/mission_goal";
 	this->path_goal_topic_    = "/path_goal";
-	this->ooi_topic_          = "/boom_stage/poses";
+	this->ooi_topic_          = "/ObjectPose2";
 	this->state_request_topic_= "/aero/supervisor/state_transition_request";
 	this->path_threshold_     = 1.0;
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "local_frame", this->local_frame_, this->local_frame_);

@@ -556,7 +556,7 @@ void DetectorNode::computeDisparity() {
 			//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
 			float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
 //cout << "Pre Disparity Value of detection "<< disp_val <<endl;			
-//cout << "Disparity Value of detection "<< disp_val <<endl;
+cout << "Disparity Value of detection "<< disp_val <<endl;
 			this->stereo_model.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
 	//		cout << "Disp: " << disp_val << endl << "X: " << obj_3d.x << endl
@@ -567,6 +567,12 @@ void DetectorNode::computeDisparity() {
 			searchPoint.x = detection.getX();
 			searchPoint.y = detection.getY();
 			searchPoint.z = detection.getZ();
+	ROS_ERROR_STREAM("search point is at ("<<searchPoint.x<<","<<searchPoint.y <<","<<searchPoint.z <<")");
+//			if(searchPoint.z > 0.3 || searchPoint.z < -0.5)
+//{
+//searchPoint.z = 0.0;
+//}
+			ROS_ERROR_STREAM("search point is at ("<<searchPoint.x<<","<<searchPoint.y <<","<<searchPoint.z <<")");
 
 			int K = 10;
 				  std::vector<int> pointIdxVec;
@@ -872,7 +878,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 									center.y + WHA_faces[i].height / 2),
 									cv::Scalar(255, 0, 0));
 			//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-//			ROS_ERROR_STREAM("Detection is of type " << type);
+			ROS_ERROR_STREAM("Detection is of size " << WHA_faces[i].width << ","<< WHA_faces[i].height);
 			DetectionPtr_t newDetection(new Detection_t());
 			newDetection->first.first = center.x;
 			newDetection->first.second = center.y;
@@ -941,6 +947,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 				Point(center.x + SUN_faces[j].width / 2,
 						center.y + SUN_faces[j].height / 2),
 				cv::Scalar(0, 0, 255));
+ROS_ERROR_STREAM("Detection is of size " <<SUN_faces[j].width << ","<< SUN_faces[j].height);
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 //		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
 //		DetectionPtr_t newDetection(new Detection_t());
@@ -973,8 +980,8 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
 
-
-		ROS_ERROR_STREAM("Detection is of type " << type);
+ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces[j].height);
+	//	ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
@@ -1012,7 +1019,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 				Point(center.x + Pipe_faces[j].width / 2,
 						center.y + Pipe_faces[j].height / 2),
 				cv::Scalar(125, 255, 255));
-
+ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_faces[j].height);
 //		ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
