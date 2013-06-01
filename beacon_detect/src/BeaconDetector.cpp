@@ -265,12 +265,14 @@ void BeaconDetector::detectBeacons()
 			{
 				tfbaseinworld=initProcess(fx,fy,px,py,img_time);
 				//calculate the pose of the robot to the beacon
+				if(!test_)
+				{				
 				boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  tfbaseinworld) );
 
 				aero_srr_msgs::StateTransitionRequest state_transition;
 				state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
 				state_transition.request.requested_state.header.stamp = ros::Time().now();
-				if(!test_)
+				
 					if(state_client_.call(state_transition))
 					{
 						if(state_transition.response.success)
@@ -288,6 +290,7 @@ void BeaconDetector::detectBeacons()
 					{
 						ROS_ERROR("Not able to call the service");
 					}
+				}
 			}
 			if(active_)
 			{
