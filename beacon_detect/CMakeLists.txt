@@ -29,4 +29,4 @@ rosbuild_add_executable(beacondetect src/beaconNode.cpp)
 rosbuild_add_executable(genconfig src/genConfiguration.cpp)
 target_link_libraries(beacondetect  bd)
 
-
+rosbuild_add_executable(abc src/test.cpp)
