@@ -513,15 +513,13 @@ void DetectorNode::computeDisparity() {
 	center.x = (int) (widthL / 2);
 	center.y = (int) (heightL / 2) + 200;
 	Point3d center_obj_3d;
-	float pre_disp_center = disp.at<float>((int) (heightL / 2),
-			(int) (widthL / 2));
-	this->stereo_model.projectDisparityTo3d(center, pre_disp_center,
-			center_obj_3d);
-
-	cout << "Center" << endl << " X: " << center_obj_3d.x << endl << "Y: "
-			<< center_obj_3d.y << endl << "Z: " << center_obj_3d.z << endl;
-	float disp_center = dispn.at<float>((int) (heightL / 2),
-			(int) (widthL / 2));
+//	float pre_disp_center = disp.at<float>((int) (heightL / 2),
+//			(int) (widthL / 2));
+//	this->stereo_model.projectDisparityTo3d(center, pre_disp_center,
+//			center_obj_3d);
+//
+//	float disp_center = dispn.at<float>((int) (heightL / 2),
+//			(int) (widthL / 2));
 
 
 
@@ -553,7 +551,7 @@ void DetectorNode::computeDisparity() {
 
 //		std::cout << "Checking disparity at  " << obj_centroid.x <<","<< obj_centroid.y << std::endl;
 //		std::cout << "Range (rows,cols): " << vdisp1.rows <<","<< vdisp1.cols << std::endl;
-		if (obj_centroid.x < disp.cols && obj_centroid.y < disp.rows) {
+		if (obj_centroid.x < numDisp && obj_centroid.y < disp.rows) {
 //			cout << "Getting Disparity" <<endl;
 			//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
 			float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
@@ -702,9 +700,7 @@ void DetectorNode::computeDisparity() {
 
 	Mat_t cmapped;
 	disp.convertTo(cmapped, CV_8U);
-	cv::ellipse(cmapped, Point2d(detection.getX(), detection.getY()),
-			cv::Size(30, 30), 0, 0, 360, 0, 2, 8, 0);
-	cv::ellipse(cmapped, center, cv::Size(20, 20), 0, 0, 360, 255, 2, 8, 0);
+	cv::line(cmapped, Point2d(numDisp,0),Point2d(numDisp,cmapped.rows),Scalar(255,255,255,0));
 	cv::rectangle(frame, Point2d(detection.getX()-100, detection.getY()-100), Point2d(detection.getX()+100, detection.getY()+100),Scalar(255,255,255));
 	cv::imshow(WINDOWDisparity, cmapped);
 	cv::waitKey(3);
@@ -798,12 +794,12 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	if (!cascade_PIPE.load(cascade_path_PIPE)) {
 		printf("--(!)Error loading\n");
 	}
-//	cv::GaussianBlur(frame, frame, cv::Size(41, 41), 2, 2);
+//	cv::GaussianBlur(frame, frame, cv::Size(9, 9), 2, 2);
 
 	std::vector<cv::Rect> WHA_faces, PINK_faces, SUN_faces, RQT_faces,
 			Pipe_faces;
 	std::vector<std::vector<cv::Rect> > Detections;
-	int HORIZON = 15;
+	int HORIZON = 0;
 
 	Mat_t frame_gray;
 	Mat_t hsv,hsv2;
@@ -835,15 +831,15 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 	//-- Detect faces
 
-	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 5, 0,
-			cv::Size(30, 39), cv::Size(85, 90)); // works for WHAground !&5
-	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 5, 0,
-			cv::Size(52, 59), cv::Size(85, 90)); // works for WHAground !&5
+	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 16, 0,
+			cv::Size(30, 39), cv::Size(75, 80)); // works for WHAground !&5
+	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 15, 0,
+			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
 	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 1, 0,
 			cv::Size(5, 5), cv::Size(46,46)); //
-	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,20, 0,
+	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,32, 0,
 			cv::Size(10, 11), cv::Size(52, 59)); // works for 8
 
 	/*
@@ -904,22 +900,22 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		object_locator::object_type type = queryObject(sample);
 
 		if (center.y > HORIZON) {
-		cv::ellipse(frame, center,
-				cv::Size(PINK_faces[j].width / 2, PINK_faces[j].height / 2), 0,
-				0, 360, cv::Scalar(255, 0, 255), 2, 8, 0);
-		cv::rectangle(frame,
-						Point(center.x - PINK_faces[j].width / 2,
-								center.y - PINK_faces[j].height / 2),
-						Point(center.x + PINK_faces[j].width / 2,
-								center.y + PINK_faces[j].height / 2),
-								cv::Scalar(255, 0, 255));
-		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-//		ROS_ERROR_STREAM("Detection is of type " << type);
-		DetectionPtr_t newDetection(new Detection_t());
-		newDetection->first.first = center.x;
-		newDetection->first.second = center.y;
-		newDetection->second = type;
-		detection_list_.push_back(newDetection);
+//		cv::ellipse(frame, center,
+//				cv::Size(PINK_faces[j].width / 2, PINK_faces[j].height / 2), 0,
+//				0, 360, cv::Scalar(255, 0, 255), 2, 8, 0);
+//		cv::rectangle(frame,
+//						Point(center.x - PINK_faces[j].width / 2,
+//								center.y - PINK_faces[j].height / 2),
+//						Point(center.x + PINK_faces[j].width / 2,
+//								center.y + PINK_faces[j].height / 2),
+//								cv::Scalar(255, 0, 255));
+//		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+////		ROS_ERROR_STREAM("Detection is of type " << type);
+//		DetectionPtr_t newDetection(new Detection_t());
+//		newDetection->first.first = center.x;
+//		newDetection->first.second = center.y;
+//		newDetection->second = type;
+//		detection_list_.push_back(newDetection);
 		}
 	}
 	/*
