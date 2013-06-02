@@ -442,7 +442,7 @@ public:
 		out<<"Currently "<<in.detections_.size()<<" Objects of Interest:\n";
 		BOOST_FOREACH(OoI_list_t::value_type entry, in.detections_)
 		{
-			out<<"Point: "<<entry.second<<", confidance: "<<entry.second<<"\n";
+			out<<"Point: ("<<entry.second.getX()<<","<<entry.second.getY()<<") , confidence: "<<entry.first<<"\n";
 		}
 		return out;
 	}

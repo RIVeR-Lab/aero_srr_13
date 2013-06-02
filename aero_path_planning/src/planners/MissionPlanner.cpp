@@ -26,7 +26,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				dr_server_(p_nh)
 {
 	geometry_msgs::Pose mission_goal;
-	mission_goal.position.x = 2.0;
+	mission_goal.position.x = 4.0;
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
@@ -170,7 +170,6 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			if(!this->mission_goals_.empty() && this->recieved_path_)
 			{
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
-				this->mission_goals_.pop_front();
 				this->updateMissionGoal();
 				if(!this->searching_)
 				{
@@ -274,6 +273,7 @@ void MissionPlanner::updateMissionGoal()
 		message->header.stamp    = ros::Time::now();
 		ROS_INFO_STREAM("Upating Mission Goal to:"<<(*message));
 		this->mission_goal_pub_.publish(message);
+		this->mission_goals_.pop_front();
 		this->recieved_path_ = false;
 	}
 }
