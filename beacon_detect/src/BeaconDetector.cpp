@@ -17,15 +17,13 @@ BeaconDetector::BeaconDetector():it_(nh_)
 {
 	getRosParam();										//initialize all the ROS Parameters
 	active_=false;										//keep the beacon detector inactive by default]
-	init_=true;											//by default the tag system is not initialized,
+	if (!estimate_only_)
+		init_=true;											//by default the tag system is not initialized,
+	else
+		init_=false;
 														//you need to find the tag_base to the world
 
 	init_finish_=false;									//the flag that controls when to end the end of init
-	m_count_=0;
-
-	total_tfbaseinworld_.setIdentity();
-	total_tfbaseinworld_.setOrigin(tf::Vector3(0,0,0));
-	total_tfbaseinworld_.setRotation(tf::Quaternion(0,0,0,1));
 
 	//the robot state controls the state of this node to init_/active_
 	//TODO: can you not listen to the robot states????
@@ -47,15 +45,18 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	/*set up the publisher for the odom so the ekf filter can use it as visual odometry, need to remap it to /vo */
 	odom_pub_ = nh_.advertise<nav_msgs::Odometry>("tag_odom",5);
 
-	/*set up the client for the robot state service */
-	state_client_ =	nh_.serviceClient<aero_srr_msgs::StateTransitionRequest>("aero/supervisor/state_transition_request");
+	if(!estimate_only_)
+	{
+		/*set up the client for the robot state service */
+		state_client_ =	nh_.serviceClient<aero_srr_msgs::StateTransitionRequest>("aero/supervisor/state_transition_request");
 
-	/*set up the action client for rotating the boom */
-	boom_client_ = boost::shared_ptr<BoomClient>(new BoomClient(nh_, "/camera_boom_control", true));
-	boom_client_->waitForServer();
+		/*set up the action client for rotating the boom */
+		boom_client_ = boost::shared_ptr<BoomClient>(new BoomClient(nh_, "/camera_boom_control", true));
+		boom_client_->waitForServer();
 
-	/* rotate boom 360 */
-	rotateBoom();
+		/* rotate boom 360 */
+		rotateBoom();
+	}
 }
 
 void BeaconDetector::rotateBoom()
@@ -183,19 +184,20 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 }
 void BeaconDetector::addtf(tf::Stamped<tf::Transform> tfbaseinworld)
 {
-	total_tfbaseinworld_.setRotation(total_tfbaseinworld_.getRotation()+tfbaseinworld.getRotation());
-	total_tfbaseinworld_.setOrigin(total_tfbaseinworld_.getOrigin()+tfbaseinworld.getOrigin());
-	m_count_++;
+	if(total_tfbaseinworld_==NULL)
+	{
+		total_tfbaseinworld_=new tf::Stamped<tf::Transform>;
+		total_tfbaseinworld_->setRotation(tfbaseinworld.getRotation());
+
+	}
+	tf::Quaternion avg=total_tfbaseinworld_->getRotation();
+	avg.slerp(tfbaseinworld.getRotation(),0.5);
+	total_tfbaseinworld_->setOrigin(total_tfbaseinworld_->getOrigin()+tfbaseinworld.getOrigin()/2);
 
 }
 tf::Stamped<tf::Transform>  BeaconDetector::estimatetf()
 {
-	tf::Stamped<tf::Transform> tfbaseinworld;
-	tfbaseinworld.setRotation(tf::Quaternion(total_tfbaseinworld_.getRotation().x()/m_count_,total_tfbaseinworld_.getRotation().y()/m_count_,total_tfbaseinworld_.getRotation().z()/m_count_,1));
-	tfbaseinworld.setOrigin(total_tfbaseinworld_.getOrigin()/m_count_);
-
-
-	return(tfbaseinworld);
+	return(*total_tfbaseinworld_);
 }
 void BeaconDetector::initConfiguration(string fname)
 {
@@ -234,6 +236,7 @@ void BeaconDetector::getRosParam()
 	//histeq			- histogram equalization or not
 	//show_result 		- show results on screen or not
 	//robot_topic		- system status message topic
+	//estimator			- if true will not do any initialization step
 
 	ros::NodeHandle pnh("~");							//handle to the local param list
 	if(!pnh.getParam("cam_topic", cam_topic_))				//initialize var from launch file
@@ -244,6 +247,11 @@ void BeaconDetector::getRosParam()
 	{
 		ROS_ERROR("Big tag size not set, will use 0.166");
 		tag_size_big_ = 0.166;								//this is the default value when you print on A4
+	}
+	if(!pnh.getParam("estimator", estimate_only_))
+	{
+		ROS_ERROR("Big tag size not set, will use 0.166");
+		estimate_only_ = false;								//this is the default value when you print on A4
 	}
 	if(!pnh.getParam("tag_size_small", tag_size_small_))
 	{
@@ -289,6 +297,7 @@ void BeaconDetector::systemCb(const aero_srr_msgs::AeroStateConstPtr& status)
 	else
 	{
 		init_=false;							//dont initalize if the robot is in any other stage
+		active_=true;
 	}
 }
 void BeaconDetector::histEq(cv::Mat &frame)

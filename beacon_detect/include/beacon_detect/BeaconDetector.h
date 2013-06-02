@@ -48,7 +48,8 @@ class BeaconDetector
 	bool			active_;								//determine if the beacon detector must be active use he topic
 	bool 			test_;									//used to set test mode
 	bool 			init_;									//if the tag tf tree is initialize
-	bool			init_finish_;
+	bool			init_finish_;							//if the boom camera initialization stage is over
+	bool 			estimate_only_;							//only estimator will work no initialization step
 
 	//ros handles
 	tf::TransformBroadcaster 			br_;							//the TF broadcaseter for ROS
@@ -69,9 +70,7 @@ class BeaconDetector
 	vector<pair<int,string> > 				constellation_;				//defines the correspondace between the tag and the tf
 	vector<bool>							tag_type_;					//if big it is 1 if small 0
 
-	tf::Stamped<tf::Transform> 				total_tfbaseinworld_;		//sum of all the estimates of the base in the world
-	unsigned int							m_count_;					//total number of estimates for the initial calibration
-
+	tf::Stamped<tf::Transform> 				*total_tfbaseinworld_;		//sum of all the estimates of the base in the world
 
 	void imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info);
 	void systemCb(const aero_srr_msgs::AeroStateConstPtr& status);
