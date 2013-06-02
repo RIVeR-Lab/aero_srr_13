@@ -450,6 +450,22 @@ void GlobalPlanner::visualizeMap() const
 	{
 		nav_msgs::OccupancyGridPtr message(new nav_msgs::OccupancyGrid());
 		this->global_map_->generateOccupancyGridforTrait(*message, occupancy_grid::utilities::CellTrait::OBSTACLE);
+
+		BOOST_FOREACH(occupancy_grid::cell_data_t& data, message->data)
+		{
+			if(data>0)
+			{
+				data = 100;
+			}
+			else
+			{
+				data = 0;
+			}
+		}
+		message->header.frame_id = this->global_map_->getFrameID();
+		message->header.stamp    = ros::Time::now();
+
+
 		this->map_viz_pub_.publish(message);
 	}
 }
