@@ -253,6 +253,7 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			if(this->searching_ )
 			{
 				this->generateDetectionGoalList();
+				this->updateGoal();
 			}
 			this->searching_ = false;
 			break;
@@ -283,16 +284,16 @@ void MissionPlanner::generateDetectionGoalList()
 	ROS_INFO_STREAM("Generating goals off of Objects of Interest! The final list was:\n"<<this->OoI_manager_);
 	this->mission_goals_.clear();
 	tf::Point temp_point;
-	geometry_msgs::PoseStamped temp_pose;
-	temp_pose.header.frame_id = this->global_frame_;
-	temp_pose.header.stamp    = ros::Time::now();
-	temp_pose.pose.orientation.w = 1.0;
+	geometry_msgs::Pose temp_pose;
+	temp_pose.orientation.w = 1.0;
 	while(!this->OoI_manager_.empty())
 	{
 		try
 		{
 			this->OoI_manager_.getNearestNeighbor(temp_point);
-			tf::pointTFToMsg(temp_point, temp_pose.pose.position);
+			tf::pointTFToMsg(temp_point, temp_pose.position);
+			ROS_INFO_STREAM("I'm adding the following detection to Mission Goals:\n"<<temp_pose.position);
+			this->mission_goals_.push_back(temp_pose);
 		}
 		catch(bool e)
 		{
