@@ -1,7 +1,7 @@
 <launch>
   <arg name="scan_topic" default="/scan" />
     
-  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" launch-prefex="xterm -e">
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
     <remap from="scan" to="$(arg scan_topic)" />
 
     <param name="map_frame" value="/world" />
