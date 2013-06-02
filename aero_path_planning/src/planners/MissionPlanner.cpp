@@ -283,7 +283,7 @@ void MissionPlanner::generateDetectionGoalList()
 {
 	ROS_INFO_STREAM("Generating goals off of Objects of Interest! The final list was:\n"<<this->OoI_manager_);
 	this->mission_goals_.clear();
-	tf::Point temp_point;
+	app::ObjectOfInterestManager::ObjectOfInterestEntry temp_point;
 	geometry_msgs::Pose temp_pose;
 	temp_pose.orientation.w = 1.0;
 	while(!this->OoI_manager_.empty())
@@ -292,6 +292,7 @@ void MissionPlanner::generateDetectionGoalList()
 		{
 			this->OoI_manager_.getNearestNeighbor(temp_point);
 			tf::pointTFToMsg(temp_point, temp_pose.position);
+			this->OoI_manager_.removeOoI(temp_point);
 			ROS_INFO_STREAM("I'm adding the following detection to Mission Goals:\n"<<temp_pose.position);
 			this->mission_goals_.push_back(temp_pose);
 		}
