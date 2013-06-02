@@ -184,7 +184,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 					this->requestNavObj();
 				}
 				//Means we've reached the end of the detections, go home
-				else if(!this->searching_)
+				else if(!this->searching_&&this->recieved_path_)
 				{
 					ROS_INFO_STREAM("Mission Planner: Finised My Mission, Heading Home!");
 					geometry_msgs::Pose home;
