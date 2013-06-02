@@ -17,7 +17,7 @@
 using namespace aero_path_planning;
 
 MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
-				OoI_manager_(0.25),
+				OoI_manager_(1.0),
 				searching_(true),
 				recieved_path_(false),
 				nh_(nh),

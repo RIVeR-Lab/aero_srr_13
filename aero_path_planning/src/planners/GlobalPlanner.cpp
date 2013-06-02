@@ -213,9 +213,9 @@ void GlobalPlanner::registerTopics()
 
 	this->local_occ_pub_ = this->nh_.advertise<occupancy_grid::MultiTraitOccupancyGridMessage>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
-	//this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2, true);
+	this->map_viz_pub_   = this->nh_.advertise<nav_msgs::OccupancyGrid>("aero/global/map_visualization", 1, true);
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 1, true);
-	//this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
+	this->slam_sub_      = this->nh_.subscribe("/map", 1, &GlobalPlanner::slamCB, this);
 	this->state_sub      = this->nh_.subscribe("/aero/state", 1, &GlobalPlanner::stateCB, this);
 	this->mission_goal_sub_ = this->nh_.subscribe("/aero/global/mission_goal", 1, &GlobalPlanner::missionGoalCB, this);
 }
@@ -341,7 +341,8 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 {
 	ROS_INFO_STREAM("Recieved new SLAM map information!");
-	//this->global_map_->setPointTrait(*message);
+	this->global_map_->addPointTrait(*message, occupancy_grid::utilities::CellTrait::OBSTACLE);
+	ROS_INFO_STREAM("SLAM Data Added!");
 }
 
 
@@ -445,7 +446,9 @@ bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid:
 
 void GlobalPlanner::visualizeMap() const
 {
-
+	nav_msgs::OccupancyGridPtr message(new nav_msgs::OccupancyGrid());
+	this->global_map_->generateOccupancyGridforTrait(*message, occupancy_grid::utilities::CellTrait::OBSTACLE);
+	this->map_viz_pub_.publish(message);
 }
 
 void GlobalPlanner::setManual(bool enable)
