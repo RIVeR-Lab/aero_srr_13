@@ -159,6 +159,7 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 				ROS_INFO("Next Step");
 				this->path_step_num++;
 				this->path_step_start = true;
+				this->arm_goal_reached = false;
 			}
 
 		} else
