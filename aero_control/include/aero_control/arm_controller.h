@@ -89,7 +89,15 @@ private:
 	inline void PlanHorizontalPath(void) {
 		path_steps = 0;
 
-		SetPathStep(false,0,0,0,true,0,0,0,0,0,0);
+	//	SetPathStep(true,30,30,30,false,0,0,0,0,0,0);
+		SetPathStep(false,0,0,0,true,0.4,-0.1,0.4,-1.421,0.4668,3);
+		SetPathStep(false,0,0,0,true,0.4,-0.1,0.6,-1.421,0.4668,3);
+		SetPathStep(false,0,0,0,true,0.4,0,0.6,-1.421,0.4668,3);
+		SetPathStep(false,0,0,0,true,0.5,0,0.4,-1.421,0.4668,3);
+		SetPathStep(false,0,0,0,true,0.3,-0.1,0.4,-1.421,0.4668,3);
+
+
+		//SetPathStep(true,0,0,0,false,0,0,0,0,0,0);
 	}
 
 	ros::NodeHandle nh_;

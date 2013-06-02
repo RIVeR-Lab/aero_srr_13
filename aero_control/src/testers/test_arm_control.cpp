@@ -22,7 +22,7 @@
 using namespace std;
 ros::Publisher pub;
 tf::TransformListener *listenerptr;
-
+ros::Timer timer;
 float x_pos = 0.4;
 float y_pos = 0;
 float z_pos = 0;
@@ -42,11 +42,12 @@ void TimerCallback(const ros::TimerEvent&) {
 	q.setRPY(rx_pos, ry_pos, rz_pos);
 
 	tf::quaternionTFToMsg(q, test_msg.pose.pose.orientation);
-	test_msg.header.frame_id = "/world";
+	test_msg.header.frame_id = "/arm_mount";
 	test_msg.pose.header.frame_id = test_msg.header.frame_id;
 	test_msg.header.stamp = ros::Time::now();
 	test_msg.pose.header.stamp = ros::Time::now();
 	pub.publish(test_msg);
+	timer.stop();
 
 }
 void TimerCallback2(const ros::TimerEvent&) {
@@ -100,13 +101,13 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string ObjectPose("ObjectPose"); ///String containing the topic name for cartesian commands
+	std::string ObjectPose("object_pose"); ///String containing the topic name for Cartesian commands
 
 	pub = nh.advertise<aero_srr_msgs::ObjectLocationMsg>(ObjectPose, 2);
 	tf::TransformListener listener;
 	listenerptr = &listener;
 
-	ros::Timer timer = nh.createTimer(ros::Duration(0.1), TimerCallback);
+ timer = nh.createTimer(ros::Duration(2.0), TimerCallback);
 
 	//ros::Timer timer2 = nh.createTimer(ros::Duration(1.0),TimerCallback2);
 
