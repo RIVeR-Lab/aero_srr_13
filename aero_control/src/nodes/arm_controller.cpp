@@ -153,6 +153,16 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 					fingers.Finger_2 = arm_path[path_step_num].finger_2_pos;
 					fingers.Finger_3 = arm_path[path_step_num].finger_3_pos;
 					set_finger_position_pub.publish(fingers);
+
+					for(int i = 0; i<50;i++)
+					{
+						ros::Duration(0.1).sleep();
+
+						ros::spinOnce();
+					}
+					ROS_INFO("Next Step");
+								this->path_step_num++;
+								this->path_step_start = true;
 				}
 			} else
 			{
