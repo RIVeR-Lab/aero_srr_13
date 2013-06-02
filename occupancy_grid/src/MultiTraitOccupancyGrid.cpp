@@ -390,7 +390,7 @@ void MultiTraitOccupancyGrid::toROSMsg(trait_t trait, nm::OccupancyGrid& message
 
 void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling, bool use_zero_as_free, bool use_negative_as_unkown)  throw (bool)
 {
-	//TODO This does not work properly right now
+	ROS_INFO_STREAM("Copying Occupancy Grid into MultiTraitOccupancyGrid....");
 	unsigned int copy_width  = confidances.info.width;
 	unsigned int copy_height = confidances.info.height;
 	if(copy_width > this->map_meta_data_.width)
@@ -401,18 +401,19 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 	{
 		copy_height = this->map_meta_data_.height;
 	}
-	for(unsigned int x = 0; x < copy_width; x++)
+	ROS_INFO_STREAM("Copy Wdith: "<<copy_width<<", Copy Height: "<<copy_height);
+	for(int x = 0; x < (int)copy_width; x++)
 	{
-		for(unsigned int y = 0; y < copy_height; y++)
+		for(int y = 0; y < (int)copy_height; y++)
 		{
-			int copy_confidence        = confidances.data[ogu::calcIndexRowMajor2D(x, y, confidances.info.width)];
+			int copy_confidence = confidances.data[ogu::calcIndexRowMajor2D(x, y, confidances.info.width)];
 			CellTrait copy_trait(trait);
 			if(use_zero_as_free)
 			{
 				if(copy_confidence == 0)
 				{
 					copy_trait      = CellTrait::FREE_LOW_COST;
-					copy_confidence = 100;
+					copy_confidence = 1000;
 				}
 			}
 			if(use_negative_as_unkown)
@@ -420,12 +421,32 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 				if(copy_confidence<0)
 				{
 					copy_trait      = CellTrait::UNKOWN;
-					copy_confidence = 10;
+					copy_confidence = 30;
 				}
 			}
-			this->addPointTrait((double)x*confidances.info.resolution, (double)y*confidances.info.resolution, copy_trait, copy_confidence);
+//			if(trait == trait_t::OBSTACLE)
+//			{
+//				if(copy_confidence == 100)
+//				{
+//					copy_trait      = CellTrait::OBSTACLE;
+//					copy_confidence = 1000;
+//				}
+//			}
+			try
+			{
+				double raw_x = (double)x*confidances.info.resolution;
+				double raw_y = (double)y*confidances.info.resolution;
+				int scale_x  = (int)(raw_x/this->map_meta_data_.resolution);
+				int scale_y  = (int)(raw_y/this->map_meta_data_.resolution);
+				this->addPointTrait(scale_x, scale_y, copy_trait, copy_confidence, false);
+			}
+			catch(bool& e)
+			{
+				ROS_WARN_STREAM("Faild to Copy Point Into Grid at x="<<x<<","<<y);
+			}
 		}
 	}
+	ROS_INFO_STREAM("Finished Copying Data Into Gird!");
 }
 
 bool MultiTraitOccupancyGrid::getGoal(gm::Pose& goal) const

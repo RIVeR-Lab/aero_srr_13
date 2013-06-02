@@ -17,7 +17,7 @@
 using namespace aero_path_planning;
 
 MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
-				OoI_manager_(0.25),
+				OoI_manager_(1.0),
 				searching_(true),
 				recieved_path_(false),
 				nh_(nh),
@@ -26,27 +26,30 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				dr_server_(p_nh)
 {
 	geometry_msgs::Pose mission_goal;
-	mission_goal.position.x = 2.0;
+	mission_goal.position.x = 4.0;
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
-	//mission_goal.position.x = 10.0;
-	//mission_goal.position.y = 10.0;
-	//mission_goal.orientation.w = 1;
-	//this->mission_goals_.push_back(mission_goal);
-	//mission_goal.position.x = 0;
-	//mission_goal.position.y = 10.0;
-	//mission_goal.orientation.w = 1;
-	//this->mission_goals_.push_back(mission_goal);
-	//mission_goal.position.x = 0;
-	//mission_goal.position.y = 0;
-	//mission_goal.orientation.w = 1;
-	//this->mission_goals_.push_back(mission_goal);
+//	geometry_msgs::Pose mission_goal2;
+//	mission_goal2.position.x = 5.0;
+//	mission_goal2.position.y = 1.0;
+//	mission_goal2.orientation.w = 1;
+//	this->mission_goals_.push_back(mission_goal2);
+//	geometry_msgs::Pose mission_goal3;
+//	mission_goal3.position.x = 10;
+//	mission_goal3.position.y = -1.0;
+//	mission_goal3.orientation.w = 1;
+//	this->mission_goals_.push_back(mission_goal3);
+//	geometry_msgs::Pose mission_goal4;
+//	mission_goal4.position.x = 5;
+//	mission_goal4.position.y = 0;
+//	mission_goal4.orientation.w = 1;
+//	this->mission_goals_.push_back(mission_goal4);
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
 	this->registerTopics();
-	this->registerTimers();
 	this->updateMissionGoal();
+	this->registerTimers();
 	ROS_INFO_STREAM("Mission Planner Running!");
 }
 
@@ -142,12 +145,13 @@ bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLoca
 	tf::pointMsgToTF(worldLocation.pose.position, world_point);
 	tf::pointMsgToTF(this->carrot_path_.front().pose.position, goal_point);
 	double dist = world_point.distance(goal_point);
-	ROS_INFO_STREAM_THROTTLE(1, "\nMission Planner: At position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\nDistance to Goal:="<<dist);
+	//ROS_INFO_STREAM_THROTTLE(1, "\nMission Planner: At position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\nDistance to Goal:="<<dist);
 	return dist<threshold;
 }
 
 void MissionPlanner::goalCB(const ros::TimerEvent& event)
 {
+	ROS_INFO_STREAM_THROTTLE(5, "Mission Planner: Currently "<<this->mission_goals_.size()<<" Mission Goals Remaining!");
 	geometry_msgs::PoseStamped current_point;
 
 	if(this->calcRobotPointWorld(current_point))
@@ -166,7 +170,6 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			if(!this->mission_goals_.empty() && this->recieved_path_)
 			{
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
-				this->mission_goals_.pop_front();
 				this->updateMissionGoal();
 				if(!this->searching_)
 				{
@@ -176,9 +179,17 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			else
 			{
 				//Means we've reached the end of the search pattern, start going to objects of interest
-				if(this->searching_)
+				if(this->searching_&&this->recieved_path_)
 				{
 					this->requestNavObj();
+				}
+				//Means we've reached the end of the detections, go home
+				else if(!this->searching_&&this->recieved_path_)
+				{
+					ROS_INFO_STREAM("Mission Planner: Finised My Mission, Heading Home!");
+					geometry_msgs::Pose home;
+					home.orientation.w = 1;
+					this->mission_goals_.push_back(home);
 				}
 			}
 		}
@@ -242,6 +253,7 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			if(this->searching_ )
 			{
 				this->generateDetectionGoalList();
+				this->updateGoal();
 			}
 			this->searching_ = false;
 			break;
@@ -262,6 +274,7 @@ void MissionPlanner::updateMissionGoal()
 		message->header.stamp    = ros::Time::now();
 		ROS_INFO_STREAM("Upating Mission Goal to:"<<(*message));
 		this->mission_goal_pub_.publish(message);
+		this->mission_goals_.pop_front();
 		this->recieved_path_ = false;
 	}
 }
@@ -271,16 +284,17 @@ void MissionPlanner::generateDetectionGoalList()
 	ROS_INFO_STREAM("Generating goals off of Objects of Interest! The final list was:\n"<<this->OoI_manager_);
 	this->mission_goals_.clear();
 	tf::Point temp_point;
-	geometry_msgs::PoseStamped temp_pose;
-	temp_pose.header.frame_id = this->global_frame_;
-	temp_pose.header.stamp    = ros::Time::now();
-	temp_pose.pose.orientation.w = 1.0;
+	geometry_msgs::Pose temp_pose;
+	temp_pose.orientation.w = 1.0;
 	while(!this->OoI_manager_.empty())
 	{
 		try
 		{
-			this->OoI_manager_.getNearestNeighbor(temp_point);
-			tf::pointTFToMsg(temp_point, temp_pose.pose.position);
+			ObjectOfInterestManager::ObjectOfInterestEntry detection(this->OoI_manager_.getNearestNeighbor(temp_point));
+			tf::pointTFToMsg(detection, temp_pose.position);
+			this->OoI_manager_.removeOoI(detection);
+			ROS_INFO_STREAM("I'm adding the following detection to Mission Goals:\n"<<temp_pose.position);
+			this->mission_goals_.push_back(temp_pose);
 		}
 		catch(bool e)
 		{
