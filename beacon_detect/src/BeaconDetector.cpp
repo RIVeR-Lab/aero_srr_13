@@ -20,6 +20,13 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	init_=true;											//by default the tag system is not initialized,
 														//you need to find the tag_base to the world
 
+	init_finish_=false;									//the flag that controls when to end the end of init
+	m_count_=0;
+
+	total_tfbaseinworld_.setIdentity();
+	total_tfbaseinworld_.setOrigin(tf::Vector3(0,0,0));
+	total_tfbaseinworld_.setRotation(tf::Quaternion(0,0,0,0));
+
 	//the robot state controls the state of this node to init_/active_
 	//TODO: can you not listen to the robot states????
 	ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
@@ -44,17 +51,20 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	state_client_ =	nh_.serviceClient<aero_srr_msgs::StateTransitionRequest>("aero/supervisor/state_transition_request");
 
 	/*set up the action client for rotating the boom */
-	//boom_client_ = boost::shared_ptr<BoomClient>(new BoomClient(nh_, "/camera_boom_control", true));
+	boom_client_ = boost::shared_ptr<BoomClient>(new BoomClient(nh_, "/camera_boom_control", true));
 
 	/* rotate boom 360 */
-	//rotateBoom();
+	rotateBoom();
 }
 void BeaconDetector::rotateBoom()
 {
 	device_driver_base::SetJointPositionGoal boom_position;
-	boom_position.angle = 180;
+	boom_position.angle = M_PI;
 	boom_position.max_velocity = 0.1;
 	boom_client_->sendGoalAndWait(boom_position);
+	boom_position.angle = -M_PI;
+	boom_position.max_velocity = 0.1;
+	init_finish_=true;
 }
 void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
@@ -98,8 +108,10 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 		//calculate the average tf of the world location using the detections_
 		tfbaseinworld=initProcess(fx,fy,px,py,img_header);
 		//till test period is over
-		if(!test_)
+		addtf(tfbaseinworld);
+		if(!test_&&init_finish_)
 		{
+			tfbaseinworld=estimatetf();
 			boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  tfbaseinworld) );
 
 			aero_srr_msgs::StateTransitionRequest state_transition;
@@ -132,7 +144,20 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 	if(show_)
 		showResult(colorImg_);
 }
+void BeaconDetector::addtf(tf::Stamped<tf::Transform> tfbaseinworld)
+{
+	total_tfbaseinworld_.setRotation(total_tfbaseinworld_.getRotation()+tfbaseinworld.getRotation());
+	total_tfbaseinworld_.setOrigin(total_tfbaseinworld_.getOrigin()+tfbaseinworld.getOrigin());
+	m_count_++;
 
+}
+tf::Stamped<tf::Transform>  BeaconDetector::estimatetf()
+{
+	tf::Stamped<tf::Transform> tfbaseinworld;
+	tfbaseinworld.setRotation(total_tfbaseinworld_.getRotation()/m_count_);
+	tfbaseinworld.setOrigin(total_tfbaseinworld_.getOrigin()/m_count_);
+	return(tfbaseinworld);
+}
 void BeaconDetector::initConfiguration(string fname)
 {
 	FileStorage fs(fname,FileStorage::READ);

@@ -48,6 +48,7 @@ class BeaconDetector
 	bool			active_;								//determine if the beacon detector must be active use he topic
 	bool 			test_;									//used to set test mode
 	bool 			init_;									//if the tag tf tree is initialize
+	bool			init_finish_;
 
 	//ros handles
 	tf::TransformBroadcaster 			br_;							//the TF broadcaseter for ROS
@@ -62,11 +63,15 @@ class BeaconDetector
 	boost::shared_ptr<BoomClient> 		boom_client_;					//the action server for controlling the boom
 
 	//boost thread
-	boost::thread						world_broadcaster_;				//thread that does tf broadcast of the world
+	boost::thread							world_broadcaster_;				//thread that does tf broadcast of the world
 
 	std::vector<AprilTags::TagDetection> 	detections_;				//the extracted tags
 	vector<pair<int,string> > 				constellation_;				//defines the correspondace between the tag and the tf
 	vector<bool>							tag_type_;					//if big it is 1 if small 0
+
+	tf::Stamped<tf::Transform> 				total_tfbaseinworld_;		//sum of all the estimates of the base in the world
+	unsigned int							m_count_;					//total number of estimates for the initial calibration
+
 
 	void imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info);
 	void systemCb(const aero_srr_msgs::AeroStateConstPtr& status);
@@ -117,6 +122,14 @@ public:
 	 * the process when in active state
 	 */
 	void runProcess(double fx,double fy, double px, double py, std_msgs::Header imgheader);
+	/*
+	 * helper function to track statistics by addition
+	 */
+	void addtf(tf::Stamped<tf::Transform> tfbaseinworld);
+	/*
+	 * helper to estimate the average
+	 */
+	tf::Stamped<tf::Transform>  estimatetf();
 
 	virtual ~BeaconDetector();
 };
