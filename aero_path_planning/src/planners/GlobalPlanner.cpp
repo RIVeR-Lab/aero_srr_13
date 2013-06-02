@@ -233,8 +233,8 @@ void GlobalPlanner::buildGlobalMap()
 	nav_msgs::MapMetaData info;
 	info.width = this->global_x_size_;
 	info.height= this->global_y_size_;
-	info.origin.position.x = -((double)this->global_x_ori_*this->global_res_)/2.0;
-	info.origin.position.y = -((double)this->global_y_ori_*this->global_res_)/2.0;
+	info.origin.position.x = -((double)this->global_x_size_*this->global_res_)/2.0;
+	info.origin.position.y = -((double)this->global_y_size_*this->global_res_)/2.0;
 	info.origin.position.z = 0;
 	info.map_load_time = ros::Time::now();
 	info.resolution    = this->global_res_;
