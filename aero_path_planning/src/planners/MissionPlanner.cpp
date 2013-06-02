@@ -30,26 +30,25 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
-	geometry_msgs::Pose mission_goal2;
-	mission_goal2.position.x = 5.0;
-	mission_goal2.position.y = 1.0;
-	mission_goal2.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal2);
-	geometry_msgs::Pose mission_goal3;
-	mission_goal3.position.x = 10;
-	mission_goal3.position.y = -1.0;
-	mission_goal3.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal3);
-	geometry_msgs::Pose mission_goal4;
-	mission_goal4.position.x = 5;
-	mission_goal4.position.y = 0;
-	mission_goal4.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal4);
+//	geometry_msgs::Pose mission_goal2;
+//	mission_goal2.position.x = 5.0;
+//	mission_goal2.position.y = 1.0;
+//	mission_goal2.orientation.w = 1;
+//	this->mission_goals_.push_back(mission_goal2);
+//	geometry_msgs::Pose mission_goal3;
+//	mission_goal3.position.x = 10;
+//	mission_goal3.position.y = -1.0;
+//	mission_goal3.orientation.w = 1;
+//	this->mission_goals_.push_back(mission_goal3);
+//	geometry_msgs::Pose mission_goal4;
+//	mission_goal4.position.x = 5;
+//	mission_goal4.position.y = 0;
+//	mission_goal4.orientation.w = 1;
+//	this->mission_goals_.push_back(mission_goal4);
 	ROS_INFO_STREAM("Misison Planner Starting Up...");
 	this->loadParam();
 	this->registerTopics();
 	this->updateMissionGoal();
-	this->mission_goals_.pop_front();
 	this->registerTimers();
 	ROS_INFO_STREAM("Mission Planner Running!");
 }
@@ -184,6 +183,14 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 				if(this->searching_&&this->recieved_path_)
 				{
 					this->requestNavObj();
+				}
+				//Means we've reached the end of the detections, go home
+				else if(!this->searching_)
+				{
+					ROS_INFO_STREAM("Mission Planner: Finised My Mission, Heading Home!");
+					geometry_msgs::Pose home;
+					home.orientation.w = 1;
+					this->mission_goals_.push_back(home);
 				}
 			}
 		}

@@ -499,7 +499,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				dist = std::numeric_limits<double>::infinity();
 			}
 			//Check to see if we got within a threshold distance of the local goal
-			if(dist>=0.25)
+			if(dist>=0.5)
 			{
 				int speedset_idx = 0;
 				int tentacle_idx = 0;
