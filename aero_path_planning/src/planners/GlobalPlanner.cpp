@@ -110,13 +110,13 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//x dimension of global occupancy grid
 	std::string pg_x_dim(G_OCC_XDIM);
-	this->global_x_size_ = 5000;
+	this->global_x_size_ = 1000;
 	std::stringstream gx_dim_msg;
 	gx_dim_msg<<this->global_x_size_<<"*0.05m";
 
 	//y dimension of global occupancy grid
 	std::string pg_y_dim(G_OCC_YDIM);
-	this->global_y_size_ = 5000;
+	this->global_y_size_ = 1000;
 	std::stringstream gy_dim_msg;
 	gy_dim_msg<<this->global_y_size_<<"*0.05m";
 
