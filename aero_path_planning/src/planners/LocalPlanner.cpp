@@ -18,10 +18,10 @@ using namespace aero_path_planning;
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
-																																						nh_(nh),
-																																						p_nh_(p_nh),
-																																						limiter_(NULL),
-																																						occupancy_buffer_(2)
+																																								nh_(nh),
+																																								p_nh_(p_nh),
+																																								limiter_(NULL),
+																																								occupancy_buffer_(2)
 {
 	ROS_INFO("Starting Up Aero Local Planner Version %d.%d.%d", oryx_path_planner_VERSION_MAJOR, oryx_path_planner_VERSION_MINOR, oryx_path_planner_VERSION_BUILD);
 
@@ -296,10 +296,34 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 	std::vector<SpeedSet> sets;
 	app::PointConverter converter(search_grid.getResolution());
 
-	//ROS_INFO_STREAM("I'm searching a grid of resolution:"<<search_grid.getResolution()<<", dimmension x:"<<search_grid.getXSizeMeter()<<", y:"<<search_grid.getYSizeMeter()<<", with xoffset:"<<search_grid.getXOffsetGrid()<<", yoffset:"<<search_grid.getYOffsetGrid());
+	tf::Point goal_point;
+	gm::Pose goal_pose;
+	bool has_goal = search_grid.getGoal(goal_pose);
+	tf::pointMsgToTF(goal_pose.position, goal_point);
+
+	//Account for the fact that if a goal is behind us, there is a range where the goal biasing becomes convergient and we will never rotate
+	if(has_goal)
+	{
+		if(goal_pose.position.x<0)
+		{
+			//We want x/y swapped to make the range always fall between 0->-PI
+			double goal_angle = std::atan2(goal_pose.position.x, goal_pose.position.y);
+			double min_angle  = -1.1780972451;
+			double max_angle  = -1.96349540849;
+			//If we're close to directly behind the robot, rotate
+			if(goal_angle<min_angle&&goal_angle>max_angle)
+			{
+				speedset_idx = 0;
+				tentacle_idx = 0;
+				return true;
+			}
+		}
+	}
 
 	SpeedSet current_set = this->tentacles_->getSpeedSet(this->current_vel_);
 	sets.push_back(current_set);
+
+	//ROS_INFO_STREAM("I'm searching a grid of resolution:"<<search_grid.getResolution()<<", dimmension x:"<<search_grid.getXSizeMeter()<<", y:"<<search_grid.getYSizeMeter()<<", with xoffset:"<<search_grid.getXOffsetGrid()<<", yoffset:"<<search_grid.getYOffsetGrid());
 
 	if(current_set.getIndex()!=0)
 	{
@@ -311,7 +335,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 		SpeedSet fast_set    = this->tentacles_->getSpeedSet(current_set.getIndex()+1);
 		sets.push_back(fast_set);
 	}
-	bool   has_goal      = true;
+
 	bool   hit_goal      = false;
 	for(int s=0; s<(int)sets.size(); s++)
 	{
@@ -322,22 +346,26 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 			//If we already hit the goal, short circuit since we can't break from OpenMP loops
 			if(!hit_goal)
 			{
-				double length_modifier = 0;
-				bool traversing = true;
+				double length_modifier    = 0;
+				double goal_minima        = std::numeric_limits<double>::infinity();
+				bool traversing           = true;
+				bool need_minima          = true;
 				Tentacle working_tentacle = cur_set.getTentacle(i);
 				Tentacle::TentacleTraverser traverser(working_tentacle);
 				length_modifier = 0;
 
 				//As long as the tentacle has points still, and we're still traversing, continue traversing
-				app::Point      temp_point;
-				gm::PoseStamped point_pose;
+				app::Point temp_point;
+				tf::Point  end_point;
+				app::Point temp_end;
+
 				while(traverser.hasNext()&&traversing)
 				{
-					converter.convertToEng(traverser.next(), temp_point);
 					try
 					{
+						temp_point = traverser.next();
 						//ROS_INFO_STREAM("I got point type:"<<search_grid.getPointTrait(temp_point.x, temp_point.y).getString()<<"At Location:"<<temp_point.x<<","<<temp_point.y);
-						switch(search_grid.getPointTrait(temp_point.x, temp_point.y).getEnum())
+						switch(search_grid.getPointTrait((int)temp_point.x, (int)temp_point.y).getEnum())
 						{
 						case ogu::CellTrait::OBSTACLE:
 							//ROS_INFO("Hit Obstacle On Tentacle %d at length %f", i, traverser.lengthTraversed());
@@ -345,7 +373,7 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 							traversing = false;
 							break;
 						case ogu::CellTrait::GOAL:
-							//ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed());
+							ROS_INFO("Hit the Goal on Tentacle %d at length %f", i, traverser.lengthTraversed()*this->res_);
 							traversing = false;
 							hit_goal   = true;
 							break;
@@ -361,6 +389,21 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 						default:
 							break;
 						}
+						//Calculate the shortest distance to goal along the tentacle assuming we haven't alreadty found it
+						if(has_goal && need_minima)
+						{
+							converter.convertToEng(temp_point, temp_end);
+							app::pointToVector(temp_point, end_point);
+							double dist_to_goal = end_point.distance(goal_point);
+							if(dist_to_goal<goal_minima)
+							{
+								goal_minima = dist_to_goal;
+							}
+							else //If we didn't get a new minima, we are getting further away from goal moving along the arc and can stop calculating
+							{
+								need_minima = false;
+							}
+						}
 					}catch(bool& e)
 					{
 						//ROS_ERROR_STREAM("Went Out of Bounds While Searching a Tentacle with point ("<<temp_point.x<<","<<temp_point.y<<"), Map X:"<<search_grid.getXSizeMeter()<<"m, Map Y:"<<search_grid.getYSizeMeter()<<",!");
@@ -370,38 +413,13 @@ bool LocalPlanner::selectTentacle(const double& current_vel, const og::MultiTrai
 				//Modify length based on closeness to goal, if there is one
 				if(has_goal)
 				{
-					//ROS_INFO_STREAM("There is a goal...");
-					try
-					{
-						//Will throw false if there was no goal point_pose
-						gm::Pose goal_pose;
-						has_goal = search_grid.getGoal(goal_pose);
-						if(has_goal)
-						{
-							aero_path_planning::Point goal_point;
-							app::poseToPoint(goal_pose, goal_point);
-							converter.convertToGrid(goal_point, goal_point);
-							const aero_path_planning::Point end_point = traverser.next();
-							double dist_to_goal = pcl::distances::l2(end_point.getVector4fMap(), goal_point.getVector4fMap());
-							//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
-							length_modifier-= dist_to_goal*this->goal_weight_;
-						}
-					}
-					catch(bool& e)
-					{
-						//ROS_INFO("There is not a goal");
-						//There was no goal, set the flag
-						has_goal = e;
-					}
+					//ROS_INFO_STREAM("Distance To Goal: "<<dist_to_goal);
+					length_modifier-= goal_minima*this->goal_weight_;
 				}
 
-				double raw_length   = traverser.lengthTraversed();
-				double tent_fitness = 0;
-				//Cuttoff for valid tentacle (to stop a goal inside a wall making the robot drive into it)
-				if(raw_length>.25/this->res_)
-				{
-					tent_fitness = raw_length+length_modifier;
-				}
+				//Need to convert the travers's length, which will be in grid units, to meters to compare with the goal distance
+				double raw_length   = traverser.lengthTraversed()*this->res_;
+				double tent_fitness = raw_length+length_modifier;
 				//ROS_INFO("Searched Tentacle %d in set %d with fitness %f",current_set.getIndex(), working_tentacle.getIndex(), tent_fitness);
 				TentacleDataPtr_t tent_details(new TentacleData_t(cur_set.getIndex(), working_tentacle.getIndex()));
 				//If we hit the goal, make the fitness infinate, since we can't break from an OpenMP loop
@@ -460,7 +478,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 			}
 
 			//Apply a goal if we have one:
-			this->applyGoal(working_grid);
+			this->applyGoal(ros::Time(0), working_grid);
 
 			//Visualize the grid
 			this->visualizeOcc(working_grid);
@@ -473,7 +491,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				tf::Vector3 goal_position;
 				tf::pointMsgToTF(local_goal.position, goal_position);
 				dist = goal_position.length();
-				ROS_INFO_STREAM_THROTTLE(1, "Distance to Local Goal:"<<dist<<", goal <"<<goal_position.x()<<","<<goal_position.y()<<">");
+				ROS_INFO_STREAM_THROTTLE(2.5, "Local Planner: Distance to Local Goal:"<<dist<<", goal <"<<goal_position.x()<<","<<goal_position.y()<<">");
 			}
 			else
 			{
@@ -481,7 +499,7 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				dist = std::numeric_limits<double>::infinity();
 			}
 			//Check to see if we got within a threshold distance of the local goal
-			if(dist>=0.25)
+			if(dist>=0.5)
 			{
 				int speedset_idx = 0;
 				int tentacle_idx = 0;
@@ -517,22 +535,25 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 	}
 }
 
-void LocalPlanner::applyGoal(og::MultiTraitOccupancyGrid& grid) const
+void LocalPlanner::applyGoal(const ros::Time& time, og::MultiTraitOccupancyGrid& grid) const
 {
 	geometry_msgs::PoseStamped local_goal;
 	if(this->global_goal_!=geometry_msgs::PoseStampedConstPtr())
 	{
 		try
 		{
-			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, grid.getCreationTime(), ros::Duration(1.0/20.0));
-			this->transformer_.transformPose(grid.getFrameID(), grid.getCreationTime(), *this->global_goal_, this->global_goal_->header.frame_id, local_goal);
-			ROS_INFO_STREAM_THROTTLE(1, "Local Goal is:\n"<<local_goal.pose.position);
+			geometry_msgs::PoseStamped temp_goal(*this->global_goal_);
+			temp_goal.header.stamp = time;
+			//ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Global Goal is in "<<this->global_goal_->header.frame_id<<":\n"<<this->global_goal_->pose.position);
+			this->transformer_.waitForTransform(grid.getFrameID(), this->global_goal_->header.frame_id, time, ros::Duration(1.0/20.0));
+			this->transformer_.transformPose(grid.getFrameID(), temp_goal, local_goal);
+			//ROS_INFO_STREAM_THROTTLE(1, "Local Planner: Local Goal is in "<<local_goal.header.frame_id<<":\n"<<local_goal.pose.position);
 			grid.setGoal(local_goal.pose);
 
 		}
 		catch(std::exception& e)
 		{
-			ROS_ERROR_STREAM_THROTTLE(1, e.what());
+			ROS_ERROR_STREAM_THROTTLE(0.1,"LocalPlanner Could Not Transform Local Goal:\n"<< e.what());
 		}
 	}
 }

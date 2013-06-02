@@ -24,6 +24,10 @@ private:
 
 	ReconfigurableSubscriberPtr pause_sub;
 
+	ReconfigurableTimerPtr current_reset_timer;
+	int motor_stall_count;
+	int motor_stall_max;
+
 	bool is_paused_;
 
 	std::string port_;
@@ -35,10 +39,12 @@ private:
 		BOOST_FOREACH(roboteq_driver::RoboteqMotorControl motorControl, msg->motors){
 			if(is_paused_)
 				controller.setPower(motorControl.channel, 0);
-			else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::RPM)
+			else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::RPM){
 				controller.setRPM(motorControl.channel, motorControl.setpoint);
-			else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::POWER)
+			}
+			else if(motorControl.control_mode==roboteq_driver::RoboteqMotorControl::POWER){
 				controller.setPower(motorControl.channel, motorControl.setpoint);
+			}
 			else
 				ROS_WARN("Control mode %d not implemented", motorControl.control_mode);
 		}
@@ -80,6 +86,23 @@ private:
 		feedback_pub->publish(feedback);
 	}
 
+	void currentResetTimerCallback(const ros::TimerEvent& e){
+		if(!is_paused_){
+			++motor_stall_count;
+			if(motor_stall_count>=motor_stall_max){
+				boost::lock_guard<boost::mutex> lock(controller_mutex);
+				double v1, v2;
+				controller.getVelocity(1, v1);
+				controller.getVelocity(2, v2);
+				if((v1<1 && v1>-1) || (v2<1 && v2>-1)){
+					controller.setPower(1, 0);
+					controller.setPower(2, 0);
+				}
+				motor_stall_count = 0;
+			}
+		}
+	}
+
 	void openDevice(){
 		ROS_INFO_STREAM("Opending device '"<<port_<<"'");
 		controller.open(port_);
@@ -93,13 +116,15 @@ private:
 		controller.close();
 	}
 public:
-	RoboteqManager():is_paused_(false), port_("/dev/ttyACM0"), max_rpm_(250), ppr_(250), controller(max_rpm_, max_rpm_, ppr_, ppr_){
+	RoboteqManager():is_paused_(false), port_("/dev/ttyACM0"), max_rpm_(250), ppr_(250), controller(max_rpm_, max_rpm_, ppr_, ppr_),
+	motor_stall_max(4), motor_stall_count(0){
 		addDriverStateFunctions(device_driver_state::OPEN, &RoboteqManager::openDevice, &RoboteqManager::closeDevice, this);
 
 		control_sub = addReconfigurableThrottledSubscriber<roboteq_driver::RoboteqGroupMotorControl>(device_driver_state::RUNNING, 10, "roboteq_control", 1000, boost::bind(&RoboteqManager::controlCallback, this, _1));
 		pause_sub = addReconfigurableSubscriber<robot_base_msgs::SoftwareStop>(device_driver_state::RUNNING, "/pause", 1000, boost::bind(&RoboteqManager::pauseCallback, this, _1));
 		feedback_pub = addReconfigurableAdvertise<roboteq_driver::RoboteqGroupInfo>(device_driver_state::RUNNING, "roboteq_info", 1000);
 		feedback_timer = addReconfigurableTimer<RoboteqManager>(device_driver_state::RUNNING, ros::Duration(0.1), &RoboteqManager::feedbackTimerCallback, this);
+		current_reset_timer = addReconfigurableTimer<RoboteqManager>(device_driver_state::RUNNING, ros::Duration(0.25), &RoboteqManager::currentResetTimerCallback, this);
 	}
 
 	virtual void reconfigureStopped(roboteq_driver::RoboteqConfig& config){
@@ -115,6 +140,8 @@ public:
 		feedback_pub->setTopic(config.info_topic);
 
 		pause_sub->setTopic(config.pause_topic);
+
+		current_reset_timer->setPeriod(ros::Duration(1/config.current_reset_rate));
 	}
 	virtual void reconfigureRunning(roboteq_driver::RoboteqConfig& config){
 	}

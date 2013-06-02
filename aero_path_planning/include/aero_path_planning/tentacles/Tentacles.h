@@ -304,7 +304,7 @@ public:
 		 * @return	The next Point along the tentacle.
 		 * Will return the last point in the traversal for subsequent calls after the end of the traversal is reached
 		 */
-		const aero_path_planning::Point& next();
+		aero_path_planning::Point next();
 		/**
 		 * @author Adam Panzica
 		 * @brief Gets the length traversed thus far along the Tentacle
