@@ -67,7 +67,7 @@
 
   <!-- Laser -->
   <xacro:sick_laser_v0 name="laser" parent="base_link" ros_topic="laser" update_rate="25" >
-    <origin xyz="${base_length/2+0.0635} 0 0.0254" rpy="${M_PI} 0 0" />
+    <origin xyz="${base_length/2+0.0635} 0 0.0254" rpy="0 0 0" />
   </xacro:sick_laser_v0> 
 
 
