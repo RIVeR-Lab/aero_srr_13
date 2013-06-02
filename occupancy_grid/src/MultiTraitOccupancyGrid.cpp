@@ -426,11 +426,15 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 			}
 			try
 			{
-				this->addPointTrait((double)x*confidances.info.resolution, (double)y*confidances.info.resolution, copy_trait, copy_confidence);
+				double raw_x = (double)x*confidances.info.resolution;
+				double raw_y = (double)y*confidances.info.resolution;
+				int scale_x  = (int)(raw_x/this->map_meta_data_.resolution);
+				int scale_y  = (int)(raw_x/this->map_meta_data_.resolution);
+				this->addPointTrait(scale_x, scale_y, copy_trait, copy_confidence, false);
 			}
 			catch(bool& e)
 			{
-				ROS_WARN_STREAM("Faild to Copy Point Into Grid at x="<<(double)x*confidances.info.resolution<<","<<(double)y*confidances.info.resolution);
+				ROS_WARN_STREAM("Faild to Copy Point Into Grid at x="<<x<<","<<y);
 			}
 		}
 	}
