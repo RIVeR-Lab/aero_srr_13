@@ -53,24 +53,19 @@ void publish_status_rate(double rate){
 void stateCallback(const aero_srr_msgs::AeroStateConstPtr& state_msg){
   switch(state_msg->state){
   case aero_srr_msgs::AeroState::ERROR:
-    publish_status_rate(20);
+    publish_status_rate(10);
     break;
+  case aero_srr_msgs::AeroState::STARTUP:
   case aero_srr_msgs::AeroState::SEARCH:
-    publish_status_rate(1);
-    break;
   case aero_srr_msgs::AeroState::NAVOBJ:
-    publish_status_rate(1);
-    break;
   case aero_srr_msgs::AeroState::COLLECT:
-    publish_status_rate(1);
-    break;
   case aero_srr_msgs::AeroState::PICKUP:
-    publish_status_rate(1);
-    break;
   case aero_srr_msgs::AeroState::HOME:
-    publish_status_rate(1);
+    publish_status_rate(1.0);
     break;
   case aero_srr_msgs::AeroState::PAUSE:
+  case aero_srr_msgs::AeroState::SAFESTOP:
+  case aero_srr_msgs::AeroState::SHUTDOWN:
     publish_status_rate(0.0);
     break;
   case aero_srr_msgs::AeroState::MANUAL:
