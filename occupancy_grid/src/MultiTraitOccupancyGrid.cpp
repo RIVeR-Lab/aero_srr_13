@@ -424,6 +424,14 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 					copy_confidence = 30;
 				}
 			}
+			if(trait == trait_t::OBSTACLE)
+			{
+				if(copy_confidence>0)
+				{
+					copy_trait      = CellTrait::OBSTACLE;
+					copy_confidence = 1000;
+				}
+			}
 			try
 			{
 				double raw_x = (double)x*confidances.info.resolution;
