@@ -334,7 +334,7 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_, 0, this->local_info_.height/2);
 	local_gird.toROSMsg(*message);
 	this->local_occ_pub_.publish(message);
-
+	this->visualizeMap();
 
 }
 
@@ -446,9 +446,12 @@ bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid:
 
 void GlobalPlanner::visualizeMap() const
 {
-	nav_msgs::OccupancyGridPtr message(new nav_msgs::OccupancyGrid());
-	this->global_map_->generateOccupancyGridforTrait(*message, occupancy_grid::utilities::CellTrait::OBSTACLE);
-	this->map_viz_pub_.publish(message);
+	if(this->global_map_!=occupancy_grid::MultiTraitOccupancyGridPtr())
+	{
+		nav_msgs::OccupancyGridPtr message(new nav_msgs::OccupancyGrid());
+		this->global_map_->generateOccupancyGridforTrait(*message, occupancy_grid::utilities::CellTrait::OBSTACLE);
+		this->map_viz_pub_.publish(message);
+	}
 }
 
 void GlobalPlanner::setManual(bool enable)
