@@ -191,7 +191,7 @@ void BeaconDetector::addtf(tf::Stamped<tf::Transform> tfbaseinworld)
 tf::Stamped<tf::Transform>  BeaconDetector::estimatetf()
 {
 	tf::Stamped<tf::Transform> tfbaseinworld;
-	tfbaseinworld.setRotation(total_tfbaseinworld_.getRotation()/m_count_);
+	tfbaseinworld.setRotation(tf::Quaternion(total_tfbaseinworld_.getRotation().x()/m_count_,total_tfbaseinworld_.getRotation().y()/m_count_,total_tfbaseinworld_.getRotation().z()/m_count_,1));
 	tfbaseinworld.setOrigin(total_tfbaseinworld_.getOrigin()/m_count_);
 
 
