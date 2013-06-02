@@ -124,16 +124,16 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	got_left_ = true;
 	computeDisparityCb();
 	Mat_t src = img->image;
-	Mat_t normImage,mask,finalMask;
+	Mat_t normImage,mask,finalMask,hsv2;
 //	circleFind(*msg);
-	gmmRemove(msg);
+//	gmmRemove(msg,hsv2);
 	grassRemove(*msg, normImage);
 	maskCreate(*msg,mask);
 //	fenceCheckerStd(normImage);
 //	fillHoles(mask);
 	blobIdentify(normImage,mask, finalMask);
 	showAlpha(src,finalMask);
-	detectAnomalies(normImage,finalMask);
+	detectAnomalies(hsv2,finalMask);
 
 }
 void BOOMStage::boomImageCbright(const sensor_msgs::ImageConstPtr& msg,
@@ -175,7 +175,7 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 	return pt[2] != image_geometry::StereoCameraModel::MISSING_Z
 			&& !std::isinf(pt[2]);
 }
-void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg)
+void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage)
 {
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
@@ -185,12 +185,54 @@ void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg)
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
-	cv::Mat source(img->image);
-	Mat_t lab;
-    //ouput ima
-	cvtColor(source,lab,CV_BGR2Lab);
-	    cv::imshow("Background", lab);
-	    cv::waitKey(3);
+	Mat_t source(img->image);
+	Mat_t hsv;
+	Mat_t hsv32F,hsv32Fnorm;
+	cvtColor(source,hsv,CV_BGR2HSV);
+
+	hsv.convertTo(hsv32F,CV_32FC3);
+	normalize(hsv32F,hsv32Fnorm,0,1,CV_MINMAX);
+	Vec3f HSV3 = hsv32Fnorm.at<cv::Vec3f>(100, 100);
+	Vec3b RGB;
+	Vec3f HSV;
+	double Gratio, Rratio;
+	ROS_INFO_STREAM("NORM OF 32HSV at 100,100 = " << HSV3[0]);
+	Mat_t detected = Mat::zeros(source.size(), CV_8UC3);
+	for(int k = 0; k< source.rows; k++)
+	{
+		for(int m = 0;m<source.cols; m++)
+		{
+			RGB = source.at<cv::Vec3b>(k, m);
+			HSV = hsv32Fnorm.at<cv::Vec3f>(k,m);
+
+			//ROS_INFO_STREAM("RGBd is  = " << (double)RGB[1]);
+
+			Gratio = (double)RGB[1]/(double)(RGB[1]+RGB[2]+RGB[0]);
+			Rratio = (double)RGB[2]/(double)(RGB[1]+RGB[2]+RGB[0]);
+
+			//if((HSV[2] >0.95) && Gratio < 0.331 && std::abs(browness - 1) > 0.2)
+			//remove high luminosity regions and regions of green and yellow
+			if((HSV[2] >0.8) && Gratio < 0.331 && Rratio < 0.331)
+				detected.at<cv::Vec3b>(k, m) = White;
+			else
+				detected.at<cv::Vec3b>(k, m) = ZeroV;
+
+		}
+	}
+	hsvImage = detected;
+
+//	imshow("b4detection", detected);
+//
+//	//dilation (morphological operation to take away salt + pepper noise and increase size of detected blobs)
+//	int elem_type = MORPH_CROSS;
+//	int elem_size = 1;
+//
+//	Mat element = getStructuringElement( elem_type, Size( 2*elem_size + 1, 2*elem_size+1 ), Point( elem_size, elem_size ) );
+//	morphologyEx(detected, detected, MORPH_OPEN, element);// do morphological opening to remove small specks and enlarge larger detections
+
+
+	imshow("detection", detected);
+	waitKey(3);
 
 }
 

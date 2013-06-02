@@ -70,7 +70,7 @@ namespace object_locator
 		virtual void detectAnomalies(Mat_t& img, Mat_t& mask);
 		virtual void showAlpha(Mat_t& src, Mat_t& fMask);
 		virtual void computeDisparity();
-		virtual void gmmRemove(const sensor_msgs::ImageConstPtr& msg);
+		virtual void gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage);
 		virtual void generateMsg();
 
 		ros::Subscriber sync_image_sub_;

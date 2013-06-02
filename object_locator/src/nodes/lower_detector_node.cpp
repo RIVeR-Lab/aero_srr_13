@@ -84,15 +84,16 @@ DetectorNode::DetectorNode() :
 	cascade_path_PINK =
 			"/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	cascade_path_PUCK =
-			"/home/srr/ObjectDetectionData/exec/cascadeFat1/cascade.xml";
+			"/home/srr/ObjectDetectionData/exec/cascadeTE/cascade.xml";
 //	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	cascade_path_PIPE =
 			"/home/srr/ObjectDetectionData/exec/cascadePIPEX/cascade.xml";
 	ctrLeft = 0;
 	ctrRight = 0;
-	cv::namedWindow(WINDOWLeft);
-	cv::namedWindow(WINDOWRight);
-	cv::namedWindow(WINDOWDisparity);
+
+	cv::namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE);
+	cv::namedWindow(WINDOWRight, CV_WINDOW_AUTOSIZE);
+	cv::namedWindow(WINDOWDisparity, CV_WINDOW_AUTOSIZE);
 	objset = false;
 
 }
@@ -293,7 +294,7 @@ void DetectorNode::computeDisparity() {
 	Mat_t dispn(heightL, widthL, CV_32F);
 //	Mat_t disp;
 
-	int minDisp = 0;      //0         //-128-32;
+	int minDisp = 1;      //0         //-128-32;
 	int numDisp = 192;       //80        //256+80;
 	int SADSize = 21;				//10
 	int P1 = 8 * SADSize * SADSize;
@@ -548,15 +549,19 @@ void DetectorNode::computeDisparity() {
 		Point2d obj_centroid(detection_list_.at(i)->first.first,
 				detection_list_.at(i)->first.second);
 		Point3d obj_3d;
-
+		float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
+		cout << "Disparity Value of detection "<< disp_val <<endl;
+		float disp_val2 = nNdisp(obj_centroid, disp);
+					cout << "Disparity Value of detection after nNdisp "<< disp_val2 <<endl;
+//		if(disp_val <= 0.0)
+//		{
+//
+//		}
 //		std::cout << "Checking disparity at  " << obj_centroid.x <<","<< obj_centroid.y << std::endl;
 //		std::cout << "Range (rows,cols): " << vdisp1.rows <<","<< vdisp1.cols << std::endl;
 		if (obj_centroid.x < disp.cols && obj_centroid.y < disp.rows) {
 //			cout << "Getting Disparity" <<endl;
-			//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
-			float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
-//cout << "Pre Disparity Value of detection "<< disp_val <<endl;			
-cout << "Disparity Value of detection "<< disp_val <<endl;
+
 			this->stereo_model.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
 	//		cout << "Disp: " << disp_val << endl << "X: " << obj_3d.x << endl
@@ -567,12 +572,8 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 			searchPoint.x = detection.getX();
 			searchPoint.y = detection.getY();
 			searchPoint.z = detection.getZ();
-	ROS_ERROR_STREAM("search point is at ("<<searchPoint.x<<","<<searchPoint.y <<","<<searchPoint.z <<")");
-//			if(searchPoint.z > 0.3 || searchPoint.z < -0.5)
-//{
-//searchPoint.z = 0.0;
-//}
-			ROS_ERROR_STREAM("search point is at ("<<searchPoint.x<<","<<searchPoint.y <<","<<searchPoint.z <<")");
+
+
 
 			int K = 10;
 				  std::vector<int> pointIdxVec;
@@ -604,7 +605,7 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 			    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
 
 			  }
-			  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
+//			  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
 			  	  detection.setX(xAvgVal_);
 			  	  detection.setY(yAvgVal_);
 				 detection.setZ(kAvgVal_);
@@ -678,7 +679,7 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 		msg.pose.header.stamp = ros::Time::now();
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
-		ROS_ERROR_STREAM("Sent Obj msg from Classifier");
+//		ROS_ERROR_STREAM("Sent Obj msg from Classifier");
 	}
 
 
@@ -708,7 +709,6 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 	disp.convertTo(cmapped, CV_8U);
 	cv::line(cmapped, Point2d(numDisp,0),Point2d(numDisp,cmapped.rows),Scalar(255,255,255,0));
 	cv::rectangle(frame, Point2d(detection.getX()-100, detection.getY()-100), Point2d(detection.getX()+100, detection.getY()+100),Scalar(255,255,255));
-	namedWindow( WINDOWDisparity, CV_WINDOW_AUTOSIZE );
 	cv::imshow(WINDOWDisparity, cmapped);
 	cv::waitKey(3);
 
@@ -721,21 +721,25 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 
 }
 
+
 float DetectorNode::nNdisp(const Point2d& pt, const Mat_t& disp) {
 	int window = 10;
 	int startx = pt.x - window;
-	int starty = pt.y - window;
+	int starty = pt.y;
+	int ctr  = 0;
 	float sum = 0.0;
 	for (int i = 0; i < window; i++) {
 		for (int j = 0; j < window; j++) {
 			float value = disp.at<float>(starty + i, startx + j);
-			if (value == -1)
-				value = 0.0;
-			sum = sum + value;
+			if (value >= 0.0)
+			{
+				sum = sum + value;
+				ctr ++;
+			}
 		}
 	}
-
-	return sum / (float) (window * window);
+	ROS_INFO_STREAM("CTR pts = " << ctr);
+	return sum / (float) ctr;
 }
 
 Mat_t DetectorNode::gray2bgr(Mat_t img) {
@@ -822,7 +826,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //  	ROS_ERROR_STREAM("HSV at rock = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
 
 //
-	inRange(lab, Scalar(45,120, 120,0) , Scalar(60, 150, 140,0), pipeMask );
+//	inRange(lab, Scalar(45,120, 120,0) , Scalar(60, 150, 140,0), pipeMask );
 //	inRange(hsv2, Scalar(68,71, 76,0) , Scalar(83, 75, 112,0), WHAMask );
 
 //	pipePoint_ = blobIdentify(pipeMask,200);
@@ -838,15 +842,15 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	//-- Detect faces
 
 	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 16, 0,
-			cv::Size(30, 39), cv::Size(75, 80)); // works for WHAground !&5
+			cv::Size(30, 39), cv::Size(52, 59)); // works for WHAground !&5
 	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 20, 0,
 			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
-	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 10, 0,
+	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 50, 0,
 			cv::Size(5, 5), cv::Size(100,100)); //
 	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,32, 0,
-			cv::Size(10, 11), cv::Size(52, 59)); // works for 8
+			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 (10,11)    (52,59)
 
 	/*
 	 * WHA - White hook object inside detection loop BLUE
@@ -878,12 +882,12 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 									center.y + WHA_faces[i].height / 2),
 									cv::Scalar(255, 0, 0));
 			//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-			ROS_ERROR_STREAM("Detection is of size " << WHA_faces[i].width << ","<< WHA_faces[i].height);
-			DetectionPtr_t newDetection(new Detection_t());
-			newDetection->first.first = center.x;
-			newDetection->first.second = center.y;
-			newDetection->second = WHA;
-			detection_list_.push_back(newDetection);
+//			ROS_ERROR_STREAM("Detection is of size " << WHA_faces[i].width << ","<< WHA_faces[i].height);
+//			DetectionPtr_t newDetection(new Detection_t());
+//			newDetection->first.first = center.x;
+//			newDetection->first.second = center.y;
+//			newDetection->second = WHA;
+//			detection_list_.push_back(newDetection);
 		}
 
 	}
@@ -927,17 +931,17 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	/*
 	 * Puck- - RED
 	 */
-//	for (size_t j = 0; j < SUN_faces.size(); j++) {
-////		cout << "Entered circle drawing loop" << endl;
-//
-//		Mat_t faceROI = frame_gray(SUN_faces[j]);
-//
-//		//-- In each face, detect eyes
-//
-//		//-- Draw the face
-//		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
-//				SUN_faces[j].y + SUN_faces[j].height / 2);
-//		if (center.y > HORIZON) {
+	for (size_t j = 0; j < SUN_faces.size(); j++) {
+//		cout << "Entered circle drawing loop" << endl;
+
+		Mat_t faceROI = frame_gray(SUN_faces[j]);
+
+		//-- In each face, detect eyes
+
+		//-- Draw the face
+		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
+				SUN_faces[j].y + SUN_faces[j].height / 2);
+		if (center.y > HORIZON) {
 //		cv::ellipse(frame, center,
 //				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
 //				360, cv::Scalar(0, 0, 255), 2, 8, 0);
@@ -948,15 +952,15 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //						center.y + SUN_faces[j].height / 2),
 //				cv::Scalar(0, 0, 255));
 //ROS_ERROR_STREAM("Detection is of size " <<SUN_faces[j].width << ","<< SUN_faces[j].height);
-//		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-////		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
-////		DetectionPtr_t newDetection(new Detection_t());
-////		newDetection->first.first = center.x;
-////		newDetection->first.second = center.y;
-////		newDetection->second = WHA;
-////		detection_list_.push_back(newDetection);
-//		}
-//	}
+		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+//		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
+//		DetectionPtr_t newDetection(new Detection_t());
+//		newDetection->first.first = center.x;
+//		newDetection->first.second = center.y;
+//		newDetection->second = WHA;
+//		detection_list_.push_back(newDetection);
+		}
+	}
 	/*
 	 * Actually WHA but with different range GREEN
 	 */
@@ -1019,7 +1023,7 @@ ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces
 				Point(center.x + Pipe_faces[j].width / 2,
 						center.y + Pipe_faces[j].height / 2),
 				cv::Scalar(125, 255, 255));
-ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_faces[j].height);
+//ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_faces[j].height);
 //		ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
@@ -1038,9 +1042,9 @@ ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_fac
 //		cv::waitKey(3);
 //	cv::imshow(WINDOWRight, mask);
 //	cv::waitKey(3);
-//	imshow("lab",pipeMask);
+//	imshow("lab",lab);
 //	waitKey(3);
-	 namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE );
+
 	cv::imshow(WINDOWLeft, frame);
 
 	cv::waitKey(3);
