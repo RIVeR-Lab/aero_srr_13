@@ -37,6 +37,8 @@
 #include <pcl/filters/voxel_grid.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/legacy/legacy.hpp>
+#include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 
 namespace object_locator
 {
@@ -89,7 +91,7 @@ namespace object_locator
 		typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
 		std::vector<DetectionPtr_t> detection_list_;
 		tf::TransformListener optimus_prime;
-		float kAvgVal_;
+		float kAvgVal_,xAvgVal_,yAvgVal_;
 
 		//***sherlock Parameters*****/
 		double thresh_dist_, growth_rate_, shrink_rate_, thresh_det_;

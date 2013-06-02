@@ -44,7 +44,7 @@ using namespace sensor_msgs;
 
 DetectorNode::DetectorNode() :
 		it_(nh_), WINDOWLeft("Left Camera"), WINDOWRight("Right Camera"), WINDOWDisparity(
-				"Disparity"), sherlock(.5, .15, .05, .5), gotLeft(false), gotRight(
+				"Disparity"), sherlock(.1, .15, .05, .5), gotLeft(false), gotRight(
 				false)
 
 {
@@ -84,7 +84,7 @@ DetectorNode::DetectorNode() :
 	cascade_path_PINK =
 			"/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	cascade_path_PUCK =
-			"/home/srr/ObjectDetectionData/exec/cascadeWHAfar1/cascade.xml";
+			"/home/srr/ObjectDetectionData/exec/cascadeFat1/cascade.xml";
 //	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	cascade_path_PIPE =
 			"/home/srr/ObjectDetectionData/exec/cascadePIPEX/cascade.xml";
@@ -450,9 +450,9 @@ void DetectorNode::computeDisparity() {
 	  sor.filter (*cloud_filtered);
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
+//	pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromROSMsg(*points_msg,*cloud);
-	pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
+//	pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
 
 	/****** Cylinder model testing *******/
 //	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudFilt (new pcl::PointCloud<pcl::PointXYZ>);
@@ -496,7 +496,7 @@ void DetectorNode::computeDisparity() {
 	float resolution = 2.5f;
 	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
 
-    octree.setInputCloud (tcloud);
+    octree.setInputCloud (cloud);
     octree.addPointsFromInputCloud ();
 
     pcl::PointXYZ searchPoint;
@@ -513,15 +513,13 @@ void DetectorNode::computeDisparity() {
 	center.x = (int) (widthL / 2);
 	center.y = (int) (heightL / 2) + 200;
 	Point3d center_obj_3d;
-	float pre_disp_center = disp.at<float>((int) (heightL / 2),
-			(int) (widthL / 2));
-	this->stereo_model.projectDisparityTo3d(center, pre_disp_center,
-			center_obj_3d);
-
-	cout << "Center" << endl << " X: " << center_obj_3d.x << endl << "Y: "
-			<< center_obj_3d.y << endl << "Z: " << center_obj_3d.z << endl;
-	float disp_center = dispn.at<float>((int) (heightL / 2),
-			(int) (widthL / 2));
+//	float pre_disp_center = disp.at<float>((int) (heightL / 2),
+//			(int) (widthL / 2));
+//	this->stereo_model.projectDisparityTo3d(center, pre_disp_center,
+//			center_obj_3d);
+//
+//	float disp_center = dispn.at<float>((int) (heightL / 2),
+//			(int) (widthL / 2));
 
 
 
@@ -558,14 +556,60 @@ void DetectorNode::computeDisparity() {
 			//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
 			float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
 //cout << "Pre Disparity Value of detection "<< disp_val <<endl;			
-//cout << "Disparity Value of detection "<< disp_val <<endl;
+cout << "Disparity Value of detection "<< disp_val <<endl;
 			this->stereo_model.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
 	//		cout << "Disp: " << disp_val << endl << "X: " << obj_3d.x << endl
 //					<< "Y: " << obj_3d.y << endl << "Z: " << obj_3d.z << endl;
 			tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
-			tf::pointTFToMsg(detection, camera_point.point);
+
+			searchPoint.x = detection.getX();
+			searchPoint.y = detection.getY();
+			searchPoint.z = detection.getZ();
+	ROS_ERROR_STREAM("search point is at ("<<searchPoint.x<<","<<searchPoint.y <<","<<searchPoint.z <<")");
+//			if(searchPoint.z > 0.3 || searchPoint.z < -0.5)
+//{
+//searchPoint.z = 0.0;
+//}
+			ROS_ERROR_STREAM("search point is at ("<<searchPoint.x<<","<<searchPoint.y <<","<<searchPoint.z <<")");
+
+			int K = 10;
+				  std::vector<int> pointIdxVec;
+			  std::vector<int> pointIdxNKNSearch;
+			  std::vector<float> pointNKNSquaredDistance;
+
+	//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
+	//		            << " " << searchPoint.y
+	//		            << " " << searchPoint.z
+	//		            << ") with K=" << K << std::endl;
+
+			  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
+			  {
+				  float sumx =0.0;
+				  float sumy =0.0;
+				  float sumz =0.0;
+			    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+			    {
+	//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+	//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+			    	sumx = cloud->points[ pointIdxNKNSearch[i] ].x + sumx;
+			    	sumy = cloud->points[ pointIdxNKNSearch[i] ].y + sumy;
+			    	sumz = cloud->points[ pointIdxNKNSearch[i] ].z + sumz;
+			    }
+			    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
+			    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
+			    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
+
+			  }
+			  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
+			  	  detection.setX(xAvgVal_);
+			  	  detection.setY(yAvgVal_);
+				 detection.setZ(kAvgVal_);
+
+	tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
 			camera_point.header.frame_id = "/lower_stereo_optical_frame";
 			camera_point.header.stamp = tZero;
@@ -607,37 +651,8 @@ void DetectorNode::computeDisparity() {
 
 		}
 
+		
 
-		searchPoint.x = detection.getX();
-		searchPoint.y = detection.getY();
-		searchPoint.z = detection.getZ();
-
-		int K = 10;
-			  std::vector<int> pointIdxVec;
-		  std::vector<int> pointIdxNKNSearch;
-		  std::vector<float> pointNKNSquaredDistance;
-
-//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
-//		            << " " << searchPoint.y
-//		            << " " << searchPoint.z
-//		            << ") with K=" << K << std::endl;
-
-		  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
-		  {
-			  float sum =0.0;
-		    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
-		    {
-//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-		      sum = tcloud->points[ pointIdxNKNSearch[i] ].z + sum;
-		    }
-		    kAvgVal_ = sum/pointIdxNKNSearch.size ();
-
-		  }
-		  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
-			 detection.setZ(kAvgVal_);
 		cout << "I Got A Detection: " << endl << "X:" << detection.getX()
 				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
 				<< ", " << confidence << ", of type: " << typeString
@@ -691,10 +706,9 @@ void DetectorNode::computeDisparity() {
 
 	Mat_t cmapped;
 	disp.convertTo(cmapped, CV_8U);
-	cv::ellipse(cmapped, Point2d(detection.getX(), detection.getY()),
-			cv::Size(30, 30), 0, 0, 360, 0, 2, 8, 0);
-	cv::ellipse(cmapped, center, cv::Size(20, 20), 0, 0, 360, 255, 2, 8, 0);
+	cv::line(cmapped, Point2d(numDisp,0),Point2d(numDisp,cmapped.rows),Scalar(255,255,255,0));
 	cv::rectangle(frame, Point2d(detection.getX()-100, detection.getY()-100), Point2d(detection.getX()+100, detection.getY()+100),Scalar(255,255,255));
+	namedWindow( WINDOWDisparity, CV_WINDOW_AUTOSIZE );
 	cv::imshow(WINDOWDisparity, cmapped);
 	cv::waitKey(3);
 
@@ -787,29 +801,28 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	if (!cascade_PIPE.load(cascade_path_PIPE)) {
 		printf("--(!)Error loading\n");
 	}
-//	cv::GaussianBlur(frame, frame, cv::Size(41, 41), 2, 2);
+//	cv::GaussianBlur(frame, frame, cv::Size(9, 9), 2, 2);
 
 	std::vector<cv::Rect> WHA_faces, PINK_faces, SUN_faces, RQT_faces,
 			Pipe_faces;
 	std::vector<std::vector<cv::Rect> > Detections;
-	int HORIZON = 15;
+	int HORIZON = 0;
 
 	Mat_t frame_gray;
-	Mat_t hsv,hsv2;
+	Mat_t lab,lab_gray;
 	Mat_t mask(frame.rows,frame.cols,CV_8U);
 	Mat_t pipeMask = mask;
 	Mat_t WHAMask = mask;
-
-
-//  	cv::Vec3b hsvPipe = hsv.at<cv::Vec3b>(300,300);
+	cvtColor(frame,lab,CV_RGB2Lab);
+//  	cv::Vec3b hsvPipe = lab.at<cv::Vec3b>(center.x,center.y);
 //  	int H = hsvPipe[0];
 //  	int S = hsvPipe[1];
 //  	int V = hsvPipe[2];
 
-//  	ROS_WARN_STREAM("HSV at rock = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
+//  	ROS_ERROR_STREAM("HSV at rock = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
 
 //
-//	inRange(hsv, Scalar(108,198, 54,0) , Scalar(115, 240, 128,0), pipeMask );
+	inRange(lab, Scalar(45,120, 120,0) , Scalar(60, 150, 140,0), pipeMask );
 //	inRange(hsv2, Scalar(68,71, 76,0) , Scalar(83, 75, 112,0), WHAMask );
 
 //	pipePoint_ = blobIdentify(pipeMask,200);
@@ -824,16 +837,16 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 	//-- Detect faces
 
-	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 5, 0,
-			cv::Size(30, 39), cv::Size(85, 90)); // works for WHAground !&
+	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 8, 0,
+			cv::Size(30, 39), cv::Size(75, 80)); // works for WHAground !&5 *16*
 	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 5, 0,
-			cv::Size(52, 59), cv::Size(85, 90)); // works for WHAground !&
+			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90  *20*
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
-	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 1, 0,
-			cv::Size(5, 5), cv::Size(46,46)); //
-	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,8, 0,
-			cv::Size(10, 11), cv::Size(52, 59)); // works for
+	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 10, 0,
+			cv::Size(5, 5), cv::Size(100,100)); //
+	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,15, 0,
+			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 *32*
 
 	/*
 	 * WHA - White hook object inside detection loop BLUE
@@ -851,7 +864,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 		Rect cropROI(center.x-WHA_faces[i].width / 2, center.y-WHA_faces[i].height / 2, WHA_faces[i].width, WHA_faces[i].height);
 		Mat_t sample = frame(cropROI);
-		object_locator::object_type type = queryObject(sample);
+		//object_locator::object_type type = queryObject(sample);
 
 		if (center.y > HORIZON) {
 
@@ -865,11 +878,11 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 									center.y + WHA_faces[i].height / 2),
 									cv::Scalar(255, 0, 0));
 			//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-//			ROS_ERROR_STREAM("Detection is of type " << type);
+			ROS_ERROR_STREAM("Detection is of size " << WHA_faces[i].width << ","<< WHA_faces[i].height);
 			DetectionPtr_t newDetection(new Detection_t());
 			newDetection->first.first = center.x;
 			newDetection->first.second = center.y;
-			newDetection->second = type;
+			newDetection->second = WHA;
 			detection_list_.push_back(newDetection);
 		}
 
@@ -877,54 +890,54 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	/*
 	 * PINK_BALL - Tennis ball detection loop PINK
 	 */
-	for (size_t j = 0; j < PINK_faces.size(); j++) {
-//		cout << "Entered circle drawing loop" << endl;
-
-		Mat_t faceROI = frame_gray(PINK_faces[j]);
-
-		//-- In each face, detect eyes
-
-		//-- Draw the face
-		cv::Point center(PINK_faces[j].x + PINK_faces[j].width / 2,
-				PINK_faces[j].y + PINK_faces[j].height / 2);
-
-		Rect cropROI(center.x-(PINK_faces[j].width / 2), center.y-(PINK_faces[j].height / 2), PINK_faces[j].width, PINK_faces[j].height);
-		Mat_t sample = frame(cropROI);
-		object_locator::object_type type = queryObject(sample);
-
-		if (center.y > HORIZON) {
-		cv::ellipse(frame, center,
-				cv::Size(PINK_faces[j].width / 2, PINK_faces[j].height / 2), 0,
-				0, 360, cv::Scalar(255, 0, 255), 2, 8, 0);
-		cv::rectangle(frame,
-						Point(center.x - PINK_faces[j].width / 2,
-								center.y - PINK_faces[j].height / 2),
-						Point(center.x + PINK_faces[j].width / 2,
-								center.y + PINK_faces[j].height / 2),
-								cv::Scalar(255, 0, 255));
-		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-//		ROS_ERROR_STREAM("Detection is of type " << type);
-		DetectionPtr_t newDetection(new Detection_t());
-		newDetection->first.first = center.x;
-		newDetection->first.second = center.y;
-		newDetection->second = type;
-		detection_list_.push_back(newDetection);
-		}
-	}
+//	for (size_t j = 0; j < PINK_faces.size(); j++) {
+////		cout << "Entered circle drawing loop" << endl;
+//
+//		Mat_t faceROI = frame_gray(PINK_faces[j]);
+//
+//		//-- In each face, detect eyes
+//
+//		//-- Draw the face
+//		cv::Point center(PINK_faces[j].x + PINK_faces[j].width / 2,
+//				PINK_faces[j].y + PINK_faces[j].height / 2);
+//
+//		//Rect cropROI(center.x-(PINK_faces[j].width / 2), center.y-(PINK_faces[j].height / 2), PINK_faces[j].width, PINK_faces[j].height);
+//		//Mat_t sample = frame(cropROI);
+//		//object_locator::object_type type = queryObject(sample);
+////
+////		if (center.y > HORIZON) {
+//////		cv::ellipse(frame, center,
+//////				cv::Size(PINK_faces[j].width / 2, PINK_faces[j].height / 2), 0,
+//////				0, 360, cv::Scalar(255, 0, 255), 2, 8, 0);
+//////		cv::rectangle(frame,
+//////						Point(center.x - PINK_faces[j].width / 2,
+//////								center.y - PINK_faces[j].height / 2),
+//////						Point(center.x + PINK_faces[j].width / 2,
+//////								center.y + PINK_faces[j].height / 2),
+//////								cv::Scalar(255, 0, 255));
+//////		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+////////		ROS_ERROR_STREAM("Detection is of type " << type);
+//////		DetectionPtr_t newDetection(new Detection_t());
+//////		newDetection->first.first = center.x;
+//////		newDetection->first.second = center.y;
+//////		newDetection->second = type;
+//////		detection_list_.push_back(newDetection);
+////		}
+//	}
 	/*
 	 * Puck- - RED
 	 */
-	for (size_t j = 0; j < SUN_faces.size(); j++) {
-//		cout << "Entered circle drawing loop" << endl;
-
-		Mat_t faceROI = frame_gray(SUN_faces[j]);
-
-		//-- In each face, detect eyes
-
-		//-- Draw the face
-		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
-				SUN_faces[j].y + SUN_faces[j].height / 2);
-		if (center.y > HORIZON) {
+//	for (size_t j = 0; j < SUN_faces.size(); j++) {
+////		cout << "Entered circle drawing loop" << endl;
+//
+//		Mat_t faceROI = frame_gray(SUN_faces[j]);
+//
+//		//-- In each face, detect eyes
+//
+//		//-- Draw the face
+//		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
+//				SUN_faces[j].y + SUN_faces[j].height / 2);
+//		if (center.y > HORIZON) {
 //		cv::ellipse(frame, center,
 //				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
 //				360, cv::Scalar(0, 0, 255), 2, 8, 0);
@@ -934,15 +947,16 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //				Point(center.x + SUN_faces[j].width / 2,
 //						center.y + SUN_faces[j].height / 2),
 //				cv::Scalar(0, 0, 255));
-		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-//		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
-//		DetectionPtr_t newDetection(new Detection_t());
-//		newDetection->first.first = center.x;
-//		newDetection->first.second = center.y;
-//		newDetection->second = WHA;
-//		detection_list_.push_back(newDetection);
-		}
-	}
+//ROS_ERROR_STREAM("Detection is of size " <<SUN_faces[j].width << ","<< SUN_faces[j].height);
+//		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
+////		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
+////		DetectionPtr_t newDetection(new Detection_t());
+////		newDetection->first.first = center.x;
+////		newDetection->first.second = center.y;
+////		newDetection->second = WHA;
+////		detection_list_.push_back(newDetection);
+//		}
+//	}
 	/*
 	 * Actually WHA but with different range GREEN
 	 */
@@ -957,7 +971,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 		Rect cropROI(center.x - RQT_faces[j].width / 2, center.y - RQT_faces[j].height / 2, RQT_faces[j].width, RQT_faces[j].height );
 		Mat_t sample = frame(cropROI);
-		object_locator::object_type type = queryObject(sample);
+		//object_locator::object_type type = queryObject(sample);
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(RQT_faces[j].width / 2, RQT_faces[j].height / 2), 0, 0,
@@ -965,11 +979,13 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 
-		ROS_ERROR_STREAM("Detection is of type " << type);
+
+ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces[j].height);
+	//	ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
-		newDetection->second = type;
+		newDetection->second = WHA;
 		detection_list_.push_back(newDetection);
 		}
 	}
@@ -991,7 +1007,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 				center.y - Pipe_faces[j].height / 2, Pipe_faces[j].width,
 				Pipe_faces[j].height);
 		Mat_t sample = frame(cropROI);
-		object_locator::object_type type = queryObject(sample);
+		//object_locator::object_type type = queryObject(sample);
 		if (center.y > HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(Pipe_faces[j].width / 2, Pipe_faces[j].height / 2), 0,
@@ -1003,12 +1019,12 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 				Point(center.x + Pipe_faces[j].width / 2,
 						center.y + Pipe_faces[j].height / 2),
 				cv::Scalar(125, 255, 255));
-
+ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_faces[j].height);
 //		ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
 		newDetection->first.second = center.y;
-		newDetection->second = type;
+		newDetection->second = WHA;
 		detection_list_.push_back(newDetection);
 		}
 	}
@@ -1022,6 +1038,9 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //		cv::waitKey(3);
 //	cv::imshow(WINDOWRight, mask);
 //	cv::waitKey(3);
+//	imshow("lab",pipeMask);
+//	waitKey(3);
+	 namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE );
 	cv::imshow(WINDOWLeft, frame);
 
 	cv::waitKey(3);

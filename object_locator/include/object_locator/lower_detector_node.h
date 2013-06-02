@@ -83,7 +83,7 @@ private:
 				cascade_path_RQT_BALL,
 				cascade_path_PIPE,
 				cascade_path_PUCK;
-	float kAvgVal_;
+	float kAvgVal_,xAvgVal_,yAvgVal_;
 	cv::Point2f pipePoint_,WHAPoint_;
 
 	Mat_t frame;

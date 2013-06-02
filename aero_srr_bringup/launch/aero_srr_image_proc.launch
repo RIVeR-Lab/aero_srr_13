@@ -2,8 +2,13 @@
   <include file="$(find aero_prosilica_camera)/launch/stereo.launch">
   	   <arg name="left_ip_address" value="192.168.3.100"/>
   	   <arg name="right_ip_address" value="192.168.4.100"/>
-		<arg name="camera" value="upper_stereo"/>
-  
+	   <arg name="camera" value="upper_stereo"/>
+
+	   <arg name="auto_exposure" value="true" />
+	   <arg name="exposure_auto_target" value="50" />
+	   <arg name="exposure_auto_max" value="0.002" />
+	   <arg name="auto_gain" value="true" />
+	   <arg name="gain_auto_target" value="50" />
   </include>
   <group ns="/upper_stereo">
     <include file="$(find stereo_image_proc)/launch/stereo_image_proc.launch">
@@ -11,10 +16,18 @@
     </include>
   </group>
 
+
+
   <include file="$(find aero_prosilica_camera)/launch/stereo.launch">
   	   <arg name="left_ip_address" value="192.168.1.100"/>
   	   <arg name="right_ip_address" value="192.168.2.100"/>
   	   <arg name="camera" value="lower_stereo"/>
+
+	   <arg name="auto_exposure" value="true" />
+	   <arg name="exposure_auto_target" value="30" />
+	   <arg name="exposure_auto_max" value="0.002" />
+	   <arg name="auto_gain" value="true" />
+	   <arg name="gain_auto_target" value="30" />
   </include>
   <group ns="/lower_stereo">
     <include file="$(find stereo_image_proc)/launch/stereo_image_proc.launch">
