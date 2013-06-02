@@ -25,7 +25,7 @@ BeaconDetector::BeaconDetector():it_(nh_)
 
 	total_tfbaseinworld_.setIdentity();
 	total_tfbaseinworld_.setOrigin(tf::Vector3(0,0,0));
-	total_tfbaseinworld_.setRotation(tf::Quaternion(0,0,0,0));
+	total_tfbaseinworld_.setRotation(tf::Quaternion(0,0,0,1));
 
 	//the robot state controls the state of this node to init_/active_
 	//TODO: can you not listen to the robot states????
@@ -52,19 +52,56 @@ BeaconDetector::BeaconDetector():it_(nh_)
 
 	/*set up the action client for rotating the boom */
 	boom_client_ = boost::shared_ptr<BoomClient>(new BoomClient(nh_, "/camera_boom_control", true));
+	boom_client_->waitForServer();
 
 	/* rotate boom 360 */
 	rotateBoom();
 }
+
 void BeaconDetector::rotateBoom()
 {
+	ROS_INFO("Rotating Boom");
+	ros::Rate rotate_spin_rate_(20);
+
+
 	device_driver_base::SetJointPositionGoal boom_position;
+	boom_position.max_velocity = 0.5;
+
 	boom_position.angle = M_PI;
-	boom_position.max_velocity = 0.1;
-	boom_client_->sendGoalAndWait(boom_position);
+	boom_client_->sendGoal(boom_position);
+	while(!boom_client_->getState().isDone()){
+	  ros::spinOnce();
+	  rotate_spin_rate_.sleep();
+	}
+
+	ros::Time last = ros::Time::now();
+	while(ros::Time::now()-last<ros::Duration(2)){
+	  ros::spinOnce();
+	  rotate_spin_rate_.sleep();
+	}
+	
+
 	boom_position.angle = -M_PI;
-	boom_position.max_velocity = 0.1;
+	boom_client_->sendGoal(boom_position);
+	while(!boom_client_->getState().isDone()){
+	  ros::spinOnce();
+	  rotate_spin_rate_.sleep();
+	}
+
+	last = ros::Time::now();
+	while(ros::Time::now()-last<ros::Duration(2)){
+	  ros::spinOnce();
+	  rotate_spin_rate_.sleep();
+	}
+
+	boom_position.angle = 0;
+	boom_client_->sendGoal(boom_position);
+	while(!boom_client_->getState().isDone()){
+	  ros::spinOnce();
+	  rotate_spin_rate_.sleep();
+	}
 	init_finish_=true;
+	ROS_INFO("Finished rotation");
 }
 void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
@@ -156,6 +193,8 @@ tf::Stamped<tf::Transform>  BeaconDetector::estimatetf()
 	tf::Stamped<tf::Transform> tfbaseinworld;
 	tfbaseinworld.setRotation(total_tfbaseinworld_.getRotation()/m_count_);
 	tfbaseinworld.setOrigin(total_tfbaseinworld_.getOrigin()/m_count_);
+
+
 	return(tfbaseinworld);
 }
 void BeaconDetector::initConfiguration(string fname)
@@ -284,6 +323,7 @@ void BeaconDetector::publishWorld(tf::Stamped<tf::Transform>  tf)
 {
 	while(ros::ok())
 	{
+		ROS_INFO("Publishing x: %f y: %f z: %f",tf.getOrigin().getX(),tf.getOrigin().getY(),tf.getOrigin().getZ());
 		br_.sendTransform(tf::StampedTransform(tf, ros::Time::now()+ros::Duration(0.5), "/world","/tag_base"));
 	}
 	if(world_broadcaster_.joinable())

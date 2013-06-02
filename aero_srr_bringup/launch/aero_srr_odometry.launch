@@ -5,7 +5,7 @@
   <arg name="odom_topic"   default="odom" />
   <arg name="vo_topic"   default="/tag_odom" />
   <arg name="output_topic" default="aero/odom_combined" />
-  
+
   <!-- Bring Up Robot Pose Ekf -->
   <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="aero_base_pose_ekf">
     <param name="publish_tf"   value="true"/>
