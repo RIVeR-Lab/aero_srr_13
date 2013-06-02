@@ -420,7 +420,7 @@ void DetectorNode::computeDisparity() {
 							sizeof(float));
 				}
 			}
-		}
+		} 
 	} else if (encoding == enc::BGR8) {
 		const cv::Mat_<cv::Vec3b> color(left_image.height, left_image.width,
 				(cv::Vec3b*) &left_image.data[0], left_image.step);
@@ -609,7 +609,7 @@ void DetectorNode::computeDisparity() {
 //			  	  detection.setX(xAvgVal_);
 //			  	  detection.setY(yAvgVal_);
 //				 detection.setZ(kAvgVal_);
-
+	ROS_INFO_STREAM("Current det unconfident = " << detection.getX()<< "," << detection.getY() << "," <<detection.getZ());
 	tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
 			camera_point.header.frame_id = "/lower_stereo_optical_frame";
@@ -618,8 +618,8 @@ void DetectorNode::computeDisparity() {
 			world_point.header.stamp = tZero;
 //			cout << "Transforming camera to world" <<endl;
 			optimus_prime.waitForTransform("/world",
-					camera_point.header.frame_id, ros::Time(0),
-					ros::Duration(1.0));
+					camera_point.header.frame_id, camera_point.header.stamp,
+					ros::Duration(10.0));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
 //			cout << "Adding TFT to msg" <<endl;
 			tf::pointMsgToTF(world_point.point, detection);
@@ -731,7 +731,7 @@ float DetectorNode::nNdisp(const Point2d& pt, const Mat_t& disp) {
 	for (int i = 0; i < window; i++) {
 		for (int j = 0; j < window; j++) {
 			float value = disp.at<float>(starty + i, startx + j);
-			if (value >= 0.0)
+			if (value > 0.0)
 			{
 				sum = sum + value;
 				ctr ++;
@@ -844,17 +844,17 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	//-- Detect faces
 
 
-	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 16, 0,
-			cv::Size(30, 39), cv::Size(52, 59)); // works for WHAground !&5    8
-	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 20, 0,
-			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90   5
+	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 8, 0,
+			cv::Size(30, 39), cv::Size(52, 59)); // works for WHAground !&5   16 8
+	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 5, 0,
+			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90   20 5
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
 	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 50, 0,
 			cv::Size(5, 5), cv::Size(100,100)); //
 
-	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,32, 0,
-			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 (10,11)    (52,59) 15
+	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,15, 0,
+			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 (10,11)    (52,59) 32 15
 
 
 	/*
