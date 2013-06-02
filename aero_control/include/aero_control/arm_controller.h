@@ -93,8 +93,12 @@ private:
 		SetPathStep(false,0,0,0,true,0.4,-0.1,0.4,-1.421,0.4668,3);
 		SetPathStep(false,0,0,0,true,0.4,-0.1,0.6,-1.421,0.4668,3);
 		SetPathStep(false,0,0,0,true,0.4,0,0.6,-1.421,0.4668,3);
+		SetPathStep(true,40,40,20,false,0,0,0,0,0,0);
+
 		SetPathStep(false,0,0,0,true,0.5,0,0.4,-1.421,0.4668,3);
-		SetPathStep(false,0,0,0,true,0.3,-0.1,0.4,-1.421,0.4668,3);
+		//SetPathStep(true,0,0,0,false,0,0,0,0,0,0);
+
+		//SetPathStep(false,0,0,0,true,0.4,-0.1,0.6,-1.421,0.4668,3);
 
 
 		//SetPathStep(true,0,0,0,false,0,0,0,0,0,0);
