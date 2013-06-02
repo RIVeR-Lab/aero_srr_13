@@ -35,8 +35,8 @@ void setup(){
 }
 
 void loop(){
-  unsigned long pulse_length = pulseIn(PAUSE_PIN, HIGH, 100*1000);//wait at most 100 ms
-  bool_msg.data = pulse_length<1560;//will not pause if pulseIn timed out (no pulse = 0)
+  unsigned long pulse_length = pulseIn(PAUSE_PIN, HIGH);
+  bool_msg.data = pulse_length>1400;//will not pause if pulseIn timed out (no pulse = 0)
   pause_pub.publish( &bool_msg );
 
   if(nh.connected()){
