@@ -549,10 +549,10 @@ void DetectorNode::computeDisparity() {
 		Point2d obj_centroid(detection_list_.at(i)->first.first,
 				detection_list_.at(i)->first.second);
 		Point3d obj_3d;
-		float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
-		cout << "Disparity Value of detection "<< disp_val <<endl;
-		float disp_val2 = nNdisp(obj_centroid, disp);
-					cout << "Disparity Value of detection after nNdisp "<< disp_val2 <<endl;
+		float disp_val2 = disp.at<float>(obj_centroid.y, obj_centroid.x);
+		cout << "Disparity Value of detection "<< disp_val2 <<endl;
+		float disp_val = nNdisp(obj_centroid, disp);
+					cout << "Disparity Value of detection after nNdisp "<< disp_val <<endl;
 //		if(disp_val <= 0.0)
 //		{
 //
@@ -569,46 +569,46 @@ void DetectorNode::computeDisparity() {
 			tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
 
-			searchPoint.x = detection.getX();
-			searchPoint.y = detection.getY();
-			searchPoint.z = detection.getZ();
-
-
-
-			int K = 10;
-				  std::vector<int> pointIdxVec;
-			  std::vector<int> pointIdxNKNSearch;
-			  std::vector<float> pointNKNSquaredDistance;
-
-	//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
-	//		            << " " << searchPoint.y
-	//		            << " " << searchPoint.z
-	//		            << ") with K=" << K << std::endl;
-
-			  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
-			  {
-				  float sumx =0.0;
-				  float sumy =0.0;
-				  float sumz =0.0;
-			    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
-			    {
-	//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-	//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-			    	sumx = cloud->points[ pointIdxNKNSearch[i] ].x + sumx;
-			    	sumy = cloud->points[ pointIdxNKNSearch[i] ].y + sumy;
-			    	sumz = cloud->points[ pointIdxNKNSearch[i] ].z + sumz;
-			    }
-			    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
-			    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
-			    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
-
-			  }
-//			  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
-			  	  detection.setX(xAvgVal_);
-			  	  detection.setY(yAvgVal_);
-				 detection.setZ(kAvgVal_);
+//			searchPoint.x = detection.getX();
+//			searchPoint.y = detection.getY();
+//			searchPoint.z = detection.getZ();
+//
+//
+//
+//			int K = 10;
+//				  std::vector<int> pointIdxVec;
+//			  std::vector<int> pointIdxNKNSearch;
+//			  std::vector<float> pointNKNSquaredDistance;
+//
+//	//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
+//	//		            << " " << searchPoint.y
+//	//		            << " " << searchPoint.z
+//	//		            << ") with K=" << K << std::endl;
+//
+//			  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
+//			  {
+//				  float sumx =0.0;
+//				  float sumy =0.0;
+//				  float sumz =0.0;
+//			    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+//			    {
+//	//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+//	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+//	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+//	//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+//			    	sumx = cloud->points[ pointIdxNKNSearch[i] ].x + sumx;
+//			    	sumy = cloud->points[ pointIdxNKNSearch[i] ].y + sumy;
+//			    	sumz = cloud->points[ pointIdxNKNSearch[i] ].z + sumz;
+//			    }
+//			    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
+//			    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
+//			    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
+//
+//			  }
+////			  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
+//			  	  detection.setX(xAvgVal_);
+//			  	  detection.setY(yAvgVal_);
+//				 detection.setZ(kAvgVal_);
 
 	tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
@@ -724,7 +724,7 @@ void DetectorNode::computeDisparity() {
 
 float DetectorNode::nNdisp(const Point2d& pt, const Mat_t& disp) {
 	int window = 10;
-	int startx = pt.x - window;
+	int startx = pt.x - window/2;
 	int starty = pt.y;
 	int ctr  = 0;
 	float sum = 0.0;
@@ -739,6 +739,8 @@ float DetectorNode::nNdisp(const Point2d& pt, const Mat_t& disp) {
 		}
 	}
 	ROS_INFO_STREAM("CTR pts = " << ctr);
+	if(ctr == 0)
+		return 0.0;
 	return sum / (float) ctr;
 }
 
@@ -843,9 +845,9 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 
 	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 16, 0,
-			cv::Size(30, 39), cv::Size(52, 59)); // works for WHAground !&5
+			cv::Size(30, 39), cv::Size(52, 59)); // works for WHAground !&5    8
 	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 20, 0,
-			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90
+			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90   5
 	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
 			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
 	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 50, 0,

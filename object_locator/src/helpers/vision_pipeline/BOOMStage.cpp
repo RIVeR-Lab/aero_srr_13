@@ -133,7 +133,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 //	fillHoles(mask);
 	blobIdentify(normImage,mask, finalMask);
 	showAlpha(src,finalMask);
-	detectAnomalies(hsv2,finalMask);
+	detectAnomalies(normImage,finalMask);
 
 }
 void BOOMStage::boomImageCbright(const sensor_msgs::ImageConstPtr& msg,
