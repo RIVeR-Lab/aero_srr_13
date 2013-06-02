@@ -51,6 +51,11 @@ void RoboteqMotorController::open(std::string port){
 	setConfig(_AMOD, 1, 1);
 	setConfig(_AMOD, 4, 1);
 
+	setCurrentTrigger(1, 750, 75);
+	setCurrentTrigger(2, 750, 75);
+
+	saveToEEPROM();
+
 	//Initialize to initial values
 	motor_mode1_ = motor_mode2_ = MOTOR_MODE_UNDEFINED;//make sure to reset local values
 	setMotorMode(1, MOTOR_MODE_RPM);

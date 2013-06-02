@@ -35,7 +35,8 @@ void setup(){
 }
 
 void loop(){
-  bool_msg.data = !digitalRead(PAUSE_PIN);
+  unsigned long pulse_length = pulseIn(PAUSE_PIN, HIGH, 5*1000);//wait at most 5 ms
+  bool_msg.data = pulse_length>1500;//will not pause if pulseIn timed out (no pulse = 0)
   pause_pub.publish( &bool_msg );
 
   if(nh.connected()){
