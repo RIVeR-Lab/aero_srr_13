@@ -406,7 +406,7 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 	{
 		for(int y = 0; y < (int)copy_height; y++)
 		{
-			cell_data_t copy_confidence = confidances.data[ogu::calcIndexRowMajor2D(x, y, confidances.info.width)];
+			int copy_confidence = confidances.data[ogu::calcIndexRowMajor2D(x, y, confidances.info.width)];
 			CellTrait copy_trait(trait);
 			if(use_zero_as_free)
 			{
@@ -427,7 +427,7 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 			this->addPointTrait((double)x*confidances.info.resolution, (double)y*confidances.info.resolution, copy_trait, copy_confidence);
 		}
 	}
-	ROS_INFO_STREAM()
+	ROS_INFO_STREAM("Finished Copying Data Into Gird!");
 }
 
 bool MultiTraitOccupancyGrid::getGoal(gm::Pose& goal) const
