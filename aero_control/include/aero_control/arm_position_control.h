@@ -104,6 +104,7 @@ private:
 
 	bool running;
 	bool goal_reached;
+	bool last_goal_reached;
 	ros::Time goal_time;
 
 	float linear_gain;

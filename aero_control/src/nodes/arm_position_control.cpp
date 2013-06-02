@@ -71,6 +71,7 @@ ArmPositionController::ArmPositionController(ros::NodeHandle nh, ros::NodeHandle
 
 	running = false;
 	goal_reached = false;
+	last_goal_reached = true;
 	PID_X = new pid::PIDController(3, 0, 0.5, 0);
 	PID_Y = new pid::PIDController(3, 0, 0.5, 0);
 	PID_Z = new pid::PIDController(3, 0, 0.5, 0);
@@ -216,6 +217,7 @@ void ArmPositionController::UpdateError(void) {
 }
 
 void ArmPositionController::SendArmStateMSG(void) {
+  if(last_goal_reached!=goal_reached){
 	aero_control::arm_state state_msg;
 
 	state_msg.header.stamp = ros::Time().now();
@@ -230,6 +232,8 @@ void ArmPositionController::SendArmStateMSG(void) {
 	state_msg.error.yaw_error = pos_err.yaw_err;
 
 	arm_state_pub.publish(state_msg);
+	last_goal_reached = goal_reached;
+  }
 }
 
 void ArmPositionController::UpdatePID(void) {
