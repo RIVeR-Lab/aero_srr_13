@@ -1,6 +1,6 @@
 <launch>
 <node name="object_to_pose_converter" pkg="aero_control" type="object_to_pose" output="screen">
-	<param name="object_location" value="/object_location" />
+	<param name="object_location" value="/ObjectPose" />
 	<param name="desired_position" value="/desired_position" />
 </node>
 <node name="aero_base_servo" pkg="aero_control" type="base_servo_control" output="screen">
