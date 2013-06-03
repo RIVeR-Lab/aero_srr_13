@@ -44,7 +44,7 @@ using namespace sensor_msgs;
 
 DetectorNode::DetectorNode() :
 		it_(nh_), WINDOWLeft("Left Camera"), WINDOWRight("Right Camera"), WINDOWDisparity(
-				"Disparity"), sherlock(.1, .15, .05, .5, 2.0),aero(.05,.20,.10,.5, 10.0), gotLeft(false), gotRight(
+				"Disparity"), sherlock(.1, .15, .05, .5, 2.0),aero(.25,.20,.10,.5, 10.0), gotLeft(false), gotRight(
 				false), Collect_(false)
 
 {
@@ -841,7 +841,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	std::vector<cv::Rect> WHA_faces, PINK_faces, SUN_faces, RQT_faces,
 			Pipe_faces;
 	std::vector<std::vector<cv::Rect> > Detections;
-	int HORIZON = 0;
+	int HORIZON = 700;
 
 	Mat_t frame_gray;
 	Mat_t lab,lab_gray;
@@ -904,7 +904,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		Mat_t sample = frame(cropROI);
 		//object_locator::object_type type = queryObject(sample);
 
-		if (center.y > HORIZON) {
+		if (center.y < HORIZON) {
 
 			cv::ellipse(frame, center,
 					cv::Size(WHA_faces[i].width / 2, WHA_faces[i].height / 2),
@@ -917,11 +917,11 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 									cv::Scalar(255, 0, 0));
 			//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 //			ROS_ERROR_STREAM("Detection is of size " << WHA_faces[i].width << ","<< WHA_faces[i].height);
-//			DetectionPtr_t newDetection(new Detection_t());
-//			newDetection->first.first = center.x;
-//			newDetection->first.second = center.y;
-//			newDetection->second = WHA;
-//			detection_list_.push_back(newDetection);
+			DetectionPtr_t newDetection(new Detection_t());
+			newDetection->first.first = center.x;
+			newDetection->first.second = center.y;
+			newDetection->second = WHA;
+			detection_list_.push_back(newDetection);
 		}
 
 	}
@@ -975,7 +975,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		//-- Draw the face
 		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
 				SUN_faces[j].y + SUN_faces[j].height / 2);
-		if (center.y > HORIZON) {
+		if (center.y < HORIZON) {
 //		cv::ellipse(frame, center,
 //				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
 //				360, cv::Scalar(0, 0, 255), 2, 8, 0);
@@ -1010,7 +1010,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		Rect cropROI(center.x - RQT_faces[j].width / 2, center.y - RQT_faces[j].height / 2, RQT_faces[j].width, RQT_faces[j].height );
 		Mat_t sample = frame(cropROI);
 		//object_locator::object_type type = queryObject(sample);
-		if (center.y > HORIZON) {
+		if (center.y < HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(RQT_faces[j].width / 2, RQT_faces[j].height / 2), 0, 0,
 				360, cv::Scalar(0, 255,0), 2, 8, 0);
@@ -1046,7 +1046,7 @@ ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces
 				Pipe_faces[j].height);
 		Mat_t sample = frame(cropROI);
 		//object_locator::object_type type = queryObject(sample);
-		if (center.y > HORIZON) {
+		if (center.y < HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(Pipe_faces[j].width / 2, Pipe_faces[j].height / 2), 0,
 				0, 360, cv::Scalar(125, 255, 255), 2, 8, 0);
