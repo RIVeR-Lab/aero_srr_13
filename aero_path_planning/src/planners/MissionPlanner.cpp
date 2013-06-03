@@ -72,11 +72,14 @@ void MissionPlanner::loadParam()
 	this->ooi_topic_          = "/ObjectPose2";
 	this->state_request_topic_= "/aero/supervisor/state_transition_request";
 	this->path_threshold_     = 1.0;
+	this->nav_threshold_      = 1.0;
+	this->dist_threshold_     = 0.25;
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "local_frame", this->local_frame_, this->local_frame_);
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "global_frame", this->global_frame_, this->global_frame_);
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "state_topic", this->state_topic_, this->state_topic_);
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "path_topic", this->path_topic_, this->path_topic_);
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "path_threshold", this->path_threshold_, this->path_threshold_<<"m");
+	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "nav_threshold", this->nav_threshold_, this->nav_threshold_<<"m");
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "mission_goal_topic", this->mission_goal_topic_, this->mission_goal_topic_);
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "path_goal_topic", this->path_goal_topic_, this->path_goal_topic_);
 	AERO_PATH_PLANNING_LOAD_PARAM(this->p_nh_, "ooi_topic", this->ooi_topic_, this->ooi_topic_);
@@ -166,7 +169,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 		//We're following a path...
 		if(!this->carrot_path_.empty())
 		{
-			if(this->reachedNextGoal(current_point, 1.25))
+			if(this->reachedNextGoal(current_point, this->dist_threshold_))
 			{
 				this->carrot_path_.pop_front();
 				this->updateGoal();
@@ -181,6 +184,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			{
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
 				this->updateMissionGoal();
+				//If we're naving to objects of interests, means we got to one, try and collect it
 				if(this->naving_)
 				{
 					this->requestCollect();
@@ -260,6 +264,7 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			this->searching_ = true;
 			this->naving_    = false;
 			this->homeing_   = false;
+			this->dist_threshold_ = this->path_threshold_;
 			break;
 		case state_t::NAVOBJ:
 			ROS_INFO_STREAM("Missiong Planner is Naving to Objects!");
@@ -273,6 +278,7 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			this->searching_ = false;
 			this->naving_    = true;
 			this->homeing_   = false;
+			this->dist_threshold_ = this->nav_threshold_;
 			break;
 		case state_t::HOME:
 			ROS_INFO_STREAM("Mission Planner is Homing!");
@@ -280,6 +286,7 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			this->searching_ = false;
 			this->naving_    = false;
 			this->homeing_   = true;
+			this->dist_threshold_ = this->nav_threshold_;
 			break;
 		default:
 			ROS_ERROR_STREAM("Received Unkown State: "<<*message);
