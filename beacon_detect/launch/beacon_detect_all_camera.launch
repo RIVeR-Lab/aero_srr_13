@@ -14,13 +14,13 @@
 
   <include file="$(find beacon_detect)/launch/beacon_detect.launch">
     <arg name="name"            value="beacon_detectTopLeft" />
-    <arg name="img_topic"       value="/lower_stereo_raw/left/image_raw" />
+    <arg name="img_topic"       value="/upper_stereo_raw/left/image_raw" />
     <arg name="estimator" 	value="true" />
   </include>
 
   <include file="$(find beacon_detect)/launch/beacon_detect.launch">
     <arg name="name"            value="beacon_detectTopRight" />
-    <arg name="img_topic"       value="/lower_stereo_raw/right/image_raw" />
+    <arg name="img_topic"       value="/upper_stereo_raw/right/image_raw" />
     <arg name="estimator" 	value="true" />
   </include>
 

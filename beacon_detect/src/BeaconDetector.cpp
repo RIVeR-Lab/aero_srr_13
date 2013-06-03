@@ -146,7 +146,8 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 		//calculate the average tf of the world location using the detections_
 		tfbaseinworld=initProcess(fx,fy,px,py,img_header);
 		//till test period is over
-		addtf(tfbaseinworld);
+		if(!isnan(tfbaseinworld.getOrigin().x())&&!isnan(tfbaseinworld.getRotation().x())&&(tfbaseinworld.getOrigin().x()!=0))
+			addtf(tfbaseinworld);
 		if(!test_&&init_finish_)
 		{
 			tfbaseinworld=estimatetf();
