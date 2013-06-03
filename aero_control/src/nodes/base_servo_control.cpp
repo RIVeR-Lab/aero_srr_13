@@ -144,15 +144,15 @@ void BaseServoController::BaseServoStop(void) {
 
 void BaseServoController::PIDConfigCallback(aero_control::BaseServoPIDConfig &config,
 		uint32_t level) {
-	PID_X->SetPID(config.x_linear_P, config.x_linear_I, config.x_linear_D);
-	linear_gain = config.x_gain;
-	PID_Y->SetPID(config.y_linear_P, config.y_linear_I, config.y_linear_D);
-	rotational_gain = config.y_gain;
-
-	this->workspace_pose.pose.position.x = config.Workspace_X_Position;
-	this->workspace_pose.pose.position.y = config.Workspace_Y_Position;
-	workspace_pose.header.stamp = ros::Time::now();
-	this->workspace_postion_pub.publish(this->workspace_pose);
+//	PID_X->SetPID(config.x_linear_P, config.x_linear_I, config.x_linear_D);
+//	linear_gain = config.x_gain;
+//	PID_Y->SetPID(config.y_linear_P, config.y_linear_I, config.y_linear_D);
+//	rotational_gain = config.y_gain;
+//
+//	this->workspace_pose.pose.position.x = config.Workspace_X_Position;
+//	this->workspace_pose.pose.position.y = config.Workspace_Y_Position;
+//	workspace_pose.header.stamp = ros::Time::now();
+//	this->workspace_postion_pub.publish(this->workspace_pose);
 }
 
 void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
@@ -183,9 +183,9 @@ void BaseServoController::StateTimeoutTimerCallback(const ros::TimerEvent&) {
 void BaseServoController::DesiredPositionMSG(
 		const geometry_msgs::PoseStampedConstPtr& object_pose) {
 	try {
-		tf_listener.waitForTransform("/world", object_pose->header.frame_id,
+		tf_listener.waitForTransform("/base_footprint", object_pose->header.frame_id,
 				object_pose->header.stamp, ros::Duration(1.0));
-		tf_listener.transformPose("/world", *object_pose, this->desired_pose);
+		tf_listener.transformPose("/base_footprint", *object_pose, this->desired_pose);
 
 		last_position_time = ros::Time().now();
 

@@ -719,9 +719,9 @@ void DetectorNode::computeDisparity() {
 	}
 	if(aero.getDetection(robot_rel_det, rr_type, rr_conf)) {
 		aero_srr_msgs::ObjectLocationMsg msg;
-		msg.header.frame_id = robot_point.header.frame_id;
+		msg.header.frame_id = "base_footprint";
 		msg.header.stamp = ros::Time::now();
-		msg.pose.header.frame_id = robot_point.header.frame_id;
+		msg.pose.header.frame_id = "base_footprint";
 		msg.pose.header.stamp = ros::Time::now();
 		buildMsg(detection, msg.pose);
 		ObjLocationPub.publish(msg);
