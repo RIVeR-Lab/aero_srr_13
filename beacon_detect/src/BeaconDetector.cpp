@@ -64,12 +64,18 @@ void BeaconDetector::rotateBoom()
 {
 	ROS_INFO("Rotating Boom");
 	ros::Rate rotate_spin_rate_(20);
-
+	//wait tilll boom gets home
+	while(!boom_client_->getState().isDone())
+	{
+	  ros::spinOnce();
+	  rotate_spin_rate_.sleep();
+	}
 
 	device_driver_base::SetJointPositionGoal boom_position;
 	boom_position.max_velocity = 0.5;
 
 	boom_position.angle = M_PI;
+	//make the boom rotate 180 degrees so it can see the beacon
 	boom_client_->sendGoal(boom_position);
 	while(!boom_client_->getState().isDone()){
 	  ros::spinOnce();
@@ -77,12 +83,15 @@ void BeaconDetector::rotateBoom()
 	}
 
 	ros::Time last = ros::Time::now();
+	//wait in the 180 degree position for a few seconds so it can collect a few samples of the tags
+
 	while(ros::Time::now()-last<ros::Duration(2)){
 	  ros::spinOnce();
 	  rotate_spin_rate_.sleep();
 	}
 	
 
+	//ask the beacon to now rotate 180 the other side.
 	boom_position.angle = -M_PI;
 	boom_client_->sendGoal(boom_position);
 	while(!boom_client_->getState().isDone()){
@@ -90,12 +99,13 @@ void BeaconDetector::rotateBoom()
 	  rotate_spin_rate_.sleep();
 	}
 
+	//wait so you can collect a few sample
 	last = ros::Time::now();
 	while(ros::Time::now()-last<ros::Duration(2)){
 	  ros::spinOnce();
 	  rotate_spin_rate_.sleep();
 	}
-
+	//get back to home
 	boom_position.angle = 0;
 	boom_client_->sendGoal(boom_position);
 	while(!boom_client_->getState().isDone()){
@@ -153,6 +163,13 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 		if(!test_&&init_finish_)
 		{
 			tfbaseinworld=estimatetf();
+			//the tfbaseinworld is wrong dont launch thread but change the state to search so robot can continue
+			if(abs(tfbaseinworld.getOrigin().x())<0.2||tfbaseinworld.getOrigin().z()>3)
+			{
+				ROS_ERROR("Estimated tf seems to be wrong I am going to latch the tf to x=1,y=0,z=0");
+				tfbaseinworld.setIdentity();
+				tfbaseinworld.setOrigin(tf::Vector3(1,0,0));
+			}
 			boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  tfbaseinworld) );
 
 			aero_srr_msgs::StateTransitionRequest state_transition;
@@ -585,7 +602,7 @@ void BeaconDetector::showResult(cv::Mat img)
 	              cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0,0,255));
 	}
 	imshow("Result",image);
-	waitKey(20);
+	waitKey(3);
 }
 BeaconDetector::~BeaconDetector()
 {

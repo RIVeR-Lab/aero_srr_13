@@ -7,8 +7,8 @@
                    the x asis is along the oppositie direction of the tag id below  VERIFY 
 
 <node pkg="tf" type="static_transform_publisher" name="tag_base_broadcaster" args="1 0 0 0 0 0 world tag_base 50" />
-
 -->
+
 <!-- PLEASE DELETE IT IN REAL ROBOT IF GMAPPING IS RUNNING 
 <node pkg="tf" type="static_transform_publisher" name="delete_me" args="0 0 0 0 0 0 world base_footprint  50" />-->
 <!--front-->
