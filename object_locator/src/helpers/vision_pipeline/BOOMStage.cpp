@@ -60,7 +60,7 @@ void BOOMStage::loadParams() {
 			this->grass_level);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
 	this->HORIZON_TOP_NAME = "HORIZON";
-	this->HORIZON_TOP_ = 125;
+	this->HORIZON_TOP_ = 150;
 	this->HORIZON_BTM_ = 730;
 	this->grass_level = .33;
 	this->ZeroV[0] = 0;
@@ -89,8 +89,9 @@ void BOOMStage::loadParams() {
 
 //	std::string thresh_det("thresh_det");
 	thresh_det_ = .5;
+	max_conf_ = 1.0;
 //	this->getPrivateNodeHandle().getParam(thresh_det, thresh_det_);
-	this->watson_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
+	this->watson_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_, max_conf_);
 //	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
 //	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
 	this->train_ = true;
@@ -124,16 +125,17 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	got_left_ = true;
 	computeDisparityCb();
 	Mat_t src = img->image;
-	Mat_t normImage,mask,finalMask;
+	Mat_t normImage,mask,finalMask,hsv2;
+	stdFilt(*msg);
 //	circleFind(*msg);
-//	gmmRemove(msg);
-	grassRemove(*msg, normImage);
-	maskCreate(*msg,mask);
+//	gmmRemove(msg,hsv2);
+//	grassRemove(*msg, normImage);
+//	maskCreate(*msg,mask);
 //	fenceCheckerStd(normImage);
 //	fillHoles(mask);
-	blobIdentify(normImage,mask, finalMask);
-	showAlpha(src,finalMask);
-	detectAnomalies(normImage,finalMask);
+//	blobIdentify(normImage,mask, finalMask);
+//	showAlpha(src,finalMask);
+//	detectAnomalies(normImage,finalMask);
 
 }
 void BOOMStage::boomImageCbright(const sensor_msgs::ImageConstPtr& msg,
@@ -175,7 +177,68 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 	return pt[2] != image_geometry::StereoCameraModel::MISSING_Z
 			&& !std::isinf(pt[2]);
 }
-void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg)
+void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage)
+{
+//	cv_bridge::CvImagePtr img;
+////	Mat_t src = load_;
+//	try {
+//		img = cv_bridge::toCvCopy(msg, enc::BGR8);
+//	} catch (cv_bridge::Exception& e) {
+//		NODELET_ERROR("cv_bridge exception: %s", e.what());
+//		return;
+//	}
+//	Mat_t source(img->image);
+//	Mat_t hsv;
+//	Mat_t hsv32F,hsv32Fnorm;
+//	cvtColor(source,hsv,CV_BGR2HSV);
+//
+//	hsv.convertTo(hsv32F,CV_32FC3);
+//	normalize(hsv32F,hsv32Fnorm,0,1,CV_MINMAX);
+//	Vec3f HSV3 = hsv32Fnorm.at<cv::Vec3f>(100, 100);
+//	Vec3b RGB;
+//	Vec3f HSV;
+//	double Gratio, Rratio;
+//	ROS_INFO_STREAM("NORM OF 32HSV at 100,100 = " << HSV3[0]);
+//	Mat_t detected = Mat::zeros(source.size(), CV_8UC3);
+//	for(int k = 0; k< source.rows; k++)
+//	{
+//		for(int m = 0;m<source.cols; m++)
+//		{
+//			RGB = source.at<cv::Vec3b>(k, m);
+//			HSV = hsv32Fnorm.at<cv::Vec3f>(k,m);
+//
+//			//ROS_INFO_STREAM("RGBd is  = " << (double)RGB[1]);
+//
+//			Gratio = (double)RGB[1]/(double)(RGB[1]+RGB[2]+RGB[0]);
+//			Rratio = (double)RGB[2]/(double)(RGB[1]+RGB[2]+RGB[0]);
+//
+//			//if((HSV[2] >0.95) && Gratio < 0.331 && std::abs(browness - 1) > 0.2)
+//			//remove high luminosity regions and regions of green and yellow
+//			if((HSV[2] >0.8) && Gratio < 0.331 && Rratio < 0.331)
+//				detected.at<cv::Vec3b>(k, m) = White;
+//			else
+//				detected.at<cv::Vec3b>(k, m) = ZeroV;
+//
+//		}
+//	}
+//	hsvImage = detected;
+
+//	imshow("b4detection", detected);
+//
+//	//dilation (morphological operation to take away salt + pepper noise and increase size of detected blobs)
+//	int elem_type = MORPH_CROSS;
+//	int elem_size = 1;
+//
+//	Mat element = getStructuringElement( elem_type, Size( 2*elem_size + 1, 2*elem_size+1 ), Point( elem_size, elem_size ) );
+//	morphologyEx(detected, detected, MORPH_OPEN, element);// do morphological opening to remove small specks and enlarge larger detections
+
+
+//	imshow("detection", detected);
+//	waitKey(3);
+
+}
+
+void BOOMStage::stdFilt(const sensor_msgs::Image& msg)
 {
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
@@ -185,89 +248,46 @@ void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg)
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
 		return;
 	}
-	cv::Mat source(img->image);
-    //ouput ima
+	Mat_t image = img->image;
+	Mat_t dst,dst2,dst3, medSig,image_gray, sigFinal;
+	Vec3d ZeroVd;
+	ZeroVd[0] = 0.0;
+	ZeroVd[1] = 0.0;
+	ZeroVd[2] = 0.0;
+	cvtColor(image,image_gray,CV_BGR2GRAY);
+	Mat image32f;
+	image_gray.convertTo(image32f, CV_32F);
 
+	Mat mu;
+	blur(image32f, mu, Size(3, 3));
 
+	Mat mu2;
+	blur(image32f.mul(image32f), mu2, Size(3, 3));
 
+	Mat sigma;
+	cv::sqrt(mu2 - mu.mul(mu), sigma);
+	normalize(image32f, dst, 0.0, 1.0, NORM_MINMAX);
+	normalize(sigma, dst2, 0.0, 1.0, NORM_MINMAX);
 
-    cv::Mat meanImg(source.rows, source.cols, CV_32FC3);
-    cv::Mat fgImg(source.rows, source.cols, CV_8UC3);
-    cv::Mat bgImg(source.rows, source.cols, CV_8UC3);
+	medianBlur(dst2, medSig, 3);
+	for(int k = 0; k< HORIZON_TOP_; k++)
+	{
+		for(int m = 0;m<medSig.cols; m++)
+		{
+			medSig.at<cv::Vec3d>(k, m) = ZeroVd;
+		}
+	}
+	threshold(medSig, sigFinal,.55,1, THRESH_BINARY);
 
-    Rect roi(0, source.rows -101,100,100);
-    cv::Mat crop = source(roi);
+	int elem_type = MORPH_RECT;
+	int elem_size = 11;
 
-    cv::Mat floatCrop;
-    crop.convertTo(floatCrop, CV_32F);
-    cv::Mat floatSource;
-    source.convertTo(floatSource, CV_32F);
-    //convert the input image to float
+	Mat element = getStructuringElement( elem_type, Size( 2*elem_size + 1, 2*elem_size+1 ), Point( elem_size, elem_size ) );
+	morphologyEx(sigFinal, sigFinal, MORPH_DILATE, element);// do morphological opening to remove small specks and enlarge larger detections
 
-    cv::Mat cropSamples(crop.rows * crop.cols, 3, CV_32FC1);
-    int idx = 0;
-    for (int y = 0; y < crop.rows; y++) {
-        cv::Vec3f* row = floatSource.ptr<cv::Vec3f > (y);
-        for (int x = 0; x < crop.cols; x++) {
-        	cropSamples.at<cv::Vec3f > (idx++, 0) = row[x];
-        }
-    }
-
-    //now convert the float image to column vector
-    cv::Mat samples(source.rows * source.cols, 3, CV_32FC1);
-     idx = 0;
-    for (int y = 0; y < source.rows; y++) {
-        cv::Vec3f* row = floatSource.ptr<cv::Vec3f > (y);
-        for (int x = 0; x < source.cols; x++) {
-            samples.at<cv::Vec3f > (idx++, 0) = row[x];
-        }
-    }
-
-    //we need just 2 clusters
-    cv::EMParams params(2);
-    cv::ExpectationMaximization em(cropSamples, cv::Mat(), params);
-
-	    means = em.getMeans();
-	    weights = em.getWeights();
-
-	    //the two dominating colors
-
-	    //the weights of the two dominant colors
-
-
-	    //we define the foreground as the dominant color with the largest weight
-	    const int fgId = weights.at<float>(0) > weights.at<float>(1) ? 0 : 1;
-
-	    //now classify each of the source pixels
-	    idx = 0;
-	    for (int y = 0; y < source.rows; y++) {
-	        for (int x = 0; x < source.cols; x++) {
-
-	            //classify
-	            const int result = cvRound(em.predict(samples.row(idx++), NULL));
-	            //get the according mean (dominant color)
-	            const double* ps = means.ptr<double>(result, 0);
-
-	            //set the according mean value to the mean image
-	            float* pd = meanImg.ptr<float>(y, x);
-	            //float images need to be in [0..1] range
-	            pd[0] = ps[0] / 255.0;
-	            pd[1] = ps[1] / 255.0;
-	            pd[2] = ps[2] / 255.0;
-
-	            //set either foreground or background
-	            if (result == fgId) {
-	                fgImg.at<cv::Point3_<uchar> >(y, x, 0) = source.at<cv::Point3_<uchar> >(y, x, 0);
-	            } else {
-	                bgImg.at<cv::Point3_<uchar> >(y, x, 0) = source.at<cv::Point3_<uchar> >(y, x, 0);
-	            }
-	        }
-	    }
-
-//	    cv::imshow("Means", meanImg);
-	    cv::imshow("Foreground", fgImg);
-	    cv::imshow("Background", bgImg);
-	    cv::waitKey(3);
+	imshow("sigma",sigFinal);
+	imshow("rgb",image);
+	waitKey(3);
 
 }
 
@@ -578,8 +598,8 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 			rectangle(left_image_, boundRect[i].tl(), boundRect[i].br(), color, 2,
 					8, 0);
 			circle(left_image_, center[i], (int) radius[i], color, 2, 8, 0);
-//			cout << "Center of object[" << i << "]" << "= " << center[i].x
-//									<< "," << center[i].y << endl;
+			cout << "Center of object[" << i << "]" << "= " << center[i].x
+									<< "," << center[i].y << endl;
 			DetectionPtr_t newDetection(new Detection_t());
 			newDetection->first.first = center[i].x;
 			newDetection->first.second = center[i].y;
@@ -774,11 +794,14 @@ void BOOMStage::computeDisparity()
 			this->point_cloud_pub_.publish(points_msg);
 			//*********Oct tree stuff *************//
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+			pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
 			pcl::fromROSMsg(*points_msg,*cloud);
+			pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
+
 			float resolution = 2.5f;
 			pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
 
-		    octree.setInputCloud (cloud);
+		    octree.setInputCloud (tcloud);
 		    octree.addPointsFromInputCloud ();
 
 		    pcl::PointXYZ searchPoint;
@@ -814,20 +837,28 @@ void BOOMStage::computeDisparity()
 
 						  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
 						  {
-							  float sum =0.0;
+							  float sumx =0.0;
+							  float sumy =0.0;
+							  float sumz =0.0;
 						    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
 						    {
 //						      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
 //						                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
 //						                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
 //						                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-						      sum = cloud->points[ pointIdxNKNSearch[i] ].z + sum;
+						    	sumx = tcloud->points[ pointIdxNKNSearch[i] ].x + sumx;
+						    	sumy = tcloud->points[ pointIdxNKNSearch[i] ].y + sumy;
+						    	sumz = tcloud->points[ pointIdxNKNSearch[i] ].z + sumz;
 						    }
-						    kAvgVal_ = sum/pointIdxNKNSearch.size ();
+						    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
+						    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
+						    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
 
 						  }
 						  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
-						 detection.setZ(kAvgVal_);
+					  	  detection.setX(xAvgVal_);
+					  	  detection.setY(yAvgVal_);
+						  detection.setZ(kAvgVal_);
 				tf::pointTFToMsg(detection, camera_point.point);
 				ros::Time tZero(0);
 				camera_point.header.frame_id = this->optical_frame;

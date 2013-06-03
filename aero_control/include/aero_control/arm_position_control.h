@@ -26,7 +26,6 @@
 #include <aero_control/arm_state.h>
 
 #include <jaco_driver/joint_angles.h>
-#include <Eigen/Dense>
 
 
 
@@ -65,11 +64,11 @@ private:
 	void UpdatePID(void);
 	void UpdateError(void);
 	inline double MaxLinearVel(void) {
-		return 0.037;
+		return 0.05;
 	}
 
 	inline double MaxAngularVel(void) {
-		return 0.15;
+		return 0.1;
 	}
 
 	inline double LinearErrorRange(void) {
@@ -105,6 +104,7 @@ private:
 
 	bool running;
 	bool goal_reached;
+	bool last_goal_reached;
 	ros::Time goal_time;
 
 	float linear_gain;

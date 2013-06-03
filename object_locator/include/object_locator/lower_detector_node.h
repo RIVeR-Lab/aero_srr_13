@@ -18,6 +18,7 @@
 #include <iostream>
 #include <cxcore.h>
 #include <aero_srr_msgs/ObjectLocationMsg.h>
+#include <aero_srr_msgs/AeroState.h>
 #include <tf/transform_listener.h>
 #include <object_locator/DetectionManager.h>
 #include <geometry_msgs/PointStamped.h>
@@ -50,6 +51,7 @@ public:
 	void rectRightCb(const sensor_msgs::ImageConstPtr& msg);
 	void rectLeftCb(const sensor_msgs::ImageConstPtr& msg);
 	float nNdisp(const cv::Point2d& pt, const Mat_t& disp);
+	void stateCb(const aero_srr_msgs::AeroStatePtr& msg);
 //	void pointCloudCb(const sensor_msgs::PointCloud2ConstPtr& cloud);
 	void addBbox(Mat_t& img, Mat_t& final);
 	Mat_t gray2bgr(Mat_t img);
@@ -61,7 +63,7 @@ public:
 private:
 	ros::Timer disp_timer;
 	ros::NodeHandle nh_;
-	ros::Publisher ObjLocationPub, secondObjPub;
+	ros::Publisher ObjLocationPub, secondObjPub, ObjLocationPubWorld;
 	image_transport::ImageTransport it_;
 	image_transport::CameraSubscriber image_left_;
 	image_transport::CameraSubscriber image_right_;
@@ -69,6 +71,7 @@ private:
 	ros::Subscriber left_rect_sub_;
 	ros::Subscriber right_rect_sub_;
 	ros::Subscriber point_cloud_sub_;
+	ros::Subscriber state_sub_;
 	image_transport::Publisher image_pub_;
 	ros::Publisher pub_points2_;
 	ros::Publisher pub_points3_;
@@ -83,13 +86,16 @@ private:
 				cascade_path_RQT_BALL,
 				cascade_path_PIPE,
 				cascade_path_PUCK;
-	float kAvgVal_;
+	float kAvgVal_,xAvgVal_,yAvgVal_;
 	cv::Point2f pipePoint_,WHAPoint_;
+
+	uint8_t Aero_state_;
+	bool Collect_;
 
 	Mat_t frame;
 	CascadeClassifier_t cascade_WHA, cascade_PINK, cascade_WHASUN, cascade_RQT_BALL,cascade_PIPE, cascade_PUCK;
 	tf::TransformListener optimus_prime;
-	object_locator::DetectionManager sherlock;
+	object_locator::DetectionManager sherlock, aero;
 
 	typedef std::pair<int, int> PixPoint_t;
 	typedef std::pair<PixPoint_t, object_type> Detection_t;

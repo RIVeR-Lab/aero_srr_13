@@ -37,6 +37,8 @@
 #include <pcl/filters/voxel_grid.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/legacy/legacy.hpp>
+#include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 
 namespace object_locator
 {
@@ -68,8 +70,9 @@ namespace object_locator
 		virtual void detectAnomalies(Mat_t& img, Mat_t& mask);
 		virtual void showAlpha(Mat_t& src, Mat_t& fMask);
 		virtual void computeDisparity();
-		virtual void gmmRemove(const sensor_msgs::ImageConstPtr& msg);
+		virtual void gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage);
 		virtual void generateMsg();
+		virtual void stdFilt(const sensor_msgs::Image& msg);
 
 		ros::Subscriber sync_image_sub_;
 		image_transport::ImageTransport* it_;
@@ -89,10 +92,10 @@ namespace object_locator
 		typedef boost::shared_ptr<Detection_t> DetectionPtr_t;
 		std::vector<DetectionPtr_t> detection_list_;
 		tf::TransformListener optimus_prime;
-		float kAvgVal_;
+		float kAvgVal_,xAvgVal_,yAvgVal_;
 
 		//***sherlock Parameters*****/
-		double thresh_dist_, growth_rate_, shrink_rate_, thresh_det_;
+		double thresh_dist_, growth_rate_, shrink_rate_, thresh_det_, max_conf_;
 		object_locator::DetectionManager* watson_;
 
 		image_geometry::StereoCameraModel stereo_model;

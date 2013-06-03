@@ -5,7 +5,7 @@
     <remap from="scan" to="$(arg scan_topic)" />
 
     <param name="map_frame" value="/world" />
-    <param name="inverted_laser" value="true" />
+    <!--param name="inverted_laser" value="true" /-->
     <param name="map_update_frequency" value="1"/>
     <param name="maxUrange" value="30.0"/>
 

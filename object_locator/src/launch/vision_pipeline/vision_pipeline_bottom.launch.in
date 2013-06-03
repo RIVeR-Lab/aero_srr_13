@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="nodelet" type="nodelet" name="vision_pipeline_bottom"  args="manager" output="screen"/>
+ <!-- <node pkg="nodelet" type="nodelet" name="vision_pipeline_bottom"  args="manager" output="screen"/>
   
     <node pkg="nodelet" type="nodelet" name="BOTTOMStage" args="load object_locator/BOOMStage vision_pipeline_bottom" output="screen">
     <param name="left_camera" value="/lower_stereo/left/image_rect_color" />
@@ -13,7 +13,7 @@
      <param name="HORIZON" value="0" />
      <param name="grass_level" value="0.33" />
     
-  </node>
+  </node>-->
        <node name="lower_detector_node" pkg="object_locator" type="lower_detector_node" output="screen"/>
-       <node name="detectionHandler" pkg="object_locator" type="detectionHandler" output="screen"/>
+       <!--<node name="detectionHandler" pkg="object_locator" type="detectionHandler" output="screen"/>-->
 </launch>
