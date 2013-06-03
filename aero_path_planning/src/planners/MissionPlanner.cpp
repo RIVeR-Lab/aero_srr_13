@@ -30,6 +30,11 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
+	tf::Point Ooi;
+	Ooi.setZero();
+	Ooi.setX(4.0);
+	Ooi.setY(2.0);
+	this->OoI_manager_.addOoI(Ooi);
 //	geometry_msgs::Pose mission_goal2;
 //	mission_goal2.position.x = 5.0;
 //	mission_goal2.position.y = 1.0;
