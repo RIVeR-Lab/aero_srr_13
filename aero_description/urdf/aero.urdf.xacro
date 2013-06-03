@@ -30,7 +30,7 @@
   <xacro:husky/>  
 
   <!-- Boom -->
-  <xacro:static_transform parent="top_plate" name="boom_base" xyz="-0.23 0 0.0762" rpy="0 0 0">
+  <xacro:static_transform parent="base_footprint" name="boom_base" xyz="-0.4572 0 0.26035" rpy="0 0 0">
     <visual>
       <origin xyz="0 0 -0.02" rpy="0 0 0" />
       <geometry>

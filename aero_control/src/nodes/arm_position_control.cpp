@@ -61,15 +61,23 @@ ArmPositionController::ArmPositionController(ros::NodeHandle nh, ros::NodeHandle
 	last_position_time = ros::Time().now();
 	goal_time = ros::Time().now();
 
+	this->desired_pos.x=0;
+	this->desired_pos.y=0;
+	this->desired_pos.z=0;
+	this->desired_pos.roll=0;
+	this->desired_pos.pitch=0;
+	this->desired_pos.yaw=0;
+
+
 	running = false;
 	goal_reached = false;
-
-	PID_X = new pid::PIDController(3, 0, 0.5, pos_err.x_err);
-	PID_Y = new pid::PIDController(3, 0, 0.5, pos_err.y_err);
-	PID_Z = new pid::PIDController(3, 0, 0.5, pos_err.z_err);
-	PID_Roll = new pid::PIDController(3, 0, 0.5, pos_err.roll_err);
-	PID_Pitch = new pid::PIDController(3, 0, 0.5, pos_err.pitch_err);
-	PID_Yaw = new pid::PIDController(3, 0, 0.5, pos_err.yaw_err);
+	last_goal_reached = true;
+	PID_X = new pid::PIDController(3, 0, 0.5, 0);
+	PID_Y = new pid::PIDController(3, 0, 0.5, 0);
+	PID_Z = new pid::PIDController(3, 0, 0.5, 0);
+	PID_Roll = new pid::PIDController(3, 0, 0.5, 0);
+	PID_Pitch = new pid::PIDController(3, 0, 0.5, 0);
+	PID_Yaw = new pid::PIDController(3, 0, 0.5, 0);
 
 	linear_gain = 2;
 	rotational_gain = 1;
@@ -209,6 +217,7 @@ void ArmPositionController::UpdateError(void) {
 }
 
 void ArmPositionController::SendArmStateMSG(void) {
+  if(last_goal_reached!=goal_reached){
 	aero_control::arm_state state_msg;
 
 	state_msg.header.stamp = ros::Time().now();
@@ -223,71 +232,69 @@ void ArmPositionController::SendArmStateMSG(void) {
 	state_msg.error.yaw_error = pos_err.yaw_err;
 
 	arm_state_pub.publish(state_msg);
+	last_goal_reached = goal_reached;
+  }
 }
 
 void ArmPositionController::UpdatePID(void) {
-	Eigen::VectorXf cartisian_velocity(6);
-
-	cartisian_velocity(0) = PID_X->PIDUpdate(pos_err.x_err);
-	cartisian_velocity(0) *= linear_gain;
-
-	if (cartisian_velocity(0) > MaxLinearVel()) {
-		cartisian_velocity(0) = MaxLinearVel();
-	} else if (cartisian_velocity(0) < -MaxLinearVel()) {
-		cartisian_velocity(0) = -MaxLinearVel();
-	}
-	cartisian_velocity(1) = PID_Y->PIDUpdate(pos_err.y_err);
-	cartisian_velocity(1) *= linear_gain;
-
-	if (cartisian_velocity(1) > MaxLinearVel()) {
-		cartisian_velocity(1) = MaxLinearVel();
-	} else if (cartisian_velocity(1) < -MaxLinearVel()) {
-		cartisian_velocity(1) = -MaxLinearVel();
-	}
-	cartisian_velocity(2) = PID_Z->PIDUpdate(pos_err.z_err);
-	cartisian_velocity(2) *= linear_gain;
-
-	if (cartisian_velocity(2) > MaxLinearVel()) {
-		cartisian_velocity(2) = MaxLinearVel();
-	} else if (cartisian_velocity(2) < -MaxLinearVel()) {
-		cartisian_velocity(2) = -MaxLinearVel();
-	}
-	cartisian_velocity(3) = PID_Roll->PIDUpdate(pos_err.roll_err);
-	cartisian_velocity(3) *= rotational_gain;
-
-	if (cartisian_velocity(3) > MaxAngularVel()) {
-		cartisian_velocity(3) = MaxAngularVel();
-	} else if (cartisian_velocity(3) < -MaxAngularVel()) {
-		cartisian_velocity(3) = -MaxAngularVel();
-	}
-	cartisian_velocity(4) = PID_Pitch->PIDUpdate(pos_err.pitch_err);
-	cartisian_velocity(4) *= rotational_gain;
-
-	if (cartisian_velocity(4) > MaxAngularVel()) {
-		cartisian_velocity(4) = MaxAngularVel();
-	} else if (cartisian_velocity(4) < -MaxAngularVel()) {
-		cartisian_velocity(4) = -MaxAngularVel();
-	}
-	cartisian_velocity(5) = PID_Yaw->PIDUpdate(pos_err.yaw_err);
-	cartisian_velocity(5) *= rotational_gain;
-
-	if (cartisian_velocity(5) > MaxAngularVel()) {
-		cartisian_velocity(5) = MaxAngularVel();
-	} else if (cartisian_velocity(5) < -MaxAngularVel()) {
-		cartisian_velocity(5) = -MaxAngularVel();
-	}
-
-
 
 	geometry_msgs::TwistStamped cartesian_velocity_msg;
+
+
+	cartesian_velocity_msg.twist.linear.x = PID_X->PIDUpdate(pos_err.x_err);
+	cartesian_velocity_msg.twist.linear.x *= linear_gain;
+
+	if (cartesian_velocity_msg.twist.linear.x > MaxLinearVel()) {
+		cartesian_velocity_msg.twist.linear.x = MaxLinearVel();
+	} else if (cartesian_velocity_msg.twist.linear.x < -MaxLinearVel()) {
+		cartesian_velocity_msg.twist.linear.x = -MaxLinearVel();
+	}
+	cartesian_velocity_msg.twist.linear.y = PID_Y->PIDUpdate(pos_err.y_err);
+	cartesian_velocity_msg.twist.linear.y *= linear_gain;
+
+	if (cartesian_velocity_msg.twist.linear.y > MaxLinearVel()) {
+		cartesian_velocity_msg.twist.linear.y = MaxLinearVel();
+	} else if (cartesian_velocity_msg.twist.linear.y < -MaxLinearVel()) {
+		cartesian_velocity_msg.twist.linear.y = -MaxLinearVel();
+	}
+	cartesian_velocity_msg.twist.linear.z = PID_Z->PIDUpdate(pos_err.z_err);
+	cartesian_velocity_msg.twist.linear.z *= linear_gain;
+
+	if (cartesian_velocity_msg.twist.linear.z > MaxLinearVel()) {
+		cartesian_velocity_msg.twist.linear.z = MaxLinearVel();
+	} else if (cartesian_velocity_msg.twist.linear.z < -MaxLinearVel()) {
+		cartesian_velocity_msg.twist.linear.z = -MaxLinearVel();
+	}
+	cartesian_velocity_msg.twist.angular.x = PID_Roll->PIDUpdate(pos_err.roll_err);
+	cartesian_velocity_msg.twist.angular.x *= rotational_gain;
+
+	if (cartesian_velocity_msg.twist.angular.x > MaxAngularVel()) {
+		cartesian_velocity_msg.twist.angular.x = MaxAngularVel();
+	} else if (cartesian_velocity_msg.twist.angular.x < -MaxAngularVel()) {
+		cartesian_velocity_msg.twist.angular.x = -MaxAngularVel();
+	}
+	cartesian_velocity_msg.twist.angular.y = PID_Pitch->PIDUpdate(pos_err.pitch_err);
+	cartesian_velocity_msg.twist.angular.y *= rotational_gain;
+
+	if (cartesian_velocity_msg.twist.angular.y > MaxAngularVel()) {
+		cartesian_velocity_msg.twist.angular.y = MaxAngularVel();
+	} else if (cartesian_velocity_msg.twist.angular.y < -MaxAngularVel()) {
+		cartesian_velocity_msg.twist.angular.y = -MaxAngularVel();
+	}
+	cartesian_velocity_msg.twist.angular.z = PID_Yaw->PIDUpdate(pos_err.yaw_err);
+	cartesian_velocity_msg.twist.angular.z *= rotational_gain;
+
+	if (cartesian_velocity_msg.twist.angular.z > MaxAngularVel()) {
+		cartesian_velocity_msg.twist.angular.z = MaxAngularVel();
+	} else if (cartesian_velocity_msg.twist.angular.z < -MaxAngularVel()) {
+		cartesian_velocity_msg.twist.angular.z = -MaxAngularVel();
+	}
+
+
+
 	cartesian_velocity_msg.header.frame_id = "/arm_base";
 	cartesian_velocity_msg.header.stamp = ros::Time::now();
-	cartesian_velocity_msg.twist.linear.x = cartisian_velocity(0);
-	cartesian_velocity_msg.twist.linear.y = cartisian_velocity(1);
-	cartesian_velocity_msg.twist.linear.z = cartisian_velocity(2);
-	cartesian_velocity_msg.twist.angular.x = cartisian_velocity(3);
-	cartesian_velocity_msg.twist.angular.y = cartisian_velocity(4);
-	cartesian_velocity_msg.twist.angular.z = cartisian_velocity(5);
+
 
 
 	cartesian_velocity_pub.publish(cartesian_velocity_msg);
