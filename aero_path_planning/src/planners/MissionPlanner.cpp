@@ -18,7 +18,9 @@ using namespace aero_path_planning;
 
 MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				OoI_manager_(1.0),
-				searching_(true),
+				searching_(false),
+				naving_(false),
+				homeing_(false),
 				recieved_path_(false),
 				nh_(nh),
 				p_nh_(p_nh),
@@ -161,6 +163,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 
 	if(this->calcRobotPointWorld(current_point))
 	{
+		//We're following a path...
 		if(!this->carrot_path_.empty())
 		{
 			if(this->reachedNextGoal(current_point, 1.25))
@@ -169,18 +172,21 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 				this->updateGoal();
 			}
 		}
+		//We're advancing mission goals or mission states
 		else
 		{
+			//We've got more mission goals
 			ROS_INFO_STREAM_THROTTLE(5,"I have completed my current path!");
 			if(!this->mission_goals_.empty() && this->recieved_path_)
 			{
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
 				this->updateMissionGoal();
-				if(!this->searching_)
+				if(this->naving_)
 				{
 					this->requestCollect();
 				}
 			}
+			//We need to transition mission states
 			else
 			{
 				//Means we've reached the end of the search pattern, start going to objects of interest
@@ -189,9 +195,10 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 					this->requestNavObj();
 				}
 				//Means we've reached the end of the detections, go home
-				else if(!this->searching_&&this->recieved_path_)
+				else if(this->naving_&&this->recieved_path_)
 				{
 					ROS_INFO_STREAM("Mission Planner: Finised My Mission, Heading Home!");
+					this->requestHome();
 					geometry_msgs::Pose home;
 					home.orientation.w = 1;
 					this->mission_goals_.push_back(home);
@@ -251,17 +258,28 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			this->pause(false);
 			ROS_INFO_STREAM("Mission Planner is Searching!");
 			this->searching_ = true;
+			this->naving_    = false;
+			this->homeing_   = false;
 			break;
 		case state_t::NAVOBJ:
 			ROS_INFO_STREAM("Missiong Planner is Naving to Objects!");
 			this->pause(false);
 			//Only generate the goal list once
-			if(this->searching_ )
+			if(!this->naving_)
 			{
 				this->generateDetectionGoalList();
 				this->updateGoal();
 			}
 			this->searching_ = false;
+			this->naving_    = true;
+			this->homeing_   = false;
+			break;
+		case state_t::HOME:
+			ROS_INFO_STREAM("Mission Planner is Homing!");
+			this->pause(false);
+			this->searching_ = false;
+			this->naving_    = false;
+			this->homeing_   = true;
 			break;
 		default:
 			ROS_ERROR_STREAM("Received Unkown State: "<<*message);
@@ -325,6 +343,14 @@ void MissionPlanner::requestNavObj()
 	this->requestStateTransition(request);
 }
 
+void MissionPlanner::requestHome()
+{
+	ROS_INFO_STREAM("Mission Planner Requesting Transition to HOME...");
+	aero_srr_msgs::AeroState request;
+	request.state = aero_srr_msgs::AeroState::HOME;
+	this->requestStateTransition(request);
+}
+
 void MissionPlanner::requestStateTransition(aero_srr_msgs::AeroState& requested_state)
 {
 	aero_srr_msgs::StateTransitionRequestRequest request;
@@ -334,11 +360,11 @@ void MissionPlanner::requestStateTransition(aero_srr_msgs::AeroState& requested_
 	{
 		if(response.success)
 		{
-			ROS_INFO_STREAM("Mission Planner Succesfully Moved to "<<requested_state.state<<" !");
+			ROS_INFO_STREAM("Mission Planner Succesfully Moved to "<<(int)requested_state.state<<" !");
 		}
 		else
 		{
-			ROS_ERROR_STREAM("Mission Planner could not transition to "<<requested_state.state<<": "<<response.error_message);
+			ROS_ERROR_STREAM("Mission Planner could not transition to "<<(int)requested_state.state<<": "<<response.error_message);
 		}
 	}
 	else
