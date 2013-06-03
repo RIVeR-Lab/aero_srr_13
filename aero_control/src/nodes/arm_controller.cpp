@@ -214,11 +214,7 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 {
 	if (active_state == true)
 	{
-<<<<<<< HEAD
-		ROS_INFO("Active MSG");
 
-=======
->>>>>>> development-test
 		try
 		{
 			if (path_active == false)
