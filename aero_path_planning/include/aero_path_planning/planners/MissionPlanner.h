@@ -142,7 +142,9 @@ private:
 
 	aero_path_planning::ObjectOfInterestManager OoI_manager_;
 
-	double                path_threshold_;///The threshold for determining we've gotten to a point on the path, in meters
+	double                path_threshold_;///The threshold for determining we've gotten to a point on the path in search mode, in meters
+	double                nav_threshold_; ///The threshold for determining ew've gotten to an object of interest, in meters
+	double                dist_threshold_;///The threshold for determining we've gotten to a mission goal
 	bool                  searching_;     ///Flag to signal if the robot is searching or not
 	bool                  naving_;        ///Flag to singal if the robot is naving to obj
 	bool                  homeing_;        ///Flag to signal if the robot is homing
