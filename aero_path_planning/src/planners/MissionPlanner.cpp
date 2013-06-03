@@ -182,13 +182,14 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			ROS_INFO_STREAM_THROTTLE(5,"I have completed my current path!");
 			if(!this->mission_goals_.empty() && this->recieved_path_)
 			{
+				if(this->naving_)
+				{
+					ROS_INFO_STREAM("Reached an Object of Interest, attempting to Collect!");
+					this->requestCollect();
+				}
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
 				this->updateMissionGoal();
 				//If we're naving to objects of interests, means we got to one, try and collect it
-				if(this->naving_)
-				{
-					this->requestCollect();
-				}
 			}
 			//We need to transition mission states
 			else
@@ -198,14 +199,24 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 				{
 					this->requestNavObj();
 				}
+				//Means we're at the last OoI detection, attepmt to collect
+				else if(this->naving_&&!this->last_collect_)
+				{
+					ROS_INFO_STREAM("Reached the final Object of Interest, attempting to Collect!");
+					this->requestCollect();
+					this->last_collect_ = true;
+				}
 				//Means we've reached the end of the detections, go home
 				else if(this->naving_&&this->recieved_path_)
 				{
-					ROS_INFO_STREAM("Mission Planner: Finised My Mission, Heading Home!");
-					this->requestHome();
-					geometry_msgs::Pose home;
-					home.orientation.w = 1;
-					this->mission_goals_.push_back(home);
+					if(this->last_collect_)
+					{
+						ROS_INFO_STREAM("Mission Planner: Finised My Mission, Heading Home!");
+						this->requestHome();
+						geometry_msgs::Pose home;
+						home.orientation.w = 1;
+						this->mission_goals_.push_back(home);
+					}
 				}
 			}
 		}
@@ -273,7 +284,6 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			if(!this->naving_)
 			{
 				this->generateDetectionGoalList();
-				this->updateGoal();
 			}
 			this->searching_ = false;
 			this->naving_    = true;
