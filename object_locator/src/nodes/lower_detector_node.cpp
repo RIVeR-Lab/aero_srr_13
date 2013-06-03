@@ -174,6 +174,8 @@ void DetectorNode::stateCb(const aero_srr_msgs::AeroStatePtr& msg)
 	case State_t::COLLECT:
 		Collect_ = true;
 		break;
+	case State_t::PICKUP:
+		Collect_ = true;
 	default:
 		ROS_ERROR_STREAM("Received Unknown Robot State: "<<msg->state);
 		break;
