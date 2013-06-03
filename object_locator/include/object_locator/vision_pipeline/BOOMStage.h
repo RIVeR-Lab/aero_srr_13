@@ -72,6 +72,7 @@ namespace object_locator
 		virtual void computeDisparity();
 		virtual void gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage);
 		virtual void generateMsg();
+		virtual void stdFilt(const sensor_msgs::Image& msg);
 
 		ros::Subscriber sync_image_sub_;
 		image_transport::ImageTransport* it_;
@@ -94,7 +95,7 @@ namespace object_locator
 		float kAvgVal_,xAvgVal_,yAvgVal_;
 
 		//***sherlock Parameters*****/
-		double thresh_dist_, growth_rate_, shrink_rate_, thresh_det_;
+		double thresh_dist_, growth_rate_, shrink_rate_, thresh_det_, max_conf_;
 		object_locator::DetectionManager* watson_;
 
 		image_geometry::StereoCameraModel stereo_model;

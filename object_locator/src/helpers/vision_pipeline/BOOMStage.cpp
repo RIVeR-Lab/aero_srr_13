@@ -60,7 +60,7 @@ void BOOMStage::loadParams() {
 			this->grass_level);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
 	this->HORIZON_TOP_NAME = "HORIZON";
-	this->HORIZON_TOP_ = 125;
+	this->HORIZON_TOP_ = 150;
 	this->HORIZON_BTM_ = 730;
 	this->grass_level = .33;
 	this->ZeroV[0] = 0;
@@ -89,8 +89,9 @@ void BOOMStage::loadParams() {
 
 //	std::string thresh_det("thresh_det");
 	thresh_det_ = .5;
+	max_conf_ = 1.0;
 //	this->getPrivateNodeHandle().getParam(thresh_det, thresh_det_);
-	this->watson_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
+	this->watson_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_, max_conf_);
 //	load_=imread("/home/srr/ObjectDetectionData/samplesOutsideDownscaled.jpg", CV_LOAD_IMAGE_COLOR);
 //	NODELET_INFO_STREAM("img height =" << load_.cols << "\n" << "img width =" << load_.rows);
 	this->train_ = true;
@@ -125,15 +126,16 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	computeDisparityCb();
 	Mat_t src = img->image;
 	Mat_t normImage,mask,finalMask,hsv2;
+	stdFilt(*msg);
 //	circleFind(*msg);
 //	gmmRemove(msg,hsv2);
-	grassRemove(*msg, normImage);
-	maskCreate(*msg,mask);
+//	grassRemove(*msg, normImage);
+//	maskCreate(*msg,mask);
 //	fenceCheckerStd(normImage);
 //	fillHoles(mask);
-	blobIdentify(normImage,mask, finalMask);
-	showAlpha(src,finalMask);
-	detectAnomalies(normImage,finalMask);
+//	blobIdentify(normImage,mask, finalMask);
+//	showAlpha(src,finalMask);
+//	detectAnomalies(normImage,finalMask);
 
 }
 void BOOMStage::boomImageCbright(const sensor_msgs::ImageConstPtr& msg,
@@ -177,49 +179,49 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 }
 void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage)
 {
-	cv_bridge::CvImagePtr img;
-//	Mat_t src = load_;
-	try {
-		img = cv_bridge::toCvCopy(msg, enc::BGR8);
-	} catch (cv_bridge::Exception& e) {
-		NODELET_ERROR("cv_bridge exception: %s", e.what());
-		return;
-	}
-	Mat_t source(img->image);
-	Mat_t hsv;
-	Mat_t hsv32F,hsv32Fnorm;
-	cvtColor(source,hsv,CV_BGR2HSV);
-
-	hsv.convertTo(hsv32F,CV_32FC3);
-	normalize(hsv32F,hsv32Fnorm,0,1,CV_MINMAX);
-	Vec3f HSV3 = hsv32Fnorm.at<cv::Vec3f>(100, 100);
-	Vec3b RGB;
-	Vec3f HSV;
-	double Gratio, Rratio;
-	ROS_INFO_STREAM("NORM OF 32HSV at 100,100 = " << HSV3[0]);
-	Mat_t detected = Mat::zeros(source.size(), CV_8UC3);
-	for(int k = 0; k< source.rows; k++)
-	{
-		for(int m = 0;m<source.cols; m++)
-		{
-			RGB = source.at<cv::Vec3b>(k, m);
-			HSV = hsv32Fnorm.at<cv::Vec3f>(k,m);
-
-			//ROS_INFO_STREAM("RGBd is  = " << (double)RGB[1]);
-
-			Gratio = (double)RGB[1]/(double)(RGB[1]+RGB[2]+RGB[0]);
-			Rratio = (double)RGB[2]/(double)(RGB[1]+RGB[2]+RGB[0]);
-
-			//if((HSV[2] >0.95) && Gratio < 0.331 && std::abs(browness - 1) > 0.2)
-			//remove high luminosity regions and regions of green and yellow
-			if((HSV[2] >0.8) && Gratio < 0.331 && Rratio < 0.331)
-				detected.at<cv::Vec3b>(k, m) = White;
-			else
-				detected.at<cv::Vec3b>(k, m) = ZeroV;
-
-		}
-	}
-	hsvImage = detected;
+//	cv_bridge::CvImagePtr img;
+////	Mat_t src = load_;
+//	try {
+//		img = cv_bridge::toCvCopy(msg, enc::BGR8);
+//	} catch (cv_bridge::Exception& e) {
+//		NODELET_ERROR("cv_bridge exception: %s", e.what());
+//		return;
+//	}
+//	Mat_t source(img->image);
+//	Mat_t hsv;
+//	Mat_t hsv32F,hsv32Fnorm;
+//	cvtColor(source,hsv,CV_BGR2HSV);
+//
+//	hsv.convertTo(hsv32F,CV_32FC3);
+//	normalize(hsv32F,hsv32Fnorm,0,1,CV_MINMAX);
+//	Vec3f HSV3 = hsv32Fnorm.at<cv::Vec3f>(100, 100);
+//	Vec3b RGB;
+//	Vec3f HSV;
+//	double Gratio, Rratio;
+//	ROS_INFO_STREAM("NORM OF 32HSV at 100,100 = " << HSV3[0]);
+//	Mat_t detected = Mat::zeros(source.size(), CV_8UC3);
+//	for(int k = 0; k< source.rows; k++)
+//	{
+//		for(int m = 0;m<source.cols; m++)
+//		{
+//			RGB = source.at<cv::Vec3b>(k, m);
+//			HSV = hsv32Fnorm.at<cv::Vec3f>(k,m);
+//
+//			//ROS_INFO_STREAM("RGBd is  = " << (double)RGB[1]);
+//
+//			Gratio = (double)RGB[1]/(double)(RGB[1]+RGB[2]+RGB[0]);
+//			Rratio = (double)RGB[2]/(double)(RGB[1]+RGB[2]+RGB[0]);
+//
+//			//if((HSV[2] >0.95) && Gratio < 0.331 && std::abs(browness - 1) > 0.2)
+//			//remove high luminosity regions and regions of green and yellow
+//			if((HSV[2] >0.8) && Gratio < 0.331 && Rratio < 0.331)
+//				detected.at<cv::Vec3b>(k, m) = White;
+//			else
+//				detected.at<cv::Vec3b>(k, m) = ZeroV;
+//
+//		}
+//	}
+//	hsvImage = detected;
 
 //	imshow("b4detection", detected);
 //
@@ -231,7 +233,60 @@ void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage
 //	morphologyEx(detected, detected, MORPH_OPEN, element);// do morphological opening to remove small specks and enlarge larger detections
 
 
-	imshow("detection", detected);
+//	imshow("detection", detected);
+//	waitKey(3);
+
+}
+
+void BOOMStage::stdFilt(const sensor_msgs::Image& msg)
+{
+	cv_bridge::CvImagePtr img;
+//	Mat_t src = load_;
+	try {
+		img = cv_bridge::toCvCopy(msg, enc::BGR8);
+	} catch (cv_bridge::Exception& e) {
+		NODELET_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+	Mat_t image = img->image;
+	Mat_t dst,dst2,dst3, medSig,image_gray, sigFinal;
+	Vec3d ZeroVd;
+	ZeroVd[0] = 0.0;
+	ZeroVd[1] = 0.0;
+	ZeroVd[2] = 0.0;
+	cvtColor(image,image_gray,CV_BGR2GRAY);
+	Mat image32f;
+	image_gray.convertTo(image32f, CV_32F);
+
+	Mat mu;
+	blur(image32f, mu, Size(3, 3));
+
+	Mat mu2;
+	blur(image32f.mul(image32f), mu2, Size(3, 3));
+
+	Mat sigma;
+	cv::sqrt(mu2 - mu.mul(mu), sigma);
+	normalize(image32f, dst, 0.0, 1.0, NORM_MINMAX);
+	normalize(sigma, dst2, 0.0, 1.0, NORM_MINMAX);
+
+	medianBlur(dst2, medSig, 3);
+	for(int k = 0; k< HORIZON_TOP_; k++)
+	{
+		for(int m = 0;m<medSig.cols; m++)
+		{
+			medSig.at<cv::Vec3d>(k, m) = ZeroVd;
+		}
+	}
+	threshold(medSig, sigFinal,.55,1, THRESH_BINARY);
+
+	int elem_type = MORPH_RECT;
+	int elem_size = 11;
+
+	Mat element = getStructuringElement( elem_type, Size( 2*elem_size + 1, 2*elem_size+1 ), Point( elem_size, elem_size ) );
+	morphologyEx(sigFinal, sigFinal, MORPH_DILATE, element);// do morphological opening to remove small specks and enlarge larger detections
+
+	imshow("sigma",sigFinal);
+	imshow("rgb",image);
 	waitKey(3);
 
 }

@@ -44,8 +44,8 @@ using namespace sensor_msgs;
 
 DetectorNode::DetectorNode() :
 		it_(nh_), WINDOWLeft("Left Camera"), WINDOWRight("Right Camera"), WINDOWDisparity(
-				"Disparity"), sherlock(.1, .15, .05, .5), gotLeft(false), gotRight(
-				false)
+				"Disparity"), sherlock(.1, .15, .05, .5, 1.0),aero(.05,.20,.10,.5, 10.0), gotLeft(false), gotRight(
+				false), Collect_(false)
 
 {
 	//**********enable CUDA*****************
@@ -54,6 +54,8 @@ DetectorNode::DetectorNode() :
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>(
 			"ObjectPose", 2);
+	ObjLocationPubWorld = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>(
+			"ObjectPoseWorld", 2);
 	secondObjPub = nh_.advertise<geometry_msgs::PoseArray>(
 			"ObjectPose2", 2);
 	image_pub_ = it_.advertise("/out", 1);
@@ -64,7 +66,7 @@ DetectorNode::DetectorNode() :
 
 	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &DetectorNode::imageCbLeft, this);
 	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &DetectorNode::imageCbRight, this);
-
+	state_sub_   = nh_.subscribe("/aero/supervisor/state",1, &DetectorNode::stateCb, this);
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
@@ -153,6 +155,28 @@ void DetectorNode::saveImage(const sensor_msgs::Image& msg,
 			cv::imwrite(d.str(), img);
 			ctrRight++;
 		}
+	}
+}
+void DetectorNode::stateCb(const aero_srr_msgs::AeroStatePtr& msg)
+{
+	Aero_state_ = msg->state;
+	typedef aero_srr_msgs::AeroState State_t;
+	switch(msg->state)
+	{
+	case State_t::STARTUP:
+	case State_t::ERROR:
+	case State_t::SAFESTOP:
+	case State_t::SHUTDOWN:
+	case State_t::SEARCH:
+	case State_t::NAVOBJ:
+	case State_t::HOME:
+	case State_t::MANUAL:
+	case State_t::COLLECT:
+		Collect_ = true;
+		break;
+	default:
+		ROS_ERROR_STREAM("Received Unknown Robot State: "<<msg->state);
+		break;
 	}
 }
 
@@ -542,7 +566,7 @@ void DetectorNode::computeDisparity() {
 #endif
 
 	cv::Point3d real_xyz;
-	geometry_msgs::PointStamped camera_point, world_point;
+	geometry_msgs::PointStamped camera_point, world_point, robot_point;
 	for (int i = 0; i < (int) detection_list_.size(); i++) {
 //		cout << endl;
 //		cout << "In detection #"<< i+1 << "/"<< detection_list_WHA.size() <<endl;
@@ -614,6 +638,10 @@ void DetectorNode::computeDisparity() {
 			ros::Time tZero(0);
 			camera_point.header.frame_id = "/lower_stereo_optical_frame";
 			camera_point.header.stamp = tZero;
+
+			robot_point.header.frame_id = "/base_footprint";
+			robot_point.header.stamp = tZero;
+
 			world_point.header.frame_id = "/world";
 			world_point.header.stamp = tZero;
 //			cout << "Transforming camera to world" <<endl;
@@ -621,22 +649,27 @@ void DetectorNode::computeDisparity() {
 					camera_point.header.frame_id, ros::Time(0),
 					ros::Duration(1.0));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
+			optimus_prime.transformPoint("/base_footprint",camera_point,robot_point);
 //			cout << "Adding TFT to msg" <<endl;
+			tf::Point robot_rel_detection;
 			tf::pointMsgToTF(world_point.point, detection);
+			tf::pointMsgToTF(robot_point.point, robot_rel_detection);
 			sherlock.addDetection(detection, detection_list_.at(i)->second);
+			aero.addAndReplaceDetection(robot_rel_detection, WHA);
 //			cout << "Added detection to manager" <<endl;
 		}
 
 	}
 
 	tf::Point detection;
+	tf::Point robot_rel_det;
 //	cout << "Clearing list" <<endl;
 	detection_list_.clear();
 //	cout << "Shrinking Det/ection manager list" <<endl;
 	sherlock.shrink();
 //	cout << "Finished shrinking list" <<endl;96
-	double confidence;
-	object_type type;
+	double confidence, rr_conf;
+	object_type type, rr_type;
 	if (sherlock.getDetection(detection, type, confidence)) {
 		std::string typeString;
 		switch (type) {
@@ -678,32 +711,25 @@ void DetectorNode::computeDisparity() {
 		msg.pose.header.frame_id = world_point.header.frame_id;
 		msg.pose.header.stamp = ros::Time::now();
 		buildMsg(detection, msg.pose);
-		ObjLocationPub.publish(msg);
+		ObjLocationPubWorld.publish(msg);
 //		ROS_ERROR_STREAM("Sent Obj msg from Classifier");
+	}
+	if(aero.getDetection(robot_rel_det, rr_type, rr_conf)) {
+		aero_srr_msgs::ObjectLocationMsg msg;
+		msg.header.frame_id = robot_point.header.frame_id;
+		msg.header.stamp = ros::Time::now();
+		msg.pose.header.frame_id = robot_point.header.frame_id;
+		msg.pose.header.stamp = ros::Time::now();
+		buildMsg(detection, msg.pose);
+		ObjLocationPub.publish(msg);
+	}
+	if(Collect_)
+	{
+		aero.clear();
+		Collect_ = false;
 	}
 
 
-	// Neighbors within voxel search
-
-
-//	  if (octree.voxelSearch (searchPoint, pointIdxVec))
-//	  {
-//		  float sum =0.0;
-//	    std::cout << "Neighbors within voxel search at (" << searchPoint.x
-//	     << " " << searchPoint.y
-//	     << " " << searchPoint.z << ")"
-//	     << std::endl;
-//
-//	    for (size_t i = 0; i < pointIdxVec.size (); ++i)
-//	    {
-////	    	std::cout << "    " << cloud->points[pointIdxVec[i]].x
-////	       << " " << cloud->points[pointIdxVec[i]].y
-////	       << " " << cloud->points[pointIdxVec[i]].z << std::endl;
-//	    sum = cloud->points[pointIdxVec[i]].z + sum;
-//	    }
-//	    float avgVal = sum/pointIdxVec.size ();
-//	    ROS_WARN_STREAM("Average value at Voxel = " << avgVal);
-//	  }
 
 	Mat_t cmapped;
 	disp.convertTo(cmapped, CV_8U);

@@ -15,10 +15,10 @@
 using namespace object_locator;
 
 DetectionManager::DetectionManager(double threshold_dist, double growth_rate,
-		double shrink_rate, double threshold_det) :
+		double shrink_rate, double threshold_det, double max_confidence) :
 		threshold_dist_(threshold_dist), growth_rate_(growth_rate), shrink_rate_(
 				shrink_rate), threshold_det_(threshold_det), max_condifdence_(
-				1.0) {
+				max_confidence) {
 
 }
 
@@ -56,6 +56,33 @@ void DetectionManager::addDetection(const tf::Point& detection,
 			if (item->second < this->max_condifdence_) {
 
 				item->first.first = (item->first.first + detection) / 2;
+				item->second += this->growth_rate_;
+			}
+			growth = true;
+		}
+
+		if (growth) {
+			break;
+		}
+	}
+
+	if (!growth) {
+		DetectionPtr newDetection(new Detection_t());
+		newDetection->first.first = detection;
+		newDetection->first.second = type;
+		newDetection->second = this->growth_rate_;
+		this->detections_.push_back(newDetection);
+	}
+}
+
+void DetectionManager::addAndReplaceDetection(const tf::Point& detection, const object_type type)
+{
+	bool growth = false;
+	BOOST_FOREACH(DetectionArray_t::value_type item, this->detections_) {
+		if (item->first.first.distance(detection) <= this->threshold_dist_) {
+			if (item->second < this->max_condifdence_) {
+
+				item->first.first = detection;
 				item->second += this->growth_rate_;
 			}
 			growth = true;
