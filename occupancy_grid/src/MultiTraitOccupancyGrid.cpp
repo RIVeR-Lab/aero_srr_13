@@ -390,7 +390,7 @@ void MultiTraitOccupancyGrid::toROSMsg(trait_t trait, nm::OccupancyGrid& message
 
 void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances, trait_t trait, bool scaling, bool use_zero_as_free, bool use_negative_as_unkown)  throw (bool)
 {
-	ROS_INFO_STREAM("Copying Occupancy Grid into MultiTraitOccupancyGrid....");
+	//ROS_INFO_STREAM("Copying Occupancy Grid into MultiTraitOccupancyGrid....");
 	unsigned int copy_width  = confidances.info.width;
 	unsigned int copy_height = confidances.info.height;
 	if(copy_width > this->map_meta_data_.width)
@@ -401,7 +401,7 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 	{
 		copy_height = this->map_meta_data_.height;
 	}
-	ROS_INFO_STREAM("Copy Wdith: "<<copy_width<<", Copy Height: "<<copy_height);
+	//ROS_INFO_STREAM("Copy Wdith: "<<copy_width<<", Copy Height: "<<copy_height);
 	for(int x = 0; x < (int)copy_width; x++)
 	{
 		for(int y = 0; y < (int)copy_height; y++)
@@ -446,7 +446,7 @@ void MultiTraitOccupancyGrid::addPointTrait(const nm::OccupancyGrid& confidances
 			}
 		}
 	}
-	ROS_INFO_STREAM("Finished Copying Data Into Gird!");
+	//ROS_INFO_STREAM("Finished Copying Data Into Gird!");
 }
 
 bool MultiTraitOccupancyGrid::getGoal(gm::Pose& goal) const
