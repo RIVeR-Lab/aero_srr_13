@@ -69,7 +69,6 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	this->path_active = false;
 	this->path_step_start = true;
 	this->path_step_start_time = ros::Time().now();
-	this->pause_time = ros::Time().now();
 
 	/* Messages */
 	this->object_position_sub = nh.subscribe(object_pose, 1, &ArmController::ObjectPositionMSG, this);
