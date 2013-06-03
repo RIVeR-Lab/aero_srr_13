@@ -90,6 +90,13 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 	linear_gain = 1;
 	rotational_gain = 1;
 
+	x_change = 0;
+	y_change = 0;
+
+	 forward_vel= 0;
+
+	 rotational_vel= 0;
+
 	this->workspace_pose.pose.position.x = 0.75;
 	this->workspace_pose.pose.position.y = 0;
 	this->workspace_pose.pose.position.z = 0;
@@ -189,6 +196,8 @@ void BaseServoController::DesiredPositionMSG(
 
 		last_position_time = ros::Time().now();
 
+		x_change = 0;
+		y_change = 0;
 
 
 		BaseServoStart();
@@ -248,8 +257,19 @@ void BaseServoController::UpdateError(void) {
 		tf_listener.waitForTransform("/base_footprint", this->workspace_pose.header.frame_id,
 				this->workspace_pose.header.stamp, ros::Duration(0.1));
 		tf_listener.transformPose("/base_footprint", this->workspace_pose, workspace_error_pose);
-		pos_err.x_err = desired_error_pose.pose.position.x - workspace_error_pose.pose.position.x;
-		pos_err.y_err = desired_error_pose.pose.position.y - workspace_error_pose.pose.position.y;
+
+		double dT = ros::Time::now().toSec()-PID_Time.toSec();
+
+		x_change += forward_vel*dT*cos(rotational_vel*dT);
+		y_change+=forward_vel*dT*sin(rotational_vel*dT);
+		ROS_INFO("x_change = %f, y_change = %f",x_change,y_change);
+
+		pos_err.x_err = desired_error_pose.pose.position.x-x_change - workspace_error_pose.pose.position.x;
+		pos_err.y_err = desired_error_pose.pose.position.y-y_change - workspace_error_pose.pose.position.y;
+
+
+		this->PID_Time = ros::Time::now();
+
 
 		ROS_INFO("X_Err = %f, Y_Err = %f",pos_err.x_err,pos_err.y_err);
 
@@ -277,7 +297,6 @@ void BaseServoController::UpdateError(void) {
 }
 void BaseServoController::UpdatePID(void) {
 
-	double forward_vel;
 
 	forward_vel = PID_X->PIDUpdate(pos_err.x_err);
 	forward_vel *= linear_gain;
@@ -288,7 +307,6 @@ void BaseServoController::UpdatePID(void) {
 		forward_vel = -MaxLinearVel();
 	}
 
-	double rotational_vel;
 
 	rotational_vel = PID_Y->PIDUpdate(pos_err.y_err);
 	rotational_vel *= rotational_gain;

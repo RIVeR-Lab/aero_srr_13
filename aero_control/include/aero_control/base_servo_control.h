@@ -79,6 +79,7 @@ private:
 
 	ros::Timer error_update_timer;
 	ros::Timer state_timeout_timer;
+	ros::Time PID_Time;
 
 
 	bool error_update_timer_flag;
@@ -89,6 +90,12 @@ private:
 
 	float linear_gain;
 	float rotational_gain;
+
+	double forward_vel;
+	double rotational_vel;
+
+	double x_change;
+	double y_change;
 
 	bool active_state;
 
