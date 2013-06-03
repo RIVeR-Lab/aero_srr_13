@@ -102,12 +102,15 @@ namespace aero_control
 				path_steps = 0;
 
 				//	SetPathStep(true,30,30,30,false,0,0,0,0,0,0);
-				SetPathStep(false, 0, 0, 0, true, 0.4, -0.1, 0.4, -1.421, 0.4668, 3);
-				SetPathStep(false, 0, 0, 0, true, 0.4, -0.1, 0.6, -1.421, 0.4668, 3);
-				SetPathStep(false, 0, 0, 0, true, 0.4, 0, 0.6, -1.421, 0.4668, 3);
-				SetPathStep(true, 40, 40, 20, false, 0, 0, 0, 0, 0, 0);
+				SetPathStep(false, 0, 0, 0, true, 0.196, 0.253, 0.476, -1.551448, -0.03685, 3.092539);
+				SetPathStep(false, 0, 0, 0, true, 0.299844, -0.184166, 0.480376, -1.551448,-0.03685,3.092539);
+				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
+				SetPathStep(true, 0, 0, 0, false, 0, 0, 0, 0, 0, 0);
+				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x, obj_pose.pose.position.y-0.1, -0.090333, -1.629365,-0.558572,-0.268738);
+				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x, obj_pose.pose.position.y+0.05, -0.090333, -1.629365,-0.558572,-0.268738);
+				SetPathStep(true, 54, 54, 54, false, 0, 0, 0, 0, 0, 0);
+				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
 
-				SetPathStep(false, 0, 0, 0, true, 0.5, 0, 0.4, -1.421, 0.4668, 3);
 				//SetPathStep(true,0,0,0,false,0,0,0,0,0,0);
 
 				//SetPathStep(false,0,0,0,true,0.4,-0.1,0.6,-1.421,0.4668,3);
