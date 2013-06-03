@@ -104,7 +104,7 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//Update rate to generate local occupancy grid
 	std::string pg_up_rate(G_OCC_UPDTRT);
-	this->global_update_rate_ = 30.0;
+	this->global_update_rate_ = 10.0;
 	std::stringstream gup_rate_msg;
 	gup_rate_msg<<this->global_update_rate_<<"s";
 
@@ -340,9 +340,9 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 
 void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 {
-	ROS_INFO_STREAM("Recieved new SLAM map information!");
+	//ROS_INFO_STREAM("Recieved new SLAM map information!");
 	this->global_map_->addPointTrait(*message, occupancy_grid::utilities::CellTrait::OBSTACLE);
-	ROS_INFO_STREAM("SLAM Data Added!");
+	//ROS_INFO_STREAM("SLAM Data Added!");
 }
 
 
