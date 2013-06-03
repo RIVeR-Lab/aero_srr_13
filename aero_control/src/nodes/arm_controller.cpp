@@ -61,7 +61,6 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	ROS_INFO("Starting Up Arm Controller...");
 
 	this->active_state = false;
-	this->active_state = true; //need to remove
 
 	this->previous_state = aero_srr_msgs::AeroState::STARTUP;
 	this->arm_moving = false;
@@ -193,7 +192,6 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 		} else
 		{
 
-			path_timer.stop(); //TODO Remove
 			ROS_INFO("DONE");
 
 			this->path_active = false;
