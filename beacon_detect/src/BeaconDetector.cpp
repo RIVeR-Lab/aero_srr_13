@@ -199,7 +199,7 @@ void BeaconDetector::addtf(tf::Stamped<tf::Transform> tfbaseinworld)
 	{
 		tf::Quaternion avg=total_tfbaseinworld_->getRotation();
 		avg.slerp(tfbaseinworld.getRotation(),0.5);
-		total_tfbaseinworld_->setOrigin(total_tfbaseinworld_->getOrigin()+tfbaseinworld.getOrigin()/2);
+		total_tfbaseinworld_->setOrigin((total_tfbaseinworld_->getOrigin()+tfbaseinworld.getOrigin())/2);
 	}
 
 }
@@ -341,7 +341,7 @@ void BeaconDetector::publishWorld(tf::Stamped<tf::Transform>  tf)
 {
 	while(ros::ok())
 	{
-		ROS_INFO("Publishing x: %f y: %f z: %f",tf.getOrigin().getX(),tf.getOrigin().getY(),tf.getOrigin().getZ());
+		//ROS_INFO("Publishing x: %f y: %f z: %f",tf.getOrigin().getX(),tf.getOrigin().getY(),tf.getOrigin().getZ());
 		br_.sendTransform(tf::StampedTransform(tf, ros::Time::now()+ros::Duration(0.5), "/world","/tag_base"));
 	}
 	if(world_broadcaster_.joinable())
@@ -530,7 +530,7 @@ tf::Stamped<tf::Transform> BeaconDetector::initProcess(double fx,double fy, doub
 void BeaconDetector::pubOdom(tf::Stamped<tf::Transform> pose, ros::Time time)
 {
 	nav_msgs::Odometry msg;
-	msg.header.stamp = time;           // time of current measurement
+	msg.header.stamp = time+ros::Duration(0.3);           // time of current measurement
     msg.header.frame_id = "base_footprint";        // the tracked robot frame
 	msg.pose.pose.position.x = pose.getOrigin().getX();    // x measurement tag.
 	msg.pose.pose.position.y = pose.getOrigin().getY();    // y measurement tag.
