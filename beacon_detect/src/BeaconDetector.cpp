@@ -16,7 +16,8 @@ using namespace cv;
 BeaconDetector::BeaconDetector():it_(nh_)
 {
 	getRosParam();										//initialize all the ROS Parameters
-	active_=false;										//keep the beacon detector inactive by default]
+	active_=false;
+      total_tfbaseinworld_=NULL;										//keep the beacon detector inactive by default]
 	if (!estimate_only_)
 		init_=true;											//by default the tag system is not initialized,
 	else
@@ -137,7 +138,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 
 	detections_ = tag_detector.extractTags(gray);	//get tags if detected
 
-	ROS_INFO("%d tag detected. \n",(int)detections_.size());									//DEBUG information
+	ROS_INFO("%d tag detected.",(int)detections_.size());									//DEBUG information
 	if(detections_.size()==0)
 		return;
 
@@ -148,6 +149,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 		//till test period is over
 		if(!isnan(tfbaseinworld.getOrigin().x())&&!isnan(tfbaseinworld.getRotation().x())&&(tfbaseinworld.getOrigin().x()!=0))
 			addtf(tfbaseinworld);
+
 		if(!test_&&init_finish_)
 		{
 			tfbaseinworld=estimatetf();
@@ -185,19 +187,25 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 }
 void BeaconDetector::addtf(tf::Stamped<tf::Transform> tfbaseinworld)
 {
+	ROS_INFO("adding a value tf");
 	if(total_tfbaseinworld_==NULL)
 	{
-		total_tfbaseinworld_=new tf::Stamped<tf::Transform>;
+		ROS_INFO("adding the first tf");
+		total_tfbaseinworld_=new tf::Stamped<tf::Transform>();
 		total_tfbaseinworld_->setRotation(tfbaseinworld.getRotation());
 
 	}
-	tf::Quaternion avg=total_tfbaseinworld_->getRotation();
-	avg.slerp(tfbaseinworld.getRotation(),0.5);
-	total_tfbaseinworld_->setOrigin(total_tfbaseinworld_->getOrigin()+tfbaseinworld.getOrigin()/2);
+	else
+	{
+		tf::Quaternion avg=total_tfbaseinworld_->getRotation();
+		avg.slerp(tfbaseinworld.getRotation(),0.5);
+		total_tfbaseinworld_->setOrigin(total_tfbaseinworld_->getOrigin()+tfbaseinworld.getOrigin()/2);
+	}
 
 }
 tf::Stamped<tf::Transform>  BeaconDetector::estimatetf()
 {
+	ROS_INFO("Estimated value: : %f y: %f z: %f",total_tfbaseinworld_->getOrigin().getX(),total_tfbaseinworld_->getOrigin().getY(),total_tfbaseinworld_->getOrigin().getZ());
 	return(*total_tfbaseinworld_);
 }
 void BeaconDetector::initConfiguration(string fname)
