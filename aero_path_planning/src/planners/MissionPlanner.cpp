@@ -239,6 +239,7 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 		case state_t::SAFESTOP:
 		case state_t::SHUTDOWN:
 		case state_t::COLLECT:
+		case state_t::PICKUP:
 			this->pause(true);
 			break;
 		case state_t::SEARCH:
