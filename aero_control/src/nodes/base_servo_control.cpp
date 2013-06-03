@@ -100,9 +100,9 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 
 	 rotational_vel= 0;
 
-	this->workspace_pose.pose.position.x = 0.914;
+	this->workspace_pose.pose.position.x = 0.65;
 
-	this->workspace_pose.pose.position.y = 0;
+	this->workspace_pose.pose.position.y = 0.1;
 	this->workspace_pose.pose.position.z = 0;
 	tf::Quaternion q;
 
@@ -170,7 +170,7 @@ void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
 	UpdateError();
 
 	//if we don't see anything then stop moving
-	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 5) {
+	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 1) {
 		BaseServoStop();
 	}
 
@@ -266,6 +266,10 @@ void BaseServoController::UpdateError(void) {
 
 		x_change += forward_vel*dT*cos(rotational_vel*dT);
 		y_change+=forward_vel*dT*sin(rotational_vel*dT);
+
+		//x_change =0;
+		//y_change=0;
+
 		ROS_INFO("x_change = %f, y_change = %f",x_change,y_change);
 
 		pos_err.x_err = desired_error_pose.pose.position.x-x_change - workspace_error_pose.pose.position.x;
@@ -280,7 +284,7 @@ void BaseServoController::UpdateError(void) {
 		if (pos_err.x_err < ErrorRange() && pos_err.y_err < ErrorRange()) {
 
 			ROS_INFO("In Range");
-			if (ros::Time().now().toSec() - in_range_time.toSec() > 1) {
+			if (ros::Time().now().toSec() - in_range_time.toSec() > 5) {
 				ROS_INFO("Moving on");
 
 				aero_srr_msgs::StateTransitionRequest state_transition;

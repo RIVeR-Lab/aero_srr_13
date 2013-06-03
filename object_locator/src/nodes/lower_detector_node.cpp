@@ -44,7 +44,7 @@ using namespace sensor_msgs;
 
 DetectorNode::DetectorNode() :
 		it_(nh_), WINDOWLeft("Left Camera"), WINDOWRight("Right Camera"), WINDOWDisparity(
-				"Disparity"), sherlock(.25, .15, .05, .5, 2.0),aero(1.0,.40,.10,.5, 1.0), gotLeft(false), gotRight(
+				"Disparity"), sherlock(.25, .15, .05, .5, 2.0),aero(1.5,.20,.10,.25, .25), gotLeft(false), gotRight(
 				false), Collect_(false)
 
 {
@@ -733,7 +733,7 @@ void DetectorNode::computeDisparity() {
 		msg.header.stamp = ros::Time::now();
 		msg.pose.header.frame_id = "base_footprint";
 		msg.pose.header.stamp = ros::Time::now();
-		buildMsg(detection, msg.pose);
+		buildMsg(robot_rel_det, msg.pose);
 		ObjLocationPub.publish(msg);
 		ROS_WARN_STREAM("Sent obj pose msg");
 	}
