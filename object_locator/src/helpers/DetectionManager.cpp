@@ -53,9 +53,9 @@ void DetectionManager::addDetection(const tf::Point& detection,
 	bool growth = false;
 	BOOST_FOREACH(DetectionArray_t::value_type item, this->detections_) {
 		if (item->first.first.distance(detection) <= this->threshold_dist_) {
+			item->first.first = (item->first.first + detection) / 2;
 			if (item->second < this->max_condifdence_) {
-
-				item->first.first = (item->first.first + detection) / 2;
+				
 				item->second += this->growth_rate_;
 			}
 			growth = true;
@@ -80,11 +80,12 @@ void DetectionManager::addAndReplaceDetection(const tf::Point& detection, const 
 	bool growth = false;
 	BOOST_FOREACH(DetectionArray_t::value_type item, this->detections_) {
 		if (item->first.first.distance(detection) <= this->threshold_dist_) {
-			if (item->second < this->max_condifdence_) {
+
 
 				item->first.first = detection;
+			if (item->second < this->max_condifdence_) {
 				item->second += this->growth_rate_;
-			}
+					}
 			growth = true;
 		}
 

@@ -90,7 +90,7 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 	linear_gain = 1;
 	rotational_gain = 1;
 
-	this->workspace_pose.pose.position.x = 0.75;
+	this->workspace_pose.pose.position.x = 0.914;
 	this->workspace_pose.pose.position.y = 0;
 	this->workspace_pose.pose.position.z = 0;
 	tf::Quaternion q;

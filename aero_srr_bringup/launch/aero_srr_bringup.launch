@@ -52,6 +52,6 @@
   <include file="$(find object_locator)/launch/vision_pipeline_bottom.launch">
   </include> 
 
-  <include file="$(find aero_control)/launch/aero_base_servo.launch"/>
+  <!--<include file="$(find aero_control)/launch/aero_base_servo.launch"/>-->
   <include file="$(find aero_control)/launch/aero_arm.launch"/>
 </launch>
