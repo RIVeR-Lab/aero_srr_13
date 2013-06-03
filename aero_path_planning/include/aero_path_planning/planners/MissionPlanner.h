@@ -149,6 +149,7 @@ private:
 	bool                  naving_;        ///Flag to singal if the robot is naving to obj
 	bool                  homeing_;        ///Flag to signal if the robot is homing
 	bool                  recieved_path_; ///Flag to signal if the robot has ever recieved a carrot path
+	bool                  last_collect_;  ///Flag to singla if we've attempted to collect the last OoI
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system
