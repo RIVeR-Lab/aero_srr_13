@@ -22,7 +22,7 @@ Supervisor::Supervisor(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 		p_nh_(p_nh)
 {
 	ROS_INFO_STREAM("Initializing Aero SRR Supervisor...");
-	this->state_.state = state_t::COLLECT;
+	this->state_.state = state_t::SEARCH;
 	this->loadParams();
 	this->registerTopics();
 	this->registerTimers();

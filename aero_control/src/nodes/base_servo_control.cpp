@@ -100,7 +100,7 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 
 	 rotational_vel= 0;
 
-	this->workspace_pose.pose.position.x = 0.65;
+	this->workspace_pose.pose.position.x = 0.7;
 
 	this->workspace_pose.pose.position.y = 0.1;
 	this->workspace_pose.pose.position.z = 0;
@@ -170,7 +170,7 @@ void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
 	UpdateError();
 
 	//if we don't see anything then stop moving
-	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 1) {
+	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 0.25) {
 		BaseServoStop();
 	}
 

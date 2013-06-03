@@ -36,7 +36,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	Ooi.setZero();
 	Ooi.setX(4.0);
 	Ooi.setY(-1.5);
-	this->OoI_manager_.addOoI(Ooi);
+	//this->OoI_manager_.addOoI(Ooi);
 //	geometry_msgs::Pose mission_goal2;
 //	mission_goal2.position.x = 5.0;
 //	mission_goal2.position.y = 1.0;
