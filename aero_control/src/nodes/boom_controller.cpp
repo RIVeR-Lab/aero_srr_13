@@ -53,64 +53,59 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	/* Services */
 	this->aero_state_transition_srv_client = nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(
 			aero_state_transition);
-	this->boom_control_srv_client = nh.serviceClient<aero_base::SetBoomPosition>(boom_control);
+	this->boom_control_client = boost::shared_ptr<BoomClient>(new BoomClient(nh, boom_control, false));
 	this->PlanBoomPath();
 	this->boom_path_step_num = 0;
 
-	ros::Rate home_rate(10);
+	ros::Rate spin_rate(20);
+	ros::Time last_pause_home = ros::Time(0);
 	
 	while (ros::ok())
 	{
-
-
-
-		if (this->active_state == true && this->pause_state != true)
+	  
+	  if(! this->pause_state ){
+		if (this->active_state == true)
 		{
+		  if(boom_control_client->getState().isDone()){
+		    GoToPosition(this->boom_path[boom_path_step_num].angle,
+				 this->boom_path[boom_path_step_num].velocity);
 
-			GoToPosition(this->boom_path[boom_path_step_num].angle,this->boom_path[boom_path_step_num].velocity ,this->boom_path[boom_path_step_num].delay);
-			boom_path_step_num++;
-			if( boom_path_step_num >= boom_path_steps)
-			{
-				boom_path_step_num = 0;
-			}
-
-		} else if (this->pause_state != true)
+		    boom_path_step_num++;
+		    if( boom_path_step_num >= boom_path_steps)
+		      {
+			boom_path_step_num = 0;
+		      }
+		  }
+		} else
 		{
-
-			GoHome();
-			home_rate.sleep();
+		  ros::Time now = ros::Time::now();
+		  if(now-last_pause_home>ros::Duration(1)){
+		    GoHome();
+		    last_pause_home = now;
+		  }
 		}
-		ROS_INFO("Spinning!");
+	  }
 
-		ros::spinOnce();
-		ros::Duration(1.0).sleep();
-
+	  spin_rate.sleep();
+	  ROS_DEBUG("Spinning!");
+	  ros::spinOnce();
 	}
 
 	GoHome();
 
 }
 
-void BoomController::SendBoomControl(aero_base::SetBoomPosition boom_position)
+void BoomController::GoToPosition(double angle, double velocity)
 {
-
-	boom_control_srv_client.call(boom_position);
-}
-
-void BoomController::GoToPosition(double angle, double velocity, double delay)
-{
-
-	aero_base::SetBoomPosition boom_position;
-	boom_position.request.angle = angle;
-	boom_position.request.max_velocity = velocity;
-	SendBoomControl(boom_position);
-	ros::Duration(delay).sleep();
-
+  device_driver_base::SetJointPositionGoal boom_position;
+  boom_position.angle = angle;
+  boom_position.max_velocity = velocity;
+  boom_control_client->sendGoal(boom_position);
 }
 
 void BoomController::GoHome(void)
 {
-	GoToPosition(0,1,0);
+	GoToPosition(0, 1);
 }
 
 void BoomController::AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_state)

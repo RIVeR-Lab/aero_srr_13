@@ -1,16 +1,17 @@
 <launch>
   <arg name="imu_topic" default="/imu" />
 
-  //Drive Base
+  <!-- Drive Base -->
   <arg name="odom_topic" default="/odom" />
   <arg name="velocity_command_topic" default="/cmd_vel" />
   <arg name="drive_pose_frame" default="/odom" />
   <arg name="drive_twist_frame" default="/base_footprint" />
 
-  //Camera Boom
-  <arg name="camera_boom_pose_topic" default="/camera_boom_pose" />
+  <!-- Camera Boom -->
   <arg name="camera_boom_control_service" default="/camera_boom_control" />
 
+  <arg name="pause_topic" default="/pause" />
+  <arg name="state_topic" default="/state" />
 
   <include file="$(find aero_description)/launch/aero.launch">
     <arg name="launch_joint_state_publisher" value="0" />
@@ -21,7 +22,7 @@
   <!-- Launch IMU Driver -->
   <node pkg="kvh_driver" type="kvh_driver_node" name="imu_node">
     <param name="device_id" value="kvh-1750" />
-    <param name="device_address" value="/dev/ttyUSB0" />
+    <param name="device_address" value="/dev/IMU" />
     <param name="imu_topic" value="$(arg imu_topic)" />
   </node>
 
@@ -35,15 +36,16 @@
 
   <!-- Launch Camera Boom Controller and motor driver -->
   <include file="$(find aero_base)/launch/aero_camera_boom_node.launch">
-    <arg name="pose_topic" value="$(arg camera_boom_pose_topic)" />
+    <arg name="pause_topic" value="$(arg pause_topic)" />
     <arg name="pose_control_service" value="$(arg camera_boom_control_service)" />
   </include>
 
 
   <!-- Launch rosserial and controller node for arduino -->
-  <node pkg="rosserial_python" type="serial_node.py" name="aero_arduino" args="/dev/ARDUINO"/>
+  <node pkg="rosserial_python" type="serial_node.py" name="aero_arduino" args="/dev/ARDUINO" respawn="true"/>
   <node pkg="aero_base" type="aero_arduino_controller" name="aero_arduino_controller">
-    <param name="imu_topic" value="$(arg imu_topic)" />
+    <param name="pause_topic" value="$(arg pause_topic)" />
+    <param name="state_topic" value="$(arg state_topic)" />
   </node>
 
 </launch>

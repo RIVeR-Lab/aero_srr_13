@@ -1,7 +1,7 @@
 <!-- Bring up anything needed for calculating odometry here -->
 <launch>
   <!-- Input Arguments -->
-  <arg name="imu_topic"    default="kvh/odom" />
+  <arg name="imu_topic"    default="imu" />
   <arg name="odom_topic"   default="odom" />
   <arg name="output_topic" default="aero/odom_combined" />
   

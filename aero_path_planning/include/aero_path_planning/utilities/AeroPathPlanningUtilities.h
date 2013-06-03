@@ -22,6 +22,8 @@
 #include <boost/foreach.hpp>
 #include <geometry_msgs/Pose.h>
 #include <tf/tf.h>
+#include <deque>
+#include <iostream>
 //*********************** LOCAL DEPENDENCIES ************************************//
 #include <aero_path_planning/utilities/TypeDefinitions.h>
 #include <aero_path_planning/utilities/PointConverter.hpp>
@@ -54,6 +56,12 @@
 #endif
 
 #define PRINT_POINT_S(prefix, point) prefix<<": Point<"<<point.x<<","<<point.y<<","<<point.z<<">"
+
+
+#define AERO_PATH_PLANNING_LOAD_PARAM(nh, param_name, param_store, message_stream)	if(!nh.getParam(param_name, param_store))\
+																					{\
+																						ROS_WARN_STREAM("Parameter "<<param_name<<" not set, using default value:"<<message_stream);\
+																					}
 
 namespace aero_path_planning
 {
@@ -328,6 +336,118 @@ void vectorToPoint(const tf::Vector3& vector, aero_path_planning::Point& point);
  * @param [in] point  Point to fill with the data from the vector
  */
 void pointToVector(const aero_path_planning::Point& point, tf::Vector3& vector);
+
+class ObjectOfInterestManager
+{
+private:
+	typedef std::pair<double, tf::Point> OoI_weight_pair;
+	typedef std::list<OoI_weight_pair> OoI_list_t;
+	OoI_list_t detections_;  ///List of detections
+	
+	double dist_thresh_;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Calculates the weighted average between two points
+	 * @param [in]  existing The existing OoI and it's weighting parameter
+	 * @param [in]  addition The new OoI location
+	 * @param [out] result   The resultant weighted averaged pair. Can be the same as 'existing'
+	 */
+	void weightedAverage(const OoI_weight_pair& existing, const tf::Point& addition, OoI_weight_pair& result) const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Calculates if two OoI's are equavalent based on the distance_threshold parameter
+	 * @param [in] a
+	 * @param [in] b
+	 * @return True if they are within distance_threshold of each other, else false
+	 */
+	bool sameLocation(const tf::Point& a, const tf::Point& b) const;
+
+public:
+	/**
+	 * @author Adam Panzica
+	 * @brief  Helper container class for use with the ObjectOfInterestManaer. It allows for efficient removal of elements from the manager.
+	 */
+	class ObjectOfInterestEntry : public tf::Point
+	{
+		friend class ObjectOfInterestManager;
+	public:
+		ObjectOfInterestEntry(const ObjectOfInterestEntry& copy);
+		ObjectOfInterestEntry& operator=(const ObjectOfInterestEntry& rhs);
+	protected:
+		OoI_list_t::const_iterator idx_;
+		ObjectOfInterestEntry();
+		ObjectOfInterestEntry(const tf::Point& location, OoI_list_t::const_iterator idx);
+	};
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Creates a new ObjectOfInterestManager
+	 * @param distance_treshold Distance, in meters, to consider two points the same
+	 */
+	ObjectOfInterestManager(double distance_treshold);
+	virtual ~ObjectOfInterestManager();
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Sets the distance threshold to consider two points to be equal
+	 * @param [in] distance_trheshold The distance in meters to consider two points to be the same
+	 */
+	void setDisanceThreshold(double distance_trheshold);
+
+	/**
+	 * @author Adam Panzica
+	 * @return The threshold the manager is using to consider two points to be equal
+	 */
+	double getDistanceThreshold() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @return True if there are no Objects of Interest in the manager, else false
+	 */
+	bool empty() const;
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Adds a new Object of Interest to the manager
+	 * @param [in] object The location of the object of interest
+	 *
+	 * When adding objects, the manager will consider two points that are within the distance_threshold parameter to be the same. In this event it will update
+	 * the entry with a weighted average of the two locations
+	 */
+	void addOoI(const tf::Point& object);
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Removes an object of interest from the manager
+	 * @param [in] object The object to remove
+	 * @return True if successful, else false if the object wasn't in the manager
+	 */
+	bool removeOoI(const ObjectOfInterestEntry& object);
+
+
+	/**
+	 * @author Adam Panzica
+	 * @brief Retrieves the nearest neighbor of a location
+	 * @param [in] location The location to find the nearest neighbor of
+	 * @return An OoI_entry_t containing the index of the entry (needed for element removal) and the location of the object of interest closest to the given location
+	 * @throw false if there were no items in the list
+	 * In the case of a manager with no OoI's, returned OoI_entry_t.first will be -1 as there are no neighbors to find
+	 */
+	ObjectOfInterestEntry getNearestNeighbor(const tf::Point& location) const throw(bool);
+
+	friend std::ostream& operator<<(std::ostream& out, const ObjectOfInterestManager& in)
+	{
+		out<<"Currently "<<in.detections_.size()<<" Objects of Interest:\n";
+		BOOST_FOREACH(OoI_list_t::value_type entry, in.detections_)
+		{
+			out<<"Point: "<<entry.second<<", confidance: "<<entry.second<<"\n";
+		}
+		return out;
+	}
+
+};
 
 } /* aero_path_planning */;
 

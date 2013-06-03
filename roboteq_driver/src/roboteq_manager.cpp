@@ -3,7 +3,7 @@
 #include "roboteq_driver/roboteq_motor_controller.h"
 #include "roboteq_driver/RoboteqGroupInfo.h"
 #include "roboteq_driver/RoboteqGroupMotorControl.h"
-#include "aero_srr_msgs/SoftwareStop.h"
+#include "robot_base_msgs/SoftwareStop.h"
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/foreach.hpp>
@@ -43,7 +43,7 @@ private:
 				ROS_WARN("Control mode %d not implemented", motorControl.control_mode);
 		}
 	}
-	void pauseCallback(const aero_srr_msgs::SoftwareStop::ConstPtr& msg){
+	void pauseCallback(const robot_base_msgs::SoftwareStop::ConstPtr& msg){
 		boost::lock_guard<boost::mutex> lock(controller_mutex);
 		is_paused_ = msg->stop;
 		controller.setPower(1, 0);
@@ -97,7 +97,7 @@ public:
 		addDriverStateFunctions(device_driver_state::OPEN, &RoboteqManager::openDevice, &RoboteqManager::closeDevice, this);
 
 		control_sub = addReconfigurableThrottledSubscriber<roboteq_driver::RoboteqGroupMotorControl>(device_driver_state::RUNNING, 10, "roboteq_control", 1000, boost::bind(&RoboteqManager::controlCallback, this, _1));
-		pause_sub = addReconfigurableSubscriber<aero_srr_msgs::SoftwareStop>(device_driver_state::RUNNING, "/pause", 1000, boost::bind(&RoboteqManager::pauseCallback, this, _1));
+		pause_sub = addReconfigurableSubscriber<robot_base_msgs::SoftwareStop>(device_driver_state::RUNNING, "/pause", 1000, boost::bind(&RoboteqManager::pauseCallback, this, _1));
 		feedback_pub = addReconfigurableAdvertise<roboteq_driver::RoboteqGroupInfo>(device_driver_state::RUNNING, "roboteq_info", 1000);
 		feedback_timer = addReconfigurableTimer<RoboteqManager>(device_driver_state::RUNNING, ros::Duration(0.1), &RoboteqManager::feedbackTimerCallback, this);
 	}

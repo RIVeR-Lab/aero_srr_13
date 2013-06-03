@@ -67,14 +67,14 @@
 
   <!-- Laser -->
   <xacro:sick_laser_v0 name="laser" parent="base_link" ros_topic="laser" update_rate="25" >
-    <origin xyz="${base_length/2+0.0635} 0 0.0254" rpy="0 0 0" />
+    <origin xyz="${base_length/2+0.0635} 0 0.0254" rpy="${M_PI} 0 0" />
   </xacro:sick_laser_v0> 
 
 
 
 
 
-  <!-- Arm -->
+  <!-- Arm --><!--0.0826-->
   <xacro:static_transform parent="base_link" name="arm_mount" xyz="0.325374 0 0.1" rpy="0 0 0">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />

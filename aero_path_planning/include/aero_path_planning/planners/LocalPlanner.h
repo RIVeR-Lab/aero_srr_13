@@ -13,7 +13,7 @@
 #include<queue>
 #include<actionlib/client/simple_action_client.h>
 #include<boost/circular_buffer.hpp>
-#include<aero_srr_msgs/SoftwareStop.h>
+#include<robot_base_msgs/SoftwareStop.h>
 #include<geometry_msgs/Twist.h>
 #include <dynamic_reconfigure/server.h>
 #include <tf/transform_listener.h>
@@ -126,7 +126,7 @@ private:
 	 * @brief	Callback for handling the SoftwareStop message
 	 * @param message The message to process
 	 */
-	void stopCB(const aero_srr_msgs::SoftwareStopConstPtr& message);
+	void stopCB(const robot_base_msgs::SoftwareStopConstPtr& message);
 
 	/**
 	 * @author	Adam Panzica

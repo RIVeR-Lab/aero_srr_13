@@ -18,8 +18,10 @@
 #include <aero_srr_msgs/AeroState.h>
 #include <deque>
 #include <dynamic_reconfigure/server.h>
+#include <geometry_msgs/PoseArray.h>
 //************ LOCAL DEPENDANCIES ****************//
 #include <aero_path_planning/MissionPlannerConfig.h>
+#include <aero_path_planning/utilities/AeroPathPlanningUtilities.h>
 //***********    NAMESPACES     ****************//
 
 namespace aero_path_planning
@@ -35,6 +37,7 @@ namespace aero_path_planning
 class MissionPlanner
 {
 private:
+
 	/**
 	 * @author Adam Panzica
 	 * @brief  Loads parameters from the ROS system
@@ -109,19 +112,37 @@ private:
 	 * @author Adam Panzica
 	 * @brief Updates the current mission goal
 	 */
-	void updateMissionGoal() const;
+	void updateMissionGoal();
+
+	void ooiCB(const geometry_msgs::PoseArrayConstPtr& message);
+
+	void generateDetectionGoalList();
+
+	void requestCollect();
+
+	void requestNavObj();
+
+	void requestStateTransition(aero_srr_msgs::AeroState& requested_state);
+
+	void pause(bool enable);
 
 	std::string state_topic_;           ///Topic name for receiving robot state from the supervisor
 	std::string path_topic_;            ///Topic name for receiving new carrot paths
+	std::string ooi_topic_;             ///Topic name for receiving Object of Interest detections
 	std::string path_goal_topic_;       ///Topic name to publish to to update the goal used by the local planner
 	std::string mission_goal_topic_;    ///Topic name to publish noew mission goals to be used by the global planner
 	std::string global_frame_;			///frame_id of the global scale frame
 	std::string local_frame_;           ///frame_id of the local scale frame
+	std::string state_request_topic_;   ///Topic name to request state transition requests
 
 	std::deque<geometry_msgs::Pose>        mission_goals_; ///The chain of mission-goal points to fallow
 	std::deque<geometry_msgs::PoseStamped> carrot_path_;   ///The current carrot path
 
-	double                                path_threshold_;///The threshold for determining we've gotten to a point on the path, in meters
+	aero_path_planning::ObjectOfInterestManager OoI_manager_;
+
+	double                path_threshold_;///The threshold for determining we've gotten to a point on the path, in meters
+	bool                  searching_;     ///Flag to signal if the robot is searching or not
+	bool                  recieved_path_; ///Flag to signal if the robot has ever recieved a carrot path
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system
@@ -130,8 +151,10 @@ private:
 
 	ros::Subscriber       state_sub_;       ///Subscriber for the supervisor state
 	ros::Subscriber       path_sub_;        ///Subscriber to new carrot paths
+	ros::Subscriber       ooi_sub_;         ///Subscriber to new Objects of Interest
 	ros::Publisher        path_goal_pub_;   ///Publisher to update the current global goal used by LocalPlanner
 	ros::Publisher        mission_goal_pub_;///Publisher to update the current mission goal used by GlobalPlanner
+	ros::ServiceClient    state_request_client_;///Publisher to request state changes
 	ros::Timer            goal_timer_;      ///Timer to update the goal point
 
 	dynamic_reconfigure::Server<MissionPlannerConfig> dr_server_; ///Server for dynamic_reconfigure requests

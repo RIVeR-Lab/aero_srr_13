@@ -1,5 +1,6 @@
 rosbuild_add_library(GlobalPlanner GlobalPlanner.cpp)
 rosbuild_add_library(LocalPlanner  LocalPlanner.cpp)
 rosbuild_add_library(MissionPlanner MissionPlanner.cpp)
+target_link_libraries(MissionPlanner AeroUtilities)
 target_link_libraries(GlobalPlanner OccupancyGrid Tentacles AStarCarrot RRTCarrot AeroUtilities MultiTraitOccupancyGridHelpers)
 target_link_libraries(LocalPlanner OccupancyGrid Tentacles AeroUtilities TentacleRateLimiter MultiTraitOccupancyGridHelpers)

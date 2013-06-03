@@ -189,8 +189,8 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 //			normImg_.at<cv::Vec3b>(x,y) = nRGB;
 			browness = nR / nG;
 			whiteness = sumRGB / 756;
-			if ((nB > .37)){
-//					|| ((std::abs(browness - 1) < .2) && (whiteness < .9))) {
+			if ((nG > .37)
+					|| ((std::abs(browness - 1) < .15) && (whiteness < .9))) {
 				norma.at<cv::Vec3b>(x, y) = ZeroV;
 
 			}
@@ -218,11 +218,11 @@ void BOOMStage::grassRemove(const sensor_msgs::Image& msg, Mat_t& normImage) {
 
 	cv::line(norma, Point2d(0, HORIZON_BTM_), Point2d(norma.cols, HORIZON_BTM_),
 			Scalar(0, 255, 0));
-;
+
 
 //
-//imshow("norm", norma);
-//waitKey(3);
+imshow("norm", norma);
+waitKey(3);
 
 
 }
@@ -417,9 +417,9 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 	Mat threshold_output;
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
-	medianBlur(img, med, 11);
+//	medianBlur(img, med, 11);
 
-	normImg = med;
+	normImg = img;
 	cvtColor(normImg, src_gray, CV_BGR2GRAY);
 
 	/// Detect edges using Threshold
@@ -452,7 +452,7 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 		if (flag[i] != 1) {
 			Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255),
 					rng.uniform(0, 255));
-			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > 5 && radius[i] < 100)){
+			if((mask.at<cv::Vec3b>(center[i].y,center[i].x)[0] >0) && (radius[i] > 4 && radius[i] < 100)){
 			drawContours(drawing, contours_poly, i, color, 1, 8,
 					vector<Vec4i>(), 0, Point());
 			rectangle(drawing, boundRect[i].tl(), boundRect[i].br(), color, 2,
@@ -733,7 +733,7 @@ void BOOMStage::computeDisparity()
 		detection_list_.clear();
 		watson_->shrink();
 		geometry_msgs::PoseArrayPtr poses(new geometry_msgs::PoseArray);
-		poses->header.frame_id = "upper_stereo_optical_frame";
+		poses->header.frame_id = "/world";
 		geometry_msgs::Pose tempPose;
 		tempPose.orientation.w  = 1;
 
