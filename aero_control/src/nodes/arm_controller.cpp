@@ -26,8 +26,8 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	std::string arm_state("arm_state"); ///String containing the topic name for arm State
 	std::string object_pose("object_pose"); ///String containing the topic name for object position
 	std::string set_finger_position("set_finger_position"); ///String containing the topic name for set_finger_position
-	std::string aero_state("aero/supervisor/state"); ///String containing the topic name for aero_state
-	std::string aero_state_transition("aero/supervisor/control_mode"); ///String containing the topic name for aero_state_transition
+	std::string aero_state("aero_state"); ///String containing the topic name for aero_state
+	std::string aero_state_transition("aero_state_transition"); ///String containing the topic name for aero_state_transition
 
 	//Grab the topic parameters, print warnings if using default values
 	if (!param_nh.getParam(object_pose, object_pose))
@@ -71,7 +71,7 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 
 	/* Messages */
 	this->object_position_sub = nh.subscribe(object_pose, 1, &ArmController::ObjectPositionMSG, this);
-	//this->aero_state_sub = nh.subscribe(aero_state, 1, &ArmController::AeroStateMSG, this);
+	this->aero_state_sub = nh.subscribe(aero_state, 1, &ArmController::AeroStateMSG, this);
 
 	this->arm_state_sub = nh.subscribe(arm_state, 1, &ArmController::ArmStateMSG, this);
 
@@ -94,7 +94,6 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 
 void ArmController::PathTimerCallback(const ros::TimerEvent&)
 {
-	ROS_INFO("Path");
 	if (this->path_active == true)
 	{
 		ROS_INFO("Active");
@@ -148,8 +147,8 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 
 				} else if (arm_path[path_step_num].finger_motion == true)
 				{
-					while (this->pause_state == true)
-					{
+				//	while (this->pause_state == true)
+					//{
 						while (this->pause_state == true)
 						{
 							ros::Duration(0.1).sleep();
@@ -167,16 +166,16 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 
 						for (int i = 0; i < 50; i++)
 						{
-							if (this->pause_state == true)
-							{
-								break;
-							}
+//							if (this->pause_state == true)
+//							{
+//								break;
+//							}
 							ros::Duration(0.1).sleep();
 
 							ros::spinOnce();
 
 						}
-					}
+					//}
 					ROS_INFO("Next Step");
 					this->path_step_num++;
 					this->path_step_start = true;
@@ -209,6 +208,8 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 
 void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgConstPtr& object)
 {
+	ROS_INFO("Got object");
+
 	if (active_state == true)
 	{
 
@@ -457,7 +458,7 @@ void ArmController::ArmStateMSG(const aero_control::arm_stateConstPtr& arm_state
 
 void ArmController::AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_state)
 {
-
+ROS_INFO("State = %d", aero_state->state);
 	switch (aero_state->state)
 	{
 

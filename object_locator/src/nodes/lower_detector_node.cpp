@@ -693,7 +693,7 @@ void DetectorNode::computeDisparity() {
 				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
 				<< ", " << confidence << ", of type: " << typeString
 				<< std::endl;
-
+		
 		aero_srr_msgs::ObjectLocationMsg msg;
 		geometry_msgs::PoseArrayPtr poses(new geometry_msgs::PoseArray);
 		poses->header.frame_id = "/world";
@@ -707,11 +707,11 @@ void DetectorNode::computeDisparity() {
 		secondObjPub.publish(poses);
 
 
-
-		msg.header.frame_id = world_point.header.frame_id;
-		msg.header.stamp = ros::Time::now();
-		msg.pose.header.frame_id = world_point.header.frame_id;
-		msg.pose.header.stamp = ros::Time::now();
+		
+		msg.header.frame_id = "/world";
+		msg.header.stamp = left_image.header.stamp;
+		msg.pose.header.frame_id = "/world";
+		msg.pose.header.stamp = left_image.header.stamp;
 		buildMsg(detection, msg.pose);
 		ObjLocationPubWorld.publish(msg);
 //		ROS_ERROR_STREAM("Sent Obj msg from Classifier");
