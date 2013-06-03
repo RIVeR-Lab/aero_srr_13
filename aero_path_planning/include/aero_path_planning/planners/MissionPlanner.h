@@ -122,6 +122,8 @@ private:
 
 	void requestNavObj();
 
+	void requestHome();
+
 	void requestStateTransition(aero_srr_msgs::AeroState& requested_state);
 
 	void pause(bool enable);
@@ -142,6 +144,8 @@ private:
 
 	double                path_threshold_;///The threshold for determining we've gotten to a point on the path, in meters
 	bool                  searching_;     ///Flag to signal if the robot is searching or not
+	bool                  naving_;        ///Flag to singal if the robot is naving to obj
+	bool                  homeing_;        ///Flag to signal if the robot is homing
 	bool                  recieved_path_; ///Flag to signal if the robot has ever recieved a carrot path
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
