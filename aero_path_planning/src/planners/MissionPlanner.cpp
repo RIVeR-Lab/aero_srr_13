@@ -178,18 +178,18 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 		//We're advancing mission goals or mission states
 		else
 		{
+			//Means we're at an OoI, attepmt to collect
+			if(this->naving_&& this->recieved_path_)
+			{
+				ROS_INFO_STREAM("Reached the Object of Interest, attempting to Collect!");
+				this->requestCollect();
+			}
 			//We've got more mission goals
 			ROS_INFO_STREAM_THROTTLE(5,"I have completed my current path!");
 			if(!this->mission_goals_.empty() && this->recieved_path_)
 			{
-				if(this->naving_)
-				{
-					ROS_INFO_STREAM("Reached an Object of Interest, attempting to Collect!");
-					this->requestCollect();
-				}
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
 				this->updateMissionGoal();
-				//If we're naving to objects of interests, means we got to one, try and collect it
 			}
 			//We need to transition mission states
 			else
@@ -198,13 +198,6 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 				if(this->searching_&&this->recieved_path_)
 				{
 					this->requestNavObj();
-				}
-				//Means we're at the last OoI detection, attepmt to collect
-				else if(this->naving_&&!this->last_collect_)
-				{
-					ROS_INFO_STREAM("Reached the final Object of Interest, attempting to Collect!");
-					this->requestCollect();
-					this->last_collect_ = true;
 				}
 				//Means we've reached the end of the detections, go home
 				else if(this->naving_&&this->recieved_path_)

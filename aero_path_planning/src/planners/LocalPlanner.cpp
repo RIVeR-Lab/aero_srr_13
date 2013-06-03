@@ -33,7 +33,7 @@ LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std
 	this->loadParam();
 	this->regTopic();
 	this->regTimers();
-	this->setTentacleMode();
+	this->setManualMode();
 
 	switch(this->platform_)
 	{
