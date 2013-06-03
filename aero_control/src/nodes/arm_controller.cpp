@@ -69,6 +69,8 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	this->path_active = false;
 	this->path_step_start = true;
 	this->path_step_start_time = ros::Time().now();
+	this->pause_time = ros::Time().now();
+
 	/* Messages */
 	this->object_position_sub = nh.subscribe(object_pose, 1, &ArmController::ObjectPositionMSG, this);
 	//this->aero_state_sub = nh.subscribe(aero_state, 1, &ArmController::AeroStateMSG, this);
@@ -108,15 +110,18 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 		if (this->path_step_num < this->path_steps)
 		{
 
-
-
 			if (this->path_step_start == true)
 			{
 				ROS_INFO("reset time");
 				this->path_step_start_time = ros::Time().now();
 			}
+			if (this->pause_state == true)
+			{
+				this->path_step_start_time = ros::Time().now();
+			}
 
-			if ((arm_goal_reached != true|| this->path_step_start == true) && (ros::Time().now().toSec() - this->path_step_start_time.toSec()) < 20)
+			if ((arm_goal_reached != true || this->path_step_start == true)
+					&& (ros::Time().now().toSec() - this->path_step_start_time.toSec()) < 20)
 			{
 
 				this->path_step_start = false;
@@ -145,24 +150,38 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 
 				} else if (arm_path[path_step_num].finger_motion == true)
 				{
-					ROS_INFO("finger_path");
-
-					jaco_driver::finger_position fingers;
-
-					fingers.Finger_1 = arm_path[path_step_num].finger_1_pos;
-					fingers.Finger_2 = arm_path[path_step_num].finger_2_pos;
-					fingers.Finger_3 = arm_path[path_step_num].finger_3_pos;
-					set_finger_position_pub.publish(fingers);
-
-					for(int i = 0; i<50;i++)
+					while (this->pause_state == true)
 					{
-						ros::Duration(0.1).sleep();
+						while (this->pause_state == true)
+						{
+							ros::Duration(0.1).sleep();
+							ros::spinOnce();
 
-						ros::spinOnce();
+						}
+						ROS_INFO("finger_path");
+
+						jaco_driver::finger_position fingers;
+
+						fingers.Finger_1 = arm_path[path_step_num].finger_1_pos;
+						fingers.Finger_2 = arm_path[path_step_num].finger_2_pos;
+						fingers.Finger_3 = arm_path[path_step_num].finger_3_pos;
+						set_finger_position_pub.publish(fingers);
+
+						for (int i = 0; i < 50; i++)
+						{
+							if (this->pause_state == true)
+							{
+								break;
+							}
+							ros::Duration(0.1).sleep();
+
+							ros::spinOnce();
+
+						}
 					}
 					ROS_INFO("Next Step");
-								this->path_step_num++;
-								this->path_step_start = true;
+					this->path_step_num++;
+					this->path_step_start = true;
 				}
 			} else
 			{
@@ -448,20 +467,28 @@ void ArmController::AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_st
 
 		case aero_srr_msgs::AeroState::PICKUP:
 			this->active_state = true;
+			this->pause_state = false;
 			break;
 		case aero_srr_msgs::AeroState::COLLECT:
 			this->active_state = false;
+			this->pause_state = false;
+
 			break;
 		case aero_srr_msgs::AeroState::SHUTDOWN:
 			this->active_state = false;
+			this->pause_state = false;
+
 			ros::shutdown();
 			break;
 		case aero_srr_msgs::AeroState::PAUSE:
-			this->active_state = false;
+			this->pause_state = true;
+
 			break;
 		case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
 		default:
 			this->active_state = false;
+			this->pause_state = false;
+
 			previous_state = aero_state->state;
 
 			break;
