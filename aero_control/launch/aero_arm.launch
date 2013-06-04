@@ -1,7 +1,8 @@
 <launch>
-
+  <arg name="software_pause_topic" default="/pause" />
 
   <include file="$(find jaco_driver)/launch/jaco_arm.launch">
+	<param name="software_pause_topic" value="$(arg software_pause_topic)" />
   </include> 
 <node name="aero_arm_controller" pkg="aero_control" type="arm_controller" output="screen">
 

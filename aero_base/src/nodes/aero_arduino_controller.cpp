@@ -29,9 +29,10 @@ static ros::Publisher status_rate_pub;
 
 
 bool last_pause_state = true;
+bool is_first_time = true;
 void pauseCallback(const std_msgs::BoolConstPtr& is_paused){
   ROS_DEBUG_STREAM("Reveived software stop message from arduino: "<<is_paused->data);
-  if(is_paused->data!=last_pause_state){
+  if(is_paused->data!=last_pause_state || is_first_time){
     robot_base_msgs::SoftwareStop msg;
     msg.stop = is_paused->data;
     msg.header.stamp = ros::Time::now();
@@ -40,6 +41,7 @@ void pauseCallback(const std_msgs::BoolConstPtr& is_paused){
     else
       msg.message = "Hardware pause was released";
     last_pause_state = msg.stop;
+    is_first_time = false;
     ROS_INFO_STREAM(msg.message);
     pause_pub.publish(msg);
   }
