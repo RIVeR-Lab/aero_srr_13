@@ -27,7 +27,7 @@ BeaconDetector::BeaconDetector():it_(nh_)
 
 	init_finish_=false;									//the flag that controls when to end the end of init
 	
-	timer_=nh_.createTimer(ros::Duration(200), &BeaconDetector::timerCallback,this,true);
+	timer_=nh_.createTimer(ros::Duration(60), &BeaconDetector::timerCallback,this,true);
 
 	if(!test_)											//in test mode do not subscribe to the robot status
 		robot_sub_ = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
@@ -65,6 +65,8 @@ BeaconDetector::BeaconDetector():it_(nh_)
 }
 void BeaconDetector::timerCallback(const ros::TimerEvent& event)
 {
+	if(estimate_only_)
+		return;
 	aero_srr_msgs::StateTransitionRequest state_transition;
 			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
 			state_transition.request.requested_state.header.stamp = ros::Time().now();
