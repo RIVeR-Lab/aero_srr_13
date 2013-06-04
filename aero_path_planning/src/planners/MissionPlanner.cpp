@@ -100,6 +100,7 @@ void MissionPlanner::registerTimers()
 {
 	ROS_INFO_STREAM("Mission Planner Registering Timers...");
 	this->goal_timer_ = this->nh_.createTimer(ros::Duration(1.0/10.0), &MissionPlanner::goalCB, this);
+	this->mission_timeout_ = this->nh_.createTimer(ros::Duration(60*20), &MissionPlanner::timeoutCB, this, true);
 }
 
 void MissionPlanner::drCB(const MissionPlannerConfig& config, uint32_t level)
@@ -146,6 +147,11 @@ void MissionPlanner::ooiCB(const geometry_msgs::PoseArrayConstPtr& message)
 
 		ROS_INFO_STREAM("Added new detections, current detection state:\n"<<this->OoI_manager_);
 	}
+}
+
+void MissionPlanner::timeoutCB(const ros::TimerEvent& event)
+{
+	this->requestHome();
 }
 
 bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLocation, const double threshold) const
@@ -207,9 +213,6 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 					{
 						ROS_INFO_STREAM("Mission Planner: Finised My Mission, Heading Home!");
 						this->requestHome();
-						geometry_msgs::Pose home;
-						home.orientation.w = 1;
-						this->mission_goals_.push_back(home);
 					}
 				}
 			}
@@ -252,6 +255,7 @@ bool MissionPlanner::calcRobotPointWorld(geometry_msgs::PoseStamped& point) cons
 
 void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 {
+	geometry_msgs::Pose home;
 	typedef aero_srr_msgs::AeroState state_t;
 	switch(message->state)
 	{
@@ -292,6 +296,9 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			this->naving_    = false;
 			this->homeing_   = true;
 			this->dist_threshold_ = this->nav_threshold_;
+			this->mission_goals_.clear();
+			home.orientation.w = 1;
+			this->mission_goals_.push_back(home);
 			break;
 		default:
 			ROS_ERROR_STREAM("Received Unkown State: "<<*message);

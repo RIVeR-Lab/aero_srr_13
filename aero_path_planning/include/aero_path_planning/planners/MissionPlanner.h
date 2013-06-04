@@ -87,6 +87,13 @@ private:
 
 	/**
 	 * @author Adam Panzica
+	 * @brief Causes the robot to return home after a set timeout period
+	 * @param event
+	 */
+	void timeoutCB(const ros::TimerEvent& event);
+
+	/**
+	 * @author Adam Panzica
 	 * @brief  Publishes the next goal on the carrot path
 	 */
 	void updateGoal() const;
@@ -163,7 +170,8 @@ private:
 	ros::Publisher        mission_goal_pub_;///Publisher to update the current mission goal used by GlobalPlanner
 	ros::ServiceClient    state_request_client_;///Publisher to request state changes
 	ros::Timer            goal_timer_;      ///Timer to update the goal point
-	mutable ros::Time             time_out_start_;  ///Timeout to prevent getting stuck without ever reaching a hoal
+	ros::Timer            mission_timeout_;///One shot timer to make the robot come home after the alloted time
+	mutable ros::Time     time_out_start_;  ///Timeout to prevent getting stuck without ever reaching a hoal
 
 	dynamic_reconfigure::Server<MissionPlannerConfig> dr_server_; ///Server for dynamic_reconfigure requests
 
