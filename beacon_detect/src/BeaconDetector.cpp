@@ -26,9 +26,9 @@ BeaconDetector::BeaconDetector():it_(nh_)
 
 	init_finish_=false;									//the flag that controls when to end the end of init
 
-	//the robot state controls the state of this node to init_/active_
-	//TODO: can you not listen to the robot states????
-	ros::Subscriber sub = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
+
+	if(!test_)											//in test mode do not subscribe to the robot status
+		robot_sub_ = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
 
 	/* Start the camera video from the camera topic */
 	if(!cam_topic_.empty())
@@ -559,12 +559,12 @@ void BeaconDetector::pubOdom(tf::Stamped<tf::Transform> pose, ros::Time time)
 
 	ROS_INFO("x: %f y: %f z: %f",pose.getOrigin().getX(),pose.getOrigin().getY(),pose.getOrigin().getZ());
 
-	msg.pose.covariance[0]=0.007;
-	msg.pose.covariance[7]=0.007;
-	msg.pose.covariance[14]=0.007;
-	msg.pose.covariance[21]=0.007;
-	msg.pose.covariance[28]=0.007;
-	msg.pose.covariance[35]=0.007;
+	msg.pose.covariance[0]=7E-6;
+	msg.pose.covariance[7]=7E-6;
+	msg.pose.covariance[14]=7E-6;
+	msg.pose.covariance[21]=7E-6;
+	msg.pose.covariance[28]=7E-6;
+	msg.pose.covariance[35]=7E-6;
 	odom_pub_.publish(msg);
 }
 

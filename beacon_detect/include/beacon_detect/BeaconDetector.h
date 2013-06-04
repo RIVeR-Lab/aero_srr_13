@@ -60,6 +60,7 @@ class BeaconDetector
 	image_transport::Publisher 			pub_;							//a image publisher
 	ros::Publisher 						pose_pub_;						//to publish pose of home
 	ros::Publisher						odom_pub_;						//publishes the odometry messages
+	ros::Subscriber						robot_sub_;
 	ros::ServiceClient 					state_client_;					//the client responsible for make state change of the robot
 	boost::shared_ptr<BoomClient> 		boom_client_;					//the action server for controlling the boom
 
