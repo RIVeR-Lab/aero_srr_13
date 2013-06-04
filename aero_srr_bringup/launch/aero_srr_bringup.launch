@@ -58,5 +58,5 @@
   </include>
   
   <include file="$(find beacon_detect)/launch/beacon_tf_tree.launch"/>
-  <include file="$(find beacon_detect)/launch/detect_all.launch"/>
+  <include file="$(find beacon_detect)/launch/beacon_detect_all_camera.launch"/>
 </launch>
