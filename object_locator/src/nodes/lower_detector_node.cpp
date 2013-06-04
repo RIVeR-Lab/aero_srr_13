@@ -93,7 +93,7 @@ DetectorNode::DetectorNode() :
 	ctrLeft = 0;
 	ctrRight = 0;
 
-	cv::namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE);
+//	cv::namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE);
 //	cv::namedWindow(WINDOWRight, CV_WINDOW_AUTOSIZE);
 //	cv::namedWindow(WINDOWDisparity, CV_WINDOW_AUTOSIZE);
 	objset = false;
@@ -101,7 +101,7 @@ DetectorNode::DetectorNode() :
 }
 
 DetectorNode::~DetectorNode() {
-	cv::destroyWindow(WINDOWLeft);
+//	cv::destroyWindow(WINDOWLeft);
 //	cv::destroyWindow(WINDOWRight);
 //	cv::destroyWindow(WINDOWDisparity);
 	//	cvDestroyAllWindows();
@@ -1090,9 +1090,9 @@ ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces
 //	imshow("lab",lab);
 //	waitKey(3);
 
-	cv::imshow(WINDOWLeft, frame);
+//	cv::imshow(WINDOWLeft, frame);
 
-	cv::waitKey(1);
+//	cv::waitKey(1);
 	ROS_WARN_STREAM("Detections took " <<time_Obj - ros::Time::now());
 }
 void DetectorNode::addBbox(Mat_t& src, Mat_t& final)
@@ -1142,8 +1142,8 @@ object_locator::object_type DetectorNode::queryObject(const Mat_t& crop)
 		   }
 	   }
 
-	   imshow("CroppedSample", sample);
-	   waitKey(3);
+	 //  imshow("CroppedSample", sample);
+	//   waitKey(3);
 	   if(whiteCtr > blackCtr)
 		   return WHA;
 	   else
@@ -1227,12 +1227,12 @@ Point2f DetectorNode::blobIdentify(Mat_t& img, int objThresh)
 
 	   /// Show in a window
 //		cv::line(drawing,Point2d(0,HORIZON_),Point2d(drawing.cols,HORIZON_),Scalar(0,255,0));
-	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-	   imshow( "Contours", drawing );
+//	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+//	   imshow( "Contours", drawing );
 
 
 
-	   cv::waitKey(3);
+//	   cv::waitKey(3);
 	   return final;
 //		std::stringstream s;
 //		s << "/home/srr/ObjectDetectionData/blob/0.png";
