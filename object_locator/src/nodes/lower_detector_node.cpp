@@ -219,6 +219,12 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 }
 
 void DetectorNode::computeDisparity() {
+
+	if(detection_list_.size()<=0)
+		return;
+
+	cout<<"***********************************"<<endl;
+
 	ros::Time time_Obj = ros::Time::now();
 	processImage(left_image, mat_left, WINDOWLeft);
 	processImage(right_image, mat_right, WINDOWRight);
@@ -343,22 +349,27 @@ void DetectorNode::computeDisparity() {
 //	cv::StereoSGBM stereoSGBM(minDisp, numDisp, SADSize, P1, P2, disp12MaxDiff, preFilterCap, uniqueness, specSize, specRange, false);
 //	stereoSGBM(img1_rect, img2_rect, disp);
 
-	cv::StereoBM stereoBM;
-	cv::Ptr<CvStereoBMState> params = stereoBM.state;
-	stereoBM.state->SADWindowSize = SADSize;
-	stereoBM.state->preFilterCap = 31;
-	stereoBM.state->minDisparity = minDisp;
-	stereoBM.state->numberOfDisparities = numDisp;
-	stereoBM.state->uniquenessRatio = uniqueness;
-	stereoBM.state->textureThreshold = 10;
-	stereoBM.state->speckleWindowSize = specSize;
-	stereoBM.state->speckleRange = specRange;
-	stereoBM.state->preFilterSize = 9;
-	stereoBM(img1_rect, img2_rect, disp, CV_32F);
+	if(detection_list_.size()>0)
+	{
+		cv::StereoBM stereoBM;
+		cv::Ptr<CvStereoBMState> params = stereoBM.state;
+		stereoBM.state->SADWindowSize = SADSize;
+		stereoBM.state->preFilterCap = 31;
+		stereoBM.state->minDisparity = minDisp;
+		stereoBM.state->numberOfDisparities = numDisp;
+		stereoBM.state->uniquenessRatio = uniqueness;
+		stereoBM.state->textureThreshold = 10;
+		stereoBM.state->speckleWindowSize = specSize;
+		stereoBM.state->speckleRange = specRange;
+		stereoBM.state->preFilterSize = 9;
+		stereoBM(img1_rect, img2_rect, disp, CV_32F);
+	}
 
-	cv::Mat_<cv::Vec3f> points_mat_;
-	this->stereo_model.projectDisparityImageTo3d(disp, points_mat_, true);
-	cv::Mat_<cv::Vec3f> mat = points_mat_;
+
+	//tarek: commented out 3 lines below
+	//	cv::Mat_<cv::Vec3f> points_mat_;
+	//	this->stereo_model.projectDisparityImageTo3d(disp, points_mat_, true);
+	//	cv::Mat_<cv::Vec3f> mat = points_mat_;
 
 //	sensor_msgs::PointCloud2Ptr points_msg = boost::make_shared<
 //			sensor_msgs::PointCloud2>();
@@ -536,8 +547,10 @@ void DetectorNode::computeDisparity() {
 //	std::stringstream s,d;
 //		s << "/home/srr/ObjectDetectionData/Disparity1.png";
 //		cv::imwrite(s.str(), dispn);
-	disp.convertTo(dispn, -1, 1.0 / 16);
-
+	if(detection_list_.size()>0)
+	{
+		disp.convertTo(dispn, -1, 1.0 / 16);
+	}
 	Point2d center;
 	center.x = (int) (widthL / 2);
 	center.y = (int) (heightL / 2) + 200;
@@ -580,7 +593,7 @@ void DetectorNode::computeDisparity() {
 		float disp_val2 = disp.at<float>(obj_centroid.y, obj_centroid.x);
 		cout << "Disparity Value of detection "<< disp_val2 <<endl;
 		float disp_val = nNdisp(obj_centroid, disp);
-					cout << "Disparity Value of detection after nNdisp "<< disp_val <<endl;
+		cout << "Disparity Value of detection after nNdisp "<< disp_val <<endl;
 //		if(disp_val <= 0.0)
 //		{
 //
@@ -651,11 +664,11 @@ void DetectorNode::computeDisparity() {
 //			cout << "Transforming camera to world" <<endl;
 			try
 			{
-			optimus_prime.waitForTransform("/world",
-					camera_point.header.frame_id, camera_point.header.stamp,
-					ros::Duration(0.25));
-			optimus_prime.transformPoint("/world", camera_point, world_point);
-			optimus_prime.transformPoint("/base_footprint",camera_point,robot_point);
+				optimus_prime.waitForTransform("/world",
+						camera_point.header.frame_id, camera_point.header.stamp,
+						ros::Duration(0.25));
+				optimus_prime.transformPoint("/world", camera_point, world_point);
+				optimus_prime.transformPoint("/base_footprint",camera_point,robot_point);
 			}
 			catch(std::exception& e)
 			{
