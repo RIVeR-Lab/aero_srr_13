@@ -163,6 +163,7 @@ private:
 	ros::Publisher        mission_goal_pub_;///Publisher to update the current mission goal used by GlobalPlanner
 	ros::ServiceClient    state_request_client_;///Publisher to request state changes
 	ros::Timer            goal_timer_;      ///Timer to update the goal point
+	mutable ros::Time             time_out_start_;  ///Timeout to prevent getting stuck without ever reaching a hoal
 
 	dynamic_reconfigure::Server<MissionPlannerConfig> dr_server_; ///Server for dynamic_reconfigure requests
 

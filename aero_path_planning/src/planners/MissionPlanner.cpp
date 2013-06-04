@@ -32,10 +32,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
-	tf::Point Ooi;
-	Ooi.setZero();
-	Ooi.setX(4.0);
-	Ooi.setY(-1.5);
+
 	//this->OoI_manager_.addOoI(Ooi);
 //	geometry_msgs::Pose mission_goal2;
 //	mission_goal2.position.x = 5.0;
@@ -158,8 +155,9 @@ bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLoca
 	tf::pointMsgToTF(worldLocation.pose.position, world_point);
 	tf::pointMsgToTF(this->carrot_path_.front().pose.position, goal_point);
 	double dist = world_point.distance(goal_point);
+	ros::Duration timeout (this->time_out_start_ - ros::Time::now());
 	//ROS_INFO_STREAM_THROTTLE(1, "\nMission Planner: At position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\nDistance to Goal:="<<dist);
-	return dist<threshold;
+	return dist<threshold || timeout>ros::Duration(90);
 }
 
 void MissionPlanner::goalCB(const ros::TimerEvent& event)
@@ -225,6 +223,7 @@ void MissionPlanner::updateGoal() const
 	{
 		geometry_msgs::PoseStamped goal_pose(this->carrot_path_.front());
 		this->path_goal_pub_.publish(goal_pose);
+		this->time_out_start_ = ros::Time::now();
 	}
 
 }
