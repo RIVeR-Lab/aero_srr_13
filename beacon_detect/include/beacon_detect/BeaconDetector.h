@@ -80,6 +80,7 @@ class BeaconDetector
 	void systemCb(const aero_srr_msgs::AeroStateConstPtr& status);
 	void checkStopcb(const robot_base_msgs::SoftwareStopConstPtr& message);			//callback for the software stop
 
+       ros::Timer timer_;
 public:
 	//initalization functions
 	BeaconDetector();
@@ -134,7 +135,8 @@ public:
 	 * helper to estimate the average
 	 */
 	tf::Stamped<tf::Transform>  estimatetf();
-
+	
+	void timerCallback(const ros::TimerEvent& event);
 	virtual ~BeaconDetector();
 };
 

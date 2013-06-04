@@ -26,7 +26,8 @@ BeaconDetector::BeaconDetector():it_(nh_)
 														//you need to find the tag_base to the world
 
 	init_finish_=false;									//the flag that controls when to end the end of init
-
+	
+	timer_=nh_.createTimer(ros::Duration(200), &BeaconDetector::timerCallback,this,true);
 
 	if(!test_)											//in test mode do not subscribe to the robot status
 		robot_sub_ = nh_.subscribe(robot_topic_.c_str(), 5, &BeaconDetector::systemCb, this);
@@ -62,7 +63,31 @@ BeaconDetector::BeaconDetector():it_(nh_)
 		rotateBoom();
 	}
 }
-
+void BeaconDetector::timerCallback(const ros::TimerEvent& event)
+{
+	aero_srr_msgs::StateTransitionRequest state_transition;
+			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
+			state_transition.request.requested_state.header.stamp = ros::Time().now();
+		
+			//wait till it gets out pause
+			if(state_client_.call(state_transition))
+			{
+				if(state_transition.response.success)
+				{
+					ROS_INFO("Aero successfully transitioned to the Search mode");
+					active_=true;
+					init_=false;
+				}
+				else
+				{
+					ROS_ERROR("%s",state_transition.response.error_message.c_str());
+				}
+			}
+			else
+			{
+				ROS_ERROR("Aero state service is not running! Please start it");
+			}
+}
 void BeaconDetector::rotateBoom()
 {
 	ROS_INFO("Rotating Boom");
@@ -157,6 +182,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 
 	if(init_)
 	{
+		timer_.stop();
 		//calculate the average tf of the world location using the detections_
 		tfbaseinworld=initProcess(fx,fy,px,py,img_header);
 		//till test period is over
