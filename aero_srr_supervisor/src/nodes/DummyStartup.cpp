@@ -51,7 +51,7 @@ void stopCB(const robot_base_msgs::SoftwareStopConstPtr& message){
 	else
 	{
 		aero_srr_msgs::AeroState req;
-		req.state = aero_srr_msgs::AeroState::SEARCH;
+		req.state = aero_srr_msgs::AeroState::COLLECT;
 		requestStateTransition(req);
 	}
 	ROS_WARN("Dummy Starrtup Node Got Software Stop [%s]: %s",(message->stop)?"Stop":"Go", message->message.c_str());

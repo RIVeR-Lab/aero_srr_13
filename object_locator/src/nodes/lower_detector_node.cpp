@@ -649,18 +649,18 @@ void DetectorNode::computeDisparity() {
 			world_point.header.frame_id = "/world";
 			world_point.header.stamp = left_image.header.stamp;
 //			cout << "Transforming camera to world" <<endl;
-			try
-			{
+			//try
+			//{
 			optimus_prime.waitForTransform("/world",
 					camera_point.header.frame_id, camera_point.header.stamp,
-					ros::Duration(0.25));
+					ros::Duration(10.0));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
 			optimus_prime.transformPoint("/base_footprint",camera_point,robot_point);
-			}
-			catch(std::exception& e)
-			{
-				ROS_ERROR_STREAM(e.what());
-			}
+			//}
+			//catch(std::exception& e)
+			//{
+			//	ROS_ERROR_STREAM(e.what());
+			//}
 //			cout << "Adding TFT to msg" <<endl;
 			tf::Point robot_rel_detection;
 			tf::pointMsgToTF(world_point.point, detection);
