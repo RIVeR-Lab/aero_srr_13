@@ -13,7 +13,7 @@ float flash_rate = 0;
 
 void rateCb(const std_msgs::Float32& status_rate){
   flash_rate = status_rate.data;
-  last_invert = 0;//make sure we make a change next time
+  //last_invert = 0;//make sure we make a change next time
 }
 
 std_msgs::Bool bool_msg;
@@ -39,19 +39,23 @@ void loop(){
   bool_msg.data = pulse_length>1400;//will not pause if pulseIn timed out (no pulse = 0)
   pause_pub.publish( &bool_msg );
 
-  if(nh.connected()){
-    if(flash_rate!=0){
+  //if(nh.connected()){
+   if( !bool_msg.data)
+{
       unsigned long time = millis();
-      if(time-last_invert>=(1000/flash_rate/2)){
+      if(time-last_invert>=(1000/1/2)){
 	digitalWrite(LIGHT_PIN, !digitalRead(LIGHT_PIN));
 	last_invert = time;
-      }
     }
+}
+
+  //  }
     else
+{
       digitalWrite(LIGHT_PIN, LIGHT_ON);
   }
-  else
-    digitalWrite(LIGHT_PIN, LIGHT_ON);
+ // else
+ //   digitalWrite(LIGHT_PIN, LIGHT_ON);
   
 
   delay(50);

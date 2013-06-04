@@ -36,6 +36,8 @@ void BOOMStage::loadParams() {
 	this->upper_bound = 100;
 	this->output_topic = "output_topic";
 	this->grass_level_name = "grass_level";
+	this->HORIZON_TOP_NAME = "HORIZON";
+	this->HORIZON_TOP_ = 150;
 	this->getPrivateNodeHandle().getParam(this->left_camera,
 			this->left_camera);
 	this->getPrivateNodeHandle().getParam(this->right_camera,
@@ -59,8 +61,7 @@ void BOOMStage::loadParams() {
 	this->getPrivateNodeHandle().getParam(this->grass_level_name,
 			this->grass_level);
 	this->it_ = new image_transport::ImageTransport(this->getNodeHandle());
-	this->HORIZON_TOP_NAME = "HORIZON";
-	this->HORIZON_TOP_ = 150;
+
 	this->HORIZON_BTM_ = 730;
 	this->grass_level = .33;
 	this->ZeroV[0] = 0;
@@ -70,7 +71,7 @@ void BOOMStage::loadParams() {
 	this->White[0] = 255;
 	this->White[1] = 255;
 	this->White[2] = 255;
-	this->got_left_ = false;
+	this->got_left_ = false;ROS_INFO_STREAM("here2!");
 	this->got_right_ = false;
 //	this->left_header_ = 0;
 //	this->left_encoding_ = enc::RGB8;
@@ -125,8 +126,8 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 	got_left_ = true;
 	computeDisparityCb();
 	Mat_t src = img->image;
-	Mat_t normImage,mask,finalMask,hsv2;
-	stdFilt(*msg);
+	Mat_t normImage,mask,finalMask,std;
+//	stdFilt(*msg, std);
 //	circleFind(*msg);
 //	gmmRemove(msg,hsv2);
 //	grassRemove(*msg, normImage);
@@ -135,7 +136,7 @@ void BOOMStage::boomImageCbleft(const sensor_msgs::ImageConstPtr& msg,
 //	fillHoles(mask);
 //	blobIdentify(normImage,mask, finalMask);
 //	showAlpha(src,finalMask);
-//	detectAnomalies(normImage,finalMask);
+//	detectAnomalies(std,finalMask);
 
 }
 void BOOMStage::boomImageCbright(const sensor_msgs::ImageConstPtr& msg,
@@ -238,7 +239,7 @@ void BOOMStage::gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage
 
 }
 
-void BOOMStage::stdFilt(const sensor_msgs::Image& msg)
+void BOOMStage::stdFilt(const sensor_msgs::Image& msg, Mat_t& std)
 {
 	cv_bridge::CvImagePtr img;
 //	Mat_t src = load_;
@@ -246,10 +247,12 @@ void BOOMStage::stdFilt(const sensor_msgs::Image& msg)
 		img = cv_bridge::toCvCopy(msg, enc::BGR8);
 	} catch (cv_bridge::Exception& e) {
 		NODELET_ERROR("cv_bridge exception: %s", e.what());
+		ROS_INFO_STREAM("here_exception!");
 		return;
 	}
 	Mat_t image = img->image;
-	Mat_t dst,dst2,dst3, medSig,image_gray, sigFinal;
+	Mat_t dst,dst2,dst3, medSig,image_gray;
+	Mat_t sigFinal = img->image;
 	Vec3d ZeroVd;
 	ZeroVd[0] = 0.0;
 	ZeroVd[1] = 0.0;
@@ -274,20 +277,31 @@ void BOOMStage::stdFilt(const sensor_msgs::Image& msg)
 	{
 		for(int m = 0;m<medSig.cols; m++)
 		{
-			medSig.at<cv::Vec3d>(k, m) = ZeroVd;
+
+			medSig.at<float>(k, m) = 0;
+
 		}
 	}
+	float sigVec = medSig.at<float>(HORIZON_TOP_+1, 100);
+	ROS_WARN_STREAM("med sig value after" << sigVec);
 	threshold(medSig, sigFinal,.55,1, THRESH_BINARY);
 
 	int elem_type = MORPH_RECT;
 	int elem_size = 11;
 
+	ROS_INFO_STREAM("here0!");
 	Mat element = getStructuringElement( elem_type, Size( 2*elem_size + 1, 2*elem_size+1 ), Point( elem_size, elem_size ) );
 	morphologyEx(sigFinal, sigFinal, MORPH_DILATE, element);// do morphological opening to remove small specks and enlarge larger detections
-
+	Mat_t sigFinal8;
+	sigFinal.convertTo(sigFinal8, CV_32SC1);
+	sigFinal8 = sigFinal8 * 255;
+	std = sigFinal8;
+	cv::line(sigFinal, Point2d(0,HORIZON_TOP_),Point2d(sigFinal.cols,HORIZON_TOP_),255);
 	imshow("sigma",sigFinal);
 	imshow("rgb",image);
 	waitKey(3);
+
+
 
 }
 
@@ -549,18 +563,27 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 	RNG rng(12345);
 	Mat threshold_output;
 	vector<vector<Point> > contours;
+
 	vector<Vec4i> hierarchy;
 //	medianBlur(img, med, 11);
 
-	normImg = img;
-	cvtColor(normImg, src_gray, CV_BGR2GRAY);
+
+	ROS_INFO_STREAM("here2!");
+
+	img.copyTo(normImg);
+
+
+	ROS_ERROR_STREAM("type: "<<normImg.type());
+	ROS_ERROR_STREAM("dimensions: "<<normImg.depth());
+
+//	cvtColor(normImg, src_gray, CV_BGR2GRAY);
 	/// Detect edges using Threshold
-	threshold(src_gray, threshold_output, thresh, 255, THRESH_BINARY);
+//	threshold(src_gray, threshold_output, thresh, 255, THRESH_BINARY);
 
 	/// Find contours
-	findContours(threshold_output, contours, hierarchy, CV_RETR_TREE,
+	findContours(normImg, contours, hierarchy, CV_RETR_TREE,
 			CV_CHAIN_APPROX_NONE, Point(0, 0));
-
+	ROS_INFO_STREAM("after countours!");
 	/// Approximate contours to polygons + get bounding rects and circles
 	vector<vector<Point> > contours_poly(contours.size());
 	vector<Rect> boundRect(contours.size());
@@ -577,7 +600,7 @@ void BOOMStage::detectAnomalies(Mat_t& img, Mat_t& mask) {
 		else
 			flag[i] = 0;
 	}
-
+	ROS_INFO_STREAM("drawing!");
 	/// Draw polygonal contour + bonding rects + circles
 	Mat drawing = Mat::zeros(threshold_output.size(), CV_8UC3);
 	for (int i = 0; i < contours.size(); i++) {
@@ -793,18 +816,18 @@ void BOOMStage::computeDisparity()
 
 			this->point_cloud_pub_.publish(points_msg);
 			//*********Oct tree stuff *************//
-			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-			pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
-			pcl::fromROSMsg(*points_msg,*cloud);
-			pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
-
-			float resolution = 2.5f;
-			pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
-
-		    octree.setInputCloud (tcloud);
-		    octree.addPointsFromInputCloud ();
-
-		    pcl::PointXYZ searchPoint;
+//			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+//			pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
+//			pcl::fromROSMsg(*points_msg,*cloud);
+//			pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
+//
+//			float resolution = 2.5f;
+//			pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
+//
+//		    octree.setInputCloud (tcloud);
+//		    octree.addPointsFromInputCloud ();
+//
+//		    pcl::PointXYZ searchPoint;
 
 
 		geometry_msgs::PointStamped camera_point, world_point;
@@ -812,59 +835,22 @@ void BOOMStage::computeDisparity()
 			Point2d obj_centroid(detection_list_.at(i)->first.first,
 					detection_list_.at(i)->first.second);
 			Point3d obj_3d;
-
+			float disp_val = nNdisp(obj_centroid, disp);
 			if (obj_centroid.x < disp.cols && obj_centroid.y < disp.rows) {
 
-				float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
+
 				this->stereo_model.projectDisparityTo3d(obj_centroid, disp_val,
 						obj_3d);
 
 
 				tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
-				searchPoint.x = detection.getX();
-						searchPoint.y = detection.getY();
-						searchPoint.z = detection.getZ();
 
-						int K = 10;
-							  std::vector<int> pointIdxVec;
-						  std::vector<int> pointIdxNKNSearch;
-						  std::vector<float> pointNKNSquaredDistance;
-
-//						  std::cout << "K nearest neighbor search at (" << searchPoint.x
-//						            << " " << searchPoint.y
-//						            << " " << searchPoint.z
-//						            << ") with K=" << K << std::endl;
-
-						  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
-						  {
-							  float sumx =0.0;
-							  float sumy =0.0;
-							  float sumz =0.0;
-						    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
-						    {
-//						      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-//						                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-//						                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-//						                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-						    	sumx = tcloud->points[ pointIdxNKNSearch[i] ].x + sumx;
-						    	sumy = tcloud->points[ pointIdxNKNSearch[i] ].y + sumy;
-						    	sumz = tcloud->points[ pointIdxNKNSearch[i] ].z + sumz;
-						    }
-						    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
-						    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
-						    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
-
-						  }
-						  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
-					  	  detection.setX(xAvgVal_);
-					  	  detection.setY(yAvgVal_);
-						  detection.setZ(kAvgVal_);
 				tf::pointTFToMsg(detection, camera_point.point);
 				ros::Time tZero(0);
 				camera_point.header.frame_id = this->optical_frame;
-				camera_point.header.stamp = tZero;
+				camera_point.header.stamp = left_msg_.header.stamp;;
 				world_point.header.frame_id = "/world";
-				world_point.header.stamp = tZero;
+				world_point.header.stamp = left_msg_.header.stamp;
 				optimus_prime.waitForTransform("/world",
 						camera_point.header.frame_id, ros::Time(0),
 						ros::Duration(1.0));
@@ -894,14 +880,35 @@ void BOOMStage::computeDisparity()
 			ROS_ERROR_STREAM("Sent color msg from color Detector");
 		}
 		ROS_WARN_STREAM("Number of detections in list = " << detections.size());
-		Mat_t cmapped;
-		disp.convertTo(cmapped, CV_8U);
-		imshow("disparty",cmapped);
-		waitKey(3);
+//		Mat_t cmapped;
+//		disp.convertTo(cmapped, CV_8U);
+//		imshow("disparty",cmapped);
+//		waitKey(3);
 
 }
 
 
+float BOOMStage::nNdisp(const Point2d& pt, const Mat_t& disp) {
+	int window = 10;
+	int startx = pt.x - window/2;
+	int starty = pt.y;
+	int ctr  = 0;
+	float sum = 0.0;
+	for (int i = 0; i < window; i++) {
+		for (int j = 0; j < window; j++) {
+			float value = disp.at<float>(starty + i, startx + j);
+			if (value > 0.0)
+			{
+				sum = sum + value;
+				ctr ++;
+			}
+		}
+	}
+//	ROS_INFO_STREAM("CTR pts = " << ctr);
+	if(ctr == 0)
+		return 0.0;
+	return sum / (float) ctr;
+}
 void BOOMStage::generateMsg() {
 
 }

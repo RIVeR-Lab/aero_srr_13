@@ -72,7 +72,8 @@ namespace object_locator
 		virtual void computeDisparity();
 		virtual void gmmRemove(const sensor_msgs::ImageConstPtr& msg, Mat_t& hsvImage);
 		virtual void generateMsg();
-		virtual void stdFilt(const sensor_msgs::Image& msg);
+		virtual void stdFilt(const sensor_msgs::Image& msg, Mat_t& std);
+		virtual float nNdisp(const cv::Point2d& pt, const Mat_t& disp);
 
 		ros::Subscriber sync_image_sub_;
 		image_transport::ImageTransport* it_;
