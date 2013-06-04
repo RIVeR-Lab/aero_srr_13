@@ -649,18 +649,18 @@ void DetectorNode::computeDisparity() {
 			world_point.header.frame_id = "/world";
 			world_point.header.stamp = left_image.header.stamp;
 //			cout << "Transforming camera to world" <<endl;
-			//try
-			//{
+			try
+			{
 			optimus_prime.waitForTransform("/world",
 					camera_point.header.frame_id, camera_point.header.stamp,
 					ros::Duration(10.0));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
 			optimus_prime.transformPoint("/base_footprint",camera_point,robot_point);
-			//}
-			//catch(std::exception& e)
-			//{
-			//	ROS_ERROR_STREAM(e.what());
-			//}
+			}
+			catch(std::exception& e)
+			{
+				ROS_ERROR_STREAM(e.what());
+			}
 //			cout << "Adding TFT to msg" <<endl;
 			tf::Point robot_rel_detection;
 			tf::pointMsgToTF(world_point.point, detection);
@@ -893,7 +893,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 50, 0,
 //			cv::Size(5, 5), cv::Size(100,100)); //
 
-	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,32, 0,
+	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,28, 0,
 			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 (10,11)    (52,59) 32 15
 
 
