@@ -73,7 +73,7 @@ void SAMStage::loadParams() {
 	thresh_det_ = .5;
 	this->getPrivateNodeHandle().getParam(thresh_det, thresh_det_);
 	NODELET_INFO_STREAM("Det man vals set");
-	this->sherlock_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_);
+	this->sherlock_ = new DetectionManager(thresh_dist_, growth_rate_, shrink_rate_, thresh_det_, 1.0);
 	NODELET_INFO_STREAM("Det man Initialized!");
 	WINDOWLeft_ = "Left camera image";
 //	WINDOWDisp_ = "Disparity image";

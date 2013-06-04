@@ -90,8 +90,19 @@ BaseServoController::BaseServoController(ros::NodeHandle nh, ros::NodeHandle par
 	linear_gain = 1;
 	rotational_gain = 1;
 
-	this->workspace_pose.pose.position.x = 0.75;
-	this->workspace_pose.pose.position.y = 0;
+
+
+
+	x_change = 0;
+	y_change = 0;
+
+	 forward_vel= 0;
+
+	 rotational_vel= 0;
+
+	this->workspace_pose.pose.position.x = 0.7;
+
+	this->workspace_pose.pose.position.y = 0.1;
 	this->workspace_pose.pose.position.z = 0;
 	tf::Quaternion q;
 
@@ -144,22 +155,22 @@ void BaseServoController::BaseServoStop(void) {
 
 void BaseServoController::PIDConfigCallback(aero_control::BaseServoPIDConfig &config,
 		uint32_t level) {
-	PID_X->SetPID(config.x_linear_P, config.x_linear_I, config.x_linear_D);
-	linear_gain = config.x_gain;
-	PID_Y->SetPID(config.y_linear_P, config.y_linear_I, config.y_linear_D);
-	rotational_gain = config.y_gain;
-
-	this->workspace_pose.pose.position.x = config.Workspace_X_Position;
-	this->workspace_pose.pose.position.y = config.Workspace_Y_Position;
-	workspace_pose.header.stamp = ros::Time::now();
-	this->workspace_postion_pub.publish(this->workspace_pose);
+//	PID_X->SetPID(config.x_linear_P, config.x_linear_I, config.x_linear_D);
+//	linear_gain = config.x_gain;
+//	PID_Y->SetPID(config.y_linear_P, config.y_linear_I, config.y_linear_D);
+//	rotational_gain = config.y_gain;
+//
+//	this->workspace_pose.pose.position.x = config.Workspace_X_Position;
+//	this->workspace_pose.pose.position.y = config.Workspace_Y_Position;
+//	workspace_pose.header.stamp = ros::Time::now();
+//	this->workspace_postion_pub.publish(this->workspace_pose);
 }
 
 void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
 	UpdateError();
 
 	//if we don't see anything then stop moving
-	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 5) {
+	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 0.25) {
 		BaseServoStop();
 	}
 
@@ -183,12 +194,14 @@ void BaseServoController::StateTimeoutTimerCallback(const ros::TimerEvent&) {
 void BaseServoController::DesiredPositionMSG(
 		const geometry_msgs::PoseStampedConstPtr& object_pose) {
 	try {
-		tf_listener.waitForTransform("/world", object_pose->header.frame_id,
+		tf_listener.waitForTransform("/base_footprint", object_pose->header.frame_id,
 				object_pose->header.stamp, ros::Duration(1.0));
-		tf_listener.transformPose("/world", *object_pose, this->desired_pose);
+		tf_listener.transformPose("/base_footprint", *object_pose, this->desired_pose);
 
 		last_position_time = ros::Time().now();
 
+		x_change = 0;
+		y_change = 0;
 
 
 		BaseServoStart();
@@ -248,15 +261,30 @@ void BaseServoController::UpdateError(void) {
 		tf_listener.waitForTransform("/base_footprint", this->workspace_pose.header.frame_id,
 				this->workspace_pose.header.stamp, ros::Duration(0.1));
 		tf_listener.transformPose("/base_footprint", this->workspace_pose, workspace_error_pose);
-		pos_err.x_err = desired_error_pose.pose.position.x - workspace_error_pose.pose.position.x;
-		pos_err.y_err = desired_error_pose.pose.position.y - workspace_error_pose.pose.position.y;
+
+		double dT = ros::Time::now().toSec()-PID_Time.toSec();
+
+		x_change += forward_vel*dT*cos(rotational_vel*dT);
+		y_change+=forward_vel*dT*sin(rotational_vel*dT);
+
+		//x_change =0;
+		//y_change=0;
+
+		ROS_INFO("x_change = %f, y_change = %f",x_change,y_change);
+
+		pos_err.x_err = desired_error_pose.pose.position.x-x_change - workspace_error_pose.pose.position.x;
+		pos_err.y_err = desired_error_pose.pose.position.y-y_change - workspace_error_pose.pose.position.y;
+
+
+		this->PID_Time = ros::Time::now();
+
 
 		ROS_INFO("X_Err = %f, Y_Err = %f",pos_err.x_err,pos_err.y_err);
 
 		if (pos_err.x_err < ErrorRange() && pos_err.y_err < ErrorRange()) {
 
 			ROS_INFO("In Range");
-			if (ros::Time().now().toSec() - in_range_time.toSec() > 1) {
+			if (ros::Time().now().toSec() - in_range_time.toSec() > 5) {
 				ROS_INFO("Moving on");
 
 				aero_srr_msgs::StateTransitionRequest state_transition;
@@ -277,7 +305,6 @@ void BaseServoController::UpdateError(void) {
 }
 void BaseServoController::UpdatePID(void) {
 
-	double forward_vel;
 
 	forward_vel = PID_X->PIDUpdate(pos_err.x_err);
 	forward_vel *= linear_gain;
@@ -288,7 +315,6 @@ void BaseServoController::UpdatePID(void) {
 		forward_vel = -MaxLinearVel();
 	}
 
-	double rotational_vel;
 
 	rotational_vel = PID_Y->PIDUpdate(pos_err.y_err);
 	rotational_vel *= rotational_gain;

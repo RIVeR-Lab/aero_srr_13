@@ -33,7 +33,7 @@ LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std
 	this->loadParam();
 	this->regTopic();
 	this->regTimers();
-	this->setTentacleMode();
+	this->setManualMode();
 
 	switch(this->platform_)
 	{
@@ -627,6 +627,7 @@ void LocalPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 		break;
 	case State_t::MANUAL:
 	case State_t::COLLECT:
+	case State_t::PICKUP:
 		this->setManualMode();
 		break;
 	default:

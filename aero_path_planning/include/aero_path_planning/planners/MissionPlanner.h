@@ -122,6 +122,8 @@ private:
 
 	void requestNavObj();
 
+	void requestHome();
+
 	void requestStateTransition(aero_srr_msgs::AeroState& requested_state);
 
 	void pause(bool enable);
@@ -140,9 +142,14 @@ private:
 
 	aero_path_planning::ObjectOfInterestManager OoI_manager_;
 
-	double                path_threshold_;///The threshold for determining we've gotten to a point on the path, in meters
+	double                path_threshold_;///The threshold for determining we've gotten to a point on the path in search mode, in meters
+	double                nav_threshold_; ///The threshold for determining ew've gotten to an object of interest, in meters
+	double                dist_threshold_;///The threshold for determining we've gotten to a mission goal
 	bool                  searching_;     ///Flag to signal if the robot is searching or not
+	bool                  naving_;        ///Flag to singal if the robot is naving to obj
+	bool                  homeing_;        ///Flag to signal if the robot is homing
 	bool                  recieved_path_; ///Flag to signal if the robot has ever recieved a carrot path
+	bool                  last_collect_;  ///Flag to singla if we've attempted to collect the last OoI
 
 	ros::NodeHandle       nh_;            ///Global NodeHandle into the ROS system
 	ros::NodeHandle       p_nh_;          ///Private NodeHandle into the ROS system
