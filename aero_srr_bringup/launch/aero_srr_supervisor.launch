@@ -1,4 +1,6 @@
 <launch>
 	<node pkg="aero_srr_supervisor" type="aero_srr_supervisor" name="aero_srr_supervisor">
 	</node>
+	<node pkg="aero_srr_supervisor" type="dummy_startup_node" name="dummy_startup_node">
+	</node>
 </launch>
