@@ -41,7 +41,7 @@ BeaconDetector::BeaconDetector():it_(nh_)
 		return;
 
 	/* software stop subscriber for ensuring you dont transition into seach in pause mode" */
-	software_stop_sub_=it_.subscribe("aero/software_stop",5,&BeaconDetector::checkStopcb,this);
+	software_stop_sub_=nh_.subscribe("aero/software_stop",5,&BeaconDetector::checkStopcb,this);
 
 	/* Set up the publisher for the result stamped pose */
 	pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("tag_visualization", 5);
@@ -179,6 +179,10 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
 			state_transition.request.requested_state.header.stamp = ros::Time().now();
 			//dont call if its in software pause.
+			while(software_stop_)
+			{
+				ros::spinOnce();
+			}
 			//wait till it gets out pause
 			if(state_client_.call(state_transition))
 			{
