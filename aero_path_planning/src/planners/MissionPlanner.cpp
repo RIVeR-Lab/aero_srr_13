@@ -138,14 +138,17 @@ void MissionPlanner::pathCB(const nav_msgs::PathConstPtr& message)
 
 void MissionPlanner::ooiCB(const geometry_msgs::PoseArrayConstPtr& message)
 {
-	tf::Point temp_point;
-	BOOST_FOREACH(std::vector<geometry_msgs::Pose>::value_type pose, message->poses)
+	if(this->searching_)
 	{
-		tf::pointMsgToTF(pose.position, temp_point);
-		this->OoI_manager_.addOoI(temp_point);
-	}
+		tf::Point temp_point;
+		BOOST_FOREACH(std::vector<geometry_msgs::Pose>::value_type pose, message->poses)
+		{
+			tf::pointMsgToTF(pose.position, temp_point);
+			this->OoI_manager_.addOoI(temp_point);
+		}
 
-	ROS_INFO_STREAM("Added new detections, current detection state:\n"<<this->OoI_manager_);
+		ROS_INFO_STREAM("Added new detections, current detection state:\n"<<this->OoI_manager_);
+	}
 }
 
 bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLocation, const double threshold) const
