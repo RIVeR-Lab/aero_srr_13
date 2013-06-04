@@ -21,7 +21,11 @@
   <depend package="apriltags"/>
   <depend package="tf"/>
   <depend package="aero_srr_msgs"/>
+  <depend package="aero_srr_supervisor"/>
   <depend package="dynamic_reconfigure" />
+  <depend package="device_driver_base"/>
+  <depend package="robot_base_msgs"/>
+  <depend package="actionlib"/>
 
 
 </package>

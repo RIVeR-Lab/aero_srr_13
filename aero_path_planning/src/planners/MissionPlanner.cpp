@@ -197,6 +197,10 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			{
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
 				this->updateMissionGoal();
+				if(!this->searching_)
+				{
+					this->requestCollect();
+				}
 			}
 			//We need to transition mission states
 			else

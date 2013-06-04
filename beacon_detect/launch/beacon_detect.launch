@@ -1,8 +1,17 @@
 <launch>
-  <node name="beacondetector" pkg="beacon_detect" type="beacondetect" output="screen">
-      <param name="cam_topic" type="str" value="/image_raw" />
+  <arg name="name" default="beacon_detector" />
+  <arg name="img_topic" default="/lower_stereo_raw/right/image_raw" />
+  <arg name="estimator" default="false" />
+
+  <node name="$(arg name)" pkg="beacon_detect" type="beacondetect" output="screen">
+      <param name="cam_topic" type="str" value="$(arg img_topic)" />
       <param name="configuration" type="str" value="configuration.xml" />
-      <param name="tag_size" value=" 0.166" />	
+      <param name="tag_size_big" value=" 0.5588" />
+      <param name="tag_size_small" value=" 0.2667" />	
       <param name="show_result" value="true" />
+      <param name="test_mode"	value="true" /> 
+      <param name="histeq"	value="true" />
+      <param name="estimator"   value="$(arg estimator)" />
+      <param name="robot_topic" value="/aero/supervisor/state" />	
   </node>
 </launch>
