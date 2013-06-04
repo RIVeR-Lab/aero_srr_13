@@ -39,14 +39,14 @@ void loop(){
   bool_msg.data = pulse_length>1400;//will not pause if pulseIn timed out (no pulse = 0)
   pause_pub.publish( &bool_msg );
 
-  if(nh.connected()){
+  //if(nh.connected()){
     if(flash_rate!=0){
       unsigned long time = millis();
       if(time-last_invert>=(1000/flash_rate/2)){
 	digitalWrite(LIGHT_PIN, !digitalRead(LIGHT_PIN));
 	last_invert = time;
       }
-    }
+  //  }
     else
       digitalWrite(LIGHT_PIN, LIGHT_ON);
   }
