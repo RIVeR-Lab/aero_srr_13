@@ -37,7 +37,7 @@ public:
 	 * @param shrink_rate    The rate to decrease confidence in a detection by
 	 * @param threshold_det  The minimum confidence to consider a detection a positive one
 	 */
-	DetectionManager(double threshold_dist, double growth_rate, double shrink_rate, double threshold_det);
+	DetectionManager(double threshold_dist, double growth_rate, double shrink_rate, double threshold_det, double max_confidence);
 
 	/**
 	 * @author Adam Panzica
@@ -69,6 +69,13 @@ public:
 	 * it will increase the confidence of that detection, otherwise it will create a new detection with a default starting confidance
 	 */
 	void addDetection(const tf::Point& detection, const object_type type);
+	/**
+	 * @author Samir Zutshi
+	 * @brief Adds and replaces a detection if in the sameness threshold.
+	 * @param [in] detection in the same frame as other detections.
+	 */
+
+	void addAndReplaceDetection(const tf::Point& detection, const object_type type);
 
 	/**
 	 * @author Adam Panzica
@@ -86,6 +93,7 @@ public:
 	 */
 	bool getDetection(tf::Point& detection, object_type &type, double& confidence) const;
 	bool getAllAboveConf(std::vector<tf::Point>& detections) const;
+
 	/**
 	 * @author Adam Panzica
 	 * @brief  Clears all detections in the manager

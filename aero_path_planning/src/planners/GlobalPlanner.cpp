@@ -104,19 +104,19 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//Update rate to generate local occupancy grid
 	std::string pg_up_rate(G_OCC_UPDTRT);
-	this->global_update_rate_ = 30.0;
+	this->global_update_rate_ = 10.0;
 	std::stringstream gup_rate_msg;
 	gup_rate_msg<<this->global_update_rate_<<"s";
 
 	//x dimension of global occupancy grid
 	std::string pg_x_dim(G_OCC_XDIM);
-	this->global_x_size_ = 5000;
+	this->global_x_size_ = 1000;
 	std::stringstream gx_dim_msg;
 	gx_dim_msg<<this->global_x_size_<<"*0.05m";
 
 	//y dimension of global occupancy grid
 	std::string pg_y_dim(G_OCC_YDIM);
-	this->global_y_size_ = 5000;
+	this->global_y_size_ = 1000;
 	std::stringstream gy_dim_msg;
 	gy_dim_msg<<this->global_y_size_<<"*0.05m";
 
@@ -213,9 +213,9 @@ void GlobalPlanner::registerTopics()
 
 	this->local_occ_pub_ = this->nh_.advertise<occupancy_grid::MultiTraitOccupancyGridMessage>(this->local_occupancy_topic_, 2);
 	this->laser_sub_     = this->nh_.subscribe(this->global_laser_topic_, 2, &GlobalPlanner::laserCB, this);
-	//this->map_viz_pub_   = this->nh_.advertise<aero_path_planning::OccupancyGridMsg>("aero/global/vizualization", 2, true);
+	this->map_viz_pub_   = this->nh_.advertise<nav_msgs::OccupancyGrid>("aero/global/map_visualization", 1, true);
 	this->path_pub_      = this->nh_.advertise<nav_msgs::Path>("aero/global/path", 1, true);
-	//this->slam_sub_      = this->nh_.subscribe("/map", 2, &GlobalPlanner::slamCB, this);
+	this->slam_sub_      = this->nh_.subscribe("/map", 1, &GlobalPlanner::slamCB, this);
 	this->state_sub      = this->nh_.subscribe("/aero/state", 1, &GlobalPlanner::stateCB, this);
 	this->mission_goal_sub_ = this->nh_.subscribe("/aero/global/mission_goal", 1, &GlobalPlanner::missionGoalCB, this);
 }
@@ -233,8 +233,8 @@ void GlobalPlanner::buildGlobalMap()
 	nav_msgs::MapMetaData info;
 	info.width = this->global_x_size_;
 	info.height= this->global_y_size_;
-	info.origin.position.x = -((double)this->global_x_ori_*this->global_res_)/2.0;
-	info.origin.position.y = -((double)this->global_y_ori_*this->global_res_)/2.0;
+	info.origin.position.x = -((double)this->global_x_size_*this->global_res_)/2.0;
+	info.origin.position.y = -((double)this->global_y_size_*this->global_res_)/2.0;
 	info.origin.position.z = 0;
 	info.map_load_time = ros::Time::now();
 	info.resolution    = this->global_res_;
@@ -334,14 +334,15 @@ void GlobalPlanner::chunckCB(const ros::TimerEvent& event)
 	occupancy_grid::MultiTraitOccupancyGrid local_gird(this->local_frame_, this->traits_, occupancy_grid::utilities::CellTrait::UNKOWN, this->local_info_, 0, this->local_info_.height/2);
 	local_gird.toROSMsg(*message);
 	this->local_occ_pub_.publish(message);
-
+	this->visualizeMap();
 
 }
 
 void GlobalPlanner::slamCB(const nm::OccupancyGridConstPtr& message)
 {
-	ROS_INFO_STREAM("Recieved new SLAM map information!");
-	//this->global_map_->setPointTrait(*message);
+	//ROS_INFO_STREAM("Recieved new SLAM map information!");
+	this->global_map_->addPointTrait(*message, occupancy_grid::utilities::CellTrait::OBSTACLE);
+	//ROS_INFO_STREAM("SLAM Data Added!");
 }
 
 
@@ -445,7 +446,28 @@ bool GlobalPlanner::checkCollision(const tf::Point& point, const occupancy_grid:
 
 void GlobalPlanner::visualizeMap() const
 {
+	if(this->global_map_!=occupancy_grid::MultiTraitOccupancyGridPtr())
+	{
+		nav_msgs::OccupancyGridPtr message(new nav_msgs::OccupancyGrid());
+		this->global_map_->generateOccupancyGridforTrait(*message, occupancy_grid::utilities::CellTrait::OBSTACLE);
 
+//		BOOST_FOREACH(occupancy_grid::cell_data_t& data, message->data)
+//		{
+//			if(data>0)
+//			{
+//				data = 100;
+//			}
+//			else
+//			{
+//				data = 0;
+//			}
+//		}
+		message->header.frame_id = this->global_map_->getFrameID();
+		message->header.stamp    = ros::Time::now();
+
+
+		this->map_viz_pub_.publish(message);
+	}
 }
 
 void GlobalPlanner::setManual(bool enable)

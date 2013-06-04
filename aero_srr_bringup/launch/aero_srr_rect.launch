@@ -1,0 +1,22 @@
+<launch>
+
+  <arg name="manager" /> <!-- Must be globally qualified -->
+  <arg name="respawn" default="false" />
+  <arg name="left" default="left" />
+  <arg name="right" default="right" />
+  <!-- Basic processing for left camera -->
+  
+  <include file="$(find image_proc)/launch/image_proc.launch"
+	   ns="$(arg left)">
+    <arg name="manager" value="$(arg manager)" />
+    <arg name="respawn" value="$(arg respawn)" />
+  </include>
+
+  <!-- Basic processing for right camera -->
+  <include file="$(find image_proc)/launch/image_proc.launch"
+	   ns="$(arg right)">
+    <arg name="manager" value="$(arg manager)" />
+    <arg name="respawn" value="$(arg respawn)" />
+  </include>
+
+</launch>

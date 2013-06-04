@@ -11,7 +11,7 @@
 	   <arg name="gain_auto_target" value="50" />
   </include>
   <group ns="/upper_stereo">
-    <include file="$(find stereo_image_proc)/launch/stereo_image_proc.launch">
+    <include file="$(find aero_srr_bringup)/launch/aero_srr_rect.launch">
       <arg name="manager" value="/upper_stereo_nodelet_manager"/>
     </include>
   </group>
@@ -30,7 +30,7 @@
 	   <arg name="gain_auto_target" value="30" />
   </include>
   <group ns="/lower_stereo">
-    <include file="$(find stereo_image_proc)/launch/stereo_image_proc.launch">
+    <include file="$(find aero_srr_bringup)/launch/aero_srr_rect.launch">
       <arg name="manager" value="/lower_stereo_nodelet_manager"/>
     </include>
   </group>

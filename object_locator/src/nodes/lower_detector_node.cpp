@@ -44,8 +44,8 @@ using namespace sensor_msgs;
 
 DetectorNode::DetectorNode() :
 		it_(nh_), WINDOWLeft("Left Camera"), WINDOWRight("Right Camera"), WINDOWDisparity(
-				"Disparity"), sherlock(.1, .15, .05, .5), gotLeft(false), gotRight(
-				false)
+				"Disparity"), sherlock(.25, .15, .05, .5, 2.0),aero(1.5,.20,.10,.25, .25), gotLeft(false), gotRight(
+				false), Collect_(false)
 
 {
 	//**********enable CUDA*****************
@@ -54,17 +54,19 @@ DetectorNode::DetectorNode() :
 	//********ROS subscriptions and published topics***************
 	ObjLocationPub = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>(
 			"ObjectPose", 2);
+	ObjLocationPubWorld = nh_.advertise<aero_srr_msgs::ObjectLocationMsg>(
+			"ObjectPoseWorld", 2);
 	secondObjPub = nh_.advertise<geometry_msgs::PoseArray>(
 			"ObjectPose2", 2);
 	image_pub_ = it_.advertise("/out", 1);
-	pub_points2_ = nh_.advertise<PointCloud2>("lower_stereo/pointCloud", 1);
-	pub_points3_ = nh_.advertise<PointCloud2>("points3", 1);
+//	pub_points2_ = nh_.advertise<PointCloud2>("lower_stereo/pointCloud", 1);
+//	pub_points3_ = nh_.advertise<PointCloud2>("points3", 1);
 
 
 
 	image_left_  = it_.subscribeCamera("/lower_stereo/left/image_rect_color", 1, &DetectorNode::imageCbLeft, this);
 	image_right_ = it_.subscribeCamera("/lower_stereo/right/image_rect_color", 1, &DetectorNode::imageCbRight, this);
-
+	state_sub_   = nh_.subscribe("/aero/supervisor/state",1, &DetectorNode::stateCb, this);
 
 //	disp_image_sub_ = nh_.subscribe("/stereo_camera/disparity",1, &ImageConverter::imageCbRight, this);
 //	left_rect_sub_ = nh_.subscribe("/stereo_camera/left/image_rect_color",1, &ImageConverter::rectLeftCb, this);
@@ -75,7 +77,7 @@ DetectorNode::DetectorNode() :
 	//	image_left_ = it_.subscribeCamera("out", 1, &ImageConverter::imageCbLeft, this);
 //	point_cloud_sub_ = nh_.subscribe<sensor_msgs::PointCloud2> ("/lower_stereo/points2", 2, &ImageConverter::pointCloudCb, this);
 	//********ROS Timer for Disparity image cb**************
-	disp_timer = nh_.createTimer(ros::Duration(1 / 18),
+	disp_timer = nh_.createTimer(ros::Duration(1 / 20),
 			&DetectorNode::computeDisparityCb, this);
 
 	//Cascade Trained xml file locations
@@ -84,23 +86,24 @@ DetectorNode::DetectorNode() :
 	cascade_path_PINK =
 			"/home/srr/ObjectDetectionData/exec/cascadePINKBALL/cascade.xml";
 	cascade_path_PUCK =
-			"/home/srr/ObjectDetectionData/exec/cascadeFat1/cascade.xml";
+			"/home/srr/ObjectDetectionData/exec/cascadeTE/cascade.xml";
 //	cascade_path_RQT_BALL = "/home/srr/ObjectDetectionData/exec/cascadeWHAOutside/cascade.xml";
 	cascade_path_PIPE =
 			"/home/srr/ObjectDetectionData/exec/cascadePIPEX/cascade.xml";
 	ctrLeft = 0;
 	ctrRight = 0;
-	cv::namedWindow(WINDOWLeft);
-	cv::namedWindow(WINDOWRight);
-	cv::namedWindow(WINDOWDisparity);
+
+	cv::namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE);
+//	cv::namedWindow(WINDOWRight, CV_WINDOW_AUTOSIZE);
+//	cv::namedWindow(WINDOWDisparity, CV_WINDOW_AUTOSIZE);
 	objset = false;
 
 }
 
 DetectorNode::~DetectorNode() {
 	cv::destroyWindow(WINDOWLeft);
-	cv::destroyWindow(WINDOWRight);
-	cv::destroyWindow(WINDOWDisparity);
+//	cv::destroyWindow(WINDOWRight);
+//	cv::destroyWindow(WINDOWDisparity);
 	//	cvDestroyAllWindows();
 }
 
@@ -154,6 +157,31 @@ void DetectorNode::saveImage(const sensor_msgs::Image& msg,
 		}
 	}
 }
+void DetectorNode::stateCb(const aero_srr_msgs::AeroStatePtr& msg)
+{
+	Aero_state_ = msg->state;
+	typedef aero_srr_msgs::AeroState State_t;
+	switch(msg->state)
+	{
+	case State_t::STARTUP:
+	case State_t::ERROR:
+	case State_t::SAFESTOP:
+	case State_t::SHUTDOWN:
+	case State_t::SEARCH:
+	case State_t::NAVOBJ:
+	case State_t::HOME:
+	case State_t::MANUAL:
+	case State_t::COLLECT:
+		Collect_ = true;
+		break;
+	case State_t::PICKUP:
+		Collect_ = true;
+		break;
+	default:
+		ROS_ERROR_STREAM("Received Unknown Robot State: "<<msg->state);
+		break;
+	}
+}
 
 void DetectorNode::rectLeftCb(const sensor_msgs::ImageConstPtr& msg) {
 	left_image = *msg;
@@ -191,6 +219,7 @@ inline bool isValidPoint(const cv::Vec3f& pt) {
 }
 
 void DetectorNode::computeDisparity() {
+	ros::Time time_Obj = ros::Time::now();
 	processImage(left_image, mat_left, WINDOWLeft);
 	processImage(right_image, mat_right, WINDOWRight);
 //	ROS_INFO_STREAM("Finished acquiring images");
@@ -293,7 +322,7 @@ void DetectorNode::computeDisparity() {
 	Mat_t dispn(heightL, widthL, CV_32F);
 //	Mat_t disp;
 
-	int minDisp = 0;      //0         //-128-32;
+	int minDisp = 1;      //0         //-128-32;
 	int numDisp = 192;       //80        //256+80;
 	int SADSize = 21;				//10
 	int P1 = 8 * SADSize * SADSize;
@@ -331,127 +360,127 @@ void DetectorNode::computeDisparity() {
 	this->stereo_model.projectDisparityImageTo3d(disp, points_mat_, true);
 	cv::Mat_<cv::Vec3f> mat = points_mat_;
 
-	sensor_msgs::PointCloud2Ptr points_msg = boost::make_shared<
-			sensor_msgs::PointCloud2>();
-	points_msg->header = left_image.header;
-	points_msg->height = mat.rows;
-	points_msg->width = mat.cols;
-	points_msg->fields.resize(4);
-	points_msg->fields[0].name = "x";
-	points_msg->fields[0].offset = 0;
-	points_msg->fields[0].count = 1;
-	points_msg->fields[0].datatype = sensor_msgs::PointField::FLOAT32;
-	points_msg->fields[1].name = "y";
-	points_msg->fields[1].offset = 4;
-	points_msg->fields[1].count = 1;
-	points_msg->fields[1].datatype = sensor_msgs::PointField::FLOAT32;
-	points_msg->fields[2].name = "z";
-	points_msg->fields[2].offset = 8;
-	points_msg->fields[2].count = 1;
-	points_msg->fields[2].datatype = sensor_msgs::PointField::FLOAT32;
-	points_msg->fields[3].name = "rgb";
-	points_msg->fields[3].offset = 12;
-	points_msg->fields[3].count = 1;
-	points_msg->fields[3].datatype = sensor_msgs::PointField::FLOAT32;
-
-	//points_msg->is_bigendian = false; ???
-	static const int STEP = 16;
-	points_msg->point_step = STEP;
-	points_msg->row_step = points_msg->point_step * points_msg->width;
-	points_msg->data.resize(points_msg->row_step * points_msg->height);
-	points_msg->is_dense = false; // there may be invalid points
-
-	float bad_point = std::numeric_limits<float>::quiet_NaN();
-	int offset = 0;
-	for (int v = 0; v < mat.rows; ++v) {
-		for (int u = 0; u < mat.cols; ++u, offset += STEP) {
-			if (isValidPoint(mat(v, u))) {
-				// x,y,z,rgba
-				memcpy(&points_msg->data[offset + 0], &mat(v, u)[0],
-						sizeof(float));
-				memcpy(&points_msg->data[offset + 4], &mat(v, u)[1],
-						sizeof(float));
-				memcpy(&points_msg->data[offset + 8], &mat(v, u)[2],
-						sizeof(float));
-			} else {
-				memcpy(&points_msg->data[offset + 0], &bad_point,
-						sizeof(float));
-				memcpy(&points_msg->data[offset + 4], &bad_point,
-						sizeof(float));
-				memcpy(&points_msg->data[offset + 8], &bad_point,
-						sizeof(float));
-			}
-		}
-	}
-	// Fill in color
-	namespace enc = sensor_msgs::image_encodings;
-	const std::string& encoding = left_image.encoding;
-	offset = 0;
-	if (encoding == enc::MONO8) {
-		const cv::Mat_<uint8_t> color(left_image.height, left_image.width,
-				(uint8_t*) &left_image.data[0], left_image.step);
-		for (int v = 0; v < mat.rows; ++v) {
-			for (int u = 0; u < mat.cols; ++u, offset += STEP) {
-				if (isValidPoint(mat(v, u))) {
-					uint8_t g = color(v, u);
-					int32_t rgb = (g << 16) | (g << 8) | g;
-					memcpy(&points_msg->data[offset + 12], &rgb,
-							sizeof(int32_t));
-				} else {
-					memcpy(&points_msg->data[offset + 12], &bad_point,
-							sizeof(float));
-				}
-			}
-		}
-	} else if (encoding == enc::RGB8) {
-		const cv::Mat_<cv::Vec3b> color(left_image.height, left_image.width,
-				(cv::Vec3b*) &left_image.data[0], left_image.step);
-		for (int v = 0; v < mat.rows; ++v) {
-			for (int u = 0; u < mat.cols; ++u, offset += STEP) {
-				if (isValidPoint(mat(v, u))) {
-					const cv::Vec3b& rgb = color(v, u);
-					int32_t rgb_packed = (rgb[0] << 16) | (rgb[1] << 8)
-							| rgb[2];
-					memcpy(&points_msg->data[offset + 12], &rgb_packed,
-							sizeof(int32_t));
-				} else {
-					memcpy(&points_msg->data[offset + 12], &bad_point,
-							sizeof(float));
-				}
-			}
-		}
-	} else if (encoding == enc::BGR8) {
-		const cv::Mat_<cv::Vec3b> color(left_image.height, left_image.width,
-				(cv::Vec3b*) &left_image.data[0], left_image.step);
-		for (int v = 0; v < mat.rows; ++v) {
-			for (int u = 0; u < mat.cols; ++u, offset += STEP) {
-				if (isValidPoint(mat(v, u))) {
-					const cv::Vec3b& bgr = color(v, u);
-					int32_t rgb_packed = (bgr[2] << 16) | (bgr[1] << 8)
-							| bgr[0];
-					memcpy(&points_msg->data[offset + 12], &rgb_packed,
-							sizeof(int32_t));
-				} else {
-					memcpy(&points_msg->data[offset + 12], &bad_point,
-							sizeof(float));
-				}
-			}
-		}
-	} else {
-		ROS_WARN_THROTTLE(30,
-				"Could not fill color channel of the point cloud, "
-						"unsupported encoding '%s'", encoding.c_str());
-	}
-	pub_points2_.publish(points_msg);
-	sensor_msgs::PointCloud2::Ptr cloud_filtered (new sensor_msgs::PointCloud2 ());
-	  pcl::VoxelGrid<sensor_msgs::PointCloud2> sor;
-	  sor.setInputCloud (points_msg);
-	  sor.setLeafSize (0.01f, 0.01f, 0.01f);
-	  sor.filter (*cloud_filtered);
-
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-//	pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::fromROSMsg(*points_msg,*cloud);
+//	sensor_msgs::PointCloud2Ptr points_msg = boost::make_shared<
+//			sensor_msgs::PointCloud2>();
+//	points_msg->header = left_image.header;
+//	points_msg->height = mat.rows;
+//	points_msg->width = mat.cols;
+//	points_msg->fields.resize(4);
+//	points_msg->fields[0].name = "x";
+//	points_msg->fields[0].offset = 0;
+//	points_msg->fields[0].count = 1;
+//	points_msg->fields[0].datatype = sensor_msgs::PointField::FLOAT32;
+//	points_msg->fields[1].name = "y";
+//	points_msg->fields[1].offset = 4;
+//	points_msg->fields[1].count = 1;
+//	points_msg->fields[1].datatype = sensor_msgs::PointField::FLOAT32;
+//	points_msg->fields[2].name = "z";
+//	points_msg->fields[2].offset = 8;
+//	points_msg->fields[2].count = 1;
+//	points_msg->fields[2].datatype = sensor_msgs::PointField::FLOAT32;
+//	points_msg->fields[3].name = "rgb";
+//	points_msg->fields[3].offset = 12;
+//	points_msg->fields[3].count = 1;
+//	points_msg->fields[3].datatype = sensor_msgs::PointField::FLOAT32;
+//
+//	//points_msg->is_bigendian = false; ???
+//	static const int STEP = 16;
+//	points_msg->point_step = STEP;
+//	points_msg->row_step = points_msg->point_step * points_msg->width;
+//	points_msg->data.resize(points_msg->row_step * points_msg->height);
+//	points_msg->is_dense = false; // there may be invalid points
+//
+//	float bad_point = std::numeric_limits<float>::quiet_NaN();
+//	int offset = 0;
+//	for (int v = 0; v < mat.rows; ++v) {
+//		for (int u = 0; u < mat.cols; ++u, offset += STEP) {
+//			if (isValidPoint(mat(v, u))) {
+//				// x,y,z,rgba
+//				memcpy(&points_msg->data[offset + 0], &mat(v, u)[0],
+//						sizeof(float));
+//				memcpy(&points_msg->data[offset + 4], &mat(v, u)[1],
+//						sizeof(float));
+//				memcpy(&points_msg->data[offset + 8], &mat(v, u)[2],
+//						sizeof(float));
+//			} else {
+//				memcpy(&points_msg->data[offset + 0], &bad_point,
+//						sizeof(float));
+//				memcpy(&points_msg->data[offset + 4], &bad_point,
+//						sizeof(float));
+//				memcpy(&points_msg->data[offset + 8], &bad_point,
+//						sizeof(float));
+//			}
+//		}
+//	}
+//	// Fill in color
+//	namespace enc = sensor_msgs::image_encodings;
+//	const std::string& encoding = left_image.encoding;
+//	offset = 0;
+//	if (encoding == enc::MONO8) {
+//		const cv::Mat_<uint8_t> color(left_image.height, left_image.width,
+//				(uint8_t*) &left_image.data[0], left_image.step);
+//		for (int v = 0; v < mat.rows; ++v) {
+//			for (int u = 0; u < mat.cols; ++u, offset += STEP) {
+//				if (isValidPoint(mat(v, u))) {
+//					uint8_t g = color(v, u);
+//					int32_t rgb = (g << 16) | (g << 8) | g;
+//					memcpy(&points_msg->data[offset + 12], &rgb,
+//							sizeof(int32_t));
+//				} else {
+//					memcpy(&points_msg->data[offset + 12], &bad_point,
+//							sizeof(float));
+//				}
+//			}
+//		}
+//	} else if (encoding == enc::RGB8) {
+//		const cv::Mat_<cv::Vec3b> color(left_image.height, left_image.width,
+//				(cv::Vec3b*) &left_image.data[0], left_image.step);
+//		for (int v = 0; v < mat.rows; ++v) {
+//			for (int u = 0; u < mat.cols; ++u, offset += STEP) {
+//				if (isValidPoint(mat(v, u))) {
+//					const cv::Vec3b& rgb = color(v, u);
+//					int32_t rgb_packed = (rgb[0] << 16) | (rgb[1] << 8)
+//							| rgb[2];
+//					memcpy(&points_msg->data[offset + 12], &rgb_packed,
+//							sizeof(int32_t));
+//				} else {
+//					memcpy(&points_msg->data[offset + 12], &bad_point,
+//							sizeof(float));
+//				}
+//			}
+//		}
+//	} else if (encoding == enc::BGR8) {
+//		const cv::Mat_<cv::Vec3b> color(left_image.height, left_image.width,
+//				(cv::Vec3b*) &left_image.data[0], left_image.step);
+//		for (int v = 0; v < mat.rows; ++v) {
+//			for (int u = 0; u < mat.cols; ++u, offset += STEP) {
+//				if (isValidPoint(mat(v, u))) {
+//					const cv::Vec3b& bgr = color(v, u);
+//					int32_t rgb_packed = (bgr[2] << 16) | (bgr[1] << 8)
+//							| bgr[0];
+//					memcpy(&points_msg->data[offset + 12], &rgb_packed,
+//							sizeof(int32_t));
+//				} else {
+//					memcpy(&points_msg->data[offset + 12], &bad_point,
+//							sizeof(float));
+//				}
+//			}
+//		}
+//	} else {
+//		ROS_WARN_THROTTLE(30,
+//				"Could not fill color channel of the point cloud, "
+//						"unsupported encoding '%s'", encoding.c_str());
+//	}
+//	pub_points2_.publish(points_msg);
+//	sensor_msgs::PointCloud2::Ptr cloud_filtered (new sensor_msgs::PointCloud2 ());
+//	  pcl::VoxelGrid<sensor_msgs::PointCloud2> sor;
+//	  sor.setInputCloud (points_msg);
+//	  sor.setLeafSize (0.01f, 0.01f, 0.01f);
+//	  sor.filter (*cloud_filtered);
+//
+//	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+////	pcl::PointCloud<pcl::PointXYZ>::Ptr tcloud(new pcl::PointCloud<pcl::PointXYZ>);
+//	pcl::fromROSMsg(*points_msg,*cloud);
 //	pcl_ros::transformPointCloud("/world", *cloud, *tcloud,optimus_prime);
 
 	/****** Cylinder model testing *******/
@@ -493,13 +522,13 @@ void DetectorNode::computeDisparity() {
 //	  pub_points3_.publish(filtered_msg);
 
 	//*********Oct tree stuff *************//
-	float resolution = 2.5f;
-	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
-
-    octree.setInputCloud (cloud);
-    octree.addPointsFromInputCloud ();
-
-    pcl::PointXYZ searchPoint;
+//	float resolution = 2.5f;
+//	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
+//
+//    octree.setInputCloud (cloud);
+//    octree.addPointsFromInputCloud ();
+//
+//    pcl::PointXYZ searchPoint;
 
 
 
@@ -541,22 +570,26 @@ void DetectorNode::computeDisparity() {
 #endif
 
 	cv::Point3d real_xyz;
-	geometry_msgs::PointStamped camera_point, world_point;
+	geometry_msgs::PointStamped camera_point, world_point, robot_point;
 	for (int i = 0; i < (int) detection_list_.size(); i++) {
 //		cout << endl;
 //		cout << "In detection #"<< i+1 << "/"<< detection_list_WHA.size() <<endl;
 		Point2d obj_centroid(detection_list_.at(i)->first.first,
 				detection_list_.at(i)->first.second);
 		Point3d obj_3d;
-
+		float disp_val2 = disp.at<float>(obj_centroid.y, obj_centroid.x);
+		cout << "Disparity Value of detection "<< disp_val2 <<endl;
+		float disp_val = nNdisp(obj_centroid, disp);
+					cout << "Disparity Value of detection after nNdisp "<< disp_val <<endl;
+//		if(disp_val <= 0.0)
+//		{
+//
+//		}
 //		std::cout << "Checking disparity at  " << obj_centroid.x <<","<< obj_centroid.y << std::endl;
 //		std::cout << "Range (rows,cols): " << vdisp1.rows <<","<< vdisp1.cols << std::endl;
 		if (obj_centroid.x < disp.cols && obj_centroid.y < disp.rows) {
 //			cout << "Getting Disparity" <<endl;
-			//		float disp_val = dispn.at<float>(obj_centroid.y,obj_centroid.x);
-			float disp_val = disp.at<float>(obj_centroid.y, obj_centroid.x);
-//cout << "Pre Disparity Value of detection "<< disp_val <<endl;			
-cout << "Disparity Value of detection "<< disp_val <<endl;
+
 			this->stereo_model.projectDisparityTo3d(obj_centroid, disp_val,
 					obj_3d);
 	//		cout << "Disp: " << disp_val << endl << "X: " << obj_3d.x << endl
@@ -564,78 +597,91 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 			tf::Point detection(obj_3d.x, obj_3d.y, obj_3d.z);
 //			cout << "adding detection to camera_point" <<endl;
 
-			searchPoint.x = detection.getX();
-			searchPoint.y = detection.getY();
-			searchPoint.z = detection.getZ();
-	ROS_ERROR_STREAM("search point is at ("<<searchPoint.x<<","<<searchPoint.y <<","<<searchPoint.z <<")");
-//			if(searchPoint.z > 0.3 || searchPoint.z < -0.5)
-//{
-//searchPoint.z = 0.0;
-//}
-			ROS_ERROR_STREAM("search point is at ("<<searchPoint.x<<","<<searchPoint.y <<","<<searchPoint.z <<")");
-
-			int K = 10;
-				  std::vector<int> pointIdxVec;
-			  std::vector<int> pointIdxNKNSearch;
-			  std::vector<float> pointNKNSquaredDistance;
-
-	//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
-	//		            << " " << searchPoint.y
-	//		            << " " << searchPoint.z
-	//		            << ") with K=" << K << std::endl;
-
-			  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
-			  {
-				  float sumx =0.0;
-				  float sumy =0.0;
-				  float sumz =0.0;
-			    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
-			    {
-	//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-	//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-			    	sumx = cloud->points[ pointIdxNKNSearch[i] ].x + sumx;
-			    	sumy = cloud->points[ pointIdxNKNSearch[i] ].y + sumy;
-			    	sumz = cloud->points[ pointIdxNKNSearch[i] ].z + sumz;
-			    }
-			    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
-			    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
-			    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
-
-			  }
-			  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
-			  	  detection.setX(xAvgVal_);
-			  	  detection.setY(yAvgVal_);
-				 detection.setZ(kAvgVal_);
-
+//			searchPoint.x = detection.getX();
+//			searchPoint.y = detection.getY();
+//			searchPoint.z = detection.getZ();
+//
+//
+//
+//			int K = 10;
+//				  std::vector<int> pointIdxVec;
+//			  std::vector<int> pointIdxNKNSearch;
+//			  std::vector<float> pointNKNSquaredDistance;
+//
+//	//		  std::cout << "K nearest neighbor search at (" << searchPoint.x
+//	//		            << " " << searchPoint.y
+//	//		            << " " << searchPoint.z
+//	//		            << ") with K=" << K << std::endl;
+//
+//			  if (octree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
+//			  {
+//				  float sumx =0.0;
+//				  float sumy =0.0;
+//				  float sumz =0.0;
+//			    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+//			    {
+//	//		      std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+//	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+//	//		                << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+//	//		                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+//			    	sumx = cloud->points[ pointIdxNKNSearch[i] ].x + sumx;
+//			    	sumy = cloud->points[ pointIdxNKNSearch[i] ].y + sumy;
+//			    	sumz = cloud->points[ pointIdxNKNSearch[i] ].z + sumz;
+//			    }
+//			    xAvgVal_ = sumx/pointIdxNKNSearch.size ();
+//			    yAvgVal_ = sumy/pointIdxNKNSearch.size ();
+//			    kAvgVal_ = sumz/pointIdxNKNSearch.size ();
+//
+//			  }
+////			  ROS_WARN_STREAM("Average value at point in cloud = " << kAvgVal_);
+//			  	  detection.setX(xAvgVal_);
+//			  	  detection.setY(yAvgVal_);
+//				 detection.setZ(kAvgVal_);
+	ROS_INFO_STREAM("Current det unconfident = " << detection.getX()<< "," << detection.getY() << "," <<detection.getZ());
 	tf::pointTFToMsg(detection, camera_point.point);
 			ros::Time tZero(0);
 			camera_point.header.frame_id = "/lower_stereo_optical_frame";
-			camera_point.header.stamp = tZero;
+			camera_point.header.stamp = left_image.header.stamp;
+
+			robot_point.header.frame_id = "/base_footprint";
+			robot_point.header.stamp = left_image.header.stamp;
+
 			world_point.header.frame_id = "/world";
-			world_point.header.stamp = tZero;
+			world_point.header.stamp = left_image.header.stamp;
 //			cout << "Transforming camera to world" <<endl;
+			try
+			{
 			optimus_prime.waitForTransform("/world",
-					camera_point.header.frame_id, ros::Time(0),
-					ros::Duration(1.0));
+					camera_point.header.frame_id, camera_point.header.stamp,
+					ros::Duration(0.25));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
+			optimus_prime.transformPoint("/base_footprint",camera_point,robot_point);
+			}
+			catch(std::exception& e)
+			{
+				ROS_ERROR_STREAM(e.what());
+			}
 //			cout << "Adding TFT to msg" <<endl;
+			tf::Point robot_rel_detection;
 			tf::pointMsgToTF(world_point.point, detection);
+			tf::pointMsgToTF(robot_point.point, robot_rel_detection);
 			sherlock.addDetection(detection, detection_list_.at(i)->second);
+			aero.addAndReplaceDetection(robot_rel_detection, WHA);
 //			cout << "Added detection to manager" <<endl;
 		}
 
 	}
 
 	tf::Point detection;
+	tf::Point robot_rel_det;
 //	cout << "Clearing list" <<endl;
 	detection_list_.clear();
 //	cout << "Shrinking Det/ection manager list" <<endl;
 	sherlock.shrink();
+	aero.shrink();
 //	cout << "Finished shrinking list" <<endl;96
-	double confidence;
-	object_type type;
+	double confidence, rr_conf;
+	object_type type, rr_type;
 	if (sherlock.getDetection(detection, type, confidence)) {
 		std::string typeString;
 		switch (type) {
@@ -657,7 +703,7 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 				<< ", Y: " << detection.getY() << ", Z: " << detection.getZ()
 				<< ", " << confidence << ", of type: " << typeString
 				<< std::endl;
-
+		
 		aero_srr_msgs::ObjectLocationMsg msg;
 		geometry_msgs::PoseArrayPtr poses(new geometry_msgs::PoseArray);
 		poses->header.frame_id = "/world";
@@ -671,46 +717,40 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 		secondObjPub.publish(poses);
 
 
-
-		msg.header.frame_id = world_point.header.frame_id;
-		msg.header.stamp = ros::Time::now();
-		msg.pose.header.frame_id = world_point.header.frame_id;
-		msg.pose.header.stamp = ros::Time::now();
+		
+		msg.header.frame_id = "/world";
+		msg.header.stamp = left_image.header.stamp;
+		msg.pose.header.frame_id = "/world";
+		msg.pose.header.stamp = left_image.header.stamp;
 		buildMsg(detection, msg.pose);
+		ObjLocationPubWorld.publish(msg);
+//		ROS_ERROR_STREAM("Sent Obj msg from Classifier");
+	}
+	ROS_WARN_STREAM("before aero get det");
+	if(aero.getDetection(robot_rel_det, rr_type, rr_conf)) {
+		aero_srr_msgs::ObjectLocationMsg msg;
+		msg.header.frame_id = "base_footprint";
+		msg.header.stamp = ros::Time::now();
+		msg.pose.header.frame_id = "base_footprint";
+		msg.pose.header.stamp = ros::Time::now();
+		buildMsg(robot_rel_det, msg.pose);
 		ObjLocationPub.publish(msg);
-		ROS_ERROR_STREAM("Sent Obj msg from Classifier");
+		ROS_WARN_STREAM("Sent obj pose msg");
+	}
+	if(Collect_)
+	{
+		aero.clear();
+		Collect_ = false;
 	}
 
 
-	// Neighbors within voxel search
 
-
-//	  if (octree.voxelSearch (searchPoint, pointIdxVec))
-//	  {
-//		  float sum =0.0;
-//	    std::cout << "Neighbors within voxel search at (" << searchPoint.x
-//	     << " " << searchPoint.y
-//	     << " " << searchPoint.z << ")"
-//	     << std::endl;
-//
-//	    for (size_t i = 0; i < pointIdxVec.size (); ++i)
-//	    {
-////	    	std::cout << "    " << cloud->points[pointIdxVec[i]].x
-////	       << " " << cloud->points[pointIdxVec[i]].y
-////	       << " " << cloud->points[pointIdxVec[i]].z << std::endl;
-//	    sum = cloud->points[pointIdxVec[i]].z + sum;
-//	    }
-//	    float avgVal = sum/pointIdxVec.size ();
-//	    ROS_WARN_STREAM("Average value at Voxel = " << avgVal);
-//	  }
-
-	Mat_t cmapped;
-	disp.convertTo(cmapped, CV_8U);
-	cv::line(cmapped, Point2d(numDisp,0),Point2d(numDisp,cmapped.rows),Scalar(255,255,255,0));
-	cv::rectangle(frame, Point2d(detection.getX()-100, detection.getY()-100), Point2d(detection.getX()+100, detection.getY()+100),Scalar(255,255,255));
-	namedWindow( WINDOWDisparity, CV_WINDOW_AUTOSIZE );
-	cv::imshow(WINDOWDisparity, cmapped);
-	cv::waitKey(3);
+//	Mat_t cmapped;
+//	disp.convertTo(cmapped, CV_8U);
+//	cv::line(cmapped, Point2d(numDisp,0),Point2d(numDisp,cmapped.rows),Scalar(255,255,255,0));
+//	cv::rectangle(frame, Point2d(detection.getX()-100, detection.getY()-100), Point2d(detection.getX()+100, detection.getY()+100),Scalar(255,255,255));
+//	cv::imshow(WINDOWDisparity, cmapped);
+//	cv::waitKey(1);
 
 //	cmapped = gray2bgr(vdisp1);
 
@@ -718,24 +758,30 @@ cout << "Disparity Value of detection "<< disp_val <<endl;
 //	cv::waitKey(3);
 //	cv::imshow(WINDOWRight, img2_rect );
 //		cv::waitKey(3);
-
+	ROS_WARN_STREAM("compute DIsp took " <<ros::Time::now()-time_Obj);
 }
+
 
 float DetectorNode::nNdisp(const Point2d& pt, const Mat_t& disp) {
 	int window = 10;
-	int startx = pt.x - window;
-	int starty = pt.y - window;
+	int startx = pt.x - window/2;
+	int starty = pt.y;
+	int ctr  = 0;
 	float sum = 0.0;
 	for (int i = 0; i < window; i++) {
 		for (int j = 0; j < window; j++) {
 			float value = disp.at<float>(starty + i, startx + j);
-			if (value == -1)
-				value = 0.0;
-			sum = sum + value;
+			if (value > 0.0)
+			{
+				sum = sum + value;
+				ctr ++;
+			}
 		}
 	}
-
-	return sum / (float) (window * window);
+	ROS_INFO_STREAM("CTR pts = " << ctr);
+	if(ctr == 0)
+		return 0.0;
+	return sum / (float) ctr;
 }
 
 Mat_t DetectorNode::gray2bgr(Mat_t img) {
@@ -775,7 +821,7 @@ void DetectorNode::computeDisparityCb(const ros::TimerEvent& event) {
 }
 void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		cv_bridge::CvImagePtr& cv_ptr, const char* WINDOW) {
-
+	ros::Time time_Obj = ros::Time::now();
 	try {
 		cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
 	} catch (cv_bridge::Exception& e) {
@@ -788,32 +834,32 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		printf("--(!)Error loading\n");
 	}
 
-	if (!cascade_PINK.load(cascade_path_PINK)) {
-		printf("--(!)Error loading\n");
-	}
-	if (!cascade_PUCK.load(cascade_path_PUCK)) {
-		printf("--(!)Error loading\n");
-	}
+//	if (!cascade_PINK.load(cascade_path_PINK)) {
+//		printf("--(!)Error loading\n");
+//	}
+//	if (!cascade_PUCK.load(cascade_path_PUCK)) {
+//		printf("--(!)Error loading\n");
+//	}
 //	if( !cascade_RQT_BALL.load(cascade_path_RQT_BALL))
 //		{
 //			printf("--(!)Error loading\n");
 //		}
-	if (!cascade_PIPE.load(cascade_path_PIPE)) {
-		printf("--(!)Error loading\n");
-	}
+//	if (!cascade_PIPE.load(cascade_path_PIPE)) {
+//		printf("--(!)Error loading\n");
+//	}
 //	cv::GaussianBlur(frame, frame, cv::Size(9, 9), 2, 2);
 
 	std::vector<cv::Rect> WHA_faces, PINK_faces, SUN_faces, RQT_faces,
 			Pipe_faces;
 	std::vector<std::vector<cv::Rect> > Detections;
-	int HORIZON = 0;
+	int HORIZON = 660;
 
 	Mat_t frame_gray;
-	Mat_t lab,lab_gray;
-	Mat_t mask(frame.rows,frame.cols,CV_8U);
-	Mat_t pipeMask = mask;
-	Mat_t WHAMask = mask;
-	cvtColor(frame,lab,CV_RGB2Lab);
+//	Mat_t lab,lab_gray;
+//	Mat_t mask(frame.rows,frame.cols,CV_8U);
+//	Mat_t pipeMask = mask;
+//	Mat_t WHAMask = mask;
+//	cvtColor(frame,lab,CV_RGB2Lab);
 //  	cv::Vec3b hsvPipe = lab.at<cv::Vec3b>(center.x,center.y);
 //  	int H = hsvPipe[0];
 //  	int S = hsvPipe[1];
@@ -822,7 +868,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //  	ROS_ERROR_STREAM("HSV at rock = " << endl << "H: " << H << endl << "S: " << S << endl << "V: " << V);
 
 //
-	inRange(lab, Scalar(45,120, 120,0) , Scalar(60, 150, 140,0), pipeMask );
+//	inRange(lab, Scalar(45,120, 120,0) , Scalar(60, 150, 140,0), pipeMask );
 //	inRange(hsv2, Scalar(68,71, 76,0) , Scalar(83, 75, 112,0), WHAMask );
 
 //	pipePoint_ = blobIdentify(pipeMask,200);
@@ -837,16 +883,19 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 
 	//-- Detect faces
 
+
 	cascade_WHA.detectMultiScale(frame_gray, RQT_faces, 1.1, 8, 0,
-			cv::Size(30, 39), cv::Size(75, 80)); // works for WHAground !&5 *16*
+			cv::Size(30, 39), cv::Size(52, 59)); // works for WHAground !&5   16 8
 	cascade_WHA.detectMultiScale(frame_gray, WHA_faces, 1.1, 5, 0,
-			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90  *20*
-	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
-			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
-	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 10, 0,
-			cv::Size(5, 5), cv::Size(100,100)); //
-	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,15, 0,
-			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 *32*
+			cv::Size(52, 59), cv::Size(75, 80)); // works for WHAground !&5 85 90   20 5
+//	cascade_PINK.detectMultiScale(frame_gray, PINK_faces, 1.1, 20, 0,
+//			cv::Size(45, 45), cv::Size(80, 80)); // works for PINK !&
+//	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 50, 0,
+//			cv::Size(5, 5), cv::Size(100,100)); //
+
+	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,16, 0,
+			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 (10,11)    (52,59) 32 15
+
 
 	/*
 	 * WHA - White hook object inside detection loop BLUE
@@ -854,7 +903,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	for (size_t i = 0; i < WHA_faces.size(); i++) {
 //		cout << "Entered circle drawing loop" << endl;
 
-		Mat_t faceROI = frame_gray(WHA_faces[i]);
+//		Mat_t faceROI = frame_gray(WHA_faces[i]);
 
 		//-- In each face, detect eyes
 
@@ -862,11 +911,11 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 		cv::Point center(WHA_faces[i].x + WHA_faces[i].width / 2,
 				WHA_faces[i].y + WHA_faces[i].height / 2);
 
-		Rect cropROI(center.x-WHA_faces[i].width / 2, center.y-WHA_faces[i].height / 2, WHA_faces[i].width, WHA_faces[i].height);
-		Mat_t sample = frame(cropROI);
+//		Rect cropROI(center.x-WHA_faces[i].width / 2, center.y-WHA_faces[i].height / 2, WHA_faces[i].width, WHA_faces[i].height);
+//		Mat_t sample = frame(cropROI);
 		//object_locator::object_type type = queryObject(sample);
 
-		if (center.y > HORIZON) {
+		if (center.y < HORIZON) {
 
 			cv::ellipse(frame, center,
 					cv::Size(WHA_faces[i].width / 2, WHA_faces[i].height / 2),
@@ -878,7 +927,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 									center.y + WHA_faces[i].height / 2),
 									cv::Scalar(255, 0, 0));
 			//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
-			ROS_ERROR_STREAM("Detection is of size " << WHA_faces[i].width << ","<< WHA_faces[i].height);
+//			ROS_ERROR_STREAM("Detection is of size " << WHA_faces[i].width << ","<< WHA_faces[i].height);
 			DetectionPtr_t newDetection(new Detection_t());
 			newDetection->first.first = center.x;
 			newDetection->first.second = center.y;
@@ -930,24 +979,24 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //	for (size_t j = 0; j < SUN_faces.size(); j++) {
 ////		cout << "Entered circle drawing loop" << endl;
 //
-//		Mat_t faceROI = frame_gray(SUN_faces[j]);
+////		Mat_t faceROI = frame_gray(SUN_faces[j]);
 //
 //		//-- In each face, detect eyes
 //
 //		//-- Draw the face
 //		cv::Point center(SUN_faces[j].x + SUN_faces[j].width / 2,
 //				SUN_faces[j].y + SUN_faces[j].height / 2);
-//		if (center.y > HORIZON) {
-//		cv::ellipse(frame, center,
-//				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
-//				360, cv::Scalar(0, 0, 255), 2, 8, 0);
-//		cv::rectangle(frame,
-//				Point(center.x - SUN_faces[j].width / 2,
-//						center.y - SUN_faces[j].height / 2),
-//				Point(center.x + SUN_faces[j].width / 2,
-//						center.y + SUN_faces[j].height / 2),
-//				cv::Scalar(0, 0, 255));
-//ROS_ERROR_STREAM("Detection is of size " <<SUN_faces[j].width << ","<< SUN_faces[j].height);
+//		if (center.y < HORIZON) {
+////		cv::ellipse(frame, center,
+////				cv::Size(SUN_faces[j].width / 2, SUN_faces[j].height / 2), 0, 0,
+////				360, cv::Scalar(0, 0, 255), 2, 8, 0);
+////		cv::rectangle(frame,
+////				Point(center.x - SUN_faces[j].width / 2,
+////						center.y - SUN_faces[j].height / 2),
+////				Point(center.x + SUN_faces[j].width / 2,
+////						center.y + SUN_faces[j].height / 2),
+////				cv::Scalar(0, 0, 255));
+////ROS_ERROR_STREAM("Detection is of size " <<SUN_faces[j].width << ","<< SUN_faces[j].height);
 //		//		std::cout << "Found object at " << center.x <<","<<center.y<< std::endl;
 ////		ROS_WARN_STREAM("Found object at " << center.x <<","<<center.y <<"of size width, height : " << SUN_faces[j].width << "," << SUN_faces[j].height);
 ////		DetectionPtr_t newDetection(new Detection_t());
@@ -963,16 +1012,16 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 	for (size_t j = 0; j < RQT_faces.size(); j++) {
 //		cout << "Entered circle drawing loop" << endl;
 
-		Mat_t faceROI = frame_gray(RQT_faces[j]);
+//		Mat_t faceROI = frame_gray(RQT_faces[j]);
 
 
 		cv::Point center(RQT_faces[j].x + RQT_faces[j].width / 2,
 				RQT_faces[j].y + RQT_faces[j].height / 2);
 
-		Rect cropROI(center.x - RQT_faces[j].width / 2, center.y - RQT_faces[j].height / 2, RQT_faces[j].width, RQT_faces[j].height );
-		Mat_t sample = frame(cropROI);
+//		Rect cropROI(center.x - RQT_faces[j].width / 2, center.y - RQT_faces[j].height / 2, RQT_faces[j].width, RQT_faces[j].height );
+//		Mat_t sample = frame(cropROI);
 		//object_locator::object_type type = queryObject(sample);
-		if (center.y > HORIZON) {
+		if (center.y < HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(RQT_faces[j].width / 2, RQT_faces[j].height / 2), 0, 0,
 				360, cv::Scalar(0, 255,0), 2, 8, 0);
@@ -996,19 +1045,19 @@ ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces
 	for (size_t j = 0; j < Pipe_faces.size(); j++) {
 //		cout << "Entered circle drawing loop" << endl;
 
-		Mat_t faceROI = frame_gray(Pipe_faces[j]);
+//		Mat_t faceROI = frame_gray(Pipe_faces[j]);
 
 
 
 		cv::Point center(Pipe_faces[j].x + Pipe_faces[j].width / 2,
 				Pipe_faces[j].y + Pipe_faces[j].height / 2);
 
-		Rect cropROI(center.x - Pipe_faces[j].width / 2,
-				center.y - Pipe_faces[j].height / 2, Pipe_faces[j].width,
-				Pipe_faces[j].height);
-		Mat_t sample = frame(cropROI);
+//		Rect cropROI(center.x - Pipe_faces[j].width / 2,
+//				center.y - Pipe_faces[j].height / 2, Pipe_faces[j].width,
+//				Pipe_faces[j].height);
+//		Mat_t sample = frame(cropROI);
 		//object_locator::object_type type = queryObject(sample);
-		if (center.y > HORIZON) {
+		if (center.y < HORIZON) {
 		cv::ellipse(frame, center,
 				cv::Size(Pipe_faces[j].width / 2, Pipe_faces[j].height / 2), 0,
 				0, 360, cv::Scalar(125, 255, 255), 2, 8, 0);
@@ -1019,7 +1068,7 @@ ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces
 				Point(center.x + Pipe_faces[j].width / 2,
 						center.y + Pipe_faces[j].height / 2),
 				cv::Scalar(125, 255, 255));
-ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_faces[j].height);
+//ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_faces[j].height);
 //		ROS_ERROR_STREAM("Detection is of type " << type);
 		DetectionPtr_t newDetection(new Detection_t());
 		newDetection->first.first = center.x;
@@ -1038,13 +1087,13 @@ ROS_ERROR_STREAM("Detection is of size " <<Pipe_faces[j].width << ","<< Pipe_fac
 //		cv::waitKey(3);
 //	cv::imshow(WINDOWRight, mask);
 //	cv::waitKey(3);
-//	imshow("lab",pipeMask);
+//	imshow("lab",lab);
 //	waitKey(3);
-	 namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE );
+
 	cv::imshow(WINDOWLeft, frame);
 
-	cv::waitKey(3);
-
+	cv::waitKey(1);
+	ROS_WARN_STREAM("Detections took " <<time_Obj - ros::Time::now());
 }
 void DetectorNode::addBbox(Mat_t& src, Mat_t& final)
 {
