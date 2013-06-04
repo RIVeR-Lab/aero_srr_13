@@ -16,6 +16,7 @@ using namespace cv;
 BeaconDetector::BeaconDetector():it_(nh_)
 {
 	getRosParam();										//initialize all the ROS Parameters
+	software_stop_=false;								//it is not active
 	active_=false;
       total_tfbaseinworld_=NULL;										//keep the beacon detector inactive by default]
 	if (!estimate_only_)
@@ -39,6 +40,8 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	else
 		return;
 
+	/* software stop subscriber for ensuring you dont transition into seach in pause mode" */
+	software_stop_sub_=it_.subscribe("aero/software_stop",5,&BeaconDetector::checkStopcb,this);
 
 	/* Set up the publisher for the result stamped pose */
 	pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("tag_visualization", 5);
@@ -175,7 +178,8 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 			aero_srr_msgs::StateTransitionRequest state_transition;
 			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
 			state_transition.request.requested_state.header.stamp = ros::Time().now();
-
+			//dont call if its in software pause.
+			//wait till it gets out pause
 			if(state_client_.call(state_transition))
 			{
 				if(state_transition.response.success)
@@ -325,6 +329,22 @@ void BeaconDetector::systemCb(const aero_srr_msgs::AeroStateConstPtr& status)
 		init_=false;							//dont initalize if the robot is in any other stage
 		active_=true;
 	}
+}
+void BeaconDetector::checkStopcb(const robot_base_msgs::SoftwareStopConstPtr& message)
+{
+
+	if(message->stop)
+	{
+		software_stop_=true;
+	}
+	else
+	{
+		software_stop_=false;
+	}
+
+	ROS_WARN("A Software Stop Message [%s]: %s",(message->stop)?"Stop":"Go", message->message.c_str());
+
+
 }
 void BeaconDetector::histEq(cv::Mat &frame)
 {

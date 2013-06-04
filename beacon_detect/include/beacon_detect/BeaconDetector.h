@@ -30,6 +30,7 @@
 #include <aero_srr_msgs/StateTransitionRequest.h>
 #include <actionlib/client/simple_action_client.h>
 #include <device_driver_base/SetJointPositionAction.h>
+#include <robot_base_msgs/SoftwareStop.h>
 
 class BeaconDetector
 {
@@ -50,6 +51,7 @@ class BeaconDetector
 	bool 			init_;									//if the tag tf tree is initialize
 	bool			init_finish_;							//if the boom camera initialization stage is over
 	bool 			estimate_only_;							//only estimator will work no initialization step
+	bool 			software_stop_;							//if software stop is enabled it is true
 
 	//ros handles
 	tf::TransformBroadcaster 			br_;							//the TF broadcaseter for ROS
@@ -61,6 +63,7 @@ class BeaconDetector
 	ros::Publisher 						pose_pub_;						//to publish pose of home
 	ros::Publisher						odom_pub_;						//publishes the odometry messages
 	ros::Subscriber						robot_sub_;
+	ros::Subscriber						software_stop_sub_;				//subscribe to software stop
 	ros::ServiceClient 					state_client_;					//the client responsible for make state change of the robot
 	boost::shared_ptr<BoomClient> 		boom_client_;					//the action server for controlling the boom
 
@@ -75,6 +78,7 @@ class BeaconDetector
 
 	void imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& cam_info);
 	void systemCb(const aero_srr_msgs::AeroStateConstPtr& status);
+	void checkStopcb(const robot_base_msgs::SoftwareStopConstPtr& message);			//callback for the software stop
 
 public:
 	//initalization functions
