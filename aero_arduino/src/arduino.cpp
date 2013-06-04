@@ -47,6 +47,7 @@ void loop(){
 	digitalWrite(LIGHT_PIN, !digitalRead(LIGHT_PIN));
 	last_invert = time;
     }
+}
 
   //  }
     else
