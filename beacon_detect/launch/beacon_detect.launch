@@ -1,6 +1,6 @@
 <launch>
   <arg name="name" default="beacon_detector" />
-  <arg name="img_topic" default="/upper_stereo_raw/right/image_raw" />
+  <arg name="img_topic" default="/lower_stereo_raw/right/image_raw" />
   <arg name="estimator" default="false" />
 
   <node name="$(arg name)" pkg="beacon_detect" type="beacondetect" output="screen">
@@ -9,7 +9,7 @@
       <param name="tag_size_big" value=" 0.5588" />
       <param name="tag_size_small" value=" 0.2667" />	
       <param name="show_result" value="true" />
-      <param name="test_mode"	value="false" /> 
+      <param name="test_mode"	value="true" /> 
       <param name="histeq"	value="true" />
       <param name="estimator"   value="$(arg estimator)" />
       <param name="robot_topic" value="/aero/supervisor/state" />	
