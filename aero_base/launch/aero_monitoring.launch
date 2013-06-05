@@ -25,5 +25,5 @@
     <param name="diagnostic_period" value="2" />
     <param name="computer_frame" value="/computer" />
   </node>
-  <node pkg="rqt_gui" type="rqt_gui" name="battery_monitor_gui" args="-s manzanita_mk3_driver/battery.BatteryDashboard"/>
+  <!--node pkg="rqt_gui" type="rqt_gui" name="battery_monitor_gui" args="-s manzanita_mk3_driver/battery.BatteryDashboard"/-->
 </launch>
