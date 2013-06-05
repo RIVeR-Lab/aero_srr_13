@@ -1,0 +1,17 @@
+<package>
+  <description brief="srr_filter">
+
+     srr_filter
+
+  </description>
+  <author>AERO Laptop Dev</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/srr_filter</url>
+  <depend package="laser_filters"/>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+
