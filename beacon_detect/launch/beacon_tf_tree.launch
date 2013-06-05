@@ -3,24 +3,32 @@
      the beacon has both small and normal tags. small tags have the post s
      adjust the heights properly can be simplifieed by setting up an xacro
      for the tags, the z axis is out of the tag
-                   the y axis is down from the top right corner ----> VERIFY
-                   the x asis is along the oppositie direction of the tag id below ---> VERIFY 
--->
-<node pkg="tf" type="static_transform_publisher" name="home_broadcaster" args="1 0 0 0 0 0 world home 100" />
+                   the y axis is down from the top right corner  VERIFY
+                   the x asis is along the oppositie direction of the tag id below  VERIFY 
 
+<node pkg="tf" type="static_transform_publisher" name="tag_base_broadcaster" args="1 0 0 0 0 0 world tag_base 50" />
+-->
+
+<!-- PLEASE DELETE IT IN REAL ROBOT IF GMAPPING IS RUNNING 
+<node pkg="tf" type="static_transform_publisher" name="delete_me" args="0 0 0 0 0 0 world base_footprint  50" />-->
 <!--front-->
-<node pkg="tf" type="static_transform_publisher" name="tag1_broadcaster" args="-.5 0 1 0 -1.57 0 home tag_1 100" />
-<node pkg="tf" type="static_transform_publisher" name="tag1s_broadcaster" args="-.5 0 0.5 0 -1.57 0 home tag_1s 100" />
+<node pkg="tf" type="static_transform_publisher" name="tag1_broadcaster" args="-.33655 0 .322263 -1.57 1.57 1.57 tag_base tag1 50" />
 
 <!--back-->
-<node pkg="tf" type="static_transform_publisher" name="tag2_broadcaster" args=".5 0 1 0 1.57 0 home tag_2 100" />
-<node pkg="tf" type="static_transform_publisher" name="tag2s_broadcaster" args=".5 0 0.5 0 1.57 0 home tag_2s 100" />
+<node pkg="tf" type="static_transform_publisher" name="tag2_broadcaster" args=".33655 0 0.322263 -1.57 -1.57 -1.57 tag_base tag2 50" />
 
 <!--left-->
-<node pkg="tf" type="static_transform_publisher" name="tag3_broadcaster" args="0 0.5 1 0 0 -1.57 home tag_3 100" />
-<node pkg="tf" type="static_transform_publisher" name="tag3s_broadcaster" args="0 0.5 0.5 0 0 -1.57 home tag_3s 100" />
+<node pkg="tf" type="static_transform_publisher" name="tag3_broadcaster" args="-.168275 -0.322263 0.1611315 0 0 1.57 tag_base tag3 50" />
+
+<node pkg="tf" type="static_transform_publisher" name="tag3b_broadcaster" args="-.168275 -0.322263 0.4833945 0 0 1.57 tag_base tag4 50" />
 
 <!--right-->
-<node pkg="tf" type="static_transform_publisher" name="tag4_broadcaster" args="0 -0.5 1 0 0 1.57 home tag_4 100" />
-<node pkg="tf" type="static_transform_publisher" name="tag4s_broadcaster" args="0 -0.5 0.5 0 0 1.57 home tag_4s 100" />
+<node pkg="tf" type="static_transform_publisher" name="tag4_broadcaster" args="-.168275 0.322263 0.1611315 0 0 -1.57 tag_base tag5 50" />
+
+<node pkg="tf" type="static_transform_publisher" name="tag4b_broadcaster" args="-.168275 0.322263 0.4833945 0 0 -1.57 tag_base tag6 50" />
+
+<!--top-->
+<node pkg="tf" type="static_transform_publisher" name="tag5_broadcaster" args="-.168275 0.1611315 0.644525 0 0 0 tag_base tag7 50" />
+
+<node pkg="tf" type="static_transform_publisher" name="tag6_broadcaster" args="-.168275 -0.1611315 0.644525 0 0 0 tag_base tag8 50" />
 </launch>
