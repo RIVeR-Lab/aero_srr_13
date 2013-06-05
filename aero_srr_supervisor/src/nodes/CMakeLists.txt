@@ -1,2 +1,4 @@
 rosbuild_add_executable(aero_srr_supervisor aero_srr_supervisor.cpp)
 target_link_libraries(aero_srr_supervisor Supervisor)
+
+rosbuild_add_executable(dummy_startup_node DummyStartup.cpp)
