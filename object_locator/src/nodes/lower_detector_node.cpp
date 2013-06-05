@@ -93,7 +93,7 @@ DetectorNode::DetectorNode() :
 	ctrLeft = 0;
 	ctrRight = 0;
 
-	cv::namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE);
+//	cv::namedWindow( WINDOWLeft, CV_WINDOW_AUTOSIZE);
 //	cv::namedWindow(WINDOWRight, CV_WINDOW_AUTOSIZE);
 //	cv::namedWindow(WINDOWDisparity, CV_WINDOW_AUTOSIZE);
 	objset = false;
@@ -101,7 +101,7 @@ DetectorNode::DetectorNode() :
 }
 
 DetectorNode::~DetectorNode() {
-	cv::destroyWindow(WINDOWLeft);
+//	cv::destroyWindow(WINDOWLeft);
 //	cv::destroyWindow(WINDOWRight);
 //	cv::destroyWindow(WINDOWDisparity);
 	//	cvDestroyAllWindows();
@@ -653,7 +653,7 @@ void DetectorNode::computeDisparity() {
 			{
 			optimus_prime.waitForTransform("/world",
 					camera_point.header.frame_id, camera_point.header.stamp,
-					ros::Duration(0.25));
+					ros::Duration(10.0));
 			optimus_prime.transformPoint("/world", camera_point, world_point);
 			optimus_prime.transformPoint("/base_footprint",camera_point,robot_point);
 			}
@@ -893,7 +893,7 @@ void DetectorNode::detectAndDisplay(const sensor_msgs::Image& msg,
 //	cascade_PUCK.detectMultiScale(frame_gray, SUN_faces, 1.1, 50, 0,
 //			cv::Size(5, 5), cv::Size(100,100)); //
 
-	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,32, 0,
+	cascade_WHA.detectMultiScale(frame_gray, Pipe_faces, 1.1,28, 0,
 			cv::Size(10, 11), cv::Size(52, 59)); // works for 8 (10,11)    (52,59) 32 15
 
 
@@ -1090,9 +1090,9 @@ ROS_ERROR_STREAM("Detection is of size " <<RQT_faces[j].width << ","<< RQT_faces
 //	imshow("lab",lab);
 //	waitKey(3);
 
-	cv::imshow(WINDOWLeft, frame);
+//	cv::imshow(WINDOWLeft, frame);
 
-	cv::waitKey(1);
+//	cv::waitKey(1);
 	ROS_WARN_STREAM("Detections took " <<time_Obj - ros::Time::now());
 }
 void DetectorNode::addBbox(Mat_t& src, Mat_t& final)
@@ -1142,8 +1142,8 @@ object_locator::object_type DetectorNode::queryObject(const Mat_t& crop)
 		   }
 	   }
 
-	   imshow("CroppedSample", sample);
-	   waitKey(3);
+	 //  imshow("CroppedSample", sample);
+	//   waitKey(3);
 	   if(whiteCtr > blackCtr)
 		   return WHA;
 	   else
@@ -1227,12 +1227,12 @@ Point2f DetectorNode::blobIdentify(Mat_t& img, int objThresh)
 
 	   /// Show in a window
 //		cv::line(drawing,Point2d(0,HORIZON_),Point2d(drawing.cols,HORIZON_),Scalar(0,255,0));
-	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-	   imshow( "Contours", drawing );
+//	   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+//	   imshow( "Contours", drawing );
 
 
 
-	   cv::waitKey(3);
+//	   cv::waitKey(3);
 	   return final;
 //		std::stringstream s;
 //		s << "/home/srr/ObjectDetectionData/blob/0.png";

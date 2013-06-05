@@ -102,19 +102,38 @@ namespace aero_control
 				path_steps = 0;
 
 				//	SetPathStep(true,30,30,30,false,0,0,0,0,0,0);
-				SetPathStep(false, 0, 0, 0, true, 0.196, 0.253, 0.476, -1.551448, -0.03685, -0.287756);
+				SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
 
 				SetPathStep(false, 0, 0, 0, true, 0.299844, -0.184166, 0.480376, -1.551448,-0.03685,-0.287756);
 				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
 				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
 
 				SetPathStep(true, 0, 0, 0, false, 0, 0, 0, 0, 0, 0);
-				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y-0.2, -0.08, -1.629365,-0.558572,-0.287756);
+				int height=obj_pose.pose.position.z;
+				if(obj_pose.pose.position.z<-0.085)
+				{
+					height = -0.085;
+				}else if(obj_pose.pose.position.z>-0.085)
+				{
+					height=0.1;
+				}
+				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y-0.2, height, -1.629365,-0.558572,-0.287756);
 
-				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y-0.2, -0.08, -1.629365,-0.558572,-0.287756);
-				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y+0.03, -0.08, -1.629365,-0.558572,-0.287756);
+				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y-0.2, height, -1.629365,-0.558572,-0.287756);
+				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y+0.03, height, -1.629365,-0.558572,-0.287756);
 				SetPathStep(true, 54, 54, 54, false, 0, 0, 0, 0, 0, 0);
 				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
+				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
+				SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
+				SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
+				SetPathStep(false, 0, 0, 0, true, -0.353810, 0.030760, 0.503740, -3.068122, 0.254117, 0.043479);
+				SetPathStep(true, 0, 0, 0, false, 0, 0, 0, 0, 0, 0);
+				SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
+				SetPathStep(true, 54, 54, 54, false, 0, 0, 0, 0, 0, 0);
+
+
+				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
+
 
 				//SetPathStep(true,0,0,0,false,0,0,0,0,0,0);
 
