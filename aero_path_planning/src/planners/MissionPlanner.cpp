@@ -61,15 +61,11 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
 	mission_goal.position.x = 75.0;
-	mission_goal.position.y = 5;
+	mission_goal.position.y = -5;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
 	mission_goal.position.x = 80.0;
 	mission_goal.position.y = 5;
-	mission_goal.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal);
-	mission_goal.position.x = 80.0;
-	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
 	mission_goal.position.x = 80.0;
@@ -77,7 +73,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
 	mission_goal.position.x = 75.0;
-	mission_goal.position.y = -5;
+	mission_goal.position.y = 5;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
 	mission_goal.position.x = 70.0;
