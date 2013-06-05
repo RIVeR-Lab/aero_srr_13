@@ -1,5 +1,5 @@
 <launch>
-  <arg name="software_pause_topic" default="/pause" />
+  <arg name="software_pause_topic" default="/aero/software_stop" />
 
   <include file="$(find jaco_driver)/launch/jaco_arm.launch">
 	<param name="software_pause_topic" value="$(arg software_pause_topic)" />
