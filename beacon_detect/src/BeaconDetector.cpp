@@ -68,7 +68,7 @@ void BeaconDetector::timerCallback(const ros::TimerEvent& event)
 	if(estimate_only_)
 		return;
 	aero_srr_msgs::StateTransitionRequest state_transition;
-			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
+			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::COLLECT;
 			state_transition.request.requested_state.header.stamp = ros::Time().now();
 		
 			//wait till it gets out pause
@@ -204,7 +204,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 			boost::thread world_broadcaster_( boost::bind( &BeaconDetector::publishWorld, this,  tfbaseinworld) );
 
 			aero_srr_msgs::StateTransitionRequest state_transition;
-			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::SEARCH;
+			state_transition.request.requested_state.state = aero_srr_msgs::AeroState::COLLECT;
 			state_transition.request.requested_state.header.stamp = ros::Time().now();
 			//dont call if its in software pause.
 			while(software_stop_)
