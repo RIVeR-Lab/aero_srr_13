@@ -51,7 +51,7 @@ namespace aero_laser_filter
 		this->p_nh_.getParam("output_frame", this->output_frame_);
 
 		double temp_x = 0;
-		double temp_y = -5.0;
+		double temp_y = -5.0/2.0;
 		double temp_z = 0;
 		this->p_nh_.getParam(crop_ns+btmlft_ns+x, temp_x);
 		this->p_nh_.getParam(crop_ns+btmlft_ns+y, temp_y);
@@ -60,8 +60,8 @@ namespace aero_laser_filter
 		this->crop_bottom_left_.y = temp_y;
 		this->crop_bottom_left_.z = temp_z;
 
-		temp_x = 10;
-		temp_y = 5.0;
+		temp_x = 10/2.0;
+		temp_y = 5.0/2.0;
 		temp_z = 0;
 		this->p_nh_.getParam(crop_ns+toprgt_ns+x, temp_x);
 		this->p_nh_.getParam(crop_ns+toprgt_ns+y, temp_y);
