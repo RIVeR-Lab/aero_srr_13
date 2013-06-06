@@ -45,7 +45,7 @@ BoomController::BoomController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	ROS_INFO("Starting Up Boom Controller...");
 
 	this->active_state = false;
-	this->pause_state = false;
+	this->pause_state = true;
 
 	/* Messages */
 	this->aero_state_sub = nh.subscribe(aero_state, 1, &BoomController::AeroStateMSG, this);
@@ -124,6 +124,7 @@ void BoomController::AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_s
 			this->pause_state = false;
 			ros::shutdown();
 			break;
+		case aero_srr_msgs::AeroState::STARTUP:
 		case aero_srr_msgs::AeroState::PAUSE:
 			this->pause_state = true;
 			break;

@@ -28,14 +28,67 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				dr_server_(p_nh)
 {
 	geometry_msgs::Pose mission_goal;
-	mission_goal.position.x = 4.0;
+	mission_goal.position.x = 10.0;
 	mission_goal.position.y = 0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
-	tf::Point Ooi;
-	Ooi.setZero();
-	Ooi.setX(4.0);
-	Ooi.setY(-1.5);
+	mission_goal.position.x = 20.0;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 30.0;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 40.0;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 50.0;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 60.0;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 70.0;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 70.0;
+	mission_goal.position.y = 5;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 75.0;
+	mission_goal.position.y = 5;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 80.0;
+	mission_goal.position.y = 5;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 80.0;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 80.0;
+	mission_goal.position.y = -5;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 75.0;
+	mission_goal.position.y = -5;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 70.0;
+	mission_goal.position.y = -5;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+	mission_goal.position.x = 70.0;
+	mission_goal.position.y = 0;
+	mission_goal.orientation.w = 1;
+	this->mission_goals_.push_back(mission_goal);
+
 	//this->OoI_manager_.addOoI(Ooi);
 //	geometry_msgs::Pose mission_goal2;
 //	mission_goal2.position.x = 5.0;
@@ -103,6 +156,7 @@ void MissionPlanner::registerTimers()
 {
 	ROS_INFO_STREAM("Mission Planner Registering Timers...");
 	this->goal_timer_ = this->nh_.createTimer(ros::Duration(1.0/10.0), &MissionPlanner::goalCB, this);
+	this->mission_timeout_ = this->nh_.createTimer(ros::Duration(60*20), &MissionPlanner::timeoutCB, this, true);
 }
 
 void MissionPlanner::drCB(const MissionPlannerConfig& config, uint32_t level)
@@ -138,14 +192,22 @@ void MissionPlanner::pathCB(const nav_msgs::PathConstPtr& message)
 
 void MissionPlanner::ooiCB(const geometry_msgs::PoseArrayConstPtr& message)
 {
-	tf::Point temp_point;
-	BOOST_FOREACH(std::vector<geometry_msgs::Pose>::value_type pose, message->poses)
+	if(this->searching_)
 	{
-		tf::pointMsgToTF(pose.position, temp_point);
-		this->OoI_manager_.addOoI(temp_point);
-	}
+		tf::Point temp_point;
+		BOOST_FOREACH(std::vector<geometry_msgs::Pose>::value_type pose, message->poses)
+		{
+			tf::pointMsgToTF(pose.position, temp_point);
+			this->OoI_manager_.addOoI(temp_point);
+		}
 
-	ROS_INFO_STREAM("Added new detections, current detection state:\n"<<this->OoI_manager_);
+		ROS_INFO_STREAM("Added new detections, current detection state:\n"<<this->OoI_manager_);
+	}
+}
+
+void MissionPlanner::timeoutCB(const ros::TimerEvent& event)
+{
+	this->requestHome();
 }
 
 bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLocation, const double threshold) const
@@ -155,8 +217,9 @@ bool MissionPlanner::reachedNextGoal(const geometry_msgs::PoseStamped& worldLoca
 	tf::pointMsgToTF(worldLocation.pose.position, world_point);
 	tf::pointMsgToTF(this->carrot_path_.front().pose.position, goal_point);
 	double dist = world_point.distance(goal_point);
+	ros::Duration timeout (this->time_out_start_ - ros::Time::now());
 	//ROS_INFO_STREAM_THROTTLE(1, "\nMission Planner: At position:"<<worldLocation.pose.position<<"\nGoal position:"<<this->carrot_path_.front().pose.position<<"\nDistance to Goal:="<<dist);
-	return dist<threshold;
+	return dist<threshold || timeout>ros::Duration(90);
 }
 
 void MissionPlanner::goalCB(const ros::TimerEvent& event)
@@ -210,9 +273,6 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 					{
 						ROS_INFO_STREAM("Mission Planner: Finised My Mission, Heading Home!");
 						this->requestHome();
-						geometry_msgs::Pose home;
-						home.orientation.w = 1;
-						this->mission_goals_.push_back(home);
 					}
 				}
 			}
@@ -226,6 +286,7 @@ void MissionPlanner::updateGoal() const
 	{
 		geometry_msgs::PoseStamped goal_pose(this->carrot_path_.front());
 		this->path_goal_pub_.publish(goal_pose);
+		this->time_out_start_ = ros::Time::now();
 	}
 
 }
@@ -254,6 +315,7 @@ bool MissionPlanner::calcRobotPointWorld(geometry_msgs::PoseStamped& point) cons
 
 void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 {
+	geometry_msgs::Pose home;
 	typedef aero_srr_msgs::AeroState state_t;
 	switch(message->state)
 	{
@@ -294,6 +356,9 @@ void MissionPlanner::stateCB(const aero_srr_msgs::AeroStateConstPtr& message)
 			this->naving_    = false;
 			this->homeing_   = true;
 			this->dist_threshold_ = this->nav_threshold_;
+			this->mission_goals_.clear();
+			home.orientation.w = 1;
+			this->mission_goals_.push_back(home);
 			break;
 		default:
 			ROS_ERROR_STREAM("Received Unkown State: "<<*message);
