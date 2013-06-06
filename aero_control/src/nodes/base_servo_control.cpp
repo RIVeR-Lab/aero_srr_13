@@ -170,7 +170,7 @@ void BaseServoController::ErrorUpdateTimerCallback(const ros::TimerEvent&) {
 	UpdateError();
 
 	//if we don't see anything then stop moving
-	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 0.25) {
+	if ((ros::Time().now().toSec() - last_position_time.toSec()) > 0.5) {
 		BaseServoStop();
 	}
 
