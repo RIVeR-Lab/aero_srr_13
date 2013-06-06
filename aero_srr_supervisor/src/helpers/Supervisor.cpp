@@ -80,6 +80,7 @@ void Supervisor::buildStateTable()
 	this->state_table_.addTranstion(state_t::STARTUP, state_t::MANUAL);
 	this->state_table_.addTranstion(state_t::STARTUP, state_t::SEARCH);
 	this->state_table_.addTranstion(state_t::STARTUP, state_t::SAFESTOP);
+	this->state_table_.addTranstion(state_t::STARTUP, state_t::COLLECT);
 	this->state_table_.addTranstion(state_t::STARTUP, state_t::ERROR);
 
 
