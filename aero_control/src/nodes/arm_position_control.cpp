@@ -72,16 +72,21 @@ ArmPositionController::ArmPositionController(ros::NodeHandle nh, ros::NodeHandle
 	running = false;
 	goal_reached = false;
 	last_goal_reached = true;
-	PID_X = new pid::PIDController(3, 0, 0.5, 0);
-	PID_Y = new pid::PIDController(3, 0, 0.5, 0);
-	PID_Z = new pid::PIDController(3, 0, 0.5, 0);
-	PID_Roll = new pid::PIDController(3, 0, 0.5, 0);
-	PID_Pitch = new pid::PIDController(3, 0, 0.5, 0);
-	PID_Yaw = new pid::PIDController(3, 0, 0.5, 0);
+	PID_X = new pid::PIDController(0.6, 0, 0.45, 0);
+	PID_Y = new pid::PIDController(0.6, 0, 0.45, 0);
+	PID_Z = new pid::PIDController(0.6, 0, 0.45, 0);
+	PID_Roll = new pid::PIDController(0.65, 0, 0.3, 0);
+	PID_Pitch = new pid::PIDController(0.65, 0, 0.3, 0);
+	PID_Yaw = new pid::PIDController(0.65, 0, 0.3, 0);
 
-	linear_gain = 2;
+	linear_gain = 0.5;
 	rotational_gain = 1;
 
+
+
+
+	//	f = boost::bind(&ArmPositionController::callback,this, _1, _2);
+		//server.setCallback(f);
 }
 
 ArmPositionController::~ArmPositionController() {
@@ -92,6 +97,21 @@ ArmPositionController::~ArmPositionController() {
 	delete PID_Pitch;
 	delete PID_Yaw;
 
+}
+
+void  ArmPositionController::callback(aero_control::AeroArmVelocityConfig &config, uint32_t level) {
+
+	PID_X->SetPID(config.linear_P,config.linear_I,config.linear_D);
+	PID_Y->SetPID(config.linear_P,config.linear_I,config.linear_D);
+	PID_Z->SetPID(config.linear_P,config.linear_I,config.linear_D);
+
+
+	PID_Roll->SetPID(config.rotational_P,config.rotational_I_r,config.rotational_D_r);
+	PID_Pitch->SetPID(config.rotational_P,config.rotational_I_r,config.rotational_D_r);
+	PID_Yaw->SetPID(config.rotational_P,config.rotational_I_r,config.rotational_D_r);
+
+	linear_gain = config.gain;
+	rotational_gain = config.gain_r;
 }
 
 void ArmPositionController::CurrentPositionMSG(

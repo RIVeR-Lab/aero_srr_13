@@ -23,6 +23,7 @@
 #include <aero_srr_msgs/AeroState.h>
 #include <aero_srr_msgs/StateTransitionRequest.h>
 #include <aero_control/arm_state.h>
+#include "jaco_driver/zero_arm.h"
 
 namespace aero_control
 {
@@ -34,6 +35,7 @@ namespace aero_control
 			ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh);
 
 		private:
+			void ZeroArmMSG(const jaco_driver::zero_armConstPtr& zero_stat);
 			void PathTimerCallback(const ros::TimerEvent&);
 			void ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgConstPtr& object);
 			void ArmStateMSG(const aero_control::arm_stateConstPtr& arm_state);
@@ -92,47 +94,48 @@ namespace aero_control
 
 			}
 
-			inline void GetBinPath(void)
-			{
-
-			}
 
 			inline void PlanHorizontalPath(void)
 			{
 				path_steps = 0;
 
 				//	SetPathStep(true,30,30,30,false,0,0,0,0,0,0);
-				SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
+				//SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
 
-				SetPathStep(false, 0, 0, 0, true, 0.299844, -0.184166, 0.480376, -1.551448,-0.03685,-0.287756);
 				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
-				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
+			//	SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
 
 				SetPathStep(true, 0, 0, 0, false, 0, 0, 0, 0, 0, 0);
 				int height=obj_pose.pose.position.z;
-				if(obj_pose.pose.position.z<-0.085)
+				if(obj_pose.pose.position.z<-0.09)
 				{
 					height = -0.085;
-				}else if(obj_pose.pose.position.z>-0.085)
+				}else if(obj_pose.pose.position.z>0.3)
 				{
-					height=0.1;
+					height=0.2;
 				}
-				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y-0.2, height, -1.629365,-0.558572,-0.287756);
+
 
 				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y-0.2, height, -1.629365,-0.558572,-0.287756);
+
+				//SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y-0.2, height, -1.629365,-0.558572,-0.25);
 				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y+0.03, height, -1.629365,-0.558572,-0.287756);
 				SetPathStep(true, 54, 54, 54, false, 0, 0, 0, 0, 0, 0);
+				//SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
+
+				SetPathStep(false, 0, 0, 0, true, obj_pose.pose.position.x+0.04, obj_pose.pose.position.y+0.03, 0.336926, -1.629365,-0.558572,-0.287756);
+
 				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
-				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
+				SetPathStep(false, 0, 0, 0, true, 0, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
 				SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
-				SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
-				SetPathStep(false, 0, 0, 0, true, -0.353810, 0.030760, 0.503740, -3.068122, 0.254117, 0.043479);
+				SetPathStep(false, 0, 0, 0, true, -0.353810, 0.030760, 0.503740, -1.510923, 0.469618, -0.097515);
+
+				SetPathStep(false, 0, 0, 0, true, -0.353810, 0.030760, 0.503740, -3.14159, 0.254117, 0.043479);
 				SetPathStep(true, 0, 0, 0, false, 0, 0, 0, 0, 0, 0);
 				SetPathStep(false, 0, 0, 0, true, -0.279794, -0.256773, 0.589230, -1.510923, 0.469618, -0.097515);
 				SetPathStep(true, 54, 54, 54, false, 0, 0, 0, 0, 0, 0);
 
 
-				SetPathStep(false, 0, 0, 0, true, 0.41, -0.04874, 0.336926, -1.562391,-0.40512,-0.287756);
 
 
 				//SetPathStep(true,0,0,0,false,0,0,0,0,0,0);
@@ -146,10 +149,11 @@ namespace aero_control
 			ros::Subscriber object_position_sub;
 			ros::Subscriber aero_state_sub;
 			ros::Subscriber arm_state_sub;
+			ros::Subscriber ZeroArm_sub;
 
 			ros::Publisher arm_position_pub;
 			ros::Publisher set_finger_position_pub;
-
+			ros::Publisher ZeroArm_pub;
 			ros::ServiceClient aero_state_transition_srv_client;
 
 			tf::TransformListener listener;
@@ -170,6 +174,8 @@ namespace aero_control
 
 			uint8_t object_type;
 			uint8_t path_step_num;
+			bool home;
+			bool arm_homed;
 
 	};
 

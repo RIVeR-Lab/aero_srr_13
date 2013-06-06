@@ -23,9 +23,9 @@ using namespace std;
 ros::Publisher pub;
 tf::TransformListener *listenerptr;
 ros::Timer timer;
-float x_pos = 0.4;
+float x_pos = 0.3;
 float y_pos = 0;
-float z_pos = 0;
+float z_pos = -0.09;
 float rx_pos = 0;
 float ry_pos = 0;
 float rz_pos = 0;
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	ros::NodeHandle param_nh("~");
 
-	std::string ObjectPose("object_pose"); ///String containing the topic name for Cartesian commands
+	std::string ObjectPose("ObjectPose"); ///String containing the topic name for Cartesian commands
 
 	pub = nh.advertise<aero_srr_msgs::ObjectLocationMsg>(ObjectPose, 2);
 	tf::TransformListener listener;
@@ -110,12 +110,12 @@ int main(int argc, char **argv) {
  timer = nh.createTimer(ros::Duration(2.0), TimerCallback);
 
 	//ros::Timer timer2 = nh.createTimer(ros::Duration(1.0),TimerCallback2);
-
-	dynamic_reconfigure::Server<aero_control::TestVelocityConfig> server;
-	dynamic_reconfigure::Server<aero_control::TestVelocityConfig>::CallbackType f;
-
-	f = boost::bind(&callback, _1, _2);
-	server.setCallback(f);
+//
+//	dynamic_reconfigure::Server<aero_control::TestVelocityConfig> server;
+//	dynamic_reconfigure::Server<aero_control::TestVelocityConfig>::CallbackType f;
+//
+//	f = boost::bind(&callback, _1, _2);
+//	server.setCallback(f);
 	ros::spin();
 }
 
