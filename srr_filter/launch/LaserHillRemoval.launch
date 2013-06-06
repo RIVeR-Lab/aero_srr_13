@@ -1,0 +1,8 @@
+<launch>
+
+   <node pkg="srr_filter" name="hillremover" type="hillremoval" >
+	<param name="width" value="40" />
+        <param name="threshold" value="0.05" />
+        <param name="window_size" value="2" />
+   </node> 
+</launch>
