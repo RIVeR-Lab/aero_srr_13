@@ -28,15 +28,15 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 				dr_server_(p_nh)
 {
 	geometry_msgs::Pose mission_goal;
-	double scaler = 4.0;
-	mission_goal.position.x = 10.0/scaler;
-	mission_goal.position.y = 0;
+	double scaler = 1;
+	mission_goal.position.x = 5.0;
+	mission_goal.position.y = 1.0;
 	mission_goal.orientation.w = 1;
 	this->mission_goals_.push_back(mission_goal);
-	mission_goal.position.x = 20.0/scaler;
-	mission_goal.position.y = 0;
-	mission_goal.orientation.w = 1;
-	this->mission_goals_.push_back(mission_goal);
+//	mission_goal.position.x = 20.0/scaler;
+//	mission_goal.position.y = 0;
+//	mission_goal.orientation.w = 1;
+//	this->mission_goals_.push_back(mission_goal);
 //	mission_goal.position.x = 30.0/scaler;
 //	mission_goal.position.y = 0;
 //	mission_goal.orientation.w = 1;
@@ -239,7 +239,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 		else
 		{
 			//Means we're at an OoI, attepmt to collect
-			if(this->naving_&& this->recieved_path_)
+			if(this->naving_&& !this->recieved_path_)
 			{
 				ROS_INFO_STREAM("Reached the Object of Interest, attempting to Collect!");
 				this->requestCollect();
@@ -250,10 +250,6 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			{
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
 				this->updateMissionGoal();
-				if(!this->searching_)
-				{
-					this->requestCollect();
-				}
 			}
 			//We need to transition mission states
 			else
