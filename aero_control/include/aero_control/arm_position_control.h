@@ -24,6 +24,8 @@
 #include <aero_control/pid_control.h>
 #include <jaco_driver/joint_velocity.h>
 #include <aero_control/arm_state.h>
+#include <aero_control/AeroArmVelocityConfig.h>
+#include <dynamic_reconfigure/server.h>
 
 #include <jaco_driver/joint_angles.h>
 
@@ -63,12 +65,15 @@ private:
 	void UpdateCurrentPose(void);
 	void UpdatePID(void);
 	void UpdateError(void);
+
+	void callback(aero_control::AeroArmVelocityConfig &config, uint32_t level) ;
+
 	inline double MaxLinearVel(void) {
-		return 0.05;
+		return 0.15;
 	}
 
 	inline double MaxAngularVel(void) {
-		return 0.1;
+		return 0.6;
 	}
 
 	inline double LinearErrorRange(void) {
@@ -110,7 +115,8 @@ private:
 	float linear_gain;
 	float rotational_gain;
 
-
+	dynamic_reconfigure::Server<aero_control::AeroArmVelocityConfig> server;
+			dynamic_reconfigure::Server<aero_control::AeroArmVelocityConfig>::CallbackType f;
 
 
 };

@@ -28,6 +28,8 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	std::string set_finger_position("set_finger_position"); ///String containing the topic name for set_finger_position
 	std::string aero_state("aero_state"); ///String containing the topic name for aero_state
 	std::string aero_state_transition("aero_state_transition"); ///String containing the topic name for aero_state_transition
+	std::string zero_arm_req("zero_arm_req"); ///String containing the topic name for zero_arm_req
+	std::string zero_arm_stat("zero_arm_stat"); ///String containing the topic name for zero_arm_stat
 
 	//Grab the topic parameters, print warnings if using default values
 	if (!param_nh.getParam(object_pose, object_pose))
@@ -50,6 +52,14 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	if (!param_nh.getParam(arm_state, arm_state))
 		ROS_WARN("Parameter <%s> Not Set. Using Default Arm State Topic <%s>!", arm_state.c_str(),
 				arm_state.c_str());
+
+	if (!param_nh.getParam(zero_arm_req, zero_arm_req))
+		ROS_WARN("Parameter <%s> Not Set. Using Default zero_arm_req Topic <%s>!", zero_arm_req.c_str(),
+				zero_arm_req.c_str());
+	if (!param_nh.getParam(zero_arm_stat, zero_arm_stat))
+		ROS_WARN("Parameter <%s> Not Set. Using Default zero_arm_stat Topic <%s>!", zero_arm_stat.c_str(),
+				zero_arm_stat.c_str());
+
 	//Print out received topics
 	ROS_DEBUG("Using Object Position Topic Name: <%s>", object_pose.c_str());
 	ROS_DEBUG("Using Arm Position Topic Name: <%s>", desired_arm_pose.c_str());
@@ -61,7 +71,7 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	ROS_INFO("Starting Up Arm Controller...");
 
 	this->active_state = false;
-
+	this->arm_homed = false;
 	this->previous_state = aero_srr_msgs::AeroState::STARTUP;
 	this->arm_moving = false;
 	this->arm_goal_reached = false;
@@ -79,6 +89,9 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 
 	this->set_finger_position_pub = nh.advertise<jaco_driver::finger_position>(set_finger_position, 2);
 
+	this->ZeroArm_pub = nh.advertise<jaco_driver::zero_arm>(zero_arm_req, 1, true);
+	this->ZeroArm_sub = nh.subscribe(zero_arm_stat, 1, &ArmController::ZeroArmMSG, this);
+
 	/* Services */
 	this->aero_state_transition_srv_client = nh.serviceClient<aero_srr_msgs::StateTransitionRequest>(
 			aero_state_transition);
@@ -88,6 +101,7 @@ ArmController::ArmController(ros::NodeHandle nh, ros::NodeHandle param_nh)
 	path_timer.stop();
 
 	this->path_step_num = 0;
+	this->home = false;
 	PlanHorizontalPath();
 
 }
@@ -104,51 +118,66 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 		ROS_INFO("arm_goal_reached=%d", arm_goal_reached);
 		ROS_INFO("path_step_start=%d", path_step_start);
 
-		if (this->path_step_num < this->path_steps)
+		if (path_step_num == 0 && home == true)
 		{
+			this->home = false;
+			this->arm_homed = false;
 
-			if (this->path_step_start == true)
-			{
-				ROS_INFO("reset time");
-				this->path_step_start_time = ros::Time().now();
-			}
-			if (this->pause_state == true)
-			{
-				this->path_step_start_time = ros::Time().now();
-			}
+			jaco_driver::zero_arm zero_stat;
 
-			if ((arm_goal_reached != true || this->path_step_start == true)
-					&& (ros::Time().now().toSec() - this->path_step_start_time.toSec()) < 20)
+			zero_stat.zero = true;
+
+			ZeroArm_pub.publish(zero_stat);
+
+		}
+
+		if (this->arm_homed == true)
+		{
+			if (this->path_step_num < this->path_steps)
 			{
 
-				this->path_step_start = false;
-				if (arm_path[path_step_num].arm_motion == true)
+				if (this->path_step_start == true)
 				{
-					ROS_INFO("arm_path");
-
-					geometry_msgs::PoseStamped arm_pose;
-
-					arm_pose.pose.position.x = arm_path[path_step_num].x_pos;
-					arm_pose.pose.position.y = arm_path[path_step_num].y_pos;
-					arm_pose.pose.position.z = arm_path[path_step_num].z_pos;
-
-					tf::Quaternion q;
-
-					q.setRPY(arm_path[path_step_num].roll_pos, arm_path[path_step_num].pitch_pos,
-							arm_path[path_step_num].yaw_pos);
-
-					tf::quaternionTFToMsg(q, arm_pose.pose.orientation);
-
-					arm_pose.header.frame_id = "/arm_mount";
-
-					arm_pose.header.stamp = ros::Time().now();
-
-					arm_position_pub.publish(arm_pose);
-
-				} else if (arm_path[path_step_num].finger_motion == true)
+					ROS_INFO("reset time");
+					this->path_step_start_time = ros::Time().now();
+				}
+				if (this->pause_state == true)
 				{
-				//	while (this->pause_state == true)
-					//{
+					this->path_step_start_time = ros::Time().now();
+				}
+
+				if ((arm_goal_reached != true || this->path_step_start == true)
+						&& (ros::Time().now().toSec() - this->path_step_start_time.toSec()) < 20)
+				{
+
+					this->path_step_start = false;
+					if (arm_path[path_step_num].arm_motion == true)
+					{
+						ROS_INFO("arm_path");
+
+						geometry_msgs::PoseStamped arm_pose;
+
+						arm_pose.pose.position.x = arm_path[path_step_num].x_pos;
+						arm_pose.pose.position.y = arm_path[path_step_num].y_pos;
+						arm_pose.pose.position.z = arm_path[path_step_num].z_pos;
+
+						tf::Quaternion q;
+
+						q.setRPY(arm_path[path_step_num].roll_pos, arm_path[path_step_num].pitch_pos,
+								arm_path[path_step_num].yaw_pos);
+
+						tf::quaternionTFToMsg(q, arm_pose.pose.orientation);
+
+						arm_pose.header.frame_id = "/arm_mount";
+
+						arm_pose.header.stamp = ros::Time().now();
+
+						arm_position_pub.publish(arm_pose);
+
+					} else if (arm_path[path_step_num].finger_motion == true)
+					{
+						//	while (this->pause_state == true)
+						//{
 						while (this->pause_state == true)
 						{
 							ros::Duration(0.1).sleep();
@@ -175,31 +204,32 @@ void ArmController::PathTimerCallback(const ros::TimerEvent&)
 							ros::spinOnce();
 
 						}
-					//}
+						//}
+						ROS_INFO("Next Step");
+						this->path_step_num++;
+						this->path_step_start = true;
+					}
+				} else
+				{
 					ROS_INFO("Next Step");
 					this->path_step_num++;
 					this->path_step_start = true;
+					this->arm_goal_reached = false;
 				}
+
 			} else
 			{
-				ROS_INFO("Next Step");
-				this->path_step_num++;
-				this->path_step_start = true;
-				this->arm_goal_reached = false;
+
+				ROS_INFO("DONE");
+
+				this->path_active = false;
+				this->active_state = false;
+				aero_srr_msgs::StateTransitionRequest state_transition;
+
+				state_transition.request.requested_state.state = previous_state;
+				state_transition.request.requested_state.header.stamp = ros::Time().now();
+				aero_state_transition_srv_client.call(state_transition);
 			}
-
-		} else
-		{
-
-			ROS_INFO("DONE");
-
-			this->path_active = false;
-			this->active_state = false;
-			aero_srr_msgs::StateTransitionRequest state_transition;
-
-			state_transition.request.requested_state.state = previous_state;
-			state_transition.request.requested_state.header.stamp = ros::Time().now();
-			aero_state_transition_srv_client.call(state_transition);
 		}
 
 	}
@@ -212,13 +242,14 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 
 	if (active_state == true)
 	{
+		ROS_INFO("active");
 
 		try
 		{
 			if (path_active == false)
 			{
 
-				ROS_INFO("Start");
+				ROS_INFO("path_active = false");
 				try
 				{
 					listener.waitForTransform("/arm_mount", object->pose.header.frame_id,
@@ -226,6 +257,8 @@ void ArmController::ObjectPositionMSG(const aero_srr_msgs::ObjectLocationMsgCons
 					listener.transformPose("/arm_mount", object->pose, this->obj_pose);
 
 					this->object_type = object->object_type;
+					this->home = true;
+					this->arm_homed = false;
 
 					path_active = true;
 					this->path_step_start = true;
@@ -458,40 +491,52 @@ void ArmController::ArmStateMSG(const aero_control::arm_stateConstPtr& arm_state
 
 void ArmController::AeroStateMSG(const aero_srr_msgs::AeroStateConstPtr& aero_state)
 {
-ROS_INFO("State = %d", aero_state->state);
+	ROS_INFO("State msg= %d", aero_state->state);
 	switch (aero_state->state)
 	{
+		ROS_INFO("State msg still= %d", aero_state->state);
 
-		case aero_srr_msgs::AeroState::PICKUP:
-			this->active_state = true;
-			this->pause_state = false;
-			break;
-		case aero_srr_msgs::AeroState::COLLECT:
-			this->active_state = false;
-			this->pause_state = false;
+	case aero_srr_msgs::AeroState::PICKUP:
+		this->active_state = true;
+		this->pause_state = false;
 
-			break;
-		case aero_srr_msgs::AeroState::SHUTDOWN:
-			this->active_state = false;
-			this->pause_state = false;
+		ROS_INFO("Pickup True");
 
-			ros::shutdown();
-			break;
-		case aero_srr_msgs::AeroState::PAUSE:
-			this->pause_state = true;
+		break;
+	case aero_srr_msgs::AeroState::COLLECT:
+		this->active_state = false;
+		this->pause_state = false;
+		ROS_INFO("Collect True");
 
-			break;
-		case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
-		default:
-			this->active_state = false;
-			this->pause_state = false;
+		break;
+	case aero_srr_msgs::AeroState::SHUTDOWN:
+		this->active_state = false;
+		this->pause_state = false;
 
-			previous_state = aero_state->state;
+		ros::shutdown();
+		break;
+	case aero_srr_msgs::AeroState::PAUSE:
+		this->pause_state = true;
 
-			break;
+		break;
+	case aero_srr_msgs::AeroState::ERROR: //TODO Does this node need to do anything on error?
+	default:
+		this->active_state = false;
+		this->pause_state = false;
+
+		previous_state = aero_state->state;
+		ROS_INFO("Default True");
+
+		break;
 	}
 }
 
+void ArmController::ZeroArmMSG(const jaco_driver::zero_armConstPtr& zero_stat)
+{
+
+	this->arm_homed = zero_stat->zero;
+
+}
 int main(int argc, char **argv)
 {
 
