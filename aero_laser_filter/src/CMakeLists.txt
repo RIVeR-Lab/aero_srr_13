@@ -18,7 +18,7 @@ set(NODE_MANAGER_VAL "\"${R_NS}_laser_filter_pipeline\"")
 #Parameter for input topic for the front end of the pipeline
 set(INPUT_TOPIC_ARG "input_topic")
 set(INPUT_TOPIC_CDF INPUT_TOPIC)
-set(INPUT_TOPIC_VAL "\"/scan\"")
+set(INPUT_TOPIC_VAL "\"/filtered_scan\"")
 
 #Parameter for the raw point cloud topic consumed by the stages
 set(POINTCLOUD_ARG "point_cloud_raw")
