@@ -32,7 +32,7 @@ MissionPlanner::MissionPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh):
 	mission_goal.position.x = 5.0;
 	mission_goal.position.y = 1.0;
 	mission_goal.orientation.w = 1;
-//	this->mission_goals_.push_back(mission_goal);
+	this->mission_goals_.push_back(mission_goal);
 //	mission_goal.position.x = 20.0/scaler;
 //	mission_goal.position.y = 0;
 //	mission_goal.orientation.w = 1;
