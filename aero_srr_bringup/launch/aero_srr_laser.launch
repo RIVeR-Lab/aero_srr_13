@@ -10,12 +10,14 @@
  	<!-- Bring up anything related to the LIDAR here -->
  	<include file="$(find aero_laser_filter)/launch/aero_laser_filter.launch">
   		<arg name="node_manager" value="$(arg node_manager)"/>
-		<arg name="input_topic"  value="$(arg input_topic)"/>
+		<arg name="input_topic"  value="/filtered_scan"/>
 		<arg name="local_topic"  value="$(arg local_topic)"/>
 		<arg name="local_frame"  value="$(arg local_frame)"/>
 		<arg name="global_topic" value="$(arg global_topic)"/>
 		<arg name="global_frame" value="$(arg global_frame)"/>
  	</include>
+ 	
+ 	<include file="$(find srr_filter)/launch/LaserHillRemoval.launch"/>
 
 	<node pkg="LMS1xx" type="LMS100" name="LMS100" output="screen">
 		<param name="host" value="192.168.0.1"/>
