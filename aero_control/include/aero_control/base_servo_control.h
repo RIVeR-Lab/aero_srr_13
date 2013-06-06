@@ -55,7 +55,7 @@ private:
 	}
 
 	inline double ErrorRange(void) {
-		return 0.05;
+		return 0.1;
 	}
 
 	ros::NodeHandle nh_;
