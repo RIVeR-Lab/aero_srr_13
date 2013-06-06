@@ -111,11 +111,11 @@ set(G_OCC_UPDTRT_VAL "\"0.2\"")
 
 set(G_OCC_XDIM_ARG "${R_NS}/${O_NS}/${G_NS}/x_dim")
 set(G_OCC_XDIM_CDF G_OCC_XDIM)
-set(G_OCC_XDIM_VAL "\"1000\"")
+set(G_OCC_XDIM_VAL "\"2000\"")
 
 set(G_OCC_YDIM_ARG "${R_NS}/${O_NS}/${G_NS}/y_dim")
 set(G_OCC_YDIM_CDF G_OCC_YDIM)
-set(G_OCC_YDIM_VAL "\"1000\"")
+set(G_OCC_YDIM_VAL "\"2000\"")
 
 set(G_OCC_ZDIM_ARG "${R_NS}/${O_NS}/${G_NS}/z_dim")
 set(G_OCC_ZDIM_CDF G_OCC_ZDIM)
