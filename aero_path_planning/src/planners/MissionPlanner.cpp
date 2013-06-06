@@ -239,7 +239,7 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 		else
 		{
 			//Means we're at an OoI, attepmt to collect
-			if(this->naving_&& this->recieved_path_)
+			if(this->naving_&& !this->recieved_path_)
 			{
 				ROS_INFO_STREAM("Reached the Object of Interest, attempting to Collect!");
 				this->requestCollect();
@@ -250,10 +250,6 @@ void MissionPlanner::goalCB(const ros::TimerEvent& event)
 			{
 				ROS_INFO_STREAM("Reached a Mission Goal, Moving to the next one!");
 				this->updateMissionGoal();
-				if(!this->searching_)
-				{
-					this->requestCollect();
-				}
 			}
 			//We need to transition mission states
 			else
