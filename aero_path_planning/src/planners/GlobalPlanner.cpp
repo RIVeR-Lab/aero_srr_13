@@ -104,7 +104,7 @@ void GlobalPlanner::loadOccupancyParam()
 
 	//Update rate to generate local occupancy grid
 	std::string pg_up_rate(G_OCC_UPDTRT);
-	this->global_update_rate_ = 30.0;
+	this->global_update_rate_ = 120.0;
 	std::stringstream gup_rate_msg;
 	gup_rate_msg<<this->global_update_rate_<<"s";
 
