@@ -39,15 +39,11 @@ Teleop::Teleop(ros::NodeHandle nh, std::string Joystick, std::string BaseVelocit
 	this->base_velocity_pub = nh.advertise<geometry_msgs::Twist>(BaseVelocity, 2, true);
 
 	this->send_vel_timer = nh.createTimer(ros::Duration(0.05), &Teleop::SendVelTimerCallback, this);
-
-	this->supervisor_cmd_timer = nh.createTimer(ros::Duration(1), &Teleop::SupervisorTimerCallback,
-			this);
+	send_vel_timer.stop();
 
 }
 
-void Teleop::SupervisorTimerCallback(const ros::TimerEvent&) {
 
-}
 
 void Teleop::SendVelTimerCallback(const ros::TimerEvent&) {
 	if ((ros::Time().now().toSec() - last_joy_time.toSec()) > 0.2) {
@@ -58,11 +54,24 @@ void Teleop::SendVelTimerCallback(const ros::TimerEvent&) {
 }
 
 void Teleop::JoystickMSG(const sensor_msgs::JoyConstPtr& joystick) {
+
+
+
+	DriveMode();
+
+
+
+}
+void Teleop::DriveMode(void)
+{
 	base_velocity.linear.x = joystick->axes[1] * this->drive_scale;
 	base_velocity.angular.z = joystick->axes[0] * this->turn_scale;
 	last_joy_time = ros::Time().now();
+	send_vel_timer.start();
 
 }
+
+
 
 int main(int argc, char **argv) {
 
@@ -74,11 +83,11 @@ int main(int argc, char **argv) {
 	std::string Joystick("joy"); ///String containing the topic name for Joystick
 	std::string BaseVelocity("BaseVelocity"); ///String containing the topic name for BaseVelocity
 
-	const std::string DeadmanButton("~deadman_button"); ///String containing the topic name for DeadmanButton
+	const std::string DeadmanButton("deadman_button"); ///String containing the topic name for DeadmanButton
 	int deadman_button;
-	const std::string TurnScale("~turn_scale"); ///String containing the topic name for TurnScale
+	const std::string TurnScale("turn_scale"); ///String containing the topic name for TurnScale
 	double turn_scale;
-	const std::string DriveScale("~drive_scale"); ///String containing the topic name for DriveScale
+	const std::string DriveScale("drive_scale"); ///String containing the topic name for DriveScale
 	double drive_scale;
 
 	if (argc < 1) {
