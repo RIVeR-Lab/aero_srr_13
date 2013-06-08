@@ -36,7 +36,7 @@ BeaconDetector::BeaconDetector():it_(nh_)
 	if(!cam_topic_.empty())
 	{
 		subImg_ = it_.subscribeCamera(cam_topic_.c_str(), 1, &BeaconDetector::imageCb, this);
-		ROS_INFO("Subscribing to: %s\n",cam_topic_.c_str());
+		ROS_INFO_THROTTLE(10,"Subscribing to: %s\n",cam_topic_.c_str());
 	}
 	else
 		return;
@@ -178,7 +178,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 
 	detections_ = tag_detector.extractTags(gray);	//get tags if detected
 
-	ROS_INFO("%d tag detected.",(int)detections_.size());									//DEBUG information
+	ROS_INFO_THROTTLE(10,"%d tag detected.",(int)detections_.size());									//DEBUG information
 	if(detections_.size()==0)
 		return;
 
@@ -240,7 +240,7 @@ void BeaconDetector::imageCb(const sensor_msgs::ImageConstPtr& msg,const sensor_
 }
 void BeaconDetector::addtf(tf::Stamped<tf::Transform> tfbaseinworld)
 {
-	ROS_INFO("adding a value tf");
+	ROS_INFO_THROTTLE(10,"adding a value tf");
 	if(total_tfbaseinworld_==NULL)
 	{
 		ROS_INFO("adding the first tf");
@@ -258,7 +258,7 @@ void BeaconDetector::addtf(tf::Stamped<tf::Transform> tfbaseinworld)
 }
 tf::Stamped<tf::Transform>  BeaconDetector::estimatetf()
 {
-	ROS_INFO("Estimated value: : %f y: %f z: %f",total_tfbaseinworld_->getOrigin().getX(),total_tfbaseinworld_->getOrigin().getY(),total_tfbaseinworld_->getOrigin().getZ());
+	ROS_INFO_THROTTLE(10,"Estimated value: : %f y: %f z: %f",total_tfbaseinworld_->getOrigin().getX(),total_tfbaseinworld_->getOrigin().getY(),total_tfbaseinworld_->getOrigin().getZ());
 	return(*total_tfbaseinworld_);
 }
 void BeaconDetector::initConfiguration(string fname)
@@ -440,11 +440,11 @@ void BeaconDetector::runProcess(double fx,double fy, double px, double py, std_m
 		tag=checkInConst(detections_[i],tag_type);			//check if it is the constellation if so whats is its name in home tf tree?
 		if(tag.empty())
 		{
-			ROS_INFO("Found a tag not in the tag constellation");
+			ROS_INFO_THROTTLE(10,"Found a tag not in the tag constellation");
 			continue;
 		}
 
-		ROS_INFO( "  Id: %d --- Hamming distance: %d \n",detections_[i].id,  detections_[i].hammingDistance );
+		ROS_INFO_THROTTLE(10, "  Id: %d --- Hamming distance: %d \n",detections_[i].id,  detections_[i].hammingDistance );
 
 		// recovering the relative pose requires camera calibration;
 		Eigen::Matrix4d T;
@@ -513,7 +513,7 @@ void BeaconDetector::runProcess(double fx,double fy, double px, double py, std_m
 
 tf::Stamped<tf::Transform> BeaconDetector::initProcess(double fx,double fy, double px, double py, std_msgs::Header imgheader)
 {
-	ROS_INFO("In initialization");
+	ROS_INFO_THROTTLE(10,"In initialization");
 
 	string tag;										//the tag name if it is valid
 	bool tag_type;									//if small use the small size for cal else use big
@@ -529,11 +529,11 @@ tf::Stamped<tf::Transform> BeaconDetector::initProcess(double fx,double fy, doub
 		tag=checkInConst(detections_[i],tag_type);			//check if it is the constellation if so whats is its name in home tf tree?
 		if(tag.empty())
 		{
-			ROS_INFO("Detected tag is not the part of the beacon constellation");
+			ROS_INFO_THROTTLE(10,"Detected tag is not the part of the beacon constellation");
 			continue;
 		}
 
-		ROS_INFO( "  Id: %d --- Hamming distance: %f \n",detections_[i].id,  detections_[i].hammingDistance );
+		ROS_INFO_THROTTLE(10, "  Id: %d --- Hamming distance: %f \n",detections_[i].id,  detections_[i].hammingDistance );
 
 		// recovering the relative pose requires camera calibration;
 		Eigen::Matrix4d T;
@@ -586,7 +586,7 @@ tf::Stamped<tf::Transform> BeaconDetector::initProcess(double fx,double fy, doub
 
 		world2base*=(tag2world);
 
-		ROS_INFO("x: %f y: %f z: %f",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
+		ROS_INFO_THROTTLE(10,"x: %f y: %f z: %f",world2base.getOrigin().getX(),world2base.getOrigin().getY(),world2base.getOrigin().getZ());
 
 		if(test_)
 			br_.sendTransform(tf::StampedTransform(world2base, ros::Time::now()+ros::Duration(0.5), "/world","/tag_base"));
@@ -609,7 +609,7 @@ void BeaconDetector::pubOdom(tf::Stamped<tf::Transform> pose, ros::Time time)
 	msg.pose.pose.orientation.z = pose.getRotation().getZ();
 	msg.pose.pose.orientation.w = pose.getRotation().getW();
 
-	ROS_INFO("x: %f y: %f z: %f",pose.getOrigin().getX(),pose.getOrigin().getY(),pose.getOrigin().getZ());
+	ROS_INFO_THROTTLE(10,"x: %f y: %f z: %f",pose.getOrigin().getX(),pose.getOrigin().getY(),pose.getOrigin().getZ());
 
 	msg.pose.covariance[0]=7E-6;
 	msg.pose.covariance[7]=7E-6;
