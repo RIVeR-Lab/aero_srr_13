@@ -1,0 +1,4 @@
+./opencv_createsamples -img WHAfar.jpg -num 5000 -bg negatives.dat -vec samplesWHAfar.vec -maxxangle 0.8 -maxyangle 0.8 -maxzangle 0.8 -maxidev 100 -bgcolor 0 -bgthresh 0 -w 23 -h 23
+
+./opencv_traincascade  -data cascadeWHAfar -vec samplesWHAfar.vec -bg negatives.dat -numStages 10 -numPos 3000 -numNeg 4947 -featureType HOG -minHitRate 0.95 --maxFalseAlarmRate 0.5 -w 23 -h 23 
+
