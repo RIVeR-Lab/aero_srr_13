@@ -22,6 +22,7 @@
   <depend package="dynamic_reconfigure"/>
   <depend package="occupancy_grid"/>
   <depend package="robot_base_msgs"/>
+  <depend package="performance_profiling"/>
 
 </package>
 
