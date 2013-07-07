@@ -25,6 +25,7 @@
 #include <aero_path_planning/OccupancyGridMsg.h>
 #include <aero_srr_msgs/AeroState.h>
 #include <aero_path_planning/LocalPlannerConfig.h>
+#include <aero_path_planning/performance_profiling/performance_profiling.h>
 #include <aero_path_planning/utilities/TentacleRateLimiter.h>
 
 namespace og = occupancy_grid;
@@ -102,6 +103,11 @@ private:
 	og::MultiTraitOccupancyGridPtr working_grid_;                  ///The last new occupancy grid recieved
 	PointCloudPtr lidar_patch_;                                 ///The last patch of LIDAR data recieved
 	geometry_msgs::PoseStampedConstPtr global_goal_;			///The most reciently recieved global goal
+
+    performance_profiling::DurationAverager wg_create;
+    performance_profiling::DurationAverager l_copy;
+    performance_profiling::DurationAverager tent_sel;
+    performance_profiling::DurationAverager total_time;
 
 	/**
 	 * @author Adam Panzica

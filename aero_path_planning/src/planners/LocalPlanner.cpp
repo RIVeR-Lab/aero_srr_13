@@ -13,8 +13,11 @@
 #include "OryxPathPlannerConfig.h"
 #include <aero_path_planning/occupancy_grid/MultiTraitOccupancyGridHelpers.h>
 
+
+
 using namespace aero_path_planning;
 
+#define PERFORMANCE_PROFILING_ENABLE
 
 
 LocalPlanner::LocalPlanner(ros::NodeHandle& nh, ros::NodeHandle& p_nh) throw(std::runtime_error):
@@ -450,19 +453,29 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 
 	if(should_plan_)
 	{
-		//Grab the next occupancy grid to process if we've recieved new data from global planner
+        //Grab the next occupancy grid to process if we've recieved new data from global planne
 		if(!this->occupancy_buffer_.empty())
 		{
 			this->working_grid_= this->occupancy_buffer_.front();
 			this->occupancy_buffer_.pop_front();
-		}
+        }
+
 		if(this->working_grid_!=occupancy_grid::MultiTraitOccupancyGridPtr())
 		{
 			//Build a working grid to apply the LIDAR patch to
+            ros::Duration wg_coppy;
+
+            PERFORMANCE_PROFILING_PROFILE_CODE(
 			og::MultiTraitOccupancyGrid working_grid(*this->working_grid_);
+            , wg_coppy);
+
+            this->wg_create.add(wg_coppy);
 			//If we actually have a working grid, plan on it
 			//ROS_INFO_STREAM("I Have  Working Grid to Local Plan On!");
 			//If we have a LIDAR patch, apply it
+            ros::Duration lidar_copy;
+
+            PERFORMANCE_PROFILING_PROFILE_CODE(
 			if(this->lidar_patch_!= PointCloudPtr())
 			{
 				//ROS_INFO_STREAM("I'm apllying the LIDAR pach...");
@@ -476,7 +489,12 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 					ROS_ERROR_STREAM("Failed to Copy LIDAR Data due to:"<<error_message);
 				}
 			}
+            , lidar_copy);
+            this->l_copy.add(lidar_copy);
 
+            ros::Duration select_tentacle;
+
+            PERFORMANCE_PROFILING_PROFILE_CODE(
 			//Apply a goal if we have one:
 			this->applyGoal(ros::Time(0), working_grid);
 
@@ -519,6 +537,10 @@ void LocalPlanner::planningCB(const ros::TimerEvent& event)
 				this->set_rad_ = 0;
 				this->set_vel_ = 0;
 			}
+            , select_tentacle)
+            this->tent_sel.add(select_tentacle);
+            this->total_time.add(select_tentacle+lidar_copy+wg_coppy);
+            ROS_WARN_STREAM_THROTTLE(1, "Performance Profiling: WG:"<<this->wg_create.getAverage().toSec()<<"s, LD:"<<this->l_copy.getAverage())
 		}
 		else
 		{
